@@ -1,6 +1,7 @@
 import BasePoint from './BasePoint'
 import JPoint from './JacobianPoint'
 import BigNumber from './BigNumber'
+import Curve from './Curve'
 
 export default class Point extends BasePoint {
   x: BigNumber | null
@@ -64,6 +65,22 @@ export default class Point extends BasePoint {
 
   validate (): boolean {
     return this.curve.validate(this)
+  }
+
+  encode (compact: boolean = true, enc?: 'hex'): number[] | string {
+    const len = this.curve.p.byteLength()
+    const x = this.getX().toArray('be', len)
+    let res: number[]
+    if (compact) {
+      res = [this.getY().isEven() ? 0x02 : 0x03].concat(x)
+    } else {
+      res = [0x04].concat(x, this.getY().toArray('be', len))
+    }
+    if (enc !== 'hex') {
+      return res
+    } else {
+      return Curve.toHex(res)
+    }
   }
 
   _getBeta (): undefined | Point {

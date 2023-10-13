@@ -18,22 +18,6 @@ export default abstract class BasePoint {
     this.precomputed = null
   }
 
-  eq (p: any): boolean {
-    throw new Error('Not implemented')
-  };
-
-  validate (): boolean {
-    throw new Error('Not implemented')
-  };
-
-  getX (): BigNumber {
-    throw new Error('Not implmented')
-  }
-
-  getY (): BigNumber {
-    throw new Error('Not implmented')
-  }
-
   add (p: any): any {
     throw new Error('Not implmented')
   }
@@ -41,22 +25,6 @@ export default abstract class BasePoint {
   dbl (): any {
     throw new Error('Not implmented')
   }
-
-  encode (compact: boolean = true, enc?: 'hex'): number[] | string {
-    const len = this.curve.p.byteLength()
-    const x = this.getX().toArray('be', len)
-    let res: number[]
-    if (compact) {
-      res = [this.getY().isEven() ? 0x02 : 0x03].concat(x)
-    } else {
-      res = [0x04].concat(x, this.getY().toArray('be', len))
-    }
-    if (enc !== 'hex') {
-      return res
-    } else {
-      return Curve.toHex(res)
-    }
-  };
 
   precompute (power?: number): any {
     if (this.precomputed != null) { return this }

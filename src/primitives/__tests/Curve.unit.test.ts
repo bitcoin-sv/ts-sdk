@@ -18,9 +18,6 @@ describe('Curve', () => {
     expect(p.toJ().dbl().toP().validate()).toBe(true)
     expect(p.mul(new BigNumber('79be667e f9dcbbac 55a06295 ce870b07', 16)).validate()).toBe(true)
 
-    const j = p.toJ()
-    expect(j.trpl().eq(j.dbl().add(j))).toBe(true)
-
     // Endomorphism test
     expect(curve.endo).toBeDefined()
     expect(

@@ -129,54 +129,17 @@ export default class JacobianPoint extends BasePoint {
       return this.dbl()
     }
 
-    if (this.curve.zeroA || this.curve.threeA) {
-      /* eslint-disable @typescript-eslint/no-this-alias */
-      let r = this as JacobianPoint
-      for (let i = 0; i < pow; i++) { r = r.dbl() }
-      return r
-    }
-
-    // 1M + 2S + 1A + N * (4S + 5M + 8A)
-    // N = 1 => 6M + 6S + 9A
-    const a = this.curve.a
-    const tinv = this.curve.tinv
-
-    let jx = this.x
-    const jy = this.y
-    let jz = this.z
-    let jz4 = jz.redSqr().redSqr()
-
-    // Reuse results
-    let jyd = jy.redAdd(jy)
-    for (let i = 0; i < pow; i++) {
-      const jx2 = jx.redSqr()
-      const jyd2 = jyd.redSqr()
-      const jyd4 = jyd2.redSqr()
-      const c = jx2.redAdd(jx2).redIAdd(jx2).redIAdd(a.redMul(jz4))
-
-      const t1 = jx.redMul(jyd2)
-      const nx = c.redSqr().redISub(t1.redAdd(t1))
-      const t2 = t1.redISub(nx)
-      let dny = c.redMul(t2)
-      dny = dny.redIAdd(dny).redISub(jyd4)
-      const nz = jyd.redMul(jz)
-      if (i + 1 < pow) { jz4 = jz4.redMul(jyd4) }
-
-      jx = nx
-      jz = nz
-      jyd = dny
-    }
-
-    return new JacobianPoint(jx, jyd.redMul(tinv), jz)
+    /* eslint-disable @typescript-eslint/no-this-alias */
+    let r = this as JacobianPoint
+    for (let i = 0; i < pow; i++) { r = r.dbl() }
+    return r
   }
 
   dbl (): JacobianPoint {
-    if (this.isInfinity()) { return this }
+    if (this.isInfinity()) {
+      return this
+    }
 
-    if (this.curve.zeroA) { return this._zeroDbl() } else if (this.curve.threeA) { return this._threeDbl() } else { return this._dbl() }
-  }
-
-  _zeroDbl (): JacobianPoint {
     let nx
     let ny
     let nz
@@ -243,149 +206,6 @@ export default class JacobianPoint extends BasePoint {
       nz = this.y.redMul(this.z)
       nz = nz.redIAdd(nz)
     }
-
-    return new JacobianPoint(nx, ny, nz)
-  }
-
-  _threeDbl (): JacobianPoint {
-    let nx
-    let ny
-    let nz
-    // Z = 1
-    if (this.zOne) {
-      // hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-3.html
-      //     #doubling-mdbl-2007-bl
-      // 1M + 5S + 15A
-
-      // XX = X1^2
-      const xx = this.x.redSqr()
-      // YY = Y1^2
-      const yy = this.y.redSqr()
-      // YYYY = YY^2
-      const yyyy = yy.redSqr()
-      // S = 2 * ((X1 + YY)^2 - XX - YYYY)
-      let s = this.x.redAdd(yy).redSqr().redISub(xx).redISub(yyyy)
-      s = s.redIAdd(s)
-      // M = 3 * XX + a
-      const m = xx.redAdd(xx).redIAdd(xx).redIAdd(this.curve.a)
-      // T = M^2 - 2 * S
-      const t = m.redSqr().redISub(s).redISub(s)
-      // X3 = T
-      nx = t
-      // Y3 = M * (S - T) - 8 * YYYY
-      let yyyy8 = yyyy.redIAdd(yyyy)
-      yyyy8 = yyyy8.redIAdd(yyyy8)
-      yyyy8 = yyyy8.redIAdd(yyyy8)
-      ny = m.redMul(s.redISub(t)).redISub(yyyy8)
-      // Z3 = 2 * Y1
-      nz = this.y.redAdd(this.y)
-    } else {
-      // hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-3.html#doubling-dbl-2001-b
-      // 3M + 5S
-
-      // delta = Z1^2
-      const delta = this.z.redSqr()
-      // gamma = Y1^2
-      const gamma = this.y.redSqr()
-      // beta = X1 * gamma
-      const beta = this.x.redMul(gamma)
-      // alpha = 3 * (X1 - delta) * (X1 + delta)
-      let alpha = this.x.redSub(delta).redMul(this.x.redAdd(delta))
-      alpha = alpha.redAdd(alpha).redIAdd(alpha)
-      // X3 = alpha^2 - 8 * beta
-      let beta4 = beta.redIAdd(beta)
-      beta4 = beta4.redIAdd(beta4)
-      const beta8 = beta4.redAdd(beta4)
-      nx = alpha.redSqr().redISub(beta8)
-      // Z3 = (Y1 + Z1)^2 - gamma - delta
-      nz = this.y.redAdd(this.z).redSqr().redISub(gamma).redISub(delta)
-      // Y3 = alpha * (4 * beta - X3) - 8 * gamma^2
-      let ggamma8 = gamma.redSqr()
-      ggamma8 = ggamma8.redIAdd(ggamma8)
-      ggamma8 = ggamma8.redIAdd(ggamma8)
-      ggamma8 = ggamma8.redIAdd(ggamma8)
-      ny = alpha.redMul(beta4.redISub(nx)).redISub(ggamma8)
-    }
-
-    return new JacobianPoint(nx, ny, nz)
-  }
-
-  _dbl (): JacobianPoint {
-    const a = this.curve.a
-
-    // 4M + 6S + 10A
-    const jx = this.x
-    const jy = this.y
-    const jz = this.z
-    const jz4 = jz.redSqr().redSqr()
-
-    const jx2 = jx.redSqr()
-    const jy2 = jy.redSqr()
-
-    const c = jx2.redAdd(jx2).redIAdd(jx2).redIAdd(a.redMul(jz4))
-
-    let jxd4 = jx.redAdd(jx)
-    jxd4 = jxd4.redIAdd(jxd4)
-    const t1 = jxd4.redMul(jy2)
-    const nx = c.redSqr().redISub(t1.redAdd(t1))
-    const t2 = t1.redISub(nx)
-
-    let jyd8 = jy2.redSqr()
-    jyd8 = jyd8.redIAdd(jyd8)
-    jyd8 = jyd8.redIAdd(jyd8)
-    jyd8 = jyd8.redIAdd(jyd8)
-    const ny = c.redMul(t2).redISub(jyd8)
-    const nz = jy.redAdd(jy).redMul(jz)
-
-    return new JacobianPoint(nx, ny, nz)
-  }
-
-  trpl (): JacobianPoint {
-    if (!this.curve.zeroA) { return this.dbl().add(this) }
-
-    // hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#tripling-tpl-2007-bl
-    // 5M + 10S + ...
-
-    // XX = X1^2
-    const xx = this.x.redSqr()
-    // YY = Y1^2
-    const yy = this.y.redSqr()
-    // ZZ = Z1^2
-    const zz = this.z.redSqr()
-    // YYYY = YY^2
-    const yyyy = yy.redSqr()
-    // M = 3 * XX + a * ZZ2; a = 0
-    const m = xx.redAdd(xx).redIAdd(xx)
-    // MM = M^2
-    const mm = m.redSqr()
-    // E = 6 * ((X1 + YY)^2 - XX - YYYY) - MM
-    let e = this.x.redAdd(yy).redSqr().redISub(xx).redISub(yyyy)
-    e = e.redIAdd(e)
-    e = e.redAdd(e).redIAdd(e)
-    e = e.redISub(mm)
-    // EE = E^2
-    const ee = e.redSqr()
-    // T = 16*YYYY
-    let t = yyyy.redIAdd(yyyy)
-    t = t.redIAdd(t)
-    t = t.redIAdd(t)
-    t = t.redIAdd(t)
-    // U = (M + E)^2 - MM - EE - T
-    const u = m.redIAdd(e).redSqr().redISub(mm).redISub(ee).redISub(t)
-    // X3 = 4 * (X1 * EE - 4 * YY * U)
-    let yyu4 = yy.redMul(u)
-    yyu4 = yyu4.redIAdd(yyu4)
-    yyu4 = yyu4.redIAdd(yyu4)
-    let nx = this.x.redMul(ee).redISub(yyu4)
-    nx = nx.redIAdd(nx)
-    nx = nx.redIAdd(nx)
-    // Y3 = 8 * Y1 * (U * (T - U) - E * EE)
-    let ny = this.y.redMul(u.redMul(t.redISub(u)).redISub(e.redMul(ee)))
-    ny = ny.redIAdd(ny)
-    ny = ny.redIAdd(ny)
-    ny = ny.redIAdd(ny)
-    // Z3 = (Z1 + E)^2 - ZZ - EE
-    const nz = this.z.redAdd(e).redSqr().redISub(zz).redISub(ee)
 
     return new JacobianPoint(nx, ny, nz)
   }

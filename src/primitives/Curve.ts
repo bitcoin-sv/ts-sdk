@@ -1,7 +1,6 @@
 import BigNumber from './BigNumber'
 import ReductionContext from './ReductionContext'
 import MontgomoryMethod from './MontgomoryMethod'
-import sha256 from './sha256'
 import Point from './Point'
 import JPoint from './JacobianPoint'
 
@@ -813,7 +812,6 @@ export default class Curve {
   _wnafT3: any[]
   _wnafT4: any[]
   _bitLength: number
-  _maxwellTrick: boolean
 
   // Represent num in a w-NAF form
   static assert (
@@ -987,7 +985,6 @@ export default class Curve {
       b: '7',
       n: 'ffffffff ffffffff ffffffff fffffffe baaedce6 af48a03b bfd25e8c d0364141',
       h: '1',
-      hash: sha256,
 
       // Precomputed endomorphism
       beta: '7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c28719501ee',
@@ -1032,16 +1029,7 @@ export default class Curve {
     this._wnafT4 = new Array(4)
 
     this._bitLength = this.n.bitLength()
-
-    // Generalized Greg Maxwell's trick
-    const adjustCount = this.p.div(this.n)
-    if (adjustCount.cmpn(100) > 0) {
-      this.redN = null
-    } else {
-      this._maxwellTrick = true
-      this.redN = this.n.toRed(this.red)
-    }
-
+    this.redN = this.n.toRed(this.red)
     this.a = new BigNumber(conf.a, 16).toRed(this.red)
     this.b = new BigNumber(conf.b, 16).toRed(this.red)
     this.tinv = this.two.redInvm()
