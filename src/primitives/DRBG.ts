@@ -1,12 +1,31 @@
-import { sha256 } from './Hash'
+import { toArray, SHA256HMAC } from './Hash'
+
+const zero2 = (word: string): string => {
+  if (word.length === 1) {
+    return '0' + word
+  } else {
+    return word
+  }
+}
+
+const toHex = (msg: number[]): string => {
+  let res = ''
+  for (let i = 0; i < msg.length; i++) {
+    res += zero2(msg[i].toString(16))
+  }
+  return res
+}
 
 export default class HmacDRBG {
   K: number[]
   V: number[]
 
-  constructor (entropy: number[], nonce: number[]) {
+  constructor (entropy: number[] | string, nonce: number[] | string) {
     this.K = null
     this.V = null
+
+    entropy = toArray(entropy, 'hex')
+    nonce = toArray(nonce, 'hex')
 
     if (entropy.length < 32) {
       throw new Error('Not enough entropy. Minimum is 256 bits')
@@ -22,8 +41,8 @@ export default class HmacDRBG {
     this.update(seed)
   }
 
-  hmac () {
-    return new sha256.hmac(this.K)
+  hmac (): SHA256HMAC {
+    return new SHA256HMAC(this.K)
   }
 
   update (seed?): void {
@@ -31,27 +50,27 @@ export default class HmacDRBG {
       .update(this.V)
       .update([0x00])
     if (seed !== undefined) { kmac = kmac.update(seed) }
-    this.K = kmac.digest()
-    this.V = this.hmac().update(this.V).digest()
+    this.K = kmac.digest() as number[]
+    this.V = this.hmac().update(this.V).digest() as number[]
     if (seed === undefined) { return }
 
     this.K = this.hmac()
       .update(this.V)
       .update([0x01])
       .update(seed)
-      .digest()
-    this.V = this.hmac().update(this.V).digest()
+      .digest() as number[]
+    this.V = this.hmac().update(this.V).digest() as number[]
   }
 
-  generate (len: number): number[] {
+  generate (len: number): string {
     let temp = []
     while (temp.length < len) {
-      this.V = this.hmac().update(this.V).digest()
+      this.V = this.hmac().update(this.V).digest() as number[]
       temp = temp.concat(this.V)
     }
 
     const res = temp.slice(0, len)
     this.update()
-    return res
+    return toHex(res)
   }
 }

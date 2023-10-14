@@ -38,7 +38,7 @@ export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false,
       ? customK(iter)
       : BigNumber.isBN(customK)
         ? customK
-        : new BigNumber(drbg.generate(bytes))
+        : new BigNumber(drbg.generate(bytes), 16)
     k = truncateToN(k, true)
     if (k.cmpn(1) <= 0 || k.cmp(ns1) >= 0) { continue }
 

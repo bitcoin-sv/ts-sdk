@@ -1,6 +1,7 @@
 import BigNumber from './BigNumber'
 import PublicKey from './PublicKey'
 import Message from './Message'
+import { verify } from './ECDSA'
 
 export default class Signature {
   r: BigNumber
@@ -11,7 +12,6 @@ export default class Signature {
     this.s = s
   }
 
-  verify (msg: Message, key: PublicKey): boolean {
-
+  verify (msg: Message, key: PublicKey): void {
   }
 }
