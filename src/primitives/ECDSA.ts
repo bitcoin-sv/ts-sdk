@@ -15,6 +15,21 @@ function truncateToN (msg: BigNumber, truncOnly?: boolean): BigNumber {
   }
 }
 
+/**
+ * Generates a digital signature for a given message.
+ *
+ * @function sign
+ * @param msg - The BigNumber message for which the signature has to be computed.
+ * @param key - Private key in BigNumber.
+ * @param forceLowS - Optional boolean flag if True forces "s" to be the lower of two possible values.
+ * @param customK - Optional specification for k value, which can be a function or BigNumber.
+ * @returns Returns the elliptic curve digital signature of the message.
+ *
+ * @example
+ * const msg = new BigNumber('2664878')
+ * const key = new BigNumber('123456')
+ * const signature = sign(msg, key)
+ */
 export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: BigNumber | Function): Signature => {
   const curve = new Curve()
   msg = truncateToN(msg)
@@ -62,6 +77,24 @@ export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false,
   }
 }
 
+/**
+ * Verifies a digital signature of a given message.
+ *
+ * Message and key used during the signature generation process, and the previously computed signature
+ * are used to validate the authenticity of the digital signature.
+ *
+ * @function verify
+ * @param msg - The BigNumber message for which the signature has to be verified.
+ * @param sig - Signature object consisting of parameters 'r' and 's'.
+ * @param key - Public key in Point.
+ * @returns Returns true if the signature is valid and false otherwise.
+ *
+ * @example
+ * const msg = new BigNumber('2664878', 16)
+ * const key = new Point(new BigNumber(10), new BigNumber(20)
+ * const signature = sign(msg, new BigNumber('123456'))
+ * const isVerified = verify(msg, sig, key)
+ */
 export const verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
   const curve = new Curve()
   msg = truncateToN(msg)

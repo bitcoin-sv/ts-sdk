@@ -7,7 +7,38 @@ const assert = (
   }
 }
 
-abstract class BlockHash {
+/**
+ * The BaseHash class is an abstract base class for cryptographic hash functions.
+ * It provides a common structure and functionality for hash function classes.
+ *
+ * @class BaseHash
+ *
+ * @property pending - Stores partially processed message segments.
+ * @property pendingTotal - The total number of characters that are being stored in `pending`
+ * @property blockSize - The size of each block to processed.
+ * @property outSize - The size of the final hash output.
+ * @property endian - The endianness used during processing, can either be 'big' or 'little'.
+ * @property _delta8 - The block size divided by 8, useful in various computations.
+ * @property _delta32 - The block size divided by 32, useful in various computations.
+ * @property padLength - The length of padding to be added to finalize the computation.
+ * @property hmacStrength - The HMAC strength value.
+ *
+ * @param blockSize - The size of the block to be hashed.
+ * @param outSize - The size of the resulting hash.
+ * @param hmacStrength - The strength of the HMAC.
+ * @param padLength - The length of the padding to be added.
+ *
+ * @example
+ * Sub-classes would extend this base BaseHash class like:
+ * class RIPEMD160 extends BaseHash {
+ *   constructor () {
+ *     super(512, 160, 192, 64);
+ *     // ...
+ *   }
+ *   // ...
+ * }
+ */
+abstract class BaseHash {
   pending: number[] | null
   pendingTotal: number
   blockSize: number
@@ -41,6 +72,19 @@ abstract class BlockHash {
     throw new Error('Not implemented')
   }
 
+  /**
+   * Converts the input message into an array, pads it, and joins into 32bit blocks.
+   * If there is enough data, it tries updating the hash computation.
+   *
+   * @method update
+   * @param msg - The message segment to include in the hashing computation.
+   * @param enc - The encoding of the message. If 'hex', the string will be treated as such, 'utf8' otherwise.
+   *
+   * @returns Returns the instance of the object for chaining.
+   *
+   * @example
+   * sha256.update('Hello World', 'utf8');
+   */
   update (msg: number[] | string, enc?: 'hex'): this {
   // Convert message to array, pad it, and join into 32bit blocks
     msg = toArray(msg, enc)
@@ -69,6 +113,17 @@ abstract class BlockHash {
     return this
   }
 
+  /**
+   * Finalizes the hash computation and returns the hash value/result.
+   *
+   * @method digest
+   * @param enc - The encoding of the final hash. If 'hex' then a hex string will be provided, otherwise an array of numbers.
+   *
+   * @returns Returns the final hash value.
+   *
+   * @example
+   * const hash = sha256.digest('hex');
+   */
   digest (enc?: 'hex'): number[] | string {
     this.update(this._pad())
     assert(this.pending === null)
@@ -76,6 +131,14 @@ abstract class BlockHash {
     return this._digest(enc)
   };
 
+  /**
+   * [Private Method] Used internally to prepare the padding for the final stage of the hash computation.
+   *
+   * @method _pad
+   * @private
+   *
+   * @returns Returns an array denoting the padding.
+   */
   private _pad (): number[] { //
     let len = this.pendingTotal
     const bytes = this._delta8
@@ -349,7 +412,24 @@ function Kh (j): number {
   if (j <= 15) { return 0x50a28be6 } else if (j <= 31) { return 0x5c4dd124 } else if (j <= 47) { return 0x6d703ef3 } else if (j <= 63) { return 0x7a6d76e9 } else { return 0x00000000 }
 }
 
-export class RIPEMD160 extends BlockHash {
+/**
+ * An implementation of RIPEMD160 cryptographic hash function. Extends the BaseHash class.
+ * It provides a way to compute a 'digest' for any kind of input data; transforming the data
+ * into a unique output of fixed size. The output is deterministic; it will always be
+ * the same for the same input.
+ *
+ * @class RIPEMD160
+ * @param None
+ *
+ * @constructor
+ * Use the RIPEMD160 constructor to create an instance of RIPEMD160 hash function.
+ *
+ * @example
+ * const ripemd160 = new RIPEMD160();
+ *
+ * @property h - Array that is updated iteratively as part of hashing computation.
+ */
+export class RIPEMD160 extends BaseHash {
   h: number[]
 
   constructor () {
@@ -411,7 +491,26 @@ export class RIPEMD160 extends BlockHash {
   }
 }
 
-export class SHA256 extends BlockHash {
+/**
+ * An implementation of SHA256 cryptographic hash function. Extends the BaseHash class.
+ * It provides a way to compute a 'digest' for any kind of input data; transforming the data
+ * into a unique output of fixed size. The output is deterministic; it will always be
+ * the same for the same input.
+ *
+ * @class SHA256
+ * @param None
+ *
+ * @constructor
+ * Use the SHA256 constructor to create an instance of SHA256 hash function.
+ *
+ * @example
+ * const sha256 = new SHA256();
+ *
+ * @property h - The initial hash constants
+ * @property W - Provides a way to recycle usage of the array memory.
+ * @property k - The round constants used for each round of SHA-256
+ */
+export class SHA256 extends BaseHash {
   h: number[]
   W: number[]
   k: number[]
@@ -496,7 +595,26 @@ export class SHA256 extends BlockHash {
   }
 }
 
-export class SHA1 extends BlockHash {
+/**
+ * An implementation of SHA1 cryptographic hash function. Extends the BaseHash class.
+ * It provides a way to compute a 'digest' for any kind of input data; transforming the data
+ * into a unique output of fixed size. The output is deterministic; it will always be
+ * the same for the same input.
+ *
+ * @class SHA1
+ * @param None
+ *
+ * @constructor
+ * Use the SHA1 constructor to create an instance of SHA1 hash function.
+ *
+ * @example
+ * const sha1 = new SHA1();
+ *
+ * @property h - The initial hash constants.
+ * @property W - Provides a way to recycle usage of the array memory.
+ * @property k - The round constants used for each round of SHA-1.
+ */
+export class SHA1 extends BaseHash {
   h: number[]
   W: number[]
   k: number[]
@@ -592,23 +710,81 @@ export class SHA256HMAC {
   }
 }
 
+/**
+ * Computes RIPEMD160 hash of a given message.
+ * @function ripemd160
+ * @param msg - The message to compute the hash for.
+ * @param enc - The encoding of the message. If 'hex', the message is decoded from hexadecimal first.
+ *
+ * @returns the computed RIPEMD160 hash of the message.
+ *
+ * @example
+ * const digest = ripemd160('Hello, world!');
+ */
 export const ripemd160 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
   return new RIPEMD160().update(msg, enc).digest(enc)
 }
 
+/**
+ * Computes SHA1 hash of a given message.
+ * @function sha1
+ * @param msg - The message to compute the hash for.
+ * @param enc - The encoding of the message. If 'hex', the message is decoded from hexadecimal first.
+ *
+ * @returns the computed SHA1 hash of the message.
+ *
+ * @example
+ * const digest = sha1('Hello, world!');
+ */
 export const sha1 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
   return new SHA1().update(msg, enc).digest(enc)
 }
 
+/**
+ * Computes SHA256 hash of a given message.
+ * @function sha256
+ * @param msg - The message to compute the hash for.
+ * @param enc - The encoding of the message. If 'hex', the message is decoded from hexadecimal first.
+ *
+ * @returns the computed SHA256 hash of the message.
+ *
+ * @example
+ * const digest = sha256('Hello, world!');
+ */
 export const sha256 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
   return new SHA256().update(msg, enc).digest(enc)
 }
 
+/**
+ * Performs a 'double hash' using SHA256. This means the data is hashed twice
+ * with SHA256. First, the SHA256 hash of the message is computed, then the
+ * SHA256 hash of the resulting hash is computed.
+ * @function hash256
+ * @param msg - The message to compute the hash for.
+ * @param enc - Encoding of the message.If 'hex', the message is decoded from hexadecimal.
+ *
+ * @returns the double hashed SHA256 output.
+ *
+ * @example
+ * const doubleHash = hash256('Hello, world!');
+ */
 export const hash256 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
   const first = new SHA256().update(msg, enc).digest()
   return new SHA256().update(first).digest(enc)
 }
 
+/**
+ * Computes SHA256 hash of a given message and then computes a RIPEMD160 hash of the result.
+ *
+ * @function hash160
+ * @param msg - The message to compute the hash for.
+ * @param enc - The encoding of the message. If 'hex', the message is decoded from hexadecimal.
+ *
+ * @returns the RIPEMD160 hash of the SHA256 hash of the input message.
+ *
+ * @example
+ * const hash = hash160('Hello, world!');
+ */
 export const hash160 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
   const first = new SHA256().update(msg, enc).digest()
   return new RIPEMD160().update(first).digest(enc)

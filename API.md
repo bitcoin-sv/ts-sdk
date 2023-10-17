@@ -1,18 +1,22 @@
 # API
 
-Links: [API](#api), [Classes](#classes)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ## Classes
 
-| |
-| --- |
-| [BigNumber](#class-bignumber) |
-| [K256](#class-k256) |
-| [Mersenne](#class-mersenne) |
-| [MontgomoryMethod](#class-montgomorymethod) |
-| [ReductionContext](#class-reductioncontext) |
+| | |
+| --- | --- |
+| [BasePoint](#class-basepoint) | [PrivateKey](#class-privatekey) |
+| [BigNumber](#class-bignumber) | [PublicKey](#class-publickey) |
+| [Curve](#class-curve) | [RIPEMD160](#class-ripemd160) |
+| [HmacDRBG](#class-hmacdrbg) | [ReductionContext](#class-reductioncontext) |
+| [JacobianPoint](#class-jacobianpoint) | [SHA1](#class-sha1) |
+| [K256](#class-k256) | [SHA256](#class-sha256) |
+| [Mersenne](#class-mersenne) | [SHA256HMAC](#class-sha256hmac) |
+| [MontgomoryMethod](#class-montgomorymethod) | [Signature](#class-signature) |
+| [Point](#class-point) | [SymmetricKey](#class-symmetrickey) |
 
-Links: [API](#api), [Classes](#classes)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 
@@ -160,7 +164,7 @@ mersenne.split(new BigNumber('2345', 16), new BigNumber());
 
 </details>
 
-Links: [API](#api), [Classes](#classes)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: K256
@@ -253,7 +257,7 @@ k256.split(input, output);
 
 </details>
 
-Links: [API](#api), [Classes](#classes)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: ReductionContext
@@ -786,7 +790,7 @@ this.verify2(new BigNumber(10).toRed(this), new BigNumber(20)); //throws an Erro
 
 </details>
 
-Links: [API](#api), [Classes](#classes)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: BigNumber
@@ -808,7 +812,7 @@ export default class BigNumber {
     static isBN(num: any): boolean 
     static max(left: BigNumber, right: BigNumber): BigNumber 
     static min(left: BigNumber, right: BigNumber): BigNumber 
-    constructor(number: number | string | number[] | Buffer | BigNumber = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
+    constructor(number: number | string | number[] | Buffer = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
     copy(dest: BigNumber): void 
     static move(dest: BigNumber, src: BigNumber): void 
     clone(): BigNumber 
@@ -951,7 +955,7 @@ export default class BigNumber {
 #### Constructor
 
 ```ts
-constructor(number: number | string | number[] | Buffer | BigNumber = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
+constructor(number: number | string | number[] | Buffer = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
 ```
 
 Argument Details
@@ -4291,7 +4295,7 @@ const zeroBits = bn.zeroBits(); // 3
 
 </details>
 
-Links: [API](#api), [Classes](#classes)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: MontgomoryMethod
@@ -4502,6 +4506,1093 @@ const product = montMethod.mul(a, b);
 
 </details>
 
-Links: [API](#api), [Classes](#classes)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: Curve
+
+```ts
+export default class Curve {
+    p: BigNumber;
+    red: ReductionContext;
+    redN: BigNumber | null;
+    zero: BigNumber;
+    one: BigNumber;
+    two: BigNumber;
+    g: Point;
+    n: BigNumber;
+    a: BigNumber;
+    b: BigNumber;
+    tinv: BigNumber;
+    zeroA: boolean;
+    threeA: boolean;
+    endo: any;
+    _endoWnafT1: any[];
+    _endoWnafT2: any[];
+    _wnafT1: any[];
+    _wnafT2: any[];
+    _wnafT3: any[];
+    _wnafT4: any[];
+    _bitLength: number;
+    static assert(expression: unknown, message: string = "Elliptic curve assertion failed"): void 
+    getNAF(num: BigNumber, w: number, bits: number): number[] 
+    getJSF(k1: BigNumber, k2: BigNumber): number[][] 
+    static cachedProperty(obj, name: string, computer): void 
+    static parseBytes(bytes: string | number[]): number[] 
+    static intFromLE(bytes: number[]): BigNumber 
+    constructor() 
+    _getEndomorphism(conf): {
+        beta: BigNumber;
+        lambda: BigNumber;
+        basis: Array<{
+            a: BigNumber;
+            b: BigNumber;
+        }>;
+    } | undefined 
+    ;
+    _getEndoRoots(num: BigNumber): [
+        BigNumber,
+        BigNumber
+    ] 
+    ;
+    _getEndoBasis(lambda: BigNumber): [
+        {
+            a: BigNumber;
+            b: BigNumber;
+        },
+        {
+            a: BigNumber;
+            b: BigNumber;
+        }
+    ] 
+    _endoSplit(k: BigNumber): {
+        k1: BigNumber;
+        k2: BigNumber;
+    } 
+    validate(point: Point): boolean 
+    ;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: BasePoint
+
+```ts
+export default abstract class BasePoint {
+    curve: Curve;
+    type: "affine" | "jacobian";
+    precomputed: {
+        doubles: {
+            step: number;
+            points: any[];
+        } | undefined;
+        naf: {
+            wnd: any;
+            points: any[];
+        } | undefined;
+        beta: BasePoint | null | undefined;
+    } | null;
+    constructor(type: "affine" | "jacobian") 
+    add(p: any): BasePoint 
+    dbl(): BasePoint 
+    precompute(power?: number): BasePoint 
+    ;
+    _hasDoubles(k: BigNumber): boolean 
+    ;
+    _getDoubles(step?: number, power?: number): {
+        step: number;
+        points: any[];
+    } 
+    ;
+    _getNAFPoints(wnd: number): {
+        wnd: number;
+        points: any[];
+    } 
+    _getBeta(): any 
+    dblp(k: number): BasePoint 
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: JacobianPoint
+
+```ts
+export default class JacobianPoint extends BasePoint {
+    x: BigNumber;
+    y: BigNumber;
+    z: BigNumber;
+    zOne: boolean;
+    constructor(x: string | BigNumber | null, y: string | BigNumber | null, z: string | BigNumber | null) 
+    toP(): Point 
+    neg(): JacobianPoint 
+    add(p: JacobianPoint): JacobianPoint 
+    mixedAdd(p: Point): JacobianPoint 
+    dblp(pow: number): JacobianPoint 
+    dbl(): JacobianPoint 
+    eq(p: Point | JacobianPoint): boolean 
+    eqXToP(x: BigNumber): boolean 
+    inspect(): string 
+    isInfinity(): boolean 
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: Point
+
+```ts
+export default class Point extends BasePoint {
+    x: BigNumber | null;
+    y: BigNumber | null;
+    inf: boolean;
+    static fromString(str: string): Point 
+    static fromX(x: BigNumber | number | number[] | string, odd: boolean): Point 
+    static fromJSON(obj: string | any[], isRed: boolean): Point 
+    constructor(x: BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null, isRed: boolean = true) 
+    validate(): boolean 
+    encode(compact: boolean = true, enc?: "hex"): number[] | string 
+    toString(): string 
+    _getBeta(): undefined | Point 
+    toJSON(): [
+        BigNumber | null,
+        BigNumber | null,
+        {
+            doubles: {
+                step: any;
+                points: any[];
+            } | undefined;
+            naf: {
+                wnd: any;
+                points: any[];
+            } | undefined;
+        }?
+    ] 
+    inspect(): string 
+    isInfinity(): boolean 
+    add(p: Point): Point 
+    dbl(): Point 
+    getX(): BigNumber 
+    getY(): BigNumber 
+    _fixedNafMul(k: BigNumber): Point 
+    _wnafMulAdd(defW: number, points: Point[], coeffs: BigNumber[], len: number, jacobianResult?: boolean): BasePoint 
+    _endoWnafMulAdd(points, coeffs, jacobianResult?: boolean): BasePoint 
+    _wnafMul(p: BasePoint, k: BigNumber): BasePoint 
+    mul(k: BigNumber | number | number[] | string): Point 
+    mulAdd(k1: BigNumber, p2: Point, k2: BigNumber): Point 
+    jmulAdd(k1: BigNumber, p2: Point, k2: BigNumber): JPoint 
+    eq(p: Point): boolean 
+    neg(_precompute?: boolean): Point 
+    toJ(): JPoint 
+}
+```
+
+<details>
+
+<summary>Class Point Details</summary>
+
+#### Method toString
+
+function toString() { [native code] }
+
+```ts
+toString(): string 
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: RIPEMD160
+
+An implementation of RIPEMD160 cryptographic hash function. Extends the BaseHash class.
+It provides a way to compute a 'digest' for any kind of input data; transforming the data
+into a unique output of fixed size. The output is deterministic; it will always be
+the same for the same input.
+
+Example
+
+```ts
+const ripemd160 = new RIPEMD160();
+```
+
+```ts
+export class RIPEMD160 extends BaseHash {
+    h: number[];
+    constructor() 
+    _update(msg: number[], start: number): void 
+    _digest(enc?: "hex"): string | number[] 
+}
+```
+
+<details>
+
+<summary>Class RIPEMD160 Details</summary>
+
+#### Property h
+
+Array that is updated iteratively as part of hashing computation.
+
+```ts
+h: number[]
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: SHA256
+
+An implementation of SHA256 cryptographic hash function. Extends the BaseHash class.
+It provides a way to compute a 'digest' for any kind of input data; transforming the data
+into a unique output of fixed size. The output is deterministic; it will always be
+the same for the same input.
+
+Example
+
+```ts
+const sha256 = new SHA256();
+```
+
+```ts
+export class SHA256 extends BaseHash {
+    h: number[];
+    W: number[];
+    k: number[];
+    constructor() 
+    _update(msg: number[], start?: number): void 
+    ;
+    _digest(enc?: "hex"): number[] | string 
+}
+```
+
+<details>
+
+<summary>Class SHA256 Details</summary>
+
+#### Property W
+
+Provides a way to recycle usage of the array memory.
+
+```ts
+W: number[]
+```
+
+#### Property h
+
+The initial hash constants
+
+```ts
+h: number[]
+```
+
+#### Property k
+
+The round constants used for each round of SHA-256
+
+```ts
+k: number[]
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: SHA1
+
+An implementation of SHA1 cryptographic hash function. Extends the BaseHash class.
+It provides a way to compute a 'digest' for any kind of input data; transforming the data
+into a unique output of fixed size. The output is deterministic; it will always be
+the same for the same input.
+
+Example
+
+```ts
+const sha1 = new SHA1();
+```
+
+```ts
+export class SHA1 extends BaseHash {
+    h: number[];
+    W: number[];
+    k: number[];
+    constructor() 
+    _update(msg: number[], start?: number): void 
+    _digest(enc?: "hex"): number[] | string 
+}
+```
+
+<details>
+
+<summary>Class SHA1 Details</summary>
+
+#### Property W
+
+Provides a way to recycle usage of the array memory.
+
+```ts
+W: number[]
+```
+
+#### Property h
+
+The initial hash constants.
+
+```ts
+h: number[]
+```
+
+#### Property k
+
+The round constants used for each round of SHA-1.
+
+```ts
+k: number[]
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: SHA256HMAC
+
+```ts
+export class SHA256HMAC {
+    inner: SHA256;
+    outer: SHA256;
+    blockSize = 64;
+    outSize = 32;
+    constructor(key) 
+    update(msg: number[] | string, enc?: "hex"): SHA256HMAC 
+    digest(enc?: "hex"): number[] | string 
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: HmacDRBG
+
+```ts
+export default class HmacDRBG {
+    K: number[];
+    V: number[];
+    constructor(entropy: number[] | string, nonce: number[] | string) 
+    hmac(): SHA256HMAC 
+    update(seed?): void 
+    generate(len: number): string 
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: Signature
+
+Represents a digital signature.
+
+A digital signature is a mathematical scheme for verifying the authenticity of
+digital messages or documents. In many scenarios, it is equivalent to a handwritten signature or stamped seal.
+The signature pair (R, S) corresponds to the raw ECDSA ([Elliptic Curve Digital Signature Algorithm](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm)) signature.
+Signatures are often serialized into a format known as '[DER encoding](https://en.wikipedia.org/wiki/X.690#DER_encoding)' for transmission.
+
+```ts
+export default class Signature {
+    r: BigNumber;
+    s: BigNumber;
+    static fromDER(data: number[] | string, enc?: "hex"): Signature 
+    constructor(r: BigNumber, s: BigNumber) 
+    verify(msg: number[] | string, key: PublicKey, enc?: "hex"): boolean 
+    toDER(enc?: "hex"): number[] | string 
+}
+```
+
+<details>
+
+<summary>Class Signature Details</summary>
+
+#### Constructor
+
+Creates an instance of the Signature class.
+
+```ts
+constructor(r: BigNumber, s: BigNumber) 
+```
+
+Argument Details
+
++ **r**
+  + The R component of the signature.
++ **s**
+  + The S component of the signature.
+
+Example
+
+```ts
+const r = new BigNumber('208755674028...');
+const s = new BigNumber('564745627577...');
+const signature = new Signature(r, s);
+```
+
+#### Method fromDER
+
+Takes an array of numbers or a string and returns a new Signature instance.
+This method will throw an error if the DER encoding is invalid.
+If a string is provided, it is assumed to represent a hexadecimal sequence.
+
+```ts
+static fromDER(data: number[] | string, enc?: "hex"): Signature 
+```
+
+Returns
+
+The decoded data in the form of Signature instance.
+
+Argument Details
+
++ **data**
+  + The sequence to decode from DER encoding.
++ **enc**
+  + The encoding of the data string.
+
+Example
+
+```ts
+const signature = Signature.fromDER('30440220018c1f5502f8...', 'hex');
+```
+
+#### Method toDER
+
+Converts an instance of Signature into DER encoding.
+
+If the encoding parameter is set to 'hex', the function will return a hex string.
+Otherwise, it will return an array of numbers.
+
+```ts
+toDER(enc?: "hex"): number[] | string 
+```
+
+Returns
+
+The current instance in DER encoding.
+
+Argument Details
+
++ **enc**
+  + The encoding to use for the output.
+
+Example
+
+```ts
+const der = signature.toDER('hex');
+```
+
+#### Method verify
+
+Verifies a digital signature.
+
+This method will return true if the signature, key, and message hash match.
+If the data or key do not match the signature, the function returns false.
+
+```ts
+verify(msg: number[] | string, key: PublicKey, enc?: "hex"): boolean 
+```
+
+Returns
+
+A boolean representing whether the signature is valid.
+
+Argument Details
+
++ **msg**
+  + The message to verify.
++ **key**
+  + The public key used to sign the original message.
++ **enc**
+  + The encoding of the msg string.
+
+Example
+
+```ts
+const msg = 'The quick brown fox jumps over the lazy dog';
+const publicKey = PublicKey.fromString('04188ca1050...');
+const isVerified = signature.verify(msg, publicKey);
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: PrivateKey
+
+Represents a Private Key, which is a secret that can be used to generate signatures in a cryptographic system.
+
+The `PrivateKey` class extends from the `BigNumber` class. It offers methods to create signatures, verify them,
+create a corresponding public key and derive a shared secret from a public key.
+
+```ts
+export default class PrivateKey extends BigNumber {
+    static fromRandom(): PrivateKey 
+    sign(msg: number[] | string, enc?: "hex"): Signature 
+    verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
+    toPublicKey(): PublicKey 
+    deriveSharedSecret(key: PublicKey): Point 
+}
+```
+
+<details>
+
+<summary>Class PrivateKey Details</summary>
+
+#### Method deriveSharedSecret
+
+Derives a shared secret from the public key.
+
+```ts
+deriveSharedSecret(key: PublicKey): Point 
+```
+
+Returns
+
+The derived shared secret (a point on the curve).
+
+Argument Details
+
++ **key**
+  + The public key to derive the shared secret from.
+
+Throws
+
+Will throw an error if the public key is not valid.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+const publicKey = privateKey.toPublicKey();
+const sharedSecret = privateKey.deriveSharedSecret(publicKey);
+```
+
+#### Method fromRandom
+
+Generates a private key randomly.
+
+```ts
+static fromRandom(): PrivateKey 
+```
+
+Returns
+
+The newly generated Private Key.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+```
+
+#### Method sign
+
+Signs a message using the private key.
+
+```ts
+sign(msg: number[] | string, enc?: "hex"): Signature 
+```
+
+Returns
+
+A digital signature generated from the hash of the message and the private key.
+
+Argument Details
+
++ **msg**
+  + The message (array of numbers or string) to be signed.
++ **enc**
+  + If 'hex' the string will be treated as hex, utf8 otherwise.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+const signature = privateKey.sign('Hello, World!');
+```
+
+#### Method toPublicKey
+
+Converts the private key to its corresponding public key.
+
+The public key is generated by multiplying the base point G of the curve and the private key.
+
+```ts
+toPublicKey(): PublicKey 
+```
+
+Returns
+
+The generated PublicKey.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+const publicKey = privateKey.toPublicKey();
+```
+
+#### Method verify
+
+Verifies a message's signature using the public key associated with this private key.
+
+```ts
+verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
+```
+
+Returns
+
+Whether or not the signature is valid.
+
+Argument Details
+
++ **msg**
+  + The original message which has been signed.
++ **sig**
+  + The signature to be verified.
++ **enc**
+  + The data encoding method.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+const signature = privateKey.sign('Hello, World!');
+const isSignatureValid = privateKey.verify('Hello, World!', signature);
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: PublicKey
+
+The PublicKey class extends the Point class. It is used in public-key cryptography to derive shared secret, verify message signatures, and encode the public key in the DER format.
+The class comes with static methods to generate PublicKey instances from private keys or from strings.
+
+```ts
+export default class PublicKey extends Point {
+    static fromPrivateKey(key: PrivateKey): PublicKey 
+    static fromString(str: string): PublicKey 
+    deriveSharedSecret(priv: PrivateKey): Point 
+    verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
+    toDER(): string 
+}
+```
+
+<details>
+
+<summary>Class PublicKey Details</summary>
+
+#### Method deriveSharedSecret
+
+Derive a shared secret from a public key and a private key for use in symmetric encryption.
+This method multiplies the public key (an instance of Point) with a private key.
+
+```ts
+deriveSharedSecret(priv: PrivateKey): Point 
+```
+
+Returns
+
+Returns the Point representing the shared secret.
+
+Argument Details
+
++ **priv**
+  + The private key to use in deriving the shared secret.
+
+Throws
+
+Will throw an error if the public key is not valid for ECDH secret derivation.
+
+Example
+
+```ts
+const myPrivKey = new PrivateKey(...)
+const sharedSecret = myPubKey.deriveSharedSecret(myPrivKey)
+```
+
+#### Method fromPrivateKey
+
+Static factory method to derive a public key from a private key.
+It multiplies the generator point 'g' on the elliptic curve by the private key.
+
+```ts
+static fromPrivateKey(key: PrivateKey): PublicKey 
+```
+
+Returns
+
+Returns the PublicKey derived from the given PrivateKey.
+
+Argument Details
+
++ **key**
+  + The private key from which to derive the public key.
+
+Example
+
+```ts
+const myPrivKey = new PrivateKey(...)
+const myPubKey = PublicKey.fromPrivateKey(myPrivKey)
+```
+
+#### Method fromString
+
+Static factory method to create a PublicKey instance from a string.
+
+```ts
+static fromString(str: string): PublicKey 
+```
+
+Returns
+
+Returns the PublicKey created from the string.
+
+Argument Details
+
++ **str**
+  + A string representing a public key.
+
+Example
+
+```ts
+const myPubKey = PublicKey.fromString("03....")
+```
+
+#### Method toDER
+
+Encode the public key to DER (Distinguished Encoding Rules) format.
+
+```ts
+toDER(): string 
+```
+
+Returns
+
+Returns the DER-encoded string of this public key.
+
+Example
+
+```ts
+const derPublicKey = myPubKey.toDER()
+```
+
+#### Method verify
+
+Verify a signature of a message using this public key.
+
+```ts
+verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
+```
+
+Returns
+
+Returns true if the signature is verified successfully, otherwise false.
+
+Argument Details
+
++ **msg**
+  + The message to verify. It can be a string or an array of numbers.
++ **sig**
+  + The Signature of the message that needs verification.
++ **enc**
+  + The encoding of the message. It defaults to 'hex'.
+
+Example
+
+```ts
+const myMessage = "Hello, world!"
+const mySignature = new Signature(...)
+const isVerified = myPubKey.verify(myMessage, mySignature)
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: SymmetricKey
+
+```ts
+export default class SymmetricKey extends BigNumber {
+    encrypt(msg: number[] | string, enc?: "hex"): string | number[] 
+    decrypt(msg: number[] | string, enc?: "hex"): string | number[] 
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+## Functions
+
+### Function: toArray
+
+```ts
+export function toArray(msg: number[] | string, enc?: "hex"): number[] 
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+## Variables
+
+| |
+| --- |
+| [encode](#variable-encode) |
+| [hash160](#variable-hash160) |
+| [hash256](#variable-hash256) |
+| [ripemd160](#variable-ripemd160) |
+| [sha1](#variable-sha1) |
+| [sha256](#variable-sha256) |
+| [sign](#variable-sign) |
+| [toArray](#variable-toarray) |
+| [toHex](#variable-tohex) |
+| [verify](#variable-verify) |
+| [zero2](#variable-zero2) |
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+
+### Variable: zero2
+
+```ts
+zero2 = (word: string): string => {
+    if (word.length === 1) {
+        return "0" + word;
+    }
+    else {
+        return word;
+    }
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: toHex
+
+```ts
+toHex = (msg: number[]): string => {
+    let res = "";
+    for (let i = 0; i < msg.length; i++) {
+        res += zero2(msg[i].toString(16));
+    }
+    return res;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: toArray
+
+```ts
+toArray = (msg: any, enc?: "hex" | "utf8"): any[] => {
+    if (Array.isArray(msg)) {
+        return msg.slice();
+    }
+    if (!(msg as boolean)) {
+        return [];
+    }
+    const res: any[] = [];
+    if (typeof msg !== "string") {
+        for (let i = 0; i < msg.length; i++) {
+            res[i] = msg[i] | 0;
+        }
+        return res;
+    }
+    if (enc === "hex") {
+        msg = msg.replace(/[^a-z0-9]+/ig, "");
+        if (msg.length % 2 !== 0) {
+            msg = "0" + (msg as string);
+        }
+        for (let i = 0; i < msg.length; i += 2) {
+            res.push(parseInt((msg[i] as string) + (msg[i + 1] as string), 16));
+        }
+    }
+    else {
+        for (let i = 0; i < msg.length; i++) {
+            const c = msg.charCodeAt(i);
+            const hi = c >> 8;
+            const lo = c & 255;
+            if (hi as unknown as boolean) {
+                res.push(hi, lo);
+            }
+            else {
+                res.push(lo);
+            }
+        }
+    }
+    return res;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: encode
+
+```ts
+encode = (arr: number[], enc?: "hex"): string | number[] => {
+    if (enc === "hex") {
+        return toHex(arr);
+    }
+    else {
+        return arr;
+    }
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: ripemd160
+
+```ts
+ripemd160 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    return new RIPEMD160().update(msg, enc).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: sha1
+
+```ts
+sha1 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    return new SHA1().update(msg, enc).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: sha256
+
+```ts
+sha256 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    return new SHA256().update(msg, enc).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: hash256
+
+```ts
+hash256 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    const first = new SHA256().update(msg, enc).digest();
+    return new SHA256().update(first).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: hash160
+
+```ts
+hash160 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    const first = new SHA256().update(msg, enc).digest();
+    return new RIPEMD160().update(first).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: sign
+
+```ts
+sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: BigNumber | Function): Signature => {
+    const curve = new Curve();
+    msg = truncateToN(msg);
+    const bytes = curve.n.byteLength();
+    const bkey = key.toArray("be", bytes);
+    const nonce = msg.toArray("be", bytes);
+    const drbg = new DRBG(bkey, nonce);
+    const ns1 = curve.n.subn(1);
+    for (let iter = 0;; iter++) {
+        let k = typeof customK === "function"
+            ? customK(iter)
+            : BigNumber.isBN(customK)
+                ? customK
+                : new BigNumber(drbg.generate(bytes), 16);
+        k = truncateToN(k, true);
+        if (k.cmpn(1) <= 0 || k.cmp(ns1) >= 0) {
+            continue;
+        }
+        const kp = curve.g.mul(k);
+        if (kp.isInfinity()) {
+            continue;
+        }
+        const kpX = kp.getX();
+        const r = kpX.umod(curve.n);
+        if (r.cmpn(0) === 0) {
+            continue;
+        }
+        let s = k.invm(curve.n).mul(r.mul(key).iadd(msg));
+        s = s.umod(curve.n);
+        if (s.cmpn(0) === 0) {
+            continue;
+        }
+        if (forceLowS && s.cmp(curve.n.ushrn(1)) > 0) {
+            s = curve.n.sub(s);
+        }
+        return new Signature(r, s);
+    }
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: verify
+
+```ts
+verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
+    const curve = new Curve();
+    msg = truncateToN(msg);
+    const r = sig.r;
+    const s = sig.s;
+    if (r.cmpn(1) < 0 || r.cmp(curve.n) >= 0) {
+        return false;
+    }
+    if (s.cmpn(1) < 0 || s.cmp(curve.n) >= 0) {
+        return false;
+    }
+    const sinv = s.invm(curve.n);
+    const u1 = sinv.mul(msg).umod(curve.n);
+    const u2 = sinv.mul(r).umod(curve.n);
+    const p = curve.g.jmulAdd(u1, key, u2);
+    if (p.isInfinity()) {
+        return false;
+    }
+    return p.eqXToP(r);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---

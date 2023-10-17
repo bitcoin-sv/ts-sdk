@@ -9,11 +9,12 @@ describe('ECDH', function () {
     const s2 = PrivateKey.fromRandom()
     let sh1 = s1.deriveSharedSecret(s2.toPublicKey())
     let sh2 = s2.deriveSharedSecret(s1.toPublicKey())
-
     expect(sh1.toString()).toEqual(sh2.toString())
-
     sh1 = s1.deriveSharedSecret(PublicKey.fromString(s2.toPublicKey().toDER()))
     sh2 = s2.deriveSharedSecret(PublicKey.fromString(s1.toPublicKey().toDER()))
+    expect(sh1.toString()).toEqual(sh2.toString())
+    sh1 = s1.deriveSharedSecret(PublicKey.fromPrivateKey(s2))
+    sh2 = s2.deriveSharedSecret(PublicKey.fromPrivateKey(s1))
     expect(sh1.toString()).toEqual(sh2.toString())
   })
   it('should be able to prevent a twist attack for secp256k1', () => {
