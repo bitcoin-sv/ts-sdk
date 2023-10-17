@@ -3,11 +3,11 @@ class Rand {
   constructor () {
     if (typeof self === 'object') {
       /* eslint-disable-next-line */
-      if ((self.crypto && self.crypto.getRandomValues) || (self.msCrypto && self.msCrypto.getRandomValues)) {
+      if (self.crypto && self.crypto.getRandomValues) {
         this._rand = n => {
-          const arr = new Uint8Array(n);
+          const arr = new Uint8Array(n)
           /* eslint-disable-next-line */
-          (self.crypto || self.msCrypto).getRandomValues(arr)
+          self.crypto.getRandomValues(arr)
           return arr
         }
       } else if (typeof window === 'object') {
@@ -32,7 +32,7 @@ class Rand {
   }
 }
 
-let ayn = null
+let ayn: Rand | null = null
 
 /**
  * Generates a sequence of pseudo-random bytes with the given length.

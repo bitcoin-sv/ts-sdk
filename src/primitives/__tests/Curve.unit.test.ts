@@ -143,9 +143,9 @@ describe('Point codec', () => {
       expect(p.encode(true, 'hex')).toBe(definition.compactEncoded)
 
       // Decodes as expected
-      expect(curve.decodePoint(definition.encoded, 'hex').eq(p)).toBe(true)
-      expect(curve.decodePoint(definition.compactEncoded, 'hex').eq(p)).toBe(true)
-      expect(curve.decodePoint(definition.hybrid, 'hex').eq(p)).toBe(true)
+      expect(Point.fromString(definition.encoded).eq(p)).toBe(true)
+      expect(Point.fromString(definition.compactEncoded).eq(p)).toBe(true)
+      expect(Point.fromString(definition.hybrid).eq(p)).toBe(true)
     }
   }
 
@@ -185,13 +185,13 @@ describe('Point codec', () => {
         'ae12777aacfbb620f3be96017f45c560de80f0f6518fe4a03c870c36b075f297'
   }
 
-  // it('should throw when trying to decode random bytes', () => {
-  //   assert.throws(() => {
-  //     elliptic.curves.secp256k1.curve.decodePoint(
-  //       '05' +
-  //         '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798')
-  //   })
-  // })
+  it('should throw when trying to decode random bytes', () => {
+    expect(() => {
+      Point.fromString(
+        '05' +
+        '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798')
+    }).toThrow()
+  })
 
   it('should be able to encode/decode a short curve point with even Y',
     makeShortTest(shortPointEvenY))

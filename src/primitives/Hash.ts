@@ -592,24 +592,24 @@ export class SHA256HMAC {
   }
 }
 
-export const ripemd160 = (msg: number[], enc?: 'hex'): number[] | string => {
-  return new RIPEMD160().update(msg).digest(enc)
+export const ripemd160 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
+  return new RIPEMD160().update(msg, enc).digest(enc)
 }
 
-export const sha1 = (msg: number[], enc?: 'hex'): number[] | string => {
-  return new SHA1().update(msg).digest(enc)
+export const sha1 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
+  return new SHA1().update(msg, enc).digest(enc)
 }
 
-export const sha256 = (msg: number[], enc?: 'hex'): number[] | string => {
-  return new SHA256().update(msg).digest(enc)
+export const sha256 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
+  return new SHA256().update(msg, enc).digest(enc)
 }
 
-export const hash256 = (msg: number[], enc?: 'hex'): number[] | string => {
-  const first = new SHA256().update(msg).digest()
+export const hash256 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
+  const first = new SHA256().update(msg, enc).digest()
   return new SHA256().update(first).digest(enc)
 }
 
-export const hash160 = (msg: number[], enc?: 'hex'): number[] | string => {
-  const first = new SHA256().update(msg).digest()
+export const hash160 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
+  const first = new SHA256().update(msg, enc).digest()
   return new RIPEMD160().update(first).digest(enc)
 }

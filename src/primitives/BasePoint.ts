@@ -18,15 +18,15 @@ export default abstract class BasePoint {
     this.precomputed = null
   }
 
-  add (p: any): any {
+  add (p: any): BasePoint {
     throw new Error('Not implmented')
   }
 
-  dbl (): any {
+  dbl (): BasePoint {
     throw new Error('Not implmented')
   }
 
-  precompute (power?: number): any {
+  precompute (power?: number): BasePoint {
     if (this.precomputed != null) { return this }
 
     const precomputed = {
@@ -87,7 +87,7 @@ export default abstract class BasePoint {
     const res = [this]
     const max = (1 << wnd) - 1
     const dbl = max === 1 ? null : this.dbl()
-    for (let i = 1; i < max; i++) { res[i] = res[i - 1].add(dbl) }
+    for (let i = 1; i < max; i++) { res[i] = res[i - 1].add(dbl) as this }
     return {
       wnd,
       points: res
@@ -98,7 +98,7 @@ export default abstract class BasePoint {
     return null
   }
 
-  dblp (k: number): any {
+  dblp (k: number): BasePoint {
     let r: BasePoint = this
     for (let i = 0; i < k; i++) { r = r.dbl() }
     return r

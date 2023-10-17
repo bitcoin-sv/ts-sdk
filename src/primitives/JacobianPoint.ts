@@ -19,9 +19,18 @@ export default class JacobianPoint extends BasePoint {
       this.y = this.curve.one
       this.z = new BigNumber(0)
     } else {
-      this.x = new BigNumber(x, 16)
-      this.y = new BigNumber(y, 16)
-      this.z = new BigNumber(z, 16)
+      if (!BigNumber.isBN(x)) {
+        x = new BigNumber(x as string, 16)
+      }
+      this.x = x as BigNumber
+      if (!BigNumber.isBN(y)) {
+        y = new BigNumber(y as string, 16)
+      }
+      this.y = y as BigNumber
+      if (!BigNumber.isBN(z)) {
+        z = new BigNumber(z as string, 16)
+      }
+      this.z = z as BigNumber
     }
     if (this.x.red == null) { this.x = this.x.toRed(this.curve.red) }
     if (this.y.red == null) { this.y = this.y.toRed(this.curve.red) }
@@ -210,11 +219,11 @@ export default class JacobianPoint extends BasePoint {
     return new JacobianPoint(nx, ny, nz)
   }
 
-  mul (k: BigNumber | number | number[] | string, kbase?: number | 'hex'): JacobianPoint {
-    k = new BigNumber(k, kbase)
+  // mul (k: BigNumber | number | number[] | string, kbase?: number | 'hex'): JacobianPoint {
+  //   k = new BigNumber(k, kbase)
 
-    return this.curve._wnafMul(this, k) as JacobianPoint
-  }
+  //   return this.curve._wnafMul(this, k) as JacobianPoint
+  // }
 
   eq (p: Point | JacobianPoint): boolean {
     if (p.type === 'affine') { return this.eq((p as Point).toJ()) }

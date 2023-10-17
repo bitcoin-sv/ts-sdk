@@ -173,11 +173,4 @@ describe('BN.js/Constructor', () => {
       expect(new BigNumber(Buffer.from('010203', 'hex'), 'le').toString(16)).toEqual('30201')
     })
   })
-
-  describe('with BN input', () => {
-    it('should clone BN', () => {
-      const num = new BigNumber(12345)
-      expect(new BigNumber(num).toString(10)).toEqual('12345')
-    })
-  })
 })

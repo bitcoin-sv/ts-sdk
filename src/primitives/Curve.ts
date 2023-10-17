@@ -2,7 +2,7 @@ import BigNumber from './BigNumber'
 import ReductionContext from './ReductionContext'
 import MontgomoryMethod from './MontgomoryMethod'
 import Point from './Point'
-import JPoint from './JacobianPoint'
+import { toArray } from './utils'
 
 const precomputed = {
   doubles: {
@@ -823,62 +823,7 @@ export default class Curve {
     }
   }
 
-  static toArray (msg: any, enc?: 'hex' | 'utf8'): any[] {
-    if (Array.isArray(msg)) { return msg.slice() }
-    if (!(msg as boolean)) { return [] }
-    const res: any[] = []
-    if (typeof msg !== 'string') {
-      for (let i = 0; i < msg.length; i++) { res[i] = msg[i] | 0 }
-      return res
-    }
-    if (enc === 'hex') {
-      msg = msg.replace(/[^a-z0-9]+/ig, '')
-      if (msg.length % 2 !== 0) { msg = '0' + (msg as string) }
-      for (let i = 0; i < msg.length; i += 2) {
-        res.push(
-          parseInt((msg[i] as string) + (msg[i + 1] as string), 16)
-        )
-      }
-    } else {
-      for (let i = 0; i < msg.length; i++) {
-        const c = msg.charCodeAt(i)
-        const hi = c >> 8
-        const lo = c & 0xff
-        if (hi as unknown as boolean) {
-          res.push(hi, lo)
-        } else {
-          res.push(lo)
-        }
-      }
-    }
-    return res
-  }
-
-  static zero2 (word: string): string {
-    if (word.length === 1) {
-      return '0' + word
-    } else {
-      return word
-    }
-  }
-
-  static toHex (msg: number[]): string {
-    let res = ''
-    for (let i = 0; i < msg.length; i++) {
-      res += Curve.zero2(msg[i].toString(16))
-    }
-    return res
-  }
-
-  static encode (arr: number[], enc?: 'hex'): string | number[] {
-    if (enc === 'hex') {
-      return Curve.toHex(arr)
-    } else {
-      return arr
-    }
-  };
-
-  static getNAF (num: BigNumber, w: number, bits: number): number[] {
+  getNAF (num: BigNumber, w: number, bits: number): number[] {
     const naf = new Array(Math.max(num.bitLength(), bits) + 1)
     naf.fill(0)
 
@@ -903,7 +848,7 @@ export default class Curve {
   }
 
   // Represent k1, k2 in a Joint Sparse Form
-  static getJSF (k1: BigNumber, k2: BigNumber): number[][] {
+  getJSF (k1: BigNumber, k2: BigNumber): number[][] {
     const jsf: any[][] = [
       [],
       []
@@ -963,7 +908,7 @@ export default class Curve {
 
   static parseBytes (bytes: string | number[]): number[] {
     return typeof bytes === 'string'
-      ? Curve.toArray(bytes, 'hex')
+      ? toArray(bytes, 'hex')
       : bytes
   }
 
@@ -1041,233 +986,6 @@ export default class Curve {
     this.endo = this._getEndomorphism(conf)
     this._endoWnafT1 = new Array(4)
     this._endoWnafT2 = new Array(4)
-  }
-
-  _fixedNafMul (p: Point, k: BigNumber): Point {
-    Curve.assert(p.precomputed)
-    const doubles = p._getDoubles()
-
-    const naf = Curve.getNAF(k, 1, this._bitLength)
-    let I = (1 << (doubles.step + 1)) - (doubles.step % 2 === 0 ? 2 : 1)
-    I /= 3
-
-    // Translate into more windowed form
-    const repr = []
-    for (let j = 0; j < naf.length; j += doubles.step) {
-      let nafW = 0
-      for (let k = j + doubles.step - 1; k >= j; k--) {
-        nafW = (nafW << 1) + naf[k]
-      }
-      repr.push(nafW)
-    }
-
-    let a = new JPoint(null, null, null)
-    let b = new JPoint(null, null, null)
-    for (let i = I; i > 0; i--) {
-      for (let j = 0; j < repr.length; j++) {
-        const nafW = repr[j]
-        if (nafW === i) {
-          b = b.mixedAdd(doubles.points[j])
-        } else if (nafW === -i) {
-          b = b.mixedAdd((doubles.points[j]).neg())
-        }
-      }
-      a = a.add(b)
-    }
-    return a.toP()
-  }
-
-  _wnafMul (p: Point | JPoint, k: BigNumber): Point | JPoint {
-    let w = 4
-
-    // Precompute window
-    const nafPoints = p._getNAFPoints(w)
-    w = nafPoints.wnd
-    const wnd = nafPoints.points
-
-    // Get NAF form
-    const naf = Curve.getNAF(k, w, this._bitLength)
-
-    // Add `this`*(N+1) for every w-NAF index
-    let acc = new JPoint(null, null, null)
-    for (let i = naf.length - 1; i >= 0; i--) {
-      // Count zeroes
-      let k
-      for (k = 0; i >= 0 && naf[i] === 0; i--) { k++ }
-      if (i >= 0) { k++ }
-      acc = acc.dblp(k)
-
-      if (i < 0) { break }
-      const z = naf[i]
-      Curve.assert(z !== 0)
-      if (p.type === 'affine') {
-        // J +- P
-        if (z > 0) {
-          acc = acc.mixedAdd(wnd[(z - 1) >> 1])
-        } else {
-          acc = acc.mixedAdd(wnd[(-z - 1) >> 1].neg())
-        }
-      } else {
-        // J +- J
-        if (z > 0) {
-          acc = acc.add(wnd[(z - 1) >> 1])
-        } else {
-          acc = acc.add(wnd[(-z - 1) >> 1].neg())
-        }
-      }
-    }
-    return p.type === 'affine' ? acc.toP() : acc
-  }
-
-  _wnafMulAdd (
-    defW: number,
-    points: Point[],
-    coeffs: BigNumber[],
-    len: number,
-    jacobianResult?: boolean
-  ): Point | JPoint {
-    const wndWidth = this._wnafT1
-    const wnd = this._wnafT2
-    const naf = this._wnafT3
-
-    // Fill all arrays
-    let max = 0
-    for (let i = 0; i < len; i++) {
-      const p = points[i]
-      const nafPoints = p._getNAFPoints(defW)
-      wndWidth[i] = nafPoints.wnd
-      wnd[i] = nafPoints.points
-    }
-
-    // Comb small window NAFs
-    for (let i = len - 1; i >= 1; i -= 2) {
-      const a = i - 1
-      const b = i
-      if (wndWidth[a] !== 1 || wndWidth[b] !== 1) {
-        naf[a] = Curve.getNAF(coeffs[a], wndWidth[a], this._bitLength)
-        naf[b] = Curve.getNAF(coeffs[b], wndWidth[b], this._bitLength)
-        max = Math.max(naf[a].length, max)
-        max = Math.max(naf[b].length, max)
-        continue
-      }
-
-      const comb: any[] = [
-        points[a], /* 1 */
-        null, /* 3 */
-        null, /* 5 */
-        points[b] /* 7 */
-      ]
-
-      // Try to avoid Projective points, if possible
-      if (points[a].y.cmp(points[b].y) === 0) {
-        comb[1] = points[a].add(points[b])
-        comb[2] = points[a].toJ().mixedAdd(points[b].neg())
-      } else if (points[a].y.cmp(points[b].y.redNeg()) === 0) {
-        comb[1] = points[a].toJ().mixedAdd(points[b])
-        comb[2] = points[a].add(points[b].neg())
-      } else {
-        comb[1] = points[a].toJ().mixedAdd(points[b])
-        comb[2] = points[a].toJ().mixedAdd(points[b].neg())
-      }
-
-      const index = [
-        -3, /* -1 -1 */
-        -1, /* -1 0 */
-        -5, /* -1 1 */
-        -7, /* 0 -1 */
-        0, /* 0 0 */
-        7, /* 0 1 */
-        5, /* 1 -1 */
-        1, /* 1 0 */
-        3 /* 1 1 */
-      ]
-
-      const jsf = Curve.getJSF(coeffs[a], coeffs[b])
-      max = Math.max(jsf[0].length, max)
-      naf[a] = new Array(max)
-      naf[b] = new Array(max)
-      for (let j = 0; j < max; j++) {
-        const ja = jsf[0][j] | 0
-        const jb = jsf[1][j] | 0
-
-        naf[a][j] = index[(ja + 1) * 3 + (jb + 1)]
-        naf[b][j] = 0
-        wnd[a] = comb
-      }
-    }
-
-    let acc = new JPoint(null, null, null)
-    const tmp = this._wnafT4
-    for (let i = max; i >= 0; i--) {
-      let k = 0
-
-      while (i >= 0) {
-        let zero = true
-        for (let j = 0; j < len; j++) {
-          tmp[j] = naf[j][i] | 0
-          if (tmp[j] !== 0) { zero = false }
-        }
-        if (!zero) { break }
-        k++
-        i--
-      }
-      if (i >= 0) { k++ }
-      acc = acc.dblp(k)
-      if (i < 0) { break }
-
-      for (let j = 0; j < len; j++) {
-        const z = tmp[j]
-        let p
-        if (z === 0) {
-          continue
-        } else if (z > 0) {
-          p = wnd[j][(z - 1) >> 1]
-        } else if (z < 0) {
-          p = wnd[j][(-z - 1) >> 1].neg()
-        }
-
-        if (p.type === 'affine') {
-          acc = acc.mixedAdd(p)
-        } else {
-          acc = acc.add(p)
-        }
-      }
-    }
-    // Zeroify references
-    for (let i = 0; i < len; i++) { wnd[i] = null }
-
-    if (jacobianResult) {
-      return acc
-    } else {
-      return acc.toP()
-    }
-  }
-
-  decodePoint (bytes: number[], enc?: 'hex'): Point {
-    bytes = Curve.toArray(bytes, enc)
-
-    const len = this.p.byteLength()
-
-    // uncompressed, hybrid-odd, hybrid-even
-    if ((bytes[0] === 0x04 || bytes[0] === 0x06 || bytes[0] === 0x07) &&
-      bytes.length - 1 === 2 * len) {
-      if (bytes[0] === 0x06) {
-        Curve.assert(bytes[bytes.length - 1] % 2 === 0)
-      } else if (bytes[0] === 0x07) {
-        Curve.assert(bytes[bytes.length - 1] % 2 === 1)
-      }
-
-      const res = new Point(
-        bytes.slice(1, 1 + len),
-        bytes.slice(1 + len, 1 + 2 * len)
-      )
-
-      return res
-    } else if ((bytes[0] === 0x02 || bytes[0] === 0x03) &&
-              bytes.length - 1 === len) {
-      return this.pointFromX(bytes.slice(1, 1 + len), bytes[0] === 0x03)
-    }
-    throw new Error('Unknown point format')
   }
 
   _getEndomorphism (conf): {
@@ -1430,29 +1148,7 @@ export default class Curve {
     const k1 = k.sub(p1).sub(p2)
     const k2 = q1.add(q2).neg()
     return { k1, k2 }
-  };
-
-  pointFromX (x: BigNumber | number | number[] | string, odd: boolean): Point {
-    x = new BigNumber(x, 16)
-    if (x.red == null) {
-      x = x.toRed(this.red)
-    }
-
-    const y2 = x.redSqr().redMul(x).redIAdd(x.redMul(this.a)).redIAdd(this.b)
-    let y = y2.redSqrt()
-    if (y.redSqr().redSub(y2).cmp(this.zero) !== 0) {
-      throw new Error('invalid point')
-    }
-
-    // XXX Is there any way to tell if the number is odd without converting it
-    // to non-red form?
-    const isOdd = y.fromRed().isOdd()
-    if ((odd && !isOdd) || (!odd && isOdd)) {
-      y = y.redNeg()
-    }
-
-    return new Point(x, y)
-  };
+  }
 
   validate (point: Point): boolean {
     if (point.inf) { return true }
@@ -1464,37 +1160,4 @@ export default class Curve {
     const rhs = x.redSqr().redMul(x).redIAdd(ax).redIAdd(this.b)
     return y.redSqr().redISub(rhs).cmpn(0) === 0
   };
-
-  _endoWnafMulAdd (points, coeffs, jacobianResult?: boolean): Point | JPoint {
-    const npoints = this._endoWnafT1
-    const ncoeffs = this._endoWnafT2
-    let i
-    for (i = 0; i < points.length; i++) {
-      const split = this._endoSplit(coeffs[i])
-      let p = points[i]
-      let beta = p._getBeta()
-
-      if (split.k1.negative !== 0) {
-        split.k1.ineg()
-        p = p.neg(true)
-      }
-      if (split.k2.negative !== 0) {
-        split.k2.ineg()
-        beta = beta.neg(true)
-      }
-
-      npoints[i * 2] = p
-      npoints[i * 2 + 1] = beta
-      ncoeffs[i * 2] = split.k1
-      ncoeffs[i * 2 + 1] = split.k2
-    }
-    const res = this._wnafMulAdd(1, npoints, ncoeffs, i * 2, jacobianResult)
-
-    // Clean-up references to points and coefficients
-    for (let j = 0; j < i * 2; j++) {
-      npoints[j] = null
-      ncoeffs[j] = null
-    }
-    return res
-  }
 }

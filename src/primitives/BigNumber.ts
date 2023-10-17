@@ -190,14 +190,10 @@ export default class BigNumber {
    * const bn = new BigNumber('123456', 10, 'be');
    */
   constructor (
-    number: number | string | number[] | Buffer | BigNumber = 0,
+    number: number | string | number[] | Buffer = 0,
     base: number | 'be' | 'le' | 'hex' = 10,
     endian: 'be' | 'le' = 'be'
   ) {
-    if (BigNumber.isBN(number)) {
-      return number as unknown as BigNumber
-    }
-
     this.negative = 0
     this.words = []
     this.length = 0
@@ -3233,7 +3229,7 @@ export default class BigNumber {
 
       if (mode !== 'div') {
         mod = res.mod.neg()
-        if (positive as boolean && mod.negative !== 0) {
+        if (positive && mod.negative !== 0) {
           mod.iadd(num)
         }
       }
@@ -3262,7 +3258,7 @@ export default class BigNumber {
 
       if (mode !== 'div') {
         mod = res.mod.neg()
-        if (positive as boolean && mod.negative !== 0) {
+        if (positive && mod.negative !== 0) {
           mod.isub(num)
         }
       }
@@ -4100,7 +4096,7 @@ export default class BigNumber {
       this.red,
       'fromRed works only with numbers in reduction context'
     )
-    return (this.red as ReductionContext).convertFrom(this)
+    return (this.red).convertFrom(this)
   }
 
   /**
@@ -4137,7 +4133,7 @@ export default class BigNumber {
    */
   redAdd (num: BigNumber): BigNumber {
     this.assert(this.red, 'redAdd works only with red numbers')
-    return (this.red as ReductionContext).add(this, num)
+    return (this.red).add(this, num)
   }
 
   /**
@@ -4156,7 +4152,7 @@ export default class BigNumber {
    */
   redIAdd (num: BigNumber): BigNumber {
     this.assert(this.red, 'redIAdd works only with red numbers')
-    return (this.red as ReductionContext).iadd(this, num)
+    return (this.red).iadd(this, num)
   }
 
   /**
@@ -4175,7 +4171,7 @@ export default class BigNumber {
    */
   redSub (num: BigNumber): BigNumber {
     this.assert(this.red, 'redSub works only with red numbers')
-    return (this.red as ReductionContext).sub(this, num)
+    return (this.red).sub(this, num)
   }
 
   /**
@@ -4194,7 +4190,7 @@ export default class BigNumber {
    */
   redISub (num: BigNumber): BigNumber {
     this.assert(this.red, 'redISub works only with red numbers')
-    return (this.red as ReductionContext).isub(this, num)
+    return (this.red).isub(this, num)
   }
 
   /**
@@ -4213,7 +4209,7 @@ export default class BigNumber {
    */
   redShl (num: number): BigNumber {
     this.assert(this.red, 'redShl works only with red numbers')
-    return (this.red as ReductionContext).shl(this, num)
+    return (this.red).shl(this, num)
   }
 
   /**
@@ -4232,8 +4228,8 @@ export default class BigNumber {
    */
   redMul (num: BigNumber): BigNumber {
     this.assert(this.red, 'redMul works only with red numbers')
-    ; (this.red as ReductionContext).verify2(this, num)
-    return (this.red as ReductionContext).mul(this, num)
+    ; (this.red).verify2(this, num)
+    return (this.red).mul(this, num)
   }
 
   /**
@@ -4251,8 +4247,8 @@ export default class BigNumber {
    */
   redIMul (num: BigNumber): BigNumber {
     this.assert(this.red, 'redMul works only with red numbers')
-    ; (this.red as ReductionContext).verify2(this, num)
-    return (this.red as ReductionContext).imul(this, num)
+    ; (this.red).verify2(this, num)
+    return (this.red).imul(this, num)
   }
 
   /**
@@ -4272,8 +4268,8 @@ export default class BigNumber {
    */
   redSqr (): BigNumber {
     this.assert(this.red, 'redSqr works only with red numbers')
-    ; (this.red as ReductionContext).verify1(this)
-    return (this.red as ReductionContext).sqr(this)
+    ; (this.red).verify1(this)
+    return (this.red).sqr(this)
   }
 
   /**
@@ -4293,8 +4289,8 @@ export default class BigNumber {
    */
   redISqr (): BigNumber {
     this.assert(this.red, 'redISqr works only with red numbers')
-    ; (this.red as ReductionContext).verify1(this)
-    return (this.red as ReductionContext).isqr(this)
+    ; (this.red).verify1(this)
+    return (this.red).isqr(this)
   }
 
   /**
@@ -4315,8 +4311,8 @@ export default class BigNumber {
    */
   redSqrt (): BigNumber {
     this.assert(this.red, 'redSqrt works only with red numbers')
-    ; (this.red as ReductionContext).verify1(this)
-    return (this.red as ReductionContext).sqrt(this)
+    ; (this.red).verify1(this)
+    return (this.red).sqrt(this)
   }
 
   /**
@@ -4334,8 +4330,8 @@ export default class BigNumber {
    */
   redInvm (): BigNumber {
     this.assert(this.red, 'redInvm works only with red numbers')
-    ; (this.red as ReductionContext).verify1(this)
-    return (this.red as ReductionContext).invm(this)
+    ; (this.red).verify1(this)
+    return (this.red).invm(this)
   }
 
   /**
@@ -4353,8 +4349,8 @@ export default class BigNumber {
    */
   redNeg (): BigNumber {
     this.assert(this.red, 'redNeg works only with red numbers')
-    ; (this.red as ReductionContext).verify1(this)
-    return (this.red as ReductionContext).neg(this)
+    ; (this.red).verify1(this)
+    return (this.red).neg(this)
   }
 
   /**
@@ -4374,8 +4370,8 @@ export default class BigNumber {
    */
   redPow (num: BigNumber): BigNumber {
     this.assert((this.red != null) && (num.red == null), 'redPow(normalNum)')
-    ; (this.red as ReductionContext).verify1(this)
-    return (this.red as ReductionContext).pow(this, num)
+    ; (this.red).verify1(this)
+    return (this.red).pow(this, num)
   }
 
   /**
@@ -4678,7 +4674,7 @@ export default class BigNumber {
     if (buf.length > maxNumSize) {
       throw new Error('script number overflow')
     }
-    if (requireMinimal === true && buf.length > 0) {
+    if (requireMinimal && buf.length > 0) {
     // Check that the number is encoded with the minimum possible
     // number of bytes.
     //

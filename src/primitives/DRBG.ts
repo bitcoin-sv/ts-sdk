@@ -1,20 +1,5 @@
-import { toArray, SHA256HMAC } from './Hash'
-
-const zero2 = (word: string): string => {
-  if (word.length === 1) {
-    return '0' + word
-  } else {
-    return word
-  }
-}
-
-const toHex = (msg: number[]): string => {
-  let res = ''
-  for (let i = 0; i < msg.length; i++) {
-    res += zero2(msg[i].toString(16))
-  }
-  return res
-}
+import { SHA256HMAC } from './Hash'
+import { toHex, toArray } from './utils'
 
 export default class HmacDRBG {
   K: number[]
