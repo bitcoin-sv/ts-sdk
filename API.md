@@ -1043,23 +1043,6 @@ let num = new BigNumber(50000);
 console.log(num.words);  // output: [ 50000 ]
 ```
 
-#### Method _iaddn
-
-A helper method for in-place addition, used when there are no sign changes or size checks needed.
-
-```ts
-_iaddn(num: number): BigNumber 
-```
-
-Returns
-
-Returns the BigNumber after the addition.
-
-Argument Details
-
-+ **num**
-  + The plain number to add.
-
 #### Method _invmp
 
 Compute the multiplicative inverse of the current BigNumber in the modulus field specified by `p`.
