@@ -219,12 +219,6 @@ export default class JacobianPoint extends BasePoint {
     return new JacobianPoint(nx, ny, nz)
   }
 
-  // mul (k: BigNumber | number | number[] | string, kbase?: number | 'hex'): JacobianPoint {
-  //   k = new BigNumber(k, kbase)
-
-  //   return this.curve._wnafMul(this, k) as JacobianPoint
-  // }
-
   eq (p: Point | JacobianPoint): boolean {
     if (p.type === 'affine') { return this.eq((p as Point).toJ()) }
 

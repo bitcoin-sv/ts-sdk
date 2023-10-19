@@ -545,7 +545,7 @@ export class SHA256 extends BaseHash {
   _update (msg: number[], start?: number): void {
     const W = this.W
 
-    let i
+    let i: number
     for (i = 0; i < 16; i++) {
       W[i] = msg[start + i]
     }
@@ -634,7 +634,7 @@ export class SHA1 extends BaseHash {
   _update (msg: number[], start?: number): void {
     const W = this.W
 
-    let i
+    let i: number
     for (i = 0; i < 16; i++) { W[i] = msg[start + i] }
 
     for (; i < W.length; i++) {
