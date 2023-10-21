@@ -17,73 +17,42 @@ describe('SymmetricKey', () => {
     const decryptedValue = KEYS[2].decrypt(encryptedValue, 'utf8')
     expect(originalValue).toEqual(decryptedValue)
   })
-  // it('Encrypts values of type Uint8Array', () => {
-  //   const originalValue = new Uint8Array([42, 99, 33, 0, 1])
-  //   const encryptedValue = encrypt(
-  //     originalValue,
-  //     getKey(2)
-  //   )
-  //   const decryptedValue = decrypt(
-  //     encryptedValue,
-  //     getKey(2),
-  //     'Uint8Array'
-  //   )
-  //   expect(originalValue).toEqual(decryptedValue)
-  // })
-  // it('Can return the result as a Uint8Array', () => {
-  //   const originalValue = new Uint8Array([5, 95, 6, 94])
-  //   const encryptedValue = encrypt(
-  //     originalValue,
-  //     getKey(2),
-  //     'Uint8Array'
-  //   )
-  //   expect(encryptedValue.constructor).toEqual(Uint8Array)
-  // })
-  it('Decrypts a correctly-encrypted value', () => {
-    const result = KEYS[0].decrypt(CIPHERTEXT_1, 'hex')
-    expect(result).toEqual(PLAINTEXT_1)
+  it('Encrypts values as an array', () => {
+    const originalValue = [42, 99, 33, 0, 1]
+    const encryptedValue = KEYS[2].encrypt(
+      originalValue
+    )
+    const decryptedValue = KEYS[2].decrypt(
+      encryptedValue
+    )
+    expect(originalValue).toEqual(decryptedValue)
   })
-  // it('Returns the decrypted value as a Uint8Array when appropriate', () => {
-  //   const result = decrypt(CIPHERTEXT_1, getKey(1), 'Uint8Array')
-  //   expect(result.constructor === Uint8Array).toBe(true)
-  // })
-  // it('Throws a useful error when decryption fails', () => {
-  //   expect(decrypt(
-  //     CIPHERTEXT_1,
-  //     getKey(2)
-  //   )).rejects.toThrow('Decryption failed!')
-  // })
-  // it('decrypts values encrypted with the encrypt function', () => {
-  //   const originalValue = 'secret value'
-  //   const encryptedValue = encrypt(originalValue, getKey(2))
-  //   const decryptedValue = decrypt(encryptedValue, getKey(2))
-  //   expect(originalValue).toEqual(decryptedValue)
-  // })
-  // it('Can decrypt Uint8Array ciphertexts', () => {
-  //   const originalValue = 'secret value'
-  //   const encryptedValue = encrypt(
-  //     originalValue,
-  //     getKey(2),
-  //     'Uint8Array'
-  //   )
-  //   expect(encryptedValue.constructor).toEqual(Uint8Array)
-  //   const decryptedValue = decrypt(encryptedValue, getKey(2))
-  //   expect(originalValue).toEqual(decryptedValue)
-  // })
-  // vectors.forEach((vector, index) => {
-  //   it(`Should pass test vector #${index + 1}`, () => {
-  //     const importedKey = crypto.subtle.importKey(
-  //       'raw',
-  //       decodeUint8FromString(vector.key),
-  //       { name: 'AES-GCM' },
-  //       false,
-  //       ['decrypt']
-  //     )
-  //     const result = decrypt(
-  //       vector.ciphertext,
-  //       importedKey
-  //     )
-  //     expect(result).toEqual(vector.plaintext)
-  //   })
-  // })
+  it('Decrypts a correctly-encrypted value', () => {
+    const result = KEYS[0].decrypt(CIPHERTEXT_1, 'hex') as string
+    expect(Buffer.from(result, 'hex').toString('utf8')).toEqual(PLAINTEXT_1)
+  })
+  it('Throws a useful error when decryption fails', () => {
+    expect(() => {
+      KEYS[2].decrypt(
+        CIPHERTEXT_1,
+        'hex'
+      )
+    }).toThrow(new Error('Decryption failed!'))
+  })
+  it('decrypts values encrypted with the encrypt function', () => {
+    const originalValue = 'secret value'
+    const encryptedValue = KEYS[1].encrypt(originalValue)
+    const decryptedValue = KEYS[1].decrypt(encryptedValue, 'utf8')
+    expect(originalValue).toEqual(decryptedValue)
+  })
+  vectors.forEach((vector, index) => {
+    it(`Should pass test vector #${index + 1}`, () => {
+      const key = new SymmetricKey([...Buffer.from(vector.key, 'base64')])
+      const result = key.decrypt(
+        [...Buffer.from(vector.ciphertext, 'base64')],
+        'hex'
+      )
+      expect(result).toEqual(Buffer.from(vector.plaintext).toString('hex'))
+    })
+  })
 })
