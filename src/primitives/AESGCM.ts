@@ -374,8 +374,7 @@ export function AESGCM (
   let preCounterBlock
   let plainTag
   const hashSubKey = AES(createZeroBlock(16), key)
-
-  preCounterBlock = [].concat(initializationVector)
+  preCounterBlock = [...initializationVector]
   if (initializationVector.length === 12) {
     preCounterBlock = preCounterBlock.concat(createZeroBlock(3)).concat([0x01])
   } else {
@@ -417,4 +416,64 @@ export function AESGCM (
     result: cipherText,
     authenticationTag: gctr(ghash(plainTag, hashSubKey), preCounterBlock, key)
   }
+}
+
+export function AESGCMDecrypt (
+  cipherText: number[],
+  additionalAuthenticatedData: number[],
+  initializationVector: number[],
+  authenticationTag: number[],
+  key: number[]
+): number[] | null {
+  let preCounterBlock
+  let compareTag
+
+  // Generate the hash subkey
+  const hashSubKey = AES(createZeroBlock(16), key)
+
+  preCounterBlock = [...initializationVector]
+  if (initializationVector.length === 12) {
+    preCounterBlock = preCounterBlock.concat(createZeroBlock(3)).concat([0x01])
+  } else {
+    if (initializationVector.length % 16 !== 0) {
+      preCounterBlock = preCounterBlock.concat(createZeroBlock(16 - (initializationVector.length % 16)))
+    }
+
+    preCounterBlock = preCounterBlock.concat(createZeroBlock(8))
+
+    preCounterBlock = ghash(preCounterBlock.concat(createZeroBlock(4)).concat(getBytes(initializationVector.length * 8)), hashSubKey)
+  }
+
+  // Decrypt to obtain the plain text
+  const plainText = gctr(cipherText, incrementLeastSignificantThirtyTwoBits(preCounterBlock), key)
+
+  compareTag = additionalAuthenticatedData.slice()
+
+  if (additionalAuthenticatedData.length === 0) {
+    compareTag = compareTag.concat(createZeroBlock(16))
+  } else if (additionalAuthenticatedData.length % 16 !== 0) {
+    compareTag = compareTag.concat(createZeroBlock(16 - (additionalAuthenticatedData.length % 16)))
+  }
+
+  compareTag = compareTag.concat(cipherText)
+
+  if (cipherText.length === 0) {
+    compareTag = compareTag.concat(createZeroBlock(16))
+  } else if (cipherText.length % 16 !== 0) {
+    compareTag = compareTag.concat(createZeroBlock(16 - (cipherText.length % 16)))
+  }
+
+  compareTag = compareTag.concat(createZeroBlock(4))
+    .concat(getBytes(additionalAuthenticatedData.length * 8))
+    .concat(createZeroBlock(4)).concat(getBytes(cipherText.length * 8))
+
+  // Generate the authentication tag
+  const calculatedTag = gctr(ghash(compareTag, hashSubKey), preCounterBlock, key)
+
+  // If the calculated tag does not match the provided tag, return null - the decryption failed.
+  if (calculatedTag.join() !== authenticationTag.join()) {
+    return null
+  }
+
+  return plainText
 }

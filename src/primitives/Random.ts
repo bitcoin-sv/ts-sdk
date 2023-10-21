@@ -8,7 +8,7 @@ class Rand {
           const arr = new Uint8Array(n)
           /* eslint-disable-next-line */
           self.crypto.getRandomValues(arr)
-          return arr
+          return [...arr]
         }
       } else if (typeof window === 'object') {
         this._rand = () => {
@@ -20,7 +20,7 @@ class Rand {
         /* eslint-disable-next-line */
         const crypto = require('crypto')
         if (typeof crypto.randomBytes === 'function') {
-          this._rand = n => crypto.randomBytes(n)
+          this._rand = n => [...crypto.randomBytes(n)]
         }
       } catch (e) {
       }
