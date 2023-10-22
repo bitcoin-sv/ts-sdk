@@ -5314,17 +5314,99 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ---
 ### Class: SymmetricKey
 
+`SymmetricKey` is a class that extends the `BigNumber` class and implements symmetric encryption and decryption methods.
+Symmetric-Key encryption is a form of encryption where the same key is used to encrypt and decrypt the message.
+It leverages the Advanced Encryption Standard Galois/Counter Mode (AES-GCM) for encryption and decryption of messages.
+
 ```ts
 export default class SymmetricKey extends BigNumber {
     encrypt(msg: number[] | string, enc?: "hex"): string | number[] 
-    decrypt(msg: number[] | string, enc?: "hex"): string | number[] 
+    decrypt(msg: number[] | string, enc?: "hex" | "utf8"): string | number[] 
 }
 ```
+
+<details>
+
+<summary>Class SymmetricKey Details</summary>
+
+#### Method decrypt
+
+Decrypts a given AES-GCM encrypted message using the same key that was used for encryption.
+The method extracts the IV and the authentication tag from the encrypted message, then attempts to decrypt it.
+If the decryption fails (e.g., due to message tampering), an error is thrown.
+
+```ts
+decrypt(msg: number[] | string, enc?: "hex" | "utf8"): string | number[] 
+```
+
+Returns
+
+Returns the decrypted message as a string or an array of numbers, depending on `enc` argument. If absent, an array of numbers is returned.
+
+Argument Details
+
++ **msg**
+  + The encrypted message to be decrypted. It can be a string or an array of numbers.
++ **enc**
+  + optional. The encoding of the message (if no encoding is provided, uses utf8 for strings, unless specified as hex).
+
+Throws
+
+Will throw an error if the decryption fails, likely due to message tampering or incorrect decryption key.
+
+Example
+
+```ts
+const key = new SymmetricKey(1234);
+const decryptedMessage = key.decrypt(encryptedMessage, 'utf8');
+```
+
+#### Method encrypt
+
+Encrypts a given message using AES-GCM encryption.
+The generated Initialization Vector (IV) is attached to the encrypted message for decryption purposes.
+The OpenSSL format of |IV|encryptedContent|authTag| is used.
+
+```ts
+encrypt(msg: number[] | string, enc?: "hex"): string | number[] 
+```
+
+Returns
+
+Returns the encrypted message as a string or an array of numbers, depending on `enc` argument.
+
+Argument Details
+
++ **msg**
+  + The message to be encrypted. It can be a string or an array of numbers.
++ **enc**
+  + optional. The encoding of the message. If hex, the string is assumed to be hex, UTF-8 otherwise.
+
+Example
+
+```ts
+const key = new SymmetricKey(1234);
+const encryptedMessage = key.encrypt('plainText', 'utf8');
+```
+
+</details>
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ## Functions
+
+| |
+| --- |
+| [AES](#function-aes) |
+| [AESGCM](#function-aesgcm) |
+| [AESGCMDecrypt](#function-aesgcmdecrypt) |
+| [ghash](#function-ghash) |
+| [toArray](#function-toarray) |
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 
 ### Function: toArray
 
@@ -5335,21 +5417,58 @@ export function toArray(msg: number[] | string, enc?: "hex"): number[]
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
+### Function: AES
+
+```ts
+export function AES(input: number[], key: number[]): number[] 
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Function: ghash
+
+```ts
+export function ghash(input: number[], hashSubKey: number[]): number[] 
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Function: AESGCM
+
+```ts
+export function AESGCM(plainText: number[], additionalAuthenticatedData: number[], initializationVector: number[], key: number[]): {
+    result: number[];
+    authenticationTag: number[];
+} 
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Function: AESGCMDecrypt
+
+```ts
+export function AESGCMDecrypt(cipherText: number[], additionalAuthenticatedData: number[], initializationVector: number[], authenticationTag: number[], key: number[]): number[] | null 
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ## Variables
 
-| |
-| --- |
-| [encode](#variable-encode) |
-| [hash160](#variable-hash160) |
-| [hash256](#variable-hash256) |
-| [ripemd160](#variable-ripemd160) |
-| [sha1](#variable-sha1) |
-| [sha256](#variable-sha256) |
-| [sign](#variable-sign) |
-| [toArray](#variable-toarray) |
-| [toHex](#variable-tohex) |
-| [verify](#variable-verify) |
-| [zero2](#variable-zero2) |
+| | |
+| --- | --- |
+| [checkBit](#variable-checkbit) | [ripemd160](#variable-ripemd160) |
+| [encode](#variable-encode) | [sha1](#variable-sha1) |
+| [exclusiveOR](#variable-exclusiveor) | [sha256](#variable-sha256) |
+| [getBytes](#variable-getbytes) | [sign](#variable-sign) |
+| [hash160](#variable-hash160) | [toArray](#variable-toarray) |
+| [hash256](#variable-hash256) | [toHex](#variable-tohex) |
+| [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [verify](#variable-verify) |
+| [multiply](#variable-multiply) | [zero2](#variable-zero2) |
+| [rightShift](#variable-rightshift) |  |
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -5435,12 +5554,14 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ### Variable: encode
 
 ```ts
-encode = (arr: number[], enc?: "hex"): string | number[] => {
-    if (enc === "hex") {
-        return toHex(arr);
-    }
-    else {
-        return arr;
+encode = (arr: number[], enc?: "hex" | "utf8"): string | number[] => {
+    switch (enc) {
+        case "hex":
+            return toHex(arr);
+        case "utf8":
+            return toUTF8(arr);
+        default:
+            return arr;
     }
 }
 ```
@@ -5573,6 +5694,121 @@ verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
         return false;
     }
     return p.eqXToP(r);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: checkBit
+
+```ts
+checkBit = function (byteArray: number[], byteIndex: number, bitIndex: number): 1 | 0 {
+    return (byteArray[byteIndex] & (1 << bitIndex)) !== 0 ? 1 : 0;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: getBytes
+
+```ts
+getBytes = function (numericValue: number): number[] {
+    return [
+        (numericValue & 4278190080) >>> 24,
+        (numericValue & 16711680) >> 16,
+        (numericValue & 65280) >> 8,
+        numericValue & 255
+    ];
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: exclusiveOR
+
+```ts
+exclusiveOR = function (block0: number[], block1: number[]): number[] {
+    let i;
+    const result = [];
+    for (i = 0; i < block0.length; i++) {
+        result[i] = block0[i] ^ block1[i];
+    }
+    return result;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: rightShift
+
+```ts
+rightShift = function (block: number[]): number[] {
+    let i: number;
+    let carry = 0;
+    let oldCarry = 0;
+    for (i = 0; i < block.length; i++) {
+        oldCarry = carry;
+        carry = block[i] & 1;
+        block[i] = block[i] >> 1;
+        if (oldCarry !== 0) {
+            block[i] = block[i] | 128;
+        }
+    }
+    return block;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: multiply
+
+```ts
+multiply = function (block0: number[], block1: number[]): number[] {
+    let i;
+    let j;
+    let v = block1.slice();
+    let z = createZeroBlock(16);
+    for (i = 0; i < 16; i++) {
+        for (j = 7; j !== -1; j--) {
+            if (checkBit(block0, i, j) !== 0) {
+                z = exclusiveOR(z, v);
+            }
+            if (checkBit(v, 15, 0) !== 0) {
+                v = exclusiveOR(rightShift(v), R);
+            }
+            else {
+                v = rightShift(v);
+            }
+        }
+    }
+    return z;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: incrementLeastSignificantThirtyTwoBits
+
+```ts
+incrementLeastSignificantThirtyTwoBits = function (block: number[]): number[] {
+    let i;
+    const result = block.slice();
+    for (i = 15; i !== 11; i--) {
+        result[i] = result[i] + 1;
+        if (result[i] === 256) {
+            result[i] = 0;
+        }
+        else {
+            break;
+        }
+    }
+    return result;
 }
 ```
 
