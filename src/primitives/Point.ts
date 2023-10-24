@@ -218,6 +218,21 @@ export default class Point extends BasePoint {
     return this.curve.validate(this)
   }
 
+  /**
+   * Encodes the coordinates of a point into an array or a hexadecimal string.
+   * The details of encoding are determined by the optional compact and enc parameters.
+   *
+   * @method encode
+   * @param compact - If true, an additional prefix byte 0x02 or 0x03 based on the 'y' coordinate being even or odd respectively is used. If false, byte 0x04 is used.
+   * @param enc - Expects the string 'hex' if hexadecimal string encoding is required instead of an array of numbers.
+   * @throws Will throw an error if the specified encoding method is not recognized. Expects 'hex'.
+   * @returns If enc is undefined, a byte array representation of the point will be returned. if enc is 'hex', a hexadecimal string representation of the point will be returned.
+   *
+   * @example
+   * const aPoint = new Point(x, y);
+   * const encodedPointArray = aPoint.encode();
+   * const encodedPointHex = aPoint.encode(true, 'hex');
+   */
   encode (compact: boolean = true, enc?: 'hex'): number[] | string {
     const len = this.curve.p.byteLength()
     const x = this.getX().toArray('be', len)
@@ -234,10 +249,31 @@ export default class Point extends BasePoint {
     }
   }
 
+  /**
+   * Converts the point coordinates to a hexadecimal string. A wrapper method
+   * for encode. Byte 0x02 or 0x03 is used as prefix based on the 'y' coordinate being even or odd respectively.
+   *
+   * @method toString
+   * @returns {string} A hexadecimal string representation of the point coordinates.
+   *
+   * @example
+   * const aPoint = new Point(x, y);
+   * const stringPoint = aPoint.toString();
+   */
   toString (): string {
     return this.encode(true, 'hex') as string
   }
 
+  /**
+   * Exports the x and y coordinates of the point, and the precomputed doubles and non-adjacent form (NAF) for optimization. The output is an array.
+   *
+   * @method toJSON
+   * @returns An Array where first two elements are the coordinates of the point and optional third element is an object with doubles and NAF points.
+   *
+   * @example
+   * const aPoint = new Point(x, y);
+   * const jsonPoint = aPoint.toJSON();
+   */
   toJSON (): [BigNumber | null, BigNumber | null, { doubles: { step: any, points: any[] } | undefined, naf: { wnd: any, points: any[] } | undefined }?] {
     if (this.precomputed == null) { return [this.x, this.y] }
 
@@ -259,6 +295,16 @@ export default class Point extends BasePoint {
       : undefined]
   }
 
+  /**
+   * Provides the point coordinates in a human-readable string format for debugging purposes.
+   *
+   * @method inspect
+   * @returns String of the format '<EC Point x: x-coordinate y: y-coordinate>', or '<EC Point Infinity>' if the point is at infinity.
+   *
+   * @example
+   * const aPoint = new Point(x, y);
+   * console.log(aPoint.inspect());
+   */
   inspect (): string {
     if (this.isInfinity()) {
       return '<EC Point Infinity>'
@@ -267,10 +313,31 @@ export default class Point extends BasePoint {
       ' y: ' + this.y.fromRed().toString(16, 2) + '>'
   }
 
+  /**
+   * Checks if the point is at infinity.
+   * @method isInfinity
+   * @returns Returns whether or not the point is at infinity.
+   *
+   * @example
+   * const p = new Point(null, null);
+   * console.log(p.isInfinity()); // outputs: true
+   */
   isInfinity (): boolean {
     return this.inf
   }
 
+  /**
+   * Adds another Point to this Point, returning a new Point.
+   *
+   * @method add
+   * @param p - The Point to add to this one.
+   * @returns A new Point that results from the addition.
+   *
+   * @example
+   * const p1 = new Point(1, 2);
+   * const p2 = new Point(2, 3);
+   * const result = p1.add(p2);
+   */
   add (p: Point): Point {
     // O + P = P
     if (this.inf) { return p }
@@ -345,6 +412,17 @@ export default class Point extends BasePoint {
     return this.y.fromRed()
   }
 
+  /**
+   * Multiplies this Point by a scalar value, returning a new Point.
+   *
+   * @method mul
+   * @param k - The scalar value to multiply this Point by.
+   * @returns  A new Point that results from the multiplication.
+   *
+   * @example
+   * const p = new Point(1, 2);
+   * const result = p.mul(2); // this doubles the Point
+   */
   mul (k: BigNumber | number | number[] | string): Point {
     if (!BigNumber.isBN(k)) {
       k = new BigNumber(k as number, 16)
@@ -359,18 +437,61 @@ export default class Point extends BasePoint {
     }
   }
 
+  /**
+   * Performs a multiplication and addition operation in a single step.
+   * Multiplies this Point by k1, adds the resulting Point to the result of p2 multiplied by k2.
+   *
+   * @method mulAdd
+   * @param k1 - The scalar value to multiply this Point by.
+   * @param p2 - The other Point to be involved in the operation.
+   * @param k2 - The scalar value to multiply the Point p2 by.
+   * @returns A Point that results from the combined multiplication and addition operations.
+   *
+   * @example
+   * const p1 = new Point(1, 2);
+   * const p2 = new Point(2, 3);
+   * const result = p1.mulAdd(2, p2, 3);
+   */
   mulAdd (k1: BigNumber, p2: Point, k2: BigNumber): Point {
     const points = [this, p2]
     const coeffs = [k1, k2]
     return this._endoWnafMulAdd(points, coeffs) as Point
   }
 
+  /**
+   * Performs the Jacobian multiplication and addition operation in a single
+   * step. Instead of returning a regular Point, the result is a JacobianPoint.
+   *
+   * @method jmulAdd
+   * @param k1 - The scalar value to multiply this Point by.
+   * @param p2 - The other Point to be involved in the operation
+   * @param k2 - The scalar value to multiply the Point p2 by.
+   * @returns A JacobianPoint that results from the combined multiplication and addition operation.
+   *
+   * @example
+   * const p1 = new Point(1, 2);
+   * const p2 = new Point(2, 3);
+   * const result = p1.jmulAdd(2, p2, 3);
+   */
   jmulAdd (k1: BigNumber, p2: Point, k2: BigNumber): JPoint {
     const points = [this, p2]
     const coeffs = [k1, k2]
     return this._endoWnafMulAdd(points, coeffs, true) as JPoint
   }
 
+  /**
+   * Checks if the Point instance is equal to another given Point.
+   *
+   * @method eq
+   * @param p - The Point to be checked if equal to the current instance.
+   *
+   * @returns Whether the two Point instances are equal. Both the 'x' and 'y' coordinates have to match, and both points have to either be valid or at infinity for equality. If both conditions are true, it returns true, else it returns false.
+   *
+   * @example
+   * const p1 = new Point(5, 20);
+   * const p2 = new Point(5, 20);
+   * const areEqual = p1.eq(p2); // returns true
+   */
   eq (p: Point): boolean {
     return this === p || (
       (this.inf === p.inf) &&
@@ -408,6 +529,20 @@ export default class Point extends BasePoint {
     return res
   }
 
+  /**
+   * Performs the "doubling" operation on the Point a given number of times.
+   * This is used in elliptic curve operations to perform multiplication by 2, multiple times.
+   * If the point is at infinity, it simply returns the point because doubling
+   * a point at infinity is still infinity.
+   *
+   * @method dblp
+   * @param k - The number of times the "doubling" operation is to be performed on the Point.
+   * @returns The Point after 'k' "doubling" operations have been performed.
+   *
+   * @example
+   * const p = new Point(5, 20);
+   * const doubledPoint = p.dblp(10); // returns the point after "doubled" 10 times
+   */
   dblp (k: number): Point {
     /* eslint-disable @typescript-eslint/no-this-alias */
     let r: Point = this

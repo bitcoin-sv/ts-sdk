@@ -4589,6 +4589,17 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ---
 ### Class: JacobianPoint
 
+The `JacobianPoint` class extends the `BasePoint` class for handling Jacobian coordinates on an Elliptic Curve.
+This class defines the properties and the methods needed to work with points in Jacobian coordinates.
+
+The Jacobian coordinates represent a point (x, y, z) on an Elliptic Curve such that the usual (x, y) coordinates are given by (x/z^2, y/z^3).
+
+Example
+
+```ts
+const pointJ = new JacobianPoint('3', '4', '1');
+```
+
 ```ts
 export default class JacobianPoint extends BasePoint {
     x: BigNumber;
@@ -4608,6 +4619,297 @@ export default class JacobianPoint extends BasePoint {
     isInfinity(): boolean 
 }
 ```
+
+<details>
+
+<summary>Class JacobianPoint Details</summary>
+
+#### Constructor
+
+Constructs a new `JacobianPoint` instance.
+
+```ts
+constructor(x: string | BigNumber | null, y: string | BigNumber | null, z: string | BigNumber | null) 
+```
+
+Argument Details
+
++ **x**
+  + If `null`, the x-coordinate will default to the curve's defined 'one' constant.
+If `x` is not a BigNumber, `x` will be converted to a `BigNumber` assuming it is a hex string.
++ **y**
+  + If `null`, the y-coordinate will default to the curve's defined 'one' constant.
+If `y` is not a BigNumber, `y` will be converted to a `BigNumber` assuming it is a hex string.
++ **z**
+  + If `null`, the z-coordinate will default to 0.
+If `z` is not a BigNumber, `z` will be converted to a `BigNumber` assuming it is a hex string.
+
+Example
+
+```ts
+const pointJ1 = new JacobianPoint(null, null, null); // creates point at infinity
+const pointJ2 = new JacobianPoint('3', '4', '1'); // creates point (3, 4, 1)
+```
+
+#### Property x
+
+The `x` coordinate of the point in the Jacobian form.
+
+```ts
+x: BigNumber
+```
+
+#### Property y
+
+The `y` coordinate of the point in the Jacobian form.
+
+```ts
+y: BigNumber
+```
+
+#### Property z
+
+The `z` coordinate of the point in the Jacobian form.
+
+```ts
+z: BigNumber
+```
+
+#### Property zOne
+
+Flag that indicates if the `z` coordinate is one.
+
+```ts
+zOne: boolean
+```
+
+#### Method add
+
+Addition operation in the Jacobian coordinates. It takes a Jacobian point as an argument
+and returns a new Jacobian point as a result of the addition. In the special cases,
+when either one of the points is the point at infinity, it will return the other point.
+
+```ts
+add(p: JacobianPoint): JacobianPoint 
+```
+
+Returns
+
+Returns a new Jacobian point as the result of the addition.
+
+Argument Details
+
++ **p**
+  + The Jacobian point to be added.
+
+Example
+
+```ts
+const p1 = new JacobianPoint(x1, y1, z1)
+const p2 = new JacobianPoint(x2, y2, z2)
+const result = p1.add(p2)
+```
+
+#### Method dbl
+
+Point doubling operation in the Jacobian coordinates. A special case is when the point is the point at infinity, in this case, this function will return the point itself.
+
+```ts
+dbl(): JacobianPoint 
+```
+
+Returns
+
+Returns a new Jacobian point as the result of the doubling.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x, y, z)
+const result = jp.dbl()
+```
+
+#### Method dblp
+
+Multiple doubling operation. It doubles the Jacobian point as many times as the pow parameter specifies. If pow is 0 or the point is the point at infinity, it will return the point itself.
+
+```ts
+dblp(pow: number): JacobianPoint 
+```
+
+Returns
+
+Returns a new Jacobian point as the result of multiple doublings.
+
+Argument Details
+
++ **pow**
+  + The number of times the point should be doubled.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x, y, z)
+const result = jp.dblp(3)
+```
+
+#### Method eq
+
+Equality check operation. It checks whether the affine or Jacobian point is equal to this Jacobian point.
+
+```ts
+eq(p: Point | JacobianPoint): boolean 
+```
+
+Returns
+
+Returns true if the points are equal, otherwise returns false.
+
+Argument Details
+
++ **p**
+  + The affine or Jacobian point to compare with.
+
+Example
+
+```ts
+const jp1 = new JacobianPoint(x1, y1, z1)
+const jp2 = new JacobianPoint(x2, y2, z2)
+const areEqual = jp1.eq(jp2)
+```
+
+#### Method eqXToP
+
+Equality check operation in relation to an x coordinate of a point in projective coordinates.
+It checks whether the x coordinate of the Jacobian point is equal to the provided x coordinate
+of a point in projective coordinates.
+
+```ts
+eqXToP(x: BigNumber): boolean 
+```
+
+Returns
+
+Returns true if the x coordinates are equal, otherwise returns false.
+
+Argument Details
+
++ **x**
+  + The x coordinate of a point in projective coordinates.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x1, y1, z1)
+const isXEqual = jp.eqXToP(x2)
+```
+
+#### Method inspect
+
+Returns the string representation of the JacobianPoint instance.
+
+```ts
+inspect(): string 
+```
+
+Returns
+
+Returns the string description of the JacobianPoint. If the JacobianPoint represents a point at infinity, the return value of this function is '<EC JPoint Infinity>'. For a normal point, it returns the string description format as '<EC JPoint x: x-coordinate y: y-coordinate z: z-coordinate>'.
+
+Example
+
+```ts
+const point = new JacobianPoint('5', '6', '1');
+console.log(point.inspect()); // Output: '<EC JPoint x: 5 y: 6 z: 1>'
+```
+
+#### Method isInfinity
+
+Checks whether the JacobianPoint instance represents a point at infinity.
+
+```ts
+isInfinity(): boolean 
+```
+
+Returns
+
+Returns true if the JacobianPoint's z-coordinate equals to zero (which represents the point at infinity in Jacobian coordinates). Returns false otherwise.
+
+Example
+
+```ts
+const point = new JacobianPoint('5', '6', '0');
+console.log(point.isInfinity()); // Output: true
+```
+
+#### Method mixedAdd
+
+Mixed addition operation. This function combines the standard point addition with
+the transformation from the affine to Jacobian coordinates. It first converts
+the affine point to Jacobian, and then preforms the addition.
+
+```ts
+mixedAdd(p: Point): JacobianPoint 
+```
+
+Returns
+
+Returns the result of the mixed addition as a new Jacobian point.
+
+Argument Details
+
++ **p**
+  + The affine point to be added.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x1, y1, z1)
+const ap = new Point(x2, y2)
+const result = jp.mixedAdd(ap)
+```
+
+#### Method neg
+
+Negation operation. It returns the additive inverse of the Jacobian point.
+
+```ts
+neg(): JacobianPoint 
+```
+
+Returns
+
+Returns a new Jacobian point as the result of the negation.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x, y, z)
+const result = jp.neg()
+```
+
+#### Method toP
+
+Converts the `JacobianPoint` object instance to standard affine `Point` format and returns `Point` type.
+
+```ts
+toP(): Point 
+```
+
+Returns
+
+The `Point`(affine) object representing the same point as the original `JacobianPoint`.
+
+If the initial `JacobianPoint` represents point at infinity, an instance of `Point` at infinity is returned.
+
+Example
+
+```ts
+const pointJ = new JacobianPoint('3', '4', '1');
+const pointP = pointJ.toP();  // The point in affine coordinates.
+```
+
+</details>
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -4712,6 +5014,31 @@ The y-coordinate of the point.
 y: BigNumber | null
 ```
 
+#### Method add
+
+Adds another Point to this Point, returning a new Point.
+
+```ts
+add(p: Point): Point 
+```
+
+Returns
+
+A new Point that results from the addition.
+
+Argument Details
+
++ **p**
+  + The Point to add to this one.
+
+Example
+
+```ts
+const p1 = new Point(1, 2);
+const p2 = new Point(2, 3);
+const result = p1.add(p2);
+```
+
 #### Method dbl
 
 Doubles the current point.
@@ -4725,6 +5052,90 @@ Example
 ```ts
 const P = new Point('123', '456');
 const result = P.dbl();
+```
+
+#### Method dblp
+
+Performs the "doubling" operation on the Point a given number of times.
+This is used in elliptic curve operations to perform multiplication by 2, multiple times.
+If the point is at infinity, it simply returns the point because doubling
+a point at infinity is still infinity.
+
+```ts
+dblp(k: number): Point 
+```
+
+Returns
+
+The Point after 'k' "doubling" operations have been performed.
+
+Argument Details
+
++ **k**
+  + The number of times the "doubling" operation is to be performed on the Point.
+
+Example
+
+```ts
+const p = new Point(5, 20);
+const doubledPoint = p.dblp(10); // returns the point after "doubled" 10 times
+```
+
+#### Method encode
+
+Encodes the coordinates of a point into an array or a hexadecimal string.
+The details of encoding are determined by the optional compact and enc parameters.
+
+```ts
+encode(compact: boolean = true, enc?: "hex"): number[] | string 
+```
+
+Returns
+
+If enc is undefined, a byte array representation of the point will be returned. if enc is 'hex', a hexadecimal string representation of the point will be returned.
+
+Argument Details
+
++ **compact**
+  + If true, an additional prefix byte 0x02 or 0x03 based on the 'y' coordinate being even or odd respectively is used. If false, byte 0x04 is used.
++ **enc**
+  + Expects the string 'hex' if hexadecimal string encoding is required instead of an array of numbers.
+
+Throws
+
+Will throw an error if the specified encoding method is not recognized. Expects 'hex'.
+
+Example
+
+```ts
+const aPoint = new Point(x, y);
+const encodedPointArray = aPoint.encode();
+const encodedPointHex = aPoint.encode(true, 'hex');
+```
+
+#### Method eq
+
+Checks if the Point instance is equal to another given Point.
+
+```ts
+eq(p: Point): boolean 
+```
+
+Returns
+
+Whether the two Point instances are equal. Both the 'x' and 'y' coordinates have to match, and both points have to either be valid or at infinity for equality. If both conditions are true, it returns true, else it returns false.
+
+Argument Details
+
++ **p**
+  + The Point to be checked if equal to the current instance.
+
+Example
+
+```ts
+const p1 = new Point(5, 20);
+const p2 = new Point(5, 20);
+const areEqual = p1.eq(p2); // returns true
 ```
 
 #### Method fromJSON
@@ -4848,6 +5259,128 @@ const P = new Point('123', '456');
 const x = P.getX();
 ```
 
+#### Method inspect
+
+Provides the point coordinates in a human-readable string format for debugging purposes.
+
+```ts
+inspect(): string 
+```
+
+Returns
+
+String of the format '<EC Point x: x-coordinate y: y-coordinate>', or '<EC Point Infinity>' if the point is at infinity.
+
+Example
+
+```ts
+const aPoint = new Point(x, y);
+console.log(aPoint.inspect());
+```
+
+#### Method isInfinity
+
+Checks if the point is at infinity.
+
+```ts
+isInfinity(): boolean 
+```
+
+Returns
+
+Returns whether or not the point is at infinity.
+
+Example
+
+```ts
+const p = new Point(null, null);
+console.log(p.isInfinity()); // outputs: true
+```
+
+#### Method jmulAdd
+
+Performs the Jacobian multiplication and addition operation in a single
+step. Instead of returning a regular Point, the result is a JacobianPoint.
+
+```ts
+jmulAdd(k1: BigNumber, p2: Point, k2: BigNumber): JPoint 
+```
+
+Returns
+
+A JacobianPoint that results from the combined multiplication and addition operation.
+
+Argument Details
+
++ **k1**
+  + The scalar value to multiply this Point by.
++ **p2**
+  + The other Point to be involved in the operation
++ **k2**
+  + The scalar value to multiply the Point p2 by.
+
+Example
+
+```ts
+const p1 = new Point(1, 2);
+const p2 = new Point(2, 3);
+const result = p1.jmulAdd(2, p2, 3);
+```
+
+#### Method mul
+
+Multiplies this Point by a scalar value, returning a new Point.
+
+```ts
+mul(k: BigNumber | number | number[] | string): Point 
+```
+
+Returns
+
+A new Point that results from the multiplication.
+
+Argument Details
+
++ **k**
+  + The scalar value to multiply this Point by.
+
+Example
+
+```ts
+const p = new Point(1, 2);
+const result = p.mul(2); // this doubles the Point
+```
+
+#### Method mulAdd
+
+Performs a multiplication and addition operation in a single step.
+Multiplies this Point by k1, adds the resulting Point to the result of p2 multiplied by k2.
+
+```ts
+mulAdd(k1: BigNumber, p2: Point, k2: BigNumber): Point 
+```
+
+Returns
+
+A Point that results from the combined multiplication and addition operations.
+
+Argument Details
+
++ **k1**
+  + The scalar value to multiply this Point by.
++ **p2**
+  + The other Point to be involved in the operation.
++ **k2**
+  + The scalar value to multiply the Point p2 by.
+
+Example
+
+```ts
+const p1 = new Point(1, 2);
+const p2 = new Point(2, 3);
+const result = p1.mulAdd(2, p2, 3);
+```
+
 #### Method neg
 
 Negate a point. The negation of a point P is the mirror of P about x-axis.
@@ -4883,12 +5416,58 @@ const point = new Point(xCoordinate, yCoordinate);
 const jacobianPoint = point.toJ();
 ```
 
+#### Method toJSON
+
+Exports the x and y coordinates of the point, and the precomputed doubles and non-adjacent form (NAF) for optimization. The output is an array.
+
+```ts
+toJSON(): [
+    BigNumber | null,
+    BigNumber | null,
+    {
+        doubles: {
+            step: any;
+            points: any[];
+        } | undefined;
+        naf: {
+            wnd: any;
+            points: any[];
+        } | undefined;
+    }?
+] 
+```
+
+Returns
+
+An Array where first two elements are the coordinates of the point and optional third element is an object with doubles and NAF points.
+
+Example
+
+```ts
+const aPoint = new Point(x, y);
+const jsonPoint = aPoint.toJSON();
+```
+
 #### Method toString
 
 function toString() { [native code] }
 
+Converts the point coordinates to a hexadecimal string. A wrapper method
+for encode. Byte 0x02 or 0x03 is used as prefix based on the 'y' coordinate being even or odd respectively.
+
 ```ts
 toString(): string 
+```
+
+Returns
+
+A hexadecimal string representation of the point coordinates.
+
+Example
+
+```ts
+const aPoint = new Point(x, y);
+const stringPoint = aPoint.toString();
 ```
 
 #### Method validate
