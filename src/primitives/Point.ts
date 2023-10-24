@@ -4,11 +4,39 @@ import BigNumber from './BigNumber'
 import { toArray, toHex } from './utils'
 import ReductionContext from './ReductionContext'
 
+/**
+ * `Point` class is a representation of an elliptic curve point with affine coordinates.
+ * It extends the functionality of BasePoint and carries x, y coordinates of point on the curve.
+ * It also introduces new methods for handling Point operations in elliptic curve.
+ *
+ * @class Point
+ * @extends {BasePoint}
+ *
+ * @property x - The x-coordinate of the point.
+ * @property y - The y-coordinate of the point.
+ * @property inf - Flag to record if the point is at infinity in the Elliptic Curve.
+ */
 export default class Point extends BasePoint {
   x: BigNumber | null
   y: BigNumber | null
   inf: boolean
 
+  /**
+   * Creates a point object from a given string. This string can represent coordinates in hex format, or points
+   * in multiple established formats.
+   * The function verifies the integrity of the provided data and throws errors if inconsistencies are found.
+   *
+   * @method fromString
+   * @static
+   * @param str - The point representation string.
+   * @returns Returns a new point representing the given string.
+   * @throws `Error` If the point string value has a wrong length.
+   * @throws `Error` If the point format is unknown.
+   *
+   * @example
+   * const pointStr = 'abcdef';
+   * const point = Point.fromString(pointStr);
+   */
   static fromString (str: string): Point {
     const bytes = toArray(str, 'hex')
 
@@ -40,6 +68,22 @@ export default class Point extends BasePoint {
     throw new Error('Unknown point format')
   }
 
+  /**
+   * Generates a point from an x coordinate and a boolean indicating whether the corresponding
+   * y coordinate is odd.
+   *
+   * @method fromX
+   * @static
+   * @param x - The x coordinate of the point.
+   * @param odd - Boolean indicating whether the corresponding y coordinate is odd or not.
+   * @returns Returns the new point.
+   * @throws `Error` If the point is invalid.
+   *
+   * @example
+   * const xCoordinate = new BigNumber('10');
+   * const point = Point.fromX(xCoordinate, true);
+   */
+
   static fromX (x: BigNumber | number | number[] | string, odd: boolean): Point {
     const red = new ReductionContext('k256')
     const a = new BigNumber(0).toRed(red)
@@ -69,6 +113,21 @@ export default class Point extends BasePoint {
     return new Point(x, y)
   }
 
+  /**
+   * Generates a point from a serialized JSON object. The function accounts for different options in the JSON object,
+   * including precomputed values for optimization of EC operations, and calls another helper function to turn nested
+   * JSON points into proper Point objects.
+   *
+   * @method fromJSON
+   * @static
+   * @param obj - An object or array that holds the data for the point.
+   * @param isRed - A boolean to direct how the Point is constructed from the JSON object.
+   * @returns Returns a new point based on the deserialized JSON object.
+   *
+   * @example
+   * const serializedPoint = '{"x":52,"y":15}';
+   * const point = Point.fromJSON(serializedPoint, true);
+   */
   static fromJSON (
     obj: string | any[], isRed: boolean
   ): Point {
@@ -103,6 +162,16 @@ export default class Point extends BasePoint {
     return res
   }
 
+  /**
+   * @constructor
+   * @param x - The x-coordinate of the point. May be a number, a BigNumber, a string (which will be interpreted as hex), a number array, or null. If null, an "Infinity" point is constructed.
+   * @param y - The y-coordinate of the point, similar to x.
+   * @param isRed - A boolean indicating if the point is a member of the field of integers modulo the k256 prime. Default is true.
+   *
+   * @example
+   * new Point('abc123', 'def456');
+   * new Point(null, null); // Generates Infinity point.
+   */
   constructor (
     x: BigNumber | number | number[] | string | null,
     y: BigNumber | number | number[] | string | null,
@@ -134,6 +203,17 @@ export default class Point extends BasePoint {
     }
   }
 
+  /**
+   * Validates if a point belongs to the curve. Follows the short Weierstrass
+   * equation for elliptic curves: y^2 = x^3 + ax + b.
+   *
+   * @method validate
+   * @returns {boolean} true if the point is on the curve, false otherwise.
+   *
+   * @example
+   * const aPoint = new Point(x, y);
+   * const isValid = aPoint.validate();
+   */
   validate (): boolean {
     return this.curve.validate(this)
   }
@@ -156,40 +236,6 @@ export default class Point extends BasePoint {
 
   toString (): string {
     return this.encode(true, 'hex') as string
-  }
-
-  _getBeta (): undefined | Point {
-    if (typeof this.curve.endo !== 'object') { return }
-
-    const pre = this.precomputed
-    if (typeof pre === 'object' && pre !== null && typeof pre.beta === 'object' && pre.beta !== null) {
-      return pre.beta as Point
-    }
-
-    const beta = new Point(this.x.redMul(this.curve.endo.beta), this.y)
-    if (pre != null) {
-      const curve = this.curve
-      const endoMul = (p: Point): Point => {
-        return new Point(p.x.redMul(curve.endo.beta), p.y)
-      }
-      pre.beta = beta
-      beta.precomputed = {
-        beta: null,
-        naf: (pre.naf != null)
-          ? {
-              wnd: pre.naf.wnd,
-              points: pre.naf.points.map(endoMul)
-            }
-          : undefined,
-        doubles: (pre.doubles != null)
-          ? {
-              step: pre.doubles.step,
-              points: pre.doubles.points.map(endoMul)
-            }
-          : undefined
-      }
-    }
-    return beta
   }
 
   toJSON (): [BigNumber | null, BigNumber | null, { doubles: { step: any, points: any[] } | undefined, naf: { wnd: any, points: any[] } | undefined }?] {
@@ -248,6 +294,15 @@ export default class Point extends BasePoint {
     return new Point(nx, ny)
   }
 
+  /**
+   * Doubles the current point.
+   *
+   * @method dbl
+   *
+   * @example
+   * const P = new Point('123', '456');
+   * const result = P.dbl();
+   * */
   dbl (): Point {
     if (this.inf) { return this }
 
@@ -268,15 +323,152 @@ export default class Point extends BasePoint {
     return new Point(nx, ny)
   }
 
+  /**
+   * Returns X coordinate of point
+   *
+   * @example
+   * const P = new Point('123', '456');
+   * const x = P.getX();
+   */
   getX (): BigNumber {
     return this.x.fromRed()
   }
 
+  /**
+   * Returns X coordinate of point
+   *
+   * @example
+   * const P = new Point('123', '456');
+   * const x = P.getX();
+   */
   getY (): BigNumber {
     return this.y.fromRed()
   }
 
-  _fixedNafMul (k: BigNumber): Point {
+  mul (k: BigNumber | number | number[] | string): Point {
+    if (!BigNumber.isBN(k)) {
+      k = new BigNumber(k as number, 16)
+    }
+    k = k as BigNumber
+    if (this.isInfinity()) {
+      return this
+    } else if (this._hasDoubles(k)) {
+      return this._fixedNafMul(k)
+    } else {
+      return this._endoWnafMulAdd([this], [k]) as Point
+    }
+  }
+
+  mulAdd (k1: BigNumber, p2: Point, k2: BigNumber): Point {
+    const points = [this, p2]
+    const coeffs = [k1, k2]
+    return this._endoWnafMulAdd(points, coeffs) as Point
+  }
+
+  jmulAdd (k1: BigNumber, p2: Point, k2: BigNumber): JPoint {
+    const points = [this, p2]
+    const coeffs = [k1, k2]
+    return this._endoWnafMulAdd(points, coeffs, true) as JPoint
+  }
+
+  eq (p: Point): boolean {
+    return this === p || (
+      (this.inf === p.inf) &&
+      (this.inf || (this.x.cmp(p.x) === 0 && this.y.cmp(p.y) === 0)))
+  }
+
+  /**
+   * Negate a point. The negation of a point P is the mirror of P about x-axis.
+   *
+   * @method neg
+   *
+   * @example
+   * const P = new Point('123', '456');
+   * const result = P.neg();
+   */
+  neg (_precompute?: boolean): Point {
+    if (this.inf) { return this }
+
+    const res = new Point(this.x, this.y.redNeg())
+    if (_precompute && (this.precomputed != null)) {
+      const pre = this.precomputed
+      const negate = (p: Point): Point => p.neg()
+      res.precomputed = {
+        naf: (pre.naf != null) && {
+          wnd: pre.naf.wnd,
+          points: pre.naf.points.map(negate)
+        },
+        doubles: (pre.doubles != null) && {
+          step: pre.doubles.step,
+          points: pre.doubles.points.map((p) => p.neg())
+        },
+        beta: undefined
+      }
+    }
+    return res
+  }
+
+  dblp (k: number): Point {
+    /* eslint-disable @typescript-eslint/no-this-alias */
+    let r: Point = this
+    for (let i = 0; i < k; i++) { r = r.dbl() }
+    return r
+  }
+
+  /**
+   * Converts the point to a Jacobian point. If the point is at infinity, the corresponding Jacobian point
+   * will also be at infinity.
+   *
+   * @method toJ
+   * @returns Returns a new Jacobian point based on the current point.
+   *
+   * @example
+   * const point = new Point(xCoordinate, yCoordinate);
+   * const jacobianPoint = point.toJ();
+   */
+  toJ (): JPoint {
+    if (this.inf) {
+      return new JPoint(null, null, null)
+    }
+    const res = new JPoint(this.x, this.y, this.curve.one)
+    return res
+  }
+
+  private _getBeta (): undefined | Point {
+    if (typeof this.curve.endo !== 'object') { return }
+
+    const pre = this.precomputed
+    if (typeof pre === 'object' && pre !== null && typeof pre.beta === 'object' && pre.beta !== null) {
+      return pre.beta as Point
+    }
+
+    const beta = new Point(this.x.redMul(this.curve.endo.beta), this.y)
+    if (pre != null) {
+      const curve = this.curve
+      const endoMul = (p: Point): Point => {
+        return new Point(p.x.redMul(curve.endo.beta), p.y)
+      }
+      pre.beta = beta
+      beta.precomputed = {
+        beta: null,
+        naf: (pre.naf != null)
+          ? {
+              wnd: pre.naf.wnd,
+              points: pre.naf.points.map(endoMul)
+            }
+          : undefined,
+        doubles: (pre.doubles != null)
+          ? {
+              step: pre.doubles.step,
+              points: pre.doubles.points.map(endoMul)
+            }
+          : undefined
+      }
+    }
+    return beta
+  }
+
+  private _fixedNafMul (k: BigNumber): Point {
     if (typeof this.precomputed !== 'object' || this.precomputed === null) {
       throw new Error('_fixedNafMul requires precomputed values for the point')
     }
@@ -312,7 +504,7 @@ export default class Point extends BasePoint {
     return a.toP()
   }
 
-  _wnafMulAdd (
+  private _wnafMulAdd (
     defW: number,
     points: Point[],
     coeffs: BigNumber[],
@@ -438,7 +630,7 @@ export default class Point extends BasePoint {
     }
   }
 
-  _endoWnafMulAdd (points, coeffs, jacobianResult?: boolean): BasePoint {
+  private _endoWnafMulAdd (points: Point[], coeffs, jacobianResult?: boolean): BasePoint {
     const npoints = this.curve._endoWnafT1
     const ncoeffs = this.curve._endoWnafT2
     let i
@@ -471,121 +663,55 @@ export default class Point extends BasePoint {
     return res
   }
 
-  _wnafMul (p: BasePoint, k: BigNumber): BasePoint {
-    let w = 4
+  private _hasDoubles (k: BigNumber): boolean {
+    if (this.precomputed == null) { return false }
 
-    // Precompute window
-    const nafPoints = p._getNAFPoints(w)
-    w = nafPoints.wnd
-    const wnd = nafPoints.points
+    const doubles = this.precomputed.doubles
+    if (typeof doubles !== 'object') { return false }
 
-    // Get NAF form
-    const naf = this.curve.getNAF(k, w, this.curve._bitLength)
+    return doubles.points.length >= Math.ceil((k.bitLength() + 1) / doubles.step)
+  };
 
-    // Add `this`*(N+1) for every w-NAF index
-    let acc = new JPoint(null, null, null)
-    for (let i = naf.length - 1; i >= 0; i--) {
-      // Count zeroes
-      let k
-      for (k = 0; i >= 0 && naf[i] === 0; i--) { k++ }
-      if (i >= 0) { k++ }
-      acc = acc.dblp(k)
-
-      if (i < 0) { break }
-      const z = naf[i]
-      if (z === 0) {
-        throw new Error('z cannot be 0')
-      }
-      if (p.type === 'affine') {
-        // J +- P
-        if (z > 0) {
-          acc = acc.mixedAdd(wnd[(z - 1) >> 1])
-        } else {
-          acc = acc.mixedAdd(wnd[(-z - 1) >> 1].neg())
-        }
-      } else {
-        // J +- J
-        if (z > 0) {
-          acc = acc.add(wnd[(z - 1) >> 1])
-        } else {
-          acc = acc.add(wnd[(-z - 1) >> 1].neg())
-        }
-      }
-    }
-    return p.type === 'affine' ? acc.toP() : acc
-  }
-
-  mul (k: BigNumber | number | number[] | string): Point {
-    if (!BigNumber.isBN(k)) {
-      k = new BigNumber(k as number, 16)
-    }
-    k = k as BigNumber
-    if (this.isInfinity()) {
-      return this
-    } else if (this._hasDoubles(k)) {
-      return this._fixedNafMul(k)
-    } else if (
-      typeof this.curve.endo === 'object' && this.curve.endo !== null
+  private _getDoubles (
+    step?: number,
+    power?: number
+  ): { step: number, points: any[] } {
+    if (
+      typeof this.precomputed === 'object' && this.precomputed !== null &&
+      typeof this.precomputed.doubles === 'object' &&
+      this.precomputed.doubles !== null
     ) {
-      return this._endoWnafMulAdd([this], [k]) as Point
-    } else {
-      return this._wnafMul(this, k) as Point
+      return this.precomputed.doubles
     }
-  }
 
-  mulAdd (k1: BigNumber, p2: Point, k2: BigNumber): Point {
-    const points = [this, p2]
-    const coeffs = [k1, k2]
-    if (typeof this.curve.endo === 'object' && this.curve.endo !== null) {
-      return this._endoWnafMulAdd(points, coeffs) as Point
-    } else {
-      return this._wnafMulAdd(1, points, coeffs, 2) as Point
+    const doubles = [this]
+    /* eslint-disable @typescript-eslint/no-this-alias */
+    let acc: Point = this
+    for (let i = 0; i < power; i += step) {
+      for (let j = 0; j < step; j++) { acc = acc.dbl() }
+      doubles.push(acc as this)
     }
-  }
-
-  jmulAdd (k1: BigNumber, p2: Point, k2: BigNumber): JPoint {
-    const points = [this, p2]
-    const coeffs = [k1, k2]
-    if (typeof this.curve.endo === 'object' && this.curve.endo !== null) {
-      return this._endoWnafMulAdd(points, coeffs, true) as JPoint
-    } else {
-      return this._wnafMulAdd(1, points, coeffs, 2, true) as JPoint
+    return {
+      step,
+      points: doubles
     }
-  }
+  };
 
-  eq (p: Point): boolean {
-    return this === p || (
-      (this.inf === p.inf) &&
-      (this.inf || (this.x.cmp(p.x) === 0 && this.y.cmp(p.y) === 0)))
-  }
-
-  neg (_precompute?: boolean): Point {
-    if (this.inf) { return this }
-
-    const res = new Point(this.x, this.y.redNeg())
-    if (_precompute && (this.precomputed != null)) {
-      const pre = this.precomputed
-      const negate = (p: Point): Point => p.neg()
-      res.precomputed = {
-        naf: (pre.naf != null) && {
-          wnd: pre.naf.wnd,
-          points: pre.naf.points.map(negate)
-        },
-        doubles: (pre.doubles != null) && {
-          step: pre.doubles.step,
-          points: pre.doubles.points.map((p) => p.neg())
-        },
-        beta: undefined
-      }
+  private _getNAFPoints (wnd: number): { wnd: number, points: any[] } {
+    if (
+      typeof this.precomputed === 'object' && this.precomputed !== null &&
+      typeof this.precomputed.naf === 'object' && this.precomputed.naf !== null
+    ) {
+      return this.precomputed.naf
     }
-    return res
-  }
 
-  toJ (): JPoint {
-    if (this.inf) {
-      return new JPoint(null, null, null)
+    const res = [this]
+    const max = (1 << wnd) - 1
+    const dbl = max === 1 ? null : this.dbl()
+    for (let i = 1; i < max; i++) { res[i] = res[i - 1].add(dbl) as this }
+    return {
+      wnd,
+      points: res
     }
-    const res = new JPoint(this.x, this.y, this.curve.one)
-    return res
   }
 }

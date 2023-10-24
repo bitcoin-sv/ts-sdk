@@ -113,15 +113,6 @@ describe('Curve', () => {
     expect(bad.dbl().add(good.dbl().neg()).isInfinity()).toBe(true)
   })
 
-  test('should store precomputed values correctly on negation', () => {
-    const curve = new Curve()
-    const p = curve.g.mul('2')
-    p.precompute()
-    const neg = p.neg(true)
-    const neg2 = neg.neg(true)
-    expect(p.eq(neg2)).toBe(true)
-  })
-
   test('should correctly handle scalar multiplication of zero', () => {
     const curve = new Curve()
     const p1 = curve.g.mul('0')

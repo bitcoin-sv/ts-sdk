@@ -4562,6 +4562,9 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ---
 ### Class: BasePoint
 
+Base class for Point (affine coordinates) and JacobianPoint classes,
+defining their curve and type.
+
 ```ts
 export default abstract class BasePoint {
     curve: Curve;
@@ -4578,23 +4581,6 @@ export default abstract class BasePoint {
         beta: BasePoint | null | undefined;
     } | null;
     constructor(type: "affine" | "jacobian") 
-    add(p: any): BasePoint 
-    dbl(): BasePoint 
-    precompute(power?: number): BasePoint 
-    ;
-    _hasDoubles(k: BigNumber): boolean 
-    ;
-    _getDoubles(step?: number, power?: number): {
-        step: number;
-        points: any[];
-    } 
-    ;
-    _getNAFPoints(wnd: number): {
-        wnd: number;
-        points: any[];
-    } 
-    _getBeta(): any 
-    dblp(k: number): BasePoint 
 }
 ```
 
@@ -4628,6 +4614,10 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ---
 ### Class: Point
 
+`Point` class is a representation of an elliptic curve point with affine coordinates.
+It extends the functionality of BasePoint and carries x, y coordinates of point on the curve.
+It also introduces new methods for handling Point operations in elliptic curve.
+
 ```ts
 export default class Point extends BasePoint {
     x: BigNumber | null;
@@ -4640,7 +4630,6 @@ export default class Point extends BasePoint {
     validate(): boolean 
     encode(compact: boolean = true, enc?: "hex"): number[] | string 
     toString(): string 
-    _getBeta(): undefined | Point 
     toJSON(): [
         BigNumber | null,
         BigNumber | null,
@@ -4661,16 +4650,15 @@ export default class Point extends BasePoint {
     dbl(): Point 
     getX(): BigNumber 
     getY(): BigNumber 
-    _fixedNafMul(k: BigNumber): Point 
-    _wnafMulAdd(defW: number, points: Point[], coeffs: BigNumber[], len: number, jacobianResult?: boolean): BasePoint 
-    _endoWnafMulAdd(points, coeffs, jacobianResult?: boolean): BasePoint 
-    _wnafMul(p: BasePoint, k: BigNumber): BasePoint 
     mul(k: BigNumber | number | number[] | string): Point 
     mulAdd(k1: BigNumber, p2: Point, k2: BigNumber): Point 
     jmulAdd(k1: BigNumber, p2: Point, k2: BigNumber): JPoint 
     eq(p: Point): boolean 
     neg(_precompute?: boolean): Point 
+    dblp(k: number): Point 
     toJ(): JPoint 
+    ;
+    ;
 }
 ```
 
@@ -4678,12 +4666,249 @@ export default class Point extends BasePoint {
 
 <summary>Class Point Details</summary>
 
+#### Constructor
+
+```ts
+constructor(x: BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null, isRed: boolean = true) 
+```
+
+Argument Details
+
++ **x**
+  + The x-coordinate of the point. May be a number, a BigNumber, a string (which will be interpreted as hex), a number array, or null. If null, an "Infinity" point is constructed.
++ **y**
+  + The y-coordinate of the point, similar to x.
++ **isRed**
+  + A boolean indicating if the point is a member of the field of integers modulo the k256 prime. Default is true.
+
+Example
+
+```ts
+new Point('abc123', 'def456');
+new Point(null, null); // Generates Infinity point.
+```
+
+#### Property inf
+
+Flag to record if the point is at infinity in the Elliptic Curve.
+
+```ts
+inf: boolean
+```
+
+#### Property x
+
+The x-coordinate of the point.
+
+```ts
+x: BigNumber | null
+```
+
+#### Property y
+
+The y-coordinate of the point.
+
+```ts
+y: BigNumber | null
+```
+
+#### Method dbl
+
+Doubles the current point.
+
+```ts
+dbl(): Point 
+```
+
+Example
+
+```ts
+const P = new Point('123', '456');
+const result = P.dbl();
+```
+
+#### Method fromJSON
+
+Generates a point from a serialized JSON object. The function accounts for different options in the JSON object,
+including precomputed values for optimization of EC operations, and calls another helper function to turn nested
+JSON points into proper Point objects.
+
+```ts
+static fromJSON(obj: string | any[], isRed: boolean): Point 
+```
+
+Returns
+
+Returns a new point based on the deserialized JSON object.
+
+Argument Details
+
++ **obj**
+  + An object or array that holds the data for the point.
++ **isRed**
+  + A boolean to direct how the Point is constructed from the JSON object.
+
+Example
+
+```ts
+const serializedPoint = '{"x":52,"y":15}';
+const point = Point.fromJSON(serializedPoint, true);
+```
+
+#### Method fromString
+
+Creates a point object from a given string. This string can represent coordinates in hex format, or points
+in multiple established formats.
+The function verifies the integrity of the provided data and throws errors if inconsistencies are found.
+
+```ts
+static fromString(str: string): Point 
+```
+
+Returns
+
+Returns a new point representing the given string.
+
+Argument Details
+
++ **str**
+  + The point representation string.
+
+Throws
+
+`Error` If the point string value has a wrong length.
+
+`Error` If the point format is unknown.
+
+Example
+
+```ts
+const pointStr = 'abcdef';
+const point = Point.fromString(pointStr);
+```
+
+#### Method fromX
+
+Generates a point from an x coordinate and a boolean indicating whether the corresponding
+y coordinate is odd.
+
+```ts
+static fromX(x: BigNumber | number | number[] | string, odd: boolean): Point 
+```
+
+Returns
+
+Returns the new point.
+
+Argument Details
+
++ **x**
+  + The x coordinate of the point.
++ **odd**
+  + Boolean indicating whether the corresponding y coordinate is odd or not.
+
+Throws
+
+`Error` If the point is invalid.
+
+Example
+
+```ts
+const xCoordinate = new BigNumber('10');
+const point = Point.fromX(xCoordinate, true);
+```
+
+#### Method getX
+
+Returns X coordinate of point
+
+```ts
+getX(): BigNumber 
+```
+
+Example
+
+```ts
+const P = new Point('123', '456');
+const x = P.getX();
+```
+
+#### Method getY
+
+Returns X coordinate of point
+
+```ts
+getY(): BigNumber 
+```
+
+Example
+
+```ts
+const P = new Point('123', '456');
+const x = P.getX();
+```
+
+#### Method neg
+
+Negate a point. The negation of a point P is the mirror of P about x-axis.
+
+```ts
+neg(_precompute?: boolean): Point 
+```
+
+Example
+
+```ts
+const P = new Point('123', '456');
+const result = P.neg();
+```
+
+#### Method toJ
+
+Converts the point to a Jacobian point. If the point is at infinity, the corresponding Jacobian point
+will also be at infinity.
+
+```ts
+toJ(): JPoint 
+```
+
+Returns
+
+Returns a new Jacobian point based on the current point.
+
+Example
+
+```ts
+const point = new Point(xCoordinate, yCoordinate);
+const jacobianPoint = point.toJ();
+```
+
 #### Method toString
 
 function toString() { [native code] }
 
 ```ts
 toString(): string 
+```
+
+#### Method validate
+
+Validates if a point belongs to the curve. Follows the short Weierstrass
+equation for elliptic curves: y^2 = x^3 + ax + b.
+
+```ts
+validate(): boolean 
+```
+
+Returns
+
+true if the point is on the curve, false otherwise.
+
+Example
+
+```ts
+const aPoint = new Point(x, y);
+const isValid = aPoint.validate();
 ```
 
 </details>
