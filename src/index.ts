@@ -1,1 +1,1 @@
-export * as primitives from './primitives/index'
+export * as primitives from './primitives/index.ts'

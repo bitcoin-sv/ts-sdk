@@ -1,8 +1,8 @@
-import BigNumber from './BigNumber'
-import Signature from './Signature'
-import Curve from './Curve'
-import Point from './Point'
-import DRBG from './DRBG'
+import BigNumber from './BigNumber.ts'
+import Signature from './Signature.ts'
+import Curve from './Curve.ts'
+import Point from './Point.ts'
+import DRBG from './DRBG.ts'
 
 function truncateToN (msg: BigNumber, truncOnly?: boolean): BigNumber {
   const curve = new Curve()

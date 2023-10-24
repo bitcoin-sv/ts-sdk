@@ -1,8 +1,8 @@
-import BigNumber from './BigNumber'
-import ReductionContext from './ReductionContext'
-import MontgomoryMethod from './MontgomoryMethod'
-import Point from './Point'
-import { toArray } from './utils'
+import BigNumber from './BigNumber.ts'
+import ReductionContext from './ReductionContext.ts'
+import MontgomoryMethod from './MontgomoryMethod.ts'
+import Point from './Point.ts'
+import { toArray } from './utils.ts'
 
 // This ensures that only one curve is ever created, enhancing performance.
 // This assumes there is never a need to have multiple distinct Curve instances.

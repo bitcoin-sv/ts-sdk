@@ -113,7 +113,7 @@ function finiteFieldMultiplication (value0: number, value1: number): number {
 function mixColumns (state: number[][]): void {
   let i
   let j
-  const temp = [[], [], [], []]
+  const temp: number[][] = [[], [], [], []]
 
   for (i = 0; i < 4; i++) {
     temp[0][i] = finiteFieldMultiplication(0x02, state[0][i]) ^ finiteFieldMultiplication(0x03, state[1][i]) ^

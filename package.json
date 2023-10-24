@@ -23,7 +23,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "ts-standard --fix src/**/*.ts",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -b",
+    "dev": "tsc -b -w",
     "prepublish": "npm run build",
     "doc": "ts2md"
   },

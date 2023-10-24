@@ -1,6 +1,6 @@
-import BigNumber from './BigNumber'
-import K256 from './K256'
-import Mersenne from './Mersenne'
+import BigNumber from './BigNumber.ts'
+import K256 from './K256.ts'
+import Mersenne from './Mersenne.ts'
 
 /**
  * A base reduction engine that provides several arithmetic operations over

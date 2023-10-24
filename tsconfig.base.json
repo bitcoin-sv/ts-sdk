@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "ESNext"],
+    "module": "NodeNext",
+    "target": "esnext",
+    "moduleResolution": "NodeNext",
+    "moduleDetection": "force",
+    "rootDir": "./",
+    "baseUrl": "./",
+    "strict": false,
+    "isolatedModules": true,
+    "strictNullChecks": false,
+    "downlevelIteration": false,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": false,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true
+  },
+  "files": ["mod.ts"],
+  "include": ["src"],
+  "exclude": ["dist", "*/**/__tests"]
+}

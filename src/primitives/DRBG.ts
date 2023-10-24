@@ -1,14 +1,11 @@
-import { SHA256HMAC } from './Hash'
-import { toHex, toArray } from './utils'
+import { SHA256HMAC } from './Hash.ts'
+import { toHex, toArray } from './utils.ts'
 
 export default class HmacDRBG {
   K: number[]
   V: number[]
 
   constructor (entropy: number[] | string, nonce: number[] | string) {
-    this.K = null
-    this.V = null
-
     entropy = toArray(entropy, 'hex')
     nonce = toArray(nonce, 'hex')
 
