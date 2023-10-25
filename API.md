@@ -9,7 +9,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 | [BasePoint](#class-basepoint) | [PrivateKey](#class-privatekey) |
 | [BigNumber](#class-bignumber) | [PublicKey](#class-publickey) |
 | [Curve](#class-curve) | [RIPEMD160](#class-ripemd160) |
-| [HmacDRBG](#class-hmacdrbg) | [ReductionContext](#class-reductioncontext) |
+| [DRBG](#class-drbg) | [ReductionContext](#class-reductioncontext) |
 | [JacobianPoint](#class-jacobianpoint) | [SHA1](#class-sha1) |
 | [K256](#class-k256) | [SHA256](#class-sha256) |
 | [Mersenne](#class-mersenne) | [SHA256HMAC](#class-sha256hmac) |
@@ -5666,10 +5666,18 @@ export class SHA256HMAC {
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
-### Class: HmacDRBG
+### Class: DRBG
+
+This class behaves as a HMAC-based deterministic random bit generator (DRBG). It implements a deterministic random number generator using SHA256HMAC HASH function. It takes an initial entropy and nonce when instantiated for seeding purpose.
+
+Example
 
 ```ts
-export default class HmacDRBG {
+const drbg = new DRBG('af12de...', '123ef...');
+```
+
+```ts
+export default class DRBG {
     K: number[];
     V: number[];
     constructor(entropy: number[] | string, nonce: number[] | string) 
@@ -5678,6 +5686,78 @@ export default class HmacDRBG {
     generate(len: number): string 
 }
 ```
+
+<details>
+
+<summary>Class DRBG Details</summary>
+
+#### Method generate
+
+Generates deterministic random hexadecimal string of given length.
+In every generation process, it also updates the internal state `K` and `V`.
+
+```ts
+generate(len: number): string 
+```
+
+Returns
+
+The required deterministic random hexadecimal string.
+
+Argument Details
+
++ **len**
+  + The length of required random number.
+
+Example
+
+```ts
+const randomHex = drbg.generate(256);
+```
+
+#### Method hmac
+
+Generates HMAC using the K value of the instance. This method is used internally for operations.
+
+```ts
+hmac(): SHA256HMAC 
+```
+
+Returns
+
+The SHA256HMAC object created with K value.
+
+Example
+
+```ts
+const hmac = drbg.hmac();
+```
+
+#### Method update
+
+Updates the `K` and `V` values of the instance based on the seed.
+The seed if not provided uses `V` as seed.
+
+```ts
+update(seed?): void 
+```
+
+Returns
+
+Nothing, but updates the internal state `K` and `V` value.
+
+Argument Details
+
++ **seed**
+  + an optional value that used to update `K` and `V`. Default is `undefined`.
+
+Example
+
+```ts
+drbg.update('e13af...');
+```
+
+</details>
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
