@@ -1,6 +1,6 @@
-import BasePoint from './BasePoint.ts'
-import BigNumber from './BigNumber.ts'
-import Point from './Point.ts'
+import BasePoint from './BasePoint.js'
+import BigNumber from './BigNumber.js'
+import Point from './Point.js'
 
 /**
  * The `JacobianPoint` class extends the `BasePoint` class for handling Jacobian coordinates on an Elliptic Curve.

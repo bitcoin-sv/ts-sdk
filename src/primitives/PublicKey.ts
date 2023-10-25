@@ -1,10 +1,10 @@
-import Point from './Point.ts'
-import PrivateKey from './PrivateKey.ts'
-import Curve from './Curve.ts'
-import { verify } from './ECDSA.ts'
-import BigNumber from './BigNumber.ts'
-import { sha256 } from './Hash.ts'
-import Signature from './Signature.ts'
+import Point from './Point.js'
+import PrivateKey from './PrivateKey.js'
+import Curve from './Curve.js'
+import { verify } from './ECDSA.js'
+import BigNumber from './BigNumber.js'
+import { sha256 } from './Hash.js'
+import Signature from './Signature.js'
 
 /**
  * The PublicKey class extends the Point class. It is used in public-key cryptography to derive shared secret, verify message signatures, and encode the public key in the DER format.

@@ -1,1 +1,1 @@
-export * as primitives from './primitives/index.ts'
+export * as primitives from './primitives/index.js'

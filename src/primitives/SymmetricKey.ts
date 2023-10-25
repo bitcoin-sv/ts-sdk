@@ -1,7 +1,7 @@
-import BigNumber from './BigNumber.ts'
-import { AESGCM, AESGCMDecrypt } from './AESGCM.ts'
-import Random from './Random.ts'
-import { toArray, encode } from './utils.ts'
+import BigNumber from './BigNumber.js'
+import { AESGCM, AESGCMDecrypt } from './AESGCM.js'
+import Random from './Random.js'
+import { toArray, encode } from './utils.js'
 
 /**
  * `SymmetricKey` is a class that extends the `BigNumber` class and implements symmetric encryption and decryption methods.

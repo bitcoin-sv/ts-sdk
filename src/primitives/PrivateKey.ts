@@ -1,11 +1,11 @@
-import BigNumber from './BigNumber.ts'
-import Signature from './Signature.ts'
-import PublicKey from './PublicKey.ts'
-import Point from './Point.ts'
-import Curve from './Curve.ts'
-import { sign, verify } from './ECDSA.ts'
-import { sha256 } from './Hash.ts'
-import Random from './Random.ts'
+import BigNumber from './BigNumber.js'
+import Signature from './Signature.js'
+import PublicKey from './PublicKey.js'
+import Point from './Point.js'
+import Curve from './Curve.js'
+import { sign, verify } from './ECDSA.js'
+import { sha256 } from './Hash.js'
+import Random from './Random.js'
 
 /**
  * Represents a Private Key, which is a secret that can be used to generate signatures in a cryptographic system.

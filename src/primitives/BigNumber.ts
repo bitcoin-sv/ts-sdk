@@ -1,4 +1,4 @@
-import ReductionContext from './ReductionContext.ts'
+import ReductionContext from './ReductionContext.js'
 
 /**
  * JavaScript numbers are only precise up to 53 bits. Since Bitcoin relies on

@@ -1,8 +1,8 @@
-import BigNumber from './BigNumber.ts'
-import PublicKey from './PublicKey.ts'
-import { verify } from './ECDSA.ts'
-import { sha256 } from './Hash.ts'
-import { toArray, toHex } from './utils.ts'
+import BigNumber from './BigNumber.js'
+import PublicKey from './PublicKey.js'
+import { verify } from './ECDSA.js'
+import { sha256 } from './Hash.js'
+import { toArray, toHex } from './utils.js'
 
 /**
  * Represents a digital signature.

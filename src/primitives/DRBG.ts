@@ -1,5 +1,5 @@
-import { SHA256HMAC } from './Hash.ts'
-import { toHex, toArray } from './utils.ts'
+import { SHA256HMAC } from './Hash.js'
+import { toHex, toArray } from './utils.js'
 
 export default class HmacDRBG {
   K: number[]

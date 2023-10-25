@@ -1,8 +1,8 @@
-import BasePoint from './BasePoint.ts'
-import JPoint from './JacobianPoint.ts'
-import BigNumber from './BigNumber.ts'
-import { toArray, toHex } from './utils.ts'
-import ReductionContext from './ReductionContext.ts'
+import BasePoint from './BasePoint.js'
+import JPoint from './JacobianPoint.js'
+import BigNumber from './BigNumber.js'
+import { toArray, toHex } from './utils.js'
+import ReductionContext from './ReductionContext.js'
 
 /**
  * `Point` class is a representation of an elliptic curve point with affine coordinates.

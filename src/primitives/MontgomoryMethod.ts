@@ -1,5 +1,5 @@
-import ReductionContext from './ReductionContext.ts'
-import BigNumber from './BigNumber.ts'
+import ReductionContext from './ReductionContext.js'
+import BigNumber from './BigNumber.js'
 
 /**
  * Represents a Montgomery reduction context, which is a mathematical method
