@@ -1,6 +1,6 @@
 /* eslint-env jest */
-import BigNumber from '../BigNumber'
-import ReductionContext from '../ReductionContext'
+import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
+import ReductionContext from '../../../dist/cjs/src/primitives/ReductionContext'
 import { dhGroups } from './BigNumber.fixtures'
 
 describe('BN.js/Slow DH test', () => {

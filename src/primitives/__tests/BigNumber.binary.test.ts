@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import BigNumber from '../BigNumber'
+import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
 
 describe('BN.js/Binary', function () {
   describe('.shl()', function () {

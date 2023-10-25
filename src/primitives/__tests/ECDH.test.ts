@@ -1,7 +1,7 @@
 /* eslint-env jest */
-import PublicKey from '../PublicKey'
-import PrivateKey from '../PrivateKey'
-import BigNumber from '../BigNumber'
+import PublicKey from '../../../dist/cjs/src/primitives/PublicKey'
+import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
+import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
 
 describe('ECDH', function () {
   it('should work with secp256k1', function () {

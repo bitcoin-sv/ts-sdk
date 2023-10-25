@@ -1,6 +1,6 @@
 /* global describe, it */
 
-import BigNumber from '../BigNumber'
+import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
 import * as fixtures from './BigNumber.fixtures'
 
 describe('BN.js/Arithmetic', () => {

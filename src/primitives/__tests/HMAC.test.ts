@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import { SHA256HMAC } from '../Hash'
+import { SHA256HMAC } from '../../../dist/cjs/src/primitives/Hash'
 
 describe('HMAC', function () {
   describe('mixed test vector', function () {

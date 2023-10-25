@@ -1,4 +1,4 @@
-import DRBG from '../DRBG'
+import DRBG from '../../../dist/cjs/src/primitives/DRBG'
 import DRBGVectors from './DRBG.vectors'
 
 describe('Hmac_DRBG', () => {

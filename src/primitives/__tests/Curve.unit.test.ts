@@ -1,8 +1,8 @@
 /* eslint-env jest */
-import Curve from '../Curve'
-import Point from '../Point'
-import JPoint from '../JacobianPoint'
-import BigNumber from '../BigNumber'
+import Curve from '../../../dist/cjs/src/primitives/Curve.js'
+import Point from '../../../dist/cjs/src/primitives/Point'
+import JPoint from '../../../dist/cjs/src/primitives/JacobianPoint'
+import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
 
 describe('Curve', () => {
   it('should work with secp256k1', () => {

@@ -1,4 +1,4 @@
-import BigNumber from '../BigNumber'
+import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
 
 describe('BN.js/Constructor', () => {
   describe('with Smi input', () => {

@@ -1,6 +1,6 @@
 /* eslint-env jest */
-import * as hash from '../Hash'
-import crypto = require('crypto')
+import * as hash from '../../../dist/cjs/src/primitives/Hash'
+import * as crypto from 'crypto'
 
 describe('Hash', function () {
   function test (Hash, cases): void {
