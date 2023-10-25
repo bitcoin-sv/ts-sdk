@@ -673,13 +673,38 @@ export class SHA1 extends BaseHash {
   }
 }
 
+/**
+ * The `SHA256HMAC` class is used to create Hash-based Message Authentication Code (HMAC) using the SHA-256 cryptographic hash function.
+ *
+ * HMAC is a specific type of MAC involving a cryptographic hash function and a secret cryptographic key. It may be used to simultaneously verify both the data integrity and the authenticity of a message.
+ *
+ * This class also uses the SHA-256 cryptographic hash algorithm that produces a 256-bit (32-byte) hash value.
+ *
+ * @property inner - Represents the inner hash of SHA-256.
+ * @property outer - Represents the outer hash of SHA-256.
+ * @property blockSize - The block size for the SHA-256 hash function, in bytes. It's set to 64 bytes.
+ * @property outSize - The output size of the SHA-256 hash function, in bytes. It's set to 32 bytes.
+ */
 export class SHA256HMAC {
   inner: SHA256
   outer: SHA256
   blockSize = 64
   outSize = 32
 
-  constructor (key) {
+  /**
+   * The constructor for the `SHA256HMAC` class.
+   *
+   * It initializes the `SHA256HMAC` object and sets up the inner and outer padded keys.
+   * If the key size is larger than the blockSize, it is digested using SHA-256.
+   * If the key size is less than the blockSize, it is padded with zeroes.
+   *
+   * @constructor
+   * @param key - The key to use to create the HMAC. Can be a number array or a string in hexadecimal format.
+   *
+   * @example
+   * const myHMAC = new SHA256HMAC('deadbeef');
+   */
+  constructor (key: number[] | string) {
     key = toArray(key, 'hex')
     // Shorten key, if needed
     if (key.length > this.blockSize) {
@@ -699,11 +724,32 @@ export class SHA256HMAC {
     this.outer = new SHA256().update(key)
   }
 
+  /**
+   * Updates the `SHA256HMAC` object with part of the message to be hashed.
+   *
+   * @method update
+   * @param msg - Part of the message to hash. Can be a number array or a string.
+   * @param enc - If 'hex', then the input is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+   * @returns Returns the instance of `SHA256HMAC` for chaining calls.
+   *
+   * @example
+   * myHMAC.update('deadbeef', 'hex');
+   */
   update (msg: number[] | string, enc?: 'hex'): SHA256HMAC {
     this.inner.update(msg, enc)
     return this
   }
 
+  /**
+   * Finalizes the HMAC computation and returns the resultant hash.
+   *
+   * @method digest
+   * @param enc - If 'hex', then the output is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+   * @returns Returns the digest of the hashed data. Can be a number array or a string.
+   *
+   * @example
+   * let hashedMessage = myHMAC.digest('hex');
+   */
   digest (enc?: 'hex'): number[] | string {
     this.outer.update(this.inner.digest() as number[])
     return this.outer.digest(enc)
