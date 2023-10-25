@@ -9,7 +9,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 | [BasePoint](#class-basepoint) | [PrivateKey](#class-privatekey) |
 | [BigNumber](#class-bignumber) | [PublicKey](#class-publickey) |
 | [Curve](#class-curve) | [RIPEMD160](#class-ripemd160) |
-| [HmacDRBG](#class-hmacdrbg) | [ReductionContext](#class-reductioncontext) |
+| [DRBG](#class-drbg) | [ReductionContext](#class-reductioncontext) |
 | [JacobianPoint](#class-jacobianpoint) | [SHA1](#class-sha1) |
 | [K256](#class-k256) | [SHA256](#class-sha256) |
 | [Mersenne](#class-mersenne) | [SHA256HMAC](#class-sha256hmac) |
@@ -5651,25 +5651,148 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ---
 ### Class: SHA256HMAC
 
+The `SHA256HMAC` class is used to create Hash-based Message Authentication Code (HMAC) using the SHA-256 cryptographic hash function.
+
+HMAC is a specific type of MAC involving a cryptographic hash function and a secret cryptographic key. It may be used to simultaneously verify both the data integrity and the authenticity of a message.
+
+This class also uses the SHA-256 cryptographic hash algorithm that produces a 256-bit (32-byte) hash value.
+
 ```ts
 export class SHA256HMAC {
     inner: SHA256;
     outer: SHA256;
     blockSize = 64;
     outSize = 32;
-    constructor(key) 
+    constructor(key: number[] | string) 
     update(msg: number[] | string, enc?: "hex"): SHA256HMAC 
     digest(enc?: "hex"): number[] | string 
 }
 ```
 
+<details>
+
+<summary>Class SHA256HMAC Details</summary>
+
+#### Constructor
+
+The constructor for the `SHA256HMAC` class.
+
+It initializes the `SHA256HMAC` object and sets up the inner and outer padded keys.
+If the key size is larger than the blockSize, it is digested using SHA-256.
+If the key size is less than the blockSize, it is padded with zeroes.
+
+```ts
+constructor(key: number[] | string) 
+```
+
+Argument Details
+
++ **key**
+  + The key to use to create the HMAC. Can be a number array or a string in hexadecimal format.
+
+Example
+
+```ts
+const myHMAC = new SHA256HMAC('deadbeef');
+```
+
+#### Property blockSize
+
+The block size for the SHA-256 hash function, in bytes. It's set to 64 bytes.
+
+```ts
+blockSize = 64
+```
+
+#### Property inner
+
+Represents the inner hash of SHA-256.
+
+```ts
+inner: SHA256
+```
+
+#### Property outSize
+
+The output size of the SHA-256 hash function, in bytes. It's set to 32 bytes.
+
+```ts
+outSize = 32
+```
+
+#### Property outer
+
+Represents the outer hash of SHA-256.
+
+```ts
+outer: SHA256
+```
+
+#### Method digest
+
+Finalizes the HMAC computation and returns the resultant hash.
+
+```ts
+digest(enc?: "hex"): number[] | string 
+```
+
+Returns
+
+Returns the digest of the hashed data. Can be a number array or a string.
+
+Argument Details
+
++ **enc**
+  + If 'hex', then the output is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+
+Example
+
+```ts
+let hashedMessage = myHMAC.digest('hex');
+```
+
+#### Method update
+
+Updates the `SHA256HMAC` object with part of the message to be hashed.
+
+```ts
+update(msg: number[] | string, enc?: "hex"): SHA256HMAC 
+```
+
+Returns
+
+Returns the instance of `SHA256HMAC` for chaining calls.
+
+Argument Details
+
++ **msg**
+  + Part of the message to hash. Can be a number array or a string.
++ **enc**
+  + If 'hex', then the input is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+
+Example
+
+```ts
+myHMAC.update('deadbeef', 'hex');
+```
+
+</details>
+
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
-### Class: HmacDRBG
+### Class: DRBG
+
+This class behaves as a HMAC-based deterministic random bit generator (DRBG). It implements a deterministic random number generator using SHA256HMAC HASH function. It takes an initial entropy and nonce when instantiated for seeding purpose.
+
+Example
 
 ```ts
-export default class HmacDRBG {
+const drbg = new DRBG('af12de...', '123ef...');
+```
+
+```ts
+export default class DRBG {
     K: number[];
     V: number[];
     constructor(entropy: number[] | string, nonce: number[] | string) 
@@ -5678,6 +5801,78 @@ export default class HmacDRBG {
     generate(len: number): string 
 }
 ```
+
+<details>
+
+<summary>Class DRBG Details</summary>
+
+#### Method generate
+
+Generates deterministic random hexadecimal string of given length.
+In every generation process, it also updates the internal state `K` and `V`.
+
+```ts
+generate(len: number): string 
+```
+
+Returns
+
+The required deterministic random hexadecimal string.
+
+Argument Details
+
++ **len**
+  + The length of required random number.
+
+Example
+
+```ts
+const randomHex = drbg.generate(256);
+```
+
+#### Method hmac
+
+Generates HMAC using the K value of the instance. This method is used internally for operations.
+
+```ts
+hmac(): SHA256HMAC 
+```
+
+Returns
+
+The SHA256HMAC object created with K value.
+
+Example
+
+```ts
+const hmac = drbg.hmac();
+```
+
+#### Method update
+
+Updates the `K` and `V` values of the instance based on the seed.
+The seed if not provided uses `V` as seed.
+
+```ts
+update(seed?): void 
+```
+
+Returns
+
+Nothing, but updates the internal state `K` and `V` value.
+
+Argument Details
+
++ **seed**
+  + an optional value that used to update `K` and `V`. Default is `undefined`.
+
+Example
+
+```ts
+drbg.update('e13af...');
+```
+
+</details>
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
