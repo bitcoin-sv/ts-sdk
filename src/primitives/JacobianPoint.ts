@@ -1,13 +1,43 @@
-import BasePoint from './BasePoint'
-import BigNumber from './BigNumber'
-import Point from './Point'
+import BasePoint from './BasePoint.js'
+import BigNumber from './BigNumber.js'
+import Point from './Point.js'
 
+/**
+ * The `JacobianPoint` class extends the `BasePoint` class for handling Jacobian coordinates on an Elliptic Curve.
+ * This class defines the properties and the methods needed to work with points in Jacobian coordinates.
+ *
+ * The Jacobian coordinates represent a point (x, y, z) on an Elliptic Curve such that the usual (x, y) coordinates are given by (x/z^2, y/z^3).
+ *
+ * @property x - The `x` coordinate of the point in the Jacobian form.
+ * @property y - The `y` coordinate of the point in the Jacobian form.
+ * @property z - The `z` coordinate of the point in the Jacobian form.
+ * @property zOne - Flag that indicates if the `z` coordinate is one.
+ *
+ * @example
+ * const pointJ = new JacobianPoint('3', '4', '1');
+ */
 export default class JacobianPoint extends BasePoint {
   x: BigNumber
   y: BigNumber
   z: BigNumber
   zOne: boolean
 
+  /**
+   * Constructs a new `JacobianPoint` instance.
+   *
+   * @param x - If `null`, the x-coordinate will default to the curve's defined 'one' constant.
+   * If `x` is not a BigNumber, `x` will be converted to a `BigNumber` assuming it is a hex string.
+   *
+   * @param y - If `null`, the y-coordinate will default to the curve's defined 'one' constant.
+   * If `y` is not a BigNumber, `y` will be converted to a `BigNumber` assuming it is a hex string.
+   *
+   * @param z - If `null`, the z-coordinate will default to 0.
+   * If `z` is not a BigNumber, `z` will be converted to a `BigNumber` assuming it is a hex string.
+   *
+   * @example
+   * const pointJ1 = new JacobianPoint(null, null, null); // creates point at infinity
+   * const pointJ2 = new JacobianPoint('3', '4', '1'); // creates point (3, 4, 1)
+   */
   constructor (
     x: string | BigNumber | null,
     y: string | BigNumber | null,
@@ -19,9 +49,18 @@ export default class JacobianPoint extends BasePoint {
       this.y = this.curve.one
       this.z = new BigNumber(0)
     } else {
-      this.x = new BigNumber(x, 16)
-      this.y = new BigNumber(y, 16)
-      this.z = new BigNumber(z, 16)
+      if (!BigNumber.isBN(x)) {
+        x = new BigNumber(x as string, 16)
+      }
+      this.x = x as BigNumber
+      if (!BigNumber.isBN(y)) {
+        y = new BigNumber(y as string, 16)
+      }
+      this.y = y as BigNumber
+      if (!BigNumber.isBN(z)) {
+        z = new BigNumber(z as string, 16)
+      }
+      this.z = z as BigNumber
     }
     if (this.x.red == null) { this.x = this.x.toRed(this.curve.red) }
     if (this.y.red == null) { this.y = this.y.toRed(this.curve.red) }
@@ -30,6 +69,17 @@ export default class JacobianPoint extends BasePoint {
     this.zOne = this.z === this.curve.one
   }
 
+  /**
+   * Converts the `JacobianPoint` object instance to standard affine `Point` format and returns `Point` type.
+   *
+   * @returns The `Point`(affine) object representing the same point as the original `JacobianPoint`.
+   *
+   * If the initial `JacobianPoint` represents point at infinity, an instance of `Point` at infinity is returned.
+   *
+   * @example
+   * const pointJ = new JacobianPoint('3', '4', '1');
+   * const pointP = pointJ.toP();  // The point in affine coordinates.
+   */
   toP (): Point {
     if (this.isInfinity()) {
       return new Point(null, null)
@@ -43,10 +93,34 @@ export default class JacobianPoint extends BasePoint {
     return new Point(ax, ay)
   }
 
+  /**
+   * Negation operation. It returns the additive inverse of the Jacobian point.
+   *
+   * @method neg
+   * @returns Returns a new Jacobian point as the result of the negation.
+   *
+   * @example
+   * const jp = new JacobianPoint(x, y, z)
+   * const result = jp.neg()
+   */
   neg (): JacobianPoint {
     return new JacobianPoint(this.x, this.y.redNeg(), this.z)
   }
 
+  /**
+   * Addition operation in the Jacobian coordinates. It takes a Jacobian point as an argument
+   * and returns a new Jacobian point as a result of the addition. In the special cases,
+   * when either one of the points is the point at infinity, it will return the other point.
+   *
+   * @method add
+   * @param p - The Jacobian point to be added.
+   * @returns Returns a new Jacobian point as the result of the addition.
+   *
+   * @example
+   * const p1 = new JacobianPoint(x1, y1, z1)
+   * const p2 = new JacobianPoint(x2, y2, z2)
+   * const result = p1.add(p2)
+   */
   add (p: JacobianPoint): JacobianPoint {
     // O + P = P
     if (this.isInfinity()) { return p }
@@ -83,6 +157,20 @@ export default class JacobianPoint extends BasePoint {
     return new JacobianPoint(nx, ny, nz)
   }
 
+  /**
+   * Mixed addition operation. This function combines the standard point addition with
+   * the transformation from the affine to Jacobian coordinates. It first converts
+   * the affine point to Jacobian, and then preforms the addition.
+   *
+   * @method mixedAdd
+   * @param p - The affine point to be added.
+   * @returns Returns the result of the mixed addition as a new Jacobian point.
+   *
+   * @example
+   * const jp = new JacobianPoint(x1, y1, z1)
+   * const ap = new Point(x2, y2)
+   * const result = jp.mixedAdd(ap)
+   */
   mixedAdd (p: Point): JacobianPoint {
     // O + P = P
     if (this.isInfinity()) { return p.toJ() }
@@ -118,6 +206,17 @@ export default class JacobianPoint extends BasePoint {
     return new JacobianPoint(nx, ny, nz)
   }
 
+  /**
+   * Multiple doubling operation. It doubles the Jacobian point as many times as the pow parameter specifies. If pow is 0 or the point is the point at infinity, it will return the point itself.
+   *
+   * @method dblp
+   * @param pow - The number of times the point should be doubled.
+   * @returns Returns a new Jacobian point as the result of multiple doublings.
+   *
+   * @example
+   * const jp = new JacobianPoint(x, y, z)
+   * const result = jp.dblp(3)
+   */
   dblp (pow: number): JacobianPoint {
     if (pow === 0) {
       return this
@@ -129,54 +228,27 @@ export default class JacobianPoint extends BasePoint {
       return this.dbl()
     }
 
-    if (this.curve.zeroA || this.curve.threeA) {
-      /* eslint-disable @typescript-eslint/no-this-alias */
-      let r = this as JacobianPoint
-      for (let i = 0; i < pow; i++) { r = r.dbl() }
-      return r
-    }
-
-    // 1M + 2S + 1A + N * (4S + 5M + 8A)
-    // N = 1 => 6M + 6S + 9A
-    const a = this.curve.a
-    const tinv = this.curve.tinv
-
-    let jx = this.x
-    const jy = this.y
-    let jz = this.z
-    let jz4 = jz.redSqr().redSqr()
-
-    // Reuse results
-    let jyd = jy.redAdd(jy)
-    for (let i = 0; i < pow; i++) {
-      const jx2 = jx.redSqr()
-      const jyd2 = jyd.redSqr()
-      const jyd4 = jyd2.redSqr()
-      const c = jx2.redAdd(jx2).redIAdd(jx2).redIAdd(a.redMul(jz4))
-
-      const t1 = jx.redMul(jyd2)
-      const nx = c.redSqr().redISub(t1.redAdd(t1))
-      const t2 = t1.redISub(nx)
-      let dny = c.redMul(t2)
-      dny = dny.redIAdd(dny).redISub(jyd4)
-      const nz = jyd.redMul(jz)
-      if (i + 1 < pow) { jz4 = jz4.redMul(jyd4) }
-
-      jx = nx
-      jz = nz
-      jyd = dny
-    }
-
-    return new JacobianPoint(jx, jyd.redMul(tinv), jz)
+    /* eslint-disable @typescript-eslint/no-this-alias */
+    let r = this as JacobianPoint
+    for (let i = 0; i < pow; i++) { r = r.dbl() }
+    return r
   }
 
+  /**
+   * Point doubling operation in the Jacobian coordinates. A special case is when the point is the point at infinity, in this case, this function will return the point itself.
+   *
+   * @method dbl
+   * @returns Returns a new Jacobian point as the result of the doubling.
+   *
+   * @example
+   * const jp = new JacobianPoint(x, y, z)
+   * const result = jp.dbl()
+   */
   dbl (): JacobianPoint {
-    if (this.isInfinity()) { return this }
+    if (this.isInfinity()) {
+      return this
+    }
 
-    if (this.curve.zeroA) { return this._zeroDbl() } else if (this.curve.threeA) { return this._threeDbl() } else { return this._dbl() }
-  }
-
-  _zeroDbl (): JacobianPoint {
     let nx
     let ny
     let nz
@@ -247,155 +319,18 @@ export default class JacobianPoint extends BasePoint {
     return new JacobianPoint(nx, ny, nz)
   }
 
-  _threeDbl (): JacobianPoint {
-    let nx
-    let ny
-    let nz
-    // Z = 1
-    if (this.zOne) {
-      // hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-3.html
-      //     #doubling-mdbl-2007-bl
-      // 1M + 5S + 15A
-
-      // XX = X1^2
-      const xx = this.x.redSqr()
-      // YY = Y1^2
-      const yy = this.y.redSqr()
-      // YYYY = YY^2
-      const yyyy = yy.redSqr()
-      // S = 2 * ((X1 + YY)^2 - XX - YYYY)
-      let s = this.x.redAdd(yy).redSqr().redISub(xx).redISub(yyyy)
-      s = s.redIAdd(s)
-      // M = 3 * XX + a
-      const m = xx.redAdd(xx).redIAdd(xx).redIAdd(this.curve.a)
-      // T = M^2 - 2 * S
-      const t = m.redSqr().redISub(s).redISub(s)
-      // X3 = T
-      nx = t
-      // Y3 = M * (S - T) - 8 * YYYY
-      let yyyy8 = yyyy.redIAdd(yyyy)
-      yyyy8 = yyyy8.redIAdd(yyyy8)
-      yyyy8 = yyyy8.redIAdd(yyyy8)
-      ny = m.redMul(s.redISub(t)).redISub(yyyy8)
-      // Z3 = 2 * Y1
-      nz = this.y.redAdd(this.y)
-    } else {
-      // hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-3.html#doubling-dbl-2001-b
-      // 3M + 5S
-
-      // delta = Z1^2
-      const delta = this.z.redSqr()
-      // gamma = Y1^2
-      const gamma = this.y.redSqr()
-      // beta = X1 * gamma
-      const beta = this.x.redMul(gamma)
-      // alpha = 3 * (X1 - delta) * (X1 + delta)
-      let alpha = this.x.redSub(delta).redMul(this.x.redAdd(delta))
-      alpha = alpha.redAdd(alpha).redIAdd(alpha)
-      // X3 = alpha^2 - 8 * beta
-      let beta4 = beta.redIAdd(beta)
-      beta4 = beta4.redIAdd(beta4)
-      const beta8 = beta4.redAdd(beta4)
-      nx = alpha.redSqr().redISub(beta8)
-      // Z3 = (Y1 + Z1)^2 - gamma - delta
-      nz = this.y.redAdd(this.z).redSqr().redISub(gamma).redISub(delta)
-      // Y3 = alpha * (4 * beta - X3) - 8 * gamma^2
-      let ggamma8 = gamma.redSqr()
-      ggamma8 = ggamma8.redIAdd(ggamma8)
-      ggamma8 = ggamma8.redIAdd(ggamma8)
-      ggamma8 = ggamma8.redIAdd(ggamma8)
-      ny = alpha.redMul(beta4.redISub(nx)).redISub(ggamma8)
-    }
-
-    return new JacobianPoint(nx, ny, nz)
-  }
-
-  _dbl (): JacobianPoint {
-    const a = this.curve.a
-
-    // 4M + 6S + 10A
-    const jx = this.x
-    const jy = this.y
-    const jz = this.z
-    const jz4 = jz.redSqr().redSqr()
-
-    const jx2 = jx.redSqr()
-    const jy2 = jy.redSqr()
-
-    const c = jx2.redAdd(jx2).redIAdd(jx2).redIAdd(a.redMul(jz4))
-
-    let jxd4 = jx.redAdd(jx)
-    jxd4 = jxd4.redIAdd(jxd4)
-    const t1 = jxd4.redMul(jy2)
-    const nx = c.redSqr().redISub(t1.redAdd(t1))
-    const t2 = t1.redISub(nx)
-
-    let jyd8 = jy2.redSqr()
-    jyd8 = jyd8.redIAdd(jyd8)
-    jyd8 = jyd8.redIAdd(jyd8)
-    jyd8 = jyd8.redIAdd(jyd8)
-    const ny = c.redMul(t2).redISub(jyd8)
-    const nz = jy.redAdd(jy).redMul(jz)
-
-    return new JacobianPoint(nx, ny, nz)
-  }
-
-  trpl (): JacobianPoint {
-    if (!this.curve.zeroA) { return this.dbl().add(this) }
-
-    // hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#tripling-tpl-2007-bl
-    // 5M + 10S + ...
-
-    // XX = X1^2
-    const xx = this.x.redSqr()
-    // YY = Y1^2
-    const yy = this.y.redSqr()
-    // ZZ = Z1^2
-    const zz = this.z.redSqr()
-    // YYYY = YY^2
-    const yyyy = yy.redSqr()
-    // M = 3 * XX + a * ZZ2; a = 0
-    const m = xx.redAdd(xx).redIAdd(xx)
-    // MM = M^2
-    const mm = m.redSqr()
-    // E = 6 * ((X1 + YY)^2 - XX - YYYY) - MM
-    let e = this.x.redAdd(yy).redSqr().redISub(xx).redISub(yyyy)
-    e = e.redIAdd(e)
-    e = e.redAdd(e).redIAdd(e)
-    e = e.redISub(mm)
-    // EE = E^2
-    const ee = e.redSqr()
-    // T = 16*YYYY
-    let t = yyyy.redIAdd(yyyy)
-    t = t.redIAdd(t)
-    t = t.redIAdd(t)
-    t = t.redIAdd(t)
-    // U = (M + E)^2 - MM - EE - T
-    const u = m.redIAdd(e).redSqr().redISub(mm).redISub(ee).redISub(t)
-    // X3 = 4 * (X1 * EE - 4 * YY * U)
-    let yyu4 = yy.redMul(u)
-    yyu4 = yyu4.redIAdd(yyu4)
-    yyu4 = yyu4.redIAdd(yyu4)
-    let nx = this.x.redMul(ee).redISub(yyu4)
-    nx = nx.redIAdd(nx)
-    nx = nx.redIAdd(nx)
-    // Y3 = 8 * Y1 * (U * (T - U) - E * EE)
-    let ny = this.y.redMul(u.redMul(t.redISub(u)).redISub(e.redMul(ee)))
-    ny = ny.redIAdd(ny)
-    ny = ny.redIAdd(ny)
-    ny = ny.redIAdd(ny)
-    // Z3 = (Z1 + E)^2 - ZZ - EE
-    const nz = this.z.redAdd(e).redSqr().redISub(zz).redISub(ee)
-
-    return new JacobianPoint(nx, ny, nz)
-  }
-
-  mul (k: BigNumber | number | number[] | string, kbase?: number | 'hex'): JacobianPoint {
-    k = new BigNumber(k, kbase)
-
-    return this.curve._wnafMul(this, k) as JacobianPoint
-  }
-
+  /**
+   * Equality check operation. It checks whether the affine or Jacobian point is equal to this Jacobian point.
+   *
+   * @method eq
+   * @param p - The affine or Jacobian point to compare with.
+   * @returns Returns true if the points are equal, otherwise returns false.
+   *
+   * @example
+   * const jp1 = new JacobianPoint(x1, y1, z1)
+   * const jp2 = new JacobianPoint(x2, y2, z2)
+   * const areEqual = jp1.eq(jp2)
+   */
   eq (p: Point | JacobianPoint): boolean {
     if (p.type === 'affine') { return this.eq((p as Point).toJ()) }
 
@@ -415,6 +350,19 @@ export default class JacobianPoint extends BasePoint {
     return this.y.redMul(pz3).redISub(p.y.redMul(z3)).cmpn(0) === 0
   }
 
+  /**
+   * Equality check operation in relation to an x coordinate of a point in projective coordinates.
+   * It checks whether the x coordinate of the Jacobian point is equal to the provided x coordinate
+   * of a point in projective coordinates.
+   *
+   * @method eqXToP
+   * @param x - The x coordinate of a point in projective coordinates.
+   * @returns Returns true if the x coordinates are equal, otherwise returns false.
+   *
+   * @example
+   * const jp = new JacobianPoint(x1, y1, z1)
+   * const isXEqual = jp.eqXToP(x2)
+   */
   eqXToP (x: BigNumber): boolean {
     const zs = this.z.redSqr()
     const rx = x.toRed(this.curve.red).redMul(zs)
@@ -431,6 +379,15 @@ export default class JacobianPoint extends BasePoint {
     }
   }
 
+  /**
+   * Returns the string representation of the JacobianPoint instance.
+   * @method inspect
+   * @returns Returns the string description of the JacobianPoint. If the JacobianPoint represents a point at infinity, the return value of this function is '<EC JPoint Infinity>'. For a normal point, it returns the string description format as '<EC JPoint x: x-coordinate y: y-coordinate z: z-coordinate>'.
+   *
+   * @example
+   * const point = new JacobianPoint('5', '6', '1');
+   * console.log(point.inspect()); // Output: '<EC JPoint x: 5 y: 6 z: 1>'
+   */
   inspect (): string {
     if (this.isInfinity()) { return '<EC JPoint Infinity>' }
     return '<EC JPoint x: ' + this.x.toString(16, 2) +
@@ -438,6 +395,15 @@ export default class JacobianPoint extends BasePoint {
       ' z: ' + this.z.toString(16, 2) + '>'
   }
 
+  /**
+   * Checks whether the JacobianPoint instance represents a point at infinity.
+   * @method isInfinity
+   * @returns Returns true if the JacobianPoint's z-coordinate equals to zero (which represents the point at infinity in Jacobian coordinates). Returns false otherwise.
+   *
+   * @example
+   * const point = new JacobianPoint('5', '6', '0');
+   * console.log(point.isInfinity()); // Output: true
+   */
   isInfinity (): boolean {
     return this.z.cmpn(0) === 0
   }

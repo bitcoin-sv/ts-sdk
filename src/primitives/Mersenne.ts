@@ -1,4 +1,4 @@
-import BigNumber from './BigNumber'
+import BigNumber from './BigNumber.js'
 
 /**
  * A representation of a pseudo-Mersenne prime.

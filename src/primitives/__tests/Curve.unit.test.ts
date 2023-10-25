@@ -1,8 +1,8 @@
 /* eslint-env jest */
-import Curve from '../Curve'
-import Point from '../Point'
-import JPoint from '../JacobianPoint'
-import BigNumber from '../BigNumber'
+import Curve from '../../../dist/cjs/src/primitives/Curve.js'
+import Point from '../../../dist/cjs/src/primitives/Point'
+import JPoint from '../../../dist/cjs/src/primitives/JacobianPoint'
+import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
 
 describe('Curve', () => {
   it('should work with secp256k1', () => {
@@ -17,9 +17,6 @@ describe('Curve', () => {
     expect(p.dbl().validate()).toBe(true)
     expect(p.toJ().dbl().toP().validate()).toBe(true)
     expect(p.mul(new BigNumber('79be667e f9dcbbac 55a06295 ce870b07', 16)).validate()).toBe(true)
-
-    const j = p.toJ()
-    expect(j.trpl().eq(j.dbl().add(j))).toBe(true)
 
     // Endomorphism test
     expect(curve.endo).toBeDefined()
@@ -116,15 +113,6 @@ describe('Curve', () => {
     expect(bad.dbl().add(good.dbl().neg()).isInfinity()).toBe(true)
   })
 
-  test('should store precomputed values correctly on negation', () => {
-    const curve = new Curve()
-    const p = curve.g.mul('2')
-    p.precompute()
-    const neg = p.neg(true)
-    const neg2 = neg.neg(true)
-    expect(p.eq(neg2)).toBe(true)
-  })
-
   test('should correctly handle scalar multiplication of zero', () => {
     const curve = new Curve()
     const p1 = curve.g.mul('0')
@@ -146,9 +134,9 @@ describe('Point codec', () => {
       expect(p.encode(true, 'hex')).toBe(definition.compactEncoded)
 
       // Decodes as expected
-      expect(curve.decodePoint(definition.encoded, 'hex').eq(p)).toBe(true)
-      expect(curve.decodePoint(definition.compactEncoded, 'hex').eq(p)).toBe(true)
-      expect(curve.decodePoint(definition.hybrid, 'hex').eq(p)).toBe(true)
+      expect(Point.fromString(definition.encoded).eq(p)).toBe(true)
+      expect(Point.fromString(definition.compactEncoded).eq(p)).toBe(true)
+      expect(Point.fromString(definition.hybrid).eq(p)).toBe(true)
     }
   }
 
@@ -188,13 +176,13 @@ describe('Point codec', () => {
         'ae12777aacfbb620f3be96017f45c560de80f0f6518fe4a03c870c36b075f297'
   }
 
-  // it('should throw when trying to decode random bytes', () => {
-  //   assert.throws(() => {
-  //     elliptic.curves.secp256k1.curve.decodePoint(
-  //       '05' +
-  //         '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798')
-  //   })
-  // })
+  it('should throw when trying to decode random bytes', () => {
+    expect(() => {
+      Point.fromString(
+        '05' +
+        '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798')
+    }).toThrow()
+  })
 
   it('should be able to encode/decode a short curve point with even Y',
     makeShortTest(shortPointEvenY))

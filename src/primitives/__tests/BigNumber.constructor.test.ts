@@ -1,4 +1,4 @@
-import BigNumber from '../BigNumber'
+import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
 
 describe('BN.js/Constructor', () => {
   describe('with Smi input', () => {
@@ -171,13 +171,6 @@ describe('BN.js/Constructor', () => {
 
     it('should import little endian', () => {
       expect(new BigNumber(Buffer.from('010203', 'hex'), 'le').toString(16)).toEqual('30201')
-    })
-  })
-
-  describe('with BN input', () => {
-    it('should clone BN', () => {
-      const num = new BigNumber(12345)
-      expect(new BigNumber(num).toString(10)).toEqual('12345')
     })
   })
 })

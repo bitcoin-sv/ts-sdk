@@ -1,5 +1,5 @@
-import Mersenne from './Mersenne'
-import BigNumber from './BigNumber'
+import Mersenne from './Mersenne.js'
+import BigNumber from './BigNumber.js'
 
 /**
  * A class representing K-256, a prime number with optimizations, specifically used in the secp256k1 curve.

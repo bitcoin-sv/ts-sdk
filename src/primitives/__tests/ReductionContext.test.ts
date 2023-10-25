@@ -1,8 +1,8 @@
 /* eslint-env jest */
-import BigNumber from '../BigNumber'
-import ReductionContext from '../ReductionContext'
-import MontgomoryMethod from '../MontgomoryMethod'
-import K256 from '../K256'
+import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
+import ReductionContext from '../../../dist/cjs/src/primitives/ReductionContext'
+import MontgomoryMethod from '../../../dist/cjs/src/primitives/MontgomoryMethod'
+import K256 from '../../../dist/cjs/src/primitives/K256'
 
 describe('BN.js/Reduction context', function () {
   const testMethod = (name: string, Method): void => {

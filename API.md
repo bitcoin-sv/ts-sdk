@@ -1,18 +1,22 @@
 # API
 
-Links: [API](#api), [Classes](#classes)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ## Classes
 
-| |
-| --- |
-| [BigNumber](#class-bignumber) |
-| [K256](#class-k256) |
-| [Mersenne](#class-mersenne) |
-| [MontgomoryMethod](#class-montgomorymethod) |
-| [ReductionContext](#class-reductioncontext) |
+| | |
+| --- | --- |
+| [BasePoint](#class-basepoint) | [PrivateKey](#class-privatekey) |
+| [BigNumber](#class-bignumber) | [PublicKey](#class-publickey) |
+| [Curve](#class-curve) | [RIPEMD160](#class-ripemd160) |
+| [DRBG](#class-drbg) | [ReductionContext](#class-reductioncontext) |
+| [JacobianPoint](#class-jacobianpoint) | [SHA1](#class-sha1) |
+| [K256](#class-k256) | [SHA256](#class-sha256) |
+| [Mersenne](#class-mersenne) | [SHA256HMAC](#class-sha256hmac) |
+| [MontgomoryMethod](#class-montgomorymethod) | [Signature](#class-signature) |
+| [Point](#class-point) | [SymmetricKey](#class-symmetrickey) |
 
-Links: [API](#api), [Classes](#classes)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 
@@ -160,7 +164,7 @@ mersenne.split(new BigNumber('2345', 16), new BigNumber());
 
 </details>
 
-Links: [API](#api), [Classes](#classes)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: K256
@@ -253,7 +257,7 @@ k256.split(input, output);
 
 </details>
 
-Links: [API](#api), [Classes](#classes)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: ReductionContext
@@ -786,7 +790,7 @@ this.verify2(new BigNumber(10).toRed(this), new BigNumber(20)); //throws an Erro
 
 </details>
 
-Links: [API](#api), [Classes](#classes)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: BigNumber
@@ -808,7 +812,7 @@ export default class BigNumber {
     static isBN(num: any): boolean 
     static max(left: BigNumber, right: BigNumber): BigNumber 
     static min(left: BigNumber, right: BigNumber): BigNumber 
-    constructor(number: number | string | number[] | Buffer | BigNumber = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
+    constructor(number: number | string | number[] | Buffer = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
     copy(dest: BigNumber): void 
     static move(dest: BigNumber, src: BigNumber): void 
     clone(): BigNumber 
@@ -951,7 +955,7 @@ export default class BigNumber {
 #### Constructor
 
 ```ts
-constructor(number: number | string | number[] | Buffer | BigNumber = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
+constructor(number: number | string | number[] | Buffer = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
 ```
 
 Argument Details
@@ -1038,23 +1042,6 @@ Example
 let num = new BigNumber(50000);
 console.log(num.words);  // output: [ 50000 ]
 ```
-
-#### Method _iaddn
-
-A helper method for in-place addition, used when there are no sign changes or size checks needed.
-
-```ts
-_iaddn(num: number): BigNumber 
-```
-
-Returns
-
-Returns the BigNumber after the addition.
-
-Argument Details
-
-+ **num**
-  + The plain number to add.
 
 #### Method _invmp
 
@@ -4291,7 +4278,7 @@ const zeroBits = bn.zeroBits(); // 3
 
 </details>
 
-Links: [API](#api), [Classes](#classes)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: MontgomoryMethod
@@ -4502,6 +4489,2328 @@ const product = montMethod.mul(a, b);
 
 </details>
 
-Links: [API](#api), [Classes](#classes)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: Curve
+
+```ts
+export default class Curve {
+    p: BigNumber;
+    red: ReductionContext;
+    redN: BigNumber | null;
+    zero: BigNumber;
+    one: BigNumber;
+    two: BigNumber;
+    g: Point;
+    n: BigNumber;
+    a: BigNumber;
+    b: BigNumber;
+    tinv: BigNumber;
+    zeroA: boolean;
+    threeA: boolean;
+    endo: any;
+    _endoWnafT1: any[];
+    _endoWnafT2: any[];
+    _wnafT1: any[];
+    _wnafT2: any[];
+    _wnafT3: any[];
+    _wnafT4: any[];
+    _bitLength: number;
+    static assert(expression: unknown, message: string = "Elliptic curve assertion failed"): void 
+    getNAF(num: BigNumber, w: number, bits: number): number[] 
+    getJSF(k1: BigNumber, k2: BigNumber): number[][] 
+    static cachedProperty(obj, name: string, computer): void 
+    static parseBytes(bytes: string | number[]): number[] 
+    static intFromLE(bytes: number[]): BigNumber 
+    constructor() 
+    _getEndomorphism(conf): {
+        beta: BigNumber;
+        lambda: BigNumber;
+        basis: Array<{
+            a: BigNumber;
+            b: BigNumber;
+        }>;
+    } | undefined 
+    ;
+    _getEndoRoots(num: BigNumber): [
+        BigNumber,
+        BigNumber
+    ] 
+    ;
+    _getEndoBasis(lambda: BigNumber): [
+        {
+            a: BigNumber;
+            b: BigNumber;
+        },
+        {
+            a: BigNumber;
+            b: BigNumber;
+        }
+    ] 
+    _endoSplit(k: BigNumber): {
+        k1: BigNumber;
+        k2: BigNumber;
+    } 
+    validate(point: Point): boolean 
+    ;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: BasePoint
+
+Base class for Point (affine coordinates) and JacobianPoint classes,
+defining their curve and type.
+
+```ts
+export default abstract class BasePoint {
+    curve: Curve;
+    type: "affine" | "jacobian";
+    precomputed: {
+        doubles: {
+            step: number;
+            points: any[];
+        } | undefined;
+        naf: {
+            wnd: any;
+            points: any[];
+        } | undefined;
+        beta: BasePoint | null | undefined;
+    } | null;
+    constructor(type: "affine" | "jacobian") 
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: JacobianPoint
+
+The `JacobianPoint` class extends the `BasePoint` class for handling Jacobian coordinates on an Elliptic Curve.
+This class defines the properties and the methods needed to work with points in Jacobian coordinates.
+
+The Jacobian coordinates represent a point (x, y, z) on an Elliptic Curve such that the usual (x, y) coordinates are given by (x/z^2, y/z^3).
+
+Example
+
+```ts
+const pointJ = new JacobianPoint('3', '4', '1');
+```
+
+```ts
+export default class JacobianPoint extends BasePoint {
+    x: BigNumber;
+    y: BigNumber;
+    z: BigNumber;
+    zOne: boolean;
+    constructor(x: string | BigNumber | null, y: string | BigNumber | null, z: string | BigNumber | null) 
+    toP(): Point 
+    neg(): JacobianPoint 
+    add(p: JacobianPoint): JacobianPoint 
+    mixedAdd(p: Point): JacobianPoint 
+    dblp(pow: number): JacobianPoint 
+    dbl(): JacobianPoint 
+    eq(p: Point | JacobianPoint): boolean 
+    eqXToP(x: BigNumber): boolean 
+    inspect(): string 
+    isInfinity(): boolean 
+}
+```
+
+<details>
+
+<summary>Class JacobianPoint Details</summary>
+
+#### Constructor
+
+Constructs a new `JacobianPoint` instance.
+
+```ts
+constructor(x: string | BigNumber | null, y: string | BigNumber | null, z: string | BigNumber | null) 
+```
+
+Argument Details
+
++ **x**
+  + If `null`, the x-coordinate will default to the curve's defined 'one' constant.
+If `x` is not a BigNumber, `x` will be converted to a `BigNumber` assuming it is a hex string.
++ **y**
+  + If `null`, the y-coordinate will default to the curve's defined 'one' constant.
+If `y` is not a BigNumber, `y` will be converted to a `BigNumber` assuming it is a hex string.
++ **z**
+  + If `null`, the z-coordinate will default to 0.
+If `z` is not a BigNumber, `z` will be converted to a `BigNumber` assuming it is a hex string.
+
+Example
+
+```ts
+const pointJ1 = new JacobianPoint(null, null, null); // creates point at infinity
+const pointJ2 = new JacobianPoint('3', '4', '1'); // creates point (3, 4, 1)
+```
+
+#### Property x
+
+The `x` coordinate of the point in the Jacobian form.
+
+```ts
+x: BigNumber
+```
+
+#### Property y
+
+The `y` coordinate of the point in the Jacobian form.
+
+```ts
+y: BigNumber
+```
+
+#### Property z
+
+The `z` coordinate of the point in the Jacobian form.
+
+```ts
+z: BigNumber
+```
+
+#### Property zOne
+
+Flag that indicates if the `z` coordinate is one.
+
+```ts
+zOne: boolean
+```
+
+#### Method add
+
+Addition operation in the Jacobian coordinates. It takes a Jacobian point as an argument
+and returns a new Jacobian point as a result of the addition. In the special cases,
+when either one of the points is the point at infinity, it will return the other point.
+
+```ts
+add(p: JacobianPoint): JacobianPoint 
+```
+
+Returns
+
+Returns a new Jacobian point as the result of the addition.
+
+Argument Details
+
++ **p**
+  + The Jacobian point to be added.
+
+Example
+
+```ts
+const p1 = new JacobianPoint(x1, y1, z1)
+const p2 = new JacobianPoint(x2, y2, z2)
+const result = p1.add(p2)
+```
+
+#### Method dbl
+
+Point doubling operation in the Jacobian coordinates. A special case is when the point is the point at infinity, in this case, this function will return the point itself.
+
+```ts
+dbl(): JacobianPoint 
+```
+
+Returns
+
+Returns a new Jacobian point as the result of the doubling.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x, y, z)
+const result = jp.dbl()
+```
+
+#### Method dblp
+
+Multiple doubling operation. It doubles the Jacobian point as many times as the pow parameter specifies. If pow is 0 or the point is the point at infinity, it will return the point itself.
+
+```ts
+dblp(pow: number): JacobianPoint 
+```
+
+Returns
+
+Returns a new Jacobian point as the result of multiple doublings.
+
+Argument Details
+
++ **pow**
+  + The number of times the point should be doubled.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x, y, z)
+const result = jp.dblp(3)
+```
+
+#### Method eq
+
+Equality check operation. It checks whether the affine or Jacobian point is equal to this Jacobian point.
+
+```ts
+eq(p: Point | JacobianPoint): boolean 
+```
+
+Returns
+
+Returns true if the points are equal, otherwise returns false.
+
+Argument Details
+
++ **p**
+  + The affine or Jacobian point to compare with.
+
+Example
+
+```ts
+const jp1 = new JacobianPoint(x1, y1, z1)
+const jp2 = new JacobianPoint(x2, y2, z2)
+const areEqual = jp1.eq(jp2)
+```
+
+#### Method eqXToP
+
+Equality check operation in relation to an x coordinate of a point in projective coordinates.
+It checks whether the x coordinate of the Jacobian point is equal to the provided x coordinate
+of a point in projective coordinates.
+
+```ts
+eqXToP(x: BigNumber): boolean 
+```
+
+Returns
+
+Returns true if the x coordinates are equal, otherwise returns false.
+
+Argument Details
+
++ **x**
+  + The x coordinate of a point in projective coordinates.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x1, y1, z1)
+const isXEqual = jp.eqXToP(x2)
+```
+
+#### Method inspect
+
+Returns the string representation of the JacobianPoint instance.
+
+```ts
+inspect(): string 
+```
+
+Returns
+
+Returns the string description of the JacobianPoint. If the JacobianPoint represents a point at infinity, the return value of this function is '<EC JPoint Infinity>'. For a normal point, it returns the string description format as '<EC JPoint x: x-coordinate y: y-coordinate z: z-coordinate>'.
+
+Example
+
+```ts
+const point = new JacobianPoint('5', '6', '1');
+console.log(point.inspect()); // Output: '<EC JPoint x: 5 y: 6 z: 1>'
+```
+
+#### Method isInfinity
+
+Checks whether the JacobianPoint instance represents a point at infinity.
+
+```ts
+isInfinity(): boolean 
+```
+
+Returns
+
+Returns true if the JacobianPoint's z-coordinate equals to zero (which represents the point at infinity in Jacobian coordinates). Returns false otherwise.
+
+Example
+
+```ts
+const point = new JacobianPoint('5', '6', '0');
+console.log(point.isInfinity()); // Output: true
+```
+
+#### Method mixedAdd
+
+Mixed addition operation. This function combines the standard point addition with
+the transformation from the affine to Jacobian coordinates. It first converts
+the affine point to Jacobian, and then preforms the addition.
+
+```ts
+mixedAdd(p: Point): JacobianPoint 
+```
+
+Returns
+
+Returns the result of the mixed addition as a new Jacobian point.
+
+Argument Details
+
++ **p**
+  + The affine point to be added.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x1, y1, z1)
+const ap = new Point(x2, y2)
+const result = jp.mixedAdd(ap)
+```
+
+#### Method neg
+
+Negation operation. It returns the additive inverse of the Jacobian point.
+
+```ts
+neg(): JacobianPoint 
+```
+
+Returns
+
+Returns a new Jacobian point as the result of the negation.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x, y, z)
+const result = jp.neg()
+```
+
+#### Method toP
+
+Converts the `JacobianPoint` object instance to standard affine `Point` format and returns `Point` type.
+
+```ts
+toP(): Point 
+```
+
+Returns
+
+The `Point`(affine) object representing the same point as the original `JacobianPoint`.
+
+If the initial `JacobianPoint` represents point at infinity, an instance of `Point` at infinity is returned.
+
+Example
+
+```ts
+const pointJ = new JacobianPoint('3', '4', '1');
+const pointP = pointJ.toP();  // The point in affine coordinates.
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: Point
+
+`Point` class is a representation of an elliptic curve point with affine coordinates.
+It extends the functionality of BasePoint and carries x, y coordinates of point on the curve.
+It also introduces new methods for handling Point operations in elliptic curve.
+
+```ts
+export default class Point extends BasePoint {
+    x: BigNumber | null;
+    y: BigNumber | null;
+    inf: boolean;
+    static fromString(str: string): Point 
+    static fromX(x: BigNumber | number | number[] | string, odd: boolean): Point 
+    static fromJSON(obj: string | any[], isRed: boolean): Point 
+    constructor(x: BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null, isRed: boolean = true) 
+    validate(): boolean 
+    encode(compact: boolean = true, enc?: "hex"): number[] | string 
+    toString(): string 
+    toJSON(): [
+        BigNumber | null,
+        BigNumber | null,
+        {
+            doubles: {
+                step: any;
+                points: any[];
+            } | undefined;
+            naf: {
+                wnd: any;
+                points: any[];
+            } | undefined;
+        }?
+    ] 
+    inspect(): string 
+    isInfinity(): boolean 
+    add(p: Point): Point 
+    dbl(): Point 
+    getX(): BigNumber 
+    getY(): BigNumber 
+    mul(k: BigNumber | number | number[] | string): Point 
+    mulAdd(k1: BigNumber, p2: Point, k2: BigNumber): Point 
+    jmulAdd(k1: BigNumber, p2: Point, k2: BigNumber): JPoint 
+    eq(p: Point): boolean 
+    neg(_precompute?: boolean): Point 
+    dblp(k: number): Point 
+    toJ(): JPoint 
+    ;
+    ;
+}
+```
+
+<details>
+
+<summary>Class Point Details</summary>
+
+#### Constructor
+
+```ts
+constructor(x: BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null, isRed: boolean = true) 
+```
+
+Argument Details
+
++ **x**
+  + The x-coordinate of the point. May be a number, a BigNumber, a string (which will be interpreted as hex), a number array, or null. If null, an "Infinity" point is constructed.
++ **y**
+  + The y-coordinate of the point, similar to x.
++ **isRed**
+  + A boolean indicating if the point is a member of the field of integers modulo the k256 prime. Default is true.
+
+Example
+
+```ts
+new Point('abc123', 'def456');
+new Point(null, null); // Generates Infinity point.
+```
+
+#### Property inf
+
+Flag to record if the point is at infinity in the Elliptic Curve.
+
+```ts
+inf: boolean
+```
+
+#### Property x
+
+The x-coordinate of the point.
+
+```ts
+x: BigNumber | null
+```
+
+#### Property y
+
+The y-coordinate of the point.
+
+```ts
+y: BigNumber | null
+```
+
+#### Method add
+
+Adds another Point to this Point, returning a new Point.
+
+```ts
+add(p: Point): Point 
+```
+
+Returns
+
+A new Point that results from the addition.
+
+Argument Details
+
++ **p**
+  + The Point to add to this one.
+
+Example
+
+```ts
+const p1 = new Point(1, 2);
+const p2 = new Point(2, 3);
+const result = p1.add(p2);
+```
+
+#### Method dbl
+
+Doubles the current point.
+
+```ts
+dbl(): Point 
+```
+
+Example
+
+```ts
+const P = new Point('123', '456');
+const result = P.dbl();
+```
+
+#### Method dblp
+
+Performs the "doubling" operation on the Point a given number of times.
+This is used in elliptic curve operations to perform multiplication by 2, multiple times.
+If the point is at infinity, it simply returns the point because doubling
+a point at infinity is still infinity.
+
+```ts
+dblp(k: number): Point 
+```
+
+Returns
+
+The Point after 'k' "doubling" operations have been performed.
+
+Argument Details
+
++ **k**
+  + The number of times the "doubling" operation is to be performed on the Point.
+
+Example
+
+```ts
+const p = new Point(5, 20);
+const doubledPoint = p.dblp(10); // returns the point after "doubled" 10 times
+```
+
+#### Method encode
+
+Encodes the coordinates of a point into an array or a hexadecimal string.
+The details of encoding are determined by the optional compact and enc parameters.
+
+```ts
+encode(compact: boolean = true, enc?: "hex"): number[] | string 
+```
+
+Returns
+
+If enc is undefined, a byte array representation of the point will be returned. if enc is 'hex', a hexadecimal string representation of the point will be returned.
+
+Argument Details
+
++ **compact**
+  + If true, an additional prefix byte 0x02 or 0x03 based on the 'y' coordinate being even or odd respectively is used. If false, byte 0x04 is used.
++ **enc**
+  + Expects the string 'hex' if hexadecimal string encoding is required instead of an array of numbers.
+
+Throws
+
+Will throw an error if the specified encoding method is not recognized. Expects 'hex'.
+
+Example
+
+```ts
+const aPoint = new Point(x, y);
+const encodedPointArray = aPoint.encode();
+const encodedPointHex = aPoint.encode(true, 'hex');
+```
+
+#### Method eq
+
+Checks if the Point instance is equal to another given Point.
+
+```ts
+eq(p: Point): boolean 
+```
+
+Returns
+
+Whether the two Point instances are equal. Both the 'x' and 'y' coordinates have to match, and both points have to either be valid or at infinity for equality. If both conditions are true, it returns true, else it returns false.
+
+Argument Details
+
++ **p**
+  + The Point to be checked if equal to the current instance.
+
+Example
+
+```ts
+const p1 = new Point(5, 20);
+const p2 = new Point(5, 20);
+const areEqual = p1.eq(p2); // returns true
+```
+
+#### Method fromJSON
+
+Generates a point from a serialized JSON object. The function accounts for different options in the JSON object,
+including precomputed values for optimization of EC operations, and calls another helper function to turn nested
+JSON points into proper Point objects.
+
+```ts
+static fromJSON(obj: string | any[], isRed: boolean): Point 
+```
+
+Returns
+
+Returns a new point based on the deserialized JSON object.
+
+Argument Details
+
++ **obj**
+  + An object or array that holds the data for the point.
++ **isRed**
+  + A boolean to direct how the Point is constructed from the JSON object.
+
+Example
+
+```ts
+const serializedPoint = '{"x":52,"y":15}';
+const point = Point.fromJSON(serializedPoint, true);
+```
+
+#### Method fromString
+
+Creates a point object from a given string. This string can represent coordinates in hex format, or points
+in multiple established formats.
+The function verifies the integrity of the provided data and throws errors if inconsistencies are found.
+
+```ts
+static fromString(str: string): Point 
+```
+
+Returns
+
+Returns a new point representing the given string.
+
+Argument Details
+
++ **str**
+  + The point representation string.
+
+Throws
+
+`Error` If the point string value has a wrong length.
+
+`Error` If the point format is unknown.
+
+Example
+
+```ts
+const pointStr = 'abcdef';
+const point = Point.fromString(pointStr);
+```
+
+#### Method fromX
+
+Generates a point from an x coordinate and a boolean indicating whether the corresponding
+y coordinate is odd.
+
+```ts
+static fromX(x: BigNumber | number | number[] | string, odd: boolean): Point 
+```
+
+Returns
+
+Returns the new point.
+
+Argument Details
+
++ **x**
+  + The x coordinate of the point.
++ **odd**
+  + Boolean indicating whether the corresponding y coordinate is odd or not.
+
+Throws
+
+`Error` If the point is invalid.
+
+Example
+
+```ts
+const xCoordinate = new BigNumber('10');
+const point = Point.fromX(xCoordinate, true);
+```
+
+#### Method getX
+
+Returns X coordinate of point
+
+```ts
+getX(): BigNumber 
+```
+
+Example
+
+```ts
+const P = new Point('123', '456');
+const x = P.getX();
+```
+
+#### Method getY
+
+Returns X coordinate of point
+
+```ts
+getY(): BigNumber 
+```
+
+Example
+
+```ts
+const P = new Point('123', '456');
+const x = P.getX();
+```
+
+#### Method inspect
+
+Provides the point coordinates in a human-readable string format for debugging purposes.
+
+```ts
+inspect(): string 
+```
+
+Returns
+
+String of the format '<EC Point x: x-coordinate y: y-coordinate>', or '<EC Point Infinity>' if the point is at infinity.
+
+Example
+
+```ts
+const aPoint = new Point(x, y);
+console.log(aPoint.inspect());
+```
+
+#### Method isInfinity
+
+Checks if the point is at infinity.
+
+```ts
+isInfinity(): boolean 
+```
+
+Returns
+
+Returns whether or not the point is at infinity.
+
+Example
+
+```ts
+const p = new Point(null, null);
+console.log(p.isInfinity()); // outputs: true
+```
+
+#### Method jmulAdd
+
+Performs the Jacobian multiplication and addition operation in a single
+step. Instead of returning a regular Point, the result is a JacobianPoint.
+
+```ts
+jmulAdd(k1: BigNumber, p2: Point, k2: BigNumber): JPoint 
+```
+
+Returns
+
+A JacobianPoint that results from the combined multiplication and addition operation.
+
+Argument Details
+
++ **k1**
+  + The scalar value to multiply this Point by.
++ **p2**
+  + The other Point to be involved in the operation
++ **k2**
+  + The scalar value to multiply the Point p2 by.
+
+Example
+
+```ts
+const p1 = new Point(1, 2);
+const p2 = new Point(2, 3);
+const result = p1.jmulAdd(2, p2, 3);
+```
+
+#### Method mul
+
+Multiplies this Point by a scalar value, returning a new Point.
+
+```ts
+mul(k: BigNumber | number | number[] | string): Point 
+```
+
+Returns
+
+A new Point that results from the multiplication.
+
+Argument Details
+
++ **k**
+  + The scalar value to multiply this Point by.
+
+Example
+
+```ts
+const p = new Point(1, 2);
+const result = p.mul(2); // this doubles the Point
+```
+
+#### Method mulAdd
+
+Performs a multiplication and addition operation in a single step.
+Multiplies this Point by k1, adds the resulting Point to the result of p2 multiplied by k2.
+
+```ts
+mulAdd(k1: BigNumber, p2: Point, k2: BigNumber): Point 
+```
+
+Returns
+
+A Point that results from the combined multiplication and addition operations.
+
+Argument Details
+
++ **k1**
+  + The scalar value to multiply this Point by.
++ **p2**
+  + The other Point to be involved in the operation.
++ **k2**
+  + The scalar value to multiply the Point p2 by.
+
+Example
+
+```ts
+const p1 = new Point(1, 2);
+const p2 = new Point(2, 3);
+const result = p1.mulAdd(2, p2, 3);
+```
+
+#### Method neg
+
+Negate a point. The negation of a point P is the mirror of P about x-axis.
+
+```ts
+neg(_precompute?: boolean): Point 
+```
+
+Example
+
+```ts
+const P = new Point('123', '456');
+const result = P.neg();
+```
+
+#### Method toJ
+
+Converts the point to a Jacobian point. If the point is at infinity, the corresponding Jacobian point
+will also be at infinity.
+
+```ts
+toJ(): JPoint 
+```
+
+Returns
+
+Returns a new Jacobian point based on the current point.
+
+Example
+
+```ts
+const point = new Point(xCoordinate, yCoordinate);
+const jacobianPoint = point.toJ();
+```
+
+#### Method toJSON
+
+Exports the x and y coordinates of the point, and the precomputed doubles and non-adjacent form (NAF) for optimization. The output is an array.
+
+```ts
+toJSON(): [
+    BigNumber | null,
+    BigNumber | null,
+    {
+        doubles: {
+            step: any;
+            points: any[];
+        } | undefined;
+        naf: {
+            wnd: any;
+            points: any[];
+        } | undefined;
+    }?
+] 
+```
+
+Returns
+
+An Array where first two elements are the coordinates of the point and optional third element is an object with doubles and NAF points.
+
+Example
+
+```ts
+const aPoint = new Point(x, y);
+const jsonPoint = aPoint.toJSON();
+```
+
+#### Method toString
+
+function toString() { [native code] }
+
+Converts the point coordinates to a hexadecimal string. A wrapper method
+for encode. Byte 0x02 or 0x03 is used as prefix based on the 'y' coordinate being even or odd respectively.
+
+```ts
+toString(): string 
+```
+
+Returns
+
+A hexadecimal string representation of the point coordinates.
+
+Example
+
+```ts
+const aPoint = new Point(x, y);
+const stringPoint = aPoint.toString();
+```
+
+#### Method validate
+
+Validates if a point belongs to the curve. Follows the short Weierstrass
+equation for elliptic curves: y^2 = x^3 + ax + b.
+
+```ts
+validate(): boolean 
+```
+
+Returns
+
+true if the point is on the curve, false otherwise.
+
+Example
+
+```ts
+const aPoint = new Point(x, y);
+const isValid = aPoint.validate();
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: RIPEMD160
+
+An implementation of RIPEMD160 cryptographic hash function. Extends the BaseHash class.
+It provides a way to compute a 'digest' for any kind of input data; transforming the data
+into a unique output of fixed size. The output is deterministic; it will always be
+the same for the same input.
+
+Example
+
+```ts
+const ripemd160 = new RIPEMD160();
+```
+
+```ts
+export class RIPEMD160 extends BaseHash {
+    h: number[];
+    constructor() 
+    _update(msg: number[], start: number): void 
+    _digest(enc?: "hex"): string | number[] 
+}
+```
+
+<details>
+
+<summary>Class RIPEMD160 Details</summary>
+
+#### Property h
+
+Array that is updated iteratively as part of hashing computation.
+
+```ts
+h: number[]
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: SHA256
+
+An implementation of SHA256 cryptographic hash function. Extends the BaseHash class.
+It provides a way to compute a 'digest' for any kind of input data; transforming the data
+into a unique output of fixed size. The output is deterministic; it will always be
+the same for the same input.
+
+Example
+
+```ts
+const sha256 = new SHA256();
+```
+
+```ts
+export class SHA256 extends BaseHash {
+    h: number[];
+    W: number[];
+    k: number[];
+    constructor() 
+    _update(msg: number[], start?: number): void 
+    ;
+    _digest(enc?: "hex"): number[] | string 
+}
+```
+
+<details>
+
+<summary>Class SHA256 Details</summary>
+
+#### Property W
+
+Provides a way to recycle usage of the array memory.
+
+```ts
+W: number[]
+```
+
+#### Property h
+
+The initial hash constants
+
+```ts
+h: number[]
+```
+
+#### Property k
+
+The round constants used for each round of SHA-256
+
+```ts
+k: number[]
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: SHA1
+
+An implementation of SHA1 cryptographic hash function. Extends the BaseHash class.
+It provides a way to compute a 'digest' for any kind of input data; transforming the data
+into a unique output of fixed size. The output is deterministic; it will always be
+the same for the same input.
+
+Example
+
+```ts
+const sha1 = new SHA1();
+```
+
+```ts
+export class SHA1 extends BaseHash {
+    h: number[];
+    W: number[];
+    k: number[];
+    constructor() 
+    _update(msg: number[], start?: number): void 
+    _digest(enc?: "hex"): number[] | string 
+}
+```
+
+<details>
+
+<summary>Class SHA1 Details</summary>
+
+#### Property W
+
+Provides a way to recycle usage of the array memory.
+
+```ts
+W: number[]
+```
+
+#### Property h
+
+The initial hash constants.
+
+```ts
+h: number[]
+```
+
+#### Property k
+
+The round constants used for each round of SHA-1.
+
+```ts
+k: number[]
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: SHA256HMAC
+
+The `SHA256HMAC` class is used to create Hash-based Message Authentication Code (HMAC) using the SHA-256 cryptographic hash function.
+
+HMAC is a specific type of MAC involving a cryptographic hash function and a secret cryptographic key. It may be used to simultaneously verify both the data integrity and the authenticity of a message.
+
+This class also uses the SHA-256 cryptographic hash algorithm that produces a 256-bit (32-byte) hash value.
+
+```ts
+export class SHA256HMAC {
+    inner: SHA256;
+    outer: SHA256;
+    blockSize = 64;
+    outSize = 32;
+    constructor(key: number[] | string) 
+    update(msg: number[] | string, enc?: "hex"): SHA256HMAC 
+    digest(enc?: "hex"): number[] | string 
+}
+```
+
+<details>
+
+<summary>Class SHA256HMAC Details</summary>
+
+#### Constructor
+
+The constructor for the `SHA256HMAC` class.
+
+It initializes the `SHA256HMAC` object and sets up the inner and outer padded keys.
+If the key size is larger than the blockSize, it is digested using SHA-256.
+If the key size is less than the blockSize, it is padded with zeroes.
+
+```ts
+constructor(key: number[] | string) 
+```
+
+Argument Details
+
++ **key**
+  + The key to use to create the HMAC. Can be a number array or a string in hexadecimal format.
+
+Example
+
+```ts
+const myHMAC = new SHA256HMAC('deadbeef');
+```
+
+#### Property blockSize
+
+The block size for the SHA-256 hash function, in bytes. It's set to 64 bytes.
+
+```ts
+blockSize = 64
+```
+
+#### Property inner
+
+Represents the inner hash of SHA-256.
+
+```ts
+inner: SHA256
+```
+
+#### Property outSize
+
+The output size of the SHA-256 hash function, in bytes. It's set to 32 bytes.
+
+```ts
+outSize = 32
+```
+
+#### Property outer
+
+Represents the outer hash of SHA-256.
+
+```ts
+outer: SHA256
+```
+
+#### Method digest
+
+Finalizes the HMAC computation and returns the resultant hash.
+
+```ts
+digest(enc?: "hex"): number[] | string 
+```
+
+Returns
+
+Returns the digest of the hashed data. Can be a number array or a string.
+
+Argument Details
+
++ **enc**
+  + If 'hex', then the output is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+
+Example
+
+```ts
+let hashedMessage = myHMAC.digest('hex');
+```
+
+#### Method update
+
+Updates the `SHA256HMAC` object with part of the message to be hashed.
+
+```ts
+update(msg: number[] | string, enc?: "hex"): SHA256HMAC 
+```
+
+Returns
+
+Returns the instance of `SHA256HMAC` for chaining calls.
+
+Argument Details
+
++ **msg**
+  + Part of the message to hash. Can be a number array or a string.
++ **enc**
+  + If 'hex', then the input is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+
+Example
+
+```ts
+myHMAC.update('deadbeef', 'hex');
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: DRBG
+
+This class behaves as a HMAC-based deterministic random bit generator (DRBG). It implements a deterministic random number generator using SHA256HMAC HASH function. It takes an initial entropy and nonce when instantiated for seeding purpose.
+
+Example
+
+```ts
+const drbg = new DRBG('af12de...', '123ef...');
+```
+
+```ts
+export default class DRBG {
+    K: number[];
+    V: number[];
+    constructor(entropy: number[] | string, nonce: number[] | string) 
+    hmac(): SHA256HMAC 
+    update(seed?): void 
+    generate(len: number): string 
+}
+```
+
+<details>
+
+<summary>Class DRBG Details</summary>
+
+#### Method generate
+
+Generates deterministic random hexadecimal string of given length.
+In every generation process, it also updates the internal state `K` and `V`.
+
+```ts
+generate(len: number): string 
+```
+
+Returns
+
+The required deterministic random hexadecimal string.
+
+Argument Details
+
++ **len**
+  + The length of required random number.
+
+Example
+
+```ts
+const randomHex = drbg.generate(256);
+```
+
+#### Method hmac
+
+Generates HMAC using the K value of the instance. This method is used internally for operations.
+
+```ts
+hmac(): SHA256HMAC 
+```
+
+Returns
+
+The SHA256HMAC object created with K value.
+
+Example
+
+```ts
+const hmac = drbg.hmac();
+```
+
+#### Method update
+
+Updates the `K` and `V` values of the instance based on the seed.
+The seed if not provided uses `V` as seed.
+
+```ts
+update(seed?): void 
+```
+
+Returns
+
+Nothing, but updates the internal state `K` and `V` value.
+
+Argument Details
+
++ **seed**
+  + an optional value that used to update `K` and `V`. Default is `undefined`.
+
+Example
+
+```ts
+drbg.update('e13af...');
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: Signature
+
+Represents a digital signature.
+
+A digital signature is a mathematical scheme for verifying the authenticity of
+digital messages or documents. In many scenarios, it is equivalent to a handwritten signature or stamped seal.
+The signature pair (R, S) corresponds to the raw ECDSA ([Elliptic Curve Digital Signature Algorithm](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm)) signature.
+Signatures are often serialized into a format known as '[DER encoding](https://en.wikipedia.org/wiki/X.690#DER_encoding)' for transmission.
+
+```ts
+export default class Signature {
+    r: BigNumber;
+    s: BigNumber;
+    static fromDER(data: number[] | string, enc?: "hex"): Signature 
+    constructor(r: BigNumber, s: BigNumber) 
+    verify(msg: number[] | string, key: PublicKey, enc?: "hex"): boolean 
+    toDER(enc?: "hex"): number[] | string 
+}
+```
+
+<details>
+
+<summary>Class Signature Details</summary>
+
+#### Constructor
+
+Creates an instance of the Signature class.
+
+```ts
+constructor(r: BigNumber, s: BigNumber) 
+```
+
+Argument Details
+
++ **r**
+  + The R component of the signature.
++ **s**
+  + The S component of the signature.
+
+Example
+
+```ts
+const r = new BigNumber('208755674028...');
+const s = new BigNumber('564745627577...');
+const signature = new Signature(r, s);
+```
+
+#### Method fromDER
+
+Takes an array of numbers or a string and returns a new Signature instance.
+This method will throw an error if the DER encoding is invalid.
+If a string is provided, it is assumed to represent a hexadecimal sequence.
+
+```ts
+static fromDER(data: number[] | string, enc?: "hex"): Signature 
+```
+
+Returns
+
+The decoded data in the form of Signature instance.
+
+Argument Details
+
++ **data**
+  + The sequence to decode from DER encoding.
++ **enc**
+  + The encoding of the data string.
+
+Example
+
+```ts
+const signature = Signature.fromDER('30440220018c1f5502f8...', 'hex');
+```
+
+#### Method toDER
+
+Converts an instance of Signature into DER encoding.
+
+If the encoding parameter is set to 'hex', the function will return a hex string.
+Otherwise, it will return an array of numbers.
+
+```ts
+toDER(enc?: "hex"): number[] | string 
+```
+
+Returns
+
+The current instance in DER encoding.
+
+Argument Details
+
++ **enc**
+  + The encoding to use for the output.
+
+Example
+
+```ts
+const der = signature.toDER('hex');
+```
+
+#### Method verify
+
+Verifies a digital signature.
+
+This method will return true if the signature, key, and message hash match.
+If the data or key do not match the signature, the function returns false.
+
+```ts
+verify(msg: number[] | string, key: PublicKey, enc?: "hex"): boolean 
+```
+
+Returns
+
+A boolean representing whether the signature is valid.
+
+Argument Details
+
++ **msg**
+  + The message to verify.
++ **key**
+  + The public key used to sign the original message.
++ **enc**
+  + The encoding of the msg string.
+
+Example
+
+```ts
+const msg = 'The quick brown fox jumps over the lazy dog';
+const publicKey = PublicKey.fromString('04188ca1050...');
+const isVerified = signature.verify(msg, publicKey);
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: PrivateKey
+
+Represents a Private Key, which is a secret that can be used to generate signatures in a cryptographic system.
+
+The `PrivateKey` class extends from the `BigNumber` class. It offers methods to create signatures, verify them,
+create a corresponding public key and derive a shared secret from a public key.
+
+```ts
+export default class PrivateKey extends BigNumber {
+    static fromRandom(): PrivateKey 
+    sign(msg: number[] | string, enc?: "hex"): Signature 
+    verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
+    toPublicKey(): PublicKey 
+    deriveSharedSecret(key: PublicKey): Point 
+}
+```
+
+<details>
+
+<summary>Class PrivateKey Details</summary>
+
+#### Method deriveSharedSecret
+
+Derives a shared secret from the public key.
+
+```ts
+deriveSharedSecret(key: PublicKey): Point 
+```
+
+Returns
+
+The derived shared secret (a point on the curve).
+
+Argument Details
+
++ **key**
+  + The public key to derive the shared secret from.
+
+Throws
+
+Will throw an error if the public key is not valid.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+const publicKey = privateKey.toPublicKey();
+const sharedSecret = privateKey.deriveSharedSecret(publicKey);
+```
+
+#### Method fromRandom
+
+Generates a private key randomly.
+
+```ts
+static fromRandom(): PrivateKey 
+```
+
+Returns
+
+The newly generated Private Key.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+```
+
+#### Method sign
+
+Signs a message using the private key.
+
+```ts
+sign(msg: number[] | string, enc?: "hex"): Signature 
+```
+
+Returns
+
+A digital signature generated from the hash of the message and the private key.
+
+Argument Details
+
++ **msg**
+  + The message (array of numbers or string) to be signed.
++ **enc**
+  + If 'hex' the string will be treated as hex, utf8 otherwise.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+const signature = privateKey.sign('Hello, World!');
+```
+
+#### Method toPublicKey
+
+Converts the private key to its corresponding public key.
+
+The public key is generated by multiplying the base point G of the curve and the private key.
+
+```ts
+toPublicKey(): PublicKey 
+```
+
+Returns
+
+The generated PublicKey.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+const publicKey = privateKey.toPublicKey();
+```
+
+#### Method verify
+
+Verifies a message's signature using the public key associated with this private key.
+
+```ts
+verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
+```
+
+Returns
+
+Whether or not the signature is valid.
+
+Argument Details
+
++ **msg**
+  + The original message which has been signed.
++ **sig**
+  + The signature to be verified.
++ **enc**
+  + The data encoding method.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+const signature = privateKey.sign('Hello, World!');
+const isSignatureValid = privateKey.verify('Hello, World!', signature);
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: PublicKey
+
+The PublicKey class extends the Point class. It is used in public-key cryptography to derive shared secret, verify message signatures, and encode the public key in the DER format.
+The class comes with static methods to generate PublicKey instances from private keys or from strings.
+
+```ts
+export default class PublicKey extends Point {
+    static fromPrivateKey(key: PrivateKey): PublicKey 
+    static fromString(str: string): PublicKey 
+    deriveSharedSecret(priv: PrivateKey): Point 
+    verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
+    toDER(): string 
+}
+```
+
+<details>
+
+<summary>Class PublicKey Details</summary>
+
+#### Method deriveSharedSecret
+
+Derive a shared secret from a public key and a private key for use in symmetric encryption.
+This method multiplies the public key (an instance of Point) with a private key.
+
+```ts
+deriveSharedSecret(priv: PrivateKey): Point 
+```
+
+Returns
+
+Returns the Point representing the shared secret.
+
+Argument Details
+
++ **priv**
+  + The private key to use in deriving the shared secret.
+
+Throws
+
+Will throw an error if the public key is not valid for ECDH secret derivation.
+
+Example
+
+```ts
+const myPrivKey = new PrivateKey(...)
+const sharedSecret = myPubKey.deriveSharedSecret(myPrivKey)
+```
+
+#### Method fromPrivateKey
+
+Static factory method to derive a public key from a private key.
+It multiplies the generator point 'g' on the elliptic curve by the private key.
+
+```ts
+static fromPrivateKey(key: PrivateKey): PublicKey 
+```
+
+Returns
+
+Returns the PublicKey derived from the given PrivateKey.
+
+Argument Details
+
++ **key**
+  + The private key from which to derive the public key.
+
+Example
+
+```ts
+const myPrivKey = new PrivateKey(...)
+const myPubKey = PublicKey.fromPrivateKey(myPrivKey)
+```
+
+#### Method fromString
+
+Static factory method to create a PublicKey instance from a string.
+
+```ts
+static fromString(str: string): PublicKey 
+```
+
+Returns
+
+Returns the PublicKey created from the string.
+
+Argument Details
+
++ **str**
+  + A string representing a public key.
+
+Example
+
+```ts
+const myPubKey = PublicKey.fromString("03....")
+```
+
+#### Method toDER
+
+Encode the public key to DER (Distinguished Encoding Rules) format.
+
+```ts
+toDER(): string 
+```
+
+Returns
+
+Returns the DER-encoded string of this public key.
+
+Example
+
+```ts
+const derPublicKey = myPubKey.toDER()
+```
+
+#### Method verify
+
+Verify a signature of a message using this public key.
+
+```ts
+verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
+```
+
+Returns
+
+Returns true if the signature is verified successfully, otherwise false.
+
+Argument Details
+
++ **msg**
+  + The message to verify. It can be a string or an array of numbers.
++ **sig**
+  + The Signature of the message that needs verification.
++ **enc**
+  + The encoding of the message. It defaults to 'hex'.
+
+Example
+
+```ts
+const myMessage = "Hello, world!"
+const mySignature = new Signature(...)
+const isVerified = myPubKey.verify(myMessage, mySignature)
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: SymmetricKey
+
+`SymmetricKey` is a class that extends the `BigNumber` class and implements symmetric encryption and decryption methods.
+Symmetric-Key encryption is a form of encryption where the same key is used to encrypt and decrypt the message.
+It leverages the Advanced Encryption Standard Galois/Counter Mode (AES-GCM) for encryption and decryption of messages.
+
+```ts
+export default class SymmetricKey extends BigNumber {
+    encrypt(msg: number[] | string, enc?: "hex"): string | number[] 
+    decrypt(msg: number[] | string, enc?: "hex" | "utf8"): string | number[] 
+}
+```
+
+<details>
+
+<summary>Class SymmetricKey Details</summary>
+
+#### Method decrypt
+
+Decrypts a given AES-GCM encrypted message using the same key that was used for encryption.
+The method extracts the IV and the authentication tag from the encrypted message, then attempts to decrypt it.
+If the decryption fails (e.g., due to message tampering), an error is thrown.
+
+```ts
+decrypt(msg: number[] | string, enc?: "hex" | "utf8"): string | number[] 
+```
+
+Returns
+
+Returns the decrypted message as a string or an array of numbers, depending on `enc` argument. If absent, an array of numbers is returned.
+
+Argument Details
+
++ **msg**
+  + The encrypted message to be decrypted. It can be a string or an array of numbers.
++ **enc**
+  + optional. The encoding of the message (if no encoding is provided, uses utf8 for strings, unless specified as hex).
+
+Throws
+
+Will throw an error if the decryption fails, likely due to message tampering or incorrect decryption key.
+
+Example
+
+```ts
+const key = new SymmetricKey(1234);
+const decryptedMessage = key.decrypt(encryptedMessage, 'utf8');
+```
+
+#### Method encrypt
+
+Encrypts a given message using AES-GCM encryption.
+The generated Initialization Vector (IV) is attached to the encrypted message for decryption purposes.
+The OpenSSL format of |IV|encryptedContent|authTag| is used.
+
+```ts
+encrypt(msg: number[] | string, enc?: "hex"): string | number[] 
+```
+
+Returns
+
+Returns the encrypted message as a string or an array of numbers, depending on `enc` argument.
+
+Argument Details
+
++ **msg**
+  + The message to be encrypted. It can be a string or an array of numbers.
++ **enc**
+  + optional. The encoding of the message. If hex, the string is assumed to be hex, UTF-8 otherwise.
+
+Example
+
+```ts
+const key = new SymmetricKey(1234);
+const encryptedMessage = key.encrypt('plainText', 'utf8');
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+## Functions
+
+| |
+| --- |
+| [AES](#function-aes) |
+| [AESGCM](#function-aesgcm) |
+| [AESGCMDecrypt](#function-aesgcmdecrypt) |
+| [ghash](#function-ghash) |
+| [toArray](#function-toarray) |
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+
+### Function: toArray
+
+```ts
+export function toArray(msg: number[] | string, enc?: "hex"): number[] 
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Function: AES
+
+```ts
+export function AES(input: number[], key: number[]): number[] 
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Function: ghash
+
+```ts
+export function ghash(input: number[], hashSubKey: number[]): number[] 
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Function: AESGCM
+
+```ts
+export function AESGCM(plainText: number[], additionalAuthenticatedData: number[], initializationVector: number[], key: number[]): {
+    result: number[];
+    authenticationTag: number[];
+} 
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Function: AESGCMDecrypt
+
+```ts
+export function AESGCMDecrypt(cipherText: number[], additionalAuthenticatedData: number[], initializationVector: number[], authenticationTag: number[], key: number[]): number[] | null 
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+## Variables
+
+| | |
+| --- | --- |
+| [checkBit](#variable-checkbit) | [ripemd160](#variable-ripemd160) |
+| [encode](#variable-encode) | [sha1](#variable-sha1) |
+| [exclusiveOR](#variable-exclusiveor) | [sha256](#variable-sha256) |
+| [getBytes](#variable-getbytes) | [sign](#variable-sign) |
+| [hash160](#variable-hash160) | [toArray](#variable-toarray) |
+| [hash256](#variable-hash256) | [toHex](#variable-tohex) |
+| [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [verify](#variable-verify) |
+| [multiply](#variable-multiply) | [zero2](#variable-zero2) |
+| [rightShift](#variable-rightshift) |  |
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+
+### Variable: zero2
+
+```ts
+zero2 = (word: string): string => {
+    if (word.length === 1) {
+        return "0" + word;
+    }
+    else {
+        return word;
+    }
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: toHex
+
+```ts
+toHex = (msg: number[]): string => {
+    let res = "";
+    for (let i = 0; i < msg.length; i++) {
+        res += zero2(msg[i].toString(16));
+    }
+    return res;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: toArray
+
+```ts
+toArray = (msg: any, enc?: "hex" | "utf8"): any[] => {
+    if (Array.isArray(msg)) {
+        return msg.slice();
+    }
+    if (!(msg as boolean)) {
+        return [];
+    }
+    const res: any[] = [];
+    if (typeof msg !== "string") {
+        for (let i = 0; i < msg.length; i++) {
+            res[i] = msg[i] | 0;
+        }
+        return res;
+    }
+    if (enc === "hex") {
+        msg = msg.replace(/[^a-z0-9]+/ig, "");
+        if (msg.length % 2 !== 0) {
+            msg = "0" + (msg as string);
+        }
+        for (let i = 0; i < msg.length; i += 2) {
+            res.push(parseInt((msg[i] as string) + (msg[i + 1] as string), 16));
+        }
+    }
+    else {
+        for (let i = 0; i < msg.length; i++) {
+            const c = msg.charCodeAt(i);
+            const hi = c >> 8;
+            const lo = c & 255;
+            if (hi as unknown as boolean) {
+                res.push(hi, lo);
+            }
+            else {
+                res.push(lo);
+            }
+        }
+    }
+    return res;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: encode
+
+```ts
+encode = (arr: number[], enc?: "hex" | "utf8"): string | number[] => {
+    switch (enc) {
+        case "hex":
+            return toHex(arr);
+        case "utf8":
+            return toUTF8(arr);
+        default:
+            return arr;
+    }
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: ripemd160
+
+```ts
+ripemd160 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    return new RIPEMD160().update(msg, enc).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: sha1
+
+```ts
+sha1 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    return new SHA1().update(msg, enc).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: sha256
+
+```ts
+sha256 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    return new SHA256().update(msg, enc).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: hash256
+
+```ts
+hash256 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    const first = new SHA256().update(msg, enc).digest();
+    return new SHA256().update(first).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: hash160
+
+```ts
+hash160 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    const first = new SHA256().update(msg, enc).digest();
+    return new RIPEMD160().update(first).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: sign
+
+```ts
+sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: BigNumber | Function): Signature => {
+    const curve = new Curve();
+    msg = truncateToN(msg);
+    const bytes = curve.n.byteLength();
+    const bkey = key.toArray("be", bytes);
+    const nonce = msg.toArray("be", bytes);
+    const drbg = new DRBG(bkey, nonce);
+    const ns1 = curve.n.subn(1);
+    for (let iter = 0;; iter++) {
+        let k = typeof customK === "function"
+            ? customK(iter)
+            : BigNumber.isBN(customK)
+                ? customK
+                : new BigNumber(drbg.generate(bytes), 16);
+        k = truncateToN(k, true);
+        if (k.cmpn(1) <= 0 || k.cmp(ns1) >= 0) {
+            continue;
+        }
+        const kp = curve.g.mul(k);
+        if (kp.isInfinity()) {
+            continue;
+        }
+        const kpX = kp.getX();
+        const r = kpX.umod(curve.n);
+        if (r.cmpn(0) === 0) {
+            continue;
+        }
+        let s = k.invm(curve.n).mul(r.mul(key).iadd(msg));
+        s = s.umod(curve.n);
+        if (s.cmpn(0) === 0) {
+            continue;
+        }
+        if (forceLowS && s.cmp(curve.n.ushrn(1)) > 0) {
+            s = curve.n.sub(s);
+        }
+        return new Signature(r, s);
+    }
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: verify
+
+```ts
+verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
+    const curve = new Curve();
+    msg = truncateToN(msg);
+    const r = sig.r;
+    const s = sig.s;
+    if (r.cmpn(1) < 0 || r.cmp(curve.n) >= 0) {
+        return false;
+    }
+    if (s.cmpn(1) < 0 || s.cmp(curve.n) >= 0) {
+        return false;
+    }
+    const sinv = s.invm(curve.n);
+    const u1 = sinv.mul(msg).umod(curve.n);
+    const u2 = sinv.mul(r).umod(curve.n);
+    const p = curve.g.jmulAdd(u1, key, u2);
+    if (p.isInfinity()) {
+        return false;
+    }
+    return p.eqXToP(r);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: checkBit
+
+```ts
+checkBit = function (byteArray: number[], byteIndex: number, bitIndex: number): 1 | 0 {
+    return (byteArray[byteIndex] & (1 << bitIndex)) !== 0 ? 1 : 0;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: getBytes
+
+```ts
+getBytes = function (numericValue: number): number[] {
+    return [
+        (numericValue & 4278190080) >>> 24,
+        (numericValue & 16711680) >> 16,
+        (numericValue & 65280) >> 8,
+        numericValue & 255
+    ];
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: exclusiveOR
+
+```ts
+exclusiveOR = function (block0: number[], block1: number[]): number[] {
+    let i;
+    const result = [];
+    for (i = 0; i < block0.length; i++) {
+        result[i] = block0[i] ^ block1[i];
+    }
+    return result;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: rightShift
+
+```ts
+rightShift = function (block: number[]): number[] {
+    let i: number;
+    let carry = 0;
+    let oldCarry = 0;
+    for (i = 0; i < block.length; i++) {
+        oldCarry = carry;
+        carry = block[i] & 1;
+        block[i] = block[i] >> 1;
+        if (oldCarry !== 0) {
+            block[i] = block[i] | 128;
+        }
+    }
+    return block;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: multiply
+
+```ts
+multiply = function (block0: number[], block1: number[]): number[] {
+    let i;
+    let j;
+    let v = block1.slice();
+    let z = createZeroBlock(16);
+    for (i = 0; i < 16; i++) {
+        for (j = 7; j !== -1; j--) {
+            if (checkBit(block0, i, j) !== 0) {
+                z = exclusiveOR(z, v);
+            }
+            if (checkBit(v, 15, 0) !== 0) {
+                v = exclusiveOR(rightShift(v), R);
+            }
+            else {
+                v = rightShift(v);
+            }
+        }
+    }
+    return z;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: incrementLeastSignificantThirtyTwoBits
+
+```ts
+incrementLeastSignificantThirtyTwoBits = function (block: number[]): number[] {
+    let i;
+    const result = block.slice();
+    for (i = 15; i !== 11; i--) {
+        result[i] = result[i] + 1;
+        if (result[i] === 256) {
+            result[i] = 0;
+        }
+        else {
+            break;
+        }
+    }
+    return result;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
