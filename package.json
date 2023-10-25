@@ -19,9 +19,9 @@
     }
   },
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test": "npm run build && jest",
+    "test:watch": "npm run build && jest --watch",
+    "test:coverage": "npm run build && jest --coverage",
     "lint": "ts-standard --fix src/**/*.ts",
     "build": "tsc -b",
     "dev": "tsc -b -w",
