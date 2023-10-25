@@ -212,7 +212,7 @@ export default class BigNumber {
       }
 
       if (typeof number === 'object') {
-        return this.initArray(number, base, endian)
+        return this.initArray(number, endian)
       }
 
       if (base === 'hex') {
@@ -233,7 +233,7 @@ export default class BigNumber {
         } else {
           this.parseBase(number, base, start)
           if (endian === 'le') {
-            this.initArray(this.toArray(), base, endian)
+            this.initArray(this.toArray(), endian)
           }
         }
       }
@@ -293,7 +293,7 @@ export default class BigNumber {
     if (endian !== 'le') return this
 
     // Reverse the bytes
-    this.initArray(this.toArray(), base, endian)
+    this.initArray(this.toArray(), endian)
     return this
   }
 
@@ -303,11 +303,10 @@ export default class BigNumber {
    * @method initArray
    * @private
    * @param number - The array of numbers to initialize the BigNumber from. Each number represents a part of the value of the big number.
-   * @param base - The base of the numbers provided in the array.
    * @param endian - The endianness ('be' for big-endian, 'le' for little-endian).
    * @return The current BigNumber instance.
    */
-  private initArray (number, base, endian): BigNumber {
+  private initArray (number, endian): BigNumber {
     // Perhaps a Uint8Array
     this.assert(
       typeof number.length === 'number',
