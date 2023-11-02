@@ -16,6 +16,16 @@
       "types": "./dist/types/src/*.d.ts",
       "import": "./dist/esm/src/*.js",
       "require": "./dist/cjs/src/*.js"
+    },
+    "./primitives": {
+      "import": "./dist/esm/src/primitives/index.js",
+      "require": "./dist/cjs/src/primitives/index.js",
+      "types": "./dist/types/src/primitives/index.d.ts"
+    },
+    "./primitives/*": {
+      "import": "./dist/esm/src/primitives/*.js",
+      "require": "./dist/cjs/src/primitives/*.js",
+      "types": "./dist/types/src/primitives/*.d.ts"
     }
   },
   "scripts": {
