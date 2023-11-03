@@ -149,22 +149,6 @@ describe('BN.js/Utils', () => {
     })
   })
 
-  describe('.toBuffer', () => {
-    it('should return proper Buffer', () => {
-      const n = new BigNumber(0x123456)
-      expect(n.toBuffer({ endian: 'big', size: 5 }).toString('hex')).toEqual('0000123456')
-      expect(n.toBuffer({ endian: 'little', size: 5 }).toString('hex')).toEqual('5634120000')
-
-      const s = '211e1566be78319bb949470577c2d4ac7e800a90d5104379478d8039451a8efe'
-      for (let i = 1; i <= s.length; i++) {
-        const slice = (i % 2 === 0 ? '' : '0') + s.slice(0, i)
-        const bn = new BigNumber(slice, 16)
-        expect(bn.toBuffer({ endian: 'big' }).toString('hex')).toEqual(slice)
-        expect(bn.toBuffer({ endian: 'little' }).toString('hex')).toEqual(Buffer.from(slice, 'hex').reverse().toString('hex'))
-      }
-    })
-  })
-
   describe('.toNumber()', () => {
     it('should return proper Number if below the limit', () => {
       expect(new BigNumber(0x123456).toNumber()).toEqual(0x123456)

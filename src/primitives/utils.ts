@@ -1,3 +1,5 @@
+import BigNumber from './BigNumber.js'
+
 /**
  * Appends a '0' to a single-character word to ensure it has two characters.
  * @param {string} word - The input word.
@@ -131,5 +133,195 @@ export const encode = (arr: number[], enc?: 'hex' | 'utf8'): string | number[] =
     // If no encoding is provided, return the original array
     default:
       return arr
+  }
+}
+
+export class Writer {
+  public bufs: number[][]
+
+  constructor (bufs?: number[][]) {
+    this.bufs = bufs || []
+  }
+
+  getLength(): number {
+    let len = 0
+    for (const i in this.bufs) {
+      const buf = this.bufs[i]
+      len = len + buf.length
+    }
+    return len
+  }
+
+  toArray(): number[] {
+    let ret = []
+    for (const x of this.bufs) {
+      ret = [...ret, ...x]
+    }
+    return ret
+  }
+
+  write(buf: number[]): Writer {
+    this.bufs.push(buf)
+    return this
+  }
+
+  writeReverse(buf: number[]): Writer {
+    const buf2: number[] = new Array(buf.length)
+    for (let i = 0; i < buf2.length; i++) {
+      buf2[i] = buf[buf.length - 1 - i]
+    }
+    this.bufs.push(buf2)
+    return this
+  }
+
+  writeUInt8(n: number): Writer {
+    const buf = new Array(1)
+    buf[0] = n
+    this.write(buf)
+    return this
+  }
+
+  writeInt8(n: number): Writer {
+    const buf = new Array(1)
+    buf[0] = n
+    this.write(buf)
+    return this
+  }
+
+  writeUInt16BE(n: number): Writer {
+    this.bufs.push([
+      (n >> 8) & 0xFF, // shift right 8 bits to get the high byte
+      n & 0xFF         // low byte is just the last 8 bits
+    ]);
+    return this;
+  }
+
+  writeInt16BE(n: number): Writer {
+    return this.writeUInt16BE(n & 0xFFFF); // Mask with 0xFFFF to get the lower 16 bits
+  }
+
+  writeUInt16LE(n: number): Writer {
+    this.bufs.push([
+      n & 0xFF,         // low byte is just the last 8 bits
+      (n >> 8) & 0xFF  // shift right 8 bits to get the high byte
+    ]);
+    return this;
+  }
+
+  writeInt16LE(n: number): Writer {
+    return this.writeUInt16LE(n & 0xFFFF); // Mask with 0xFFFF to get the lower 16 bits
+  }
+
+  writeUInt32BE(n: number): Writer {
+    this.bufs.push([
+      (n >> 24) & 0xFF, // highest byte
+      (n >> 16) & 0xFF,
+      (n >> 8) & 0xFF,
+      n & 0xFF          // lowest byte
+    ]);
+    return this;
+  }
+
+  writeInt32BE(n: number): Writer {
+    return this.writeUInt32BE(n >>> 0); // Using unsigned right shift to handle negative numbers
+  }
+
+  writeUInt32LE(n: number): Writer {
+    this.bufs.push([
+      n & 0xFF,         // lowest byte
+      (n >> 8) & 0xFF,
+      (n >> 16) & 0xFF,
+      (n >> 24) & 0xFF  // highest byte
+    ]);
+    return this;
+  }
+
+  writeInt32LE(n: number): Writer {
+    return this.writeUInt32LE(n >>> 0); // Using unsigned right shift to handle negative numbers
+  }
+
+  writeUInt64BEBn(bn: BigNumber): Writer {
+      const buf = bn.toArray('be', 8)
+      this.write(buf)
+      return this
+  }
+
+  writeUInt64LEBn(bn: BigNumber): Writer {
+      const buf = bn.toArray('be', 8)
+      this.writeReverse(buf)
+      return this
+  }
+
+  writeVarIntNum(n: number): Writer {
+      const buf = Writer.varIntNum(n)
+      this.write(buf)
+      return this
+  }
+
+  writeVarIntBn(bn: BigNumber): Writer {
+      const buf = Writer.varIntBn(bn)
+      this.write(buf)
+      return this
+  }
+
+  static varIntNum(n: number): number[] {
+    let buf: number[];
+    if (n < 253) {
+      buf = [n]; // 1 byte
+    } else if (n < 0x10000) {
+      // 253 followed by the number in little-endian format
+      buf = [
+        253,        // 0xfd
+        n & 0xFF,   // low byte
+        (n >> 8) & 0xFF, // high byte
+      ];
+    } else if (n < 0x100000000) {
+      // 254 followed by the number in little-endian format
+      buf = [
+        254,        // 0xfe
+        n & 0xFF,
+        (n >> 8) & 0xFF,
+        (n >> 16) & 0xFF,
+        (n >> 24) & 0xFF,
+      ];
+    } else {
+      // 255 followed by the number in little-endian format
+      // Since JavaScript bitwise operations work on 32 bits, we need to handle 64-bit numbers in two parts
+      const low = n & 0xFFFFFFFF;
+      const high = Math.floor(n / 0x100000000) & 0xFFFFFFFF;
+      buf = [
+        255,        // 0xff
+        low & 0xFF,
+        (low >> 8) & 0xFF,
+        (low >> 16) & 0xFF,
+        (low >> 24) & 0xFF,
+        high & 0xFF,
+        (high >> 8) & 0xFF,
+        (high >> 16) & 0xFF,
+        (high >> 24) & 0xFF,
+      ];
+    }
+    return buf;
+  }
+
+  static varIntBn(bn: BigNumber): number[] {
+    let buf: number[]
+    const n = bn.toNumber()
+    if (n < 253) {
+      // No need for bitwise operation as the value is within a byte's range
+      buf = [n]
+    } else if (n < 0x10000) {
+      // Value fits in a uint16
+      buf = [253, n & 0xFF, (n >> 8) & 0xFF]
+    } else if (n < 0x100000000) {
+      // Value fits in a uint32
+      buf = [254, n & 0xFF, (n >> 8) & 0xFF, (n >> 16) & 0xFF, (n >> 24) & 0xFF]
+    } else {
+      const bw = new Writer()
+      bw.writeUInt8(255)
+      bw.writeUInt64LEBn(bn)
+      buf = bw.toArray()
+    }
+    return buf
   }
 }

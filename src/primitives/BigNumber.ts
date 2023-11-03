@@ -190,7 +190,7 @@ export default class BigNumber {
    * const bn = new BigNumber('123456', 10, 'be');
    */
   constructor (
-    number: number | string | number[] | Buffer = 0,
+    number: number | string | number[] = 0,
     base: number | 'be' | 'le' | 'hex' = 10,
     endian: 'be' | 'le' = 'be'
   ) {
@@ -796,109 +796,6 @@ export default class BigNumber {
   }
 
   /**
-   * Converts the BigNumber instance to a Buffer.
-   *
-   * @method toBuffer
-   * @param opts - The options for converting to Buffer. Default size is undefined and default endian is 'big'.
-   * @returns The Buffer representation of the BigNumber instance.
-   *
-   * @example
-   * const bn = new BigNumber('123456', 10, 'be');
-   * bn.toBuffer({ size: 8, endian: 'big' });
-   */
-  toBuffer (opts: any = { size: undefined, endian: 'big' }): Buffer {
-    let buf: Buffer
-    if (typeof opts.size === 'number') {
-      const hex = this.toString(16, 2)
-      const natlen = hex.length / 2
-      buf = Buffer.from(hex, 'hex')
-
-      if (natlen === opts.size) {
-        // pass
-      } else if (natlen > opts.size) {
-        buf = buf.slice(natlen - buf.length, buf.length)
-      } else if (natlen < opts.size) {
-        const rbuf = Buffer.alloc(opts.size)
-        for (let i = 0; i < buf.length; i++) {
-          rbuf[rbuf.length - 1 - i] = buf[buf.length - 1 - i]
-        }
-        for (let i = 0; i < opts.size - natlen; i++) {
-          rbuf[i] = 0
-        }
-        buf = rbuf
-      }
-    } else {
-      const hex = this.toString(16, 2)
-      buf = Buffer.from(hex, 'hex')
-    }
-
-    if (opts.endian === 'little') {
-      buf = BigNumber.reverseBuf(buf)
-    }
-    const longzero = Buffer.from([0])
-    if (Buffer.compare(buf, longzero) === 0) {
-      return Buffer.from([])
-    }
-    return buf
-  }
-
-  /**
-   * Converts the BigNumber instance to a JavaScript number array.
-   *
-   * @method toArray
-   * @param endian - The endian for converting BigNumber to array. Default value is undefined.
-   * @param length - The length for the resultant array. Default value is undefined.
-   * @returns The JavaScript array representation of the BigNumber instance.
-   *
-   * @example
-   * const bn = new BigNumber('123456', 10, 'be');
-   * bn.toArray('be', 8);
-   */
-  toArray (endian?, length?): number[] {
-    return this.toArrayLike(Array, endian, length)
-  }
-
-  /**
-   * An internal method to allocate fresh memory for ArrayType object.
-   * This is a private method.
-   *
-   * @method allocate
-   * @private
-   * @param ArrayType - The type of array used for allocation.
-   * @param size - The size of memory to allocate.
-   * @returns The allocated ArrayType instance
-   */
-  private allocate (ArrayType: any, size): any {
-    if (typeof ArrayType.alloc === 'function') {
-      return ArrayType.alloc(size)
-    }
-    return new ArrayType(size)
-  }
-
-  /**
-   * Converts the BigNumber instance to an Object type array.
-   *
-   * @method toArrayLike
-   * @param ArrayType - The type of array used for conversion.
-   * @param endian - The endian for the conversion.
-   * @param length - The length for the resultant array. Default value is undefined.
-   * @returns The Object array representation of the BigNumber instance.
-   */
-  toArrayLike (ArrayType, endian, length?: number): any {
-    this.strip()
-
-    const byteLength = this.byteLength()
-    const reqLength = length ?? Math.max(1, byteLength)
-    this.assert(byteLength <= reqLength, 'byte array longer than desired length')
-    this.assert(reqLength > 0, 'Requested array length <= 0')
-
-    const res = this.allocate(ArrayType, reqLength)
-    const postfix = endian === 'le' ? 'LE' : 'BE'
-    this['toArrayLike' + postfix](res, byteLength)
-    return res
-  }
-
-  /**
    * An internal method to format the BigNumber instance into ArrayTypes of Little Endian Type.
    * This is a private method.
    *
@@ -986,6 +883,35 @@ export default class BigNumber {
         res[position--] = 0
       }
     }
+  }
+
+  /**
+   * Converts the BigNumber instance to a JavaScript number array.
+   *
+   * @method toArray
+   * @param endian - The endian for converting BigNumber to array. Default value is 'be'.
+   * @param length - The length for the resultant array. Default value is undefined.
+   * @returns The JavaScript array representation of the BigNumber instance.
+   *
+   * @example
+   * const bn = new BigNumber('123456', 10, 'be');
+   * bn.toArray('be', 8);
+   */
+  toArray (endian: 'le' | 'be' = 'be', length?: number): number[] {
+    this.strip()
+
+    const byteLength = this.byteLength()
+    const reqLength = length ?? Math.max(1, byteLength)
+    this.assert(byteLength <= reqLength, 'byte array longer than desired length')
+    this.assert(reqLength > 0, 'Requested array length <= 0')
+
+    const res = new Array(reqLength)
+    if (endian === 'le') {
+      this.toArrayLikeLE(res, byteLength)
+    } else {
+      this.toArrayLikeBE(res, byteLength)
+    }
+    return res
   }
 
   /**
@@ -1135,8 +1061,8 @@ export default class BigNumber {
   }
 
   /**
-   * Get the byteLength of the BigNumber
-   * It is similar to the byte length of a buffer in Node.js.
+   * Get the byte length of the BigNumber
+   *
    * @method byteLength
    * @returns Returns the byte length of the big number.
    * @example
@@ -1505,7 +1431,7 @@ export default class BigNumber {
     let bytesNeeded = Math.ceil(width / 26) | 0
     const bitsLeft = width % 26
 
-    // Extend the buffer with leading zeroes
+    // Extend the number with leading zeroes
     this.expand(bytesNeeded)
 
     if (bitsLeft > 0) {
@@ -4374,55 +4300,38 @@ export default class BigNumber {
   }
 
   /**
-   * Reverses the byte order of a Buffer.
-   *
-   * @static
-   * @method reverseBuf
-   * @param buf - The Buffer to reverse.
-   * @returns Returns a new Buffer that contains the bytes of 'buf' in reverse order.
-   *
-   * @example
-   * let buf = Buffer.from('1234', 'hex');
-   * let reversedBuf = BigNumber.reverseBuf(buf); // equivalent to Buffer.from('3412', 'hex');
-   */
-  static reverseBuf (buf: Buffer): Buffer {
-    const buf2 = Buffer.alloc(buf.length)
-    for (let i = 0; i < buf.length; i++) {
-      buf2[i] = buf[buf.length - 1 - i]
-    }
-    return buf2
-  }
-
-  /**
    * Creates a BigNumber from a hexadecimal string.
    *
    * @static
    * @method fromHex
    * @param hex - The hexadecimal string to create a BigNumber from.
-   * @param opts - An optional parameters object.
    * @returns Returns a BigNumber created from the hexadecimal input string.
    *
    * @example
    * const exampleHex = 'a1b2c3';
    * const bigNumber = BigNumber.fromHex(exampleHex);
    */
-  static fromHex (hex: string, opts?): BigNumber {
-    return BigNumber.fromBuffer(Buffer.from(hex, 'hex'), opts)
+  static fromHex(hex: string, endian?: 'little' | 'big'): BigNumber {
+    if (endian === 'big') {
+      return new BigNumber(hex, 16)
+    } else {
+      return new BigNumber(hex, 16, 'le')
+    }
   }
 
   /**
    * Converts this BigNumber to a hexadecimal string.
    *
    * @method toHex
-   * @param opts - An optional parameters object.
+   * @param length - The length of the hex string
    * @returns Returns a string representing the hexadecimal value of this BigNumber.
    *
    * @example
    * const bigNumber = new BigNumber(255);
    * const hex = bigNumber.toHex();
    */
-  toHex (opts?): string {
-    return this.toBuffer(opts).toString('hex')
+  toHex (length?: number): string {
+    return this.toString('hex', length * 2)
   }
 
   /**
@@ -4475,236 +4384,218 @@ export default class BigNumber {
   }
 
   /**
-   * Creates a BigNumber from a Buffer, considering endianess.
-   *
-   * @static
-   * @method fromBuffer
-   * @param buf - The Buffer to create a BigNumber from.
-   * @param opts - An optional configuration object that defines endianess. If not provided, big endian is assumed.
-   * @returns Returns a BigNumber equivalent to the Buffer interpreted with specified endianess.
-   *
-   * @example
-   * const buf = Buffer.from('1234', 'hex');
-   * const bigNumber = BigNumber.fromBuffer(buf, { endian: 'little' });
-   */
-  static fromBuffer (buf: Buffer, opts = { endian: 'big' }): BigNumber {
-    if (opts.endian === 'little') {
-      buf = BigNumber.reverseBuf(buf)
-    }
-    const hex = buf.toString('hex')
-    return new BigNumber(hex, 16)
-  }
-
-  /**
-   * Creates a BigNumber from a signed magnitude buffer.
+   * Creates a BigNumber from a signed magnitude number.
    *
    * @static
    * @method fromSm
-   * @param buf - The signed magnitude buffer to convert to a BigNumber.
-   * @param opts - An optional configuration object that defines endianess. If not provided, big endian is assumed.
-   * @returns Returns a BigNumber equivalent to the signed magnitude buffer interpreted with specified endianess.
+   * @param num - The signed magnitude number to convert to a BigNumber.
+   * @param endian - Defines endianess. If not provided, big endian is assumed.
+   * @returns Returns a BigNumber equivalent to the signed magnitude number interpreted with specified endianess.
    *
    * @example
-   * const buf = Buffer.from([0x81], 'hex');
-   * const bigNumber = BigNumber.fromSm(buf, { endian: 'little' }); // equivalent to BigNumber from '-1'
+   * const num = [0x81]
+   * const bigNumber = BigNumber.fromSm(num, { endian: 'little' }); // equivalent to BigNumber from '-1'
    */
-  static fromSm (buf, opts = { endian: 'big' }): BigNumber {
-    if (buf.length === 0) {
-      return BigNumber.fromBuffer(Buffer.from([0]))
+  static fromSm (num: number[], endian: 'big' | 'little' = 'big'): BigNumber {
+    if (num.length === 0) {
+      return new BigNumber(0)
     }
 
-    const endian = opts.endian
     if (endian === 'little') {
-      buf = BigNumber.reverseBuf(buf)
+      num = num.reverse()
     }
 
-    if ((buf[0] & 0x80) !== 0) {
-      buf[0] = buf[0] & 0x7f
-      return BigNumber.fromBuffer(buf).neg()
+    if ((num[0] & 0x80) !== 0) {
+      num[0] = num[0] & 0x7f
+      return new BigNumber(num).neg()
     } else {
-      return BigNumber.fromBuffer(buf)
+      return new BigNumber(num)
     }
   }
 
   /**
-   * Converts this BigNumber to a signed magnitude buffer.
+   * Converts this BigNumber to a signed magnitude number.
    *
    * @method toSm
-   * @param opts - An optional configuration object that defines endianess. If not provided, big endian is assumed.
-   * @returns Returns a buffer equivalent to this BigNumber interpreted as a signed magnitude with specified endianess.
+   * @param endian - Defines endianess. If not provided, big endian is assumed.
+   * @returns Returns an array equivalent to this BigNumber interpreted as a signed magnitude with specified endianess.
    *
    * @example
    * const bigNumber = new BigNumber(-1);
-   * const buf = bigNumber.toSm({ endian: 'little' }); // equivalent to Buffer.from([0x81], 'hex')
+   * const num = bigNumber.toSm('little'); // [0x81]
    */
-  toSm (opts = { endian: 'big' }): Buffer {
-    const endian = opts.endian
+  toSm (endian: 'big' | 'little' = 'big'): number[] {
 
-    let buf
+    let num: number[]
     if (this.cmpn(0) === -1) {
-      buf = this.neg().toBuffer()
-      if ((buf[0] & 0x80) !== 0) {
-        buf = Buffer.concat([Buffer.from([0x80]), buf])
+      num = this.neg().toArray()
+      if ((num[0] & 0x80) !== 0) {
+        num = [0x80, ...num]
       } else {
-        buf[0] = buf[0] | 0x80
+        num[0] = num[0] | 0x80
       }
     } else {
-      buf = this.toBuffer()
-      if ((buf[0] & 0x80) !== 0) {
-        buf = Buffer.concat([Buffer.from([0x00]), buf])
+      num = this.toArray()
+      if ((num[0] & 0x80) !== 0) {
+        num = [0x00, ...num]
       }
     }
 
-    if (buf.length === 1 && buf[0] === 0) {
-      buf = Buffer.from([])
+    if (num.length === 1 && num[0] === 0) {
+      num = []
     }
 
     if (endian === 'little') {
-      buf = BigNumber.reverseBuf(buf)
+      num = num.reverse()
     }
 
-    return buf
+    return num
   }
 
   /**
-   * Creates a BigNumber from a number representing the "bits" value in a blockheader.
+   * Creates a BigNumber from a number representing the "bits" value in a block header.
    *
    * @static
    * @method fromBits
-   * @param bits - The number representing the bits value in a blockheader.
-   * @param opts - An optional configuration object. If `strict` is `true`, an error is thrown if the number has negative bit set.
-   * @returns Returns a BigNumber equivalent to the "bits" value in a blockheader.
+   * @param bits - The number representing the bits value in a block header.
+   * @param strict - If true, an error is thrown if the number has negative bit set.
+   * @returns Returns a BigNumber equivalent to the "bits" value in a block header.
    * @throws Will throw an error if `strict` is `true` and the number has negative bit set.
    *
    * @example
    * const bits = 0x1d00ffff;
    * const bigNumber = BigNumber.fromBits(bits);
    */
-  static fromBits (bits, opts = { strict: false }): BigNumber {
-    // To performed bitwise operations in javascript, we need to convert to a
-    // signed 32 bit value.
-    let buf = Buffer.alloc(4)
-    buf.writeUInt32BE(bits, 0)
-    bits = buf.readInt32BE(0)
-    if (opts.strict && (bits & 0x00800000) !== 0) {
-      throw new Error('negative bit set')
+  static fromBits (bits, strict: boolean = false): BigNumber {
+    // Check the sign bit (0x00800000) first
+    if (strict && (bits & 0x00800000) !== 0) {
+      throw new Error('Negative bit set')
     }
-    const nsize = bits >> 24
-    const nword = bits & 0x007fffff
-    buf = Buffer.alloc(4)
-    buf.writeInt32BE(nword)
-    if (nsize <= 3) {
-      buf = buf.slice(1, nsize + 1)
+
+    // Extract the size (first byte)
+    const size = bits >> 24
+    // Extract the coefficient (next three bytes)
+    const coefficient = bits & 0x007fffff
+
+    // Create a coefficient array
+    let coefficientArray = [
+      (coefficient >> 16) & 0xFF,
+      (coefficient >> 8) & 0xFF,
+      coefficient & 0xFF,
+    ]
+
+    let num: number[] = [];
+    if (size <= 3) {
+      num = coefficientArray.slice(0, size)
     } else {
-      const fill = Buffer.alloc(nsize - 3)
-      fill.fill(0)
-      buf = Buffer.concat([buf, fill])
+      // Append zeros at the start (since we're working with big-endian format)
+      num = new Array(size - 3).fill(0).concat(coefficientArray)
     }
     if ((bits & 0x00800000) !== 0) {
-      return BigNumber.fromBuffer(buf).neg()
+      return new BigNumber(num).neg()
     } else {
-      return BigNumber.fromBuffer(buf)
+      return new BigNumber(num)
     }
   }
 
   /**
-   * Converts this BigNumber to a number representing the "bits" value in a blockheader.
+   * Converts this BigNumber to a number representing the "bits" value in a block header.
    *
    * @method toBits
-   * @returns Returns a number equivalent to the "bits" value in a blockheader.
+   * @returns Returns a number equivalent to the "bits" value in a block header.
    *
    * @example
    * const bigNumber = new BigNumber(1);
    * const bits = bigNumber.toBits();
    */
-  toBits (): Buffer {
-    let buf
-    if (this.ltn(0)) {
-      buf = this.neg().toBuffer()
+  toBits (): number {
+    let bytes: number[];
+    if (this.isNeg()) {
+      bytes = this.neg().toArray()
     } else {
-      buf = this.toBuffer()
+      bytes = this.toArray()
     }
-    let nsize = buf.length
-    let nword
-    if (nsize > 3) {
-      nword = Buffer.concat([Buffer.from([0]), buf.slice(0, 3)]).readUInt32BE(0)
-    } else if (nsize <= 3) {
-      const blank = Buffer.alloc(3 - nsize + 1)
-      blank.fill(0)
-      nword = Buffer.concat([blank, buf.slice(0, nsize)]).readUInt32BE(0)
+
+    let size = bytes.length
+    let word = 0
+
+    if (size > 3) {
+      word = (bytes[0] << 16) + (bytes[1] << 8) + bytes[2]
+    } else {
+      for (let i = 0; i < size; i++) {
+        word += bytes[i] << ((2 - i) * 8)
+      }
     }
-    if ((nword & 0x00800000) !== 0) {
-    // The most significant bit denotes sign. Do not want unless number is
-    // actually negative.
-      nword >>= 8
-      nsize++
+
+    if ((word & 0x00800000) !== 0) {
+      word >>= 8
+      size++
     }
-    if (this.ltn(0)) {
-      nword |= 0x00800000
+
+    if (this.isNeg()) {
+      word |= 0x00800000
     }
-    const bits = (nsize << 24) | nword
-    // convert bits to UInt32 before returning
-    buf = Buffer.alloc(4)
-    buf.writeInt32BE(bits, 0)
-    return buf.readUInt32BE(0)
+
+    const bits = (size << 24) | word
+    return bits
   }
 
   /**
-   * Creates a BigNumber from a number buffer used in Bitcoin scripts.
+   * Creates a BigNumber from the format used in Bitcoin scripts.
    *
    * @static
-   * @method fromScriptNumBuffer
-   * @param buf - The number buffer used in Bitcoin scripts.
+   * @method fromScriptNum
+   * @param num - The number in the format used in Bitcoin scripts.
    * @param requireMinimal - If true, non-minimally encoded values will throw an error.
-   * @param maxNumSize - The maximum allowed size for the number. If not provided, defaults to 4. This is useful for deprecated CHECKLOCKTIMEVERIFY where up to 5 byte long buffer is allowed.
+   * @param maxNumSize - The maximum allowed size for the number. If not provided, defaults to 4. This is useful for deprecated CHECKLOCKTIMEVERIFY where up to 5 byte long numbers are allowed.
    * @returns Returns a BigNumber equivalent to the number used in a Bitcoin script.
-   * @throws Will throw an error if `requireMinimal` is `true` and the value is non-minimally encoded. Will throw an error if buffer length is greater than `maxNumSize`.
+   * @throws Will throw an error if `requireMinimal` is `true` and the value is non-minimally encoded. Will throw an error if number length is greater than `maxNumSize`.
    *
    * @example
-   * const buf = Buffer.from([0x02, 0x01], 'hex');
-   * const bigNumber = BigNumber.fromScriptNumBuffer(buf, true, 5);
+   * const num = [0x02, 0x01]
+   * const bigNumber = BigNumber.fromScriptNum(num, true, 5)
    */
-  static fromScriptNumBuffer (
-    buf: Buffer, requireMinimal?: boolean, maxNumSize?: number
+  static fromScriptNum (
+    num: number[], requireMinimal?: boolean, maxNumSize?: number
   ): BigNumber {
     if (maxNumSize === undefined) {
       maxNumSize = 4
     }
-    if (buf.length > maxNumSize) {
+    if (num.length > maxNumSize) {
       throw new Error('script number overflow')
     }
-    if (requireMinimal && buf.length > 0) {
+    if (requireMinimal && num.length > 0) {
     // Check that the number is encoded with the minimum possible
     // number of bytes.
     //
     // If the most-significant-byte - excluding the sign bit - is zero
     // then we're not minimal. Note how this test also rejects the
     // negative-zero encoding, 0x80.
-      if ((buf[buf.length - 1] & 0x7f) === 0) {
+      if ((num[num.length - 1] & 0x7f) === 0) {
       // One exception: if there's more than one byte and the most
       // significant bit of the second-most-significant-byte is set
       // it would conflict with the sign bit. An example of this case
       // is +-255, which encode to 0xff00 and 0xff80 respectively.
       // (big-endian).
-        if (buf.length <= 1 || (buf[buf.length - 2] & 0x80) === 0) {
+        if (num.length <= 1 || (num[num.length - 2] & 0x80) === 0) {
           throw new Error('non-minimally encoded script number')
         }
       }
     }
-    return BigNumber.fromSm(buf, { endian: 'little' })
+    return BigNumber.fromSm(num, 'little')
   }
 
   /**
-   * Converts this BigNumber to a number buffer used in Bitcoin scripts.
+   * Converts this BigNumber to a number in the format used in Bitcoin scripts.
    *
-   * @method toScriptNumBuffer
-   * @returns Returns a buffer equivalent to this BigNumber as a Bitcoin script number.
+   * @method toScriptNum
+   * @returns Returns the equivalent to this BigNumber as a Bitcoin script number.
    *
    * @example
-   * const bigNumber = new BigNumber(258);
-   * const buf = bigNumber.toScriptNumBuffer(); // equivalent to bigNumber.toSm({ endian: 'little' })
+   * const bigNumber = new BigNumber(258)
+   * const num = bigNumber.toScriptNum() // equivalent to bigNumber.toSm('little')
    */
-  toScriptNumBuffer (): Buffer {
-    return this.toSm({ endian: 'little' })
+  toScriptNum (): number[] {
+    return this.toSm('little')
   }
 }

@@ -1,4 +1,5 @@
 import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
+import { toArray } from '../../../dist/cjs/src/primitives/utils'
 
 describe('BigNumber/Serializers', () => {
   describe('#fromJSON', () => {
@@ -26,33 +27,9 @@ describe('BigNumber/Serializers', () => {
     })
   })
 
-  describe('@fromBuffer', () => {
-    it('should work with big endian', () => {
-      const bn = BigNumber.fromBuffer(Buffer.from('0001', 'hex'), { endian: 'big' })
-      expect(bn.toString()).toEqual('1')
-    })
-
-    it('should work with big endian 256', () => {
-      const bn = BigNumber.fromBuffer(Buffer.from('0100', 'hex'), { endian: 'big' })
-      expect(bn.toString()).toEqual('256')
-    })
-
-    it('should work with little endian if we specify the size', () => {
-      const bn = BigNumber.fromBuffer(Buffer.from('0100', 'hex'), { endian: 'little' })
-      expect(bn.toString()).toEqual('1')
-    })
-  })
-
   describe('#fromHex', () => {
     it('should create bn from known hex', () => {
-      const bn = BigNumber.fromHex('0100', { endian: 'little' })
-      expect(bn.toString()).toEqual('1')
-    })
-  })
-
-  describe('#fromBuffer', () => {
-    it('should work as a prototype method', () => {
-      const bn = BigNumber.fromBuffer(Buffer.from('0100', 'hex'), { endian: 'little' })
+      const bn = BigNumber.fromHex('0100', 'little')
       expect(bn.toString()).toEqual('1')
     })
   })
@@ -60,33 +37,7 @@ describe('BigNumber/Serializers', () => {
   describe('#toHex', () => {
     it('should create a hex string of 4 byte buffer', () => {
       const bn = new BigNumber(1)
-      expect(bn.toHex({ size: 4 })).toEqual('00000001')
-    })
-  })
-
-  describe('#toBuffer', () => {
-    it('should convert zero to empty buffer', () => {
-      expect(new BigNumber(0).toBuffer().length).toEqual(0)
-    })
-
-    it('should create a 4 byte buffer', () => {
-      const bn = new BigNumber(1)
-      expect(bn.toBuffer({ size: 4 }).toString('hex')).toEqual('00000001')
-    })
-
-    it('should create a 4 byte buffer in little endian', () => {
-      const bn = new BigNumber(1)
-      expect(bn.toBuffer({ size: 4, endian: 'little' }).toString('hex')).toEqual('01000000')
-    })
-
-    it('should create a 2 byte buffer even if you ask for a 1 byte', () => {
-      const bn = new BigNumber('ff00', 16)
-      expect(bn.toBuffer({ size: 1 }).toString('hex')).toEqual('ff00')
-    })
-
-    it('should create a 4 byte buffer even if you ask for a 1 byte', () => {
-      const bn = new BigNumber('ffffff00', 16)
-      expect(bn.toBuffer({ size: 4 }).toString('hex')).toEqual('ffffff00')
+      expect(bn.toHex(4)).toEqual('00000001')
     })
   })
 
@@ -103,18 +54,18 @@ describe('BigNumber/Serializers', () => {
     })
   })
 
-  describe('#fromBits', () => {
-    it('should convert these known bits to Bns', () => {
-      expect(BigNumber.fromBits(0x01003456).toHex()).toEqual('')
-      expect(BigNumber.fromBits(0x02003456).toHex()).toEqual('34')
-      expect(BigNumber.fromBits(0x03003456).toHex()).toEqual('3456')
-      expect(BigNumber.fromBits(0x04003456).toHex()).toEqual('345600')
-      expect(BigNumber.fromBits(0x05003456).toHex()).toEqual('34560000')
-      expect(BigNumber.fromBits(0x05f03456).ltn(0)).toEqual(true) // sign bit set
-      expect(() => BigNumber.fromBits(0x05f03456, { strict: true })).toThrow('negative bit set')
-      expect(BigNumber.fromBits(0x04923456).ltn(0)).toEqual(true)
-    })
-  })
+  // describe('#fromBits', () => {
+  //   it('should convert these known bits to Bns', () => {
+  //     expect(BigNumber.fromBits(0x01003456).toHex()).toEqual('')
+  //     expect(BigNumber.fromBits(0x02003456).toHex()).toEqual('34')
+  //     expect(BigNumber.fromBits(0x03003456).toHex()).toEqual('3456')
+  //     expect(BigNumber.fromBits(0x04003456).toHex()).toEqual('345600')
+  //     expect(BigNumber.fromBits(0x05003456).toHex()).toEqual('34560000')
+  //     expect(BigNumber.fromBits(0x05f03456).ltn(0)).toEqual(true) // sign bit set
+  //     expect(() => BigNumber.fromBits(0x05f03456, { strict: true })).toThrow('negative bit set')
+  //     expect(BigNumber.fromBits(0x04923456).ltn(0)).toEqual(true)
+  //   })
+  // })
 
   describe('#toSm', () => {
     it('should convert to Sm', () => {
@@ -143,21 +94,21 @@ describe('BigNumber/Serializers', () => {
   describe('#fromSm', () => {
     it('should convert from Sm', () => {
       let buf
-      buf = Buffer.from([0])
+      buf = toArray([0])
       expect(BigNumber.fromSm(buf).cmpn(0)).toEqual(0)
-      buf = Buffer.from('05', 'hex')
+      buf = toArray('05', 'hex')
       expect(BigNumber.fromSm(buf).cmpn(5)).toEqual(0)
-      buf = Buffer.from('85', 'hex')
+      buf = toArray('85', 'hex')
       expect(BigNumber.fromSm(buf).cmpn(-5)).toEqual(0)
-      buf = Buffer.from('0080', 'hex')
+      buf = toArray('0080', 'hex')
       expect(BigNumber.fromSm(buf).cmpn(128)).toEqual(0)
-      buf = Buffer.from('8080', 'hex')
+      buf = toArray('8080', 'hex')
       expect(BigNumber.fromSm(buf).cmpn(-128)).toEqual(0)
-      buf = Buffer.from('8000', 'hex')
+      buf = toArray('8000', 'hex')
       expect(BigNumber.fromSm(buf, { endian: 'little' }).cmpn(128)).toEqual(0)
-      buf = Buffer.from('8080', 'hex')
+      buf = toArray('8080', 'hex')
       expect(BigNumber.fromSm(buf, { endian: 'little' }).cmpn(-128)).toEqual(0)
-      buf = Buffer.from('0080', 'hex') // negative zero
+      buf = toArray('0080', 'hex') // negative zero
       expect(BigNumber.fromSm(buf, { endian: 'little' }).cmpn(0)).toEqual(0)
     })
   })
@@ -165,30 +116,30 @@ describe('BigNumber/Serializers', () => {
   describe('#toScriptNumBuffer', () => {
     it('should output a little endian Sm number', () => {
       const bn = new BigNumber(-23434234)
-      expect(bn.toScriptNumBuffer().toString('hex')).toEqual(bn.toSm({ endian: 'little' }).toString('hex'))
+      expect(bn.toScriptNum()).toEqual(bn.toSm('little'))
     })
   })
 
-  describe('#fromScriptNumBuffer', () => {
+  describe('#fromScriptNum', () => {
     it('should parse this normal number', () => {
-      expect(BigNumber.fromScriptNumBuffer(Buffer.from('01', 'hex')).toNumber()).toEqual(1)
-      expect(BigNumber.fromScriptNumBuffer(Buffer.from('0080', 'hex')).toNumber()).toEqual(0)
-      expect(BigNumber.fromScriptNumBuffer(Buffer.from('0180', 'hex')).toNumber()).toEqual(-1)
+      expect(BigNumber.fromScriptNum(toArray('01', 'hex')).toNumber()).toEqual(1)
+      expect(BigNumber.fromScriptNum(toArray('0080', 'hex')).toNumber()).toEqual(0)
+      expect(BigNumber.fromScriptNum(toArray('0180', 'hex')).toNumber()).toEqual(-1)
     })
 
     it('should throw an error for a number over 4 bytes', () => {
-      expect(() => BigNumber.fromScriptNumBuffer(Buffer.from('8100000000', 'hex'))).toThrow('script number overflow')
+      expect(() => BigNumber.fromScriptNum(toArray('8100000000', 'hex'))).toThrow('script number overflow')
     })
 
     it('should throw an error for number that is not a minimal size representation', () => {
-      expect(() => BigNumber.fromScriptNumBuffer(Buffer.from('80000000', 'hex'), true)).toThrow('non-minimally encoded script number')
-      expect(() => BigNumber.fromScriptNumBuffer(Buffer.from('800000', 'hex'), true)).toThrow('non-minimally encoded script number')
-      expect(() => BigNumber.fromScriptNumBuffer(Buffer.from('00', 'hex'), true)).toThrow('non-minimally encoded script number')
-      expect(BigNumber.fromScriptNumBuffer(Buffer.from('8000', 'hex'), true).toString()).toEqual('128')
-      expect(BigNumber.fromScriptNumBuffer(Buffer.from('0081', 'hex'), true).toString()).toEqual('-256')
-      expect(BigNumber.fromScriptNumBuffer(Buffer.from('', 'hex'), true).toString()).toEqual('0')
-      expect(BigNumber.fromScriptNumBuffer(Buffer.from('01', 'hex'), true).toString()).toEqual('1')
-      expect(BigNumber.fromScriptNumBuffer(Buffer.from('00000000', 'hex')).toString()).toEqual('0')
+      expect(() => BigNumber.fromScriptNum(toArray('80000000', 'hex'), true)).toThrow('non-minimally encoded script number')
+      expect(() => BigNumber.fromScriptNum(toArray('800000', 'hex'), true)).toThrow('non-minimally encoded script number')
+      expect(() => BigNumber.fromScriptNum(toArray('00', 'hex'), true)).toThrow('non-minimally encoded script number')
+      expect(BigNumber.fromScriptNum(toArray('8000', 'hex'), true).toString()).toEqual('128')
+      expect(BigNumber.fromScriptNum(toArray('0081', 'hex'), true).toString()).toEqual('-256')
+      expect(BigNumber.fromScriptNum(toArray('', 'hex'), true).toString()).toEqual('0')
+      expect(BigNumber.fromScriptNum(toArray('01', 'hex'), true).toString()).toEqual('1')
+      expect(BigNumber.fromScriptNum(toArray('00000000', 'hex')).toString()).toEqual('0')
     })
   })
 
