@@ -714,7 +714,10 @@ export default class BigNumber {
       if (carry !== 0) {
         out = carry.toString(16) + out
       }
-      while (out.length % padding !== 0) {
+      if (padding === 0 && out === '0') {
+        return ''
+      }
+      while (out.length % padding !== 0 && padding !== 0) {
         out = '0' + out
       }
       if (this.negative !== 0) {
@@ -4323,14 +4326,14 @@ export default class BigNumber {
    * Converts this BigNumber to a hexadecimal string.
    *
    * @method toHex
-   * @param length - The length of the hex string
+   * @param length - The minimum length of the hex string
    * @returns Returns a string representing the hexadecimal value of this BigNumber.
    *
    * @example
    * const bigNumber = new BigNumber(255);
    * const hex = bigNumber.toHex();
    */
-  toHex (length?: number): string {
+  toHex(length: number = 0): string {
     return this.toString('hex', length * 2)
   }
 
@@ -4466,35 +4469,37 @@ export default class BigNumber {
    * const bits = 0x1d00ffff;
    * const bigNumber = BigNumber.fromBits(bits);
    */
-  static fromBits (bits, strict: boolean = false): BigNumber {
-    // Check the sign bit (0x00800000) first
+  static fromBits (bits: number, strict: boolean = false): BigNumber {
+    // Convert to signed 32-bit value manually without using Buffer
+    bits = (bits & 0x80000000) ? bits - 0x100000000 : bits;
     if (strict && (bits & 0x00800000) !== 0) {
-      throw new Error('Negative bit set')
+      throw new Error('negative bit set');
     }
-
-    // Extract the size (first byte)
-    const size = bits >> 24
-    // Extract the coefficient (next three bytes)
-    const coefficient = bits & 0x007fffff
-
-    // Create a coefficient array
-    let coefficientArray = [
-      (coefficient >> 16) & 0xFF,
-      (coefficient >> 8) & 0xFF,
-      coefficient & 0xFF,
-    ]
-
-    let num: number[] = [];
-    if (size <= 3) {
-      num = coefficientArray.slice(0, size)
+    const nsize = bits >> 24;
+    let nword = bits & 0x007fffff;
+    
+    // Manually create the byte array (similar to the original buffer)
+    let bytes = [
+      (nword >> 24) & 0xFF,
+      (nword >> 16) & 0xFF,
+      (nword >> 8) & 0xFF,
+      nword & 0xFF
+    ];
+    
+    if (nsize <= 3) {
+      bytes = bytes.slice(1, 1 + nsize); // remove the most significant byte(s) as necessary
     } else {
-      // Append zeros at the start (since we're working with big-endian format)
-      num = new Array(size - 3).fill(0).concat(coefficientArray)
+      // add trailing zeros (similar to the original buffer fill)
+      for (let i = 0; i < nsize - 3; i++) {
+        bytes.push(0);
+      }
     }
+    
+    // Adjust for sign if the negative bit was set, and then convert array to BigNumber
     if ((bits & 0x00800000) !== 0) {
-      return new BigNumber(num).neg()
+      return new BigNumber(bytes).neg();
     } else {
-      return new BigNumber(num)
+      return new BigNumber(bytes);
     }
   }
 
@@ -4509,35 +4514,51 @@ export default class BigNumber {
    * const bits = bigNumber.toBits();
    */
   toBits (): number {
-    let bytes: number[];
-    if (this.isNeg()) {
-      bytes = this.neg().toArray()
+    let byteArray;
+    if (this.ltn(0)) {
+      byteArray = this.neg().toArray('be');
     } else {
-      bytes = this.toArray()
+      byteArray = this.toArray('be');
     }
 
-    let size = bytes.length
-    let word = 0
-
-    if (size > 3) {
-      word = (bytes[0] << 16) + (bytes[1] << 8) + bytes[2]
-    } else {
-      for (let i = 0; i < size; i++) {
-        word += bytes[i] << ((2 - i) * 8)
-      }
+    // Ensure that the byte array is of a minimum size
+    while (byteArray.length < 4) {
+      byteArray.unshift(0);
     }
 
-    if ((word & 0x00800000) !== 0) {
-      word >>= 8
-      size++
+    // For the case where byteArray represents '00', the bits should be 0x00000000
+    if (byteArray.every(byte => byte === 0)) {
+      return 0x00000000;
     }
 
-    if (this.isNeg()) {
-      word |= 0x00800000
+    // Remove leading zeros from the byte array for further processing
+    while (byteArray[0] === 0) {
+      byteArray.shift();
     }
 
-    const bits = (size << 24) | word
-    return bits
+    let nsize = byteArray.length;
+
+    // We're interested in the first three bytes for the "nword"
+    // or in smaller cases, what's available
+    let nword = byteArray.slice(0, 3).reduce((acc, val) => (acc * 256) + val, 0);
+
+    // Ensure we don't have the sign bit set initially
+    if ((nword & 0x800000) !== 0) {
+      // If the 24th bit is set, we're going to need one more byte to represent this number
+      byteArray.unshift(0); // Unshift a zero byte to not change the actual number
+      nsize += 1;
+      nword >>>= 8; // Shift right to make room for that byte
+    }
+
+    // Encode size and the 3 bytes into "nword"
+    let bits = (nsize << 24) | nword;
+
+    if (this.ltn(0)) {
+      // If the number is negative, set the 0x00800000 bit to indicate sign
+      bits |= 0x00800000;
+    }
+
+    return bits >>> 0; // Convert to unsigned 32-bit integer
   }
 
   /**

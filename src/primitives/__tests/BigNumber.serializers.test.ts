@@ -1,5 +1,5 @@
 import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
-import { toArray } from '../../../dist/cjs/src/primitives/utils'
+import { toArray, encode } from '../../../dist/cjs/src/primitives/utils'
 
 describe('BigNumber/Serializers', () => {
   describe('#fromJSON', () => {
@@ -54,47 +54,47 @@ describe('BigNumber/Serializers', () => {
     })
   })
 
-  // describe('#fromBits', () => {
-  //   it('should convert these known bits to Bns', () => {
-  //     expect(BigNumber.fromBits(0x01003456).toHex()).toEqual('')
-  //     expect(BigNumber.fromBits(0x02003456).toHex()).toEqual('34')
-  //     expect(BigNumber.fromBits(0x03003456).toHex()).toEqual('3456')
-  //     expect(BigNumber.fromBits(0x04003456).toHex()).toEqual('345600')
-  //     expect(BigNumber.fromBits(0x05003456).toHex()).toEqual('34560000')
-  //     expect(BigNumber.fromBits(0x05f03456).ltn(0)).toEqual(true) // sign bit set
-  //     expect(() => BigNumber.fromBits(0x05f03456, { strict: true })).toThrow('negative bit set')
-  //     expect(BigNumber.fromBits(0x04923456).ltn(0)).toEqual(true)
-  //   })
-  // })
+  describe('#fromBits', () => {
+    it('should convert these known bits to Bns', () => {
+      expect(BigNumber.fromBits(0x01003456).toHex()).toEqual('')
+      expect(BigNumber.fromBits(0x02003456).toHex()).toEqual('34')
+      expect(BigNumber.fromBits(0x03003456).toHex()).toEqual('3456')
+      expect(BigNumber.fromBits(0x04003456).toHex()).toEqual('345600')
+      expect(BigNumber.fromBits(0x05003456).toHex()).toEqual('34560000')
+      expect(BigNumber.fromBits(0x05f03456).ltn(0)).toEqual(true) // sign bit set
+      expect(() => BigNumber.fromBits(0x05f03456, true)).toThrow('negative bit set')
+      expect(BigNumber.fromBits(0x04923456).ltn(0)).toEqual(true)
+    })
+  })
 
   describe('#toSm', () => {
     it('should convert to Sm', () => {
-      let buf
-      buf = new BigNumber().toSm()
-      expect(buf.toString('hex')).toEqual('')
-      buf = new BigNumber(5).toSm()
-      expect(buf.toString('hex')).toEqual('05')
-      buf = new BigNumber(-5).toSm()
-      expect(buf.toString('hex')).toEqual('85')
-      buf = new BigNumber(128).toSm()
-      expect(buf.toString('hex')).toEqual('0080')
-      buf = new BigNumber(-128).toSm()
-      expect(buf.toString('hex')).toEqual('8080')
-      buf = new BigNumber(127).toSm()
-      expect(buf.toString('hex')).toEqual('7f')
-      buf = new BigNumber(-127).toSm()
-      expect(buf.toString('hex')).toEqual('ff')
-      buf = new BigNumber(128).toSm({ endian: 'little' })
-      expect(buf.toString('hex')).toEqual('8000')
-      buf = new BigNumber(-128).toSm({ endian: 'little' })
-      expect(buf.toString('hex')).toEqual('8080')
+      let num: number[]
+      num = new BigNumber().toSm()
+      expect(encode(num, 'hex')).toEqual('')
+      num = new BigNumber(5).toSm()
+      expect(encode(num, 'hex')).toEqual('05')
+      num = new BigNumber(-5).toSm()
+      expect(encode(num, 'hex')).toEqual('85')
+      num = new BigNumber(128).toSm()
+      expect(encode(num, 'hex')).toEqual('0080')
+      num = new BigNumber(-128).toSm()
+      expect(encode(num, 'hex')).toEqual('8080')
+      num = new BigNumber(127).toSm()
+      expect(encode(num, 'hex')).toEqual('7f')
+      num = new BigNumber(-127).toSm()
+      expect(encode(num, 'hex')).toEqual('ff')
+      num = new BigNumber(128).toSm('little')
+      expect(encode(num, 'hex')).toEqual('8000')
+      num = new BigNumber(-128).toSm('little')
+      expect(encode(num, 'hex')).toEqual('8080')
     })
   })
 
   describe('#fromSm', () => {
     it('should convert from Sm', () => {
       let buf
-      buf = toArray([0])
+      buf = [0]
       expect(BigNumber.fromSm(buf).cmpn(0)).toEqual(0)
       buf = toArray('05', 'hex')
       expect(BigNumber.fromSm(buf).cmpn(5)).toEqual(0)
@@ -105,11 +105,11 @@ describe('BigNumber/Serializers', () => {
       buf = toArray('8080', 'hex')
       expect(BigNumber.fromSm(buf).cmpn(-128)).toEqual(0)
       buf = toArray('8000', 'hex')
-      expect(BigNumber.fromSm(buf, { endian: 'little' }).cmpn(128)).toEqual(0)
+      expect(BigNumber.fromSm(buf, 'little').cmpn(128)).toEqual(0)
       buf = toArray('8080', 'hex')
-      expect(BigNumber.fromSm(buf, { endian: 'little' }).cmpn(-128)).toEqual(0)
+      expect(BigNumber.fromSm(buf, 'little').cmpn(-128)).toEqual(0)
       buf = toArray('0080', 'hex') // negative zero
-      expect(BigNumber.fromSm(buf, { endian: 'little' }).cmpn(0)).toEqual(0)
+      expect(BigNumber.fromSm(buf, 'little').cmpn(0)).toEqual(0)
     })
   })
 
