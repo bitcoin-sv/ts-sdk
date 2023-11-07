@@ -1,13 +1,80 @@
 import ScriptChunk from './ScriptChunk.js'
 import OP from './OP.js'
-import { encode, Writer } from '../primitives/utils.js'
+import { encode, Writer, toArray } from '../primitives/utils.js'
 
 export default class Script {
   chunks: ScriptChunk[]
 
-  // TODO: static from methods
+  static fromASM(asm: string): Script {
+    const chunks: ScriptChunk[] = []
+    const tokens = asm.split(' ')
+        let i = 0
+        while (i < tokens.length) {
+            const token = tokens[i]
+            let opCode
+            let opCodeNum: number
+            try {
+                opCode = token
+                opCodeNum = OP[token]
+            } catch (err) {
+                opCode = undefined
+                opCodeNum = undefined
+            }
 
-  constructor (chunks: ScriptChunk[]) {
+            // we start with two special cases, 0 and -1, which are handled specially in
+            // toASM. see _chunkToString.
+            if (token === '0') {
+                opCodeNum = 0
+                chunks.push({
+                    op: opCodeNum,
+                })
+                i = i + 1
+            } else if (token === '-1') {
+                opCodeNum = OP.OP_1NEGATE
+                chunks.push({
+                    op: opCodeNum,
+                })
+                i = i + 1
+            } else if (opCode === undefined) {
+                const hex = tokens[i]
+                const arr = toArray(hex, 'hex')
+                if (encode(arr, 'hex') !== hex) {
+                    throw new Error('invalid hex string in script')
+                }
+                const len = arr.length
+                if (len >= 0 && len < OP.OP_PUSHDATA1) {
+                    opCodeNum = len
+                } else if (len < Math.pow(2, 8)) {
+                    opCodeNum = OP.OP_PUSHDATA1
+                } else if (len < Math.pow(2, 16)) {
+                    opCodeNum = OP.OP_PUSHDATA2
+                } else if (len < Math.pow(2, 32)) {
+                    opCodeNum = OP.OP_PUSHDATA4
+                }
+                chunks.push({
+                    data: arr,
+                    op: opCodeNum
+                })
+                i = i + 1
+            } else {
+                chunks.push({
+                    op: opCodeNum,
+                })
+                i = i + 1
+            }
+        }
+        return new Script(chunks)
+  }
+
+  static fromHex(hex: string): Script {
+    return new Script()
+  }
+
+  static fromBinary(bin: number[]): Script {
+    return new Script()
+  }
+
+  constructor (chunks: ScriptChunk[] = []) {
     this.chunks = chunks
   }
 
@@ -49,8 +116,8 @@ export default class Script {
       }
 
       return writer.toArray()
-    }
-
+   }
+  
   private _chunkToString(chunk: ScriptChunk): string {
         const op = chunk.op
         let str = ''

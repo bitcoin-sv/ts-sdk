@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import { toArray, zero2, toHex, encode } from '../../../dist/cjs/src/primitives/utils'
+import { toArray, zero2, toHex, encode, Writer } from '../../../dist/cjs/src/primitives/utils'
 
 describe('utils', () => {
   it('should convert to array', () => {
