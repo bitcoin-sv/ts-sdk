@@ -10,7 +10,7 @@ export default class Spend {
     this.unlockingScript = unlockingScript
   }
 
-  validate(): boolean {
+  validate (): boolean {
     // Interpret script
     return false
   }

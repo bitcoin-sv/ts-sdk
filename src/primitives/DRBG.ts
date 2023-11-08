@@ -8,7 +8,7 @@ import { toHex, toArray } from './utils.js'
  * @constructor
  * @param entropy - Initial entropy either in number array or hexadecimal string.
  * @param nonce - Initial nonce either in number array or hexadecimal string.
- * 
+ *
  * @throws Throws an error message 'Not enough entropy. Minimum is 256 bits' when entropy's length is less than 32.
  *
  * @example

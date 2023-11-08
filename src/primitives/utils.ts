@@ -27,7 +27,7 @@ export const toHex = (msg: number[]): string => {
 }
 
 /**
- * Converts various message formats into an array of numbers. 
+ * Converts various message formats into an array of numbers.
  * Supports arrays, hexadecimal strings, and UTF-8 strings.
  *
  * @param {any} msg - The input message (array or string).
@@ -87,27 +87,27 @@ const toUTF8 = (arr: number[]): string => {
     // 1-byte sequence (0xxxxxxx)
     if (byte <= 0x7F) {
       result += String.fromCharCode(byte)
-    } 
+    }
     // 2-byte sequence (110xxxxx 10xxxxxx)
     else if (byte >= 0xC0 && byte <= 0xDF) {
       const byte2 = arr[++i]
       const codePoint = ((byte & 0x1F) << 6) | (byte2 & 0x3F)
       result += String.fromCharCode(codePoint)
-    } 
+    }
     // 3-byte sequence (1110xxxx 10xxxxxx 10xxxxxx)
     else if (byte >= 0xE0 && byte <= 0xEF) {
       const byte2 = arr[++i]
       const byte3 = arr[++i]
       const codePoint = ((byte & 0x0F) << 12) | ((byte2 & 0x3F) << 6) | (byte3 & 0x3F)
       result += String.fromCharCode(codePoint)
-    } 
+    }
     // 4-byte sequence (11110xxx 10xxxxxx 10xxxxxx 10xxxxxx)
     else if (byte >= 0xF0 && byte <= 0xF7) {
       const byte2 = arr[++i]
       const byte3 = arr[++i]
       const byte4 = arr[++i]
       const codePoint = ((byte & 0x07) << 18) | ((byte2 & 0x3F) << 12) | ((byte3 & 0x3F) << 6) | (byte4 & 0x3F)
-      
+
       // Convert to UTF-16 surrogate pair
       const surrogate1 = 0xD800 + ((codePoint - 0x10000) >> 10)
       const surrogate2 = 0xDC00 + ((codePoint - 0x10000) & 0x3FF)
@@ -143,7 +143,7 @@ export class Writer {
     this.bufs = bufs || []
   }
 
-  getLength(): number {
+  getLength (): number {
     let len = 0
     for (const i in this.bufs) {
       const buf = this.bufs[i]
@@ -160,12 +160,12 @@ export class Writer {
     return ret
   }
 
-  write(buf: number[]): Writer {
+  write (buf: number[]): Writer {
     this.bufs.push(buf)
     return this
   }
 
-  writeReverse(buf: number[]): Writer {
+  writeReverse (buf: number[]): Writer {
     const buf2: number[] = new Array(buf.length)
     for (let i = 0; i < buf2.length; i++) {
       buf2[i] = buf[buf.length - 1 - i]
@@ -174,123 +174,123 @@ export class Writer {
     return this
   }
 
-  writeUInt8(n: number): Writer {
+  writeUInt8 (n: number): Writer {
     const buf = new Array(1)
     buf[0] = n
     this.write(buf)
     return this
   }
 
-  writeInt8(n: number): Writer {
+  writeInt8 (n: number): Writer {
     const buf = new Array(1)
-    buf[0] = n
+    buf[0] = n & 0xFF
     this.write(buf)
     return this
   }
 
-  writeUInt16BE(n: number): Writer {
+  writeUInt16BE (n: number): Writer {
     this.bufs.push([
       (n >> 8) & 0xFF, // shift right 8 bits to get the high byte
-      n & 0xFF         // low byte is just the last 8 bits
-    ]);
-    return this;
+      n & 0xFF // low byte is just the last 8 bits
+    ])
+    return this
   }
 
-  writeInt16BE(n: number): Writer {
-    return this.writeUInt16BE(n & 0xFFFF); // Mask with 0xFFFF to get the lower 16 bits
+  writeInt16BE (n: number): Writer {
+    return this.writeUInt16BE(n & 0xFFFF) // Mask with 0xFFFF to get the lower 16 bits
   }
 
-  writeUInt16LE(n: number): Writer {
+  writeUInt16LE (n: number): Writer {
     this.bufs.push([
-      n & 0xFF,         // low byte is just the last 8 bits
-      (n >> 8) & 0xFF  // shift right 8 bits to get the high byte
-    ]);
-    return this;
+      n & 0xFF, // low byte is just the last 8 bits
+      (n >> 8) & 0xFF // shift right 8 bits to get the high byte
+    ])
+    return this
   }
 
-  writeInt16LE(n: number): Writer {
-    return this.writeUInt16LE(n & 0xFFFF); // Mask with 0xFFFF to get the lower 16 bits
+  writeInt16LE (n: number): Writer {
+    return this.writeUInt16LE(n & 0xFFFF) // Mask with 0xFFFF to get the lower 16 bits
   }
 
-  writeUInt32BE(n: number): Writer {
+  writeUInt32BE (n: number): Writer {
     this.bufs.push([
       (n >> 24) & 0xFF, // highest byte
       (n >> 16) & 0xFF,
       (n >> 8) & 0xFF,
-      n & 0xFF          // lowest byte
-    ]);
-    return this;
+      n & 0xFF // lowest byte
+    ])
+    return this
   }
 
-  writeInt32BE(n: number): Writer {
-    return this.writeUInt32BE(n >>> 0); // Using unsigned right shift to handle negative numbers
+  writeInt32BE (n: number): Writer {
+    return this.writeUInt32BE(n >>> 0) // Using unsigned right shift to handle negative numbers
   }
 
-  writeUInt32LE(n: number): Writer {
+  writeUInt32LE (n: number): Writer {
     this.bufs.push([
-      n & 0xFF,         // lowest byte
+      n & 0xFF, // lowest byte
       (n >> 8) & 0xFF,
       (n >> 16) & 0xFF,
-      (n >> 24) & 0xFF  // highest byte
-    ]);
-    return this;
+      (n >> 24) & 0xFF // highest byte
+    ])
+    return this
   }
 
-  writeInt32LE(n: number): Writer {
-    return this.writeUInt32LE(n >>> 0); // Using unsigned right shift to handle negative numbers
+  writeInt32LE (n: number): Writer {
+    return this.writeUInt32LE(n >>> 0) // Using unsigned right shift to handle negative numbers
   }
 
-  writeUInt64BEBn(bn: BigNumber): Writer {
-      const buf = bn.toArray('be', 8)
-      this.write(buf)
-      return this
+  writeUInt64BEBn (bn: BigNumber): Writer {
+    const buf = bn.toArray('be', 8)
+    this.write(buf)
+    return this
   }
 
-  writeUInt64LEBn(bn: BigNumber): Writer {
-      const buf = bn.toArray('be', 8)
-      this.writeReverse(buf)
-      return this
+  writeUInt64LEBn (bn: BigNumber): Writer {
+    const buf = bn.toArray('be', 8)
+    this.writeReverse(buf)
+    return this
   }
 
-  writeVarIntNum(n: number): Writer {
-      const buf = Writer.varIntNum(n)
-      this.write(buf)
-      return this
+  writeVarIntNum (n: number): Writer {
+    const buf = Writer.varIntNum(n)
+    this.write(buf)
+    return this
   }
 
-  writeVarIntBn(bn: BigNumber): Writer {
-      const buf = Writer.varIntBn(bn)
-      this.write(buf)
-      return this
+  writeVarIntBn (bn: BigNumber): Writer {
+    const buf = Writer.varIntBn(bn)
+    this.write(buf)
+    return this
   }
 
-  static varIntNum(n: number): number[] {
-    let buf: number[];
+  static varIntNum (n: number): number[] {
+    let buf: number[]
     if (n < 253) {
-      buf = [n]; // 1 byte
+      buf = [n] // 1 byte
     } else if (n < 0x10000) {
       // 253 followed by the number in little-endian format
       buf = [
-        253,        // 0xfd
-        n & 0xFF,   // low byte
-        (n >> 8) & 0xFF, // high byte
-      ];
+        253, // 0xfd
+        n & 0xFF, // low byte
+        (n >> 8) & 0xFF // high byte
+      ]
     } else if (n < 0x100000000) {
       // 254 followed by the number in little-endian format
       buf = [
-        254,        // 0xfe
+        254, // 0xfe
         n & 0xFF,
         (n >> 8) & 0xFF,
         (n >> 16) & 0xFF,
-        (n >> 24) & 0xFF,
-      ];
+        (n >> 24) & 0xFF
+      ]
     } else {
       // 255 followed by the number in little-endian format
       // Since JavaScript bitwise operations work on 32 bits, we need to handle 64-bit numbers in two parts
-      const low = n & 0xFFFFFFFF;
-      const high = Math.floor(n / 0x100000000) & 0xFFFFFFFF;
+      const low = n & 0xFFFFFFFF
+      const high = Math.floor(n / 0x100000000) & 0xFFFFFFFF
       buf = [
-        255,        // 0xff
+        255, // 0xff
         low & 0xFF,
         (low >> 8) & 0xFF,
         (low >> 16) & 0xFF,
@@ -298,13 +298,13 @@ export class Writer {
         high & 0xFF,
         (high >> 8) & 0xFF,
         (high >> 16) & 0xFF,
-        (high >> 24) & 0xFF,
-      ];
+        (high >> 24) & 0xFF
+      ]
     }
-    return buf;
+    return buf
   }
 
-  static varIntBn(bn: BigNumber): number[] {
+  static varIntBn (bn: BigNumber): number[] {
     let buf: number[]
     const n = bn.toNumber()
     if (n < 253) {

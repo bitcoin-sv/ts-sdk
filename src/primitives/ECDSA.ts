@@ -5,13 +5,13 @@ import Point from './Point.js'
 import DRBG from './DRBG.js'
 
 /**
- * Truncates a BigNumber message to the length of the curve order n, in the context of the Elliptic Curve Digital Signature Algorithm (ECDSA). 
+ * Truncates a BigNumber message to the length of the curve order n, in the context of the Elliptic Curve Digital Signature Algorithm (ECDSA).
  * This method is used as part of ECDSA signing and verification.
  *
- * The method calculates `delta`, which is a difference obtained by subtracting the bit length of the curve order `n` from the byte length of the message in bits. 
+ * The method calculates `delta`, which is a difference obtained by subtracting the bit length of the curve order `n` from the byte length of the message in bits.
  * If `delta` is greater than zero, logical shifts msg to the right by `delta`, retaining the sign.
- * 
- * Another condition is tested, but only if `truncOnly` is false. This condition compares the value of msg to curve order `n`. 
+ *
+ * Another condition is tested, but only if `truncOnly` is false. This condition compares the value of msg to curve order `n`.
  * If msg is greater or equal to `n`, it is decreased by `n` and returned.
  *
  * @method truncateToN

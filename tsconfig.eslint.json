@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "types": ["@types/node"],
+    "noEmit": true,
+    "allowJs": true
+  },
+  "include": [
+    "./src/**/*.ts",
+    ".eslintrc.js",
+    "jest.config.js",
+  ]
+}

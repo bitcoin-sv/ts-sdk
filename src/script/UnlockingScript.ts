@@ -3,7 +3,7 @@ import Spend from './Spend.js'
 import LockingScript from './LockingScript.js'
 
 export default class UnlockingScript extends Script {
-  createSpend(lockingScript: LockingScript): Spend {
+  createSpend (lockingScript: LockingScript): Spend {
     return new Spend(lockingScript, this)
   }
 }
