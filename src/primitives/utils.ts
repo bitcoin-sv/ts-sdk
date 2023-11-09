@@ -152,7 +152,7 @@ export class Writer {
     return len
   }
 
-  toArray(): number[] {
+  toArray (): number[] {
     let ret = []
     for (const x of this.bufs) {
       ret = [...ret, ...x]
@@ -306,14 +306,16 @@ export class Writer {
 
   static varIntBn (bn: BigNumber): number[] {
     let buf: number[]
-    const n = bn.toNumber()
-    if (n < 253) {
+    if (bn.ltn(253)) {
+      const n = bn.toNumber()
       // No need for bitwise operation as the value is within a byte's range
       buf = [n]
-    } else if (n < 0x10000) {
+    } else if (bn.ltn(0x10000)) {
+      const n = bn.toNumber()
       // Value fits in a uint16
       buf = [253, n & 0xFF, (n >> 8) & 0xFF]
-    } else if (n < 0x100000000) {
+    } else if (bn.ltn(0x100000000)) {
+      const n = bn.toNumber()
       // Value fits in a uint32
       buf = [254, n & 0xFF, (n >> 8) & 0xFF, (n >> 16) & 0xFF, (n >> 24) & 0xFF]
     } else {
@@ -323,5 +325,167 @@ export class Writer {
       buf = bw.toArray()
     }
     return buf
+  }
+}
+
+export class Reader {
+  public bin: number[]
+  public pos: number
+
+  constructor (bin: number[] = [], pos: number = 0) {
+    this.bin = bin
+    this.pos = pos
+  }
+
+  public eof (): boolean {
+    return this.pos >= this.bin.length
+  }
+
+  public read (len = this.bin.length): number[] {
+    const bin = this.bin.slice(this.pos, this.pos + len)
+    this.pos = this.pos + len
+    return bin
+  }
+
+  public readReverse (len = this.bin.length): number[] {
+    const bin = this.bin.slice(this.pos, this.pos + len)
+    this.pos = this.pos + len
+    const buf2 = new Array(bin.length)
+    for (let i = 0; i < buf2.length; i++) {
+      buf2[i] = bin[bin.length - 1 - i]
+    }
+    return buf2
+  }
+
+  public readUInt8 (): number {
+    const val = this.bin[this.pos]
+    this.pos += 1
+    return val
+  }
+
+  public readInt8 (): number {
+    const val = this.bin[this.pos]
+    this.pos += 1
+    // If the sign bit is set, convert to negative value
+    return (val & 0x80) !== 0 ? val - 0x100 : val
+  }
+
+  public readUInt16BE (): number {
+    const val = (this.bin[this.pos] << 8) | this.bin[this.pos + 1]
+    this.pos += 2
+    return val
+  }
+
+  public readInt16BE (): number {
+    const val = this.readUInt16BE()
+    // If the sign bit is set, convert to negative value
+    return (val & 0x8000) !== 0 ? val - 0x10000 : val
+  }
+
+  public readUInt16LE (): number {
+    const val = this.bin[this.pos] | (this.bin[this.pos + 1] << 8)
+    this.pos += 2
+    return val
+  }
+
+  public readInt16LE (): number {
+    const val = this.readUInt16LE()
+    // If the sign bit is set, convert to negative value
+    const x = (val & 0x8000) !== 0 ? val - 0x10000 : val
+    return x
+  }
+
+  public readUInt32BE (): number {
+    const val =
+      (this.bin[this.pos] * 0x1000000) + // Shift the first byte by 24 bits
+      ((this.bin[this.pos + 1] << 16) | // Shift the second byte by 16 bits
+      (this.bin[this.pos + 2] << 8) | // Shift the third byte by 8 bits
+      this.bin[this.pos + 3]) // The fourth byte
+    this.pos += 4
+    return val
+  }
+
+  public readInt32BE (): number {
+    const val = this.readUInt32BE()
+    // If the sign bit is set, convert to negative value
+    return (val & 0x80000000) !== 0 ? val - 0x100000000 : val
+  }
+
+  public readUInt32LE (): number {
+    const val =
+      (this.bin[this.pos] |
+      (this.bin[this.pos + 1] << 8) |
+      (this.bin[this.pos + 2] << 16) |
+      (this.bin[this.pos + 3] << 24)) >>> 0
+    this.pos += 4
+    return val
+  }
+
+  public readInt32LE (): number {
+    const val = this.readUInt32LE()
+    // Explicitly check if the sign bit is set and then convert to a negative value
+    return (val & 0x80000000) !== 0 ? val - 0x100000000 : val
+  }
+
+  public readUInt64BEBn (): BigNumber {
+    const bin = this.bin.slice(this.pos, this.pos + 8)
+    const bn = new BigNumber(bin)
+    this.pos = this.pos + 8
+    return bn
+  }
+
+  public readUInt64LEBn (): BigNumber {
+    const bin = this.readReverse(8)
+    const bn = new BigNumber(bin)
+    return bn
+  }
+
+  public readVarIntNum (): number {
+    const first = this.readUInt8()
+    let bn: BigNumber
+    let n: number
+    switch (first) {
+      case 0xfd:
+        return this.readUInt16LE()
+      case 0xfe:
+        return this.readUInt32LE()
+      case 0xff:
+        bn = this.readUInt64LEBn()
+        if (bn.lte(new BigNumber(2).pow(new BigNumber(53)))) {
+          return bn.toNumber()
+        } else {
+          throw new Error('number too large to retain precision - use readVarIntBn')
+        }
+      default:
+        return first
+    }
+  }
+
+  public readVarInt (): number[] {
+    const first = this.bin[this.pos]
+    switch (first) {
+      case 0xfd:
+        return this.read(1 + 2)
+      case 0xfe:
+        return this.read(1 + 4)
+      case 0xff:
+        return this.read(1 + 8)
+      default:
+        return this.read(1)
+    }
+  }
+
+  public readVarIntBn (): BigNumber {
+    const first = this.readUInt8()
+    switch (first) {
+      case 0xfd:
+        return new BigNumber(this.readUInt16LE())
+      case 0xfe:
+        return new BigNumber(this.readUInt32LE())
+      case 0xff:
+        return this.readUInt64LEBn()
+      default:
+        return new BigNumber(first)
+    }
   }
 }

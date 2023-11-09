@@ -8,7 +8,7 @@ describe('Script', () => {
   it('should make a new script', () => {
     const script = new Script()
     expect(script).toBeDefined()
-    expect(new Script().toString()).toEqual('')
+    expect(new Script().toASM()).toEqual('')
   })
 
   describe('#fromHex', () => {

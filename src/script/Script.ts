@@ -1,6 +1,6 @@
 import ScriptChunk from './ScriptChunk.js'
 import OP from './OP.js'
-import { encode, Writer, toArray } from '../primitives/utils.js'
+import { encode, Reader, Writer, toArray } from '../primitives/utils.js'
 
 export default class Script {
   chunks: ScriptChunk[]
@@ -67,11 +67,65 @@ export default class Script {
   }
 
   static fromHex (hex: string): Script {
-    return new Script()
+    return Script.fromBinary(toArray(hex, 'hex'))
   }
 
   static fromBinary (bin: number[]): Script {
-    return new Script()
+    const chunks: ScriptChunk[] = []
+
+    const br = new Reader(bin)
+    while (!br.eof()) {
+      const op = br.readUInt8()
+
+      let len = 0
+      // eslint-disable-next-line @typescript-eslint/no-shadow
+      let data: number[] = []
+      if (op > 0 && op < OP.OP_PUSHDATA1) {
+        len = op
+        chunks.push({
+          data: br.read(len),
+          op
+        })
+      } else if (op === OP.OP_PUSHDATA1) {
+        try {
+          len = br.readUInt8()
+          data = br.read(len)
+        } catch (err) {
+          br.read()
+        }
+        chunks.push({
+          data,
+          op
+        })
+      } else if (op === OP.OP_PUSHDATA2) {
+        try {
+          len = br.readUInt16LE()
+          data = br.read(len)
+        } catch (err) {
+          br.read()
+        }
+        chunks.push({
+          data,
+          op
+        })
+      } else if (op === OP.OP_PUSHDATA4) {
+        try {
+          len = br.readUInt32LE()
+          data = br.read(len)
+        } catch (err) {
+          br.read()
+        }
+        chunks.push({
+          data,
+          op
+        })
+      } else {
+        chunks.push({
+          op
+        })
+      }
+    }
+    return new Script(chunks)
   }
 
   constructor (chunks: ScriptChunk[] = []) {
@@ -114,7 +168,7 @@ export default class Script {
         }
       }
     }
-  
+
     return writer.toArray()
   }
 
