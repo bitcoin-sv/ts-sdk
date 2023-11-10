@@ -1,6 +1,7 @@
 import Script from '../../../dist/cjs/src/script/Script'
 import OP from '../../../dist/cjs/src/script/OP'
-import { toHex } from '../../../dist/cjs/src/primitives/utils'
+import { Writer, toHex } from '../../../dist/cjs/src/primitives/utils'
+import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
 
 import scriptInvalid from './script.invalid.vectors'
 import scriptValid from './script.valid.vectors'
@@ -302,60 +303,95 @@ describe('Script', () => {
     })
   })
 
-  // describe('vectors', () => {
-  //   scriptValid.forEach((a, i) => {
-  //     if (a.length === 1) {
-  //       return
-  //     }
-  //     it('should not fail when reading scriptValid vector ' + i, () => {
-  //       // The try-catch is used because Jest expects assertions
-  //       // to be made with expect().toThrow() for exceptions.
-  //       expect(() => {
-  //         Script.fromASM(a[0]).toHex()
-  //         Script.fromASM(a[0]).toASM()
-  //       }).not.toThrow()
+  describe('vectors', () => {
+    const scriptFromVector = (str: string): Script => {
+      const bw = new Writer()
+      const tokens = str.split(' ')
+      let i
+      for (i = 0; i < tokens.length; i++) {
+        const token = tokens[i]
+        if (token === '') {
+          continue
+        }
+        if (token[0] === '0' && token[1] === 'x') {
+          const hex = token.slice(2)
+          const tbuf = new Script().writeBn(BigNumber.fromHex(hex)).toBinary()
+          bw.write(tbuf)
+        } else if (token[0] === "'") {
+          const tstr = token.slice(1, token.length - 1)
+          const cbuf = Buffer.from(tstr)
+          const tbuf = Script.fromBinary([...cbuf]).toBinary()
+          bw.write(tbuf)
+        } else if (OP['OP_' + token] !== undefined) {
+          const opstr = 'OP_' + token
+          const opCodeNum = OP[opstr]
+          bw.writeUInt8(opCodeNum)
+        } else if (typeof OP[token] === 'number') {
+          const opstr = token
+          const opCodeNum = OP[opstr]
+          bw.writeUInt8(opCodeNum)
+        } else if (!isNaN(parseInt(token, 10))) {
+          const bn = new BigNumber(token)
+          const script = new Script().writeBn(bn)
+          bw.write(script.toBinary())
+        } else {
+          throw new Error('Could not determine type of script value')
+        }
+      }
+      const buf = bw.toArray()
+      return Script.fromBinary(buf)
+    }
+    scriptValid.forEach((a, i) => {
+      if (a.length === 1) {
+        return
+      }
+      it('should not fail when reading scriptValid vector ' + i, () => {
+        expect(() => {
+          scriptFromVector(a[0]).toHex()
+          scriptFromVector(a[0]).toASM()
+        }).not.toThrow()
 
-  //       expect(() => {
-  //         Script.fromASM(a[1]).toHex()
-  //         Script.fromASM(a[1]).toASM()
-  //       }).not.toThrow()
+        expect(() => {
+          scriptFromVector(a[1]).toHex()
+          scriptFromVector(a[1]).toASM()
+        }).not.toThrow()
 
-  //       // should be able to return the same output over and over
-  //       let str = Script.fromASM(a[0]).toASM()
-  //       expect(Script.fromASM(str).toASM()).toEqual(str)
-  //       str = Script.fromASM(a[1]).toASM()
-  //       expect(Script.fromASM(str).toASM()).toEqual(str)
-  //     })
-  //   })
+        // should be able to return the same output over and over
+        let str = scriptFromVector(a[0]).toASM()
+        expect(Script.fromASM(str).toASM()).toEqual(str)
+        str = scriptFromVector(a[1]).toASM()
+        expect(Script.fromASM(str).toASM()).toEqual(str)
+      })
+    })
 
-  //   scriptInvalid.forEach((a, i) => {
-  //     if (a.length === 1) {
-  //       return
-  //     }
+    scriptInvalid.forEach((a, i) => {
+      if (a.length === 1) {
+        return
+      }
 
-  //     it(`should not fail when reading scriptInvalid vector ${i}`, () => {
-  //     // Test that no errors are thrown for the first item
-  //       expect(() => {
-  //         const scriptA = Script.fromASM(a[0])
-  //         scriptA.toHex()
-  //         scriptA.toASM()
-  //       }).not.toThrow()
+      it(`should not fail when reading scriptInvalid vector ${i}`, () => {
+      // Test that no errors are thrown for the first item
+        expect(() => {
+          const scriptA = scriptFromVector(a[0])
+          scriptA.toHex()
+          scriptA.toASM()
+        }).not.toThrow()
 
-  //       // Test that no errors are thrown for the second item
-  //       expect(() => {
-  //         const scriptB = Script.fromASM(a[1])
-  //         scriptB.toHex()
-  //         scriptB.toASM()
-  //       }).not.toThrow()
+        // Test that no errors are thrown for the second item
+        expect(() => {
+          const scriptB = scriptFromVector(a[1])
+          scriptB.toHex()
+          scriptB.toASM()
+        }).not.toThrow()
 
-  //       // Test that it should be able to return the same output over and over for the first item
-  //       const strA = Script.fromASM(a[0]).toASM()
-  //       expect(Script.fromASM(strA).toASM()).toEqual(strA)
+        // Test that it should be able to return the same output over and over for the first item
+        const strA = scriptFromVector(a[0]).toASM()
+        expect(Script.fromASM(strA).toASM()).toEqual(strA)
 
-  //       // Test that it should be able to return the same output over and over for the second item
-  //       const strB = Script.fromASM(a[1]).toASM()
-  //       expect(Script.fromASM(strB).toASM()).toEqual(strB)
-  //     })
-  //   })
-  // })
+        // Test that it should be able to return the same output over and over for the second item
+        const strB = scriptFromVector(a[1]).toASM()
+        expect(Script.fromASM(strB).toASM()).toEqual(strB)
+      })
+    })
+  })
 })

@@ -1,6 +1,7 @@
 import ScriptChunk from './ScriptChunk.js'
 import OP from './OP.js'
 import { encode, toHex, Reader, Writer, toArray } from '../primitives/utils.js'
+import BigNumber from '../primitives/BigNumber.js'
 
 export default class Script {
   chunks: ScriptChunk[]
@@ -181,6 +182,69 @@ export default class Script {
     }
 
     return writer.toArray()
+  }
+
+  writeScript (script: Script): Script {
+    this.chunks = this.chunks.concat(script.chunks)
+    return this
+  }
+
+  writeOpCode (op: number): Script {
+    this.chunks.push({ op })
+    return this
+  }
+
+  setChunkOpCode (i: number, op: number): Script {
+    this.chunks[i] = { op }
+    return this
+  }
+
+  writeBn (bn: BigNumber): Script {
+    if (bn.cmpn(0) === OP.OP_0) {
+      this.chunks.push({
+        op: OP.OP_0
+      })
+    } else if (bn.cmpn(-1) === 0) {
+      this.chunks.push({
+        op: OP.OP_1NEGATE
+      })
+    } else if (bn.cmpn(1) >= 0 && bn.cmpn(16) <= 0) {
+      // see OP_1 - OP_16
+      this.chunks.push({
+        op: bn.toNumber() + OP.OP_1 - 1
+      })
+    } else {
+      const buf = bn.toSm('little')
+      this.writeBin(buf)
+    }
+    return this
+  }
+
+  writeBin (bin: number[]): Script {
+    let op
+    if (bin.length > 0 && bin.length < OP.OP_PUSHDATA1) {
+      op = bin.length
+    } else if (bin.length === 0) {
+      op = OP.OP_0
+    } else if (bin.length < Math.pow(2, 8)) {
+      op = OP.OP_PUSHDATA1
+    } else if (bin.length < Math.pow(2, 16)) {
+      op = OP.OP_PUSHDATA2
+    } else if (bin.length < Math.pow(2, 32)) {
+      op = OP.OP_PUSHDATA4
+    } else {
+      throw new Error("You can't push that much data")
+    }
+    this.chunks.push({
+      data: bin,
+      op
+    })
+    return this
+  }
+
+  writeNumber (num: number): Script {
+    this.writeBn(new BigNumber(num))
+    return this
   }
 
   removeCodeseparators (): Script {
