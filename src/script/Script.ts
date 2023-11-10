@@ -1,6 +1,6 @@
 import ScriptChunk from './ScriptChunk.js'
 import OP from './OP.js'
-import { encode, Reader, Writer, toArray } from '../primitives/utils.js'
+import { encode, toHex, Reader, Writer, toArray } from '../primitives/utils.js'
 
 export default class Script {
   chunks: ScriptChunk[]
@@ -13,12 +13,9 @@ export default class Script {
       const token = tokens[i]
       let opCode
       let opCodeNum: number
-      try {
+      if (typeof OP[token] !== 'undefined') {
         opCode = token
         opCodeNum = OP[token]
-      } catch (err) {
-        opCode = undefined
-        opCodeNum = undefined
       }
 
       // we start with two special cases, 0 and -1, which are handled specially in
@@ -56,6 +53,16 @@ export default class Script {
           op: opCodeNum
         })
         i = i + 1
+      } else if (
+        opCodeNum === OP.OP_PUSHDATA1 ||
+        opCodeNum === OP.OP_PUSHDATA2 ||
+        opCodeNum === OP.OP_PUSHDATA4
+      ) {
+        chunks.push({
+          data: toArray(tokens[i + 2], 'hex'),
+          op: opCodeNum
+        })
+        i = i + 3
       } else {
         chunks.push({
           op: opCodeNum
@@ -71,6 +78,7 @@ export default class Script {
   }
 
   static fromBinary (bin: number[]): Script {
+    bin = [...bin]
     const chunks: ScriptChunk[] = []
 
     const br = new Reader(bin)
@@ -175,32 +183,10 @@ export default class Script {
   private _chunkToString (chunk: ScriptChunk): string {
     const op = chunk.op
     let str = ''
-    if (!chunk.data) {
-      // no data chunk
-      if (typeof OP[op] !== 'undefined') {
-        // A few cases where the opcode name differs from reverseMap
-        // aside from 1 to 16 data pushes.
-        if (op === 0) {
-          // OP_0 -> 0
-          str = str + ' 0'
-        } else if (op === 79) {
-          // OP_1NEGATE -> 1
-          str = str + ' -1'
-        } else {
-          str = str + ' ' + OP[op]
-        }
-      } else {
-        let numstr = op.toString(16)
-        if (numstr.length % 2 !== 0) {
-          numstr = '0' + numstr
-        }
-        str = str + ' ' + numstr
-      }
+    if (typeof chunk.data === 'undefined') {
+      str = `${str} ${(OP[op] as string)}`
     } else {
-      // data chunk
-      if (chunk.data) {
-        str = str + ' ' + encode(chunk.data, 'hex')
-      }
+      str = `${str} ${toHex(chunk.data)}`
     }
     return str
   }
