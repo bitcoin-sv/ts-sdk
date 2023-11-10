@@ -33,7 +33,10 @@ export default class Script {
         })
         i = i + 1
       } else if (opCode === undefined) {
-        const hex = tokens[i]
+        let hex = tokens[i]
+        if (hex.length % 2 !== 0) {
+          hex = '0' + hex
+        }
         const arr = toArray(hex, 'hex')
         if (encode(arr, 'hex') !== hex) {
           throw new Error('invalid hex string in script')
@@ -180,11 +183,34 @@ export default class Script {
     return writer.toArray()
   }
 
+  removeCodeseparators (): Script {
+    const chunks = []
+    for (let i = 0; i < this.chunks.length; i++) {
+      if (this.chunks[i].op !== OP.OP_CODESEPARATOR) {
+        chunks.push(this.chunks[i])
+      }
+    }
+    this.chunks = chunks
+    return this
+  }
+
+  isPushOnly (): boolean {
+    for (let i = 0; i < this.chunks.length; i++) {
+      const chunk = this.chunks[i]
+      const opCodeNum = chunk.op
+      if (opCodeNum > OP.OP_16) {
+        return false
+      }
+    }
+    return true
+  }
+
   private _chunkToString (chunk: ScriptChunk): string {
     const op = chunk.op
     let str = ''
     if (typeof chunk.data === 'undefined') {
-      str = `${str} ${(OP[op] as string)}`
+      const val = (OP[op] as string)
+      str = `${str} ${val}`
     } else {
       str = `${str} ${toHex(chunk.data)}`
     }

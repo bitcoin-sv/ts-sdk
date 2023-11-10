@@ -12,7 +12,7 @@ describe('Script', () => {
     expect(new Script().toASM()).toEqual('')
   })
 
-  describe('#fromHex', () => {
+  describe('fromHex', () => {
     it('should parse this hex string containing an OP code', () => {
       const buf = Buffer.alloc(1)
       buf[0] = OP.OP_0
@@ -22,7 +22,7 @@ describe('Script', () => {
     })
   })
 
-  describe('#fromBinary', () => {
+  describe('fromBinary', () => {
     it('should parse this buffer containing an OP code', () => {
       const buf = Buffer.alloc(1)
       buf[0] = OP.OP_0
@@ -92,9 +92,7 @@ describe('Script', () => {
       expect(script.chunks[1].data).toEqual([1, 2, 3])
       expect(script.chunks[2].op).toEqual(buf[buf.length - 1])
     })
-  })
 
-  describe('#fromBinary', () => {
     it('should output this hex string containing an OP code', () => {
       const buf = Buffer.alloc(1)
       buf[0] = OP.OP_0
@@ -103,9 +101,7 @@ describe('Script', () => {
       expect(script.chunks[0].op).toEqual(buf[0])
       expect(script.toHex()).toEqual(buf.toString('hex'))
     })
-  })
 
-  describe('#fromBinary', () => {
     it('should output this buffer containing an OP code', () => {
       const buf = Buffer.alloc(1)
       buf[0] = OP.OP_0
@@ -177,7 +173,23 @@ describe('Script', () => {
     })
   })
 
-  describe('#fromString', () => {
+  describe('toASM', () => {
+    it('should output this buffer an OP code, data, and another OP code', () => {
+      const buf = Buffer.from([0, 0, 0, 0, 0, 0, 1, 2, 3, 0])
+      buf[0] = OP.OP_0
+      buf[1] = OP.OP_PUSHDATA4
+      buf.writeUInt16LE(3, 2)
+      buf[buf.length - 1] = OP.OP_0
+      const script = Script.fromBinary(buf)
+      expect(script.chunks.length).toEqual(3)
+      expect(script.chunks[0].op).toEqual(buf[0])
+      expect(script.chunks[1].data).toEqual([1, 2, 3])
+      expect(script.chunks[2].op).toEqual(buf[buf.length - 1])
+      expect(script.toASM()).toEqual('OP_0 010203 OP_0')
+    })
+  })
+
+  describe('fromASM', () => {
     it('should parse these known scripts', () => {
       expect(Script.fromASM('OP_0 010203 OP_0')
         .toASM()
@@ -198,28 +210,9 @@ describe('Script', () => {
       expect(Script.fromASM('OP_0 010203 OP_0')
         .toASM()
       ).toEqual('OP_0 010203 OP_0')
-      expect(Script.fromASM('OP_0 OP_3 010203 OP_0').toASM()).toEqual('OP_0 OP_3 010203 OP_0')
+      expect(Script.fromASM('OP_0 3 010203 OP_0').toASM()).toEqual('OP_0 03 010203 OP_0')
       expect(Script.fromASM('').toASM()).toEqual('')
     })
-  })
-
-  describe('#toASM', () => {
-    it('should output this buffer an OP code, data, and another OP code', () => {
-      const buf = Buffer.from([0, 0, 0, 0, 0, 0, 1, 2, 3, 0])
-      buf[0] = OP.OP_0
-      buf[1] = OP.OP_PUSHDATA4
-      buf.writeUInt16LE(3, 2)
-      buf[buf.length - 1] = OP.OP_0
-      const script = Script.fromBinary(buf)
-      expect(script.chunks.length).toEqual(3)
-      expect(script.chunks[0].op).toEqual(buf[0])
-      expect(script.chunks[1].data).toEqual([1, 2, 3])
-      expect(script.chunks[2].op).toEqual(buf[buf.length - 1])
-      expect(script.toASM()).toEqual('OP_0 010203 OP_0')
-    })
-  })
-
-  describe('@fromASM', () => {
     it('should parse this known script in ASM', () => {
       const asm = 'OP_DUP OP_HASH160 f4c03610e60ad15100929cc23da2f3a799af1725 OP_EQUALVERIFY OP_CHECKSIG'
       const script = Script.fromASM(asm)
@@ -277,16 +270,16 @@ describe('Script', () => {
       const asm1 = 'OP_FALSE'
       const asm2 = 'OP_0'
       const asm3 = '0'
-      expect(Script.fromASM(asm1).toASM()).toEqual(asm3)
-      expect(Script.fromASM(asm2).toASM()).toEqual(asm3)
-      expect(Script.fromASM(asm3).toASM()).toEqual(asm3)
+      expect(Script.fromASM(asm1).toASM()).toEqual(asm2)
+      expect(Script.fromASM(asm2).toASM()).toEqual(asm2)
+      expect(Script.fromASM(asm3).toASM()).toEqual(asm2)
     })
 
     it('should return this script correctly', () => {
       const asm1 = 'OP_1NEGATE'
       const asm2 = '-1'
-      expect(Script.fromASM(asm1).toASM()).toEqual(asm2)
-      expect(Script.fromASM(asm2).toASM()).toEqual(asm2)
+      expect(Script.fromASM(asm1).toASM()).toEqual(asm1)
+      expect(Script.fromASM(asm2).toASM()).toEqual(asm1)
     })
   })
 

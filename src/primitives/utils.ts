@@ -314,7 +314,7 @@ export class Writer {
       const n = bn.toNumber()
       // Value fits in a uint16
       buf = [253, n & 0xFF, (n >> 8) & 0xFF]
-    } else if (bn.ltn(0x100000000)) {
+    } else if (bn.lt(new BigNumber(0x100000000))) {
       const n = bn.toNumber()
       // Value fits in a uint32
       buf = [254, n & 0xFF, (n >> 8) & 0xFF, (n >> 16) & 0xFF, (n >> 24) & 0xFF]

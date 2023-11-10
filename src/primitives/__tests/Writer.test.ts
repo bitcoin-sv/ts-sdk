@@ -184,7 +184,8 @@ describe('Writer', () => {
 
     it('should write a 5 byte varInt', () => {
       const bw = new Writer()
-      bw.writeVarIntBn(new BigNumber(Math.pow(2, 16 + 1)))
+      const bn = new BigNumber(Math.pow(2, 16 + 1))
+      bw.writeVarIntBn(bn)
       expect(bw.toArray().length).toEqual(5)
     })
 
