@@ -1,22 +1,41 @@
 # API
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
+## Interfaces
+
+### Interface: ScriptChunk
+
+A representation of a chunk of a script, which includes an opcode. For push operations, the associated data to push onto the stack is also included.
+
+```ts
+export default interface ScriptChunk {
+    op: number;
+    data?: number[];
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ## Classes
 
 | | |
 | --- | --- |
-| [BasePoint](#class-basepoint) | [PrivateKey](#class-privatekey) |
-| [BigNumber](#class-bignumber) | [PublicKey](#class-publickey) |
-| [Curve](#class-curve) | [RIPEMD160](#class-ripemd160) |
-| [DRBG](#class-drbg) | [ReductionContext](#class-reductioncontext) |
-| [JacobianPoint](#class-jacobianpoint) | [SHA1](#class-sha1) |
-| [K256](#class-k256) | [SHA256](#class-sha256) |
-| [Mersenne](#class-mersenne) | [SHA256HMAC](#class-sha256hmac) |
-| [MontgomoryMethod](#class-montgomorymethod) | [Signature](#class-signature) |
+| [BasePoint](#class-basepoint) | [RIPEMD160](#class-ripemd160) |
+| [BigNumber](#class-bignumber) | [Reader](#class-reader) |
+| [Curve](#class-curve) | [ReductionContext](#class-reductioncontext) |
+| [DRBG](#class-drbg) | [SHA1](#class-sha1) |
+| [JacobianPoint](#class-jacobianpoint) | [SHA256](#class-sha256) |
+| [K256](#class-k256) | [SHA256HMAC](#class-sha256hmac) |
+| [LockingScript](#class-lockingscript) | [Script](#class-script) |
+| [Mersenne](#class-mersenne) | [Signature](#class-signature) |
+| [MontgomoryMethod](#class-montgomorymethod) | [Spend](#class-spend) |
 | [Point](#class-point) | [SymmetricKey](#class-symmetrickey) |
+| [PrivateKey](#class-privatekey) | [UnlockingScript](#class-unlockingscript) |
+| [PublicKey](#class-publickey) | [Writer](#class-writer) |
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 
@@ -164,7 +183,7 @@ mersenne.split(new BigNumber('2345', 16), new BigNumber());
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: K256
@@ -257,7 +276,7 @@ k256.split(input, output);
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: ReductionContext
@@ -790,7 +809,7 @@ this.verify2(new BigNumber(10).toRed(this), new BigNumber(20)); //throws an Erro
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: BigNumber
@@ -812,7 +831,7 @@ export default class BigNumber {
     static isBN(num: any): boolean 
     static max(left: BigNumber, right: BigNumber): BigNumber 
     static min(left: BigNumber, right: BigNumber): BigNumber 
-    constructor(number: number | string | number[] | Buffer = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
+    constructor(number: number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
     copy(dest: BigNumber): void 
     static move(dest: BigNumber, src: BigNumber): void 
     clone(): BigNumber 
@@ -823,9 +842,7 @@ export default class BigNumber {
     toString(base: number | "hex" = 10, padding: number = 1): string 
     toNumber(): number 
     toJSON(): string 
-    toBuffer(opts: any = { size: undefined, endian: "big" }): Buffer 
-    toArray(endian?, length?): number[] 
-    toArrayLike(ArrayType, endian, length?: number): any 
+    toArray(endian: "le" | "be" = "be", length?: number): number[] 
     bitLength(): number 
     static toBitArray(num: BigNumber): Array<0 | 1> 
     toBitArray(): Array<0 | 1> 
@@ -932,19 +949,17 @@ export default class BigNumber {
     redInvm(): BigNumber 
     redNeg(): BigNumber 
     redPow(num: BigNumber): BigNumber 
-    static reverseBuf(buf: Buffer): Buffer 
-    static fromHex(hex: string, opts?): BigNumber 
-    toHex(opts?): string 
+    static fromHex(hex: string, endian?: "little" | "big"): BigNumber 
+    toHex(length: number = 0): string 
     static fromJSON(str: string): BigNumber 
     static fromNumber(n: number): BigNumber 
     static fromString(str: string, base?: number | "hex"): BigNumber 
-    static fromBuffer(buf: Buffer, opts = { endian: "big" }): BigNumber 
-    static fromSm(buf, opts = { endian: "big" }): BigNumber 
-    toSm(opts = { endian: "big" }): Buffer 
-    static fromBits(bits, opts = { strict: false }): BigNumber 
-    toBits(): Buffer 
-    static fromScriptNumBuffer(buf: Buffer, requireMinimal?: boolean, maxNumSize?: number): BigNumber 
-    toScriptNumBuffer(): Buffer 
+    static fromSm(num: number[], endian: "big" | "little" = "big"): BigNumber 
+    toSm(endian: "big" | "little" = "big"): number[] 
+    static fromBits(bits: number, strict: boolean = false): BigNumber 
+    toBits(): number 
+    static fromScriptNum(num: number[], requireMinimal?: boolean, maxNumSize?: number): BigNumber 
+    toScriptNum(): number[] 
 }
 ```
 
@@ -955,7 +970,7 @@ export default class BigNumber {
 #### Constructor
 
 ```ts
-constructor(number: number | string | number[] | Buffer = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
+constructor(number: number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
 ```
 
 Argument Details
@@ -1259,8 +1274,7 @@ The number of used bits
 
 #### Method byteLength
 
-Get the byteLength of the BigNumber
-It is similar to the byte length of a buffer in Node.js.
+Get the byte length of the BigNumber
 
 ```ts
 byteLength(): number 
@@ -1608,22 +1622,22 @@ bigNum.forceRed(redCtx);
 
 #### Method fromBits
 
-Creates a BigNumber from a number representing the "bits" value in a blockheader.
+Creates a BigNumber from a number representing the "bits" value in a block header.
 
 ```ts
-static fromBits(bits, opts = { strict: false }): BigNumber 
+static fromBits(bits: number, strict: boolean = false): BigNumber 
 ```
 
 Returns
 
-Returns a BigNumber equivalent to the "bits" value in a blockheader.
+Returns a BigNumber equivalent to the "bits" value in a block header.
 
 Argument Details
 
 + **bits**
-  + The number representing the bits value in a blockheader.
-+ **opts**
-  + An optional configuration object. If `strict` is `true`, an error is thrown if the number has negative bit set.
+  + The number representing the bits value in a block header.
++ **strict**
+  + If true, an error is thrown if the number has negative bit set.
 
 Throws
 
@@ -1636,38 +1650,12 @@ const bits = 0x1d00ffff;
 const bigNumber = BigNumber.fromBits(bits);
 ```
 
-#### Method fromBuffer
-
-Creates a BigNumber from a Buffer, considering endianess.
-
-```ts
-static fromBuffer(buf: Buffer, opts = { endian: "big" }): BigNumber 
-```
-
-Returns
-
-Returns a BigNumber equivalent to the Buffer interpreted with specified endianess.
-
-Argument Details
-
-+ **buf**
-  + The Buffer to create a BigNumber from.
-+ **opts**
-  + An optional configuration object that defines endianess. If not provided, big endian is assumed.
-
-Example
-
-```ts
-const buf = Buffer.from('1234', 'hex');
-const bigNumber = BigNumber.fromBuffer(buf, { endian: 'little' });
-```
-
 #### Method fromHex
 
 Creates a BigNumber from a hexadecimal string.
 
 ```ts
-static fromHex(hex: string, opts?): BigNumber 
+static fromHex(hex: string, endian?: "little" | "big"): BigNumber 
 ```
 
 Returns
@@ -1678,8 +1666,6 @@ Argument Details
 
 + **hex**
   + The hexadecimal string to create a BigNumber from.
-+ **opts**
-  + An optional parameters object.
 
 Example
 
@@ -1758,12 +1744,12 @@ bigNum.toRed(redCtx);
 bigNum.fromRed();
 ```
 
-#### Method fromScriptNumBuffer
+#### Method fromScriptNum
 
-Creates a BigNumber from a number buffer used in Bitcoin scripts.
+Creates a BigNumber from the format used in Bitcoin scripts.
 
 ```ts
-static fromScriptNumBuffer(buf: Buffer, requireMinimal?: boolean, maxNumSize?: number): BigNumber 
+static fromScriptNum(num: number[], requireMinimal?: boolean, maxNumSize?: number): BigNumber 
 ```
 
 Returns
@@ -1772,48 +1758,48 @@ Returns a BigNumber equivalent to the number used in a Bitcoin script.
 
 Argument Details
 
-+ **buf**
-  + The number buffer used in Bitcoin scripts.
++ **num**
+  + The number in the format used in Bitcoin scripts.
 + **requireMinimal**
   + If true, non-minimally encoded values will throw an error.
 + **maxNumSize**
-  + The maximum allowed size for the number. If not provided, defaults to 4. This is useful for deprecated CHECKLOCKTIMEVERIFY where up to 5 byte long buffer is allowed.
+  + The maximum allowed size for the number. If not provided, defaults to 4. This is useful for deprecated CHECKLOCKTIMEVERIFY where up to 5 byte long numbers are allowed.
 
 Throws
 
-Will throw an error if `requireMinimal` is `true` and the value is non-minimally encoded. Will throw an error if buffer length is greater than `maxNumSize`.
+Will throw an error if `requireMinimal` is `true` and the value is non-minimally encoded. Will throw an error if number length is greater than `maxNumSize`.
 
 Example
 
 ```ts
-const buf = Buffer.from([0x02, 0x01], 'hex');
-const bigNumber = BigNumber.fromScriptNumBuffer(buf, true, 5);
+const num = [0x02, 0x01]
+const bigNumber = BigNumber.fromScriptNum(num, true, 5)
 ```
 
 #### Method fromSm
 
-Creates a BigNumber from a signed magnitude buffer.
+Creates a BigNumber from a signed magnitude number.
 
 ```ts
-static fromSm(buf, opts = { endian: "big" }): BigNumber 
+static fromSm(num: number[], endian: "big" | "little" = "big"): BigNumber 
 ```
 
 Returns
 
-Returns a BigNumber equivalent to the signed magnitude buffer interpreted with specified endianess.
+Returns a BigNumber equivalent to the signed magnitude number interpreted with specified endianess.
 
 Argument Details
 
-+ **buf**
-  + The signed magnitude buffer to convert to a BigNumber.
-+ **opts**
-  + An optional configuration object that defines endianess. If not provided, big endian is assumed.
++ **num**
+  + The signed magnitude number to convert to a BigNumber.
++ **endian**
+  + Defines endianess. If not provided, big endian is assumed.
 
 Example
 
 ```ts
-const buf = Buffer.from([0x81], 'hex');
-const bigNumber = BigNumber.fromSm(buf, { endian: 'little' }); // equivalent to BigNumber from '-1'
+const num = [0x81]
+const bigNumber = BigNumber.fromSm(num, { endian: 'little' }); // equivalent to BigNumber from '-1'
 ```
 
 #### Method fromString
@@ -3505,30 +3491,6 @@ bigNum.toRed(redCtx);
 bigNum.redSub(new BigNumber(20)); // returns a BigNumber of 10 in reduction context
 ```
 
-#### Method reverseBuf
-
-Reverses the byte order of a Buffer.
-
-```ts
-static reverseBuf(buf: Buffer): Buffer 
-```
-
-Returns
-
-Returns a new Buffer that contains the bytes of 'buf' in reverse order.
-
-Argument Details
-
-+ **buf**
-  + The Buffer to reverse.
-
-Example
-
-```ts
-let buf = Buffer.from('1234', 'hex');
-let reversedBuf = BigNumber.reverseBuf(buf); // equivalent to Buffer.from('3412', 'hex');
-```
-
 #### Method setn
 
 Set `bit` of `this` BigNumber. The `bit` is a position in the binary representation,
@@ -3724,7 +3686,7 @@ myNumber.testn(1); // Returns true (indicating that the second bit from right is
 Converts the BigNumber instance to a JavaScript number array.
 
 ```ts
-toArray(endian?, length?): number[] 
+toArray(endian: "le" | "be" = "be", length?: number): number[] 
 ```
 
 Returns
@@ -3734,7 +3696,7 @@ The JavaScript array representation of the BigNumber instance.
 Argument Details
 
 + **endian**
-  + The endian for converting BigNumber to array. Default value is undefined.
+  + The endian for converting BigNumber to array. Default value is 'be'.
 + **length**
   + The length for the resultant array. Default value is undefined.
 
@@ -3744,27 +3706,6 @@ Example
 const bn = new BigNumber('123456', 10, 'be');
 bn.toArray('be', 8);
 ```
-
-#### Method toArrayLike
-
-Converts the BigNumber instance to an Object type array.
-
-```ts
-toArrayLike(ArrayType, endian, length?: number): any 
-```
-
-Returns
-
-The Object array representation of the BigNumber instance.
-
-Argument Details
-
-+ **ArrayType**
-  + The type of array used for conversion.
-+ **endian**
-  + The endian for the conversion.
-+ **length**
-  + The length for the resultant array. Default value is undefined.
 
 #### Method toBitArray
 
@@ -3816,15 +3757,15 @@ const bits = bn.toBitArray(); // [ 1, 1, 0 ]
 
 #### Method toBits
 
-Converts this BigNumber to a number representing the "bits" value in a blockheader.
+Converts this BigNumber to a number representing the "bits" value in a block header.
 
 ```ts
-toBits(): Buffer 
+toBits(): number 
 ```
 
 Returns
 
-Returns a number equivalent to the "bits" value in a blockheader.
+Returns a number equivalent to the "bits" value in a block header.
 
 Example
 
@@ -3833,36 +3774,12 @@ const bigNumber = new BigNumber(1);
 const bits = bigNumber.toBits();
 ```
 
-#### Method toBuffer
-
-Converts the BigNumber instance to a Buffer.
-
-```ts
-toBuffer(opts: any = { size: undefined, endian: "big" }): Buffer 
-```
-
-Returns
-
-The Buffer representation of the BigNumber instance.
-
-Argument Details
-
-+ **opts**
-  + The options for converting to Buffer. Default size is undefined and default endian is 'big'.
-
-Example
-
-```ts
-const bn = new BigNumber('123456', 10, 'be');
-bn.toBuffer({ size: 8, endian: 'big' });
-```
-
 #### Method toHex
 
 Converts this BigNumber to a hexadecimal string.
 
 ```ts
-toHex(opts?): string 
+toHex(length: number = 0): string 
 ```
 
 Returns
@@ -3871,8 +3788,8 @@ Returns a string representing the hexadecimal value of this BigNumber.
 
 Argument Details
 
-+ **opts**
-  + An optional parameters object.
++ **length**
+  + The minimum length of the hex string
 
 Example
 
@@ -3950,47 +3867,47 @@ let redCtx = new ReductionContext();
 bigNum.toRed(redCtx);
 ```
 
-#### Method toScriptNumBuffer
+#### Method toScriptNum
 
-Converts this BigNumber to a number buffer used in Bitcoin scripts.
+Converts this BigNumber to a number in the format used in Bitcoin scripts.
 
 ```ts
-toScriptNumBuffer(): Buffer 
+toScriptNum(): number[] 
 ```
 
 Returns
 
-Returns a buffer equivalent to this BigNumber as a Bitcoin script number.
+Returns the equivalent to this BigNumber as a Bitcoin script number.
 
 Example
 
 ```ts
-const bigNumber = new BigNumber(258);
-const buf = bigNumber.toScriptNumBuffer(); // equivalent to bigNumber.toSm({ endian: 'little' })
+const bigNumber = new BigNumber(258)
+const num = bigNumber.toScriptNum() // equivalent to bigNumber.toSm('little')
 ```
 
 #### Method toSm
 
-Converts this BigNumber to a signed magnitude buffer.
+Converts this BigNumber to a signed magnitude number.
 
 ```ts
-toSm(opts = { endian: "big" }): Buffer 
+toSm(endian: "big" | "little" = "big"): number[] 
 ```
 
 Returns
 
-Returns a buffer equivalent to this BigNumber interpreted as a signed magnitude with specified endianess.
+Returns an array equivalent to this BigNumber interpreted as a signed magnitude with specified endianess.
 
 Argument Details
 
-+ **opts**
-  + An optional configuration object that defines endianess. If not provided, big endian is assumed.
++ **endian**
+  + Defines endianess. If not provided, big endian is assumed.
 
 Example
 
 ```ts
 const bigNumber = new BigNumber(-1);
-const buf = bigNumber.toSm({ endian: 'little' }); // equivalent to Buffer.from([0x81], 'hex')
+const num = bigNumber.toSm('little'); // [0x81]
 ```
 
 #### Method toString
@@ -4278,7 +4195,7 @@ const zeroBits = bn.zeroBits(); // 3
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: MontgomoryMethod
@@ -4489,7 +4406,70 @@ const product = montMethod.mul(a, b);
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: Writer
+
+```ts
+export class Writer {
+    public bufs: number[][];
+    constructor(bufs?: number[][]) 
+    getLength(): number 
+    toArray(): number[] 
+    write(buf: number[]): Writer 
+    writeReverse(buf: number[]): Writer 
+    writeUInt8(n: number): Writer 
+    writeInt8(n: number): Writer 
+    writeUInt16BE(n: number): Writer 
+    writeInt16BE(n: number): Writer 
+    writeUInt16LE(n: number): Writer 
+    writeInt16LE(n: number): Writer 
+    writeUInt32BE(n: number): Writer 
+    writeInt32BE(n: number): Writer 
+    writeUInt32LE(n: number): Writer 
+    writeInt32LE(n: number): Writer 
+    writeUInt64BEBn(bn: BigNumber): Writer 
+    writeUInt64LEBn(bn: BigNumber): Writer 
+    writeVarIntNum(n: number): Writer 
+    writeVarIntBn(bn: BigNumber): Writer 
+    static varIntNum(n: number): number[] 
+    static varIntBn(bn: BigNumber): number[] 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: Reader
+
+```ts
+export class Reader {
+    public bin: number[];
+    public pos: number;
+    constructor(bin: number[] = [], pos: number = 0) 
+    public eof(): boolean 
+    public read(len = this.bin.length): number[] 
+    public readReverse(len = this.bin.length): number[] 
+    public readUInt8(): number 
+    public readInt8(): number 
+    public readUInt16BE(): number 
+    public readInt16BE(): number 
+    public readUInt16LE(): number 
+    public readInt16LE(): number 
+    public readUInt32BE(): number 
+    public readInt32BE(): number 
+    public readUInt32LE(): number 
+    public readInt32LE(): number 
+    public readUInt64BEBn(): BigNumber 
+    public readUInt64LEBn(): BigNumber 
+    public readVarIntNum(): number 
+    public readVarInt(): number[] 
+    public readVarIntBn(): BigNumber 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: Curve
@@ -4557,7 +4537,7 @@ export default class Curve {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: BasePoint
@@ -4584,7 +4564,7 @@ export default abstract class BasePoint {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: JacobianPoint
@@ -4911,7 +4891,7 @@ const pointP = pointJ.toP();  // The point in affine coordinates.
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: Point
@@ -5492,7 +5472,7 @@ const isValid = aPoint.validate();
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: RIPEMD160
@@ -5531,7 +5511,7 @@ h: number[]
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: SHA256
@@ -5589,7 +5569,7 @@ k: number[]
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: SHA1
@@ -5646,7 +5626,7 @@ k: number[]
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: SHA256HMAC
@@ -5778,7 +5758,7 @@ myHMAC.update('deadbeef', 'hex');
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: DRBG
@@ -5874,7 +5854,7 @@ drbg.update('e13af...');
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: Signature
@@ -6011,7 +5991,7 @@ const isVerified = signature.verify(msg, publicKey);
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: PrivateKey
@@ -6160,7 +6140,7 @@ const isSignatureValid = privateKey.verify('Hello, World!', signature);
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: PublicKey
@@ -6308,7 +6288,7 @@ const isVerified = myPubKey.verify(myMessage, mySignature)
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: SymmetricKey
@@ -6390,7 +6370,492 @@ const encryptedMessage = key.encrypt('plainText', 'utf8');
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: Script
+
+The Script class represents a script in a Bitcoin SV transaction,
+encapsulating the functionality to construct, parse, and serialize
+scripts used in both locking (output) and unlocking (input) scripts.
+
+```ts
+export default class Script {
+    chunks: ScriptChunk[];
+    static fromASM(asm: string): Script 
+    static fromHex(hex: string): Script 
+    static fromBinary(bin: number[]): Script 
+    constructor(chunks: ScriptChunk[] = []) 
+    toASM(): string 
+    toHex(): string 
+    toBinary(): number[] 
+    writeScript(script: Script): Script 
+    writeOpCode(op: number): Script 
+    setChunkOpCode(i: number, op: number): Script 
+    writeBn(bn: BigNumber): Script 
+    writeBin(bin: number[]): Script 
+    writeNumber(num: number): Script 
+    removeCodeseparators(): Script 
+    isPushOnly(): boolean 
+    isLockingScript(): boolean 
+    isUnlockingScript(): boolean 
+}
+```
+
+<details>
+
+<summary>Class Script Details</summary>
+
+#### Constructor
+
+```ts
+constructor(chunks: ScriptChunk[] = []) 
+```
+
+Argument Details
+
++ **chunks**
+  + =[] - An array of script chunks to directly initialize the script.
+
+#### Method fromASM
+
+```ts
+static fromASM(asm: string): Script 
+```
+
+Returns
+
+A new Script instance.
+
+Argument Details
+
++ **asm**
+  + The script in ASM string format.
+
+Example
+
+```ts
+const script = Script.fromASM("OP_DUP OP_HASH160 abcd... OP_EQUALVERIFY OP_CHECKSIG")
+```
+
+#### Method fromBinary
+
+```ts
+static fromBinary(bin: number[]): Script 
+```
+
+Returns
+
+A new Script instance.
+
+Argument Details
+
++ **bin**
+  + The script in binary array format.
+
+Example
+
+```ts
+const script = Script.fromBinary([0x76, 0xa9, ...])
+```
+
+#### Method fromHex
+
+```ts
+static fromHex(hex: string): Script 
+```
+
+Returns
+
+A new Script instance.
+
+Argument Details
+
++ **hex**
+  + The script in hexadecimal format.
+
+Example
+
+```ts
+const script = Script.fromHex("76a9...");
+```
+
+#### Method isLockingScript
+
+```ts
+isLockingScript(): boolean 
+```
+
+Returns
+
+True if the script is a locking script, otherwise false.
+
+#### Method isPushOnly
+
+```ts
+isPushOnly(): boolean 
+```
+
+Returns
+
+True if the script is push-only, otherwise false.
+
+#### Method isUnlockingScript
+
+```ts
+isUnlockingScript(): boolean 
+```
+
+Returns
+
+True if the script is an unlocking script, otherwise false.
+
+#### Method removeCodeseparators
+
+```ts
+removeCodeseparators(): Script 
+```
+
+Returns
+
+This script instance for chaining.
+
+#### Method setChunkOpCode
+
+```ts
+setChunkOpCode(i: number, op: number): Script 
+```
+
+Returns
+
+This script instance for chaining.
+
+Argument Details
+
++ **i**
+  + The index of the chunk.
++ **op**
+  + The opcode to set.
+
+#### Method toASM
+
+```ts
+toASM(): string 
+```
+
+Returns
+
+The script in ASM string format.
+
+#### Method toBinary
+
+```ts
+toBinary(): number[] 
+```
+
+Returns
+
+The script in binary array format.
+
+#### Method toHex
+
+```ts
+toHex(): string 
+```
+
+Returns
+
+The script in hexadecimal format.
+
+#### Method writeBin
+
+```ts
+writeBin(bin: number[]): Script 
+```
+
+Returns
+
+This script instance for chaining.
+
+Argument Details
+
++ **bin**
+  + The binary data to append.
+
+Throws
+
+Throws an error if the data is too large to be pushed.
+
+#### Method writeBn
+
+```ts
+writeBn(bn: BigNumber): Script 
+```
+
+Returns
+
+This script instance for chaining.
+
+Argument Details
+
++ **bn**
+  + The BigNumber to append.
+
+#### Method writeNumber
+
+```ts
+writeNumber(num: number): Script 
+```
+
+Returns
+
+This script instance for chaining.
+
+Argument Details
+
++ **num**
+  + The number to append.
+
+#### Method writeOpCode
+
+```ts
+writeOpCode(op: number): Script 
+```
+
+Returns
+
+This script instance for chaining.
+
+Argument Details
+
++ **op**
+  + The opcode to append.
+
+#### Method writeScript
+
+```ts
+writeScript(script: Script): Script 
+```
+
+Returns
+
+This script instance for chaining.
+
+Argument Details
+
++ **script**
+  + The script to append.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: LockingScript
+
+The LockingScript class represents a locking script in a Bitcoin SV transaction.
+It extends the Script class and is used specifically for output scripts that lock funds.
+
+Inherits all properties and methods from the Script class.
+
+```ts
+export default class LockingScript extends Script {
+    isLockingScript(): boolean 
+    isUnlockingScript(): boolean 
+}
+```
+
+<details>
+
+<summary>Class LockingScript Details</summary>
+
+#### Method isLockingScript
+
+```ts
+isLockingScript(): boolean 
+```
+
+Returns
+
+Always returns true for a LockingScript instance.
+
+#### Method isUnlockingScript
+
+```ts
+isUnlockingScript(): boolean 
+```
+
+Returns
+
+Always returns false for a LockingScript instance.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: UnlockingScript
+
+The UnlockingScript class represents an unlocking script in a Bitcoin SV transaction.
+It extends the Script class and is used specifically for input scripts that unlock funds.
+
+Inherits all properties and methods from the Script class.
+
+```ts
+export default class UnlockingScript extends Script {
+    isLockingScript(): boolean 
+    isUnlockingScript(): boolean 
+}
+```
+
+<details>
+
+<summary>Class UnlockingScript Details</summary>
+
+#### Method isLockingScript
+
+```ts
+isLockingScript(): boolean 
+```
+
+Returns
+
+Always returns false for an UnlockingScript instance.
+
+#### Method isUnlockingScript
+
+```ts
+isUnlockingScript(): boolean 
+```
+
+Returns
+
+Always returns true for an UnlockingScript instance.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: Spend
+
+The Spend class represents a spend action within a Bitcoin SV transaction.
+It encapsulates all the necessary data required for spending a UTXO (Unspent Transaction Output)
+and includes details about the source transaction, output, and the spending transaction itself.
+
+```ts
+export default class Spend {
+    sourceTXID: string;
+    sourceOutputIndex: number;
+    sourceSatoshis: BigNumber;
+    lockingScript: LockingScript;
+    transactionVersion: number;
+    otherInputs: Array<{
+        txid: string;
+        outputIndex: number;
+        sequence: number;
+    }>;
+    outputs: Array<{
+        satoshis: BigNumber;
+        script: LockingScript;
+    }>;
+    inputIndex: number;
+    unlockingScript: UnlockingScript;
+    inputSequence: number;
+    constructor(sourceTXID: string, sourceOutputIndex: number, sourceSatoshis: BigNumber, lockingScript: LockingScript, transactionVersion: number, otherInputs: Array<{
+        txid: string;
+        outputIndex: number;
+        sequence: number;
+    }>, outputs: Array<{
+        satoshis: BigNumber;
+        script: LockingScript;
+    }>, inputIndex: number, unlockingScript: UnlockingScript, inputSequence: number) 
+    validate(): boolean 
+}
+```
+
+<details>
+
+<summary>Class Spend Details</summary>
+
+#### Constructor
+
+```ts
+constructor(sourceTXID: string, sourceOutputIndex: number, sourceSatoshis: BigNumber, lockingScript: LockingScript, transactionVersion: number, otherInputs: Array<{
+    txid: string;
+    outputIndex: number;
+    sequence: number;
+}>, outputs: Array<{
+    satoshis: BigNumber;
+    script: LockingScript;
+}>, inputIndex: number, unlockingScript: UnlockingScript, inputSequence: number) 
+```
+
+Argument Details
+
++ **sourceTXID**
+  + The transaction ID of the source UTXO.
++ **sourceOutputIndex**
+  + The index of the output in the source transaction.
++ **sourceSatoshis**
+  + The amount of satoshis in the source UTXO.
++ **lockingScript**
+  + The locking script associated with the UTXO.
++ **transactionVersion**
+  + The version of the current transaction.
++ **otherInputs**
+  + -
+An array of other inputs in the transaction.
++ **outputs**
+  + -
+The outputs of the current transaction.
++ **inputIndex**
+  + The index of this input in the current transaction.
++ **unlockingScript**
+  + The unlocking script for this spend.
++ **inputSequence**
+  + The sequence number of this input.
+
+Example
+
+```ts
+const spend = new Spend(
+  "abcd1234", // sourceTXID
+  0, // sourceOutputIndex
+  new BigNumber(1000), // sourceSatoshis
+  LockingScript.fromASM("OP_DUP OP_HASH160 abcd1234... OP_EQUALVERIFY OP_CHECKSIG"),
+  2, // transactionVersion
+  [{ txid: "abcd1234", outputIndex: 1, sequence: 0xffffffff }], // otherInputs
+  [{ satoshis: new BigNumber(500), script: LockingScript.fromASM("OP_DUP...") }], // outputs
+  0, // inputIndex
+  UnlockingScript.fromASM("3045... 02ab..."),
+  0xffffffff // inputSequence
+);
+```
+
+#### Method validate
+
+```ts
+validate(): boolean 
+```
+
+Returns
+
+Returns true if the scripts are valid and the spend is legitimate, otherwise false.
+
+Example
+
+```ts
+if (spend.validate()) {
+  console.log("Spend is valid!");
+} else {
+  console.log("Invalid spend!");
+}
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ## Functions
@@ -6403,7 +6868,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 | [ghash](#function-ghash) |
 | [toArray](#function-toarray) |
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 
@@ -6413,7 +6878,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 export function toArray(msg: number[] | string, enc?: "hex"): number[] 
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Function: AES
@@ -6422,7 +6887,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 export function AES(input: number[], key: number[]): number[] 
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Function: ghash
@@ -6431,7 +6896,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 export function ghash(input: number[], hashSubKey: number[]): number[] 
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Function: AESGCM
@@ -6443,7 +6908,7 @@ export function AESGCM(plainText: number[], additionalAuthenticatedData: number[
 } 
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Function: AESGCMDecrypt
@@ -6452,7 +6917,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 export function AESGCMDecrypt(cipherText: number[], additionalAuthenticatedData: number[], initializationVector: number[], authenticationTag: number[], key: number[]): number[] | null 
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ## Variables
@@ -6469,7 +6934,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 | [multiply](#variable-multiply) | [zero2](#variable-zero2) |
 | [rightShift](#variable-rightshift) |  |
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 
@@ -6486,7 +6951,7 @@ zero2 = (word: string): string => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: toHex
@@ -6501,7 +6966,7 @@ toHex = (msg: number[]): string => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: toArray
@@ -6547,7 +7012,7 @@ toArray = (msg: any, enc?: "hex" | "utf8"): any[] => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: encode
@@ -6565,7 +7030,7 @@ encode = (arr: number[], enc?: "hex" | "utf8"): string | number[] => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: ripemd160
@@ -6576,7 +7041,7 @@ ripemd160 = (msg: number[] | string, enc?: "hex"): number[] | string => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: sha1
@@ -6587,7 +7052,7 @@ sha1 = (msg: number[] | string, enc?: "hex"): number[] | string => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: sha256
@@ -6598,7 +7063,7 @@ sha256 = (msg: number[] | string, enc?: "hex"): number[] | string => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: hash256
@@ -6610,7 +7075,7 @@ hash256 = (msg: number[] | string, enc?: "hex"): number[] | string => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: hash160
@@ -6622,7 +7087,7 @@ hash160 = (msg: number[] | string, enc?: "hex"): number[] | string => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: sign
@@ -6668,7 +7133,7 @@ sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: Bi
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: verify
@@ -6696,7 +7161,7 @@ verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: checkBit
@@ -6707,7 +7172,7 @@ checkBit = function (byteArray: number[], byteIndex: number, bitIndex: number): 
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: getBytes
@@ -6723,7 +7188,7 @@ getBytes = function (numericValue: number): number[] {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: exclusiveOR
@@ -6739,7 +7204,7 @@ exclusiveOR = function (block0: number[], block1: number[]): number[] {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: rightShift
@@ -6761,7 +7226,7 @@ rightShift = function (block: number[]): number[] {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: multiply
@@ -6789,7 +7254,7 @@ multiply = function (block0: number[], block1: number[]): number[] {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: incrementLeastSignificantThirtyTwoBits
@@ -6811,6 +7276,6 @@ incrementLeastSignificantThirtyTwoBits = function (block: number[]): number[] {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---

@@ -1,3 +1,6 @@
+/**
+ * An object mapping opcode names (such as OP_DUP) to their corresponding numbers (such as 0x76), and vice versa.
+ */
 const OP = {
   // push value
   OP_FALSE: 0x00,

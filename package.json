@@ -26,6 +26,16 @@
       "import": "./dist/esm/src/primitives/*.js",
       "require": "./dist/cjs/src/primitives/*.js",
       "types": "./dist/types/src/primitives/*.d.ts"
+    },
+    "./script": {
+      "import": "./dist/esm/src/script/index.js",
+      "require": "./dist/cjs/src/script/index.js",
+      "types": "./dist/types/src/script/index.d.ts"
+    },
+    "./script/*": {
+      "import": "./dist/esm/src/script/*.js",
+      "require": "./dist/cjs/src/script/*.js",
+      "types": "./dist/types/src/script/*.d.ts"
     }
   },
   "scripts": {
