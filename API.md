@@ -20,20 +20,17 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ## Classes
 
-| | |
-| --- | --- |
-| [BasePoint](#class-basepoint) | [RIPEMD160](#class-ripemd160) |
-| [BigNumber](#class-bignumber) | [Reader](#class-reader) |
-| [Curve](#class-curve) | [ReductionContext](#class-reductioncontext) |
-| [DRBG](#class-drbg) | [SHA1](#class-sha1) |
-| [JacobianPoint](#class-jacobianpoint) | [SHA256](#class-sha256) |
-| [K256](#class-k256) | [SHA256HMAC](#class-sha256hmac) |
-| [LockingScript](#class-lockingscript) | [Script](#class-script) |
-| [Mersenne](#class-mersenne) | [Signature](#class-signature) |
-| [MontgomoryMethod](#class-montgomorymethod) | [Spend](#class-spend) |
-| [Point](#class-point) | [SymmetricKey](#class-symmetrickey) |
-| [PrivateKey](#class-privatekey) | [UnlockingScript](#class-unlockingscript) |
-| [PublicKey](#class-publickey) | [Writer](#class-writer) |
+| | | |
+| --- | --- | --- |
+| [BasePoint](#class-basepoint) | [Point](#class-point) | [Script](#class-script) |
+| [BigNumber](#class-bignumber) | [PrivateKey](#class-privatekey) | [Signature](#class-signature) |
+| [Curve](#class-curve) | [PublicKey](#class-publickey) | [Spend](#class-spend) |
+| [DRBG](#class-drbg) | [RIPEMD160](#class-ripemd160) | [SymmetricKey](#class-symmetrickey) |
+| [JacobianPoint](#class-jacobianpoint) | [Reader](#class-reader) | [TransactionSignature](#class-transactionsignature) |
+| [K256](#class-k256) | [ReductionContext](#class-reductioncontext) | [UnlockingScript](#class-unlockingscript) |
+| [LockingScript](#class-lockingscript) | [SHA1](#class-sha1) | [Writer](#class-writer) |
+| [Mersenne](#class-mersenne) | [SHA256](#class-sha256) |  |
+| [MontgomoryMethod](#class-montgomorymethod) | [SHA256HMAC](#class-sha256hmac) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -1763,7 +1760,7 @@ Argument Details
 + **requireMinimal**
   + If true, non-minimally encoded values will throw an error.
 + **maxNumSize**
-  + The maximum allowed size for the number. If not provided, defaults to 4. This is useful for deprecated CHECKLOCKTIMEVERIFY where up to 5 byte long numbers are allowed.
+  + The maximum allowed size for the number. If not provided, defaults to 4.
 
 Throws
 
@@ -6396,6 +6393,7 @@ export default class Script {
     writeBin(bin: number[]): Script 
     writeNumber(num: number): Script 
     removeCodeseparators(): Script 
+    findAndDelete(script: Script): Script 
     isPushOnly(): boolean 
     isLockingScript(): boolean 
     isUnlockingScript(): boolean 
@@ -6416,6 +6414,23 @@ Argument Details
 
 + **chunks**
   + =[] - An array of script chunks to directly initialize the script.
+
+#### Method findAndDelete
+
+Deletes the given item wherever it appears in the current script.
+
+```ts
+findAndDelete(script: Script): Script 
+```
+
+Returns
+
+This script instance for chaining.
+
+Argument Details
+
++ **script**
+  + The script containing the item to delete from the current script.
 
 #### Method fromASM
 
@@ -6737,6 +6752,62 @@ Always returns true for an UnlockingScript instance.
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
+### Class: TransactionSignature
+
+```ts
+export default class TransactionSignature extends Signature {
+    public static readonly SIGHASH_ALL = 1;
+    public static readonly SIGHASH_NONE = 2;
+    public static readonly SIGHASH_SINGLE = 3;
+    public static readonly SIGHASH_FORKID = 64;
+    public static readonly SIGHASH_ANYONECANPAY = 128;
+    scope: number;
+    static format(params: {
+        sourceTXID: string;
+        sourceOutputIndex: number;
+        sourceSatoshis: BigNumber;
+        transactionVersion: number;
+        otherInputs: Array<{
+            txid: string;
+            outputIndex: number;
+            sequence: number;
+        }>;
+        outputs: Array<{
+            satoshis: BigNumber;
+            script: LockingScript;
+        }>;
+        inputIndex: number;
+        subscript: Script;
+        inputSequence: number;
+        lockTime: number;
+        scope: number;
+    }): number[] 
+    static fromChecksigFormat(buf: number[]): TransactionSignature 
+    constructor(r: BigNumber, s: BigNumber, scope: number) 
+    public hasLowS(): boolean 
+    toChecksigFormat(): number[] 
+}
+```
+
+<details>
+
+<summary>Class TransactionSignature Details</summary>
+
+#### Method hasLowS
+
+Compares to bitcoind's IsLowDERSignature
+See also Ecdsa signature algorithm which enforces this.
+See also Bip 62, "low S values in signatures"
+
+```ts
+public hasLowS(): boolean 
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ### Class: Spend
 
 The Spend class represents a spend action within a Bitcoin SV transaction.
@@ -6762,14 +6833,35 @@ export default class Spend {
     inputIndex: number;
     unlockingScript: UnlockingScript;
     inputSequence: number;
-    constructor(sourceTXID: string, sourceOutputIndex: number, sourceSatoshis: BigNumber, lockingScript: LockingScript, transactionVersion: number, otherInputs: Array<{
-        txid: string;
-        outputIndex: number;
-        sequence: number;
-    }>, outputs: Array<{
-        satoshis: BigNumber;
-        script: LockingScript;
-    }>, inputIndex: number, unlockingScript: UnlockingScript, inputSequence: number) 
+    lockTime: number;
+    context: "UnlockingScript" | "LockingScript";
+    programCounter: number;
+    lastCodeSeparator: number | null;
+    stack: number[][];
+    altStack: number[][];
+    ifStack: boolean[];
+    constructor(params: {
+        sourceTXID: string;
+        sourceOutputIndex: number;
+        sourceSatoshis: BigNumber;
+        lockingScript: LockingScript;
+        transactionVersion: number;
+        otherInputs: Array<{
+            txid: string;
+            outputIndex: number;
+            sequence: number;
+        }>;
+        outputs: Array<{
+            satoshis: BigNumber;
+            script: LockingScript;
+        }>;
+        inputIndex: number;
+        unlockingScript: UnlockingScript;
+        inputSequence: number;
+        lockTime: number;
+    }) 
+    reset(): void 
+    step(): void 
     validate(): boolean 
 }
 ```
@@ -6781,14 +6873,26 @@ export default class Spend {
 #### Constructor
 
 ```ts
-constructor(sourceTXID: string, sourceOutputIndex: number, sourceSatoshis: BigNumber, lockingScript: LockingScript, transactionVersion: number, otherInputs: Array<{
-    txid: string;
-    outputIndex: number;
-    sequence: number;
-}>, outputs: Array<{
-    satoshis: BigNumber;
-    script: LockingScript;
-}>, inputIndex: number, unlockingScript: UnlockingScript, inputSequence: number) 
+constructor(params: {
+    sourceTXID: string;
+    sourceOutputIndex: number;
+    sourceSatoshis: BigNumber;
+    lockingScript: LockingScript;
+    transactionVersion: number;
+    otherInputs: Array<{
+        txid: string;
+        outputIndex: number;
+        sequence: number;
+    }>;
+    outputs: Array<{
+        satoshis: BigNumber;
+        script: LockingScript;
+    }>;
+    inputIndex: number;
+    unlockingScript: UnlockingScript;
+    inputSequence: number;
+    lockTime: number;
+}) 
 ```
 
 Argument Details
@@ -6815,6 +6919,8 @@ The outputs of the current transaction.
   + The unlocking script for this spend.
 + **inputSequence**
   + The sequence number of this input.
++ **lockTime**
+  + The lock time of the transaction.
 
 Example
 
