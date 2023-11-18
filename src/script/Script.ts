@@ -353,6 +353,25 @@ export default class Script {
   }
 
   /**
+   * Deletes the given item wherever it appears in the current script.
+   *
+   * @param script - The script containing the item to delete from the current script.
+   *
+   * @returns This script instance for chaining.
+   */
+  findAndDelete (script: Script): Script {
+    const buf = script.toHex()
+    for (let i = 0; i < this.chunks.length; i++) {
+      const script2 = new Script([this.chunks[i]])
+      const buf2 = script2.toHex()
+      if (buf === buf2) {
+        this.chunks.splice(i, 1)
+      }
+    }
+    return this
+  }
+
+  /**
    * @method isPushOnly
    * Checks if the script contains only push data operations.
    * @returns True if the script is push-only, otherwise false.

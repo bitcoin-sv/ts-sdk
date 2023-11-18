@@ -303,6 +303,15 @@ describe('Script', () => {
     })
   })
 
+  describe('#findAndDelete', () => {
+    it('should find and delete this buffer', () => {
+      expect(Script
+        .fromASM('OP_RETURN f0f0')
+        .findAndDelete(Script.fromASM('f0f0'))
+        .toASM()).toEqual('OP_RETURN')
+    })
+  })
+
   describe('vectors', () => {
     const scriptFromVector = (str: string): Script => {
       const bw = new Writer()

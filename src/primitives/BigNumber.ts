@@ -4567,7 +4567,7 @@ export default class BigNumber {
    * @method fromScriptNum
    * @param num - The number in the format used in Bitcoin scripts.
    * @param requireMinimal - If true, non-minimally encoded values will throw an error.
-   * @param maxNumSize - The maximum allowed size for the number. If not provided, defaults to 4. This is useful for deprecated CHECKLOCKTIMEVERIFY where up to 5 byte long numbers are allowed.
+   * @param maxNumSize - The maximum allowed size for the number. If not provided, defaults to 4.
    * @returns Returns a BigNumber equivalent to the number used in a Bitcoin script.
    * @throws Will throw an error if `requireMinimal` is `true` and the value is non-minimally encoded. Will throw an error if number length is greater than `maxNumSize`.
    *
