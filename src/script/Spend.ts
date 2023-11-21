@@ -1368,6 +1368,6 @@ export default class Spend {
   }
 
   private scriptEvaluationError (str: string): void {
-    throw new Error(`Script evaluation error: ${str}\n\nContext: ${this.context}\nProgram counter: ${this.programCounter}\nStack size: ${this.stack.length}\nAlt stack size: ${this.altStack.length}`)
+    throw new Error(`Script evaluation error: ${str}\n\nSource TXID: ${this.sourceTXID}\nSource output index: ${this.sourceOutputIndex}\nContext: ${this.context}\nProgram counter: ${this.programCounter}\nStack size: ${this.stack.length}\nAlt stack size: ${this.altStack.length}`)
   }
 }
