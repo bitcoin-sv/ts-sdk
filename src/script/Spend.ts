@@ -128,7 +128,7 @@ export default class Spend {
     // set the context to LockingScript and zero the program counter
     if (
       this.context === 'UnlockingScript' &&
-      this.programCounter > this.unlockingScript.chunks.length
+      this.programCounter >= this.unlockingScript.chunks.length
     ) {
       this.context = 'LockingScript'
       this.programCounter = 0
@@ -145,7 +145,8 @@ export default class Spend {
       return op === OP.OP_2MUL ||
         op === OP.OP_2DIV ||
         op === OP.OP_VERIF ||
-        op === OP.OP_VERNOTIF
+        op === OP.OP_VERNOTIF ||
+        op === OP.OP_VER
     }
 
     const isChunkMinimal = (chunk: ScriptChunk): boolean => {
@@ -460,6 +461,70 @@ export default class Spend {
         case OP.OP_NOP8:
         case OP.OP_NOP9:
         case OP.OP_NOP10:
+        case OP.OP_NOP11:
+        case OP.OP_NOP12:
+        case OP.OP_NOP13:
+        case OP.OP_NOP14:
+        case OP.OP_NOP15:
+        case OP.OP_NOP16:
+        case OP.OP_NOP17:
+        case OP.OP_NOP18:
+        case OP.OP_NOP19:
+        case OP.OP_NOP20:
+        case OP.OP_NOP21:
+        case OP.OP_NOP22:
+        case OP.OP_NOP23:
+        case OP.OP_NOP24:
+        case OP.OP_NOP25:
+        case OP.OP_NOP26:
+        case OP.OP_NOP27:
+        case OP.OP_NOP28:
+        case OP.OP_NOP29:
+        case OP.OP_NOP30:
+        case OP.OP_NOP31:
+        case OP.OP_NOP32:
+        case OP.OP_NOP33:
+        case OP.OP_NOP34:
+        case OP.OP_NOP35:
+        case OP.OP_NOP36:
+        case OP.OP_NOP37:
+        case OP.OP_NOP38:
+        case OP.OP_NOP39:
+        case OP.OP_NOP40:
+        case OP.OP_NOP41:
+        case OP.OP_NOP42:
+        case OP.OP_NOP43:
+        case OP.OP_NOP44:
+        case OP.OP_NOP45:
+        case OP.OP_NOP46:
+        case OP.OP_NOP47:
+        case OP.OP_NOP48:
+        case OP.OP_NOP49:
+        case OP.OP_NOP50:
+        case OP.OP_NOP51:
+        case OP.OP_NOP52:
+        case OP.OP_NOP53:
+        case OP.OP_NOP54:
+        case OP.OP_NOP55:
+        case OP.OP_NOP56:
+        case OP.OP_NOP57:
+        case OP.OP_NOP58:
+        case OP.OP_NOP59:
+        case OP.OP_NOP60:
+        case OP.OP_NOP61:
+        case OP.OP_NOP62:
+        case OP.OP_NOP63:
+        case OP.OP_NOP64:
+        case OP.OP_NOP65:
+        case OP.OP_NOP66:
+        case OP.OP_NOP67:
+        case OP.OP_NOP68:
+        case OP.OP_NOP69:
+        case OP.OP_NOP70:
+        case OP.OP_NOP71:
+        case OP.OP_NOP72:
+        case OP.OP_NOP73:
+        case OP.OP_NOP77:
           break
 
         case OP.OP_IF:
@@ -1267,9 +1332,12 @@ export default class Spend {
     }
     while (true) {
       this.step()
-      if (this.context === 'LockingScript' && this.programCounter > this.lockingScript.chunks.length) {
+      if (this.context === 'LockingScript' && this.programCounter >= this.lockingScript.chunks.length) {
         break
       }
+    }
+    if (this.ifStack.length > 0) {
+      this.scriptEvaluationError('Every OP_IF must be terminated prior to the end of the script.')
     }
     if (requireCleanStack) {
       if (this.stack.length !== 1) {
