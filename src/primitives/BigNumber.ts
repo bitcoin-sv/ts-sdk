@@ -179,7 +179,7 @@ export default class BigNumber {
   /**
    * @constructor
    *
-   * @param number - The number (variant types accepted) to construct a BigNumber from. Default is 0.
+   * @param number - The number (various types accepted) to construct a BigNumber from. Default is 0.
    *
    * @param base - The base of number provided. By default is 10.
    *
@@ -727,9 +727,7 @@ export default class BigNumber {
     }
 
     if (base === (base | 0) && base >= 2 && base <= 36) {
-      // var groupSize = Math.floor(BN.wordSize * Math.LN2 / Math.log(base));
       const groupSize = BigNumber.groupSizes[base]
-      // var groupBase = Math.pow(base, groupSize);
       const groupBase = BigNumber.groupBases[base]
       out = ''
       let c = this.clone()
