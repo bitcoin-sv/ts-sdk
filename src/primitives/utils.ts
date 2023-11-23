@@ -145,17 +145,16 @@ export class Writer {
 
   getLength (): number {
     let len = 0
-    for (const i in this.bufs) {
-      const buf = this.bufs[i]
+    for (const buf of this.bufs) {
       len = len + buf.length
     }
     return len
   }
 
   toArray (): number[] {
-    let ret = []
+    const ret = []
     for (const x of this.bufs) {
-      ret = [...ret, ...x]
+      ret.push(...x)
     }
     return ret
   }

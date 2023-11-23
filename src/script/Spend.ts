@@ -29,9 +29,9 @@ const requireCleanStack = true
  * @property {BigNumber} sourceSatoshis - The amount of satoshis in the source UTXO.
  * @property {LockingScript} lockingScript - The locking script associated with the UTXO.
  * @property {number} transactionVersion - The version of the current transaction.
- * @property {Array<{ txid: string, outputIndex: number, sequence: number }>} otherInputs -
+ * @property {Array<{ sourceTXID: string, sourceOutputIndex: number, sequence: number }>} otherInputs -
  *           An array of other inputs in the transaction, each with a txid, outputIndex, and sequence number.
- * @property {Array<{ satoshis: BigNumber, script: LockingScript }>} outputs -
+ * @property {Array<{ satoshis: BigNumber, lockingScript: LockingScript }>} outputs -
  *           An array of outputs of the current transaction, including the satoshi value and locking script for each.
  * @property {number} inputIndex - The index of this input in the current transaction.
  * @property {UnlockingScript} unlockingScript - The unlocking script that unlocks the UTXO for spending.
@@ -43,8 +43,8 @@ export default class Spend {
   sourceSatoshis: BigNumber
   lockingScript: LockingScript
   transactionVersion: number
-  otherInputs: Array<{ txid: string, outputIndex: number, sequence: number }>
-  outputs: Array<{ satoshis: BigNumber, script: LockingScript }>
+  otherInputs: Array<{ sourceTXID: string, sourceOutputIndex: number, sequence: number }>
+  outputs: Array<{ satoshis: BigNumber, lockingScript: LockingScript }>
   inputIndex: number
   unlockingScript: UnlockingScript
   inputSequence: number
@@ -59,33 +59,33 @@ export default class Spend {
   /**
    * @constructor
    * Constructs the Spend object with necessary transaction details.
-   * @param {string} sourceTXID - The transaction ID of the source UTXO.
-   * @param {number} sourceOutputIndex - The index of the output in the source transaction.
-   * @param {BigNumber} sourceSatoshis - The amount of satoshis in the source UTXO.
-   * @param {LockingScript} lockingScript - The locking script associated with the UTXO.
-   * @param {number} transactionVersion - The version of the current transaction.
-   * @param {Array<{ txid: string, outputIndex: number, sequence: number }>} otherInputs -
+   * @param {string} params.sourceTXID - The transaction ID of the source UTXO.
+   * @param {number} params.sourceOutputIndex - The index of the output in the source transaction.
+   * @param {BigNumber} params.sourceSatoshis - The amount of satoshis in the source UTXO.
+   * @param {LockingScript} params.lockingScript - The locking script associated with the UTXO.
+   * @param {number} params.transactionVersion - The version of the current transaction.
+   * @param {Array<{ sourceTXID: string, sourceOutputIndex: number, sequence: number }>} params.otherInputs -
    *        An array of other inputs in the transaction.
-   * @param {Array<{ satoshis: BigNumber, script: LockingScript }>} outputs -
+   * @param {Array<{ satoshis: BigNumber, lockingScript: LockingScript }>} params.outputs -
    *        The outputs of the current transaction.
-   * @param {number} inputIndex - The index of this input in the current transaction.
-   * @param {UnlockingScript} unlockingScript - The unlocking script for this spend.
-   * @param {number} inputSequence - The sequence number of this input.
-   * @param {number} lockTime - The lock time of the transaction.
+   * @param {number} params.inputIndex - The index of this input in the current transaction.
+   * @param {UnlockingScript} params.unlockingScript - The unlocking script for this spend.
+   * @param {number} params.inputSequence - The sequence number of this input.
+   * @param {number} params.lockTime - The lock time of the transaction.
    *
    * @example
-   * const spend = new Spend(
-   *   "abcd1234", // sourceTXID
-   *   0, // sourceOutputIndex
-   *   new BigNumber(1000), // sourceSatoshis
-   *   LockingScript.fromASM("OP_DUP OP_HASH160 abcd1234... OP_EQUALVERIFY OP_CHECKSIG"),
-   *   2, // transactionVersion
-   *   [{ txid: "abcd1234", outputIndex: 1, sequence: 0xffffffff }], // otherInputs
-   *   [{ satoshis: new BigNumber(500), script: LockingScript.fromASM("OP_DUP...") }], // outputs
-   *   0, // inputIndex
-   *   UnlockingScript.fromASM("3045... 02ab..."),
-   *   0xffffffff // inputSequence
-   * );
+   * const spend = new Spend({
+   *   sourceTXID: "abcd1234", // sourceTXID
+   *   sourceOutputIndex: 0, // sourceOutputIndex
+   *   sourceSatoshis: new BigNumber(1000), // sourceSatoshis
+   *   lockingScript: LockingScript.fromASM("OP_DUP OP_HASH160 abcd1234... OP_EQUALVERIFY OP_CHECKSIG"),
+   *   transactionVersion: 1, // transactionVersion
+   *   otherInputs: [{ sourceTXID: "abcd1234", sourceOutputIndex: 1, sequence: 0xffffffff }], // otherInputs
+   *   outputs: [{ satoshis: new BigNumber(500), lockingScript: LockingScript.fromASM("OP_DUP...") }], // outputs
+   *   inputIndex: 0, // inputIndex
+   *   unlockingScript: UnlockingScript.fromASM("3045... 02ab..."),
+   *   inputSequence: 0xffffffff // inputSequence
+   * });
    */
   constructor (params: {
     sourceTXID: string
@@ -93,8 +93,8 @@ export default class Spend {
     sourceSatoshis: BigNumber
     lockingScript: LockingScript
     transactionVersion: number
-    otherInputs: Array<{ txid: string, outputIndex: number, sequence: number }>
-    outputs: Array<{ satoshis: BigNumber, script: LockingScript }>
+    otherInputs: Array<{ sourceTXID: string, sourceOutputIndex: number, sequence: number }>
+    outputs: Array<{ satoshis: BigNumber, lockingScript: LockingScript }>
     inputIndex: number
     unlockingScript: UnlockingScript
     inputSequence: number

@@ -20,8 +20,4 @@ export default class P2PKH implements ScriptTemplate {
       { op: OP.OP_PUSHDATA1, data: pubkey }
     ])
   }
-
-  unlock (key: PrivateKey, transaction: Transaction): UnlockingScript {
-
-  }
 }

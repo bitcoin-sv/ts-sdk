@@ -2,8 +2,9 @@ import Signature from './Signature.js'
 import BigNumber from './BigNumber.js'
 import * as Hash from './Hash.js'
 import { toArray, Writer } from './utils.js'
-import LockingScript from '../script/LockingScript.js'
 import Script from '../script/Script.js'
+import TransactionInput from '../transaction/TransactionInput.js'
+import TransactionOutput from '../transaction/TransactionOutput.js'
 
 export default class TransactionSignature extends Signature {
   public static readonly SIGHASH_ALL = 0x00000001
@@ -19,8 +20,8 @@ export default class TransactionSignature extends Signature {
     sourceOutputIndex: number
     sourceSatoshis: BigNumber
     transactionVersion: number
-    otherInputs: Array<{ txid: string, outputIndex: number, sequence: number }>
-    outputs: Array<{ satoshis: BigNumber, script: LockingScript }>
+    otherInputs: TransactionInput[]
+    outputs: TransactionOutput[]
     inputIndex: number
     subscript: Script
     inputSequence: number
@@ -28,8 +29,8 @@ export default class TransactionSignature extends Signature {
     scope: number
   }): number[] {
     const currentInput = {
-      txid: params.sourceTXID,
-      outputIndex: params.sourceOutputIndex,
+      sourceTXID: params.sourceTXID,
+      sourceOutputIndex: params.sourceOutputIndex,
       sequence: params.inputSequence
     }
     const inputs = [...params.otherInputs]
@@ -38,8 +39,12 @@ export default class TransactionSignature extends Signature {
     const getPrevoutHash = (): number[] => {
       const writer = new Writer()
       for (const input of inputs) {
-        writer.writeReverse(toArray(input.txid))
-        writer.writeUInt32LE(input.outputIndex)
+        if (typeof input.sourceTransaction === 'undefined') {
+          writer.write(toArray(input.sourceTXID, 'hex'))
+        } else {
+          writer.write(input.sourceTransaction.id() as number[])
+        }
+        writer.writeUInt32LE(input.sourceOutputIndex)
       }
 
       const buf = writer.toArray()
@@ -65,15 +70,15 @@ export default class TransactionSignature extends Signature {
       if (typeof outputIndex === 'undefined') {
         let script: number[]
         for (const output of params.outputs) {
-          writer.writeUInt64LEBn(output.satoshis)
-          script = output.script.toBinary()
+          writer.writeUInt64BEBn(output.satoshis)
+          script = output.lockingScript.toBinary()
           writer.writeVarIntNum(script.length)
           writer.write(script)
         }
       } else {
         const output = params.outputs[outputIndex]
-        writer.writeUInt64LEBn(output.satoshis)
-        const script = output.script.toBinary()
+        writer.writeUInt64BEBn(output.satoshis)
+        const script = output.lockingScript.toBinary()
         writer.writeVarIntNum(script.length)
         writer.write(script)
       }
@@ -113,7 +118,7 @@ export default class TransactionSignature extends Signature {
     writer.write(hashSequence)
 
     //  outpoint (32-byte hash + 4-byte little endian)
-    writer.writeReverse(toArray(params.sourceTXID, 'hex'))
+    writer.write(toArray(params.sourceTXID, 'hex'))
     writer.writeUInt32LE(params.sourceOutputIndex)
 
     // scriptCode of the input (serialized as scripts inside CTxOuts)

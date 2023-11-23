@@ -137,11 +137,16 @@ export default class Transaction {
     writer.writeUInt32LE(this.version)
     writer.writeVarIntNum(this.inputs.length)
     for (const i of this.inputs) {
-      writer.write(i.sourceTransaction.hash())
+      if (typeof i.sourceTransaction !== 'undefined') {
+        writer.write(i.sourceTransaction.hash() as number[])
+      } else {
+        writer.write(toArray(i.sourceTXID, 'hex'))
+      }
       writer.writeUInt32LE(i.sourceOutputIndex)
       const scriptBin = i.unlockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
       writer.write(scriptBin)
+      writer.writeUInt32LE(i.sequence)
     }
     writer.writeVarIntNum(this.outputs.length)
     for (const o of this.outputs) {
@@ -158,7 +163,16 @@ export default class Transaction {
     return toHex(this.toBinary())
   }
 
-  hash (): number[] {
-    return hash256(this.toBinary()) as number[]
+  hash (enc?: 'hex'): number[] | string {
+    return hash256(this.toBinary(), enc)
+  }
+
+  id (enc?: 'hex'): number[] | string {
+    const id = hash256(this.toBinary()) as number[]
+    id.reverse()
+    if (enc === 'hex') {
+      return toHex(id)
+    }
+    return id
   }
 }
