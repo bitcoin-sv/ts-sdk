@@ -8,8 +8,8 @@ import Transaction from '../../../dist/cjs/src/transaction/Transaction'
 import { hash256 } from '../../../dist/cjs/src/primitives/Hash'
 
 import sighashVectors from '../../primitives/__tests/sighash.vectors'
-import invalidScripts from '../../script/__tests/script.invalid.vectors'
-import validScripts from '../../script/__tests/script.valid.vectors'
+import invalidTransactions from './tx.invalid.vectors'
+import validTransactions from './tx.valid.vectors'
 import bigTX from './bigtx.vectors'
 
 describe('Transaction', () => {
@@ -183,7 +183,7 @@ describe('Transaction', () => {
     })
 
     let j = 0
-    validScripts.forEach((vector) => {
+    validTransactions.forEach((vector) => {
       if (vector.length === 1) {
         return
       }
@@ -196,18 +196,18 @@ describe('Transaction', () => {
       j++
     })
 
-    // j = 0
-    // invalidScripts.forEach((vector) => {
-    //   if (vector.length === 1) {
-    //     return
-    //   }
-    //   it('should correctly serialized/deserialize tx_invalid test vector ' + j, () => {
-    //     const txhex = vector[1]
-    //     const txbuf = toArray(vector[1], 'hex')
-    //     const tx = Transaction.fromBinary(txbuf)
-    //     expect(toHex(tx.toBinary())).toEqual(txhex)
-    //   })
-    //   j++
-    // })
+    j = 0
+    invalidTransactions.forEach((vector) => {
+      if (vector.length === 1) {
+        return
+      }
+      it('should correctly serialized/deserialize tx_invalid test vector ' + j, () => {
+        const txhex = vector[1]
+        const txbuf = toArray(vector[1], 'hex')
+        const tx = Transaction.fromBinary(txbuf)
+        expect(toHex(tx.toBinary())).toEqual(txhex)
+      })
+      j++
+    })
   })
 })
