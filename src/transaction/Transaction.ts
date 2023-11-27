@@ -11,6 +11,7 @@ export default class Transaction {
   inputs: TransactionInput[]
   outputs: TransactionOutput[]
   lockTime: number
+  metadata: Record<string, any>
   // merkleProof?: MerkleProof
 
   // TODO: Incomplete
@@ -110,12 +111,14 @@ export default class Transaction {
     version: number = 1,
     inputs: TransactionInput[] = [],
     outputs: TransactionOutput[] = [],
-    lockTime: number = 0
+    lockTime: number = 0,
+    metadata: Record<string, any> = {}
   ) {
     this.version = version
     this.inputs = inputs
     this.outputs = outputs
     this.lockTime = lockTime
+    this.metadata = metadata
   }
 
   addInput (input: TransactionInput): void {
@@ -130,6 +133,13 @@ export default class Transaction {
 
   addOutput (output: TransactionOutput): void {
     this.outputs.push(output)
+  }
+
+  updateMetadata (metadata: Record<string, any>): void {
+    this.metadata = {
+      ...this.metadata,
+      ...metadata
+    }
   }
 
   toBinary (): number[] {
