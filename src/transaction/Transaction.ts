@@ -90,7 +90,7 @@ export default class Transaction {
     const outputsLength = br.readVarIntNum()
     const outputs: TransactionOutput[] = []
     for (let i = 0; i < outputsLength; i++) {
-      const satoshis = br.readUInt64BEBn()
+      const satoshis = br.readUInt64LEBn()
       const scriptLength = br.readVarIntNum()
       const scriptBin = br.read(scriptLength)
       const lockingScript = LockingScript.fromBinary(scriptBin)
@@ -160,7 +160,7 @@ export default class Transaction {
     }
     writer.writeVarIntNum(this.outputs.length)
     for (const o of this.outputs) {
-      writer.writeUInt64BEBn(o.satoshis)
+      writer.writeUInt64LEBn(o.satoshis)
       const scriptBin = o.lockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
       writer.write(scriptBin)

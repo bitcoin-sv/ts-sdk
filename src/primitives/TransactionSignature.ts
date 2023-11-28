@@ -70,14 +70,14 @@ export default class TransactionSignature extends Signature {
       if (typeof outputIndex === 'undefined') {
         let script: number[]
         for (const output of params.outputs) {
-          writer.writeUInt64BEBn(output.satoshis)
+          writer.writeUInt64LEBn(output.satoshis)
           script = output.lockingScript.toBinary()
           writer.writeVarIntNum(script.length)
           writer.write(script)
         }
       } else {
         const output = params.outputs[outputIndex]
-        writer.writeUInt64BEBn(output.satoshis)
+        writer.writeUInt64LEBn(output.satoshis)
         const script = output.lockingScript.toBinary()
         writer.writeVarIntNum(script.length)
         writer.write(script)
