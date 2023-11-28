@@ -201,7 +201,7 @@ describe('Transaction', () => {
         return
       }
       it(`should correctly serialized/deserialize tx_invalid test vector ${i}`, () => {
-        if (i === 142 || i === 151) {
+        if (i === 142) {
           debugger
         }
         const expectedHex = vector[1]
