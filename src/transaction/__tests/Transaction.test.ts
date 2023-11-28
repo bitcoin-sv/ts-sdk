@@ -182,32 +182,35 @@ describe('Transaction', () => {
       })
     })
 
-    let j = 0
-    validTransactions.forEach((vector) => {
+    validTransactions.forEach((vector, i) => {
       if (vector.length === 1) {
         return
       }
-      it('should correctly serialized/deserialize tx_valid test vector ' + j, () => {
-        const txhex = vector[1]
-        const txbuf = toArray(vector[1], 'hex')
-        const tx = Transaction.fromBinary(txbuf)
-        expect(toHex(tx.toBinary())).toEqual(txhex)
+      it(`should correctly serialized/deserialize tx_valid test vector ${i}`, () => {
+        const expectedHex = vector[1]
+        const expectedBin = toArray(vector[1], 'hex')
+        const actualTX = Transaction.fromBinary(expectedBin)
+        const actualBin = actualTX.toBinary()
+        const actualHex = toHex(actualBin)
+        expect(actualHex).toEqual(expectedHex)
       })
-      j++
     })
 
-    j = 0
-    invalidTransactions.forEach((vector) => {
+    invalidTransactions.forEach((vector, i) => {
       if (vector.length === 1) {
         return
       }
-      it('should correctly serialized/deserialize tx_invalid test vector ' + j, () => {
-        const txhex = vector[1]
-        const txbuf = toArray(vector[1], 'hex')
-        const tx = Transaction.fromBinary(txbuf)
-        expect(toHex(tx.toBinary())).toEqual(txhex)
+      it(`should correctly serialized/deserialize tx_invalid test vector ${i}`, () => {
+        if (i === 142 || i === 151) {
+          debugger
+        }
+        const expectedHex = vector[1]
+        const expectedBin = toArray(vector[1], 'hex')
+        const actualTX = Transaction.fromBinary(expectedBin)
+        const actualBin = actualTX.toBinary()
+        const actualHex = toHex(actualBin)
+        expect(actualHex).toEqual(expectedHex)
       })
-      j++
     })
   })
 })

@@ -76,7 +76,7 @@ export default class Transaction {
     for (let i = 0; i < inputsLength; i++) {
       const sourceTXID = toHex(br.read(32))
       const sourceOutputIndex = br.readUInt32LE()
-      const scriptLength = new BigNumber(br.readVarInt()).toNumber()
+      const scriptLength = br.readVarIntNum()
       const scriptBin = br.read(scriptLength)
       const unlockingScript = UnlockingScript.fromBinary(scriptBin)
       const sequence = br.readUInt32LE()
@@ -91,7 +91,7 @@ export default class Transaction {
     const outputs: TransactionOutput[] = []
     for (let i = 0; i < outputsLength; i++) {
       const satoshis = br.readUInt64BEBn()
-      const scriptLength = new BigNumber(br.readVarInt()).toNumber()
+      const scriptLength = br.readVarIntNum()
       const scriptBin = br.read(scriptLength)
       const lockingScript = LockingScript.fromBinary(scriptBin)
       outputs.push({
