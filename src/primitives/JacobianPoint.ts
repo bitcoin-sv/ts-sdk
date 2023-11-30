@@ -1,4 +1,4 @@
-import { BasePoint } from './internal.js'
+import { BasePoint } from './BasePoint.js'
 import BigNumber from './BigNumber.js'
 
 /**
@@ -133,55 +133,6 @@ export class JacobianPoint extends BasePoint {
   }
 
   /**
-   * Mixed addition operation. This function combines the standard point addition with
-   * the transformation from the affine to Jacobian coordinates. It first converts
-   * the affine point to Jacobian, and then preforms the addition.
-   *
-   * @method mixedAdd
-   * @param p - The affine point to be added.
-   * @returns Returns the result of the mixed addition as a new Jacobian point.
-   *
-   * @example
-   * const jp = new JacobianPoint(x1, y1, z1)
-   * const ap = new Point(x2, y2)
-   * const result = jp.mixedAdd(ap)
-   */
-  mixedAdd (p: Point): JacobianPoint {
-    // O + P = P
-    if (this.isInfinity()) { return p.toJ() }
-
-    // P + O = P
-    if (p.isInfinity()) { return this }
-
-    // 8M + 3S + 7A
-    const z2 = this.z.redSqr()
-    const u1 = this.x
-    const u2 = p.x.redMul(z2)
-    const s1 = this.y
-    const s2 = p.y.redMul(z2).redMul(this.z)
-
-    const h = u1.redSub(u2)
-    const r = s1.redSub(s2)
-    if (h.cmpn(0) === 0) {
-      if (r.cmpn(0) !== 0) {
-        return new JacobianPoint(null, null, null)
-      } else {
-        return this.dbl()
-      }
-    }
-
-    const h2 = h.redSqr()
-    const h3 = h2.redMul(h)
-    const v = u1.redMul(h2)
-
-    const nx = r.redSqr().redIAdd(h3).redISub(v).redISub(v)
-    const ny = r.redMul(v.redISub(nx)).redISub(s1.redMul(h3))
-    const nz = this.z.redMul(h)
-
-    return new JacobianPoint(nx, ny, nz)
-  }
-
-  /**
    * Multiple doubling operation. It doubles the Jacobian point as many times as the pow parameter specifies. If pow is 0 or the point is the point at infinity, it will return the point itself.
    *
    * @method dblp
@@ -292,37 +243,6 @@ export class JacobianPoint extends BasePoint {
     }
 
     return new JacobianPoint(nx, ny, nz)
-  }
-
-  /**
-   * Equality check operation. It checks whether the affine or Jacobian point is equal to this Jacobian point.
-   *
-   * @method eq
-   * @param p - The affine or Jacobian point to compare with.
-   * @returns Returns true if the points are equal, otherwise returns false.
-   *
-   * @example
-   * const jp1 = new JacobianPoint(x1, y1, z1)
-   * const jp2 = new JacobianPoint(x2, y2, z2)
-   * const areEqual = jp1.eq(jp2)
-   */
-  eq (p: Point | JacobianPoint): boolean {
-    if (p.type === 'affine') { return this.eq((p as Point).toJ()) }
-
-    if (this === p) { return true }
-
-    // x1 * z2^2 == x2 * z1^2
-    const z2 = this.z.redSqr()
-    p = p as JacobianPoint
-    const pz2 = p.z.redSqr()
-    if (this.x.redMul(pz2).redISub(p.x.redMul(z2)).cmpn(0) !== 0) {
-      return false
-    }
-
-    // y1 * z2^3 == y2 * z1^3
-    const z3 = z2.redMul(this.z)
-    const pz3 = pz2.redMul(p.z)
-    return this.y.redMul(pz3).redISub(p.y.redMul(z3)).cmpn(0) === 0
   }
 
   /**
