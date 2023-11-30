@@ -4,6 +4,17 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ## Interfaces
 
+| |
+| --- |
+| [ScriptChunk](#interface-scriptchunk) |
+| [ScriptTemplate](#interface-scripttemplate) |
+| [TransactionInput](#interface-transactioninput) |
+| [TransactionOutput](#interface-transactionoutput) |
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+
 ### Interface: ScriptChunk
 
 A representation of a chunk of a script, which includes an opcode. For push operations, the associated data to push onto the stack is also included.
@@ -18,6 +29,45 @@ export default interface ScriptChunk {
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
+### Interface: TransactionOutput
+
+```ts
+export default interface TransactionOutput {
+    satoshis: BigNumber;
+    lockingScript: LockingScript;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Interface: TransactionInput
+
+```ts
+export default interface TransactionInput {
+    sourceTransaction?: Transaction;
+    sourceTXID?: string;
+    sourceOutputIndex: number;
+    unlockingScript?: UnlockingScript;
+    sequence: number;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Interface: ScriptTemplate
+
+```ts
+export default interface ScriptTemplate {
+    lock: (...params: any) => LockingScript;
+    unlock: (...params: any) => UnlockingScript;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ## Classes
 
 | | | |
@@ -26,10 +76,10 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [BigNumber](#class-bignumber) | [PrivateKey](#class-privatekey) | [Signature](#class-signature) |
 | [Curve](#class-curve) | [PublicKey](#class-publickey) | [Spend](#class-spend) |
 | [DRBG](#class-drbg) | [RIPEMD160](#class-ripemd160) | [SymmetricKey](#class-symmetrickey) |
-| [JacobianPoint](#class-jacobianpoint) | [Reader](#class-reader) | [TransactionSignature](#class-transactionsignature) |
-| [K256](#class-k256) | [ReductionContext](#class-reductioncontext) | [UnlockingScript](#class-unlockingscript) |
-| [LockingScript](#class-lockingscript) | [SHA1](#class-sha1) | [Writer](#class-writer) |
-| [Mersenne](#class-mersenne) | [SHA256](#class-sha256) |  |
+| [JacobianPoint](#class-jacobianpoint) | [Reader](#class-reader) | [Transaction](#class-transaction) |
+| [K256](#class-k256) | [ReductionContext](#class-reductioncontext) | [TransactionSignature](#class-transactionsignature) |
+| [LockingScript](#class-lockingscript) | [SHA1](#class-sha1) | [UnlockingScript](#class-unlockingscript) |
+| [Mersenne](#class-mersenne) | [SHA256](#class-sha256) | [Writer](#class-writer) |
 | [MontgomoryMethod](#class-montgomorymethod) | [SHA256HMAC](#class-sha256hmac) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
@@ -973,7 +1023,7 @@ constructor(number: number | string | number[] = 0, base: number | "be" | "le" |
 Argument Details
 
 + **number**
-  + The number (variant types accepted) to construct a BigNumber from. Default is 0.
+  + The number (various types accepted) to construct a BigNumber from. Default is 0.
 + **base**
   + The base of number provided. By default is 10.
 + **endian**
@@ -6752,6 +6802,31 @@ Always returns true for an UnlockingScript instance.
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
+### Class: Transaction
+
+```ts
+export default class Transaction {
+    version: number;
+    inputs: TransactionInput[];
+    outputs: TransactionOutput[];
+    lockTime: number;
+    metadata: Record<string, any>;
+    static fromBinary(bin: number[]): Transaction 
+    static fromHex(hex: string): Transaction 
+    constructor(version: number = 1, inputs: TransactionInput[] = [], outputs: TransactionOutput[] = [], lockTime: number = 0, metadata: Record<string, any> = {}) 
+    addInput(input: TransactionInput): void 
+    addOutput(output: TransactionOutput): void 
+    updateMetadata(metadata: Record<string, any>): void 
+    toBinary(): number[] 
+    toHex(): string 
+    hash(enc?: "hex"): number[] | string 
+    id(enc?: "hex"): number[] | string 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ### Class: TransactionSignature
 
 ```ts
@@ -6767,15 +6842,8 @@ export default class TransactionSignature extends Signature {
         sourceOutputIndex: number;
         sourceSatoshis: BigNumber;
         transactionVersion: number;
-        otherInputs: Array<{
-            txid: string;
-            outputIndex: number;
-            sequence: number;
-        }>;
-        outputs: Array<{
-            satoshis: BigNumber;
-            script: LockingScript;
-        }>;
+        otherInputs: TransactionInput[];
+        outputs: TransactionOutput[];
         inputIndex: number;
         subscript: Script;
         inputSequence: number;
@@ -6822,13 +6890,13 @@ export default class Spend {
     lockingScript: LockingScript;
     transactionVersion: number;
     otherInputs: Array<{
-        txid: string;
-        outputIndex: number;
+        sourceTXID: string;
+        sourceOutputIndex: number;
         sequence: number;
     }>;
     outputs: Array<{
         satoshis: BigNumber;
-        script: LockingScript;
+        lockingScript: LockingScript;
     }>;
     inputIndex: number;
     unlockingScript: UnlockingScript;
@@ -6847,13 +6915,13 @@ export default class Spend {
         lockingScript: LockingScript;
         transactionVersion: number;
         otherInputs: Array<{
-            txid: string;
-            outputIndex: number;
+            sourceTXID: string;
+            sourceOutputIndex: number;
             sequence: number;
         }>;
         outputs: Array<{
             satoshis: BigNumber;
-            script: LockingScript;
+            lockingScript: LockingScript;
         }>;
         inputIndex: number;
         unlockingScript: UnlockingScript;
@@ -6880,13 +6948,13 @@ constructor(params: {
     lockingScript: LockingScript;
     transactionVersion: number;
     otherInputs: Array<{
-        txid: string;
-        outputIndex: number;
+        sourceTXID: string;
+        sourceOutputIndex: number;
         sequence: number;
     }>;
     outputs: Array<{
         satoshis: BigNumber;
-        script: LockingScript;
+        lockingScript: LockingScript;
     }>;
     inputIndex: number;
     unlockingScript: UnlockingScript;
@@ -6897,46 +6965,46 @@ constructor(params: {
 
 Argument Details
 
-+ **sourceTXID**
++ **params.sourceTXID**
   + The transaction ID of the source UTXO.
-+ **sourceOutputIndex**
++ **params.sourceOutputIndex**
   + The index of the output in the source transaction.
-+ **sourceSatoshis**
++ **params.sourceSatoshis**
   + The amount of satoshis in the source UTXO.
-+ **lockingScript**
++ **params.lockingScript**
   + The locking script associated with the UTXO.
-+ **transactionVersion**
++ **params.transactionVersion**
   + The version of the current transaction.
-+ **otherInputs**
++ **params.otherInputs**
   + -
 An array of other inputs in the transaction.
-+ **outputs**
++ **params.outputs**
   + -
 The outputs of the current transaction.
-+ **inputIndex**
++ **params.inputIndex**
   + The index of this input in the current transaction.
-+ **unlockingScript**
++ **params.unlockingScript**
   + The unlocking script for this spend.
-+ **inputSequence**
++ **params.inputSequence**
   + The sequence number of this input.
-+ **lockTime**
++ **params.lockTime**
   + The lock time of the transaction.
 
 Example
 
 ```ts
-const spend = new Spend(
-  "abcd1234", // sourceTXID
-  0, // sourceOutputIndex
-  new BigNumber(1000), // sourceSatoshis
-  LockingScript.fromASM("OP_DUP OP_HASH160 abcd1234... OP_EQUALVERIFY OP_CHECKSIG"),
-  2, // transactionVersion
-  [{ txid: "abcd1234", outputIndex: 1, sequence: 0xffffffff }], // otherInputs
-  [{ satoshis: new BigNumber(500), script: LockingScript.fromASM("OP_DUP...") }], // outputs
-  0, // inputIndex
-  UnlockingScript.fromASM("3045... 02ab..."),
-  0xffffffff // inputSequence
-);
+const spend = new Spend({
+  sourceTXID: "abcd1234", // sourceTXID
+  sourceOutputIndex: 0, // sourceOutputIndex
+  sourceSatoshis: new BigNumber(1000), // sourceSatoshis
+  lockingScript: LockingScript.fromASM("OP_DUP OP_HASH160 abcd1234... OP_EQUALVERIFY OP_CHECKSIG"),
+  transactionVersion: 1, // transactionVersion
+  otherInputs: [{ sourceTXID: "abcd1234", sourceOutputIndex: 1, sequence: 0xffffffff }], // otherInputs
+  outputs: [{ satoshis: new BigNumber(500), lockingScript: LockingScript.fromASM("OP_DUP...") }], // outputs
+  inputIndex: 0, // inputIndex
+  unlockingScript: UnlockingScript.fromASM("3045... 02ab..."),
+  inputSequence: 0xffffffff // inputSequence
+});
 ```
 
 #### Method validate
