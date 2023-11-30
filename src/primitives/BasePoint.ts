@@ -1,10 +1,10 @@
-import Curve from './Curve.js'
+import { Curve } from './internal.js'
 
 /**
  * Base class for Point (affine coordinates) and JacobianPoint classes,
  * defining their curve and type.
  */
-export default abstract class BasePoint {
+export abstract class BasePoint {
   curve: Curve
   type: 'affine' | 'jacobian'
   precomputed: {

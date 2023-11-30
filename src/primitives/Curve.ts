@@ -1,7 +1,6 @@
 import BigNumber from './BigNumber.js'
 import ReductionContext from './ReductionContext.js'
 import MontgomoryMethod from './MontgomoryMethod.js'
-import Point from './Point.js'
 import { toArray } from './utils.js'
 
 // This ensures that only one curve is ever created, enhancing performance.
@@ -9,14 +8,13 @@ import { toArray } from './utils.js'
 // So far, this assumption has proven to be valid.
 let globalCurve: Curve
 
-export default class Curve {
+export class Curve {
   p: BigNumber
   red: ReductionContext
   redN: BigNumber | null
   zero: BigNumber
   one: BigNumber
   two: BigNumber
-  g: Point
   n: BigNumber
   a: BigNumber
   b: BigNumber
@@ -965,7 +963,6 @@ export default class Curve {
 
     // Curve configuration, optional
     this.n = new BigNumber(conf.n, 16)
-    this.g = Point.fromJSON(conf.g, conf.gRed)
 
     // Temporary arrays
     this._wnafT1 = new Array(4)
@@ -1012,11 +1009,11 @@ export default class Curve {
     } else {
       // Choose the lambda that is matching selected beta
       const lambdas = this._getEndoRoots(this.n)
-      if (this.g.mul(lambdas[0]).x.cmp(this.g.x.redMul(beta)) === 0) {
+      if (conf.g.mul(lambdas[0]).x.cmp(conf.g.x.redMul(beta)) === 0) {
         lambda = lambdas[0]
       } else {
         lambda = lambdas[1]
-        Curve.assert(this.g.mul(lambda).x.cmp(this.g.x.redMul(beta)) === 0)
+        Curve.assert(conf.g.mul(lambda).x.cmp(conf.g.x.redMul(beta)) === 0)
       }
     }
 
@@ -1150,7 +1147,7 @@ export default class Curve {
     return { k1, k2 }
   }
 
-  validate (point: Point): boolean {
+  validate (point: { x: BigNumber | null, y: BigNumber | null, inf: boolean }): boolean {
     if (point.inf) { return true }
 
     const x = point.x

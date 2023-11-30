@@ -1,5 +1,4 @@
-import BasePoint from './BasePoint.js'
-import JPoint from './JacobianPoint.js'
+import { BasePoint, JacobianPoint } from './internal.js'
 import BigNumber from './BigNumber.js'
 import { toArray, toHex } from './utils.js'
 import ReductionContext from './ReductionContext.js'
@@ -16,7 +15,7 @@ import ReductionContext from './ReductionContext.js'
  * @property y - The y-coordinate of the point.
  * @property inf - Flag to record if the point is at infinity in the Elliptic Curve.
  */
-export default class Point extends BasePoint {
+export class Point extends BasePoint {
   x: BigNumber | null
   y: BigNumber | null
   inf: boolean
@@ -66,6 +65,30 @@ export default class Point extends BasePoint {
       return Point.fromX(bytes.slice(1, 1 + len), bytes[0] === 0x03)
     }
     throw new Error('Unknown point format')
+  }
+
+  /**
+   * Converts the `JacobianPoint` object instance to standard affine `Point` format and returns `Point` type.
+   *
+   * @returns The `Point`(affine) object representing the same point as the original `JacobianPoint`.
+   *
+   * If the initial `JacobianPoint` represents point at infinity, an instance of `Point` at infinity is returned.
+   *
+   * @example
+   * const pointJ = new JacobianPoint('3', '4', '1');
+   * const pointP = Point.fromJ(pointJ);  // The point in affine coordinates.
+   */
+  fromJ (jPoint: JacobianPoint): Point {
+    if (jPoint.isInfinity()) {
+      return new Point(null, null)
+    }
+
+    const zinv = jPoint.z.redInvm()
+    const zinv2 = zinv.redSqr()
+    const ax = jPoint.x.redMul(zinv2)
+    const ay = jPoint.y.redMul(zinv2).redMul(zinv)
+
+    return new Point(ax, ay)
   }
 
   /**
@@ -473,10 +496,10 @@ export default class Point extends BasePoint {
    * const p2 = new Point(2, 3);
    * const result = p1.jmulAdd(2, p2, 3);
    */
-  jmulAdd (k1: BigNumber, p2: Point, k2: BigNumber): JPoint {
+  jmulAdd (k1: BigNumber, p2: Point, k2: BigNumber): JacobianPoint {
     const points = [this, p2]
     const coeffs = [k1, k2]
-    return this._endoWnafMulAdd(points, coeffs, true) as JPoint
+    return this._endoWnafMulAdd(points, coeffs, true) as JacobianPoint
   }
 
   /**
@@ -561,12 +584,61 @@ export default class Point extends BasePoint {
    * const point = new Point(xCoordinate, yCoordinate);
    * const jacobianPoint = point.toJ();
    */
-  toJ (): JPoint {
+  toJ (): JacobianPoint {
     if (this.inf) {
-      return new JPoint(null, null, null)
+      return new JacobianPoint(null, null, null)
     }
-    const res = new JPoint(this.x, this.y, this.curve.one)
+    const res = new JacobianPoint(this.x, this.y, this.curve.one)
     return res
+  }
+
+  /**
+   * Mixed addition operation. This function combines the standard point addition with
+   * the transformation from the affine to Jacobian coordinates. It first converts
+   * the affine point to Jacobian, and then preforms the addition.
+   *
+   * @method mixedAdd
+   * @param p - The affine point to be added.
+   * @returns Returns the result of the mixed addition as a new Jacobian point.
+   *
+   * @example
+   * const jp = new JacobianPoint(x1, y1, z1)
+   * const ap = new Point(x2, y2)
+   * const result = ap.mixedAdd(jp)
+   */
+  mixedAdd (p: JacobianPoint): JacobianPoint {
+    // O + P = P
+    if (p.isInfinity()) { return p }
+
+    // P + O = P
+    if (p.isInfinity()) { return this.toJ() }
+
+    // 8M + 3S + 7A
+    const z2 = p.z.redSqr()
+    const u1 = p.x
+    const u2 = this.x.redMul(z2)
+    const s1 = p.y
+    const s2 = this.y.redMul(z2).redMul(p.z)
+
+    const h = u1.redSub(u2)
+    const r = s1.redSub(s2)
+    if (h.cmpn(0) === 0) {
+      if (r.cmpn(0) !== 0) {
+        return new JacobianPoint(null, null, null)
+      } else {
+        return p.dbl()
+      }
+    }
+
+    const h2 = h.redSqr()
+    const h3 = h2.redMul(h)
+    const v = u1.redMul(h2)
+
+    const nx = r.redSqr().redIAdd(h3).redISub(v).redISub(v)
+    const ny = r.redMul(v.redISub(nx)).redISub(s1.redMul(h3))
+    const nz = p.z.redMul(h)
+
+    return new JacobianPoint(nx, ny, nz)
   }
 
   private _getBeta (): undefined | Point {
@@ -623,20 +695,20 @@ export default class Point extends BasePoint {
       repr.push(nafW)
     }
 
-    let a = new JPoint(null, null, null)
-    let b = new JPoint(null, null, null)
+    let a = new JacobianPoint(null, null, null)
+    let b = new JacobianPoint(null, null, null)
     for (let i = I; i > 0; i--) {
       for (let j = 0; j < repr.length; j++) {
         const nafW = repr[j]
         if (nafW === i) {
-          b = b.mixedAdd(doubles.points[j])
+          b = doubles.points[j].mixedAdd(b)
         } else if (nafW === -i) {
-          b = b.mixedAdd((doubles.points[j]).neg())
+          b = (doubles.points[j]).neg().mixedAdd(b)
         }
       }
       a = a.add(b)
     }
-    return a.toP()
+    return this.fromJ(a)
   }
 
   private _wnafMulAdd (
@@ -683,13 +755,13 @@ export default class Point extends BasePoint {
       // Try to avoid Projective points, if possible
       if (points[a].y.cmp(points[b].y) === 0) {
         comb[1] = points[a].add(points[b])
-        comb[2] = points[a].toJ().mixedAdd(points[b].neg())
+        comb[2] = points[b].neg().mixedAdd(points[a].toJ())
       } else if (points[a].y.cmp(points[b].y.redNeg()) === 0) {
-        comb[1] = points[a].toJ().mixedAdd(points[b])
+        comb[1] = points[b].mixedAdd(points[a].toJ())
         comb[2] = points[a].add(points[b].neg())
       } else {
-        comb[1] = points[a].toJ().mixedAdd(points[b])
-        comb[2] = points[a].toJ().mixedAdd(points[b].neg())
+        comb[1] = points[b].mixedAdd(points[a].toJ())
+        comb[2] = points[b].neg().mixedAdd(points[a].toJ())
       }
 
       const index = [
@@ -718,7 +790,7 @@ export default class Point extends BasePoint {
       }
     }
 
-    let acc = new JPoint(null, null, null)
+    let acc = new JacobianPoint(null, null, null)
     const tmp = this.curve._wnafT4
     for (let i = max; i >= 0; i--) {
       let k = 0
@@ -749,7 +821,7 @@ export default class Point extends BasePoint {
         }
 
         if (p.type === 'affine') {
-          acc = acc.mixedAdd(p)
+          acc = p.mixedAdd(acc)
         } else {
           acc = acc.add(p)
         }
@@ -761,7 +833,7 @@ export default class Point extends BasePoint {
     if (jacobianResult) {
       return acc
     } else {
-      return acc.toP()
+      return this.fromJ(acc)
     }
   }
 

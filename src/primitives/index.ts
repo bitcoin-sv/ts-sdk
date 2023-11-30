@@ -1,5 +1,5 @@
 export { default as BigNumber } from './BigNumber.js'
-export { default as Point } from './Point.js'
+export { Point } from './internal.js'
 export { default as PublicKey } from './PublicKey.js'
 export { default as Signature } from './Signature.js'
 export { default as PrivateKey } from './PrivateKey.js'

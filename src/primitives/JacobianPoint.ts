@@ -1,6 +1,5 @@
-import BasePoint from './BasePoint.js'
+import { BasePoint } from './internal.js'
 import BigNumber from './BigNumber.js'
-import Point from './Point.js'
 
 /**
  * The `JacobianPoint` class extends the `BasePoint` class for handling Jacobian coordinates on an Elliptic Curve.
@@ -16,7 +15,7 @@ import Point from './Point.js'
  * @example
  * const pointJ = new JacobianPoint('3', '4', '1');
  */
-export default class JacobianPoint extends BasePoint {
+export class JacobianPoint extends BasePoint {
   x: BigNumber
   y: BigNumber
   z: BigNumber
@@ -67,30 +66,6 @@ export default class JacobianPoint extends BasePoint {
     if (this.z.red == null) { this.z = this.z.toRed(this.curve.red) }
 
     this.zOne = this.z === this.curve.one
-  }
-
-  /**
-   * Converts the `JacobianPoint` object instance to standard affine `Point` format and returns `Point` type.
-   *
-   * @returns The `Point`(affine) object representing the same point as the original `JacobianPoint`.
-   *
-   * If the initial `JacobianPoint` represents point at infinity, an instance of `Point` at infinity is returned.
-   *
-   * @example
-   * const pointJ = new JacobianPoint('3', '4', '1');
-   * const pointP = pointJ.toP();  // The point in affine coordinates.
-   */
-  toP (): Point {
-    if (this.isInfinity()) {
-      return new Point(null, null)
-    }
-
-    const zinv = this.z.redInvm()
-    const zinv2 = zinv.redSqr()
-    const ax = this.x.redMul(zinv2)
-    const ay = this.y.redMul(zinv2).redMul(zinv)
-
-    return new Point(ax, ay)
   }
 
   /**
