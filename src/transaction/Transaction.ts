@@ -5,6 +5,8 @@ import LockingScript from '../script/LockingScript.js'
 import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
 import { hash256 } from '../primitives/Hash.js'
 import BigNumber from '../primitives/BigNumber.js'
+import FeeModel from './FeeModel.js'
+import SatoshisPerKilobyte from './fee-models/SatoshisPerKilobyte.js'
 
 export default class Transaction {
   version: number
@@ -139,6 +141,70 @@ export default class Transaction {
     this.metadata = {
       ...this.metadata,
       ...metadata
+    }
+  }
+
+  /**
+   * Computes fees prior to signing.
+   * If no fee model is provided, uses a SatoshisPerKilobyte fee model that pays 10 sat/kb.
+   *
+   * @param model - The initialized fee model to use
+   * @param changeDistribution - Specifies how the change should be distributed
+   * amongst the change outputs
+   *
+   * TODO: Benford's law change distribution.
+   */
+  fee (model?: FeeModel, changeDistribution: 'equal' | 'random' = 'equal'): void {
+    if (typeof model === 'undefined') {
+      model = new SatoshisPerKilobyte(10)
+    }
+    const fee = model.computeFee(this)
+    // change = inputs - fee - non-change outputs
+    const change = new BigNumber(0)
+    for (const input of this.inputs) {
+      if (typeof input.sourceTransaction !== 'object') {
+        throw new Error('Source transactions are required for all inputs during fee computation')
+      }
+      change.add(
+        input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
+      )
+    }
+    change.sub(fee)
+    for (const out of this.outputs) {
+      if (!out.change) {
+        change.sub(out.satoshis)
+      }
+    }
+
+    // Distribute change among change outputs
+    if (changeDistribution === 'random') {
+      // TODO
+      throw new Error('Not yet implemented')
+    } else if (changeDistribution === 'equal') {
+      const totalChangeOutputs = this.outputs.reduce(
+        (a, e) => e.change ? a + 1 : a,
+        0
+      )
+      const perOutput = change.divn(totalChangeOutputs)
+      for (const out of this.outputs) {
+        if (out.change) {
+          out.satoshis = perOutput.clone()
+        }
+      }
+    }
+  }
+
+  /**
+   * Signs a transaction, hydrating all its unlocking scripts based on the provided script templates where they are available.
+   */
+  sign (): void {
+    for (let i = 0, l = this.inputs.length; i < l; i++) {
+      if (typeof this.inputs[i].createUnlockingScript === 'function') {
+        this.inputs[i].unlockingScript = this.inputs[i].createUnlockingScript(
+          this,
+          i
+        )
+      }
     }
   }
 

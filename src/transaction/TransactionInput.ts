@@ -6,5 +6,6 @@ export default interface TransactionInput {
   sourceTXID?: string
   sourceOutputIndex: number
   unlockingScript?: UnlockingScript
+  createUnlockingScript?: (tx: Transaction, inputIndex: number) => UnlockingScript
   sequence: number
 }
