@@ -32,6 +32,20 @@ export default class PrivateKey extends BigNumber {
   }
 
   /**
+   * Generates a private key from a string.
+   *
+   * @method fromString
+   * @static
+   * @param str - The string to generate the private key from.
+   * @param base - The base of the string.
+   * @returns The generated Private Key.
+   * @throws Will throw an error if the string is not valid.
+   **/
+  static fromString (str: string, base: number | 'hex'): PrivateKey {
+    return new PrivateKey(BigNumber.fromString(str, base).toArray())
+  }
+
+  /**
    * Signs a message using the private key.
    *
    * @method sign
