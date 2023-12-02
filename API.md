@@ -6,6 +6,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | |
 | --- |
+| [FeeModel](#interface-feemodel) |
 | [ScriptChunk](#interface-scriptchunk) |
 | [ScriptTemplate](#interface-scripttemplate) |
 | [TransactionInput](#interface-transactioninput) |
@@ -33,8 +34,23 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export default interface TransactionOutput {
-    satoshis: BigNumber;
+    satoshis?: BigNumber;
     lockingScript: LockingScript;
+    change?: boolean;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Interface: FeeModel
+
+Represents the interface for a transaction fee model.
+This interface defines a standard method for computing a fee when given a transaction.
+
+```ts
+export default interface FeeModel {
+    computeFee: (transaction: Transaction) => BigNumber;
 }
 ```
 
@@ -49,6 +65,7 @@ export default interface TransactionInput {
     sourceTXID?: string;
     sourceOutputIndex: number;
     unlockingScript?: UnlockingScript;
+    createUnlockingScript?: (tx: Transaction, inputIndex: number) => UnlockingScript;
     sequence: number;
 }
 ```
@@ -61,7 +78,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export default interface ScriptTemplate {
     lock: (...params: any) => LockingScript;
-    unlock: (...params: any) => UnlockingScript;
+    unlock: (...params: any) => (tx: Transaction, inputIndex: number) => UnlockingScript;
+    estimateUnlockingScriptLength: (...params: any) => number;
 }
 ```
 
@@ -72,15 +90,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [BasePoint](#class-basepoint) | [Point](#class-point) | [Script](#class-script) |
-| [BigNumber](#class-bignumber) | [PrivateKey](#class-privatekey) | [Signature](#class-signature) |
-| [Curve](#class-curve) | [PublicKey](#class-publickey) | [Spend](#class-spend) |
-| [DRBG](#class-drbg) | [RIPEMD160](#class-ripemd160) | [SymmetricKey](#class-symmetrickey) |
-| [JacobianPoint](#class-jacobianpoint) | [Reader](#class-reader) | [Transaction](#class-transaction) |
-| [K256](#class-k256) | [ReductionContext](#class-reductioncontext) | [TransactionSignature](#class-transactionsignature) |
-| [LockingScript](#class-lockingscript) | [SHA1](#class-sha1) | [UnlockingScript](#class-unlockingscript) |
-| [Mersenne](#class-mersenne) | [SHA256](#class-sha256) | [Writer](#class-writer) |
-| [MontgomoryMethod](#class-montgomorymethod) | [SHA256HMAC](#class-sha256hmac) |  |
+| [BasePoint](#class-basepoint) | [Point](#class-point) | [SatoshisPerKilobyte](#class-satoshisperkilobyte) |
+| [BigNumber](#class-bignumber) | [PrivateKey](#class-privatekey) | [Script](#class-script) |
+| [Curve](#class-curve) | [PublicKey](#class-publickey) | [Signature](#class-signature) |
+| [DRBG](#class-drbg) | [RIPEMD160](#class-ripemd160) | [Spend](#class-spend) |
+| [JacobianPoint](#class-jacobianpoint) | [Reader](#class-reader) | [SymmetricKey](#class-symmetrickey) |
+| [K256](#class-k256) | [ReductionContext](#class-reductioncontext) | [Transaction](#class-transaction) |
+| [LockingScript](#class-lockingscript) | [SHA1](#class-sha1) | [TransactionSignature](#class-transactionsignature) |
+| [Mersenne](#class-mersenne) | [SHA256](#class-sha256) | [UnlockingScript](#class-unlockingscript) |
+| [MontgomoryMethod](#class-montgomorymethod) | [SHA256HMAC](#class-sha256hmac) | [Writer](#class-writer) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -6051,6 +6069,7 @@ create a corresponding public key and derive a shared secret from a public key.
 ```ts
 export default class PrivateKey extends BigNumber {
     static fromRandom(): PrivateKey 
+    static fromString(str: string, base: number | "hex"): PrivateKey 
     sign(msg: number[] | string, enc?: "hex"): Signature 
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toPublicKey(): PublicKey 
@@ -6108,6 +6127,29 @@ Example
 ```ts
 const privateKey = PrivateKey.fromRandom();
 ```
+
+#### Method fromString
+
+Generates a private key from a string.
+
+```ts
+static fromString(str: string, base: number | "hex"): PrivateKey 
+```
+
+Returns
+
+The generated Private Key.
+
+Argument Details
+
++ **str**
+  + The string to generate the private key from.
++ **base**
+  + The base of the string.
+
+Throws
+
+Will throw an error if the string is not valid.
 
 #### Method sign
 
@@ -6802,6 +6844,40 @@ Always returns true for an UnlockingScript instance.
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
+### Class: SatoshisPerKilobyte
+
+Represents the "satoshis per kilobyte" transaction fee model.
+
+```ts
+export default class SatoshisPerKilobyte implements FeeModel {
+    value: number;
+    constructor(value: number) 
+    computeFee(tx: Transaction): BigNumber 
+}
+```
+
+<details>
+
+<summary>Class SatoshisPerKilobyte Details</summary>
+
+#### Constructor
+
+Constructs an instance of the sat/kb fee model.
+
+```ts
+constructor(value: number) 
+```
+
+Argument Details
+
++ **value**
+  + The number of satoshis per kilobyte to charge as a fee.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ### Class: Transaction
 
 ```ts
@@ -6817,12 +6893,47 @@ export default class Transaction {
     addInput(input: TransactionInput): void 
     addOutput(output: TransactionOutput): void 
     updateMetadata(metadata: Record<string, any>): void 
+    fee(model?: FeeModel, changeDistribution: "equal" | "random" = "equal"): void 
+    sign(): void 
     toBinary(): number[] 
     toHex(): string 
     hash(enc?: "hex"): number[] | string 
     id(enc?: "hex"): number[] | string 
 }
 ```
+
+<details>
+
+<summary>Class Transaction Details</summary>
+
+#### Method fee
+
+Computes fees prior to signing.
+If no fee model is provided, uses a SatoshisPerKilobyte fee model that pays 10 sat/kb.
+
+```ts
+fee(model?: FeeModel, changeDistribution: "equal" | "random" = "equal"): void 
+```
+
+Argument Details
+
++ **model**
+  + The initialized fee model to use
++ **changeDistribution**
+  + Specifies how the change should be distributed
+amongst the change outputs
+
+TODO: Benford's law change distribution.
+
+#### Method sign
+
+Signs a transaction, hydrating all its unlocking scripts based on the provided script templates where they are available.
+
+```ts
+sign(): void 
+```
+
+</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
