@@ -36,6 +36,46 @@
       "import": "./dist/esm/src/script/*.js",
       "require": "./dist/cjs/src/script/*.js",
       "types": "./dist/types/src/script/*.d.ts"
+    },
+    "./script/templates": {
+      "import": "./dist/esm/src/script/templates/index.js",
+      "require": "./dist/cjs/src/script/templates/index.js",
+      "types": "./dist/types/src/script/templates/index.d.ts"
+    },
+    "./script/templates/*": {
+      "import": "./dist/esm/src/script/templates/*.js",
+      "require": "./dist/cjs/src/script/templates/*.js",
+      "types": "./dist/types/src/script/templates/*.d.ts"
+    },
+    "./transaction": {
+      "import": "./dist/esm/src/transaction/index.js",
+      "require": "./dist/cjs/src/transaction/index.js",
+      "types": "./dist/types/src/transaction/index.d.ts"
+    },
+    "./transaction/*": {
+      "import": "./dist/esm/src/transaction/*.js",
+      "require": "./dist/cjs/src/transaction/*.js",
+      "types": "./dist/types/src/transaction/*.d.ts"
+    },
+    "./transaction/broadcaster": {
+      "import": "./dist/esm/src/transaction/broadcaster/index.js",
+      "require": "./dist/cjs/src/transaction/broadcaster/index.js",
+      "types": "./dist/types/src/transaction/broadcaster/index.d.ts"
+    },
+    "./transaction/broadcaster/*": {
+      "import": "./dist/esm/src/transaction/broadcaster/*.js",
+      "require": "./dist/cjs/src/transaction/broadcaster/*.js",
+      "types": "./dist/types/src/transaction/broadcaster/*.d.ts"
+    },
+    "./transaction/fee-model": {
+      "import": "./dist/esm/src/transaction/fee-model/index.js",
+      "require": "./dist/cjs/src/transaction/fee-model/index.js",
+      "types": "./dist/types/src/transaction/fee-model/index.d.ts"
+    },
+    "./transaction/fee-model/*": {
+      "import": "./dist/esm/src/transaction/fee-model/*.js",
+      "require": "./dist/cjs/src/transaction/fee-model/*.js",
+      "types": "./dist/types/src/transaction/fee-model/*.d.ts"
     }
   },
   "scripts": {
