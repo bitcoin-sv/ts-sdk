@@ -360,10 +360,14 @@ export default class Spend {
       if (buf.length < 33) {
         this.scriptEvaluationError('The public key is too short, it must be at least 33 bytes.')
       }
-      if (buf[0] === 0x04 && buf.length !== 65) {
-        this.scriptEvaluationError('The non-compressed public key must be 65 bytes.')
-      } else if ((buf[0] === 0x02 || buf[0] === 0x03) && buf.length !== 33) {
-        this.scriptEvaluationError('The compressed public key must be 33 bytes.')
+      if (buf[0] === 0x04) {
+        if (buf.length !== 65) {
+          this.scriptEvaluationError('The non-compressed public key must be 65 bytes.')
+        }
+      } else if ((buf[0] === 0x02 || buf[0] === 0x03)) {
+        if (buf.length !== 33) {
+          this.scriptEvaluationError('The compressed public key must be 33 bytes.')
+        }
       } else {
         this.scriptEvaluationError('The public key is in an unknown format.')
       }

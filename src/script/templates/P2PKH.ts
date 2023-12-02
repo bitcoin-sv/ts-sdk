@@ -12,7 +12,7 @@ export default class P2PKH implements ScriptTemplate {
     return new LockingScript([
       { op: OP.OP_DUP },
       { op: OP.OP_HASH160 },
-      { op: OP.OP_PUSHDATA1, data: pubkeyhash },
+      { op: pubkeyhash.length, data: pubkeyhash },
       { op: OP.OP_EQUALVERIFY },
       { op: OP.OP_CHECKSIG }
     ])
@@ -64,9 +64,11 @@ export default class P2PKH implements ScriptTemplate {
         rawSignature.s,
         signatureScope
       )
+      const sigForScript = sig.toChecksigFormat()
+      const pubkeyForScript = privateKey.toPublicKey().encode(true) as number[]
       return new UnlockingScript([
-        { op: OP.OP_PUSHDATA1, data: sig.toChecksigFormat() },
-        { op: OP.OP_PUSHDATA1, data: privateKey.toPublicKey().encode(true) as number[] }
+        { op: sigForScript.length, data: sigForScript },
+        { op: pubkeyForScript.length, data: pubkeyForScript }
       ])
     }
   }
