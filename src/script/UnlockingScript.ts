@@ -16,7 +16,7 @@ export default class UnlockingScript extends Script {
    * @returns {boolean} Always returns false for an UnlockingScript instance.
    */
   isLockingScript (): boolean {
-    return true
+    return false
   }
 
   /**
@@ -25,6 +25,6 @@ export default class UnlockingScript extends Script {
    * @returns {boolean} Always returns true for an UnlockingScript instance.
    */
   isUnlockingScript (): boolean {
-    return false
+    return true
   }
 }
