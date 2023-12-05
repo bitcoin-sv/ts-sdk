@@ -74,18 +74,42 @@ export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false,
         ? customK
         : new BigNumber(drbg.generate(bytes), 16)
     k = truncateToN(k, true)
-    if (k.cmpn(1) <= 0 || k.cmp(ns1) >= 0) { continue }
+    if (k.cmpn(1) <= 0 || k.cmp(ns1) >= 0) {
+      if (BigNumber.isBN(customK)) {
+        throw new Error('Invalid fixed custom K value (must be more than 1 and less than N-1)')
+      } else {
+        continue
+      }
+    }
 
     const kp = curve.g.mul(k)
-    if (kp.isInfinity()) { continue }
+    if (kp.isInfinity()) {
+      if (BigNumber.isBN(customK)) {
+        throw new Error('Invalid fixed custom K value (must not create a point at infinity when multiplied by the generator point)')
+      } else {
+        continue
+      }
+    }
 
     const kpX = kp.getX()
     const r = kpX.umod(curve.n)
-    if (r.cmpn(0) === 0) { continue }
+    if (r.cmpn(0) === 0) {
+      if (BigNumber.isBN(customK)) {
+        throw new Error('Invalid fixed custom K value (when multiplied by G, the resulting x coordinate mod N must not be zero)')
+      } else {
+        continue
+      }
+    }
 
     let s = k.invm(curve.n).mul(r.mul(key).iadd(msg))
     s = s.umod(curve.n)
-    if (s.cmpn(0) === 0) { continue }
+    if (s.cmpn(0) === 0) {
+      if (BigNumber.isBN(customK)) {
+        throw new Error('Invalid fixed custom K value (when used with the key, it cannot create a zero value for S)')
+      } else {
+        continue
+      }
+    }
 
     // Use complement of `s`, if it is > `n / 2`
     if (forceLowS && s.cmp(curve.n.ushrn(1)) > 0) {

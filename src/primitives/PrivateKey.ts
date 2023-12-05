@@ -52,15 +52,16 @@ export default class PrivateKey extends BigNumber {
    * @param msg - The message (array of numbers or string) to be signed.
    * @param enc - If 'hex' the string will be treated as hex, utf8 otherwise.
    * @param forceLowS - If true (the default), the signature will be forced to have a low S value.
+   * @param customK — If provided, uses a custom K-value for the signature. Provie a function that returns a BigNumber, or the BigNumber itself.
    * @returns A digital signature generated from the hash of the message and the private key.
    *
    * @example
    * const privateKey = PrivateKey.fromRandom();
    * const signature = privateKey.sign('Hello, World!');
    */
-  sign (msg: number[] | string, enc?: 'hex', forceLowS: boolean = true): Signature {
+  sign (msg: number[] | string, enc?: 'hex', forceLowS: boolean = true, customK?: Function | BigNumber): Signature {
     const msgHash = new BigNumber(sha256(msg, enc), 16)
-    return sign(msgHash, this, forceLowS)
+    return sign(msgHash, this, forceLowS, customK)
   }
 
   /**
