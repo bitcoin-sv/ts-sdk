@@ -7,7 +7,7 @@ import P2PKH from '../../../dist/cjs/src/script/templates/P2PKH'
 import Transaction from '../../../dist/cjs/src/transaction/Transaction'
 
 describe('Spend', () => {
-  it('Successfully validates a P2PKH spend', () => {
+  it('Successfully validates a P2PKH spend', async () => {
     const privateKey = new PrivateKey(1)
     const publicKey = new Curve().g.mul(privateKey)
     const hash = hash160(publicKey.encode(true)) as number[]
@@ -24,7 +24,7 @@ describe('Spend', () => {
       sourceOutputIndex: 0,
       sequence: 0xffffffff
     }], [], 0)
-    const unlockingScript = unlockingTemplate(spendTx, 0)
+    const unlockingScript = await unlockingTemplate.sign(spendTx, 0)
     const spend = new Spend({
       sourceTXID: sourceTx.id('hex'),
       sourceOutputIndex: 0,
@@ -41,7 +41,7 @@ describe('Spend', () => {
     const valid = spend.validate()
     expect(valid).toBe(true)
   })
-  it('Fails to verify a P2PKH spend with the wrong key', () => {
+  it('Fails to verify a P2PKH spend with the wrong key', async () => {
     const privateKey = new PrivateKey(1)
     const publicKey = new Curve().g.mul(privateKey)
     const wrongPrivateKey = new PrivateKey(2)
@@ -59,7 +59,7 @@ describe('Spend', () => {
       sourceOutputIndex: 0,
       sequence: 0xffffffff
     }], [], 0)
-    const unlockingScript = unlockingTemplate(spendTx, 0)
+    const unlockingScript = await unlockingTemplate.sign(spendTx, 0)
     const spend = new Spend({
       sourceTXID: sourceTx.id('hex'),
       sourceOutputIndex: 0,

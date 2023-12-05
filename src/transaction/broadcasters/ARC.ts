@@ -63,7 +63,6 @@ export default class ARC implements Broadcaster {
           message: 'Transaction broadcasted successfully'
         }
       } else {
-        console.log(response)
         return {
           status: 'error',
           code: data.status as boolean ? data.status : 'ERR_UNKNOWN',

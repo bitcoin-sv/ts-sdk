@@ -50,7 +50,7 @@ This interface defines a standard method for computing a fee when given a transa
 
 ```ts
 export default interface FeeModel {
-    computeFee: (transaction: Transaction) => BigNumber;
+    computeFee: (transaction: Transaction) => Promise<BigNumber>;
 }
 ```
 
@@ -65,7 +65,10 @@ export default interface TransactionInput {
     sourceTXID?: string;
     sourceOutputIndex: number;
     unlockingScript?: UnlockingScript;
-    createUnlockingScript?: (tx: Transaction, inputIndex: number) => UnlockingScript;
+    unlockingScriptTemplate?: {
+        sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
+        estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
+    };
     sequence: number;
 }
 ```
@@ -78,10 +81,41 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export default interface ScriptTemplate {
     lock: (...params: any) => LockingScript;
-    unlock: (...params: any) => (tx: Transaction, inputIndex: number) => UnlockingScript;
-    estimateUnlockingScriptLength: (...params: any) => number;
+    unlock: (...params: any) => {
+        sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
+        estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
+    };
 }
 ```
+
+<details>
+
+<summary>Interface ScriptTemplate Details</summary>
+
+#### Property lock
+
+Creates a locking script with the given parameters.
+
+```ts
+lock: (...params: any) => LockingScript
+```
+
+#### Property unlock
+
+Creates a function that generates an unlocking script along with its signature and length estimation.
+
+This method returns an object containing two functions:
+1. `sign` - A function that, when called with a transaction and an input index, returns an UnlockingScript instance.
+2. `estimateLength` - A function that returns the estimated length of the unlocking script in bytes.
+
+```ts
+unlock: (...params: any) => {
+    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
+    estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
+}
+```
+
+</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -6070,7 +6104,7 @@ create a corresponding public key and derive a shared secret from a public key.
 export default class PrivateKey extends BigNumber {
     static fromRandom(): PrivateKey 
     static fromString(str: string, base: number | "hex"): PrivateKey 
-    sign(msg: number[] | string, enc?: "hex"): Signature 
+    sign(msg: number[] | string, enc?: "hex", forceLowS: boolean = true): Signature 
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toPublicKey(): PublicKey 
     deriveSharedSecret(key: PublicKey): Point 
@@ -6156,7 +6190,7 @@ Will throw an error if the string is not valid.
 Signs a message using the private key.
 
 ```ts
-sign(msg: number[] | string, enc?: "hex"): Signature 
+sign(msg: number[] | string, enc?: "hex", forceLowS: boolean = true): Signature 
 ```
 
 Returns
@@ -6169,6 +6203,8 @@ Argument Details
   + The message (array of numbers or string) to be signed.
 + **enc**
   + If 'hex' the string will be treated as hex, utf8 otherwise.
++ **forceLowS**
+  + If true (the default), the signature will be forced to have a low S value.
 
 Example
 
@@ -6852,7 +6888,7 @@ Represents the "satoshis per kilobyte" transaction fee model.
 export default class SatoshisPerKilobyte implements FeeModel {
     value: number;
     constructor(value: number) 
-    computeFee(tx: Transaction): BigNumber 
+    async computeFee(tx: Transaction): Promise<BigNumber> 
 }
 ```
 
@@ -6872,6 +6908,23 @@ Argument Details
 
 + **value**
   + The number of satoshis per kilobyte to charge as a fee.
+
+#### Method computeFee
+
+Computes the fee for a given transaction.
+
+```ts
+async computeFee(tx: Transaction): Promise<BigNumber> 
+```
+
+Returns
+
+The fee in satoshis for the transaction, as a BigNumber.
+
+Argument Details
+
++ **tx**
+  + The transaction for which a fee is to be computed.
 
 </details>
 
@@ -6893,8 +6946,8 @@ export default class Transaction {
     addInput(input: TransactionInput): void 
     addOutput(output: TransactionOutput): void 
     updateMetadata(metadata: Record<string, any>): void 
-    fee(model?: FeeModel, changeDistribution: "equal" | "random" = "equal"): void 
-    sign(): void 
+    async fee(model?: FeeModel, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
+    async sign(): Promise<void> 
     toBinary(): number[] 
     toHex(): string 
     hash(enc?: "hex"): number[] | string 
@@ -6912,7 +6965,7 @@ Computes fees prior to signing.
 If no fee model is provided, uses a SatoshisPerKilobyte fee model that pays 10 sat/kb.
 
 ```ts
-fee(model?: FeeModel, changeDistribution: "equal" | "random" = "equal"): void 
+async fee(model?: FeeModel, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
 ```
 
 Argument Details
@@ -6930,7 +6983,7 @@ TODO: Benford's law change distribution.
 Signs a transaction, hydrating all its unlocking scripts based on the provided script templates where they are available.
 
 ```ts
-sign(): void 
+async sign(): Promise<void> 
 ```
 
 </details>

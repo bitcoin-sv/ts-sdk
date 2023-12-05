@@ -154,11 +154,11 @@ export default class Transaction {
    *
    * TODO: Benford's law change distribution.
    */
-  fee (model?: FeeModel, changeDistribution: 'equal' | 'random' = 'equal'): void {
+  async fee (model?: FeeModel, changeDistribution: 'equal' | 'random' = 'equal'): Promise<void> {
     if (typeof model === 'undefined') {
       model = new SatoshisPerKilobyte(10)
     }
-    const fee = model.computeFee(this)
+    const fee = await model.computeFee(this)
     // change = inputs - fee - non-change outputs
     const change = new BigNumber(0)
     for (const input of this.inputs) {
@@ -197,13 +197,12 @@ export default class Transaction {
   /**
    * Signs a transaction, hydrating all its unlocking scripts based on the provided script templates where they are available.
    */
-  sign (): void {
+  async sign (): Promise<void> {
     for (let i = 0, l = this.inputs.length; i < l; i++) {
-      if (typeof this.inputs[i].createUnlockingScript === 'function') {
-        this.inputs[i].unlockingScript = this.inputs[i].createUnlockingScript(
-          this,
-          i
-        )
+      if (typeof this.inputs[i].unlockingScriptTemplate === 'object') {
+        this.inputs[i].unlockingScript = await this.inputs[i]
+          .unlockingScriptTemplate
+          .sign(this, i)
       }
     }
   }
