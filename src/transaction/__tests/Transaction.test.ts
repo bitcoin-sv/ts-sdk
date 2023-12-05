@@ -5,7 +5,10 @@ import Script from '../../../dist/cjs/src/script/Script'
 import UnlockingScript from '../../../dist/cjs/src/script/UnlockingScript'
 import LockingScript from '../../../dist/cjs/src/script/LockingScript'
 import Transaction from '../../../dist/cjs/src/transaction/Transaction'
-import { hash256 } from '../../../dist/cjs/src/primitives/Hash'
+import { hash256, hash160 } from '../../../dist/cjs/src/primitives/Hash'
+import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
+import Curve from '../../../dist/cjs/src/primitives/Curve'
+import P2PKH from '../../../dist/cjs/src/script/templates/P2PKH'
 
 import sighashVectors from '../../primitives/__tests/sighash.vectors'
 import invalidTransactions from './tx.invalid.vectors'
@@ -129,6 +132,167 @@ describe('Transaction', () => {
       expect(tx.outputs.length).toEqual(0)
       tx.addOutput(txOut)
       expect(tx.outputs.length).toEqual(1)
+    })
+  })
+
+  describe('Signing', () => {
+    it('Signs unlocking script templates, hydrating the scripts', async () => {
+      const privateKey = new PrivateKey(1)
+      const publicKey = new Curve().g.mul(privateKey)
+      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const p2pkh = new P2PKH()
+      const sourceTx = new Transaction(1, [], [{
+        lockingScript: p2pkh.lock(publicKeyHash),
+        satoshis: new BigNumber(4000)
+      }], 0)
+      const spendTx = new Transaction(1, [{
+        sourceTransaction: sourceTx,
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: p2pkh.unlock(privateKey),
+        sequence: 0xffffffff
+      }], [{
+        satoshis: new BigNumber(1000),
+        lockingScript: p2pkh.lock(publicKeyHash)
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }], 0)
+      expect(spendTx.inputs[0].unlockingScript).not.toBeDefined()
+      await spendTx.fee()
+      await spendTx.sign()
+      expect(spendTx.inputs[0].unlockingScript).toBeDefined()
+      // P2PKH unlocking scripts have two chunks (the signature and public key)
+      expect(spendTx.inputs[0].unlockingScript.chunks.length).toBe(2)
+    })
+    it('Throws an Error if signing before the fee is computed', async () => {
+      const privateKey = new PrivateKey(1)
+      const publicKey = new Curve().g.mul(privateKey)
+      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const p2pkh = new P2PKH()
+      const sourceTx = new Transaction(1, [], [{
+        lockingScript: p2pkh.lock(publicKeyHash),
+        satoshis: new BigNumber(4000)
+      }], 0)
+      const spendTx = new Transaction(1, [{
+        sourceTransaction: sourceTx,
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: p2pkh.unlock(privateKey),
+        sequence: 0xffffffff
+      }], [{
+        satoshis: new BigNumber(1000),
+        lockingScript: p2pkh.lock(publicKeyHash)
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }], 0)
+      await expect(spendTx.sign()).rejects.toThrow()
+    })
+  })
+
+  describe('Fees', () => {
+    it('Computes fees with the default fee model', async () => {
+      const privateKey = new PrivateKey(1)
+      const publicKey = new Curve().g.mul(privateKey)
+      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const p2pkh = new P2PKH()
+      const sourceTx = new Transaction(1, [], [{
+        lockingScript: p2pkh.lock(publicKeyHash),
+        satoshis: new BigNumber(4000)
+      }], 0)
+      const spendTx = new Transaction(1, [{
+        sourceTransaction: sourceTx,
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: p2pkh.unlock(privateKey),
+        sequence: 0xffffffff
+      }], [{
+        satoshis: new BigNumber(1000),
+        lockingScript: p2pkh.lock(publicKeyHash)
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }], 0)
+      expect(spendTx.outputs[1].satoshis).not.toBeDefined()
+      await spendTx.fee()
+      // Transaction size is 225 bytes for one-input two-output P2PKH.
+      // Default fee rate is 10 sat/kb = 2.25 sats (round up to 3).
+      // 4000 sats in - 1000 sats out - 3 sats fee = expected 2997 sats change.
+      expect(spendTx.outputs[1].satoshis.toNumber()).toEqual(2997)
+    })
+    it('Computes fees with a custom fee model', async () => {
+      const privateKey = new PrivateKey(1)
+      const publicKey = new Curve().g.mul(privateKey)
+      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const p2pkh = new P2PKH()
+      const sourceTx = new Transaction(1, [], [{
+        lockingScript: p2pkh.lock(publicKeyHash),
+        satoshis: new BigNumber(4000)
+      }], 0)
+      const spendTx = new Transaction(1, [{
+        sourceTransaction: sourceTx,
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: p2pkh.unlock(privateKey),
+        sequence: 0xffffffff
+      }], [{
+        satoshis: new BigNumber(1000),
+        lockingScript: p2pkh.lock(publicKeyHash)
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }], 0)
+      expect(spendTx.outputs[1].satoshis).not.toBeDefined()
+      await spendTx.fee({
+        // Our custom fee model will always charge 1033 sats for a tx.
+        computeFee: async () => new BigNumber(1033)
+      })
+      // 4000 sats in - 1000 sats out - 1033 sats fee = expected 1967 sats change
+      expect(spendTx.outputs[1].satoshis.toNumber()).toEqual(1967)
+    })
+    it('Distributes change among multiple change outputs', async () => {
+      const privateKey = new PrivateKey(1)
+      const publicKey = new Curve().g.mul(privateKey)
+      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const p2pkh = new P2PKH()
+      const sourceTx = new Transaction(1, [], [{
+        lockingScript: p2pkh.lock(publicKeyHash),
+        satoshis: new BigNumber(4000)
+      }], 0)
+      const spendTx = new Transaction(1, [{
+        sourceTransaction: sourceTx,
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: p2pkh.unlock(privateKey),
+        sequence: 0xffffffff
+      }], [{
+        satoshis: new BigNumber(1000),
+        lockingScript: p2pkh.lock(publicKeyHash)
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }], 0)
+      expect(spendTx.outputs[1].satoshis).not.toBeDefined()
+      expect(spendTx.outputs[2].satoshis).not.toBeDefined()
+      await spendTx.fee({
+        // Our custom fee model will always charge 1033 sats for a tx.
+        computeFee: async () => new BigNumber(1033)
+      })
+      // 4000 sats in - 1000 sats out - 1033 sats fee = expected 1967 sats change
+      // Divide by 2 (no remainder) = 983 sats per change output
+      expect(spendTx.outputs[1].satoshis.toNumber()).toEqual(983)
+      expect(spendTx.outputs[2].satoshis.toNumber()).toEqual(983)
+    })
+  })
+
+  describe('Broadcast', () => {
+    it('Broadcasts with the provided Broadcaster instance', async () => {
+      const mockBroadcast = jest.fn(() => 'MOCK_RV')
+      const tx = new Transaction()
+      const rv = await tx.broadcast({
+        broadcast: mockBroadcast
+      })
+      expect(mockBroadcast).toHaveBeenCalledWith(tx)
+      expect(rv).toEqual('MOCK_RV')
     })
   })
 

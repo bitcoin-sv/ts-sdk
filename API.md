@@ -6,6 +6,9 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | |
 | --- |
+| [BroadcastFailure](#interface-broadcastfailure) |
+| [BroadcastResponse](#interface-broadcastresponse) |
+| [Broadcaster](#interface-broadcaster) |
 | [FeeModel](#interface-feemodel) |
 | [ScriptChunk](#interface-scriptchunk) |
 | [ScriptTemplate](#interface-scripttemplate) |
@@ -32,6 +35,21 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ### Interface: TransactionOutput
 
+Represents an output in a Bitcoin transaction.
+This interface defines the structure and components necessary to construct
+a transaction output, which secures owned Bitcoins to be unlocked later.
+
+Example
+
+```ts
+// Creating a simple transaction output
+let txOutput = {
+  satoshis: new BigNumber(1000),
+  lockingScript: LockingScript.fromASM('OP_DUP OP_HASH160 ... OP_EQUALVERIFY OP_CHECKSIG'),
+  change: false
+};
+```
+
 ```ts
 export default interface TransactionOutput {
     satoshis?: BigNumber;
@@ -57,7 +75,72 @@ export default interface FeeModel {
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
+### Interface: BroadcastResponse
+
+Defines the structure of a successful broadcast response.
+
+```ts
+export interface BroadcastResponse {
+    status: "success";
+    txid: string;
+    message: string;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Interface: BroadcastFailure
+
+Defines the structure of a failed broadcast response.
+
+```ts
+export interface BroadcastFailure {
+    status: "error";
+    code: string;
+    description: string;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Interface: Broadcaster
+
+Represents the interface for a transaction broadcaster.
+This interface defines a standard method for broadcasting transactions.
+
+```ts
+export interface Broadcaster {
+    broadcast: (transaction: Transaction) => Promise<BroadcastResponse | BroadcastFailure>;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ### Interface: TransactionInput
+
+Represents an input to a Bitcoin transaction.
+This interface defines the structure and components required to construct
+a transaction input in the Bitcoin blockchain.
+
+Example
+
+```ts
+// Creating a simple transaction input
+let txInput = {
+  sourceTXID: '123abc...',
+  sourceOutputIndex: 0,
+  sequence: 0xFFFFFFFF
+};
+
+// Using an unlocking script template
+txInput.unlockingScriptTemplate = {
+  sign: async (tx, index) => { ... },
+  estimateLength: async (tx, index) => { ... }
+};
+```
 
 ```ts
 export default interface TransactionInput {
@@ -6933,6 +7016,22 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ### Class: Transaction
 
+Represents a complete Bitcoin transaction. This class encapsulates all the details
+required for creating, signing, and processing a Bitcoin transaction, including
+inputs, outputs, and various transaction-related methods.
+
+Example
+
+```ts
+// Creating a new transaction
+let tx = new Transaction();
+tx.addInput(...);
+tx.addOutput(...);
+await tx.fee();
+await tx.sign();
+await tx.broadcast();
+```
+
 ```ts
 export default class Transaction {
     version: number;
@@ -6948,6 +7047,7 @@ export default class Transaction {
     updateMetadata(metadata: Record<string, any>): void 
     async fee(model?: FeeModel, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
     async sign(): Promise<void> 
+    async broadcast(broadcaster: Broadcaster): Promise<BroadcastResponse | BroadcastFailure> 
     toBinary(): number[] 
     toHex(): string 
     hash(enc?: "hex"): number[] | string 
@@ -6958,6 +7058,53 @@ export default class Transaction {
 <details>
 
 <summary>Class Transaction Details</summary>
+
+#### Method addInput
+
+Adds a new input to the transaction.
+
+```ts
+addInput(input: TransactionInput): void 
+```
+
+Argument Details
+
++ **input**
+  + The TransactionInput object to add to the transaction.
+
+Throws
+
+- If the input does not have a sourceTXID or sourceTransaction defined.
+
+#### Method addOutput
+
+Adds a new output to the transaction.
+
+```ts
+addOutput(output: TransactionOutput): void 
+```
+
+Argument Details
+
++ **output**
+  + The TransactionOutput object to add to the transaction.
+
+#### Method broadcast
+
+Broadcasts a transaction.
+
+```ts
+async broadcast(broadcaster: Broadcaster): Promise<BroadcastResponse | BroadcastFailure> 
+```
+
+Returns
+
+A BroadcastResponse or BroadcastFailure from the Broadcaster
+
+Argument Details
+
++ **broadcaster**
+  + The Broadcaster instance wwhere the transaction will be sent
 
 #### Method fee
 
@@ -6978,6 +7125,74 @@ amongst the change outputs
 
 TODO: Benford's law change distribution.
 
+#### Method fromBinary
+
+Creates a Transaction instance from a binary array.
+
+```ts
+static fromBinary(bin: number[]): Transaction 
+```
+
+Returns
+
+- A new Transaction instance.
+
+Argument Details
+
++ **bin**
+  + The binary array representation of the transaction.
+
+#### Method fromHex
+
+Creates a Transaction instance from a hexadecimal string.
+
+```ts
+static fromHex(hex: string): Transaction 
+```
+
+Returns
+
+- A new Transaction instance.
+
+Argument Details
+
++ **hex**
+  + The hexadecimal string representation of the transaction.
+
+#### Method hash
+
+Calculates the transaction's hash.
+
+```ts
+hash(enc?: "hex"): number[] | string 
+```
+
+Returns
+
+- The hash of the transaction in the specified format.
+
+Argument Details
+
++ **enc**
+  + The encoding to use for the hash. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
+
+#### Method id
+
+Calculates the transaction's ID.
+
+```ts
+id(enc?: "hex"): number[] | string 
+```
+
+Returns
+
+- The ID of the transaction in the specified format.
+
+Argument Details
+
++ **enc**
+  + The encoding to use for the ID. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
+
 #### Method sign
 
 Signs a transaction, hydrating all its unlocking scripts based on the provided script templates where they are available.
@@ -6985,6 +7200,43 @@ Signs a transaction, hydrating all its unlocking scripts based on the provided s
 ```ts
 async sign(): Promise<void> 
 ```
+
+#### Method toBinary
+
+Converts the transaction to a binary array format.
+
+```ts
+toBinary(): number[] 
+```
+
+Returns
+
+- The binary array representation of the transaction.
+
+#### Method toHex
+
+Converts the transaction to a hexadecimal string format.
+
+```ts
+toHex(): string 
+```
+
+Returns
+
+- The hexadecimal string representation of the transaction.
+
+#### Method updateMetadata
+
+Updates the transaction's metadata.
+
+```ts
+updateMetadata(metadata: Record<string, any>): void 
+```
+
+Argument Details
+
++ **metadata**
+  + The metadata object to merge into the existing metadata.
 
 </details>
 

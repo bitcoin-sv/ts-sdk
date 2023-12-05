@@ -7,7 +7,43 @@ import { hash256 } from '../primitives/Hash.js'
 import BigNumber from '../primitives/BigNumber.js'
 import FeeModel from './FeeModel.js'
 import SatoshisPerKilobyte from './fee-models/SatoshisPerKilobyte.js'
+import { Broadcaster, BroadcastResponse, BroadcastFailure } from './Broadcaster.js'
 
+/**
+ * Represents a complete Bitcoin transaction. This class encapsulates all the details
+ * required for creating, signing, and processing a Bitcoin transaction, including
+ * inputs, outputs, and various transaction-related methods.
+ *
+ * @class Transaction
+ * @property {number} version - The version number of the transaction. Used to specify
+ *           which set of rules this transaction follows.
+ * @property {TransactionInput[]} inputs - An array of TransactionInput objects, representing
+ *           the inputs for the transaction. Each input references a previous transaction's output.
+ * @property {TransactionOutput[]} outputs - An array of TransactionOutput objects, representing
+ *           the outputs for the transaction. Each output specifies the amount of satoshis to be
+ *           transferred and the conditions under which they can be spent.
+ * @property {number} lockTime - The lock time of the transaction. If non-zero, it specifies the
+ *           earliest time or block height at which the transaction can be added to the block chain.
+ * @property {Record<string, any>} metadata - A key-value store for attaching additional data to
+ *           the transaction object, not included in the transaction itself. Useful for adding descriptions, internal reference numbers, or other information.
+ * @property {MerkleProof} [merkleProof] - Optional. A merkle proof demonstrating the transaction's
+ *           inclusion in a block. Useful for transaction verification using SPV.
+ *
+ * @example
+ * // Creating a new transaction
+ * let tx = new Transaction();
+ * tx.addInput(...);
+ * tx.addOutput(...);
+ * await tx.fee();
+ * await tx.sign();
+ * await tx.broadcast();
+ *
+ * @description
+ * The Transaction class provides comprehensive
+ * functionality to handle various aspects of transaction creation, including
+ * adding inputs and outputs, computing fees, signing the transaction, and
+ * generating its binary or hexadecimal representation.
+ */
 export default class Transaction {
   version: number
   inputs: TransactionInput[]
@@ -70,6 +106,13 @@ export default class Transaction {
   //   return tx
   // }
 
+  /**
+   * Creates a Transaction instance from a binary array.
+   *
+   * @static
+   * @param {number[]} bin - The binary array representation of the transaction.
+   * @returns {Transaction} - A new Transaction instance.
+   */
   static fromBinary (bin: number[]): Transaction {
     const br = new Reader(bin)
     const version = br.readUInt32LE()
@@ -105,6 +148,13 @@ export default class Transaction {
     return new Transaction(version, inputs, outputs, lockTime)
   }
 
+  /**
+   * Creates a Transaction instance from a hexadecimal string.
+   *
+   * @static
+   * @param {string} hex - The hexadecimal string representation of the transaction.
+   * @returns {Transaction} - A new Transaction instance.
+   */
   static fromHex (hex: string): Transaction {
     return Transaction.fromBinary(toArray(hex, 'hex'))
   }
@@ -123,6 +173,12 @@ export default class Transaction {
     this.metadata = metadata
   }
 
+  /**
+   * Adds a new input to the transaction.
+   *
+   * @param {TransactionInput} input - The TransactionInput object to add to the transaction.
+   * @throws {Error} - If the input does not have a sourceTXID or sourceTransaction defined.
+   */
   addInput (input: TransactionInput): void {
     if (
       typeof input.sourceTXID === 'undefined' &&
@@ -133,10 +189,20 @@ export default class Transaction {
     this.inputs.push(input)
   }
 
+  /**
+   * Adds a new output to the transaction.
+   *
+   * @param {TransactionOutput} output - The TransactionOutput object to add to the transaction.
+   */
   addOutput (output: TransactionOutput): void {
     this.outputs.push(output)
   }
 
+  /**
+   * Updates the transaction's metadata.
+   *
+   * @param {Record<string, any>} metadata - The metadata object to merge into the existing metadata.
+   */
   updateMetadata (metadata: Record<string, any>): void {
     this.metadata = {
       ...this.metadata,
@@ -165,15 +231,30 @@ export default class Transaction {
       if (typeof input.sourceTransaction !== 'object') {
         throw new Error('Source transactions are required for all inputs during fee computation')
       }
-      change.add(
+      change.iadd(
         input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
       )
     }
-    change.sub(fee)
+    change.isub(fee)
+    let changeCount = 0
     for (const out of this.outputs) {
       if (!out.change) {
-        change.sub(out.satoshis)
+        change.isub(out.satoshis)
+      } else {
+        changeCount++
       }
+    }
+
+    if (change.lten(changeCount)) {
+      // There is not enough change to distribute among the change outputs.
+      // We'll remove all change outputs and leave the extra for the miners.
+      for (let i = 0; i < this.outputs.length; i++) {
+        if (this.outputs[i].change) {
+          this.outputs.splice(i, 1)
+          i--
+        }
+      }
+      return
     }
 
     // Distribute change among change outputs
@@ -181,11 +262,7 @@ export default class Transaction {
       // TODO
       throw new Error('Not yet implemented')
     } else if (changeDistribution === 'equal') {
-      const totalChangeOutputs = this.outputs.reduce(
-        (a, e) => e.change ? a + 1 : a,
-        0
-      )
-      const perOutput = change.divn(totalChangeOutputs)
+      const perOutput = change.divn(changeCount)
       for (const out of this.outputs) {
         if (out.change) {
           out.satoshis = perOutput.clone()
@@ -198,6 +275,15 @@ export default class Transaction {
    * Signs a transaction, hydrating all its unlocking scripts based on the provided script templates where they are available.
    */
   async sign (): Promise<void> {
+    for (const out of this.outputs) {
+      if (typeof out.satoshis === 'undefined') {
+        if (out.change) {
+          throw new Error('There are still change outputs with uncomputed amounts. Use the fee() method to compute the change amounts and transaction fees prior to signing.')
+        } else {
+          throw new Error('One or more transaction outputs is missing an amount. Ensure all output amounts are provided before signing.')
+        }
+      }
+    }
     for (let i = 0, l = this.inputs.length; i < l; i++) {
       if (typeof this.inputs[i].unlockingScriptTemplate === 'object') {
         this.inputs[i].unlockingScript = await this.inputs[i]
@@ -207,6 +293,21 @@ export default class Transaction {
     }
   }
 
+  /**
+   * Broadcasts a transaction.
+   *
+   * @param broadcaster The Broadcaster instance wwhere the transaction will be sent
+   * @returns A BroadcastResponse or BroadcastFailure from the Broadcaster
+   */
+  async broadcast (broadcaster: Broadcaster): Promise<BroadcastResponse | BroadcastFailure> {
+    return await broadcaster.broadcast(this)
+  }
+
+  /**
+   * Converts the transaction to a binary array format.
+   *
+   * @returns {number[]} - The binary array representation of the transaction.
+   */
   toBinary (): number[] {
     const writer = new Writer()
     writer.writeUInt32LE(this.version)
@@ -234,14 +335,31 @@ export default class Transaction {
     return writer.toArray()
   }
 
+  /**
+   * Converts the transaction to a hexadecimal string format.
+   *
+   * @returns {string} - The hexadecimal string representation of the transaction.
+   */
   toHex (): string {
     return toHex(this.toBinary())
   }
 
+  /**
+   * Calculates the transaction's hash.
+   *
+   * @param {'hex' | undefined} enc - The encoding to use for the hash. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
+   * @returns {string | number[]} - The hash of the transaction in the specified format.
+   */
   hash (enc?: 'hex'): number[] | string {
     return hash256(this.toBinary(), enc)
   }
 
+  /**
+   * Calculates the transaction's ID.
+   *
+   * @param {'hex' | undefined} enc - The encoding to use for the ID. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
+   * @returns {string | number[]} - The ID of the transaction in the specified format.
+   */
   id (enc?: 'hex'): number[] | string {
     const id = hash256(this.toBinary()) as number[]
     id.reverse()

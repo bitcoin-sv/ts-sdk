@@ -64,7 +64,8 @@ export default class SatoshisPerKilobyte implements FeeModel {
       size += length // script
     }
     size += 4 // lock time
-    const fee = (size / 1000) * this.value
+    // We'll use Math.ceil to ensure the miners get the extra satoshi.
+    const fee = Math.ceil((size / 1000) * this.value)
     return new BigNumber(fee)
   }
 }
