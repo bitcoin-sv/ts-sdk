@@ -6,6 +6,11 @@ import Spend from '../../../dist/cjs/src/script/Spend'
 import P2PKH from '../../../dist/cjs/src/script/templates/P2PKH'
 import RPuzzle from '../../../dist/cjs/src/script/templates/RPuzzle'
 import Transaction from '../../../dist/cjs/src/transaction/Transaction'
+import scriptFromVector from './scriptFromVector'
+import LockingScript from '../../../dist/cjs/src/script/LockingScript'
+import UnlockingScript from '../../../dist/cjs/src/script/UnlockingScript'
+
+import spendValid from './spend.valid.vectors'
 
 describe('Spend', () => {
   it('Successfully validates a P2PKH spend', async () => {
@@ -218,4 +223,26 @@ describe('Spend', () => {
     })
     expect(() => spend.validate()).toThrow()
   })
+  for (let i = 0; i < spendValid.length; i++) {
+    const a = spendValid[i]
+    if (a.length === 1) {
+      continue
+    }
+    it(a[2], () => {
+      const spend = new Spend({
+        sourceTXID: '0000000000000000000000000000000000000000000000000000000000000000',
+        sourceOutputIndex: 0,
+        sourceSatoshis: new BigNumber(1),
+        lockingScript: new LockingScript(scriptFromVector(a[1]).chunks),
+        transactionVersion: 1,
+        otherInputs: [],
+        outputs: [],
+        inputIndex: 0,
+        unlockingScript: new UnlockingScript(scriptFromVector(a[0]).chunks),
+        inputSequence: 0xffffffff,
+        lockTime: 0
+      })
+      expect(spend.validate()).toBe(true)
+    })
+  }
 })
