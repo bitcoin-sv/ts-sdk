@@ -9,6 +9,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [BroadcastFailure](#interface-broadcastfailure) |
 | [BroadcastResponse](#interface-broadcastresponse) |
 | [Broadcaster](#interface-broadcaster) |
+| [ChainTracker](#interface-chaintracker) |
 | [FeeModel](#interface-feemodel) |
 | [ScriptChunk](#interface-scriptchunk) |
 | [ScriptTemplate](#interface-scripttemplate) |
@@ -119,6 +120,34 @@ export interface Broadcaster {
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
+### Interface: ChainTracker
+
+The Chain Tracker is responsible for verifying the validity of a given Merkle root
+for a specific block height within the blockchain.
+
+Chain Trackers ensure the integrity of the blockchain by
+validating new headers against the chain's history. They use accumulated
+proof-of-work and protocol adherence as metrics to assess the legitimacy of blocks.
+
+Example
+
+```ts
+const chainTracker = {
+  isValidRootForHeight: (root, height) => {
+    // Implementation to check if the Merkle root is valid for the specified block height.
+  }
+};
+```
+
+```ts
+export default interface ChainTracker {
+    isValidRootForHeight: (root: string, height: number) => boolean;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ### Interface: TransactionInput
 
 Represents an input to a Bitcoin transaction.
@@ -207,15 +236,16 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [BasePoint](#class-basepoint) | [Point](#class-point) | [SatoshisPerKilobyte](#class-satoshisperkilobyte) |
-| [BigNumber](#class-bignumber) | [PrivateKey](#class-privatekey) | [Script](#class-script) |
-| [Curve](#class-curve) | [PublicKey](#class-publickey) | [Signature](#class-signature) |
-| [DRBG](#class-drbg) | [RIPEMD160](#class-ripemd160) | [Spend](#class-spend) |
-| [JacobianPoint](#class-jacobianpoint) | [Reader](#class-reader) | [SymmetricKey](#class-symmetrickey) |
-| [K256](#class-k256) | [ReductionContext](#class-reductioncontext) | [Transaction](#class-transaction) |
-| [LockingScript](#class-lockingscript) | [SHA1](#class-sha1) | [TransactionSignature](#class-transactionsignature) |
-| [Mersenne](#class-mersenne) | [SHA256](#class-sha256) | [UnlockingScript](#class-unlockingscript) |
-| [MontgomoryMethod](#class-montgomorymethod) | [SHA256HMAC](#class-sha256hmac) | [Writer](#class-writer) |
+| [BasePoint](#class-basepoint) | [Point](#class-point) | [Script](#class-script) |
+| [BigNumber](#class-bignumber) | [PrivateKey](#class-privatekey) | [Signature](#class-signature) |
+| [Curve](#class-curve) | [PublicKey](#class-publickey) | [Spend](#class-spend) |
+| [DRBG](#class-drbg) | [RIPEMD160](#class-ripemd160) | [SymmetricKey](#class-symmetrickey) |
+| [JacobianPoint](#class-jacobianpoint) | [Reader](#class-reader) | [Transaction](#class-transaction) |
+| [K256](#class-k256) | [ReductionContext](#class-reductioncontext) | [TransactionSignature](#class-transactionsignature) |
+| [LockingScript](#class-lockingscript) | [SHA1](#class-sha1) | [UnlockingScript](#class-unlockingscript) |
+| [MerklePath](#class-merklepath) | [SHA256](#class-sha256) | [Writer](#class-writer) |
+| [Mersenne](#class-mersenne) | [SHA256HMAC](#class-sha256hmac) |  |
+| [MontgomoryMethod](#class-montgomorymethod) | [SatoshisPerKilobyte](#class-satoshisperkilobyte) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -6187,7 +6217,7 @@ create a corresponding public key and derive a shared secret from a public key.
 export default class PrivateKey extends BigNumber {
     static fromRandom(): PrivateKey 
     static fromString(str: string, base: number | "hex"): PrivateKey 
-    sign(msg: number[] | string, enc?: "hex", forceLowS: boolean = true): Signature 
+    sign(msg: number[] | string, enc?: "hex", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toPublicKey(): PublicKey 
     deriveSharedSecret(key: PublicKey): Point 
@@ -6273,7 +6303,7 @@ Will throw an error if the string is not valid.
 Signs a message using the private key.
 
 ```ts
-sign(msg: number[] | string, enc?: "hex", forceLowS: boolean = true): Signature 
+sign(msg: number[] | string, enc?: "hex", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
 ```
 
 Returns
@@ -6288,6 +6318,8 @@ Argument Details
   + If 'hex' the string will be treated as hex, utf8 otherwise.
 + **forceLowS**
   + If true (the default), the signature will be forced to have a low S value.
++ **customK**
+  + — If provided, uses a custom K-value for the signature. Provie a function that returns a BigNumber, or the BigNumber itself.
 
 Example
 
@@ -7014,6 +7046,169 @@ Argument Details
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
+### Class: MerklePath
+
+Represents a Merkle Path, which is used to provide a compact proof of inclusion for a
+transaction in a block. This class encapsulates all the details required for creating
+and verifying Merkle Proofs.
+
+Example
+
+```ts
+// Creating and verifying a Merkle Path
+const merklePath = MerklePath.fromHex('...');
+const isValid = merklePath.verify(txid, chainTracker);
+```
+
+```ts
+export default class MerklePath {
+    blockHeight: number;
+    path: Array<Array<{
+        offset: number;
+        hash?: string;
+        txid?: boolean;
+        duplicate?: boolean;
+    }>>;
+    static fromHex(hex: string): MerklePath 
+    static fromBinary(bump: number[]): MerklePath 
+    constructor(blockHeight: number, path: Array<Array<{
+        offset: number;
+        hash?: string;
+        txid?: boolean;
+        duplicate?: boolean;
+    }>>) 
+    toBinary(): number[] 
+    toHex(): string 
+    computeRoot(txid: string): string 
+    verify(txid: string, chainTracker: ChainTracker): boolean 
+    combine(other: MerklePath): void 
+}
+```
+
+<details>
+
+<summary>Class MerklePath Details</summary>
+
+#### Method combine
+
+Combines this MerklePath with another to create a compound proof.
+
+```ts
+combine(other: MerklePath): void 
+```
+
+Argument Details
+
++ **other**
+  + Another MerklePath to combine with this path.
+
+Throws
+
+- If the paths have different block heights or roots.
+
+#### Method computeRoot
+
+Computes the Merkle root from the provided transaction ID.
+
+```ts
+computeRoot(txid: string): string 
+```
+
+Returns
+
+- The computed Merkle root as a hexadecimal string.
+
+Argument Details
+
++ **txid**
+  + The transaction ID to compute the Merkle root for.
+
+Throws
+
+- If the transaction ID is not part of the Merkle Path.
+
+#### Method fromBinary
+
+Creates a MerklePath instance from a binary array.
+
+```ts
+static fromBinary(bump: number[]): MerklePath 
+```
+
+Returns
+
+- A new MerklePath instance.
+
+Argument Details
+
++ **bump**
+  + The binary array representation of the Merkle Path.
+
+#### Method fromHex
+
+Creates a MerklePath instance from a hexadecimal string.
+
+```ts
+static fromHex(hex: string): MerklePath 
+```
+
+Returns
+
+- A new MerklePath instance.
+
+Argument Details
+
++ **hex**
+  + The hexadecimal string representation of the Merkle Path.
+
+#### Method toBinary
+
+Converts the MerklePath to a binary array format.
+
+```ts
+toBinary(): number[] 
+```
+
+Returns
+
+- The binary array representation of the Merkle Path.
+
+#### Method toHex
+
+Converts the MerklePath to a hexadecimal string format.
+
+```ts
+toHex(): string 
+```
+
+Returns
+
+- The hexadecimal string representation of the Merkle Path.
+
+#### Method verify
+
+Verifies if the given transaction ID is part of the Merkle tree at the specified block height.
+
+```ts
+verify(txid: string, chainTracker: ChainTracker): boolean 
+```
+
+Returns
+
+- True if the transaction ID is valid within the Merkle Path at the specified block height.
+
+Argument Details
+
++ **txid**
+  + The transaction ID to verify.
++ **chainTracker**
+  + The ChainTracker instance used to verify the Merkle root.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ### Class: Transaction
 
 Represents a complete Bitcoin transaction. This class encapsulates all the details
@@ -7039,9 +7234,10 @@ export default class Transaction {
     outputs: TransactionOutput[];
     lockTime: number;
     metadata: Record<string, any>;
+    merklePath?: MerklePath;
     static fromBinary(bin: number[]): Transaction 
     static fromHex(hex: string): Transaction 
-    constructor(version: number = 1, inputs: TransactionInput[] = [], outputs: TransactionOutput[] = [], lockTime: number = 0, metadata: Record<string, any> = {}) 
+    constructor(version: number = 1, inputs: TransactionInput[] = [], outputs: TransactionOutput[] = [], lockTime: number = 0, metadata: Record<string, any> = {}, merklePath?: MerklePath) 
     addInput(input: TransactionInput): void 
     addOutput(output: TransactionOutput): void 
     updateMetadata(metadata: Record<string, any>): void 
@@ -7699,21 +7895,41 @@ sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: Bi
                 : new BigNumber(drbg.generate(bytes), 16);
         k = truncateToN(k, true);
         if (k.cmpn(1) <= 0 || k.cmp(ns1) >= 0) {
-            continue;
+            if (BigNumber.isBN(customK)) {
+                throw new Error("Invalid fixed custom K value (must be more than 1 and less than N-1)");
+            }
+            else {
+                continue;
+            }
         }
         const kp = curve.g.mul(k);
         if (kp.isInfinity()) {
-            continue;
+            if (BigNumber.isBN(customK)) {
+                throw new Error("Invalid fixed custom K value (must not create a point at infinity when multiplied by the generator point)");
+            }
+            else {
+                continue;
+            }
         }
         const kpX = kp.getX();
         const r = kpX.umod(curve.n);
         if (r.cmpn(0) === 0) {
-            continue;
+            if (BigNumber.isBN(customK)) {
+                throw new Error("Invalid fixed custom K value (when multiplied by G, the resulting x coordinate mod N must not be zero)");
+            }
+            else {
+                continue;
+            }
         }
         let s = k.invm(curve.n).mul(r.mul(key).iadd(msg));
         s = s.umod(curve.n);
         if (s.cmpn(0) === 0) {
-            continue;
+            if (BigNumber.isBN(customK)) {
+                throw new Error("Invalid fixed custom K value (when used with the key, it cannot create a zero value for S)");
+            }
+            else {
+                continue;
+            }
         }
         if (forceLowS && s.cmp(curve.n.ushrn(1)) > 0) {
             s = curve.n.sub(s);
