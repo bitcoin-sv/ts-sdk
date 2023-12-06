@@ -8,6 +8,7 @@ import BigNumber from '../primitives/BigNumber.js'
 import FeeModel from './FeeModel.js'
 import SatoshisPerKilobyte from './fee-models/SatoshisPerKilobyte.js'
 import { Broadcaster, BroadcastResponse, BroadcastFailure } from './Broadcaster.js'
+import MerklePath from './MerklePath.js'
 
 /**
  * Represents a complete Bitcoin transaction. This class encapsulates all the details
@@ -50,7 +51,7 @@ export default class Transaction {
   outputs: TransactionOutput[]
   lockTime: number
   metadata: Record<string, any>
-  // merkleProof?: MerkleProof
+  merklePath?: MerklePath
 
   // TODO: Incomplete
   // static fromBRC1 (brc1: {
@@ -164,13 +165,15 @@ export default class Transaction {
     inputs: TransactionInput[] = [],
     outputs: TransactionOutput[] = [],
     lockTime: number = 0,
-    metadata: Record<string, any> = {}
+    metadata: Record<string, any> = {},
+    merklePath?: MerklePath
   ) {
     this.version = version
     this.inputs = inputs
     this.outputs = outputs
     this.lockTime = lockTime
     this.metadata = metadata
+    this.merklePath = merklePath
   }
 
   /**
