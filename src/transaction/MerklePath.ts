@@ -176,10 +176,10 @@ export default class MerklePath {
    * @param {ChainTracker} chainTracker - The ChainTracker instance used to verify the Merkle root.
    * @returns {boolean} - True if the transaction ID is valid within the Merkle Path at the specified block height.
    */
-  verify (txid: string, chainTracker: ChainTracker): boolean {
+  async verify (txid: string, chainTracker: ChainTracker): Promise<boolean> {
     const root = this.computeRoot(txid)
     // Use the chain tracker to determine whether this is a valid merkle root at the given block height
-    return chainTracker.isValidRootForHeight(root, this.blockHeight)
+    return await chainTracker.isValidRootForHeight(root, this.blockHeight)
   }
 
   /**

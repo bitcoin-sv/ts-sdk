@@ -12,11 +12,11 @@
  *
  * @example
  * const chainTracker = {
- *   isValidRootForHeight: (root, height) => {
+ *   isValidRootForHeight: async (root, height) => {
  *     // Implementation to check if the Merkle root is valid for the specified block height.
  *   }
  * };
  */
 export default interface ChainTracker {
-  isValidRootForHeight: (root: string, height: number) => boolean
+  isValidRootForHeight: (root: string, height: number) => Promise<boolean>
 }

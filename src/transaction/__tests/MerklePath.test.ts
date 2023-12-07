@@ -118,12 +118,12 @@ describe('MerklePath', () => {
     expect(path.computeRoot(BRC74TXID2)).toEqual(BRC74Root)
     expect(path.computeRoot(BRC74TXID3)).toEqual(BRC74Root)
   })
-  it('Verifies using a ChainTracker', () => {
+  it('Verifies using a ChainTracker', async () => {
     const path = new MerklePath(BRC74JSON.blockHeight, BRC74JSON.path)
     const tracker = {
       isValidRootForHeight: jest.fn((root, height) => root === BRC74Root && height === BRC74JSON.blockHeight)
     }
-    const result = path.verify(BRC74TXID1, tracker)
+    const result = await path.verify(BRC74TXID1, tracker)
     expect(result).toBe(true)
     expect(tracker.isValidRootForHeight).toHaveBeenCalledWith(BRC74Root, BRC74JSON.blockHeight)
   })
