@@ -9,6 +9,8 @@ import FeeModel from './FeeModel.js'
 import SatoshisPerKilobyte from './fee-models/SatoshisPerKilobyte.js'
 import { Broadcaster, BroadcastResponse, BroadcastFailure } from './Broadcaster.js'
 import MerklePath from './MerklePath.js'
+import Spend from '../script/Spend.js'
+import ChainTracker from './ChainTracker.js'
 
 /**
  * Represents a complete Bitcoin transaction. This class encapsulates all the details
@@ -370,5 +372,68 @@ export default class Transaction {
       return toHex(id)
     }
     return id
+  }
+
+  async verify (chainTracker: ChainTracker): Promise<boolean> {
+    // If the transaction has a valid merkle path, verification is complete.
+    if (typeof this.merklePath === 'object') {
+      const proofValid = await this.merklePath.verify(
+        this.id('hex') as string,
+        chainTracker
+      )
+      // Note that if the proof is provided but not valid, the transaction could still be verified by proving all inputs (if they are available) and checking the associated spends.
+      if (proofValid) {
+        return true
+      }
+    }
+
+    // Verify each input transaction and evaluate the spend events.
+    // Also, keep a total of the input amounts for later.
+    const inputTotal = new BigNumber(0)
+    for (let i = 0; i < this.inputs.length; i++) {
+      const input = this.inputs[i]
+      if (typeof input.sourceTransaction !== 'object') {
+        throw new Error(`Verification failed because the input at index ${i} of transaction ${this.id('hex') as string} is missing an associated source transaction. This source transaction is required for transaction verification because there is no merkle proof for the transaction spending a UTXO it contains.`)
+      }
+      if (typeof input.unlockingScript !== 'object') {
+        throw new Error(`Verification failed because the input at index ${i} of transaction ${this.id('hex') as string} is missing an associated unlocking script. This script is required for transaction verification because there is no merkle proof for the transaction spending the UTXO.`)
+      }
+      const sourceOutput = input.sourceTransaction.outputs[input.sourceOutputIndex]
+      inputTotal.iadd(sourceOutput.satoshis)
+      const inputVerified = await input.sourceTransaction.verify(chainTracker)
+      if (!inputVerified) {
+        return false
+      }
+      const otherInputs = [...this.inputs]
+      otherInputs.splice(i, i)
+      const spend = new Spend({
+        sourceTXID: input.sourceTransaction.id('hex') as string,
+        sourceOutputIndex: input.sourceOutputIndex,
+        lockingScript: sourceOutput.lockingScript,
+        sourceSatoshis: sourceOutput.satoshis,
+        transactionVersion: this.version,
+        otherInputs,
+        unlockingScript: input.unlockingScript,
+        inputSequence: input.sequence,
+        inputIndex: i,
+        outputs: this.outputs,
+        lockTime: this.lockTime
+      })
+      const spendValid = spend.validate()
+      if (!spendValid) {
+        return false
+      }
+    }
+
+    // Total the outputs to ensure they don't amount to more than the inputs
+    const outputTotal = new BigNumber(0)
+    for (const out of this.outputs) {
+      if (!BigNumber.isBN(out.satoshis)) {
+        throw new Error('Every output must have a efined amount during transaction verification.')
+      }
+      outputTotal.iadd(out.satoshis)
+    }
+
+    return outputTotal.lte(inputTotal)
   }
 }

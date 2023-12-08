@@ -9,6 +9,8 @@ import * as Hash from '../primitives/Hash.js'
 import TransactionSignature from '../primitives/TransactionSignature.js'
 import PublicKey from '../primitives/PublicKey.js'
 import { verify } from '../primitives/ECDSA.js'
+import TransactionInput from '../transaction/TransactionInput.js'
+import TransactionOutput from '../transaction/TransactionOutput.js'
 
 // These constants control the current behavior of the interpreter.
 // In the future, all of them will go away.
@@ -43,8 +45,8 @@ export default class Spend {
   sourceSatoshis: BigNumber
   lockingScript: LockingScript
   transactionVersion: number
-  otherInputs: Array<{ sourceTXID: string, sourceOutputIndex: number, sequence: number }>
-  outputs: Array<{ satoshis: BigNumber, lockingScript: LockingScript }>
+  otherInputs: TransactionInput[]
+  outputs: TransactionOutput[]
   inputIndex: number
   unlockingScript: UnlockingScript
   inputSequence: number
@@ -93,11 +95,11 @@ export default class Spend {
     sourceSatoshis: BigNumber
     lockingScript: LockingScript
     transactionVersion: number
-    otherInputs: Array<{ sourceTXID: string, sourceOutputIndex: number, sequence: number }>
-    outputs: Array<{ satoshis: BigNumber, lockingScript: LockingScript }>
-    inputIndex: number
+    otherInputs: TransactionInput[]
+    outputs: TransactionOutput[]
     unlockingScript: UnlockingScript
     inputSequence: number
+    inputIndex: number
     lockTime: number
   }) {
     this.sourceTXID = params.sourceTXID
