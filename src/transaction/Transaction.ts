@@ -78,7 +78,7 @@ export default class Transaction {
     for (let i = 0; i < numberOfTransactions; i++) {
       const tx = Transaction.fromReader(reader)
       const obj: { pathIndex?: number, tx: Transaction } = { tx }
-      const txid = tx.hash('hex') as string
+      const txid = tx.id('hex') as string
       if (i + 1 === numberOfTransactions) { // The last tXID is stored for later
         lastTXID = txid
       }
@@ -174,7 +174,7 @@ export default class Transaction {
     const inputsLength = br.readVarIntNum()
     const inputs: TransactionInput[] = []
     for (let i = 0; i < inputsLength; i++) {
-      const sourceTXID = toHex(br.read(32))
+      const sourceTXID = toHex(br.readReverse(32))
       const sourceOutputIndex = br.readUInt32LE()
       const scriptLength = br.readVarIntNum()
       const scriptBin = br.read(scriptLength)
@@ -385,7 +385,7 @@ export default class Transaction {
       if (typeof i.sourceTransaction !== 'undefined') {
         writer.write(i.sourceTransaction.hash() as number[])
       } else {
-        writer.write(toArray(i.sourceTXID, 'hex'))
+        writer.writeReverse(toArray(i.sourceTXID, 'hex'))
       }
       writer.writeUInt32LE(i.sourceOutputIndex)
       const scriptBin = i.unlockingScript.toBinary()
@@ -469,7 +469,7 @@ export default class Transaction {
         return false
       }
       const otherInputs = [...this.inputs]
-      otherInputs.splice(i, i)
+      otherInputs.splice(i, 1)
       const spend = new Spend({
         sourceTXID: input.sourceTransaction.id('hex') as string,
         sourceOutputIndex: input.sourceOutputIndex,

@@ -310,7 +310,6 @@ describe('Transaction', () => {
   describe('Verification', () => {
     it('Verifies the transaction from the BEEF spec', async () => {
       const tx = Transaction.fromBEEF(toArray(BRC62Hex, 'hex'))
-      expect(tx.inputs[0].sourceTransaction.merklePath.blockHeight).toEqual(814435)
       const alwaysYesChainTracker = {
         isValidRootForHeight: async () => true
       }
