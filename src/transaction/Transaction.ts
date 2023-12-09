@@ -529,6 +529,7 @@ export default class Transaction {
               BUMPs[i].combine(tx.merklePath)
               obj.pathIndex = i
               added = true
+              break
             }
           }
         }
