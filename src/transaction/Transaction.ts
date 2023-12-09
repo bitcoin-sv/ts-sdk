@@ -55,6 +55,66 @@ export default class Transaction {
   metadata: Record<string, any>
   merklePath?: MerklePath
 
+  static fromBEEF (beef: number[]): Transaction {
+    const reader = new Reader(beef)
+    // Read the version
+    const version = reader.readUInt32LE()
+    if (version !== 4022206465) {
+      throw new Error(`Invalid BEEF version. Expected 4022206465, received ${version}.`)
+    }
+
+    // Read the BUMPs
+    const numberOfBUMPs = reader.readVarIntNum()
+    const BUMPs = []
+    for (let i = 0; i < numberOfBUMPs; i++) {
+      BUMPs.push(MerklePath.fromReader(reader))
+    }
+
+    // Read all transactions into an object
+    // The object has keys of TXIDs and values of objects with transactions and BUMP indexes
+    const numberOfTransactions = reader.readVarIntNum()
+    const transactions: Record<string, { pathIndex?: number, tx: Transaction }> = {}
+    let lastTXID: string
+    for (let i = 0; i < numberOfTransactions; i++) {
+      const tx = Transaction.fromReader(reader)
+      const obj: { pathIndex?: number, tx: Transaction } = { tx }
+      const txid = tx.hash('hex') as string
+      if (i + 1 === numberOfTransactions) { // The last tXID is stored for later
+        lastTXID = txid
+      }
+      const hasBump = Boolean(reader.readUInt8())
+      if (hasBump) {
+        obj.pathIndex = reader.readVarIntNum()
+      }
+      transactions[txid] = obj
+    }
+
+    // Recursive function for adding merkle proofs or input transactions
+    const addPathOrInputs = (obj: { pathIndex?: number, tx: Transaction }): void => {
+      if (typeof obj.pathIndex === 'number') {
+        const path = BUMPs[obj.pathIndex]
+        if (typeof path !== 'object') {
+          throw new Error('Invalid merkle path index found in BEEF!')
+        }
+        obj.tx.merklePath = path
+      } else {
+        for (let i = 0; i < obj.tx.inputs.length; i++) {
+          const input = obj.tx.inputs[i]
+          const sourceObj = transactions[input.sourceTXID]
+          if (typeof sourceObj !== 'object') {
+            throw new Error(`Reference to unknown TXID in BUMP: ${input.sourceTXID}`)
+          }
+          input.sourceTransaction = sourceObj.tx
+          addPathOrInputs(sourceObj)
+        }
+      }
+    }
+
+    // Read the final transaction and Add inputs and merkle proofs to the final transaction, returning it
+    addPathOrInputs(transactions[lastTXID])
+    return transactions[lastTXID].tx
+  }
+
   // TODO: Incomplete
   // static fromBRC1 (brc1: {
   //   inputs?: Record<string, unknown>
@@ -109,15 +169,7 @@ export default class Transaction {
   //   return tx
   // }
 
-  /**
-   * Creates a Transaction instance from a binary array.
-   *
-   * @static
-   * @param {number[]} bin - The binary array representation of the transaction.
-   * @returns {Transaction} - A new Transaction instance.
-   */
-  static fromBinary (bin: number[]): Transaction {
-    const br = new Reader(bin)
+  static fromReader (br: Reader): Transaction {
     const version = br.readUInt32LE()
     const inputsLength = br.readVarIntNum()
     const inputs: TransactionInput[] = []
@@ -149,6 +201,18 @@ export default class Transaction {
     }
     const lockTime = br.readUInt32LE()
     return new Transaction(version, inputs, outputs, lockTime)
+  }
+
+  /**
+   * Creates a Transaction instance from a binary array.
+   *
+   * @static
+   * @param {number[]} bin - The binary array representation of the transaction.
+   * @returns {Transaction} - A new Transaction instance.
+   */
+  static fromBinary (bin: number[]): Transaction {
+    const br = new Reader(bin)
+    return Transaction.fromReader(br)
   }
 
   /**
@@ -435,5 +499,73 @@ export default class Transaction {
     }
 
     return outputTotal.lte(inputTotal)
+  }
+
+  toBEEF (): number[] {
+    const writer = new Writer()
+    writer.writeUInt32LE(4022206465)
+    const BUMPs: MerklePath[] = []
+    const txs: Array<{ tx: Transaction, pathIndex?: number }> = []
+
+    // Recursive function to add paths and input transactions for a TX
+    const addPathsAndInputs = (tx: Transaction): void => {
+      const obj: { tx: Transaction, pathIndex?: number } = { tx }
+      const hasProof = typeof tx.merklePath === 'object'
+      if (hasProof) {
+        let added = false
+        // If this proof is identical to another one previously added, we use that first. Otherwise, we try to merge it with proofs from the same block.
+        for (let i = 0; i < BUMPs.length; i++) {
+          if (BUMPs[i] === tx.merklePath) { // Literally the same
+            obj.pathIndex = i
+            added = true
+            break
+          }
+          if (BUMPs[i].blockHeight === tx.merklePath.blockHeight) {
+            // Probably the same...
+            const rootA = BUMPs[i].computeRoot()
+            const rootB = tx.merklePath.computeRoot()
+            if (rootA === rootB) {
+              // Definitely the same... combine them to save space
+              BUMPs[i].combine(tx.merklePath)
+              obj.pathIndex = i
+              added = true
+            }
+          }
+        }
+        // Finally, if the proof is not yet added, add a new path.
+        if (!added) {
+          obj.pathIndex = BUMPs.length
+          BUMPs.push(tx.merklePath)
+        }
+      }
+      txs.unshift(obj)
+      if (!hasProof) {
+        for (let i = 0; i < tx.inputs.length; i++) {
+          const input = tx.inputs[i]
+          if (typeof input.sourceTransaction !== 'object') {
+            throw new Error('A required source transaction is missing!')
+          }
+          addPathsAndInputs(input.sourceTransaction)
+        }
+      }
+    }
+
+    addPathsAndInputs(this)
+
+    writer.writeVarIntNum(BUMPs.length)
+    for (const b of BUMPs) {
+      writer.write(b.toBinary())
+    }
+    writer.writeVarIntNum(txs.length)
+    for (const t of txs) {
+      writer.write(t.tx.toBinary())
+      if (typeof t.pathIndex === 'number') {
+        writer.writeUInt8(1)
+        writer.writeVarIntNum(t.pathIndex)
+      } else {
+        writer.writeUInt8(0)
+      }
+    }
+    return writer.toArray()
   }
 }

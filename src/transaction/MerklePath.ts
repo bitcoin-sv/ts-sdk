@@ -43,15 +43,7 @@ export default class MerklePath {
     return MerklePath.fromBinary(toArray(hex, 'hex'))
   }
 
-  /**
-   * Creates a MerklePath instance from a binary array.
-   *
-   * @static
-   * @param {number[]} bump - The binary array representation of the Merkle Path.
-   * @returns {MerklePath} - A new MerklePath instance.
-   */
-  static fromBinary (bump: number[]): MerklePath {
-    const reader = new Reader(bump)
+  static fromReader (reader: Reader): MerklePath {
     const blockHeight = reader.readVarIntNum()
     const treeHeight = reader.readUInt8()
     const path = Array(treeHeight).fill(0).map(() => ([]))
@@ -81,6 +73,18 @@ export default class MerklePath {
       path[level].sort((a, b) => a.offset - b.offset)
     }
     return new MerklePath(blockHeight, path)
+  }
+
+  /**
+   * Creates a MerklePath instance from a binary array.
+   *
+   * @static
+   * @param {number[]} bump - The binary array representation of the Merkle Path.
+   * @returns {MerklePath} - A new MerklePath instance.
+   */
+  static fromBinary (bump: number[]): MerklePath {
+    const reader = new Reader(bump)
+    return MerklePath.fromReader(reader)
   }
 
   constructor (blockHeight: number, path: Array<Array<{
@@ -136,11 +140,14 @@ export default class MerklePath {
   /**
    * Computes the Merkle root from the provided transaction ID.
    *
-   * @param {string} txid - The transaction ID to compute the Merkle root for.
+   * @param {string} txid - The transaction ID to compute the Merkle root for. If not provided, the root will be computed from an unspecified branch, and not all branches will be validated!
    * @returns {string} - The computed Merkle root as a hexadecimal string.
    * @throws {Error} - If the transaction ID is not part of the Merkle Path.
    */
-  computeRoot (txid: string): string {
+  computeRoot (txid?: string): string {
+    if (typeof txid !== 'string') {
+      txid = this.path[0].find(leaf => Boolean(leaf?.hash)).hash
+    }
     // Find the index of the txid at the lowest level of the Merkle tree
     const index = this.path[0].find(l => l.hash === txid).offset
     if (typeof index !== 'number') {
@@ -192,10 +199,8 @@ export default class MerklePath {
     if (this.blockHeight !== other.blockHeight) {
       throw Error('You cannot combine paths which do not have the same block height.')
     }
-    const txid1 = this.path[0].find(leaf => Boolean(leaf?.hash)).hash
-    const root1 = this.computeRoot(txid1)
-    const txid2 = other.path[0].find(leaf => Boolean(leaf?.hash)).hash
-    const root2 = other.computeRoot(txid2)
+    const root1 = this.computeRoot()
+    const root2 = other.computeRoot()
     if (root1 !== root2) {
       throw Error('You cannot combine paths which do not have the same root.')
     }
