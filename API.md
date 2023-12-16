@@ -133,7 +133,7 @@ Example
 
 ```ts
 const chainTracker = {
-  isValidRootForHeight: (root, height) => {
+  isValidRootForHeight: async (root, height) => {
     // Implementation to check if the Merkle root is valid for the specified block height.
   }
 };
@@ -141,7 +141,7 @@ const chainTracker = {
 
 ```ts
 export default interface ChainTracker {
-    isValidRootForHeight: (root: string, height: number) => boolean;
+    isValidRootForHeight: (root: string, height: number) => Promise<boolean>;
 }
 ```
 
@@ -7070,6 +7070,7 @@ export default class MerklePath {
         duplicate?: boolean;
     }>>;
     static fromHex(hex: string): MerklePath 
+    static fromReader(reader: Reader): MerklePath 
     static fromBinary(bump: number[]): MerklePath 
     constructor(blockHeight: number, path: Array<Array<{
         offset: number;
@@ -7079,8 +7080,8 @@ export default class MerklePath {
     }>>) 
     toBinary(): number[] 
     toHex(): string 
-    computeRoot(txid: string): string 
-    verify(txid: string, chainTracker: ChainTracker): boolean 
+    computeRoot(txid?: string): string 
+    async verify(txid: string, chainTracker: ChainTracker): Promise<boolean> 
     combine(other: MerklePath): void 
 }
 ```
@@ -7111,7 +7112,7 @@ Throws
 Computes the Merkle root from the provided transaction ID.
 
 ```ts
-computeRoot(txid: string): string 
+computeRoot(txid?: string): string 
 ```
 
 Returns
@@ -7121,7 +7122,7 @@ Returns
 Argument Details
 
 + **txid**
-  + The transaction ID to compute the Merkle root for.
+  + The transaction ID to compute the Merkle root for. If not provided, the root will be computed from an unspecified branch, and not all branches will be validated!
 
 Throws
 
@@ -7190,7 +7191,7 @@ Returns
 Verifies if the given transaction ID is part of the Merkle tree at the specified block height.
 
 ```ts
-verify(txid: string, chainTracker: ChainTracker): boolean 
+async verify(txid: string, chainTracker: ChainTracker): Promise<boolean> 
 ```
 
 Returns
@@ -7235,6 +7236,7 @@ export default class Transaction {
     lockTime: number;
     metadata: Record<string, any>;
     merklePath?: MerklePath;
+    static fromBEEF(beef: number[]): Transaction 
     static fromBinary(bin: number[]): Transaction 
     static fromHex(hex: string): Transaction 
     constructor(version: number = 1, inputs: TransactionInput[] = [], outputs: TransactionOutput[] = [], lockTime: number = 0, metadata: Record<string, any> = {}, merklePath?: MerklePath) 
@@ -7248,6 +7250,8 @@ export default class Transaction {
     toHex(): string 
     hash(enc?: "hex"): number[] | string 
     id(enc?: "hex"): number[] | string 
+    async verify(chainTracker: ChainTracker): Promise<boolean> 
+    toBEEF(): number[] 
 }
 ```
 
@@ -7320,6 +7324,23 @@ Argument Details
 amongst the change outputs
 
 TODO: Benford's law change distribution.
+
+#### Method fromBEEF
+
+Creates a new transaction, linked to its inputs and their associated merkle paths, from a BEEF (BRC-62) structure.
+
+```ts
+static fromBEEF(beef: number[]): Transaction 
+```
+
+Returns
+
+An anchored transaction, linked to its associated inputs populated with merkle paths.
+
+Argument Details
+
++ **beef**
+  + A binary representation of a transaction in BEEF format.
 
 #### Method fromBinary
 
@@ -7397,6 +7418,18 @@ Signs a transaction, hydrating all its unlocking scripts based on the provided s
 async sign(): Promise<void> 
 ```
 
+#### Method toBEEF
+
+Serializes this transaction, together with its inputs and the respective merkle proofs, into the BEEF (BRC-62) format. This enables efficient verification of its compliance with the rules of SPV.
+
+```ts
+toBEEF(): number[] 
+```
+
+Returns
+
+The serialized BEEF structure
+
 #### Method toBinary
 
 Converts the transaction to a binary array format.
@@ -7433,6 +7466,23 @@ Argument Details
 
 + **metadata**
   + The metadata object to merge into the existing metadata.
+
+#### Method verify
+
+Verifies the legitimacy of the Bitcoin transaction according to the rules of SPV by ensuring all the input transactions link back to valid block headers, the chain of spends for all inputs are valid, and the sum of inputs is not less than the sum of outputs.
+
+```ts
+async verify(chainTracker: ChainTracker): Promise<boolean> 
+```
+
+Returns
+
+Whether the transaction is valid according to the rules of SPV.
+
+Argument Details
+
++ **chainTracker**
+  + An instance of ChainTracker, a Bitcoin block header tracker.
 
 </details>
 
@@ -7501,15 +7551,8 @@ export default class Spend {
     sourceSatoshis: BigNumber;
     lockingScript: LockingScript;
     transactionVersion: number;
-    otherInputs: Array<{
-        sourceTXID: string;
-        sourceOutputIndex: number;
-        sequence: number;
-    }>;
-    outputs: Array<{
-        satoshis: BigNumber;
-        lockingScript: LockingScript;
-    }>;
+    otherInputs: TransactionInput[];
+    outputs: TransactionOutput[];
     inputIndex: number;
     unlockingScript: UnlockingScript;
     inputSequence: number;
@@ -7526,18 +7569,11 @@ export default class Spend {
         sourceSatoshis: BigNumber;
         lockingScript: LockingScript;
         transactionVersion: number;
-        otherInputs: Array<{
-            sourceTXID: string;
-            sourceOutputIndex: number;
-            sequence: number;
-        }>;
-        outputs: Array<{
-            satoshis: BigNumber;
-            lockingScript: LockingScript;
-        }>;
-        inputIndex: number;
+        otherInputs: TransactionInput[];
+        outputs: TransactionOutput[];
         unlockingScript: UnlockingScript;
         inputSequence: number;
+        inputIndex: number;
         lockTime: number;
     }) 
     reset(): void 
@@ -7559,18 +7595,11 @@ constructor(params: {
     sourceSatoshis: BigNumber;
     lockingScript: LockingScript;
     transactionVersion: number;
-    otherInputs: Array<{
-        sourceTXID: string;
-        sourceOutputIndex: number;
-        sequence: number;
-    }>;
-    outputs: Array<{
-        satoshis: BigNumber;
-        lockingScript: LockingScript;
-    }>;
-    inputIndex: number;
+    otherInputs: TransactionInput[];
+    outputs: TransactionOutput[];
     unlockingScript: UnlockingScript;
     inputSequence: number;
+    inputIndex: number;
     lockTime: number;
 }) 
 ```

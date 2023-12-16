@@ -55,6 +55,11 @@ export default class Transaction {
   metadata: Record<string, any>
   merklePath?: MerklePath
 
+  /**
+   * Creates a new transaction, linked to its inputs and their associated merkle paths, from a BEEF (BRC-62) structure.
+   * @param beef A binary representation of a transaction in BEEF format.
+   * @returns An anchored transaction, linked to its associated inputs populated with merkle paths.
+   */
   static fromBEEF (beef: number[]): Transaction {
     const reader = new Reader(beef)
     // Read the version
@@ -115,61 +120,7 @@ export default class Transaction {
     return transactions[lastTXID].tx
   }
 
-  // TODO: Incomplete
-  // static fromBRC1 (brc1: {
-  //   inputs?: Record<string, unknown>
-  //   outputs?: TransactionOutput[]
-  //   lockTime?: number
-  // }): Transaction {
-  //   const tx = new Transaction()
-
-  //   const parseInputs = (inputs: unknown): TransactionInput[] => {
-  //     const results: TransactionInput[] = []
-  //     if (typeof inputs !== 'object') {
-  //       return results
-  //     }
-
-  //     for (const txid of Object.keys(inputs)) {
-  //       const input = inputs[txid]
-  //       const sourceTransaction = Transaction.fromHex(input.rawTx)
-  //       sourceTransaction.inputs = parseInputs(input.inputs)
-  //       for (const outputIndex of input.outputsToRedeem) {
-  //         const txInput = {
-  //           unlockingScript: UnlockingScript.fromHex(input.unlockingScript),
-  //           sourceTransaction,
-  //           sourceOutputIndex: outputIndex,
-  //           sequence: typeof input.sequence === 'number'
-  //             ? input.sequence
-  //             : 0xffffffff
-  //         }
-  //         results.push(txInput)
-  //       }
-  //     }
-
-  //     return results
-  //   }
-
-  //   const inputs = parseInputs(brc1.inputs)
-  //   for (const i of inputs) {
-  //     tx.addInput(i)
-  //   }
-
-  //   if (Array.isArray(brc1.outputs)) {
-  //     for (const out of brc1.outputs) {
-  //       tx.addOutput({
-  //         satoshis: new BigNumber(out.satoshis),
-  //         script: LockingScript.fromHex(out.script)
-  //       })
-  //     }
-  //   }
-  //   if (typeof brc1.lockTime === 'number') {
-  //     tx.lockTime = brc1.lockTime
-  //   }
-
-  //   return tx
-  // }
-
-  static fromReader (br: Reader): Transaction {
+  private static fromReader (br: Reader): Transaction {
     const version = br.readUInt32LE()
     const inputsLength = br.readVarIntNum()
     const inputs: TransactionInput[] = []
@@ -438,6 +389,13 @@ export default class Transaction {
     return id
   }
 
+  /**
+   * Verifies the legitimacy of the Bitcoin transaction according to the rules of SPV by ensuring all the input transactions link back to valid block headers, the chain of spends for all inputs are valid, and the sum of inputs is not less than the sum of outputs.
+   *
+   * @param chainTracker - An instance of ChainTracker, a Bitcoin block header tracker.
+   *
+   * @returns Whether the transaction is valid according to the rules of SPV.
+   */
   async verify (chainTracker: ChainTracker): Promise<boolean> {
     // If the transaction has a valid merkle path, verification is complete.
     if (typeof this.merklePath === 'object') {
@@ -501,6 +459,11 @@ export default class Transaction {
     return outputTotal.lte(inputTotal)
   }
 
+  /**
+   * Serializes this transaction, together with its inputs and the respective merkle proofs, into the BEEF (BRC-62) format. This enables efficient verification of its compliance with the rules of SPV.
+   *
+   * @returns The serialized BEEF structure
+   */
   toBEEF (): number[] {
     const writer = new Writer()
     writer.writeUInt32LE(4022206465)
