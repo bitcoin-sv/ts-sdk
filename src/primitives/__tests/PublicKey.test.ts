@@ -1,11 +1,10 @@
 import PublicKey from '../../../dist/cjs/src/primitives/PublicKey'
 import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
-import Signature from '../../../dist/cjs/src/primitives/Signature'
 import Point from '../../../dist/cjs/src/primitives/Point'
 import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
+import BRC42Public from './BRC42.public.vectors'
 
 describe('PublicKey', () => {
-  
   let privateKey
   let publicKey
 
@@ -15,26 +14,23 @@ describe('PublicKey', () => {
   })
 
   describe('Static methods', () => {
-    
     test('fromPrivateKey should return a valid PublicKey', () => {
       expect(publicKey).toBeInstanceOf(PublicKey)
     })
 
     test('fromDER should create a PublicKey from a string', () => {
-      const pubKeyString = publicKey.toString();
-      const newPublicKey = PublicKey.fromString(pubKeyString);
-      expect(newPublicKey).toBeInstanceOf(PublicKey);
-      expect(newPublicKey.x.toHex()).toEqual(publicKey.x.toHex());
-      expect(newPublicKey.y.toHex()).toEqual(publicKey.y.toHex());
+      const pubKeyString = publicKey.toString()
+      const newPublicKey = PublicKey.fromString(pubKeyString)
+      expect(newPublicKey).toBeInstanceOf(PublicKey)
+      expect(newPublicKey.x.toHex()).toEqual(publicKey.x.toHex())
+      expect(newPublicKey.y.toHex()).toEqual(publicKey.y.toHex())
     })
-
   })
 
   describe('Instance methods', () => {
-
     test('deriveSharedSecret should derive a shared secret Point', () => {
-      const sharedSecret = publicKey.deriveSharedSecret(privateKey);
-      expect(sharedSecret).toBeInstanceOf(Point);
+      const sharedSecret = publicKey.deriveSharedSecret(privateKey)
+      expect(sharedSecret).toBeInstanceOf(Point)
     })
 
     test('deriveSharedSecret should throw error for invalid public key', () => {
@@ -45,17 +41,26 @@ describe('PublicKey', () => {
     })
 
     test('verify should return true for valid signature', () => {
-      const message = new BigNumber('deadbeef', 16);
-      const signature = privateKey.sign(message);
-      expect(publicKey.verify(message, signature)).toBe(true);
-    });
+      const message = new BigNumber('deadbeef', 16)
+      const signature = privateKey.sign(message)
+      expect(publicKey.verify(message, signature)).toBe(true)
+    })
 
     test('toDER should return DER encoded string of public key', () => {
-      const derString = publicKey.toDER();
-      expect(typeof derString).toBe('string');
+      const derString = publicKey.toDER()
+      expect(typeof derString).toBe('string')
       expect(derString.length).toBe(66)
-    });
-
-  });
-
-});
+    })
+  })
+  describe('BRC42 vectors', () => {
+    for (let i = 0; i < BRC42Public.length; i++) {
+      it(`Passes BRC42 public vector #${i + 1}`, () => {
+        const v = BRC42Public[i]
+        const publicKey = PublicKey.fromString(v.recipientPublicKey)
+        const privateKey = PrivateKey.fromString(v.senderPrivateKey, 16)
+        const derived = publicKey.deriveChild(privateKey, v.invoiceNumber)
+        expect(derived.toString()).toEqual(v.publicKey)
+      })
+    }
+  })
+})

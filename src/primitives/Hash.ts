@@ -835,3 +835,19 @@ export const hash160 = (msg: number[] | string, enc?: 'hex'): number[] | string 
   const first = new SHA256().update(msg, enc).digest()
   return new RIPEMD160().update(first).digest(enc)
 }
+
+/**
+ * Computes SHA256 HMAC of a given message with a given key.
+ * @function sha256hmac
+ * @param key - The key used to compute the HMAC
+ * @param msg - The message to compute the hash for.
+ * @param enc - The encoding of the message. If 'hex', the message is decoded from hexadecimal first.
+ *
+ * @returns the computed HMAC of the message.
+ *
+ * @example
+ * const digest = sha256hmac('deadbeef', 'ffff001d');
+ */
+export const sha256hmac = (key: number[] | string, msg: number[] | string, enc?: 'hex'): number[] | string => {
+  return new SHA256HMAC(key).update(msg, enc).digest(enc)
+}

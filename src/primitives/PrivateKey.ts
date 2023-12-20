@@ -4,8 +4,9 @@ import PublicKey from './PublicKey.js'
 import Point from './Point.js'
 import Curve from './Curve.js'
 import { sign, verify } from './ECDSA.js'
-import { sha256 } from './Hash.js'
+import { sha256, sha256hmac } from './Hash.js'
 import Random from './Random.js'
+import { toArray } from './utils.js'
 
 /**
  * Represents a Private Key, which is a secret that can be used to generate signatures in a cryptographic system.
@@ -119,5 +120,19 @@ export default class PrivateKey extends BigNumber {
       throw new Error('Public key not valid for ECDH secret derivation')
     }
     return key.mul(this)
+  }
+
+  /**
+   * Derives a child key with BRC-42.
+   * @param publicKey The public key of the other party
+   * @param invoiceNumber The invoice number used to derive the child key
+   * @returns The derived child key.
+   */
+  deriveChild (publicKey: PublicKey, invoiceNumber: string): PrivateKey {
+    const sharedSecret = this.deriveSharedSecret(publicKey)
+    const invoiceNumberBin = toArray(invoiceNumber, 'utf8')
+    const hmac = sha256hmac(sharedSecret.encode(true), invoiceNumberBin)
+    const curve = new Curve()
+    return new PrivateKey(this.add(new BigNumber(hmac)).mod(curve.n).toArray())
   }
 }

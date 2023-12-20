@@ -3,8 +3,9 @@ import PrivateKey from './PrivateKey.js'
 import Curve from './Curve.js'
 import { verify } from './ECDSA.js'
 import BigNumber from './BigNumber.js'
-import { sha256 } from './Hash.js'
+import { sha256, sha256hmac } from './Hash.js'
 import Signature from './Signature.js'
+import { toArray } from './utils.js'
 
 /**
  * The PublicKey class extends the Point class. It is used in public-key cryptography to derive shared secret, verify message signatures, and encode the public key in the DER format.
@@ -100,5 +101,21 @@ export default class PublicKey extends Point {
    */
   toDER (): string {
     return this.encode(true, 'hex') as string
+  }
+
+  /**
+   * Derives a child key with BRC-42.
+   * @param privateKey The private key of the other party
+   * @param invoiceNumber The invoice number used to derive the child key
+   * @returns The derived child key.
+   */
+  deriveChild (privateKey: PrivateKey, invoiceNumber: string): PublicKey {
+    const sharedSecret = this.deriveSharedSecret(privateKey)
+    const invoiceNumberBin = toArray(invoiceNumber, 'utf8')
+    const hmac = sha256hmac(sharedSecret.encode(true), invoiceNumberBin)
+    const curve = new Curve()
+    const point = curve.g.mul(new BigNumber(hmac))
+    const finalPoint = this.add(point)
+    return new PublicKey(finalPoint.x, finalPoint.y)
   }
 }
