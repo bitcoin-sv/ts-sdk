@@ -76,6 +76,16 @@
       "import": "./dist/esm/src/transaction/fee-model/*.js",
       "require": "./dist/cjs/src/transaction/fee-model/*.js",
       "types": "./dist/types/src/transaction/fee-model/*.d.ts"
+    },
+     "./messages": {
+      "import": "./dist/esm/src/messages/index.js",
+      "require": "./dist/cjs/src/messages/index.js",
+      "types": "./dist/types/src/messages/index.d.ts"
+    },
+    "./messages/*": {
+      "import": "./dist/esm/src/messages/*.js",
+      "require": "./dist/cjs/src/messages/*.js",
+      "types": "./dist/types/src/messages/*.d.ts"
     }
   },
   "scripts": {

@@ -28,13 +28,13 @@ export const toHex = (msg: number[]): string => {
 
 /**
  * Converts various message formats into an array of numbers.
- * Supports arrays, hexadecimal strings, and UTF-8 strings.
+ * Supports arrays, hexadecimal strings, base64 strings, and UTF-8 strings.
  *
  * @param {any} msg - The input message (array or string).
  * @param {('hex' | 'utf8')} enc - Specifies the string encoding, if applicable.
  * @returns {any[]} - Array representation of the input.
  */
-export const toArray = (msg: any, enc?: 'hex' | 'utf8'): any[] => {
+export const toArray = (msg: any, enc?: 'hex' | 'utf8' | 'base64'): any[] => {
   // Return a copy if already an array
   if (Array.isArray(msg)) { return msg.slice() }
 
@@ -57,6 +57,26 @@ export const toArray = (msg: any, enc?: 'hex' | 'utf8'): any[] => {
         parseInt((msg[i] as string) + (msg[i + 1] as string), 16)
       )
     }
+
+  // Handle base64
+  } else if (enc === 'base64') {
+    const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+    const result: number[] = []
+    let currentBit: number = 0
+    let currentByte: number = 0
+
+    for (const char of msg.replace(/=+$/, '')) {
+      currentBit = (currentBit << 6) | base64Chars.indexOf(char)
+      currentByte += 6
+
+      if (currentByte >= 8) {
+        currentByte -= 8
+        result.push((currentBit >> currentByte) & 0xFF)
+        currentBit &= (1 << currentByte) - 1
+      }
+    }
+
+    return result
   } else {
     // Handle UTF-8 encoding
     for (let i = 0; i < msg.length; i++) {
@@ -134,6 +154,39 @@ export const encode = (arr: number[], enc?: 'hex' | 'utf8'): string | number[] =
     default:
       return arr
   }
+}
+
+/**
+ * Converts an array of bytes (each between 0 and 255) into a base64 encoded string.
+ *
+ * @param {number[]} byteArray - An array of numbers where each number is a byte (0-255).
+ * @returns {string} The base64 encoded string.
+ *
+ * @example
+ * const bytes = [72, 101, 108, 108, 111]; // Represents the string "Hello"
+ * console.log(toBase64(bytes)); // Outputs: SGVsbG8=
+ */
+export function toBase64 (byteArray: number[]): string {
+  const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+  let result = ''
+  let i: number
+
+  for (i = 0; i < byteArray.length; i += 3) {
+    const byte1 = byteArray[i]
+    const byte2 = i + 1 < byteArray.length ? byteArray[i + 1] : 0
+    const byte3 = i + 2 < byteArray.length ? byteArray[i + 2] : 0
+
+    const encoded1 = byte1 >> 2
+    const encoded2 = ((byte1 & 0x03) << 4) | (byte2 >> 4)
+    const encoded3 = ((byte2 & 0x0F) << 2) | (byte3 >> 6)
+    const encoded4 = byte3 & 0x3F
+
+    result += base64Chars.charAt(encoded1) + base64Chars.charAt(encoded2)
+    result += i + 1 < byteArray.length ? base64Chars.charAt(encoded3) : '='
+    result += i + 2 < byteArray.length ? base64Chars.charAt(encoded4) : '='
+  }
+
+  return result
 }
 
 export class Writer {
