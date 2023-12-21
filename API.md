@@ -236,16 +236,17 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
+| [ARC](#class-arc) | [P2PKH](#class-p2pkh) | [SatoshisPerKilobyte](#class-satoshisperkilobyte) |
 | [BasePoint](#class-basepoint) | [Point](#class-point) | [Script](#class-script) |
 | [BigNumber](#class-bignumber) | [PrivateKey](#class-privatekey) | [Signature](#class-signature) |
 | [Curve](#class-curve) | [PublicKey](#class-publickey) | [Spend](#class-spend) |
 | [DRBG](#class-drbg) | [RIPEMD160](#class-ripemd160) | [SymmetricKey](#class-symmetrickey) |
-| [JacobianPoint](#class-jacobianpoint) | [Reader](#class-reader) | [Transaction](#class-transaction) |
-| [K256](#class-k256) | [ReductionContext](#class-reductioncontext) | [TransactionSignature](#class-transactionsignature) |
-| [LockingScript](#class-lockingscript) | [SHA1](#class-sha1) | [UnlockingScript](#class-unlockingscript) |
-| [MerklePath](#class-merklepath) | [SHA256](#class-sha256) | [Writer](#class-writer) |
-| [Mersenne](#class-mersenne) | [SHA256HMAC](#class-sha256hmac) |  |
-| [MontgomoryMethod](#class-montgomorymethod) | [SatoshisPerKilobyte](#class-satoshisperkilobyte) |  |
+| [JacobianPoint](#class-jacobianpoint) | [RPuzzle](#class-rpuzzle) | [Transaction](#class-transaction) |
+| [K256](#class-k256) | [Reader](#class-reader) | [TransactionSignature](#class-transactionsignature) |
+| [LockingScript](#class-lockingscript) | [ReductionContext](#class-reductioncontext) | [UnlockingScript](#class-unlockingscript) |
+| [MerklePath](#class-merklepath) | [SHA1](#class-sha1) | [Writer](#class-writer) |
+| [Mersenne](#class-mersenne) | [SHA256](#class-sha256) |  |
+| [MontgomoryMethod](#class-montgomorymethod) | [SHA256HMAC](#class-sha256hmac) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -6221,12 +6222,32 @@ export default class PrivateKey extends BigNumber {
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toPublicKey(): PublicKey 
     deriveSharedSecret(key: PublicKey): Point 
+    deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
 }
 ```
 
 <details>
 
 <summary>Class PrivateKey Details</summary>
+
+#### Method deriveChild
+
+Derives a child key with BRC-42.
+
+```ts
+deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
+```
+
+Returns
+
+The derived child key.
+
+Argument Details
+
++ **publicKey**
+  + The public key of the other party
++ **invoiceNumber**
+  + The invoice number used to derive the child key
 
 #### Method deriveSharedSecret
 
@@ -6395,12 +6416,32 @@ export default class PublicKey extends Point {
     deriveSharedSecret(priv: PrivateKey): Point 
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toDER(): string 
+    deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey 
 }
 ```
 
 <details>
 
 <summary>Class PublicKey Details</summary>
+
+#### Method deriveChild
+
+Derives a child key with BRC-42.
+
+```ts
+deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey 
+```
+
+Returns
+
+The derived child key.
+
+Argument Details
+
++ **privateKey**
+  + The private key of the other party
++ **invoiceNumber**
+  + The invoice number used to derive the child key
 
 #### Method deriveSharedSecret
 
@@ -7673,6 +7714,219 @@ if (spend.validate()) {
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
+### Class: P2PKH
+
+P2PKH (Pay To Public Key Hash) class implementing ScriptTemplate.
+
+This class provides methods to create Pay To Public Key Hash locking and unlocking scripts, including the unlocking of P2PKH UTXOs with the private key.
+
+```ts
+export default class P2PKH implements ScriptTemplate {
+    lock(pubkeyhash: number[]): LockingScript 
+    unlock(privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false): {
+        sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
+        estimateLength: () => Promise<106>;
+    } 
+}
+```
+
+<details>
+
+<summary>Class P2PKH Details</summary>
+
+#### Method lock
+
+Creates a P2PKH locking script for a given public key hash.
+
+```ts
+lock(pubkeyhash: number[]): LockingScript 
+```
+
+Returns
+
+- A P2PKH locking script.
+
+Argument Details
+
++ **pubkeyhash**
+  + An array representing the public key hash.
+
+#### Method unlock
+
+Creates a function that generates a P2PKH unlocking script along with its signature and length estimation.
+
+The returned object contains:
+1. `sign` - A function that, when invoked with a transaction and an input index,
+   produces an unlocking script suitable for a P2PKH locked output.
+2. `estimateLength` - A function that returns the estimated length of the unlocking script in bytes.
+
+```ts
+unlock(privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false): {
+    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
+    estimateLength: () => Promise<106>;
+} 
+```
+
+Returns
+
+- An object containing the `sign` and `estimateLength` functions.
+
+Argument Details
+
++ **privateKey**
+  + The private key used for signing the transaction.
++ **signOutputs**
+  + The signature scope for outputs.
++ **anyoneCanPay**
+  + Flag indicating if the signature allows for other inputs to be added later.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: RPuzzle
+
+RPuzzle class implementing ScriptTemplate.
+
+This class provides methods to create R Puzzle and R Puzzle Hash locking and unlocking scripts, including the unlocking of UTXOs with the correct K value.
+
+```ts
+export default class RPuzzle implements ScriptTemplate {
+    type: "raw" | "SHA1" | "SHA256" | "HASH256" | "RIPEMD160" | "HASH160" = "raw";
+    constructor(type: "raw" | "SHA1" | "SHA256" | "HASH256" | "RIPEMD160" | "HASH160" = "raw") 
+    lock(value: number[]): LockingScript 
+    unlock(k: BigNumber, privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false): {
+        sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
+        estimateLength: () => Promise<106>;
+    } 
+}
+```
+
+<details>
+
+<summary>Class RPuzzle Details</summary>
+
+#### Constructor
+
+```ts
+constructor(type: "raw" | "SHA1" | "SHA256" | "HASH256" | "RIPEMD160" | "HASH160" = "raw") 
+```
+
+Argument Details
+
++ **type**
+  + Denotes the type of puzzle to create
+
+#### Method lock
+
+Creates an R puzzle locking script for a given R value or R value hash.
+
+```ts
+lock(value: number[]): LockingScript 
+```
+
+Returns
+
+- An R puzzle locking script.
+
+Argument Details
+
++ **value**
+  + An array representing the R value or its hash.
+
+#### Method unlock
+
+Creates a function that generates an R puzzle unlocking script along with its signature and length estimation.
+
+The returned object contains:
+1. `sign` - A function that, when invoked with a transaction and an input index,
+   produces an unlocking script suitable for an R puzzle locked output.
+2. `estimateLength` - A function that returns the estimated length of the unlocking script in bytes.
+
+```ts
+unlock(k: BigNumber, privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false): {
+    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
+    estimateLength: () => Promise<106>;
+} 
+```
+
+Returns
+
+- An object containing the `sign` and `estimateLength` functions.
+
+Argument Details
+
++ **k**
+  + — The K-value used to unlock the R-puzzle.
++ **privateKey**
+  + The private key used for signing the transaction. If not provided, a random key will be generated.
++ **signOutputs**
+  + The signature scope for outputs.
++ **anyoneCanPay**
+  + Flag indicating if the signature allows for other inputs to be added later.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: ARC
+
+Represents an ARC transaction broadcaster.
+
+```ts
+export default class ARC implements Broadcaster {
+    URL: string;
+    apiKey: string;
+    constructor(URL: string, apiKey: string) 
+    async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> 
+}
+```
+
+<details>
+
+<summary>Class ARC Details</summary>
+
+#### Constructor
+
+Constructs an instance of the ARC broadcaster.
+
+```ts
+constructor(URL: string, apiKey: string) 
+```
+
+Argument Details
+
++ **URL**
+  + The URL endpoint for the ARC API.
++ **apiKey**
+  + The API key used for authorization with the ARC API.
+
+#### Method broadcast
+
+Broadcasts a transaction via ARC.
+This method will attempt to use `window.fetch` if available (in browser environments).
+If running in a Node.js environment, it falls back to using the Node.js `https` module.
+
+```ts
+async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> 
+```
+
+Returns
+
+A promise that resolves to either a success or failure response.
+
+Argument Details
+
++ **tx**
+  + The transaction to be broadcasted.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ## Functions
 
 | |
@@ -7682,11 +7936,45 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [AESGCMDecrypt](#function-aesgcmdecrypt) |
 | [ghash](#function-ghash) |
 | [toArray](#function-toarray) |
+| [toBase64](#function-tobase64) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 
+### Function: toBase64
+
+Converts an array of bytes (each between 0 and 255) into a base64 encoded string.
+
+Example
+
+```ts
+const bytes = [72, 101, 108, 108, 111]; // Represents the string "Hello"
+console.log(toBase64(bytes)); // Outputs: SGVsbG8=
+```
+
+```ts
+export function toBase64(byteArray: number[]): string 
+```
+
+<details>
+
+<summary>Function toBase64 Details</summary>
+
+Returns
+
+The base64 encoded string.
+
+Argument Details
+
++ **byteArray**
+  + An array of numbers where each number is a byte (0-255).
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ### Function: toArray
 
 ```ts
@@ -7740,14 +8028,16 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | | |
 | --- | --- |
 | [checkBit](#variable-checkbit) | [ripemd160](#variable-ripemd160) |
-| [encode](#variable-encode) | [sha1](#variable-sha1) |
-| [exclusiveOR](#variable-exclusiveor) | [sha256](#variable-sha256) |
+| [decrypt](#variable-decrypt) | [sha1](#variable-sha1) |
+| [encode](#variable-encode) | [sha256](#variable-sha256) |
+| [encrypt](#variable-encrypt) | [sha256hmac](#variable-sha256hmac) |
+| [exclusiveOR](#variable-exclusiveor) | [sign](#variable-sign) |
 | [getBytes](#variable-getbytes) | [sign](#variable-sign) |
 | [hash160](#variable-hash160) | [toArray](#variable-toarray) |
 | [hash256](#variable-hash256) | [toHex](#variable-tohex) |
 | [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [verify](#variable-verify) |
-| [multiply](#variable-multiply) | [zero2](#variable-zero2) |
-| [rightShift](#variable-rightshift) |  |
+| [multiply](#variable-multiply) | [verify](#variable-verify) |
+| [rightShift](#variable-rightshift) | [zero2](#variable-zero2) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -7787,7 +8077,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ### Variable: toArray
 
 ```ts
-toArray = (msg: any, enc?: "hex" | "utf8"): any[] => {
+toArray = (msg: any, enc?: "hex" | "utf8" | "base64"): any[] => {
     if (Array.isArray(msg)) {
         return msg.slice();
     }
@@ -7809,6 +8099,22 @@ toArray = (msg: any, enc?: "hex" | "utf8"): any[] => {
         for (let i = 0; i < msg.length; i += 2) {
             res.push(parseInt((msg[i] as string) + (msg[i + 1] as string), 16));
         }
+    }
+    else if (enc === "base64") {
+        const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        const result: number[] = [];
+        let currentBit: number = 0;
+        let currentByte: number = 0;
+        for (const char of msg.replace(/=+$/, "")) {
+            currentBit = (currentBit << 6) | base64Chars.indexOf(char);
+            currentByte += 6;
+            if (currentByte >= 8) {
+                currentByte -= 8;
+                result.push((currentBit >> currentByte) & 255);
+                currentBit &= (1 << currentByte) - 1;
+            }
+        }
+        return result;
     }
     else {
         for (let i = 0; i < msg.length; i++) {
@@ -7899,6 +8205,17 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 hash160 = (msg: number[] | string, enc?: "hex"): number[] | string => {
     const first = new SHA256().update(msg, enc).digest();
     return new RIPEMD160().update(first).digest(enc);
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: sha256hmac
+
+```ts
+sha256hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): number[] | string => {
+    return new SHA256HMAC(key).update(msg, enc).digest(enc);
 }
 ```
 
@@ -8108,6 +8425,131 @@ incrementLeastSignificantThirtyTwoBits = function (block: number[]): number[] {
         }
     }
     return result;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: sign
+
+```ts
+sign = (message: number[], signer: PrivateKey, verifier?: PublicKey): number[] => {
+    const recipientAnyone = typeof verifier !== "object";
+    if (recipientAnyone) {
+        const curve = new Curve();
+        const anyone = new PrivateKey(1);
+        const anyonePoint = curve.g.mul(anyone);
+        verifier = new PublicKey(anyonePoint.x, anyonePoint.y);
+    }
+    const keyID = Random(32);
+    const keyIDBase64 = toBase64(keyID);
+    const invoiceNumber = `2-message signing-${keyIDBase64}`;
+    const signingKey = signer.deriveChild(verifier, invoiceNumber);
+    const signature = signingKey.sign(message).toDER();
+    const senderPublicKey = signer.toPublicKey().encode(true);
+    const version = toArray(VERSION, "hex");
+    return [
+        ...version,
+        ...senderPublicKey,
+        ...(recipientAnyone ? [0] : verifier.encode(true)),
+        ...keyID,
+        ...signature
+    ];
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: verify
+
+```ts
+verify = (message: number[], sig: number[], recipient?: PrivateKey): boolean => {
+    const reader = new Reader(sig);
+    const messageVersion = toHex(reader.read(4));
+    if (messageVersion !== VERSION) {
+        throw new Error(`Message version mismatch: Expected ${VERSION}, received ${messageVersion}`);
+    }
+    const signer = PublicKey.fromString(toHex(reader.read(33)));
+    const [verifierFirst] = reader.read(1);
+    if (verifierFirst === 0) {
+        recipient = new PrivateKey(1);
+    }
+    else {
+        const verifierRest = reader.read(32);
+        const verifierDER = toHex([verifierFirst, ...verifierRest]);
+        if (typeof recipient !== "object") {
+            throw new Error(`This signature can only be verified with knowledge of a specific private key. The associated public key is: ${verifierDER}`);
+        }
+        const recipientDER = recipient.toPublicKey().encode(true, "hex") as string;
+        if (verifierDER !== recipientDER) {
+            throw new Error(`The recipient public key is ${recipientDER} but the signature requres the recipient to have public key ${verifierDER}`);
+        }
+    }
+    const keyID = toBase64(reader.read(32));
+    const signatureDER = toHex(reader.read(reader.bin.length - reader.pos));
+    const signature = Signature.fromDER(signatureDER, "hex");
+    const invoiceNumber = `2-message signing-${keyID}`;
+    const signingKey = signer.deriveChild(recipient, invoiceNumber);
+    const verified = signingKey.verify(message, signature);
+    return verified;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: encrypt
+
+```ts
+encrypt = (message: number[], sender: PrivateKey, recipient: PublicKey): number[] => {
+    const keyID = Random(32);
+    const keyIDBase64 = toBase64(keyID);
+    const invoiceNumber = `2-message encryption-${keyIDBase64}`;
+    const signingPriv = sender.deriveChild(recipient, invoiceNumber);
+    const recipientPub = recipient.deriveChild(sender, invoiceNumber);
+    const sharedSecret = signingPriv.deriveSharedSecret(recipientPub);
+    const symmetricKey = new SymmetricKey(sharedSecret.encode(true).slice(1));
+    const encrypted = symmetricKey.encrypt(message) as number[];
+    const senderPublicKey = sender.toPublicKey().encode(true);
+    const version = toArray(VERSION, "hex");
+    return [
+        ...version,
+        ...senderPublicKey,
+        ...recipient.encode(true),
+        ...keyID,
+        ...encrypted
+    ];
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: decrypt
+
+```ts
+decrypt = (message: number[], recipient: PrivateKey): number[] => {
+    const reader = new Reader(message);
+    const messageVersion = toHex(reader.read(4));
+    if (messageVersion !== VERSION) {
+        throw new Error(`Message version mismatch: Expected ${VERSION}, received ${messageVersion}`);
+    }
+    const sender = PublicKey.fromString(toHex(reader.read(33)));
+    const expectedRecipientDER = toHex(reader.read(33));
+    const actualRecipientDER = recipient.toPublicKey().encode(true, "hex") as string;
+    if (expectedRecipientDER !== actualRecipientDER) {
+        throw new Error(`The encrypted message expects a recipient public key of ${expectedRecipientDER}, but the provided key is ${actualRecipientDER}`);
+    }
+    const keyID = toBase64(reader.read(32));
+    const encrypted = reader.read(reader.bin.length - reader.pos);
+    const invoiceNumber = `2-message encryption-${keyID}`;
+    const signingPriv = sender.deriveChild(recipient, invoiceNumber);
+    const recipientPub = recipient.deriveChild(sender, invoiceNumber);
+    const sharedSecret = signingPriv.deriveSharedSecret(recipientPub);
+    const symmetricKey = new SymmetricKey(sharedSecret.encode(true).slice(1));
+    return symmetricKey.decrypt(encrypted) as number[];
 }
 ```
 

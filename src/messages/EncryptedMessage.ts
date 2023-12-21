@@ -6,6 +6,14 @@ import { toBase64, toArray, Reader, toHex } from '../primitives/utils.js'
 
 const VERSION = '42421033'
 
+/**
+ * Encrypts a message from one party to another using the BRC-78 message encryption protocol.
+ * @param message The message to encrypt
+ * @param sender The private key of the sender
+ * @param recipient The public key of the recipient
+ *
+ * @returns The encrypted message
+ */
 export const encrypt = (
   message: number[],
   sender: PrivateKey,
@@ -30,6 +38,13 @@ export const encrypt = (
   ]
 }
 
+/**
+ * Decrypts a message from one party to another using the BRC-78 message encryption protocol.
+ * @param message The message to decrypt
+ * @param sender The private key of the recipient
+ *
+ * @returns The decrypted message
+ */
 export const decrypt = (message: number[], recipient: PrivateKey): number[] => {
   const reader = new Reader(message)
   const messageVersion = toHex(reader.read(4))

@@ -7,17 +7,25 @@ import { toBase64, toArray, Reader, toHex } from '../primitives/utils.js'
 
 const VERSION = '42423301'
 
+/**
+ * Signs a message from one party to be verified by another, or for verification by anyone, using the BRC-77 message signing protocol.
+ * @param message The message to sign
+ * @param signer The private key of the message signer
+ * @param [verifier] The public key of the person who can verify the message. If not provided, anyone will be able to verify the message signature.
+ *
+ * @returns The message signature.
+ */
 export const sign = (
   message: number[],
-  sender: PrivateKey,
-  recipient?: PublicKey
+  signer: PrivateKey,
+  verifier?: PublicKey
 ): number[] => {
-  const recipientAnyone = typeof recipient !== 'object'
+  const recipientAnyone = typeof verifier !== 'object'
   if (recipientAnyone) {
     const curve = new Curve()
     const anyone = new PrivateKey(1)
     const anyonePoint = curve.g.mul(anyone)
-    recipient = new PublicKey(
+    verifier = new PublicKey(
       anyonePoint.x,
       anyonePoint.y
     )
@@ -25,19 +33,27 @@ export const sign = (
   const keyID = Random(32)
   const keyIDBase64 = toBase64(keyID)
   const invoiceNumber = `2-message signing-${keyIDBase64}`
-  const signingKey = sender.deriveChild(recipient, invoiceNumber)
+  const signingKey = signer.deriveChild(verifier, invoiceNumber)
   const signature = signingKey.sign(message).toDER()
-  const senderPublicKey = sender.toPublicKey().encode(true)
+  const senderPublicKey = signer.toPublicKey().encode(true)
   const version = toArray(VERSION, 'hex')
   return [
     ...version,
     ...senderPublicKey,
-    ...(recipientAnyone ? [0] : recipient.encode(true)),
+    ...(recipientAnyone ? [0] : verifier.encode(true)),
     ...keyID,
     ...signature
   ]
 }
 
+/**
+ * Verifies a message using the BRC-77 message signing protocol.
+ * @param message The message to verify.
+ * @param sig The message signature to be verified.
+ * @param [recipient] The private key of the message verifier. This can be omitted if the message is verifiable by anyone.
+ *
+ * @returns True if the message is verified.
+ */
 export const verify = (message: number[], sig: number[], recipient?: PrivateKey): boolean => {
   const reader = new Reader(sig)
   const messageVersion = toHex(reader.read(4))
