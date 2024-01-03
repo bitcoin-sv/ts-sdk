@@ -177,6 +177,17 @@ export default class Transaction {
     return Transaction.fromBinary(toArray(hex, 'hex'))
   }
 
+  /**
+   * Creates a Transaction instance from a hexadecimal string encoded BEEF.
+   *
+   * @static
+   * @param {string} hex - The hexadecimal string representation of the transaction BEEF.
+   * @returns {Transaction} - A new Transaction instance.
+   */
+  static fromHexBEEF (hex: string): Transaction {
+    return Transaction.fromBEEF(toArray(hex, 'hex'))
+  }
+
   constructor (
     version: number = 1,
     inputs: TransactionInput[] = [],
