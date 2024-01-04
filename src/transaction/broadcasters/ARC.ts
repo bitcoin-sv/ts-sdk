@@ -60,7 +60,7 @@ export default class ARC implements Broadcaster {
         return {
           status: 'success',
           txid: data.txid,
-          message: 'Transaction broadcasted successfully'
+          message: data?.txStatus + ' ' + data?.extraInfo
         }
       } else {
         return {
