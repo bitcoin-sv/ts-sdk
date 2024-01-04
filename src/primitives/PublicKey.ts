@@ -5,7 +5,8 @@ import { verify } from './ECDSA.js'
 import BigNumber from './BigNumber.js'
 import { sha256, sha256hmac } from './Hash.js'
 import Signature from './Signature.js'
-import { toArray } from './utils.js'
+import { toArray, toHex } from './utils.js'
+import { hash160 } from './Hash.js'
 
 /**
  * The PublicKey class extends the Point class. It is used in public-key cryptography to derive shared secret, verify message signatures, and encode the public key in the DER format.
@@ -101,6 +102,22 @@ export default class PublicKey extends Point {
    */
   toDER (): string {
     return this.encode(true, 'hex') as string
+  }
+
+  /**
+   * Hash sha256 and ripemd160 of the public key.
+   * 
+   * @returns Returns the hash of the public key.
+   * 
+   * @example
+   * const publicKeyHash = pubkey.toHash()
+   */
+  toHash (enc?: 'hex'): number[] | string {
+    const pkh = hash160(this.encode(true)) as number[]
+    if (enc === 'hex') {
+      return toHex(pkh)
+    }
+    return pkh
   }
 
   /**
