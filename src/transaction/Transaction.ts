@@ -376,6 +376,15 @@ export default class Transaction {
   }
 
   /**
+   * Converts the transaction to a hexadecimal string BEEF.
+   *
+   * @returns {string} - The hexadecimal string representation of the transaction BEEF.
+   */
+  toHexBEEF (): string {
+    return toHex(this.toBEEF())
+  }
+
+  /**
    * Calculates the transaction's hash.
    *
    * @param {'hex' | undefined} enc - The encoding to use for the hash. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
