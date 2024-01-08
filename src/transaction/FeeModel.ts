@@ -9,5 +9,5 @@ import BigNumber from '../primitives/BigNumber.js'
  * @property {function} computeFee - A function that takes a Transaction object and returns a BigNumber representing the number of satoshis the transaction should cost.
  */
 export default interface FeeModel {
-  computeFee: (transaction: Transaction) => Promise<BigNumber>
+  computeFee: (transaction: Transaction) => Promise<number>
 }

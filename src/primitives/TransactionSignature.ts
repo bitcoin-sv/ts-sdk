@@ -15,10 +15,10 @@ export default class TransactionSignature extends Signature {
 
   scope: number
 
-  static format (params: {
+  static format(params: {
     sourceTXID: string
     sourceOutputIndex: number
-    sourceSatoshis: BigNumber
+    sourceSatoshis: number
     transactionVersion: number
     otherInputs: TransactionInput[]
     outputs: TransactionOutput[]
@@ -64,20 +64,20 @@ export default class TransactionSignature extends Signature {
       return ret
     }
 
-    function getOutputsHash (outputIndex?: number): number[] {
+    function getOutputsHash(outputIndex?: number): number[] {
       const writer = new Writer()
 
       if (typeof outputIndex === 'undefined') {
         let script: number[]
         for (const output of params.outputs) {
-          writer.writeUInt64LEBn(output.satoshis)
+          writer.writeUInt64LE(output.satoshis)
           script = output.lockingScript.toBinary()
           writer.writeVarIntNum(script.length)
           writer.write(script)
         }
       } else {
         const output = params.outputs[outputIndex]
-        writer.writeUInt64LEBn(output.satoshis)
+        writer.writeUInt64LE(output.satoshis)
         const script = output.lockingScript.toBinary()
         writer.writeVarIntNum(script.length)
         writer.write(script)
@@ -97,8 +97,8 @@ export default class TransactionSignature extends Signature {
     }
 
     if ((params.scope & TransactionSignature.SIGHASH_ANYONECANPAY) === 0 &&
-    (params.scope & 31) !== TransactionSignature.SIGHASH_SINGLE &&
-    (params.scope & 31) !== TransactionSignature.SIGHASH_NONE) {
+      (params.scope & 31) !== TransactionSignature.SIGHASH_SINGLE &&
+      (params.scope & 31) !== TransactionSignature.SIGHASH_NONE) {
       hashSequence = getSequenceHash()
     }
 
@@ -126,7 +126,7 @@ export default class TransactionSignature extends Signature {
     writer.write(params.subscript.toBinary())
 
     // value of the output spent by this input (8-byte little endian)
-    writer.writeUInt64LEBn(params.sourceSatoshis)
+    writer.writeUInt64LE(params.sourceSatoshis)
 
     // nSequence of the input (4-byte little endian)
     const sequenceNumber = currentInput.sequence
@@ -146,7 +146,7 @@ export default class TransactionSignature extends Signature {
   }
 
   // The format used in a tx
-  static fromChecksigFormat (buf: number[]): TransactionSignature {
+  static fromChecksigFormat(buf: number[]): TransactionSignature {
     if (buf.length === 0) {
       // allow setting a "blank" signature
       const r = new BigNumber(1)
@@ -160,7 +160,7 @@ export default class TransactionSignature extends Signature {
     return new TransactionSignature(tempSig.r, tempSig.s, scope)
   }
 
-  constructor (r: BigNumber, s: BigNumber, scope: number) {
+  constructor(r: BigNumber, s: BigNumber, scope: number) {
     super(r, s)
     this.scope = scope
   }
@@ -170,7 +170,7 @@ export default class TransactionSignature extends Signature {
      * See also Ecdsa signature algorithm which enforces this.
      * See also Bip 62, "low S values in signatures"
      */
-  public hasLowS (): boolean {
+  public hasLowS(): boolean {
     if (
       this.s.ltn(1) ||
       this.s.gt(new BigNumber(
@@ -182,7 +182,7 @@ export default class TransactionSignature extends Signature {
     return true
   }
 
-  toChecksigFormat (): number[] {
+  toChecksigFormat(): number[] {
     const derbuf = this.toDER() as number[]
     return [...derbuf, this.scope]
   }

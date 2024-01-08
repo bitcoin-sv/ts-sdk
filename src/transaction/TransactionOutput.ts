@@ -7,7 +7,7 @@ import LockingScript from '../script/LockingScript.js'
  * a transaction output, which secures owned Bitcoins to be unlocked later.
  *
  * @interface TransactionOutput
- * @property {BigNumber} [satoshis] - Optional. The amount of satoshis (the smallest unit of Bitcoin) to be transferred by this output.
+ * @property {number} [satoshis] - Optional. The amount of satoshis (the smallest unit of Bitcoin) to be transferred by this output.
  * @property {LockingScript} lockingScript - The script that 'locks' the satoshis,
  *           specifying the conditions under which they can be spent. This script is
  *           essential for securing the funds and typically contains cryptographic
@@ -19,7 +19,7 @@ import LockingScript from '../script/LockingScript.js'
  * @example
  * // Creating a simple transaction output
  * let txOutput = {
- *   satoshis: new BigNumber(1000),
+ *   satoshis: 1000,
  *   lockingScript: LockingScript.fromASM('OP_DUP OP_HASH160 ... OP_EQUALVERIFY OP_CHECKSIG'),
  *   change: false
  * };
@@ -31,7 +31,7 @@ import LockingScript from '../script/LockingScript.js'
  * intended recipient's public key.
  */
 export default interface TransactionOutput {
-  satoshis?: BigNumber
+  satoshis?: number
   lockingScript: LockingScript
   change?: boolean
 }

@@ -28,7 +28,9 @@ describe('ARC Broadcaster', () => {
     const mockFetch = jest.fn().mockResolvedValue({
       ok: true,
       json: async () => await Promise.resolve({
-        txid: 'mocked_txid'
+        txid: 'mocked_txid',
+        txStatus: 'success',
+        extraInfo: 'received'
       })
     })
     global.window = { fetch: mockFetch } as any
@@ -39,7 +41,7 @@ describe('ARC Broadcaster', () => {
     expect(response).toEqual({
       status: 'success',
       txid: 'mocked_txid',
-      message: 'Transaction broadcasted successfully'
+      message: 'success received'
     })
   })
 
@@ -51,7 +53,11 @@ describe('ARC Broadcaster', () => {
         callback({
           statusCode: 200,
           on: (event, handler) => {
-            if (event === 'data') handler(JSON.stringify({ txid: 'mocked_txid' }))
+            if (event === 'data') handler(JSON.stringify({
+              txid: 'mocked_txid',
+              txStatus: 'success',
+              extraInfo: 'received'
+            }))
             if (event === 'end') handler()
           }
         })
@@ -69,7 +75,7 @@ describe('ARC Broadcaster', () => {
     expect(response).toEqual({
       status: 'success',
       txid: 'mocked_txid',
-      message: 'Transaction broadcasted successfully'
+      message: 'success received'
     })
   })
 

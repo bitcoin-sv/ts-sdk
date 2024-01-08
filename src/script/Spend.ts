@@ -42,7 +42,7 @@ const requireCleanStack = true
 export default class Spend {
   sourceTXID: string
   sourceOutputIndex: number
-  sourceSatoshis: BigNumber
+  sourceSatoshis: number
   lockingScript: LockingScript
   transactionVersion: number
   otherInputs: TransactionInput[]
@@ -89,10 +89,10 @@ export default class Spend {
    *   inputSequence: 0xffffffff // inputSequence
    * });
    */
-  constructor (params: {
+  constructor(params: {
     sourceTXID: string
     sourceOutputIndex: number
-    sourceSatoshis: BigNumber
+    sourceSatoshis: number
     lockingScript: LockingScript
     transactionVersion: number
     otherInputs: TransactionInput[]
@@ -116,7 +116,7 @@ export default class Spend {
     this.reset()
   }
 
-  reset (): void {
+  reset(): void {
     this.context = 'UnlockingScript'
     this.programCounter = 0
     this.lastCodeSeparator = null
@@ -125,7 +125,7 @@ export default class Spend {
     this.ifStack = []
   }
 
-  step (): void {
+  step(): void {
     // If the context is UnlockingScript and we have reached the end,
     // set the context to LockingScript and zero the program counter
     if (
@@ -272,65 +272,65 @@ export default class Spend {
      */
     const isChecksigFormat = (buf: number[]): boolean => {
       if (buf.length < 9) {
-      //  Non-canonical signature: too short
+        //  Non-canonical signature: too short
         return false
       }
       if (buf.length > 73) {
-      // Non-canonical signature: too long
+        // Non-canonical signature: too long
         return false
       }
       if (buf[0] !== 0x30) {
-      //  Non-canonical signature: wrong type
+        //  Non-canonical signature: wrong type
         return false
       }
       if (buf[1] !== buf.length - 3) {
-      //  Non-canonical signature: wrong length marker
+        //  Non-canonical signature: wrong length marker
         return false
       }
       const nLEnR = buf[3]
       if (5 + nLEnR >= buf.length) {
-      //  Non-canonical signature: S length misplaced
+        //  Non-canonical signature: S length misplaced
         return false
       }
       const nLEnS = buf[5 + nLEnR]
       if (nLEnR + nLEnS + 7 !== buf.length) {
-      //  Non-canonical signature: R+S length mismatch
+        //  Non-canonical signature: R+S length mismatch
         return false
       }
 
       const R = buf.slice(4)
       if (buf[4 - 2] !== 0x02) {
-      //  Non-canonical signature: R value type mismatch
+        //  Non-canonical signature: R value type mismatch
         return false
       }
       if (nLEnR === 0) {
-      //  Non-canonical signature: R length is zero
+        //  Non-canonical signature: R length is zero
         return false
       }
       if ((R[0] & 0x80) !== 0) {
-      //  Non-canonical signature: R value negative
+        //  Non-canonical signature: R value negative
         return false
       }
       if (nLEnR > 1 && R[0] === 0x00 && (R[1] & 0x80) === 0) {
-      //  Non-canonical signature: R value excessively padded
+        //  Non-canonical signature: R value excessively padded
         return false
       }
 
       const S = buf.slice(6 + nLEnR)
       if (buf[6 + nLEnR - 2] !== 0x02) {
-      //  Non-canonical signature: S value type mismatch
+        //  Non-canonical signature: S value type mismatch
         return false
       }
       if (nLEnS === 0) {
-      //  Non-canonical signature: S length is zero
+        //  Non-canonical signature: S length is zero
         return false
       }
       if ((S[0] & 0x80) !== 0) {
-      //  Non-canonical signature: S value negative
+        //  Non-canonical signature: S value negative
         return false
       }
       if (nLEnS > 1 && S[0] === 0x00 && (S[1] & 0x80) === 0) {
-      //  Non-canonical signature: S value excessively padded
+        //  Non-canonical signature: S value excessively padded
         return false
       }
       return true
@@ -1063,7 +1063,7 @@ export default class Spend {
 
             fSuccess = verifySignature(sig, pubkey, subscript)
           } catch (e) {
-          // invalid sig or pubkey
+            // invalid sig or pubkey
             fSuccess = false
           }
 
@@ -1136,7 +1136,7 @@ export default class Spend {
 
           fSuccess = true
           while (fSuccess && nSigsCount > 0) {
-          // valtype& vchSig  = this.stacktop(-isig);
+            // valtype& vchSig  = this.stacktop(-isig);
             bufSig = this.stacktop(-isig)
             // valtype& vchPubKey = this.stacktop(-ikey);
             bufPubkey = this.stacktop(-ikey)
@@ -1153,7 +1153,7 @@ export default class Spend {
               pubkey = PublicKey.fromString(toHex(bufPubkey))
               fOk = verifySignature(sig, pubkey, subscript)
             } catch (e) {
-            // invalid sig or pubkey
+              // invalid sig or pubkey
               fOk = false
             }
 
@@ -1332,7 +1332,7 @@ export default class Spend {
    *   console.log("Invalid spend!");
    * }
    */
-  validate (): boolean {
+  validate(): boolean {
     if (requirePushOnlyUnlockingScripts && !this.unlockingScript.isPushOnly()) {
       this.scriptEvaluationError('Unlocking scripts can only contain push operations, and no other opcodes.')
     }
@@ -1356,11 +1356,11 @@ export default class Spend {
     return true
   }
 
-  private stacktop (i: number): number[] {
+  private stacktop(i: number): number[] {
     return this.stack[this.stack.length + i]
   }
 
-  private castToBool (val: number[]): boolean {
+  private castToBool(val: number[]): boolean {
     for (let i = 0; i < val.length; i++) {
       if (val[i] !== 0) {
         // can be negative zero
@@ -1373,7 +1373,7 @@ export default class Spend {
     return false
   }
 
-  private scriptEvaluationError (str: string): void {
+  private scriptEvaluationError(str: string): void {
     throw new Error(`Script evaluation error: ${str}\n\nSource TXID: ${this.sourceTXID}\nSource output index: ${this.sourceOutputIndex}\nContext: ${this.context}\nProgram counter: ${this.programCounter}\nStack size: ${this.stack.length}\nAlt stack size: ${this.altStack.length}`)
   }
 }

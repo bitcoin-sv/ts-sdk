@@ -17,7 +17,7 @@ export default class SatoshisPerKilobyte implements FeeModel {
    *
    * @param {number} value - The number of satoshis per kilobyte to charge as a fee.
    */
-  constructor (value: number) {
+  constructor(value: number) {
     this.value = value
   }
 
@@ -27,7 +27,7 @@ export default class SatoshisPerKilobyte implements FeeModel {
    * @param tx The transaction for which a fee is to be computed.
    * @returns The fee in satoshis for the transaction, as a BigNumber.
    */
-  async computeFee (tx: Transaction): Promise<BigNumber> {
+  async computeFee(tx: Transaction): Promise<number> {
     const getVarIntSize = (i: number): number => {
       if (i > 2 ** 32) {
         return 9
@@ -66,6 +66,6 @@ export default class SatoshisPerKilobyte implements FeeModel {
     size += 4 // lock time
     // We'll use Math.ceil to ensure the miners get the extra satoshi.
     const fee = Math.ceil((size / 1000) * this.value)
-    return new BigNumber(fee)
+    return fee
   }
 }

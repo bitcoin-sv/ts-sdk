@@ -141,7 +141,7 @@ export default class Transaction {
     const outputsLength = br.readVarIntNum()
     const outputs: TransactionOutput[] = []
     for (let i = 0; i < outputsLength; i++) {
-      const satoshis = br.readUInt64LEBn()
+      const satoshis = br.readUInt64LEBn().toNumber()
       const scriptLength = br.readVarIntNum()
       const scriptBin = br.read(scriptLength)
       const lockingScript = LockingScript.fromBinary(scriptBin)
@@ -184,11 +184,11 @@ export default class Transaction {
    * @param {string} hex - The hexadecimal string representation of the transaction BEEF.
    * @returns {Transaction} - A new Transaction instance.
    */
-  static fromHexBEEF (hex: string): Transaction {
+  static fromHexBEEF(hex: string): Transaction {
     return Transaction.fromBEEF(toArray(hex, 'hex'))
   }
 
-  constructor (
+  constructor(
     version: number = 1,
     inputs: TransactionInput[] = [],
     outputs: TransactionOutput[] = [],
@@ -257,26 +257,24 @@ export default class Transaction {
     }
     const fee = await model.computeFee(this)
     // change = inputs - fee - non-change outputs
-    const change = new BigNumber(0)
+    let change = 0
     for (const input of this.inputs) {
       if (typeof input.sourceTransaction !== 'object') {
         throw new Error('Source transactions are required for all inputs during fee computation')
       }
-      change.iadd(
-        input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
-      )
+      change += input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
     }
-    change.isub(fee)
+    change -= fee
     let changeCount = 0
     for (const out of this.outputs) {
       if (!out.change) {
-        change.isub(out.satoshis)
+        change -= out.satoshis
       } else {
         changeCount++
       }
     }
 
-    if (change.lten(changeCount)) {
+    if (change <= changeCount) {
       // There is not enough change to distribute among the change outputs.
       // We'll remove all change outputs and leave the extra for the miners.
       for (let i = 0; i < this.outputs.length; i++) {
@@ -293,10 +291,10 @@ export default class Transaction {
       // TODO
       throw new Error('Not yet implemented')
     } else if (changeDistribution === 'equal') {
-      const perOutput = change.divn(changeCount)
+      const perOutput = Math.floor(change / changeCount)
       for (const out of this.outputs) {
         if (out.change) {
-          out.satoshis = perOutput.clone()
+          out.satoshis = perOutput
         }
       }
     }
@@ -357,7 +355,7 @@ export default class Transaction {
     }
     writer.writeVarIntNum(this.outputs.length)
     for (const o of this.outputs) {
-      writer.writeUInt64LEBn(o.satoshis)
+      writer.writeUInt64LE(o.satoshis)
       const scriptBin = o.lockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
       writer.write(scriptBin)
@@ -385,7 +383,7 @@ export default class Transaction {
       const scriptBin = i.unlockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
       writer.write(scriptBin)
-      writer.writeUInt64LEBn(i.sourceTransaction.outputs[i.sourceOutputIndex].satoshis)
+      writer.writeUInt64LE(i.sourceTransaction.outputs[i.sourceOutputIndex].satoshis)
       const lockingScriptBin = i.sourceTransaction.outputs[i.sourceOutputIndex].lockingScript.toBinary()
       writer.writeVarIntNum(lockingScriptBin.length)
       writer.write(lockingScriptBin)
@@ -393,7 +391,7 @@ export default class Transaction {
     }
     writer.writeVarIntNum(this.outputs.length)
     for (const o of this.outputs) {
-      writer.writeUInt64LEBn(o.satoshis)
+      writer.writeUInt64LE(o.satoshis)
       const scriptBin = o.lockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
       writer.write(scriptBin)
@@ -425,7 +423,7 @@ export default class Transaction {
    *
    * @returns {string} - The hexadecimal string representation of the transaction BEEF.
    */
-  toHexBEEF (): string {
+  toHexBEEF(): string {
     return toHex(this.toBEEF())
   }
 
@@ -476,7 +474,7 @@ export default class Transaction {
 
     // Verify each input transaction and evaluate the spend events.
     // Also, keep a total of the input amounts for later.
-    const inputTotal = new BigNumber(0)
+    let inputTotal = 0
     for (let i = 0; i < this.inputs.length; i++) {
       const input = this.inputs[i]
       if (typeof input.sourceTransaction !== 'object') {
@@ -486,7 +484,7 @@ export default class Transaction {
         throw new Error(`Verification failed because the input at index ${i} of transaction ${this.id('hex') as string} is missing an associated unlocking script. This script is required for transaction verification because there is no merkle proof for the transaction spending the UTXO.`)
       }
       const sourceOutput = input.sourceTransaction.outputs[input.sourceOutputIndex]
-      inputTotal.iadd(sourceOutput.satoshis)
+      inputTotal += sourceOutput.satoshis
       const inputVerified = await input.sourceTransaction.verify(chainTracker)
       if (!inputVerified) {
         return false
@@ -513,15 +511,15 @@ export default class Transaction {
     }
 
     // Total the outputs to ensure they don't amount to more than the inputs
-    const outputTotal = new BigNumber(0)
+    let outputTotal = 0
     for (const out of this.outputs) {
-      if (!BigNumber.isBN(out.satoshis)) {
-        throw new Error('Every output must have a efined amount during transaction verification.')
+      if (typeof out.satoshis !== 'number') {
+        throw new Error('Every output must have a defined amount during transaction verification.')
       }
-      outputTotal.iadd(out.satoshis)
+      outputTotal += out.satoshis
     }
 
-    return outputTotal.lte(inputTotal)
+    return outputTotal <= inputTotal
   }
 
   /**
