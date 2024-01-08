@@ -45,7 +45,7 @@ Example
 ```ts
 // Creating a simple transaction output
 let txOutput = {
-  satoshis: new BigNumber(1000),
+  satoshis: 1000,
   lockingScript: LockingScript.fromASM('OP_DUP OP_HASH160 ... OP_EQUALVERIFY OP_CHECKSIG'),
   change: false
 };
@@ -53,7 +53,7 @@ let txOutput = {
 
 ```ts
 export default interface TransactionOutput {
-    satoshis?: BigNumber;
+    satoshis?: number;
     lockingScript: LockingScript;
     change?: boolean;
 }
@@ -69,7 +69,7 @@ This interface defines a standard method for computing a fee when given a transa
 
 ```ts
 export default interface FeeModel {
-    computeFee: (transaction: Transaction) => Promise<BigNumber>;
+    computeFee: (transaction: Transaction) => Promise<number>;
 }
 ```
 
@@ -4644,6 +4644,7 @@ export class Writer {
     writeInt32LE(n: number): Writer 
     writeUInt64BEBn(bn: BigNumber): Writer 
     writeUInt64LEBn(bn: BigNumber): Writer 
+    writeUInt64LE(n: number): Writer 
     writeVarIntNum(n: number): Writer 
     writeVarIntBn(bn: BigNumber): Writer 
     static varIntNum(n: number): number[] 
@@ -6416,6 +6417,7 @@ export default class PublicKey extends Point {
     deriveSharedSecret(priv: PrivateKey): Point 
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toDER(): string 
+    toHash(enc?: "hex"): number[] | string 
     deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey 
 }
 ```
@@ -6536,6 +6538,24 @@ Example
 
 ```ts
 const derPublicKey = myPubKey.toDER()
+```
+
+#### Method toHash
+
+Hash sha256 and ripemd160 of the public key.
+
+```ts
+toHash(enc?: "hex"): number[] | string 
+```
+
+Returns
+
+Returns the hash of the public key.
+
+Example
+
+```ts
+const publicKeyHash = pubkey.toHash()
 ```
 
 #### Method verify
@@ -7044,7 +7064,7 @@ Represents the "satoshis per kilobyte" transaction fee model.
 export default class SatoshisPerKilobyte implements FeeModel {
     value: number;
     constructor(value: number) 
-    async computeFee(tx: Transaction): Promise<BigNumber> 
+    async computeFee(tx: Transaction): Promise<number> 
 }
 ```
 
@@ -7070,7 +7090,7 @@ Argument Details
 Computes the fee for a given transaction.
 
 ```ts
-async computeFee(tx: Transaction): Promise<BigNumber> 
+async computeFee(tx: Transaction): Promise<number> 
 ```
 
 Returns
@@ -7280,6 +7300,7 @@ export default class Transaction {
     static fromBEEF(beef: number[]): Transaction 
     static fromBinary(bin: number[]): Transaction 
     static fromHex(hex: string): Transaction 
+    static fromHexBEEF(hex: string): Transaction 
     constructor(version: number = 1, inputs: TransactionInput[] = [], outputs: TransactionOutput[] = [], lockTime: number = 0, metadata: Record<string, any> = {}, merklePath?: MerklePath) 
     addInput(input: TransactionInput): void 
     addOutput(output: TransactionOutput): void 
@@ -7291,6 +7312,7 @@ export default class Transaction {
     toEF(): number[] 
     toHexEF(): string 
     toHex(): string 
+    toHexBEEF(): string 
     hash(enc?: "hex"): number[] | string 
     id(enc?: "hex"): number[] | string 
     async verify(chainTracker: ChainTracker): Promise<boolean> 
@@ -7419,6 +7441,23 @@ Argument Details
 + **hex**
   + The hexadecimal string representation of the transaction.
 
+#### Method fromHexBEEF
+
+Creates a Transaction instance from a hexadecimal string encoded BEEF.
+
+```ts
+static fromHexBEEF(hex: string): Transaction 
+```
+
+Returns
+
+- A new Transaction instance.
+
+Argument Details
+
++ **hex**
+  + The hexadecimal string representation of the transaction BEEF.
+
 #### Method hash
 
 Calculates the transaction's hash.
@@ -7509,6 +7548,18 @@ Returns
 
 - The hexadecimal string representation of the transaction.
 
+#### Method toHexBEEF
+
+Converts the transaction to a hexadecimal string BEEF.
+
+```ts
+toHexBEEF(): string 
+```
+
+Returns
+
+- The hexadecimal string representation of the transaction BEEF.
+
 #### Method toHexEF
 
 Converts the transaction to a hexadecimal string EF.
@@ -7569,7 +7620,7 @@ export default class TransactionSignature extends Signature {
     static format(params: {
         sourceTXID: string;
         sourceOutputIndex: number;
-        sourceSatoshis: BigNumber;
+        sourceSatoshis: number;
         transactionVersion: number;
         otherInputs: TransactionInput[];
         outputs: TransactionOutput[];
@@ -7615,7 +7666,7 @@ and includes details about the source transaction, output, and the spending tran
 export default class Spend {
     sourceTXID: string;
     sourceOutputIndex: number;
-    sourceSatoshis: BigNumber;
+    sourceSatoshis: number;
     lockingScript: LockingScript;
     transactionVersion: number;
     otherInputs: TransactionInput[];
@@ -7633,7 +7684,7 @@ export default class Spend {
     constructor(params: {
         sourceTXID: string;
         sourceOutputIndex: number;
-        sourceSatoshis: BigNumber;
+        sourceSatoshis: number;
         lockingScript: LockingScript;
         transactionVersion: number;
         otherInputs: TransactionInput[];
@@ -7659,7 +7710,7 @@ export default class Spend {
 constructor(params: {
     sourceTXID: string;
     sourceOutputIndex: number;
-    sourceSatoshis: BigNumber;
+    sourceSatoshis: number;
     lockingScript: LockingScript;
     transactionVersion: number;
     otherInputs: TransactionInput[];
