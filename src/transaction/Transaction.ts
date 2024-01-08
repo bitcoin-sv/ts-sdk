@@ -60,7 +60,7 @@ export default class Transaction {
    * @param beef A binary representation of a transaction in BEEF format.
    * @returns An anchored transaction, linked to its associated inputs populated with merkle paths.
    */
-  static fromBEEF (beef: number[]): Transaction {
+  static fromBEEF(beef: number[]): Transaction {
     const reader = new Reader(beef)
     // Read the version
     const version = reader.readUInt32LE()
@@ -120,7 +120,7 @@ export default class Transaction {
     return transactions[lastTXID].tx
   }
 
-  private static fromReader (br: Reader): Transaction {
+  private static fromReader(br: Reader): Transaction {
     const version = br.readUInt32LE()
     const inputsLength = br.readVarIntNum()
     const inputs: TransactionInput[] = []
@@ -161,7 +161,7 @@ export default class Transaction {
    * @param {number[]} bin - The binary array representation of the transaction.
    * @returns {Transaction} - A new Transaction instance.
    */
-  static fromBinary (bin: number[]): Transaction {
+  static fromBinary(bin: number[]): Transaction {
     const br = new Reader(bin)
     return Transaction.fromReader(br)
   }
@@ -173,7 +173,7 @@ export default class Transaction {
    * @param {string} hex - The hexadecimal string representation of the transaction.
    * @returns {Transaction} - A new Transaction instance.
    */
-  static fromHex (hex: string): Transaction {
+  static fromHex(hex: string): Transaction {
     return Transaction.fromBinary(toArray(hex, 'hex'))
   }
 
@@ -210,7 +210,7 @@ export default class Transaction {
    * @param {TransactionInput} input - The TransactionInput object to add to the transaction.
    * @throws {Error} - If the input does not have a sourceTXID or sourceTransaction defined.
    */
-  addInput (input: TransactionInput): void {
+  addInput(input: TransactionInput): void {
     if (
       typeof input.sourceTXID === 'undefined' &&
       typeof input.sourceTransaction === 'undefined'
@@ -225,7 +225,7 @@ export default class Transaction {
    *
    * @param {TransactionOutput} output - The TransactionOutput object to add to the transaction.
    */
-  addOutput (output: TransactionOutput): void {
+  addOutput(output: TransactionOutput): void {
     this.outputs.push(output)
   }
 
@@ -234,7 +234,7 @@ export default class Transaction {
    *
    * @param {Record<string, any>} metadata - The metadata object to merge into the existing metadata.
    */
-  updateMetadata (metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, any>): void {
     this.metadata = {
       ...this.metadata,
       ...metadata
@@ -251,7 +251,7 @@ export default class Transaction {
    *
    * TODO: Benford's law change distribution.
    */
-  async fee (model?: FeeModel, changeDistribution: 'equal' | 'random' = 'equal'): Promise<void> {
+  async fee(model?: FeeModel, changeDistribution: 'equal' | 'random' = 'equal'): Promise<void> {
     if (typeof model === 'undefined') {
       model = new SatoshisPerKilobyte(10)
     }
@@ -305,7 +305,7 @@ export default class Transaction {
   /**
    * Signs a transaction, hydrating all its unlocking scripts based on the provided script templates where they are available.
    */
-  async sign (): Promise<void> {
+  async sign(): Promise<void> {
     for (const out of this.outputs) {
       if (typeof out.satoshis === 'undefined') {
         if (out.change) {
@@ -330,7 +330,7 @@ export default class Transaction {
    * @param broadcaster The Broadcaster instance wwhere the transaction will be sent
    * @returns A BroadcastResponse or BroadcastFailure from the Broadcaster
    */
-  async broadcast (broadcaster: Broadcaster): Promise<BroadcastResponse | BroadcastFailure> {
+  async broadcast(broadcaster: Broadcaster): Promise<BroadcastResponse | BroadcastFailure> {
     return await broadcaster.broadcast(this)
   }
 
@@ -339,7 +339,7 @@ export default class Transaction {
    *
    * @returns {number[]} - The binary array representation of the transaction.
    */
-  toBinary (): number[] {
+  toBinary(): number[] {
     const writer = new Writer()
     writer.writeUInt32LE(this.version)
     writer.writeVarIntNum(this.inputs.length)
@@ -367,11 +367,56 @@ export default class Transaction {
   }
 
   /**
+   * Converts the transaction to a BRC-30 EF format.
+   *
+   * @returns {number[]} - The BRC-30 EF representation of the transaction.
+   */
+  toEF(): number[] {
+    const writer = new Writer()
+    writer.writeUInt32LE(this.version)
+    writer.write([0, 0, 0, 0, 0, 0xef])
+    writer.writeVarIntNum(this.inputs.length)
+    for (const i of this.inputs) {
+      if (typeof i.sourceTransaction === 'undefined') {
+        throw new Error('All inputs must have source transactions when serializing to EF format')
+      }
+      writer.write(i.sourceTransaction.hash() as number[])
+      writer.writeUInt32LE(i.sourceOutputIndex)
+      const scriptBin = i.unlockingScript.toBinary()
+      writer.writeVarIntNum(scriptBin.length)
+      writer.write(scriptBin)
+      writer.writeUInt64LEBn(i.sourceTransaction.outputs[i.sourceOutputIndex].satoshis)
+      const lockingScriptBin = i.sourceTransaction.outputs[i.sourceOutputIndex].lockingScript.toBinary()
+      writer.writeVarIntNum(lockingScriptBin.length)
+      writer.write(lockingScriptBin)
+      writer.writeUInt32LE(i.sequence)
+    }
+    writer.writeVarIntNum(this.outputs.length)
+    for (const o of this.outputs) {
+      writer.writeUInt64LEBn(o.satoshis)
+      const scriptBin = o.lockingScript.toBinary()
+      writer.writeVarIntNum(scriptBin.length)
+      writer.write(scriptBin)
+    }
+    writer.writeUInt32LE(this.lockTime)
+    return writer.toArray()
+  }
+
+  /**
+   * Converts the transaction to a hexadecimal string EF.
+   *
+   * @returns {string} - The hexadecimal string representation of the transaction EF.
+   */
+  toHexEF(): string {
+    return toHex(this.toEF())
+  }
+
+  /**
    * Converts the transaction to a hexadecimal string format.
    *
    * @returns {string} - The hexadecimal string representation of the transaction.
    */
-  toHex (): string {
+  toHex(): string {
     return toHex(this.toBinary())
   }
 
@@ -390,7 +435,7 @@ export default class Transaction {
    * @param {'hex' | undefined} enc - The encoding to use for the hash. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
    * @returns {string | number[]} - The hash of the transaction in the specified format.
    */
-  hash (enc?: 'hex'): number[] | string {
+  hash(enc?: 'hex'): number[] | string {
     return hash256(this.toBinary(), enc)
   }
 
@@ -400,7 +445,7 @@ export default class Transaction {
    * @param {'hex' | undefined} enc - The encoding to use for the ID. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
    * @returns {string | number[]} - The ID of the transaction in the specified format.
    */
-  id (enc?: 'hex'): number[] | string {
+  id(enc?: 'hex'): number[] | string {
     const id = hash256(this.toBinary()) as number[]
     id.reverse()
     if (enc === 'hex') {
@@ -416,7 +461,7 @@ export default class Transaction {
    *
    * @returns Whether the transaction is valid according to the rules of SPV.
    */
-  async verify (chainTracker: ChainTracker): Promise<boolean> {
+  async verify(chainTracker: ChainTracker): Promise<boolean> {
     // If the transaction has a valid merkle path, verification is complete.
     if (typeof this.merklePath === 'object') {
       const proofValid = await this.merklePath.verify(
@@ -484,7 +529,7 @@ export default class Transaction {
    *
    * @returns The serialized BEEF structure
    */
-  toBEEF (): number[] {
+  toBEEF(): number[] {
     const writer = new Writer()
     writer.writeUInt32LE(4022206465)
     const BUMPs: MerklePath[] = []

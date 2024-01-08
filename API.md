@@ -7288,6 +7288,8 @@ export default class Transaction {
     async sign(): Promise<void> 
     async broadcast(broadcaster: Broadcaster): Promise<BroadcastResponse | BroadcastFailure> 
     toBinary(): number[] 
+    toEF(): number[] 
+    toHexEF(): string 
     toHex(): string 
     hash(enc?: "hex"): number[] | string 
     id(enc?: "hex"): number[] | string 
@@ -7483,6 +7485,18 @@ Returns
 
 - The binary array representation of the transaction.
 
+#### Method toEF
+
+Converts the transaction to a BRC-30 EF format.
+
+```ts
+toEF(): number[] 
+```
+
+Returns
+
+- The BRC-30 EF representation of the transaction.
+
 #### Method toHex
 
 Converts the transaction to a hexadecimal string format.
@@ -7494,6 +7508,18 @@ toHex(): string
 Returns
 
 - The hexadecimal string representation of the transaction.
+
+#### Method toHexEF
+
+Converts the transaction to a hexadecimal string EF.
+
+```ts
+toHexEF(): string 
+```
+
+Returns
+
+- The hexadecimal string representation of the transaction EF.
 
 #### Method updateMetadata
 
