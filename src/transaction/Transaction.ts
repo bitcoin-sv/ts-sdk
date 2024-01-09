@@ -217,6 +217,10 @@ export default class Transaction {
     ) {
       throw new Error('A reference to an an input transaction is required. If the input transaction itself cannot be referenced, its TXID must still be provided.')
     }
+    // If the input sequence number hasn't been set, the expectation is that it is final.
+    if (typeof input.sequence === 'undefined') {
+      input.sequence = 0xFFFFFFFF
+    }
     this.inputs.push(input)
   }
 
@@ -383,11 +387,11 @@ export default class Transaction {
       const scriptBin = i.unlockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
       writer.write(scriptBin)
+      writer.writeUInt32LE(i.sequence)
       writer.writeUInt64LE(i.sourceTransaction.outputs[i.sourceOutputIndex].satoshis)
       const lockingScriptBin = i.sourceTransaction.outputs[i.sourceOutputIndex].lockingScript.toBinary()
       writer.writeVarIntNum(lockingScriptBin.length)
       writer.write(lockingScriptBin)
-      writer.writeUInt32LE(i.sequence)
     }
     writer.writeVarIntNum(this.outputs.length)
     for (const o of this.outputs) {
