@@ -217,6 +217,10 @@ export default class Transaction {
     ) {
       throw new Error('A reference to an an input transaction is required. If the input transaction itself cannot be referenced, its TXID must still be provided.')
     }
+    // If the input sequence number hasn't been set, the expectation is that it is final.
+    if (typeof input.sequence === 'undefined') {
+      input.sequence = 0xFFFFFFFF
+    }
     this.inputs.push(input)
   }
 
