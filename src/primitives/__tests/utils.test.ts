@@ -54,52 +54,55 @@ describe('utils', () => {
   })
   describe('base58check encoding and decoding', () => {
     it('should correctly encode and decode data with default prefix', () => {
-      let data = 'f5f2d624cfb5c3f66d06123d0829d1c9cebf770e';
-      let encoded = toBase58Check(data);
-      expect(encoded).toBe('1PRTTaJesdNovgne6Ehcdu1fpEdX7913CK');
-      expect(fromBase58Check(encoded, 'hex')).toEqual({ prefix: '00', data });
+      let data = toArray('f5f2d624cfb5c3f66d06123d0829d1c9cebf770e', 'hex')
+      let encoded = toBase58Check(data)
+      expect(encoded).toBe('1PRTTaJesdNovgne6Ehcdu1fpEdX7913CK')
+      expect(fromBase58Check(encoded)).toEqual({ prefix: [0], data })
 
       data = toArray('27b5891b01da2db74cde1689a97a2acbe23d5fb1', 'hex')
-      encoded = toBase58Check(data);
-      expect(encoded).toBe('14cxpo3MBCYYWCgF74SWTdcmxipnGUsPw3');
-      expect(fromBase58Check(encoded, 'hex')).toEqual({ prefix: '00', data })
+      encoded = toBase58Check(data)
+      expect(encoded).toBe('14cxpo3MBCYYWCgF74SWTdcmxipnGUsPw3')
+      expect(fromBase58Check(encoded)).toEqual({ prefix: [0], data })
     });
 
     it('should correctly encode and decode data with custom prefix', () => {
-      const prefix = '80';
-      let data = '1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD';
-      let encoded = toBase58Check(data, prefix);
-      expect(encoded).toBe('5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn');
-      expect(fromBase58Check(encoded, 'hex')).toEqual({ prefix, data });
+      const prefix = [0x80]
+      let data = toArray('1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD', 'hex')
+      let encoded = toBase58Check(data, prefix)
+      expect(encoded).toBe('5J3mBbAH58CpQ3Y5RNJpUKPE62SQ5tfcvU2JpbnkeyhfsYB1Jcn')
+      expect(fromBase58Check(encoded)).toEqual({ prefix, data })
 
-      data = toArray('3aba4162c7251c891207b747840551a71939b0de081f85c4e44cf7c13e41daa6', 'hex');
-      encoded = toBase58Check(data, prefix);
-      expect(encoded).toBe('5JG9hT3beGTJuUAmCQEmNaxAuMacCTfXuw1R3FCXig23RQHMr4K');
-      expect(fromBase58Check(encoded, 'hex')).toEqual({ prefix, data });
+      data = toArray('3aba4162c7251c891207b747840551a71939b0de081f85c4e44cf7c13e41daa6', 'hex')
+      encoded = toBase58Check(data, prefix)
+      expect(encoded).toBe('5JG9hT3beGTJuUAmCQEmNaxAuMacCTfXuw1R3FCXig23RQHMr4K')
+      expect(fromBase58Check(encoded)).toEqual({ prefix, data })
     });
 
     it('should correctly handle encoding and decoding with different encoding formats', () => {
-      const prefix = '80';
-      const encoding = 'hex';
-      let data = '1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD01';
-      let encoded = toBase58Check(data, prefix, encoding);
-      expect(encoded).toBe('KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ');
-      expect(fromBase58Check(encoded, 'hex')).toEqual({ prefix, data });
+      const prefix = [0x80]
+      let dataHex = '1E99423A4ED27608A15A2616A2B0E9E52CED330AC530EDCC32C8FFC6A526AEDD01'
+      dataHex = dataHex.toLowerCase()
+      let data = toArray(dataHex, 'hex')
+      let encoded = toBase58Check(data, prefix)
+      expect(encoded).toBe('KxFC1jmwwCoACiCAWZ3eXa96mBM6tb3TYzGmf6YwgdGWZgawvrtJ')
+      expect(fromBase58Check(encoded, 'hex')).toEqual({ prefix: '80', data: dataHex })
 
-      data = toArray('3aba4162c7251c891207b747840551a71939b0de081f85c4e44cf7c13e41daa601', 'hex');
-      encoded = toBase58Check(data, prefix, encoding);
-      expect(encoded).toBe('KyBsPXxTuVD82av65KZkrGrWi5qLMah5SdNq6uftawDbgKa2wv6S');
-      expect(fromBase58Check(encoded, 'hex')).toEqual({ prefix, data });
+      dataHex = '3aba4162c7251c891207b747840551a71939b0de081f85c4e44cf7c13e41daa601'
+      data = toArray(dataHex, 'hex')
+      encoded = toBase58Check(data, prefix)
+      expect(encoded).toBe('KyBsPXxTuVD82av65KZkrGrWi5qLMah5SdNq6uftawDbgKa2wv6S')
+      expect(fromBase58Check(encoded, 'hex')).toEqual({ prefix: '80', data: dataHex })
     });
 
     it('should correctly encode and decode Bitcoin addresses', () => {
-      let data = '086eaa677895f92d4a6c5ef740c168932b5e3f44';
-      let encoded = toBase58Check(data);
-      expect(encoded).toBe('1mayif3H2JDC62S4N3rLNtBNRAiUUP99k');
-      expect(fromBase58Check(encoded, 'hex')).toEqual({ prefix: '00', data });
+      const dataHex = '086eaa677895f92d4a6c5ef740c168932b5e3f44'
+      let data = toArray(dataHex, 'hex')
+      let encoded = toBase58Check(data)
+      expect(encoded).toBe('1mayif3H2JDC62S4N3rLNtBNRAiUUP99k')
+      expect(fromBase58Check(encoded, 'hex')).toEqual({ prefix: '00', data: dataHex })
 
-      const address = '1mayif3H2JDC62S4N3rLNtBNRAiUUP99k';
-      expect(fromBase58Check(address, 'hex')).toEqual({ prefix: '00', data });
+      const address = '1mayif3H2JDC62S4N3rLNtBNRAiUUP99k'
+      expect(fromBase58Check(address, 'hex')).toEqual({ prefix: '00', data: dataHex })
     })
   })
 })

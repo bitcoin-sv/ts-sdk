@@ -285,10 +285,10 @@ export const toBase58Check = (bin: number[], prefix: number[] = [0]) => {
  * @param str - The base58check string to convert to binary
  * @returns The binary array representation
  */
-export const fromBase58Check = (str: string) => {
+export const fromBase58Check = (str: string, enc?: 'hex') => {
   const bin = fromBase58(str)
-  let prefix = bin.slice(0, 1)
-  let data = bin.slice(1, -4)
+  let prefix: string | number[] = bin.slice(0, 1)
+  let data: string | number[] = bin.slice(1, -4)
   let hash = [...prefix, ...data]
   hash = hash256(hash) as number[]
   bin.slice(-4).forEach((check, index) => {
@@ -296,6 +296,10 @@ export const fromBase58Check = (str: string) => {
       throw new Error('Invalid checksum')
     }
   })
+  if (enc === 'hex') {
+    prefix = toHex(prefix)
+    data = toHex(data)
+  }
   return { prefix, data }
 }
 
