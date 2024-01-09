@@ -8109,8 +8109,9 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [encode](#variable-encode) | [sha256](#variable-sha256) |
 | [encrypt](#variable-encrypt) | [sha256hmac](#variable-sha256hmac) |
 | [exclusiveOR](#variable-exclusiveor) | [sign](#variable-sign) |
-| [getBytes](#variable-getbytes) | [sign](#variable-sign) |
-| [hash160](#variable-hash160) | [toArray](#variable-toarray) |
+| [fromBase58](#variable-frombase58) | [sign](#variable-sign) |
+| [getBytes](#variable-getbytes) | [toArray](#variable-toarray) |
+| [hash160](#variable-hash160) | [toBase58](#variable-tobase58) |
 | [hash256](#variable-hash256) | [toHex](#variable-tohex) |
 | [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [verify](#variable-verify) |
 | [multiply](#variable-multiply) | [verify](#variable-verify) |
@@ -8225,6 +8226,73 @@ encode = (arr: number[], enc?: "hex" | "utf8"): string | number[] => {
         default:
             return arr;
     }
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: fromBase58
+
+```ts
+fromBase58 = (str: string): number[] => {
+    if (!str || typeof str !== "string")
+        throw new Error(`Expected base58 string but got “${str}”`);
+    if (str.match(/[IOl0]/gmu))
+        throw new Error(`Invalid base58 character “${str.match(/[IOl0]/gmu)}”`);
+    const lz = str.match(/^1+/gmu);
+    const psz: number = lz ? lz[0].length : 0;
+    const size = ((str.length - psz) * (Math.log(58) / Math.log(256)) + 1) >>> 0;
+    const uint8 = new Uint8Array([
+        ...new Uint8Array(psz),
+        ...str
+            .match(/.{1}/gmu)
+            .map((i) => base58chars.indexOf(i))
+            .reduce((acc, i) => {
+            acc = acc.map((j) => {
+                const x = j * 58 + i;
+                i = x >> 8;
+                return x;
+            });
+            return acc;
+        }, new Uint8Array(size))
+            .reverse()
+            .filter(((lastValue) => (value) => (lastValue = lastValue || value))(false))
+    ]);
+    return [...uint8];
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: toBase58
+
+```ts
+toBase58 = (bin: number[]): string => {
+    const base58Map = Array(256).fill(-1);
+    for (let i = 0; i < base58chars.length; ++i)
+        base58Map[base58chars.charCodeAt(i)] = i;
+    const result = [];
+    for (const byte of bin) {
+        let carry = byte;
+        for (let j = 0; j < result.length; ++j) {
+            const x = (base58Map[result[j]] << 8) + carry;
+            result[j] = base58chars.charCodeAt(x % 58);
+            carry = (x / 58) | 0;
+        }
+        while (carry) {
+            result.push(base58chars.charCodeAt(carry % 58));
+            carry = (carry / 58) | 0;
+        }
+    }
+    for (const byte of bin)
+        if (byte)
+            break;
+        else
+            result.push("1".charCodeAt(0));
+    result.reverse();
+    return String.fromCharCode(...result);
 }
 ```
 

@@ -189,6 +189,85 @@ export function toBase64(byteArray: number[]): string {
   return result
 }
 
+const base58chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+
+/**
+ * Converts a string from base58 to a binary array
+ * @param str - The string representation
+ * @returns The binary representation
+ */
+export const fromBase58 = (str: string): number[] => {
+  if (!str || typeof str !== "string")
+    throw new Error(`Expected base58 string but got “${str}”`)
+  if (str.match(/[IOl0]/gmu))
+    throw new Error(
+      `Invalid base58 character “${str.match(/[IOl0]/gmu)}”`
+    )
+  const lz = str.match(/^1+/gmu)
+  const psz: number = lz ? lz[0].length : 0
+  const size =
+    ((str.length - psz) * (Math.log(58) / Math.log(256)) + 1) >>> 0
+
+  const uint8 = new Uint8Array([
+    ...new Uint8Array(psz),
+    ...str
+      .match(/.{1}/gmu)
+      .map((i) => base58chars.indexOf(i))
+      .reduce((acc, i) => {
+        acc = acc.map((j) => {
+          const x = j * 58 + i;
+          i = x >> 8;
+          return x;
+        });
+        return acc;
+      }, new Uint8Array(size))
+      .reverse()
+      .filter(
+        (
+          (lastValue) => (value) =>
+            // @ts-ignore
+            (lastValue = lastValue || value)
+        )(false)
+      )
+  ])
+  return [...uint8]
+}
+
+/**
+ * Converts a binary array into a base58 string
+ * @param bin - The binary array to convert to base58
+ * @returns The base58 string representation
+ */
+export const toBase58 = (bin: number[]): string => {
+  const base58Map = Array(256).fill(-1);
+  for (let i = 0; i < base58chars.length; ++i)
+    base58Map[base58chars.charCodeAt(i)] = i;
+
+  const result = []
+
+  for (const byte of bin) {
+    let carry = byte
+    for (let j = 0; j < result.length; ++j) {
+      // @ts-ignore
+      const x = (base58Map[result[j]] << 8) + carry
+      result[j] = base58chars.charCodeAt(x % 58)
+      carry = (x / 58) | 0
+    }
+    while (carry) {
+      result.push(base58chars.charCodeAt(carry % 58))
+      carry = (carry / 58) | 0
+    }
+  }
+
+  for (const byte of bin)
+    if (byte) break
+    else result.push("1".charCodeAt(0))
+
+  result.reverse()
+
+  return String.fromCharCode(...result)
+}
+
 export class Writer {
   public bufs: number[][]
 
