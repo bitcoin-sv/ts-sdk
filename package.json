@@ -77,7 +77,7 @@
       "require": "./dist/cjs/src/transaction/fee-model/*.js",
       "types": "./dist/types/src/transaction/fee-model/*.d.ts"
     },
-     "./messages": {
+    "./messages": {
       "import": "./dist/esm/src/messages/index.js",
       "require": "./dist/cjs/src/messages/index.js",
       "types": "./dist/types/src/messages/index.d.ts"
@@ -96,7 +96,7 @@
     "build": "tsc -b",
     "dev": "tsc -b -w",
     "prepublish": "npm run build",
-    "doc": "ts2md"
+    "doc": "ts2md --inputFilename=src/script/index.ts --outputFilename=docs/script.md --firstHeadingLevel=1 && ts2md --inputFilename=src/primitives/index.ts --outputFilename=docs/primitives.md --firstHeadingLevel=1 && ts2md --inputFilename=src/transaction/index.ts --outputFilename=docs/transaction.md --firstHeadingLevel=1 && ts2md --inputFilename=src/messages/index.ts --outputFilename=docs/messages.md --firstHeadingLevel=1 && ts2md --inputFilename=src/compat/index.ts --outputFilename=docs/compat.md --firstHeadingLevel=1"
   },
   "repository": {
     "type": "git",
