@@ -1,4 +1,5 @@
 import BigNumber from './BigNumber.js'
+import { hash256 } from './Hash.js'
 
 /**
  * Appends a '0' to a single-character word to ensure it has two characters.
@@ -266,6 +267,36 @@ export const toBase58 = (bin: number[]): string => {
   result.reverse()
 
   return String.fromCharCode(...result)
+}
+
+/**
+ * Converts a binary array into a base58check string with a checksum
+ * @param bin - The binary array to convert to base58check
+ * @returns The base58check string representation
+ */
+export const toBase58Check = (bin: number[], prefix: number[] = [0]) => {
+  let hash = hash256([...prefix, ...bin]) as number[]
+  hash = [...prefix, ...bin, ...hash.slice(0, 4)]
+  return toBase58(hash)
+}
+
+/**
+ * Converts a base58check string into a binary array after validating the checksum
+ * @param str - The base58check string to convert to binary
+ * @returns The binary array representation
+ */
+export const fromBase58Check = (str: string) => {
+  const bin = fromBase58(str)
+  let prefix = bin.slice(0, 1)
+  let data = bin.slice(1, -4)
+  let hash = [...prefix, ...data]
+  hash = hash256(hash) as number[]
+  bin.slice(-4).forEach((check, index) => {
+    if (check !== hash[index]) {
+      throw new Error('Invalid checksum')
+    }
+  })
+  return { prefix, data }
 }
 
 export class Writer {
