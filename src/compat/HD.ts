@@ -54,7 +54,12 @@ export default class HD {
 
     public fromString(str: string): this {
         const decoded = fromBase58Check(str)
-        return this.fromBinary(decoded.data as number[])
+        return this.fromBinary([...decoded.prefix, ...decoded.data] as number[])
+    }
+
+    public toString(): string {
+        const bin = this.toBinary()
+        return toBase58Check(bin, [])
     }
 
     public fromSeed(bytes: number[]): this {
@@ -247,5 +252,9 @@ export default class HD {
         } else {
             throw new Error('bip32: invalid versionBytesNum byte')
         }
+    }
+
+    public isPrivate(): boolean {
+        return this.versionBytesNum === this.constants.privKey
     }
 }

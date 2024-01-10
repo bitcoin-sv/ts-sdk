@@ -283,11 +283,13 @@ export const toBase58Check = (bin: number[], prefix: number[] = [0]) => {
 /**
  * Converts a base58check string into a binary array after validating the checksum
  * @param str - The base58check string to convert to binary
+ * @param enc - If hex, the return values will be hex strings, arrays of numbers otherwise
+ * @param prefixLength - The length of the prefix. Optional, defaults to 1.
  * @returns The binary array representation
  */
-export const fromBase58Check = (str: string, enc?: 'hex') => {
+export const fromBase58Check = (str: string, enc?: 'hex', prefixLength: number = 1) => {
   const bin = fromBase58(str)
-  let prefix: string | number[] = bin.slice(0, 1)
+  let prefix: string | number[] = bin.slice(0, prefixLength)
   let data: string | number[] = bin.slice(1, -4)
   let hash = [...prefix, ...data]
   hash = hash256(hash) as number[]
