@@ -6,16 +6,17 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 
 | | |
 | --- | --- |
-| [BasePoint](#class-basepoint) | [PublicKey](#class-publickey) |
-| [BigNumber](#class-bignumber) | [RIPEMD160](#class-ripemd160) |
-| [Curve](#class-curve) | [Reader](#class-reader) |
-| [DRBG](#class-drbg) | [ReductionContext](#class-reductioncontext) |
-| [JacobianPoint](#class-jacobianpoint) | [SHA1](#class-sha1) |
-| [K256](#class-k256) | [SHA256](#class-sha256) |
-| [Mersenne](#class-mersenne) | [SHA256HMAC](#class-sha256hmac) |
-| [MontgomoryMethod](#class-montgomorymethod) | [Signature](#class-signature) |
-| [Point](#class-point) | [SymmetricKey](#class-symmetrickey) |
-| [PrivateKey](#class-privatekey) | [Writer](#class-writer) |
+| [BasePoint](#class-basepoint) | [RIPEMD160](#class-ripemd160) |
+| [BigNumber](#class-bignumber) | [Reader](#class-reader) |
+| [Curve](#class-curve) | [ReductionContext](#class-reductioncontext) |
+| [DRBG](#class-drbg) | [SHA1](#class-sha1) |
+| [JacobianPoint](#class-jacobianpoint) | [SHA256](#class-sha256) |
+| [K256](#class-k256) | [SHA256HMAC](#class-sha256hmac) |
+| [Mersenne](#class-mersenne) | [SHA512](#class-sha512) |
+| [MontgomoryMethod](#class-montgomorymethod) | [SHA512HMAC](#class-sha512hmac) |
+| [Point](#class-point) | [Signature](#class-signature) |
+| [PrivateKey](#class-privatekey) | [SymmetricKey](#class-symmetrickey) |
+| [PublicKey](#class-publickey) | [Writer](#class-writer) |
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -4545,6 +4546,64 @@ k: number[]
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
+### Class: SHA512
+
+An implementation of SHA512 cryptographic hash function. Extends the BaseHash class.
+It provides a way to compute a 'digest' for any kind of input data; transforming the data
+into a unique output of fixed size. The output is deterministic; it will always be
+the same for the same input.
+
+Example
+
+```ts
+const sha512 = new SHA512();
+```
+
+```ts
+export class SHA512 extends BaseHash {
+    h: number[];
+    W: number[];
+    k: number[];
+    constructor() 
+    _prepareBlock(msg, start) 
+    _update(msg, start) 
+    _digest(enc) 
+}
+```
+
+<details>
+
+<summary>Class SHA512 Details</summary>
+
+#### Property W
+
+Provides a way to recycle usage of the array memory.
+
+```ts
+W: number[]
+```
+
+#### Property h
+
+The initial hash constants.
+
+```ts
+h: number[]
+```
+
+#### Property k
+
+The round constants used for each round of SHA-512.
+
+```ts
+k: number[]
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ### Class: SHA256HMAC
 
 The `SHA256HMAC` class is used to create Hash-based Message Authentication Code (HMAC) using the SHA-256 cryptographic hash function.
@@ -4658,6 +4717,138 @@ update(msg: number[] | string, enc?: "hex"): SHA256HMAC
 Returns
 
 Returns the instance of `SHA256HMAC` for chaining calls.
+
+Argument Details
+
++ **msg**
+  + Part of the message to hash. Can be a number array or a string.
++ **enc**
+  + If 'hex', then the input is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+
+Example
+
+```ts
+myHMAC.update('deadbeef', 'hex');
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: SHA512HMAC
+
+The `SHA512HMAC` class is used to create Hash-based Message Authentication Code (HMAC) using the SHA-512 cryptographic hash function.
+
+HMAC is a specific type of MAC involving a cryptographic hash function and a secret cryptographic key. It may be used to simultaneously verify both the data integrity and the authenticity of a message.
+
+This class also uses the SHA-512 cryptographic hash algorithm that produces a 512-bit (64-byte) hash value.
+
+```ts
+export class SHA512HMAC {
+    inner: SHA512;
+    outer: SHA512;
+    blockSize = 128;
+    outSize = 32;
+    constructor(key: number[] | string) 
+    update(msg: number[] | string, enc?: "hex"): SHA512HMAC 
+    digest(enc?: "hex"): number[] | string 
+}
+```
+
+<details>
+
+<summary>Class SHA512HMAC Details</summary>
+
+#### Constructor
+
+The constructor for the `SHA512HMAC` class.
+
+It initializes the `SHA512HMAC` object and sets up the inner and outer padded keys.
+If the key size is larger than the blockSize, it is digested using SHA-512.
+If the key size is less than the blockSize, it is padded with zeroes.
+
+```ts
+constructor(key: number[] | string) 
+```
+
+Argument Details
+
++ **key**
+  + The key to use to create the HMAC. Can be a number array or a string in hexadecimal format.
+
+Example
+
+```ts
+const myHMAC = new SHA512HMAC('deadbeef');
+```
+
+#### Property blockSize
+
+The block size for the SHA-512 hash function, in bytes. It's set to 128 bytes.
+
+```ts
+blockSize = 128
+```
+
+#### Property inner
+
+Represents the inner hash of SHA-512.
+
+```ts
+inner: SHA512
+```
+
+#### Property outSize
+
+The output size of the SHA-512 hash function, in bytes. It's set to 64 bytes.
+
+```ts
+outSize = 32
+```
+
+#### Property outer
+
+Represents the outer hash of SHA-512.
+
+```ts
+outer: SHA512
+```
+
+#### Method digest
+
+Finalizes the HMAC computation and returns the resultant hash.
+
+```ts
+digest(enc?: "hex"): number[] | string 
+```
+
+Returns
+
+Returns the digest of the hashed data. Can be a number array or a string.
+
+Argument Details
+
++ **enc**
+  + If 'hex', then the output is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+
+Example
+
+```ts
+let hashedMessage = myHMAC.digest('hex');
+```
+
+#### Method update
+
+Updates the `SHA512HMAC` object with part of the message to be hashed.
+
+```ts
+update(msg: number[] | string, enc?: "hex"): SHA512HMAC 
+```
+
+Returns
+
+Returns the instance of `SHA512HMAC` for chaining calls.
 
 Argument Details
 
@@ -6543,10 +6734,10 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 
 | | |
 | --- | --- |
-| [checkBit](#variable-checkbit) | [ripemd160](#variable-ripemd160) |
-| [encode](#variable-encode) | [sha1](#variable-sha1) |
-| [exclusiveOR](#variable-exclusiveor) | [sha256](#variable-sha256) |
-| [fromBase58](#variable-frombase58) | [sha256hmac](#variable-sha256hmac) |
+| [checkBit](#variable-checkbit) | [sha1](#variable-sha1) |
+| [encode](#variable-encode) | [sha256](#variable-sha256) |
+| [exclusiveOR](#variable-exclusiveor) | [sha256hmac](#variable-sha256hmac) |
+| [fromBase58](#variable-frombase58) | [sha512hmac](#variable-sha512hmac) |
 | [fromBase58Check](#variable-frombase58check) | [sign](#variable-sign) |
 | [getBytes](#variable-getbytes) | [toArray](#variable-toarray) |
 | [hash160](#variable-hash160) | [toBase58](#variable-tobase58) |
@@ -6554,6 +6745,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 | [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [toHex](#variable-tohex) |
 | [multiply](#variable-multiply) | [verify](#variable-verify) |
 | [rightShift](#variable-rightshift) | [zero2](#variable-zero2) |
+| [ripemd160](#variable-ripemd160) |  |
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -6621,6 +6813,17 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ```ts
 sha256hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): number[] | string => {
     return new SHA256HMAC(key).update(msg, enc).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: sha512hmac
+
+```ts
+sha512hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): number[] | string => {
+    return new SHA512HMAC(key).update(msg, enc).digest(enc);
 }
 ```
 
@@ -6821,9 +7024,9 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ### Variable: fromBase58Check
 
 ```ts
-fromBase58Check = (str: string, enc?: "hex") => {
+fromBase58Check = (str: string, enc?: "hex", prefixLength: number = 1) => {
     const bin = fromBase58(str);
-    let prefix: string | number[] = bin.slice(0, 1);
+    let prefix: string | number[] = bin.slice(0, prefixLength);
     let data: string | number[] = bin.slice(1, -4);
     let hash = [...prefix, ...data];
     hash = hash256(hash) as number[];
