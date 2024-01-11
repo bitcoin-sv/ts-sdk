@@ -6642,6 +6642,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 | [AESGCM](#function-aesgcm) |
 | [AESGCMDecrypt](#function-aesgcmdecrypt) |
 | [ghash](#function-ghash) |
+| [pbkdf2](#function-pbkdf2) |
 | [toArray](#function-toarray) |
 | [toBase64](#function-tobase64) |
 
@@ -6654,6 +6655,40 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ```ts
 export function toArray(msg: number[] | string, enc?: "hex"): number[] 
 ```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Function: pbkdf2
+
+Limited SHA-512-only PBKDF2 function for use in deprecated BIP39 code.
+
+```ts
+export function pbkdf2(password: number[], salt: number[], iterations: number, keylen: number, digest = "sha512") 
+```
+
+<details>
+
+<summary>Function pbkdf2 Details</summary>
+
+Returns
+
+The computed key
+
+Argument Details
+
++ **password**
+  + The PBKDF2 password
++ **salt**
+  + The PBKDF2 salt
++ **iterations**
+  + The number of of iterations to run
++ **keylen**
+  + The length of the key
++ **digest**
+  + The digest (must be sha512 for this implementation)
+
+</details>
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 

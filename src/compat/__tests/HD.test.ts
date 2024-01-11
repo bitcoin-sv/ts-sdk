@@ -1,7 +1,5 @@
 import HD from '../../../dist/cjs/src/compat/HD'
 import { fromBase58Check, toBase58Check, toArray, toHex } from '../../../dist/cjs/src/primitives/utils'
-import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
-
 
 describe('HD', () => {
     it('should satisfy these basic API features', () => {

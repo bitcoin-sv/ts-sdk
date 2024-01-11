@@ -413,29 +413,29 @@ function Kh(j): number {
 }
 
 function sum64(buf, pos, ah, al) {
-  var bh = buf[pos];
-  var bl = buf[pos + 1];
+  const bh = buf[pos];
+  const bl = buf[pos + 1];
 
-  var lo = (al + bl) >>> 0;
-  var hi = (lo < al ? 1 : 0) + ah + bh;
+  const lo = (al + bl) >>> 0;
+  const hi = (lo < al ? 1 : 0) + ah + bh;
   buf[pos] = hi >>> 0;
   buf[pos + 1] = lo;
 }
 
 function sum64_hi(ah, al, bh, bl) {
-  var lo = (al + bl) >>> 0;
-  var hi = (lo < al ? 1 : 0) + ah + bh;
+  const lo = (al + bl) >>> 0;
+  const hi = (lo < al ? 1 : 0) + ah + bh;
   return hi >>> 0;
 }
 
 function sum64_lo(ah, al, bh, bl) {
-  var lo = al + bl;
+  const lo = al + bl;
   return lo >>> 0;
 }
 
 function sum64_4_hi(ah, al, bh, bl, ch, cl, dh, dl) {
-  var carry = 0;
-  var lo = al;
+  let carry = 0;
+  let lo = al;
   lo = (lo + bl) >>> 0;
   carry += lo < al ? 1 : 0;
   lo = (lo + cl) >>> 0;
@@ -443,18 +443,18 @@ function sum64_4_hi(ah, al, bh, bl, ch, cl, dh, dl) {
   lo = (lo + dl) >>> 0;
   carry += lo < dl ? 1 : 0;
 
-  var hi = ah + bh + ch + dh + carry;
+  const hi = ah + bh + ch + dh + carry;
   return hi >>> 0;
 }
 
 function sum64_4_lo(ah, al, bh, bl, ch, cl, dh, dl) {
-  var lo = al + bl + cl + dl;
+  const lo = al + bl + cl + dl;
   return lo >>> 0;
 }
 
 function sum64_5_hi(ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
-  var carry = 0;
-  var lo = al;
+  let carry = 0;
+  let lo = al;
   lo = (lo + bl) >>> 0;
   carry += lo < al ? 1 : 0;
   lo = (lo + cl) >>> 0;
@@ -464,23 +464,23 @@ function sum64_5_hi(ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
   lo = (lo + el) >>> 0;
   carry += lo < el ? 1 : 0;
 
-  var hi = ah + bh + ch + dh + eh + carry;
+  const hi = ah + bh + ch + dh + eh + carry;
   return hi >>> 0;
 }
 
 function sum64_5_lo(ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
-  var lo = al + bl + cl + dl + el;
+  const lo = al + bl + cl + dl + el;
 
   return lo >>> 0;
 }
 
 function rotr64_hi(ah, al, num) {
-  var r = (al << (32 - num)) | (ah >>> num);
+  const r = (al << (32 - num)) | (ah >>> num);
   return r >>> 0;
 }
 
 function rotr64_lo(ah, al, num) {
-  var r = (ah << (32 - num)) | (al >>> num);
+  const r = (ah << (32 - num)) | (al >>> num);
   return r >>> 0;
 }
 
@@ -489,7 +489,7 @@ function shr64_hi(ah, al, num) {
 }
 
 function shr64_lo(ah, al, num) {
-  var r = (ah << (32 - num)) | (al >>> num);
+  const r = (ah << (32 - num)) | (al >>> num);
   return r >>> 0;
 }
 
@@ -836,20 +836,21 @@ export class SHA512 extends BaseHash {
 
 
   _prepareBlock(msg, start) {
-    var W = this.W;
+    const W = this.W;
 
     // 32 x 32bit words
-    for (var i = 0; i < 32; i++)
+    let i
+    for (i = 0; i < 32; i++)
       W[i] = msg[start + i];
     for (; i < W.length; i += 2) {
-      var c0_hi = g1_512_hi(W[i - 4], W[i - 3]);  // i - 2
-      var c0_lo = g1_512_lo(W[i - 4], W[i - 3]);
-      var c1_hi = W[i - 14];  // i - 7
-      var c1_lo = W[i - 13];
-      var c2_hi = g0_512_hi(W[i - 30], W[i - 29]);  // i - 15
-      var c2_lo = g0_512_lo(W[i - 30], W[i - 29]);
-      var c3_hi = W[i - 32];  // i - 16
-      var c3_lo = W[i - 31];
+      const c0_hi = g1_512_hi(W[i - 4], W[i - 3]);  // i - 2
+      const c0_lo = g1_512_lo(W[i - 4], W[i - 3]);
+      const c1_hi = W[i - 14];  // i - 7
+      const c1_lo = W[i - 13];
+      const c2_hi = g0_512_hi(W[i - 30], W[i - 29]);  // i - 15
+      const c2_lo = g0_512_lo(W[i - 30], W[i - 29]);
+      const c3_hi = W[i - 32];  // i - 16
+      const c3_lo = W[i - 31];
 
       W[i] = sum64_4_hi(
         c0_hi, c0_lo,
@@ -867,45 +868,45 @@ export class SHA512 extends BaseHash {
   _update(msg, start) {
     this._prepareBlock(msg, start);
 
-    var W = this.W;
+    const W = this.W;
 
-    var ah = this.h[0];
-    var al = this.h[1];
-    var bh = this.h[2];
-    var bl = this.h[3];
-    var ch = this.h[4];
-    var cl = this.h[5];
-    var dh = this.h[6];
-    var dl = this.h[7];
-    var eh = this.h[8];
-    var el = this.h[9];
-    var fh = this.h[10];
-    var fl = this.h[11];
-    var gh = this.h[12];
-    var gl = this.h[13];
-    var hh = this.h[14];
-    var hl = this.h[15];
+    let ah = this.h[0];
+    let al = this.h[1];
+    let bh = this.h[2];
+    let bl = this.h[3];
+    let ch = this.h[4];
+    let cl = this.h[5];
+    let dh = this.h[6];
+    let dl = this.h[7];
+    let eh = this.h[8];
+    let el = this.h[9];
+    let fh = this.h[10];
+    let fl = this.h[11];
+    let gh = this.h[12];
+    let gl = this.h[13];
+    let hh = this.h[14];
+    let hl = this.h[15];
 
     assert(this.k.length === W.length);
-    for (var i = 0; i < W.length; i += 2) {
-      var c0_hi = hh;
-      var c0_lo = hl;
-      var c1_hi = s1_512_hi(eh, el);
-      var c1_lo = s1_512_lo(eh, el);
-      var c2_hi = ch64_hi(eh, el, fh, fl, gh, gl);
-      var c2_lo = ch64_lo(eh, el, fh, fl, gh, gl);
-      var c3_hi = this.k[i];
-      var c3_lo = this.k[i + 1];
-      var c4_hi = W[i];
-      var c4_lo = W[i + 1];
+    for (let i = 0; i < W.length; i += 2) {
+      let c0_hi = hh;
+      let c0_lo = hl;
+      let c1_hi = s1_512_hi(eh, el);
+      let c1_lo = s1_512_lo(eh, el);
+      const c2_hi = ch64_hi(eh, el, fh, fl, gh, gl);
+      const c2_lo = ch64_lo(eh, el, fh, fl, gh, gl);
+      const c3_hi = this.k[i];
+      const c3_lo = this.k[i + 1];
+      const c4_hi = W[i];
+      const c4_lo = W[i + 1];
 
-      var T1_hi = sum64_5_hi(
+      const T1_hi = sum64_5_hi(
         c0_hi, c0_lo,
         c1_hi, c1_lo,
         c2_hi, c2_lo,
         c3_hi, c3_lo,
         c4_hi, c4_lo);
-      var T1_lo = sum64_5_lo(
+      const T1_lo = sum64_5_lo(
         c0_hi, c0_lo,
         c1_hi, c1_lo,
         c2_hi, c2_lo,
@@ -917,8 +918,8 @@ export class SHA512 extends BaseHash {
       c1_hi = maj64_hi(ah, al, bh, bl, ch, cl);
       c1_lo = maj64_lo(ah, al, bh, bl, ch, cl);
 
-      var T2_hi = sum64_hi(c0_hi, c0_lo, c1_hi, c1_lo);
-      var T2_lo = sum64_lo(c0_hi, c0_lo, c1_hi, c1_lo);
+      const T2_hi = sum64_hi(c0_hi, c0_lo, c1_hi, c1_lo);
+      const T2_lo = sum64_lo(c0_hi, c0_lo, c1_hi, c1_lo);
 
       hh = gh;
       hl = gl;
@@ -964,116 +965,116 @@ export class SHA512 extends BaseHash {
 }
 
 function ch64_hi(xh, xl, yh, yl, zh, zl) {
-  var r = (xh & yh) ^ ((~xh) & zh);
+  let r = (xh & yh) ^ ((~xh) & zh);
   if (r < 0)
     r += 0x100000000;
   return r;
 }
 
 function ch64_lo(xh, xl, yh, yl, zh, zl) {
-  var r = (xl & yl) ^ ((~xl) & zl);
+  let r = (xl & yl) ^ ((~xl) & zl);
   if (r < 0)
     r += 0x100000000;
   return r;
 }
 
 function maj64_hi(xh, xl, yh, yl, zh, zl) {
-  var r = (xh & yh) ^ (xh & zh) ^ (yh & zh);
+  let r = (xh & yh) ^ (xh & zh) ^ (yh & zh);
   if (r < 0)
     r += 0x100000000;
   return r;
 }
 
 function maj64_lo(xh, xl, yh, yl, zh, zl) {
-  var r = (xl & yl) ^ (xl & zl) ^ (yl & zl);
+  let r = (xl & yl) ^ (xl & zl) ^ (yl & zl);
   if (r < 0)
     r += 0x100000000;
   return r;
 }
 
 function s0_512_hi(xh, xl) {
-  var c0_hi = rotr64_hi(xh, xl, 28);
-  var c1_hi = rotr64_hi(xl, xh, 2);  // 34
-  var c2_hi = rotr64_hi(xl, xh, 7);  // 39
+  const c0_hi = rotr64_hi(xh, xl, 28);
+  const c1_hi = rotr64_hi(xl, xh, 2);  // 34
+  const c2_hi = rotr64_hi(xl, xh, 7);  // 39
 
-  var r = c0_hi ^ c1_hi ^ c2_hi;
+  let r = c0_hi ^ c1_hi ^ c2_hi;
   if (r < 0)
     r += 0x100000000;
   return r;
 }
 
 function s0_512_lo(xh, xl) {
-  var c0_lo = rotr64_lo(xh, xl, 28);
-  var c1_lo = rotr64_lo(xl, xh, 2);  // 34
-  var c2_lo = rotr64_lo(xl, xh, 7);  // 39
+  const c0_lo = rotr64_lo(xh, xl, 28);
+  const c1_lo = rotr64_lo(xl, xh, 2);  // 34
+  const c2_lo = rotr64_lo(xl, xh, 7);  // 39
 
-  var r = c0_lo ^ c1_lo ^ c2_lo;
+  let r = c0_lo ^ c1_lo ^ c2_lo;
   if (r < 0)
     r += 0x100000000;
   return r;
 }
 
 function s1_512_hi(xh, xl) {
-  var c0_hi = rotr64_hi(xh, xl, 14);
-  var c1_hi = rotr64_hi(xh, xl, 18);
-  var c2_hi = rotr64_hi(xl, xh, 9);  // 41
+  const c0_hi = rotr64_hi(xh, xl, 14);
+  const c1_hi = rotr64_hi(xh, xl, 18);
+  const c2_hi = rotr64_hi(xl, xh, 9);  // 41
 
-  var r = c0_hi ^ c1_hi ^ c2_hi;
+  let r = c0_hi ^ c1_hi ^ c2_hi;
   if (r < 0)
     r += 0x100000000;
   return r;
 }
 
 function s1_512_lo(xh, xl) {
-  var c0_lo = rotr64_lo(xh, xl, 14);
-  var c1_lo = rotr64_lo(xh, xl, 18);
-  var c2_lo = rotr64_lo(xl, xh, 9);  // 41
+  const c0_lo = rotr64_lo(xh, xl, 14);
+  const c1_lo = rotr64_lo(xh, xl, 18);
+  const c2_lo = rotr64_lo(xl, xh, 9);  // 41
 
-  var r = c0_lo ^ c1_lo ^ c2_lo;
+  let r = c0_lo ^ c1_lo ^ c2_lo;
   if (r < 0)
     r += 0x100000000;
   return r;
 }
 
 function g0_512_hi(xh, xl) {
-  var c0_hi = rotr64_hi(xh, xl, 1);
-  var c1_hi = rotr64_hi(xh, xl, 8);
-  var c2_hi = shr64_hi(xh, xl, 7);
+  const c0_hi = rotr64_hi(xh, xl, 1);
+  const c1_hi = rotr64_hi(xh, xl, 8);
+  const c2_hi = shr64_hi(xh, xl, 7);
 
-  var r = c0_hi ^ c1_hi ^ c2_hi;
+  let r = c0_hi ^ c1_hi ^ c2_hi;
   if (r < 0)
     r += 0x100000000;
   return r;
 }
 
 function g0_512_lo(xh, xl) {
-  var c0_lo = rotr64_lo(xh, xl, 1);
-  var c1_lo = rotr64_lo(xh, xl, 8);
-  var c2_lo = shr64_lo(xh, xl, 7);
+  const c0_lo = rotr64_lo(xh, xl, 1);
+  const c1_lo = rotr64_lo(xh, xl, 8);
+  const c2_lo = shr64_lo(xh, xl, 7);
 
-  var r = c0_lo ^ c1_lo ^ c2_lo;
+  let r = c0_lo ^ c1_lo ^ c2_lo;
   if (r < 0)
     r += 0x100000000;
   return r;
 }
 
 function g1_512_hi(xh, xl) {
-  var c0_hi = rotr64_hi(xh, xl, 19);
-  var c1_hi = rotr64_hi(xl, xh, 29);  // 61
-  var c2_hi = shr64_hi(xh, xl, 6);
+  const c0_hi = rotr64_hi(xh, xl, 19);
+  const c1_hi = rotr64_hi(xl, xh, 29);  // 61
+  const c2_hi = shr64_hi(xh, xl, 6);
 
-  var r = c0_hi ^ c1_hi ^ c2_hi;
+  let r = c0_hi ^ c1_hi ^ c2_hi;
   if (r < 0)
     r += 0x100000000;
   return r;
 }
 
 function g1_512_lo(xh, xl) {
-  var c0_lo = rotr64_lo(xh, xl, 19);
-  var c1_lo = rotr64_lo(xl, xh, 29);  // 61
-  var c2_lo = shr64_lo(xh, xl, 6);
+  const c0_lo = rotr64_lo(xh, xl, 19);
+  const c1_lo = rotr64_lo(xl, xh, 29);  // 61
+  const c2_lo = shr64_lo(xh, xl, 6);
 
-  var r = c0_lo ^ c1_lo ^ c2_lo;
+  let r = c0_lo ^ c1_lo ^ c2_lo;
   if (r < 0)
     r += 0x100000000;
   return r;
@@ -1355,4 +1356,50 @@ export const sha256hmac = (key: number[] | string, msg: number[] | string, enc?:
  */
 export const sha512hmac = (key: number[] | string, msg: number[] | string, enc?: 'hex'): number[] | string => {
   return new SHA512HMAC(key).update(msg, enc).digest(enc)
+}
+
+/**
+ * Limited SHA-512-only PBKDF2 function for use in deprecated BIP39 code.
+ * @function pbkdf2
+ * @param password - The PBKDF2 password
+ * @param salt - The PBKDF2 salt
+ * @param iterations - The number of of iterations to run
+ * @param keylen - The length of the key
+ * @param digest - The digest (must be sha512 for this implementation)
+ *
+ * @returns The computed key
+ */
+export function pbkdf2(password: number[], salt: number[], iterations: number, keylen: number, digest = 'sha512'): number[] {
+  if (digest !== 'sha512') {
+    throw new Error('Only sha512 is supported in this PBKDF2 implementation')
+  }
+  const DK = new Array(keylen)
+  const block1 = [...salt, 0, 0, 0, 0]
+  const s = Buffer.from('hello')
+
+  let destPos = 0
+  const hLen = 64
+  const l = Math.ceil(keylen / hLen)
+
+  for (let i = 1; i <= l; i++) {
+    block1[salt.length] = (i >> 24) & 0xFF; // MSB
+    block1[salt.length + 1] = (i >> 16) & 0xFF;
+    block1[salt.length + 2] = (i >> 8) & 0xFF;
+    block1[salt.length + 3] = i & 0xFF; // LSB
+
+    const T = sha512hmac(password, block1) as number[]
+    let U = T
+
+    for (let j = 1; j < iterations; j++) {
+      U = sha512hmac(password, U) as number[]
+      for (let k = 0; k < hLen; k++) T[k] ^= U[k]
+    }
+
+    for (let i = 0; i < T.length; i++) {
+      DK[destPos + i] = T[i]
+    }
+    destPos += hLen
+  }
+
+  return DK.slice(0, keylen)
 }

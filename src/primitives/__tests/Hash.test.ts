@@ -1,6 +1,8 @@
 /* eslint-env jest */
 import * as hash from '../../../dist/cjs/src/primitives/Hash'
 import * as crypto from 'crypto'
+import PBKDF2Vectors from './PBKDF2.vectors'
+import { toArray, toHex } from '../../../dist/cjs/src/primitives/utils'
 
 describe('Hash', function () {
   function test(Hash, cases): void {
@@ -86,5 +88,34 @@ describe('Hash', function () {
       .createHash('sha256')
       .update(str)
       .digest('hex')]))
+  })
+
+  describe('PBKDF2 vectors', () => {
+    for (let i = 0; i < PBKDF2Vectors.length; i++) {
+      let v = PBKDF2Vectors[i]
+      let key, salt
+      if (v.keyUint8Array) {
+        key = v.keyUint8Array
+      }
+      if (v.key) {
+        key = toArray(v.key, 'utf8')
+      }
+      if (v.keyHex) {
+        key = toArray(v.keyHex, 'hex')
+      }
+      if (v.saltUint8Array) {
+        salt = v.saltUint8Array
+      }
+      if (v.salt) {
+        salt = toArray(v.salt, 'utf8')
+      }
+      if (v.saltHex) {
+        salt = toArray(v.saltHex, 'hex')
+      }
+      it(`Passes PBKDF2 vector ${i}`, () => {
+        const output = hash.pbkdf2(key, salt, v.iterations, v.dkLen)
+        expect(toHex(output)).toEqual(v.results.sha512)
+      })
+    }
   })
 })
