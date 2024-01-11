@@ -1292,6 +1292,21 @@ export const sha256 = (msg: number[] | string, enc?: 'hex'): number[] | string =
 }
 
 /**
+ * Computes SHA512 hash of a given message.
+ * @function sha512
+ * @param msg - The message to compute the hash for.
+ * @param enc - The encoding of the message. If 'hex', the message is decoded from hexadecimal first.
+ *
+ * @returns the computed SHA512 hash of the message.
+ *
+ * @example
+ * const digest = sha512('Hello, world!');
+ */
+export const sha512 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
+  return new SHA512().update(msg, enc).digest(enc)
+}
+
+/**
  * Performs a 'double hash' using SHA256. This means the data is hashed twice
  * with SHA256. First, the SHA256 hash of the message is computed, then the
  * SHA256 hash of the resulting hash is computed.
