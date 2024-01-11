@@ -6664,7 +6664,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 Limited SHA-512-only PBKDF2 function for use in deprecated BIP39 code.
 
 ```ts
-export function pbkdf2(password: number[], salt: number[], iterations: number, keylen: number, digest = "sha512") 
+export function pbkdf2(password: number[], salt: number[], iterations: number, keylen: number, digest = "sha512"): number[] 
 ```
 
 <details>

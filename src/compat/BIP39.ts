@@ -3,17 +3,36 @@ import { encode, toArray, Reader, Writer } from '../primitives/utils.js'
 import * as Hash from '../primitives/Hash.js'
 import Random from '../primitives/Random.js'
 
+/**
+ * @class BIP39
+ * 
+ * @description
+ * Class representing BIP39 functionality.
+ * This class provides methods for generating, converting, and validating mnemonic phrases
+ * according to the BIP39 standard. It supports creating mnemonics from random entropy,
+ * converting mnemonics to seeds, and validating mnemonic phrases.
+ */
 export default class BIP39 {
     public mnemonic: string
     public seed: number[]
     public Wordlist: { value: string[]; space: string }
 
+    /**
+     * Constructs a BIP39 object.
+     * @param {string} [mnemonic] - An optional mnemonic phrase.
+     * @param {number[]} [seed] - An optional seed derived from the mnemonic.
+     * @param {object} [wordlist=wordList] - An object containing a list of words and space character used in the mnemonic.
+     */
     constructor(mnemonic?: string, seed?: number[], wordlist = wordList) {
         this.mnemonic = mnemonic
         this.seed = seed
         this.Wordlist = wordlist
     }
 
+    /**
+     * Converts the mnemonic and seed into a binary representation.
+     * @returns {number[]} The binary representation of the mnemonic and seed.
+     */
     public toBinary(): number[] {
         const bw = new Writer()
         if (this.mnemonic) {
@@ -32,6 +51,11 @@ export default class BIP39 {
         return bw.toArray()
     }
 
+    /**
+     * Loads a mnemonic and seed from a binary representation.
+     * @param {number[]} bin - The binary representation of a mnemonic and seed.
+     * @returns {this} The BIP39 instance with loaded mnemonic and seed.
+     */
     public fromBinary(bin: number[]): this {
         const br = new Reader(bin)
         const mnemoniclen = br.readVarIntNum()
@@ -46,7 +70,10 @@ export default class BIP39 {
     }
 
     /**
-     * Generate a random new mnemonic from the wordlist.
+     * Generates a random mnemonic from a given bit length.
+     * @param {number} [bits=128] - The bit length for the random mnemonic (must be a multiple of 32 and at least 128).
+     * @returns {this} The BIP39 instance with the new random mnemonic.
+     * @throws {Error} If the bit length is not a multiple of 32 or is less than 128.
      */
     public fromRandom(bits?: number): this {
         if (!bits) {
@@ -64,40 +91,83 @@ export default class BIP39 {
         return this
     }
 
+    /**
+     * Static method to generate a BIP39 instance with a random mnemonic.
+     * @param {number} [bits=128] - The bit length for the random mnemonic.
+     * @returns {BIP39} A new BIP39 instance.
+     */
     public static fromRandom(bits?: number): BIP39 {
         return new this().fromRandom(bits)
     }
 
+    /**
+     * Converts given entropy into a mnemonic phrase.
+     * This method is used to generate a mnemonic from a specific entropy source.
+     * @param {number[]} buf - The entropy buffer, must be at least 128 bits.
+     * @returns {this} The BIP39 instance with the mnemonic set from the given entropy.
+     * @throws {Error} If the entropy is less than 128 bits.
+     */
     public fromEntropy(buf: number[]): this {
         this.entropy2Mnemonic(buf)
         return this
     }
 
+    /**
+     * Static method to create a BIP39 instance from a given entropy.
+     * @param {number[]} buf - The entropy buffer.
+     * @returns {BIP39} A new BIP39 instance.
+     */
     public static fromEntropy(buf: number[]): BIP39 {
         return new this().fromEntropy(buf)
     }
 
+    /**
+     * Sets the mnemonic for the instance from a string.
+     * @param {string} mnemonic - The mnemonic phrase as a string.
+     * @returns {this} The BIP39 instance with the set mnemonic.
+     */
     public fromString(mnemonic: string): this {
         this.mnemonic = mnemonic
         return this
     }
 
+    /**
+     * Static method to create a BIP39 instance from a mnemonic string.
+     * @param {string} str - The mnemonic phrase.
+     * @returns {BIP39} A new BIP39 instance.
+     */
     public static fromString(str: string): BIP39 {
         return new this().fromString(str)
     }
 
+    /**
+     * Converts the instance's mnemonic to a string representation.
+     * @returns {string} The mnemonic phrase as a string.
+     */
     public toString(): string {
         return this.mnemonic
     }
 
+    /**
+     * Converts the mnemonic to a seed.
+     * The mnemonic must pass the validity check before conversion.
+     * @param {string} [passphrase=''] - An optional passphrase for additional security.
+     * @returns {number[]} The generated seed.
+     * @throws {Error} If the mnemonic is invalid.
+     */
     public toSeed(passphrase?: string): number[] {
         this.mnemonic2Seed(passphrase)
         return this.seed
     }
 
     /**
-     * Generate a new mnemonic from some entropy generated somewhere else. The
-     * entropy must be at least 128 bits.
+     * Converts entropy to a mnemonic phrase.
+     * This method takes a buffer of entropy and converts it into a corresponding
+     * mnemonic phrase based on the BIP39 wordlist. The entropy should be at least 128 bits.
+     * The method applies a checksum and maps the entropy to words in the wordlist.
+     * @param {number[]} buf - The entropy buffer to convert. Must be at least 128 bits.
+     * @returns {this} The BIP39 instance with the mnemonic set from the entropy.
+     * @throws {Error} If the entropy is less than 128 bits or if it's not an even multiple of 11 bits.
      */
     public entropy2Mnemonic(buf: number[]): this {
         if (buf.length < 128 / 8) {
@@ -132,8 +202,10 @@ export default class BIP39 {
     }
 
     /**
-     * Check that a mnemonic is valid. This means there should be no superfluous
-     * whitespace, no invalid words, and the checksum should match.
+     * Validates the mnemonic phrase.
+     * Checks for correct length, absence of invalid words, and proper checksum.
+     * @returns {boolean} True if the mnemonic is valid, false otherwise.
+     * @throws {Error} If the mnemonic is not an even multiple of 11 bits.
      */
     public check(): boolean {
         const mnemonic = this.mnemonic
@@ -169,8 +241,13 @@ export default class BIP39 {
     }
 
     /**
-     * Convert a mnemonic to a seed. Does not check for validity of the mnemonic -
-     * for that, you should manually run check() first.
+     * Converts a mnemonic to a seed.
+     * This method takes the instance's mnemonic phrase, combines it with a passphrase (if provided),
+     * and uses PBKDF2 to generate a seed. It also validates the mnemonic before conversion.
+     * This seed can then be used for generating deterministic keys.
+     * @param {string} [passphrase=''] - An optional passphrase for added security.
+     * @returns {this} The BIP39 instance with the seed generated from the mnemonic.
+     * @throws {Error} If the mnemonic does not pass validation or if the passphrase is not a string.
      */
     public mnemonic2Seed(passphrase = ''): this {
         let mnemonic = this.mnemonic
@@ -190,6 +267,12 @@ export default class BIP39 {
         return this
     }
 
+    /**
+     * Determines the validity of a given passphrase with the mnemonic.
+     * This method is useful for checking if a passphrase matches with the mnemonic.
+     * @param {string} [passphrase=''] - The passphrase to validate.
+     * @returns {boolean} True if the mnemonic and passphrase combination is valid, false otherwise.
+     */
     public isValid(passphrase = ''): boolean {
         let isValid
         try {
@@ -200,6 +283,12 @@ export default class BIP39 {
         return isValid
     }
 
+    /**
+     * Static method to check the validity of a given mnemonic and passphrase combination.
+     * @param {string} mnemonic - The mnemonic phrase.
+     * @param {string} [passphrase=''] - The passphrase to validate.
+     * @returns {boolean} True if the combination is valid, false otherwise.
+     */
     public static isValid(mnemonic: string, passphrase = ''): boolean {
         return new BIP39(mnemonic).isValid(passphrase)
     }
