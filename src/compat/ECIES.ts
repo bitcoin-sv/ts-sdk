@@ -175,43 +175,49 @@ AES.prototype = {
 }
 
 export class AESWrapper {
-    public static encrypt(messageBuf: Buffer, keyBuf: Buffer): Buffer {
-        const key = AESWrapper.buf2Words(keyBuf)
-        const message = AESWrapper.buf2Words(messageBuf)
+    public static encrypt(messageBuf: number[], keyBuf: number[]): number[] {
+        const key = AESWrapper.buf2Words((keyBuf))
+        const message = AESWrapper.buf2Words((messageBuf))
         const a = new AES(key)
         const enc = a.encrypt(message)
         const encBuf = AESWrapper.words2Buf(enc)
         return encBuf
     }
 
-    public static decrypt(encBuf: Buffer, keyBuf: Buffer): Buffer {
-        const enc = AESWrapper.buf2Words(encBuf)
-        const key = AESWrapper.buf2Words(keyBuf)
+    public static decrypt(encBuf: number[], keyBuf: number[]): number[] {
+        const enc = AESWrapper.buf2Words((encBuf))
+        const key = AESWrapper.buf2Words((keyBuf))
         const a = new AES(key)
         const message = a.decrypt(enc)
         const messageBuf = AESWrapper.words2Buf(message)
         return messageBuf
     }
 
-    public static buf2Words(buf: Buffer): number[] {
+    public static buf2Words(buf: number[]): number[] {
         if (buf.length % 4) {
             throw new Error('buf length must be a multiple of 4')
         }
-
         const words = []
-
         for (let i = 0; i < buf.length / 4; i++) {
-            words.push(buf.readUInt32BE(i * 4))
+            const val =
+                (buf[i * 4] * 0x1000000) + // Shift the first byte by 24 bits
+                ((buf[i * 4 + 1] << 16) | // Shift the second byte by 16 bits
+                    (buf[i * 4 + 2] << 8) | // Shift the third byte by 8 bits
+                    buf[i * 4 + 3]) // The fourth byte
+            words.push(val)
         }
-
         return words
     }
 
-    public static words2Buf(words: number[]): Buffer {
-        const buf = Buffer.alloc(words.length * 4)
+    public static words2Buf(words: number[]): number[] {
+        const buf = new Array(words.length * 4)
 
         for (let i = 0; i < words.length; i++) {
-            buf.writeUInt32BE(words[i], i * 4)
+            const word = words[i];
+            buf[i * 4] = (word >>> 24) & 0xFF;
+            buf[i * 4 + 1] = (word >>> 16) & 0xFF;
+            buf[i * 4 + 2] = (word >>> 8) & 0xFF;
+            buf[i * 4 + 3] = word & 0xFF;
         }
 
         return buf
@@ -254,9 +260,9 @@ export class CBC {
     ): number[] {
         const blockSize = ivBuf.length * 8
         const blockBufs = CBC.buf2BlocksBuf(messageBuf, blockSize)
-        const encBufs = CBC.encryptBlocks(blockBufs.map(x => Buffer.from(x)), Buffer.from(ivBuf), blockCipher, Buffer.from(cipherKeyBuf))
-        const encBuf = Buffer.concat(encBufs)
-        return [...encBuf]
+        const encBufs = CBC.encryptBlocks(blockBufs, ivBuf, blockCipher, cipherKeyBuf)
+        const encBuf = encBufs.flat()
+        return encBuf
     }
 
     public static decrypt(
@@ -268,41 +274,41 @@ export class CBC {
         const bytesize = ivBuf.length
         const encBufs = []
         for (let i = 0; i < encBuf.length / bytesize; i++) {
-            encBufs.push(Buffer.from(encBuf.slice(i * bytesize, i * bytesize + bytesize)))
+            encBufs.push(encBuf.slice(i * bytesize, i * bytesize + bytesize))
         }
-        const blockBufs = CBC.decryptBlocks(encBufs, Buffer.from(ivBuf), blockCipher, Buffer.from(cipherKeyBuf))
-        const buf = CBC.blockBufs2Buf(blockBufs.map(x => [...x]))
+        const blockBufs = CBC.decryptBlocks(encBufs, ivBuf, blockCipher, cipherKeyBuf)
+        const buf = CBC.blockBufs2Buf(blockBufs)
         return buf
     }
 
     public static encryptBlock(
-        blockBuf: Buffer,
-        ivBuf: Buffer,
+        blockBuf: number[],
+        ivBuf: number[],
         blockCipher: any /* TODO: type */,
-        cipherKeyBuf: Buffer
-    ): Buffer {
+        cipherKeyBuf: number[]
+    ): number[] {
         const xorbuf = CBC.xorBufs(blockBuf, ivBuf)
         const encBuf = blockCipher.encrypt(xorbuf, cipherKeyBuf)
         return encBuf
     }
 
     public static decryptBlock(
-        encBuf: Buffer,
-        ivBuf: Buffer,
+        encBuf: number[],
+        ivBuf: number[],
         blockCipher: any /* TODO: type */,
-        cipherKeyBuf: Buffer
-    ): Buffer {
+        cipherKeyBuf: number[]
+    ): number[] {
         const xorbuf = blockCipher.decrypt(encBuf, cipherKeyBuf)
         const blockBuf = CBC.xorBufs(xorbuf, ivBuf)
         return blockBuf
     }
 
     public static encryptBlocks(
-        blockBufs: Buffer[],
-        ivBuf: Buffer,
+        blockBufs: number[][],
+        ivBuf: number[],
         blockCipher: any /* TODO: type */,
-        cipherKeyBuf: Buffer
-    ): Buffer[] {
+        cipherKeyBuf: number[]
+    ): number[][] {
         const encBufs = []
 
         for (let i = 0; i < blockBufs.length; i++) {
@@ -318,11 +324,11 @@ export class CBC {
     }
 
     public static decryptBlocks(
-        encBufs: Buffer[],
-        ivBuf: Buffer,
+        encBufs: number[][],
+        ivBuf: number[],
         blockCipher: any /* TODO: type */,
-        cipherKeyBuf: Buffer
-    ): Buffer[] {
+        cipherKeyBuf: number[]
+    ): number[][] {
         const blockBufs = []
 
         for (let i = 0; i < encBufs.length; i++) {
@@ -357,12 +363,12 @@ export class CBC {
         return paddedbuf.slice(0, paddedbuf.length - padlength)
     }
 
-    public static xorBufs(buf1: Buffer, buf2: Buffer): Buffer {
+    public static xorBufs(buf1: number[], buf2: number[]): number[] {
         if (buf1.length !== buf2.length) {
             throw new Error('bufs must have the same length')
         }
 
-        const buf = Buffer.alloc(buf1.length)
+        const buf = new Array(buf1.length)
 
         for (let i = 0; i < buf1.length; i++) {
             buf[i] = buf1[i] ^ buf2[i]
