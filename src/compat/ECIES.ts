@@ -219,7 +219,7 @@ export class AESWrapper {
 }
 
 export class CBC {
-    public static buf2BlocksBuf(buf: Buffer, blockSize: number): Buffer[] {
+    public static buf2BlocksBuf(buf: number[], blockSize: number): number[][] {
         const bytesize = blockSize / 8
         const blockBufs = []
 
@@ -236,42 +236,42 @@ export class CBC {
         return blockBufs
     }
 
-    public static blockBufs2Buf(blockBufs: Buffer[]): Buffer {
+    public static blockBufs2Buf(blockBufs: number[][]): number[] {
         let last = blockBufs[blockBufs.length - 1]
         last = CBC.pkcs7Unpad(last)
         blockBufs[blockBufs.length - 1] = last
 
-        const buf = Buffer.concat(blockBufs)
+        const buf = blockBufs.flat()
 
         return buf
     }
 
     public static encrypt(
-        messageBuf: Buffer,
-        ivBuf: Buffer,
+        messageBuf: number[],
+        ivBuf: number[],
         blockCipher: any /* TODO: type */,
-        cipherKeyBuf: Buffer
-    ): Buffer {
+        cipherKeyBuf: number[]
+    ): number[] {
         const blockSize = ivBuf.length * 8
         const blockBufs = CBC.buf2BlocksBuf(messageBuf, blockSize)
-        const encBufs = CBC.encryptBlocks(blockBufs, ivBuf, blockCipher, cipherKeyBuf)
+        const encBufs = CBC.encryptBlocks(blockBufs.map(x => Buffer.from(x)), Buffer.from(ivBuf), blockCipher, Buffer.from(cipherKeyBuf))
         const encBuf = Buffer.concat(encBufs)
-        return encBuf
+        return [...encBuf]
     }
 
     public static decrypt(
-        encBuf: Buffer,
-        ivBuf: Buffer,
+        encBuf: number[],
+        ivBuf: number[],
         blockCipher: any /* TODO: type */,
-        cipherKeyBuf: Buffer
-    ): Buffer {
+        cipherKeyBuf: number[]
+    ): number[] {
         const bytesize = ivBuf.length
         const encBufs = []
         for (let i = 0; i < encBuf.length / bytesize; i++) {
-            encBufs.push(encBuf.slice(i * bytesize, i * bytesize + bytesize))
+            encBufs.push(Buffer.from(encBuf.slice(i * bytesize, i * bytesize + bytesize)))
         }
-        const blockBufs = CBC.decryptBlocks(encBufs, ivBuf, blockCipher, cipherKeyBuf)
-        const buf = CBC.blockBufs2Buf(blockBufs)
+        const blockBufs = CBC.decryptBlocks(encBufs, Buffer.from(ivBuf), blockCipher, Buffer.from(cipherKeyBuf))
+        const buf = CBC.blockBufs2Buf(blockBufs.map(x => [...x]))
         return buf
     }
 
@@ -337,21 +337,21 @@ export class CBC {
         return blockBufs
     }
 
-    public static pkcs7Pad(buf: Buffer, blockSize: number): Buffer {
+    public static pkcs7Pad(buf: number[], blockSize: number): number[] {
         const bytesize = blockSize / 8
         const padbytesize = bytesize - buf.length
-        const pad = Buffer.alloc(padbytesize)
+        const pad = new Array(padbytesize)
         pad.fill(padbytesize)
-        const paddedbuf = Buffer.concat([buf, pad])
+        const paddedbuf = [...buf, ...pad]
         return paddedbuf
     }
 
-    public static pkcs7Unpad(paddedbuf: Buffer): Buffer {
+    public static pkcs7Unpad(paddedbuf: number[]): number[] {
         const padlength = paddedbuf[paddedbuf.length - 1]
         const padbuf = paddedbuf.slice(paddedbuf.length - padlength, paddedbuf.length)
-        const padbuf2 = Buffer.alloc(padlength)
+        const padbuf2 = new Array(padlength)
         padbuf2.fill(padlength)
-        if (toHex([...padbuf]) !== toHex([...padbuf2])) {
+        if (toHex(padbuf) !== toHex(padbuf2)) {
             throw new Error('invalid padding')
         }
         return paddedbuf.slice(0, paddedbuf.length - padlength)
@@ -375,7 +375,7 @@ export class CBC {
 export class AESCBC {
     public static encrypt(messageBuf: number[], cipherKeyBuf: number[], ivBuf: number[], concatIvBuf = true): number[] {
         ivBuf = ivBuf || new Array(128 / 8).fill(0) || Random(128 / 8)
-        const ctBuf = CBC.encrypt(Buffer.from(messageBuf), Buffer.from(ivBuf), AESWrapper, Buffer.from(cipherKeyBuf))
+        const ctBuf = CBC.encrypt(messageBuf, ivBuf, AESWrapper, cipherKeyBuf)
         if (concatIvBuf) {
             return [...ivBuf, ...ctBuf]
         } else {
@@ -387,10 +387,10 @@ export class AESCBC {
         if (!ivBuf) {
             ivBuf = encBuf.slice(0, 128 / 8)
             const ctBuf = encBuf.slice(128 / 8)
-            return [...CBC.decrypt(Buffer.from(ctBuf), Buffer.from(ivBuf), AESWrapper, Buffer.from(cipherKeyBuf))]
+            return CBC.decrypt(ctBuf, ivBuf, AESWrapper, cipherKeyBuf)
         } else {
             const ctBuf = encBuf
-            return [...CBC.decrypt(Buffer.from(ctBuf), Buffer.from(ivBuf), AESWrapper, Buffer.from(cipherKeyBuf))]
+            return CBC.decrypt(ctBuf, ivBuf, AESWrapper, cipherKeyBuf)
         }
     }
 }
