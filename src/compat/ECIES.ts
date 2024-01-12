@@ -5,7 +5,6 @@ import PublicKey from '../primitives/PublicKey.js'
 import Point from '../primitives/Point.js'
 import * as Hash from '../primitives/Hash.js'
 import { toArray, toHex, encode } from '../primitives/utils.js'
-import { Cbc as CBC } from 'cwi-bitcoin'
 
 function AES(key) {
     if (!this._tables[0][0][0]) this._precompute();
@@ -219,166 +218,159 @@ export class AESWrapper {
     }
 }
 
-// class CBC {
-//     public static buf2BlocksBuf(buf: number[], blockSize: number): number[][] {
-//         const bytesize = blockSize / 8
-//         const blockBufs = []
+export class CBC {
+    public static buf2BlocksBuf(buf: Buffer, blockSize: number): Buffer[] {
+        const bytesize = blockSize / 8
+        const blockBufs = []
 
-//         for (let i = 0; i <= buf.length / bytesize; i++) {
-//             let blockBuf = buf.slice(i * bytesize, i * bytesize + bytesize)
+        for (let i = 0; i <= buf.length / bytesize; i++) {
+            let blockBuf = buf.slice(i * bytesize, i * bytesize + bytesize)
 
-//             if (blockBuf.length < blockSize) {
-//                 blockBuf = CBC.pkcs7Pad(blockBuf, blockSize)
-//             }
+            if (blockBuf.length < blockSize) {
+                blockBuf = CBC.pkcs7Pad(blockBuf, blockSize)
+            }
 
-//             blockBufs.push(blockBuf)
-//         }
+            blockBufs.push(blockBuf)
+        }
 
-//         return blockBufs
-//     }
+        return blockBufs
+    }
 
-//     public static blockBufs2Buf(blockBufs: number[][]): number[] {
-//         let last = blockBufs[blockBufs.length - 1]
-//         last = CBC.pkcs7Unpad(last)
-//         blockBufs[blockBufs.length - 1] = last
+    public static blockBufs2Buf(blockBufs: Buffer[]): Buffer {
+        let last = blockBufs[blockBufs.length - 1]
+        last = CBC.pkcs7Unpad(last)
+        blockBufs[blockBufs.length - 1] = last
 
-//         const buf = blockBufs.flat()
+        const buf = Buffer.concat(blockBufs)
 
-//         return buf
-//     }
+        return buf
+    }
 
-//     public static encrypt(
-//         messageBuf: number[],
-//         ivBuf: number[],
-//         blockCipher: any /* TODO: type */,
-//         cipherKeyBuf: number[]
-//     ): number[] {
-//         const blockSize = ivBuf.length * 8
-//         const blockBufs = CBC.buf2BlocksBuf(messageBuf, blockSize)
-//         console.log('enc pre blocks', blockBufs)
-//         const encBufs = CBC.encryptBlocks(blockBufs, ivBuf, blockCipher, cipherKeyBuf)
-//         const encBuf = encBufs.flat()
-//         return encBuf
-//     }
+    public static encrypt(
+        messageBuf: Buffer,
+        ivBuf: Buffer,
+        blockCipher: any /* TODO: type */,
+        cipherKeyBuf: Buffer
+    ): Buffer {
+        const blockSize = ivBuf.length * 8
+        const blockBufs = CBC.buf2BlocksBuf(messageBuf, blockSize)
+        const encBufs = CBC.encryptBlocks(blockBufs, ivBuf, blockCipher, cipherKeyBuf)
+        const encBuf = Buffer.concat(encBufs)
+        return encBuf
+    }
 
-//     public static decrypt(
-//         encBuf: number[],
-//         ivBuf: number[],
-//         blockCipher: any /* TODO: type */,
-//         cipherKeyBuf: number[]
-//     ): number[] {
-//         const bytesize = ivBuf.length
-//         const encBufs = []
-//         for (let i = 0; i < encBuf.length / bytesize; i++) {
-//             encBufs.push(encBuf.slice(i * bytesize, i * bytesize + bytesize))
-//         }
-//         const blockBufs = CBC.decryptBlocks(encBufs, ivBuf, blockCipher, cipherKeyBuf)
-//         console.log('dec post', blockBufs)
-//         const buf = CBC.blockBufs2Buf(blockBufs)
-//         return buf
-//     }
+    public static decrypt(
+        encBuf: Buffer,
+        ivBuf: Buffer,
+        blockCipher: any /* TODO: type */,
+        cipherKeyBuf: Buffer
+    ): Buffer {
+        const bytesize = ivBuf.length
+        const encBufs = []
+        for (let i = 0; i < encBuf.length / bytesize; i++) {
+            encBufs.push(encBuf.slice(i * bytesize, i * bytesize + bytesize))
+        }
+        const blockBufs = CBC.decryptBlocks(encBufs, ivBuf, blockCipher, cipherKeyBuf)
+        const buf = CBC.blockBufs2Buf(blockBufs)
+        return buf
+    }
 
-//     public static encryptBlock(
-//         blockBuf: number[],
-//         ivBuf: number[],
-//         blockCipher: any /* TODO: type */,
-//         cipherKeyBuf: number[]
-//     ): number[] {
-//         const xorbuf = CBC.xorBufs(blockBuf, ivBuf)
-//         console.log('I xored', blockBuf, 'with', ivBuf, 'to get', xorbuf)
-//         const encBuf = blockCipher.encrypt(xorbuf, cipherKeyBuf)
-//         console.log('I encrypted it with key ', cipherKeyBuf, ' to get', encBuf)
-//         return encBuf
-//     }
+    public static encryptBlock(
+        blockBuf: Buffer,
+        ivBuf: Buffer,
+        blockCipher: any /* TODO: type */,
+        cipherKeyBuf: Buffer
+    ): Buffer {
+        const xorbuf = CBC.xorBufs(blockBuf, ivBuf)
+        const encBuf = blockCipher.encrypt(xorbuf, cipherKeyBuf)
+        return encBuf
+    }
 
-//     public static decryptBlock(
-//         encBuf: number[],
-//         ivBuf: number[],
-//         blockCipher: any /* TODO: type */,
-//         cipherKeyBuf: number[]
-//     ): number[] {
-//         const xorbuf = blockCipher.decrypt(encBuf, cipherKeyBuf)
-//         console.log('I decrypted', encBuf, 'with key', cipherKeyBuf, 'to get', xorbuf)
-//         const blockBuf = CBC.xorBufs(xorbuf, ivBuf)
-//         console.log('I xored', xorbuf, 'with', ivBuf, 'to get', blockBuf)
-//         return blockBuf
-//     }
+    public static decryptBlock(
+        encBuf: Buffer,
+        ivBuf: Buffer,
+        blockCipher: any /* TODO: type */,
+        cipherKeyBuf: Buffer
+    ): Buffer {
+        const xorbuf = blockCipher.decrypt(encBuf, cipherKeyBuf)
+        const blockBuf = CBC.xorBufs(xorbuf, ivBuf)
+        return blockBuf
+    }
 
-//     public static encryptBlocks(
-//         blockBufs: number[][],
-//         ivBuf: number[],
-//         blockCipher: any /* TODO: type */,
-//         cipherKeyBuf: number[]
-//     ): number[][] {
-//         const encBufs = []
+    public static encryptBlocks(
+        blockBufs: Buffer[],
+        ivBuf: Buffer,
+        blockCipher: any /* TODO: type */,
+        cipherKeyBuf: Buffer
+    ): Buffer[] {
+        const encBufs = []
 
-//         for (let i = 0; i < blockBufs.length; i++) {
-//             const blockBuf = blockBufs[i]
-//             const encBuf = CBC.encryptBlock(blockBuf, ivBuf, blockCipher, cipherKeyBuf)
+        for (let i = 0; i < blockBufs.length; i++) {
+            const blockBuf = blockBufs[i]
+            const encBuf = CBC.encryptBlock(blockBuf, ivBuf, blockCipher, cipherKeyBuf)
 
-//             encBufs.push(encBuf)
+            encBufs.push(encBuf)
 
-//             ivBuf = encBuf
-//         }
+            ivBuf = encBuf
+        }
 
-//         return encBufs
-//     }
+        return encBufs
+    }
 
-//     public static decryptBlocks(
-//         encBufs: number[][],
-//         ivBuf: number[],
-//         blockCipher: any /* TODO: type */,
-//         cipherKeyBuf: number[]
-//     ): number[][] {
-//         const blockBufs = []
+    public static decryptBlocks(
+        encBufs: Buffer[],
+        ivBuf: Buffer,
+        blockCipher: any /* TODO: type */,
+        cipherKeyBuf: Buffer
+    ): Buffer[] {
+        const blockBufs = []
 
-//         for (let i = 0; i < encBufs.length; i++) {
-//             const encBuf = encBufs[i]
-//             const blockBuf = CBC.decryptBlock(encBuf, ivBuf, blockCipher, cipherKeyBuf)
+        for (let i = 0; i < encBufs.length; i++) {
+            const encBuf = encBufs[i]
+            const blockBuf = CBC.decryptBlock(encBuf, ivBuf, blockCipher, cipherKeyBuf)
 
-//             blockBufs.push(blockBuf)
+            blockBufs.push(blockBuf)
 
-//             ivBuf = encBuf
-//         }
+            ivBuf = encBuf
+        }
 
-//         return blockBufs
-//     }
+        return blockBufs
+    }
 
-//     public static pkcs7Pad(buf: number[], blockSize: number): number[] {
-//         const bytesize = blockSize / 8
-//         const padbytesize = bytesize - buf.length
-//         const pad = new Array(padbytesize)
-//         pad.fill(padbytesize)
-//         const paddedbuf = [...buf, ...pad]
-//         return paddedbuf
-//     }
+    public static pkcs7Pad(buf: Buffer, blockSize: number): Buffer {
+        const bytesize = blockSize / 8
+        const padbytesize = bytesize - buf.length
+        const pad = Buffer.alloc(padbytesize)
+        pad.fill(padbytesize)
+        const paddedbuf = Buffer.concat([buf, pad])
+        return paddedbuf
+    }
 
-//     public static pkcs7Unpad(paddedbuf: number[]): number[] {
-//         const padlength = paddedbuf[paddedbuf.length - 1]
-//         const padbuf = paddedbuf.slice(paddedbuf.length - padlength, paddedbuf.length)
-//         const padbuf2 = new Array(padlength)
-//         padbuf2.fill(padlength)
-//         console.log(`unpad ${toHex(padbuf)} !== ${toHex(padbuf2)}`)
-//         if (toHex(padbuf) !== toHex(padbuf2)) {
-//             throw new Error('invalid padding')
-//         }
-//         return paddedbuf.slice(0, paddedbuf.length - padlength)
-//     }
+    public static pkcs7Unpad(paddedbuf: Buffer): Buffer {
+        const padlength = paddedbuf[paddedbuf.length - 1]
+        const padbuf = paddedbuf.slice(paddedbuf.length - padlength, paddedbuf.length)
+        const padbuf2 = Buffer.alloc(padlength)
+        padbuf2.fill(padlength)
+        if (toHex([...padbuf]) !== toHex([...padbuf2])) {
+            throw new Error('invalid padding')
+        }
+        return paddedbuf.slice(0, paddedbuf.length - padlength)
+    }
 
-//     public static xorBufs(buf1: number[], buf2: number[]): number[] {
-//         if (buf1.length !== buf2.length) {
-//             throw new Error('bufs must have the same length')
-//         }
+    public static xorBufs(buf1: Buffer, buf2: Buffer): Buffer {
+        if (buf1.length !== buf2.length) {
+            throw new Error('bufs must have the same length')
+        }
 
-//         const buf = new Array(buf1.length).fill(0)
+        const buf = Buffer.alloc(buf1.length)
 
-//         for (let i = 0; i < buf1.length; i++) {
-//             buf[i] = buf1[i] ^ buf2[i]
-//         }
+        for (let i = 0; i < buf1.length; i++) {
+            buf[i] = buf1[i] ^ buf2[i]
+        }
 
-//         return buf
-//     }
-// }
+        return buf
+    }
+}
 
 export class AESCBC {
     public static encrypt(messageBuf: number[], cipherKeyBuf: number[], ivBuf: number[], concatIvBuf = true): number[] {
