@@ -7,6 +7,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 | |
 | --- |
 | [BIP39](#class-bip39) |
+| [ECIES](#class-ecies) |
 | [HD](#class-hd) |
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
@@ -594,6 +595,141 @@ public toString(): string
 Returns
 
 The mnemonic phrase as a string.
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: ECIES
+
+```ts
+export default class ECIES {
+    public static ivkEkM(privKey: PrivateKey, pubKey: PublicKey): {
+        iv: number[];
+        kE: number[];
+        kM: number[];
+    } 
+    public static electrumEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, noKey = false): number[] 
+    public static electrumDecrypt(encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey: PublicKey = null): number[] 
+    public static bitcoreEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, ivBuf?: number[]): number[] 
+    public static bitcoreDecrypt(encBuf: number[], toPrivateKey: PrivateKey): number[] 
+}
+```
+
+<details>
+
+<summary>Class ECIES Details</summary>
+
+#### Method bitcoreDecrypt
+
+Decrypts a message encrypted using the Bitcore variant of ECIES.
+
+```ts
+public static bitcoreDecrypt(encBuf: number[], toPrivateKey: PrivateKey): number[] 
+```
+
+Returns
+
+The decrypted message as a number array.
+
+Argument Details
+
++ **encBuf**
+  + The encrypted message buffer.
++ **toPrivateKey**
+  + The private key of the recipient.
+
+#### Method bitcoreEncrypt
+
+Encrypts a given message using the Bitcore variant of ECIES.
+
+```ts
+public static bitcoreEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, ivBuf?: number[]): number[] 
+```
+
+Returns
+
+The encrypted message as a number array.
+
+Argument Details
+
++ **messageBuf**
+  + The message to be encrypted, in number array format.
++ **toPublicKey**
+  + The public key of the recipient.
++ **fromPrivateKey**
+  + The private key of the sender. If not provided, a random private key is used.
++ **ivBuf**
+  + The initialization vector for encryption. If not provided, a random IV is used.
+
+#### Method electrumDecrypt
+
+Decrypts a message encrypted using the Electrum ECIES method.
+
+```ts
+public static electrumDecrypt(encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey: PublicKey = null): number[] 
+```
+
+Returns
+
+The decrypted message as a number array.
+
+Argument Details
+
++ **encBuf**
+  + The encrypted message buffer.
++ **toPrivateKey**
+  + The private key of the recipient.
++ **fromPublicKey**
+  + The public key of the sender. If not provided, it is extracted from the message.
+
+#### Method electrumEncrypt
+
+Encrypts a given message using the Electrum ECIES method.
+
+```ts
+public static electrumEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, noKey = false): number[] 
+```
+
+Returns
+
+The encrypted message as a number array.
+
+Argument Details
+
++ **messageBuf**
+  + The message to be encrypted, in number array format.
++ **toPublicKey**
+  + The public key of the recipient.
++ **fromPrivateKey**
+  + The private key of the sender. If not provided, a random private key is used.
++ **noKey**
+  + If true, does not include the sender's public key in the encrypted message.
+
+#### Method ivkEkM
+
+Generates the initialization vector (iv), encryption key (kE), and MAC key (kM) 
+using the sender's private key and receiver's public key.
+
+```ts
+public static ivkEkM(privKey: PrivateKey, pubKey: PublicKey): {
+    iv: number[];
+    kE: number[];
+    kM: number[];
+} 
+```
+
+Returns
+
+An object containing the iv, kE, and kM as number arrays.
+
+Argument Details
+
++ **privKey**
+  + The sender's private key.
++ **pubKey**
+  + The receiver's public key.
 
 </details>
 

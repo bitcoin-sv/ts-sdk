@@ -6772,15 +6772,15 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 | [checkBit](#variable-checkbit) | [sha1](#variable-sha1) |
 | [encode](#variable-encode) | [sha256](#variable-sha256) |
 | [exclusiveOR](#variable-exclusiveor) | [sha256hmac](#variable-sha256hmac) |
-| [fromBase58](#variable-frombase58) | [sha512hmac](#variable-sha512hmac) |
-| [fromBase58Check](#variable-frombase58check) | [sign](#variable-sign) |
-| [getBytes](#variable-getbytes) | [toArray](#variable-toarray) |
-| [hash160](#variable-hash160) | [toBase58](#variable-tobase58) |
-| [hash256](#variable-hash256) | [toBase58Check](#variable-tobase58check) |
-| [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [toHex](#variable-tohex) |
-| [multiply](#variable-multiply) | [verify](#variable-verify) |
-| [rightShift](#variable-rightshift) | [zero2](#variable-zero2) |
-| [ripemd160](#variable-ripemd160) |  |
+| [fromBase58](#variable-frombase58) | [sha512](#variable-sha512) |
+| [fromBase58Check](#variable-frombase58check) | [sha512hmac](#variable-sha512hmac) |
+| [getBytes](#variable-getbytes) | [sign](#variable-sign) |
+| [hash160](#variable-hash160) | [toArray](#variable-toarray) |
+| [hash256](#variable-hash256) | [toBase58](#variable-tobase58) |
+| [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [toBase58Check](#variable-tobase58check) |
+| [multiply](#variable-multiply) | [toHex](#variable-tohex) |
+| [rightShift](#variable-rightshift) | [verify](#variable-verify) |
+| [ripemd160](#variable-ripemd160) | [zero2](#variable-zero2) |
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -6813,6 +6813,17 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ```ts
 sha256 = (msg: number[] | string, enc?: "hex"): number[] | string => {
     return new SHA256().update(msg, enc).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: sha512
+
+```ts
+sha512 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    return new SHA512().update(msg, enc).digest(enc);
 }
 ```
 

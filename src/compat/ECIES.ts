@@ -174,7 +174,7 @@ AES.prototype = {
     }
 }
 
-export class AESWrapper {
+class AESWrapper {
     public static encrypt(messageBuf: number[], keyBuf: number[]): number[] {
         const key = AESWrapper.buf2Words((keyBuf))
         const message = AESWrapper.buf2Words((messageBuf))
@@ -224,7 +224,7 @@ export class AESWrapper {
     }
 }
 
-export class CBC {
+class CBC {
     public static buf2BlocksBuf(buf: number[], blockSize: number): number[][] {
         const bytesize = blockSize / 8
         const blockBufs = []
@@ -378,7 +378,7 @@ export class CBC {
     }
 }
 
-export class AESCBC {
+class AESCBC {
     public static encrypt(messageBuf: number[], cipherKeyBuf: number[], ivBuf: number[], concatIvBuf = true): number[] {
         ivBuf = ivBuf || new Array(128 / 8).fill(0) || Random(128 / 8)
         const ctBuf = CBC.encrypt(messageBuf, ivBuf, AESWrapper, cipherKeyBuf)
@@ -401,7 +401,23 @@ export class AESCBC {
     }
 }
 
+/**
+ * @class ECIES
+ * Implements the Electrum ECIES protocol for encrypted communication.
+ * 
+ * @prprecated This class is deprecated in favor of the BRC-78 standard for portable encrypted messages,
+ * which provides a more comprehensive and secure solution by integrating with BRC-42 and BRC-43 standards.
+ */
 export default class ECIES {
+
+    /**
+     * Generates the initialization vector (iv), encryption key (kE), and MAC key (kM) 
+     * using the sender's private key and receiver's public key.
+     *
+     * @param {PrivateKey} privKey - The sender's private key.
+     * @param {PublicKey} pubKey - The receiver's public key.
+     * @returns {Object} An object containing the iv, kE, and kM as number arrays.
+     */
     public static ivkEkM(privKey: PrivateKey, pubKey: PublicKey): { iv: number[]; kE: number[]; kM: number[] } {
         const r = privKey
         const KB = pubKey
@@ -416,6 +432,15 @@ export default class ECIES {
         }
     }
 
+    /**
+     * Encrypts a given message using the Electrum ECIES method.
+     * 
+     * @param {number[]} messageBuf - The message to be encrypted, in number array format.
+     * @param {PublicKey} toPublicKey - The public key of the recipient.
+     * @param {PrivateKey} [fromPrivateKey] - The private key of the sender. If not provided, a random private key is used.
+     * @param {boolean} [noKey=false] - If true, does not include the sender's public key in the encrypted message.
+     * @returns {number[]} The encrypted message as a number array.
+     */
     public static electrumEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, noKey = false): number[] {
         let Rbuf
         if (fromPrivateKey === null) {
@@ -437,6 +462,14 @@ export default class ECIES {
         return [...encBuf, ...hmac]
     }
 
+    /**
+     * Decrypts a message encrypted using the Electrum ECIES method.
+     *
+     * @param {number[]} encBuf - The encrypted message buffer.
+     * @param {PrivateKey} toPrivateKey - The private key of the recipient.
+     * @param {PublicKey} [fromPublicKey=null] - The public key of the sender. If not provided, it is extracted from the message.
+     * @returns {number[]} The decrypted message as a number array.
+     */
     public static electrumDecrypt(encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey: PublicKey = null): number[] {
         const tagLength = 32
 
@@ -463,6 +496,15 @@ export default class ECIES {
         return AESCBC.decrypt(ciphertext, kE, iv)
     }
 
+    /**
+     * Encrypts a given message using the Bitcore variant of ECIES.
+     * 
+     * @param {number[]} messageBuf - The message to be encrypted, in number array format.
+     * @param {PublicKey} toPublicKey - The public key of the recipient.
+     * @param {PrivateKey} [fromPrivateKey] - The private key of the sender. If not provided, a random private key is used.
+     * @param {number[]} [ivBuf] - The initialization vector for encryption. If not provided, a random IV is used.
+     * @returns {number[]} The encrypted message as a number array.
+     */
     public static bitcoreEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, ivBuf?: number[]): number[] {
         if (!fromPrivateKey) {
             fromPrivateKey = PrivateKey.fromRandom()
@@ -483,6 +525,13 @@ export default class ECIES {
         return encBuf
     }
 
+    /**
+     * Decrypts a message encrypted using the Bitcore variant of ECIES.
+     *
+     * @param {number[]} encBuf - The encrypted message buffer.
+     * @param {PrivateKey} toPrivateKey - The private key of the recipient.
+     * @returns {number[]} The decrypted message as a number array.
+     */
     public static bitcoreDecrypt(encBuf: number[], toPrivateKey: PrivateKey): number[] {
         const kB = toPrivateKey
         const fromPublicKey = PublicKey.fromString(toHex(encBuf.slice(0, 33)))
