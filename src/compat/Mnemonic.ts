@@ -4,21 +4,21 @@ import * as Hash from '../primitives/Hash.js'
 import Random from '../primitives/Random.js'
 
 /**
- * @class BIP39
+ * @class Mnemonic
  * 
  * @description
- * Class representing BIP39 functionality.
+ * Class representing Mnemonic functionality.
  * This class provides methods for generating, converting, and validating mnemonic phrases
  * according to the BIP39 standard. It supports creating mnemonics from random entropy,
  * converting mnemonics to seeds, and validating mnemonic phrases.
  */
-export default class BIP39 {
+export default class Mnemonic {
     public mnemonic: string
     public seed: number[]
     public Wordlist: { value: string[]; space: string }
 
     /**
-     * Constructs a BIP39 object.
+     * Constructs a Mnemonic object.
      * @param {string} [mnemonic] - An optional mnemonic phrase.
      * @param {number[]} [seed] - An optional seed derived from the mnemonic.
      * @param {object} [wordlist=wordList] - An object containing a list of words and space character used in the mnemonic.
@@ -54,7 +54,7 @@ export default class BIP39 {
     /**
      * Loads a mnemonic and seed from a binary representation.
      * @param {number[]} bin - The binary representation of a mnemonic and seed.
-     * @returns {this} The BIP39 instance with loaded mnemonic and seed.
+     * @returns {this} The Mnemonic instance with loaded mnemonic and seed.
      */
     public fromBinary(bin: number[]): this {
         const br = new Reader(bin)
@@ -72,7 +72,7 @@ export default class BIP39 {
     /**
      * Generates a random mnemonic from a given bit length.
      * @param {number} [bits=128] - The bit length for the random mnemonic (must be a multiple of 32 and at least 128).
-     * @returns {this} The BIP39 instance with the new random mnemonic.
+     * @returns {this} The Mnemonic instance with the new random mnemonic.
      * @throws {Error} If the bit length is not a multiple of 32 or is less than 128.
      */
     public fromRandom(bits?: number): this {
@@ -92,11 +92,11 @@ export default class BIP39 {
     }
 
     /**
-     * Static method to generate a BIP39 instance with a random mnemonic.
+     * Static method to generate a Mnemonic instance with a random mnemonic.
      * @param {number} [bits=128] - The bit length for the random mnemonic.
-     * @returns {BIP39} A new BIP39 instance.
+     * @returns {Mnemonic} A new Mnemonic instance.
      */
-    public static fromRandom(bits?: number): BIP39 {
+    public static fromRandom(bits?: number): Mnemonic {
         return new this().fromRandom(bits)
     }
 
@@ -104,7 +104,7 @@ export default class BIP39 {
      * Converts given entropy into a mnemonic phrase.
      * This method is used to generate a mnemonic from a specific entropy source.
      * @param {number[]} buf - The entropy buffer, must be at least 128 bits.
-     * @returns {this} The BIP39 instance with the mnemonic set from the given entropy.
+     * @returns {this} The Mnemonic instance with the mnemonic set from the given entropy.
      * @throws {Error} If the entropy is less than 128 bits.
      */
     public fromEntropy(buf: number[]): this {
@@ -113,18 +113,18 @@ export default class BIP39 {
     }
 
     /**
-     * Static method to create a BIP39 instance from a given entropy.
+     * Static method to create a Mnemonic instance from a given entropy.
      * @param {number[]} buf - The entropy buffer.
-     * @returns {BIP39} A new BIP39 instance.
+     * @returns {Mnemonic} A new Mnemonic instance.
      */
-    public static fromEntropy(buf: number[]): BIP39 {
+    public static fromEntropy(buf: number[]): Mnemonic {
         return new this().fromEntropy(buf)
     }
 
     /**
      * Sets the mnemonic for the instance from a string.
      * @param {string} mnemonic - The mnemonic phrase as a string.
-     * @returns {this} The BIP39 instance with the set mnemonic.
+     * @returns {this} The Mnemonic instance with the set mnemonic.
      */
     public fromString(mnemonic: string): this {
         this.mnemonic = mnemonic
@@ -132,11 +132,11 @@ export default class BIP39 {
     }
 
     /**
-     * Static method to create a BIP39 instance from a mnemonic string.
+     * Static method to create a Mnemonic instance from a mnemonic string.
      * @param {string} str - The mnemonic phrase.
-     * @returns {BIP39} A new BIP39 instance.
+     * @returns {Mnemonic} A new Mnemonic instance.
      */
-    public static fromString(str: string): BIP39 {
+    public static fromString(str: string): Mnemonic {
         return new this().fromString(str)
     }
 
@@ -163,10 +163,10 @@ export default class BIP39 {
     /**
      * Converts entropy to a mnemonic phrase.
      * This method takes a buffer of entropy and converts it into a corresponding
-     * mnemonic phrase based on the BIP39 wordlist. The entropy should be at least 128 bits.
+     * mnemonic phrase based on the Mnemonic wordlist. The entropy should be at least 128 bits.
      * The method applies a checksum and maps the entropy to words in the wordlist.
      * @param {number[]} buf - The entropy buffer to convert. Must be at least 128 bits.
-     * @returns {this} The BIP39 instance with the mnemonic set from the entropy.
+     * @returns {this} The Mnemonic instance with the mnemonic set from the entropy.
      * @throws {Error} If the entropy is less than 128 bits or if it's not an even multiple of 11 bits.
      */
     public entropy2Mnemonic(buf: number[]): this {
@@ -246,7 +246,7 @@ export default class BIP39 {
      * and uses PBKDF2 to generate a seed. It also validates the mnemonic before conversion.
      * This seed can then be used for generating deterministic keys.
      * @param {string} [passphrase=''] - An optional passphrase for added security.
-     * @returns {this} The BIP39 instance with the seed generated from the mnemonic.
+     * @returns {this} The Mnemonic instance with the seed generated from the mnemonic.
      * @throws {Error} If the mnemonic does not pass validation or if the passphrase is not a string.
      */
     public mnemonic2Seed(passphrase = ''): this {
@@ -290,6 +290,6 @@ export default class BIP39 {
      * @returns {boolean} True if the combination is valid, false otherwise.
      */
     public static isValid(mnemonic: string, passphrase = ''): boolean {
-        return new BIP39(mnemonic).isValid(passphrase)
+        return new Mnemonic(mnemonic).isValid(passphrase)
     }
 }
