@@ -6,9 +6,9 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 
 | |
 | --- |
-| [BIP39](#class-bip39) |
 | [ECIES](#class-ecies) |
 | [HD](#class-hd) |
+| [Mnemonic](#class-mnemonic) |
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -268,10 +268,10 @@ A base58 encoded string of the HD wallet.
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
-### Class: BIP39
+### Class: Mnemonic
 
 ```ts
-export default class BIP39 {
+export default class Mnemonic {
     public mnemonic: string;
     public seed: number[];
     public Wordlist: {
@@ -282,11 +282,11 @@ export default class BIP39 {
     public toBinary(): number[] 
     public fromBinary(bin: number[]): this 
     public fromRandom(bits?: number): this 
-    public static fromRandom(bits?: number): BIP39 
+    public static fromRandom(bits?: number): Mnemonic 
     public fromEntropy(buf: number[]): this 
-    public static fromEntropy(buf: number[]): BIP39 
+    public static fromEntropy(buf: number[]): Mnemonic 
     public fromString(mnemonic: string): this 
-    public static fromString(str: string): BIP39 
+    public static fromString(str: string): Mnemonic 
     public toString(): string 
     public toSeed(passphrase?: string): number[] 
     public entropy2Mnemonic(buf: number[]): this 
@@ -299,11 +299,11 @@ export default class BIP39 {
 
 <details>
 
-<summary>Class BIP39 Details</summary>
+<summary>Class Mnemonic Details</summary>
 
 #### Constructor
 
-Constructs a BIP39 object.
+Constructs a Mnemonic object.
 
 ```ts
 constructor(mnemonic?: string, seed?: number[], wordlist = wordList) 
@@ -339,7 +339,7 @@ If the mnemonic is not an even multiple of 11 bits.
 
 Converts entropy to a mnemonic phrase.
 This method takes a buffer of entropy and converts it into a corresponding
-mnemonic phrase based on the BIP39 wordlist. The entropy should be at least 128 bits.
+mnemonic phrase based on the Mnemonic wordlist. The entropy should be at least 128 bits.
 The method applies a checksum and maps the entropy to words in the wordlist.
 
 ```ts
@@ -348,7 +348,7 @@ public entropy2Mnemonic(buf: number[]): this
 
 Returns
 
-The BIP39 instance with the mnemonic set from the entropy.
+The Mnemonic instance with the mnemonic set from the entropy.
 
 Argument Details
 
@@ -369,7 +369,7 @@ public fromBinary(bin: number[]): this
 
 Returns
 
-The BIP39 instance with loaded mnemonic and seed.
+The Mnemonic instance with loaded mnemonic and seed.
 
 Argument Details
 
@@ -387,7 +387,7 @@ public fromEntropy(buf: number[]): this
 
 Returns
 
-The BIP39 instance with the mnemonic set from the given entropy.
+The Mnemonic instance with the mnemonic set from the given entropy.
 
 Argument Details
 
@@ -400,15 +400,15 @@ If the entropy is less than 128 bits.
 
 #### Method fromEntropy
 
-Static method to create a BIP39 instance from a given entropy.
+Static method to create a Mnemonic instance from a given entropy.
 
 ```ts
-public static fromEntropy(buf: number[]): BIP39 
+public static fromEntropy(buf: number[]): Mnemonic 
 ```
 
 Returns
 
-A new BIP39 instance.
+A new Mnemonic instance.
 
 Argument Details
 
@@ -425,7 +425,7 @@ public fromRandom(bits?: number): this
 
 Returns
 
-The BIP39 instance with the new random mnemonic.
+The Mnemonic instance with the new random mnemonic.
 
 Argument Details
 
@@ -438,15 +438,15 @@ If the bit length is not a multiple of 32 or is less than 128.
 
 #### Method fromRandom
 
-Static method to generate a BIP39 instance with a random mnemonic.
+Static method to generate a Mnemonic instance with a random mnemonic.
 
 ```ts
-public static fromRandom(bits?: number): BIP39 
+public static fromRandom(bits?: number): Mnemonic 
 ```
 
 Returns
 
-A new BIP39 instance.
+A new Mnemonic instance.
 
 Argument Details
 
@@ -463,7 +463,7 @@ public fromString(mnemonic: string): this
 
 Returns
 
-The BIP39 instance with the set mnemonic.
+The Mnemonic instance with the set mnemonic.
 
 Argument Details
 
@@ -472,15 +472,15 @@ Argument Details
 
 #### Method fromString
 
-Static method to create a BIP39 instance from a mnemonic string.
+Static method to create a Mnemonic instance from a mnemonic string.
 
 ```ts
-public static fromString(str: string): BIP39 
+public static fromString(str: string): Mnemonic 
 ```
 
 Returns
 
-A new BIP39 instance.
+A new Mnemonic instance.
 
 Argument Details
 
@@ -537,7 +537,7 @@ public mnemonic2Seed(passphrase = ""): this
 
 Returns
 
-The BIP39 instance with the seed generated from the mnemonic.
+The Mnemonic instance with the seed generated from the mnemonic.
 
 Argument Details
 
