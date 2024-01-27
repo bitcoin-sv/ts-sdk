@@ -6,7 +6,7 @@ import Curve from './Curve.js'
 import { sign, verify } from './ECDSA.js'
 import { sha256, sha256hmac } from './Hash.js'
 import Random from './Random.js'
-import { toArray } from './utils.js'
+import { toArray, toBase58Check } from './utils.js'
 
 /**
  * Represents a Private Key, which is a secret that can be used to generate signatures in a cryptographic system.
@@ -100,6 +100,42 @@ export default class PrivateKey extends BigNumber {
     const c = new Curve()
     const p = c.g.mul(this)
     return new PublicKey(p.x, p.y)
+  }
+
+  /**
+   * Converts the private key to a Wallet Import Format (WIF) string.
+   * 
+   * Base58Check encoding is used for encoding the private key.
+   * The prefix 
+   * 
+   * @method toWif
+   * @returns The WIF string.
+   * 
+   * @param prefix defaults to [0x80] for mainnet, set it to [0xef] for testnet.
+   * 
+   * @example
+   * const privateKey = PrivateKey.fromRandom();
+   * const wif = privateKey.toWif();
+   * const testnetWif = privateKey.toWif([0xef]);
+   */
+  toWif (prefix : number[] = [0x80]): string {
+    return toBase58Check([...this.toArray(), 1], prefix)
+  }
+
+  /**
+   * Base58Check encodes the hash of the public key associated with this private key with a prefix to indicate locking script type.
+   * Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
+   * 
+   * @param prefix defaults to [0x00] for mainnet, set to [0x6f] for testnet.
+   * 
+   * @returns Returns the address encoding associated with the hash of the public key associated with this private key. 
+   * 
+   * @example
+   * const address = pubkey.toAddress()
+   * const testnetAddress = pubkey.toAddress([0x6f])
+   */
+  toAddress (prefix : number[] = [0x00]): string {
+    return this.toPublicKey().toAddress(prefix)
   }
 
   /**

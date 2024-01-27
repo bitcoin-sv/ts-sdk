@@ -6182,6 +6182,8 @@ export default class PrivateKey extends BigNumber {
     sign(msg: number[] | string, enc?: "hex", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toPublicKey(): PublicKey 
+    toWif(prefix: number[] = [128]): string 
+    toAddress(prefix: number[] = [0]): string 
     deriveSharedSecret(key: PublicKey): Point 
     deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
 }
@@ -6310,6 +6312,31 @@ const privateKey = PrivateKey.fromRandom();
 const signature = privateKey.sign('Hello, World!');
 ```
 
+#### Method toAddress
+
+Base58Check encodes the hash of the public key associated with this private key with a prefix to indicate locking script type.
+Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
+
+```ts
+toAddress(prefix: number[] = [0]): string 
+```
+
+Returns
+
+Returns the address encoding associated with the hash of the public key associated with this private key.
+
+Argument Details
+
++ **prefix**
+  + defaults to [0x00] for mainnet, set to [0x6f] for testnet.
+
+Example
+
+```ts
+const address = pubkey.toAddress()
+const testnetAddress = pubkey.toAddress([0x6f])
+```
+
 #### Method toPublicKey
 
 Converts the private key to its corresponding public key.
@@ -6329,6 +6356,34 @@ Example
 ```ts
 const privateKey = PrivateKey.fromRandom();
 const publicKey = privateKey.toPublicKey();
+```
+
+#### Method toWif
+
+Converts the private key to a Wallet Import Format (WIF) string.
+
+Base58Check encoding is used for encoding the private key.
+The prefix
+
+```ts
+toWif(prefix: number[] = [128]): string 
+```
+
+Returns
+
+The WIF string.
+
+Argument Details
+
++ **prefix**
+  + defaults to [0x80] for mainnet, set it to [0xef] for testnet.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+const wif = privateKey.toWif();
+const testnetWif = privateKey.toWif([0xef]);
 ```
 
 #### Method verify
@@ -6378,6 +6433,7 @@ export default class PublicKey extends Point {
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toDER(): string 
     toHash(enc?: "hex"): number[] | string 
+    toAddress(prefix: number[] = [0]): string 
     deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey 
 }
 ```
@@ -6480,6 +6536,31 @@ Example
 
 ```ts
 const myPubKey = PublicKey.fromString("03....")
+```
+
+#### Method toAddress
+
+Base58Check encodes the hash of the public key with a prefix to indicate locking script type.
+Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
+
+```ts
+toAddress(prefix: number[] = [0]): string 
+```
+
+Returns
+
+Returns the address encoding associated with the hash of the public key.
+
+Argument Details
+
++ **prefix**
+  + defaults to [0x00] for mainnet, set to [0x6f] for testnet.
+
+Example
+
+```ts
+const address = pubkey.toAddress()
+const testnetAddress = pubkey.toAddress([0x6f])
 ```
 
 #### Method toDER

@@ -5,7 +5,7 @@ import { verify } from './ECDSA.js'
 import BigNumber from './BigNumber.js'
 import { sha256, sha256hmac } from './Hash.js'
 import Signature from './Signature.js'
-import { toArray, toHex } from './utils.js'
+import { toArray, toBase58Check, toHex } from './utils.js'
 import { hash160 } from './Hash.js'
 
 /**
@@ -118,6 +118,22 @@ export default class PublicKey extends Point {
       return toHex(pkh)
     }
     return pkh
+  }
+
+  /**
+   * Base58Check encodes the hash of the public key with a prefix to indicate locking script type.
+   * Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
+   * 
+   * @param prefix defaults to [0x00] for mainnet, set to [0x6f] for testnet.
+   * 
+   * @returns Returns the address encoding associated with the hash of the public key. 
+   * 
+   * @example
+   * const address = pubkey.toAddress()
+   * const testnetAddress = pubkey.toAddress([0x6f])
+   */
+  toAddress (prefix : number[] = [0x00]): string {
+    return toBase58Check(this.toHash() as number[], prefix)
   }
 
   /**
