@@ -6,7 +6,7 @@ import Curve from './Curve.js'
 import { sign, verify } from './ECDSA.js'
 import { sha256, sha256hmac } from './Hash.js'
 import Random from './Random.js'
-import { toArray, toBase58Check } from './utils.js'
+import { fromBase58Check, toArray, toBase58Check } from './utils.js'
 
 /**
  * Represents a Private Key, which is a secret that can be used to generate signatures in a cryptographic system.
@@ -44,6 +44,27 @@ export default class PrivateKey extends BigNumber {
    **/
   static fromString (str: string, base: number | 'hex'): PrivateKey {
     return new PrivateKey(BigNumber.fromString(str, base).toArray())
+  }
+
+  /**
+   * Generates a private key from a WIF (Wallet Import Format) string.
+   *
+   * @method fromWif
+   * @static
+   * @param wif - The WIF string to generate the private key from.
+   * @param base - The base of the string.
+   * @returns The generated Private Key.
+   * @throws Will throw an error if the string is not a valid WIF.
+   **/
+  static fromWif (wif: string, prefixLength: number = 1): PrivateKey {
+    const decoded = fromBase58Check(wif, null, prefixLength)
+    if (decoded.data.length !== 33) {
+      throw new Error('Invalid WIF length')
+    }
+    if (decoded.data[32] !== 1) {
+      throw new Error('Invalid WIF padding')
+    }
+    return new PrivateKey(decoded.data.slice(0, 32))
   }
 
   /**

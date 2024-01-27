@@ -290,7 +290,7 @@ export const toBase58Check = (bin: number[], prefix: number[] = [0]) => {
 export const fromBase58Check = (str: string, enc?: 'hex', prefixLength: number = 1) => {
   const bin = fromBase58(str)
   let prefix: string | number[] = bin.slice(0, prefixLength)
-  let data: string | number[] = bin.slice(1, -4)
+  let data: string | number[] = bin.slice(prefixLength, -4)
   let hash = [...prefix, ...data]
   hash = hash256(hash) as number[]
   bin.slice(-4).forEach((check, index) => {

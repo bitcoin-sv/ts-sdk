@@ -6179,6 +6179,7 @@ create a corresponding public key and derive a shared secret from a public key.
 export default class PrivateKey extends BigNumber {
     static fromRandom(): PrivateKey 
     static fromString(str: string, base: number | "hex"): PrivateKey 
+    static fromWif(wif: string, prefixLength: number = 1): PrivateKey 
     sign(msg: number[] | string, enc?: "hex", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toPublicKey(): PublicKey 
@@ -6281,6 +6282,29 @@ Argument Details
 Throws
 
 Will throw an error if the string is not valid.
+
+#### Method fromWif
+
+Generates a private key from a WIF (Wallet Import Format) string.
+
+```ts
+static fromWif(wif: string, prefixLength: number = 1): PrivateKey 
+```
+
+Returns
+
+The generated Private Key.
+
+Argument Details
+
++ **wif**
+  + The WIF string to generate the private key from.
++ **base**
+  + The base of the string.
+
+Throws
+
+Will throw an error if the string is not a valid WIF.
 
 #### Method sign
 
@@ -7154,7 +7178,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 fromBase58Check = (str: string, enc?: "hex", prefixLength: number = 1) => {
     const bin = fromBase58(str);
     let prefix: string | number[] = bin.slice(0, prefixLength);
-    let data: string | number[] = bin.slice(1, -4);
+    let data: string | number[] = bin.slice(prefixLength, -4);
     let hash = [...prefix, ...data];
     hash = hash256(hash) as number[];
     bin.slice(-4).forEach((check, index) => {
