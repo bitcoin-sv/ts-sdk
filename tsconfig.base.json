@@ -12,13 +12,13 @@
     "strictNullChecks": false,
     "downlevelIteration": false,
     "skipLibCheck": true,
-    "allowSyntheticDefaultImports": false,
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "sourceMap": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   },
   "files": ["mod.ts"],
   "include": ["src"],
