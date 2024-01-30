@@ -1,6 +1,8 @@
 import { sign, verify, magicHash } from '../../../dist/cjs/src/compat/BSM'
 import { toArray } from '../../../dist/cjs/src/primitives/utils'
 import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
+import PublicKey from '../../../dist/cjs/src/primitives/PublicKey'
+import Signature from '../../../dist/cjs/src/primitives/Signature'
 
 describe('BSM', () => {
     describe('magicHash', () => {
@@ -25,6 +27,12 @@ describe('BSM', () => {
         it('should verify a signed message', () => {
             const sig = sign(messageBuf, privateKey)
             expect(verify(messageBuf, sig, privateKey.toPublicKey())).toEqual(true)
+        })
+        it('Should verify a signed message in base64', () => {
+            const message = toArray("Texas", 'utf8')
+            const signature = Signature.fromDER("IAV89EkfHSzAIA8cEWbbKHUYzJqcShkpWaXGJ5+mf4+YIlf3XNlr0bj9X60sNe1A7+x9qyk+zmXropMDY4370n8=", 'base64')
+            const publicKey = PublicKey.fromString("03d4d1a6c5d8c03b0e671bc1891b69afaecb40c0686188fe9019f93581b43e8334")
+            expect(verify(message, signature, publicKey)).toBe(true)
         })
     })
 })

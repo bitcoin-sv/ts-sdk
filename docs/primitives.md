@@ -6044,10 +6044,11 @@ Signatures are often serialized into a format known as '[DER encoding](https://e
 export default class Signature {
     r: BigNumber;
     s: BigNumber;
-    static fromDER(data: number[] | string, enc?: "hex"): Signature 
+    static fromDER(data: number[] | string, enc?: "hex" | "base64"): Signature 
     constructor(r: BigNumber, s: BigNumber) 
     verify(msg: number[] | string, key: PublicKey, enc?: "hex"): boolean 
-    toDER(enc?: "hex"): number[] | string 
+    toString(enc?: "hex" | "base64") 
+    toDER(enc?: "hex" | "base64"): number[] | string 
 }
 ```
 
@@ -6085,7 +6086,7 @@ This method will throw an error if the DER encoding is invalid.
 If a string is provided, it is assumed to represent a hexadecimal sequence.
 
 ```ts
-static fromDER(data: number[] | string, enc?: "hex"): Signature 
+static fromDER(data: number[] | string, enc?: "hex" | "base64"): Signature 
 ```
 
 Returns
@@ -6110,10 +6111,11 @@ const signature = Signature.fromDER('30440220018c1f5502f8...', 'hex');
 Converts an instance of Signature into DER encoding.
 
 If the encoding parameter is set to 'hex', the function will return a hex string.
+If 'base64', it will return a base64 string.
 Otherwise, it will return an array of numbers.
 
 ```ts
-toDER(enc?: "hex"): number[] | string 
+toDER(enc?: "hex" | "base64"): number[] | string 
 ```
 
 Returns
@@ -6129,6 +6131,36 @@ Example
 
 ```ts
 const der = signature.toDER('hex');
+```
+
+#### Method toString
+
+function toString() { [native code] }
+
+Converts an instance of Signature into DER encoding.
+An alias for the toDER method.
+
+If the encoding parameter is set to 'hex', the function will return a hex string.
+If 'base64', it will return a base64 string.
+Otherwise, it will return an array of numbers.
+
+```ts
+toString(enc?: "hex" | "base64") 
+```
+
+Returns
+
+The current instance in DER encoding.
+
+Argument Details
+
++ **enc**
+  + The encoding to use for the output.
+
+Example
+
+```ts
+const der = signature.toString('base64');
 ```
 
 #### Method verify
