@@ -1,6 +1,9 @@
 class Rand {
   _rand: Function
-  constructor () {
+  constructor() {
+    let noRand = () => {
+      throw new Error('No secure random number generator is available in this environment.')
+    }
     if (typeof self === 'object') {
       /* eslint-disable-next-line */
       if (self.crypto && self.crypto.getRandomValues) {
@@ -10,10 +13,8 @@ class Rand {
           self.crypto.getRandomValues(arr)
           return [...arr]
         }
-      } else if (typeof window === 'object') {
-        this._rand = () => {
-          throw new Error('Not implemented yet')
-        }
+      } else /*if (typeof window === 'object')*/ {
+        this._rand = noRand
       }
     } else {
       try {
@@ -23,11 +24,12 @@ class Rand {
           this._rand = n => [...crypto.randomBytes(n)]
         }
       } catch (e) {
+        this._rand = noRand
       }
     }
   }
 
-  generate (len: number): number[] {
+  generate(len: number): number[] {
     return this._rand(len)
   }
 }

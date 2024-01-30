@@ -55,7 +55,7 @@ For a more detailed tutorial and advanced examples, check our [Documentation](#d
 
 ## Documentation
 
-The SDK is richly documented with code-level annotations. This should show up well within editors like VSCode. For complete API docs, check out [API.md](./API.md). Please refer to the [Libraries Wiki](#) (link to be provided) for a deep dive into each feature, tutorials, and usage examples.
+The SDK is richly documented with code-level annotations. This should show up well within editors like VSCode. For complete API docs, check out [the docs folder](./docs). Please refer to the [Libraries Wiki](#) (link to be provided) for a deep dive into each feature, tutorials, and usage examples.
 
 ## Contribution Guidelines
 
