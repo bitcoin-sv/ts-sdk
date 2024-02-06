@@ -15,8 +15,8 @@ import spendValid from './spend.valid.vectors'
 describe('Spend', () => {
   it('Successfully validates a P2PKH spend', async () => {
     const privateKey = new PrivateKey(1)
-    const publicKey = new Curve().g.mul(privateKey)
-    const hash = hash160(publicKey.encode(true)) as number[]
+    const publicKey = privateKey.toPublicKey()
+    const hash = publicKey.toHash()
     const p2pkh = new P2PKH()
     const lockingScript = p2pkh.lock(hash)
     const satoshis = new BigNumber(1)
@@ -49,9 +49,9 @@ describe('Spend', () => {
   })
   it('Fails to verify a P2PKH spend with the wrong key', async () => {
     const privateKey = new PrivateKey(1)
-    const publicKey = new Curve().g.mul(privateKey)
+    const publicKey = privateKey.toPublicKey()
     const wrongPrivateKey = new PrivateKey(2)
-    const hash = hash160(publicKey.encode(true)) as number[]
+    const hash = publicKey.toHash()
     const p2pkh = new P2PKH()
     const lockingScript = p2pkh.lock(hash)
     const satoshis = new BigNumber(1)

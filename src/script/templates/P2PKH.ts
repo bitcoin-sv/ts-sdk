@@ -19,7 +19,7 @@ export default class P2PKH implements ScriptTemplate {
    * @param {number[]} pubkeyhash - An array representing the public key hash.
    * @returns {LockingScript} - A P2PKH locking script.
    */
-  lock (pubkeyhash: number[]): LockingScript {
+  lock(pubkeyhash: number[]): LockingScript {
     return new LockingScript([
       { op: OP.OP_DUP },
       { op: OP.OP_HASH160 },
@@ -42,14 +42,14 @@ export default class P2PKH implements ScriptTemplate {
    * @param {boolean} anyoneCanPay - Flag indicating if the signature allows for other inputs to be added later.
    * @returns {Object} - An object containing the `sign` and `estimateLength` functions.
    */
-  unlock (
+  unlock(
     privateKey: PrivateKey,
     signOutputs: 'all' | 'none' | 'single' = 'all',
     anyoneCanPay: boolean = false
   ): {
-      sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
-      estimateLength: () => Promise<106>
-    } {
+    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
+    estimateLength: () => Promise<106>
+  } {
     return {
       sign: async (tx: Transaction, inputIndex: number) => {
         let signatureScope = TransactionSignature.SIGHASH_FORKID
