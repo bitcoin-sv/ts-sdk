@@ -459,13 +459,13 @@ export default class Transaction {
   /**
    * Verifies the legitimacy of the Bitcoin transaction according to the rules of SPV by ensuring all the input transactions link back to valid block headers, the chain of spends for all inputs are valid, and the sum of inputs is not less than the sum of outputs.
    *
-   * @param chainTracker - An instance of ChainTracker, a Bitcoin block header tracker.
+   * @param chainTracker - An instance of ChainTracker, a Bitcoin block header tracker. If the value is set to 'scripts only', headers will not be verified.
    *
    * @returns Whether the transaction is valid according to the rules of SPV.
    */
-  async verify(chainTracker: ChainTracker): Promise<boolean> {
+  async verify(chainTracker: ChainTracker | 'scripts only'): Promise<boolean> {
     // If the transaction has a valid merkle path, verification is complete.
-    if (typeof this.merklePath === 'object') {
+    if (typeof this.merklePath === 'object' && chainTracker !== 'scripts only') {
       const proofValid = await this.merklePath.verify(
         this.id('hex') as string,
         chainTracker
