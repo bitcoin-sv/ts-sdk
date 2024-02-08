@@ -28,7 +28,7 @@ jobs:
     name: Publish
     needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && ( github.ref == 'refs/heads/master' )
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
     - uses: actions/checkout@v2
     - name: Cache node_modules
@@ -36,13 +36,12 @@ jobs:
       uses: actions/cache@v1
       with:
         path: node_modules
-        key: 12.x-${{ runner.OS }}-build-${{ hashFiles('package.json') }}
+        key: 20.x-${{ runner.OS }}-build-${{ hashFiles('package.json') }}
     - name: Build
       if: steps.cache-modules.outputs.cache-hit != 'true'
       run: npm install
     - name: Test
       run: npm run test
-
     - name: Publish
       uses: mikeal/merge-release@master
       env:
