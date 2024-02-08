@@ -23,7 +23,7 @@ jobs:
       if: steps.cache-modules.outputs.cache-hit != 'true'
       run: npm install
     - name: Test
-      run: nnpm run test
+      run: npm run test
   publish:
     name: Publish
     needs: test
