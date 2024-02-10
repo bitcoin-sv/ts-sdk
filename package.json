@@ -6,6 +6,10 @@
   "main": "dist/cjs/mod.js",
   "module": "dist/esm/mod.js",
   "types": "dist/types/mod.d.ts",
+  "files": [
+    "dist",
+    "docs"
+  ],
   "exports": {
     ".": {
       "types": "./dist/types/mod.d.ts",
