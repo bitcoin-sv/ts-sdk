@@ -55,7 +55,7 @@ Moving beyond this basic example into more advanced use-cases enables you to sta
 
 ```typescript
 transaction.addOutput({
-  script: Script.fromHex('76a9....88ac'), // Hex-encoded locking script
+  lockingScript: Script.fromHex('76a9....88ac'), // Hex-encoded locking script
   satoshis: 2500 // Number of satoshis
 })
 ```
