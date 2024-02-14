@@ -14,17 +14,18 @@ The process for SPV is detailed in [BRC-67](https://github.com/bitcoin-sv/BRCs/b
 
 ## Block Headers Client
 
-To verify BEEF structures with the BSV SDK, you'll need to provide a block headers client that, given a merkle root, will indicate to the library whether the merkle root is correct for the block that's in the active chain at the gien block height.
+To verify BEEF structures with the BSV SDK, you'll need to provide a block headers client that, given a merkle root, will indicate to the library whether the merkle root is correct for the block that's in the active chain at the given block height.
 
 For simplicity in this example, we are going to use a mock headers client that always indicates every merkle root as valid no matter what. However, in any real project, **you MUST always use an actual block headers client or attackers will be able to easily fool you with fraudulent transactions!**
 
 The TypeScript BSV SDK does not ship with a block headers client, but check out this example (link to be provided once complete) for setting up Pulse.
 
-Here is the gullable block headers client we will be using:
+Here is the gullible block headers client we will be using:
 
 ```typescript
-const gullableHeadersClient = {
-    isValidRootForHeight: async () => true // DO NOT USE IN A REAL PROJECT
+const gullibleHeadersClient = {
+    // DO NOT USE IN A REAL PROJECT due to security risks of accepting any merkle root as valid without verification
+    isValidRootForHeight: async () => true
 }
 ```
 
@@ -40,7 +41,7 @@ const BEEFHex = '0100beef01fe636d0c0007021400fe507c0c7aa754cef1f7889d5fd395cf1f7
 const tx = Transaction.fromHexBEEF(BEEFHex)
 
 // This ensures the BEEF structure is legitimate
-const verified = await tx.verify(gullableHeadersClient)
+const verified = await tx.verify(gullibleHeadersClient)
 
 // Print the results
 console.log(verified)
