@@ -6,3 +6,5 @@ Here, you will find documentation for common example usages of the library.
 - [Getting Started (React)](./GETTING_STARTED_REACT.md)
 - [Example: Creating a Simple Transaction](EXAMPLE_SIMPLE_TX.md)
 - [Example: Verifying a BEEF Structure](EXAMPLE_VERIFYING_BEEF.md)
+- [Example: Creating Transactions with Inputs, Outputs and Templates](EXAMPLE_COMPLEX_TX.md)
+- [Example: Creating the R-puzzle Script Template](EXAMPLE_SCRIPT_TEMPLATES.md)
