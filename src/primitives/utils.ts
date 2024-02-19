@@ -99,7 +99,7 @@ export const toArray = (msg: any, enc?: 'hex' | 'utf8' | 'base64'): any[] => {
  * @param {number[]} arr - The input array of numbers.
  * @returns {string} - The UTF-8 encoded string.
  */
-const toUTF8 = (arr: number[]): string => {
+export const toUTF8 = (arr: number[]): string => {
   let result = ''
 
   for (let i = 0; i < arr.length; i++) {
