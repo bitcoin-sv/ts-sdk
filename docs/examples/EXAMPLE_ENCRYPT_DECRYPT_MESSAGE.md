@@ -10,7 +10,7 @@ Understanding the ins-and-outs of message encryption and decryption is key to im
  To get started, you will first want to import the required functions / classes.
 
 ```ts
-import { PrivateKey, EncryptedMessage, toArray, toUTF8 } from '@bsv/sdk'
+import { PrivateKey, EncryptedMessage, Utils } from '@bsv/sdk'
 ```
 
 Next, you will want to configure who the sender is, the recipient, and what message you would like to encrypt.
@@ -19,14 +19,14 @@ Next, you will want to configure who the sender is, the recipient, and what mess
 const sender = new PrivateKey(15)
 const recipient = new PrivateKey(21)
 const recipientPub = recipient.toPublicKey()
-const message: number[] = toArray('Did you receive the Bitcoin payment?', 'utf8')
+const message: number[] = Utils.toArray('Did you receive the Bitcoin payment?', 'utf8')
 ```
 
 Now you are ready to generate the ciphertext using the `encrypt` function. This function will return an array of bytes so you will need to convert it using `toUTF` if you would like it as a string of text. 
 
 ```ts
 const encrypted: number[] = EncryptedMessage.encrypt(message, sender, recipientPub)
-const ciphertextMessage: string = toUTF8(encrypted)
+const ciphertextMessage: string = Utils.toUTF8(encrypted)
 ```
 
 ### Decrypting a Message
@@ -35,7 +35,7 @@ To get back your plaintext message, use the `decrypt` function and then transfor
 
 ```ts
 const decrypted: number[] = EncryptedMessage.decrypt(encrypted, recipient)
-const plaintextMessage: string = toUTF8(decrypted)
+const plaintextMessage: string = Utils.toUTF8(decrypted)
 // console.log(plaintextMessage) -> 'Did you receive the Bitcoin payment?'
 ```
 
