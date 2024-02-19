@@ -46,7 +46,7 @@ Next, we'll add an R-puzzle input into this transaction using the `RPuzzle`` tem
 
 ```typescript
 const sourceTransaction = Transaction.fromHex('...')
-const puz = new RPuzzle('HASH256')
+const puz = new RPuzzle()
 const k = new BigNumber(1)
 const unlockingScriptTemplate = puz.unlock(k)
 let txInput = {
@@ -72,7 +72,7 @@ We will now add an R-puzzle output to a transaction, making use of the script te
 #### Example: Adding an Output
 
 ```typescript
-// We must first obtain the R-value for the template
+// We must first obtain an R-value for the template
 const pubkey = PublicKey.fromString('...')
 pubkey.x.umod(c.n).toArray()
 r = r[0] > 127 ? [0, ...r] : r
@@ -90,8 +90,34 @@ myTx.addOutput(txOutput)
 
 ## Change and Fee Computation
 
+Transactions pay fees to miners for their inclusion in the blockchain. These fees are expressed as a difference between the amounts of the inputs that 
+
 ## Signing and Signature Validity
+
+```typescript
+myTx.sign()
+```
 
 ## Serialization and Broadcast
 
+```typescript
+// get your api key from https://console.taal.com
+const apiKey = 'mainnet_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' // replace
+await tx.broadcast(new ARC('https://api.taal.com/arc', apiKey))
+```
+
+Alternatively, if you don't want to use the SDK's built-in broadcasting system, you can simply serialize your transaction into a hex string as follows:
+
+```typescript
+myTx.toHex()
+```
+
 ## SPV and Serialization Formats
+
+```typescript
+myTx.toHexEF()
+```
+
+```typescript
+myTx.toHexBEEF()
+```
