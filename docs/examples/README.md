@@ -8,3 +8,5 @@ Here, you will find documentation for common example usages of the library.
 - [Example: Verifying a BEEF Structure](EXAMPLE_VERIFYING_BEEF.md)
 - [Example: Creating Transactions with Inputs, Outputs and Templates](EXAMPLE_COMPLEX_TX.md)
 - [Example: Creating the R-puzzle Script Template](EXAMPLE_SCRIPT_TEMPLATES.md)
+- [Example: Message Encryption and Decryption](EXAMPLE_ENCRYPT_DECRYPT_MESSAGE.md)
+- [Example: Message Signing](EXAMPLE_MESSAGE_SIGNING.md)

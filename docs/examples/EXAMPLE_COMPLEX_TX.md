@@ -16,7 +16,7 @@ To create a transaction with the SDK, you can either use the constructor:
 ```typescript
 const tx = new Transaction(version, inputsArray, outputsArray, lockTime)
 // or
-const tx . new Transaction()
+const tx = new Transaction()
     .addInput(inputA)
     .addInput(inputB)
     .addOutput(outputA)
@@ -103,6 +103,7 @@ In summary:
 In our above code, we already added a change output — now, we can just compute the fees before transaction signing.
 
 ```typescript
+// Compute the correct amounts for change outputs and leave the rest for the Bitcoin miners
 myTx.fee()
 ```
 
@@ -117,6 +118,7 @@ Once you've defined your inputs and outputs, and once your change has been compu
 With these considerations in mind, we can now sign our transaction. The `RPuzzle` unlocking templates we configured earlier will be used in this process.
 
 ```typescript
+// Set the input unlocking scripts based on the script templates
 myTx.sign()
 ```
 
@@ -133,6 +135,7 @@ await tx.broadcast(new ARC('https://api.taal.com/arc', apiKey))
 Alternatively, if you don't want to use the SDK's built-in broadcasting system, you can simply serialize your transaction into a hex string as follows:
 
 ```typescript
+// Serialize your transaction
 myTx.toHex()
 ```
 
@@ -145,9 +148,17 @@ Earlier in this guide, we mentioned that you can either reference a `sourceTXID`
 When properly linked, you can serialize your transactions in the SPV formats as follows:
 
 ```typescript
+// Note: Requires use of sourceTransaction instead of sourceTXID for inputs
 myTx.toHexBEEF()
 // or
 myTx.toHexEF()
 ```
 
-This enables the transactions to be verified properly by recipients, using the `.verify()` method.
+This enables the transactions to be verified properly by recipients, using the `.verify()` method:
+
+```typescript
+const incomingTX = Transaction.fromHexBEEF('...')
+incomingTX.verify(chainTracker) // Provide a source of BSV block headers to verify
+```
+
+Recipients, with nothing other than a source of BSV block headers, can verify that the transaction properly unlocks and redeems its inputs, thereby creating its outputs. To learn more about setting up a chain tracker with a source of block headers, check out the Pulse example (link to be provided once completed).
