@@ -443,7 +443,7 @@ export default class Transaction {
     toHexBEEF(): string 
     hash(enc?: "hex"): number[] | string 
     id(enc?: "hex"): number[] | string 
-    async verify(chainTracker: ChainTracker): Promise<boolean> 
+    async verify(chainTracker: ChainTracker | "scripts only"): Promise<boolean> 
     toBEEF(): number[] 
 }
 ```
@@ -718,7 +718,7 @@ Argument Details
 Verifies the legitimacy of the Bitcoin transaction according to the rules of SPV by ensuring all the input transactions link back to valid block headers, the chain of spends for all inputs are valid, and the sum of inputs is not less than the sum of outputs.
 
 ```ts
-async verify(chainTracker: ChainTracker): Promise<boolean> 
+async verify(chainTracker: ChainTracker | "scripts only"): Promise<boolean> 
 ```
 
 Returns
@@ -728,7 +728,7 @@ Whether the transaction is valid according to the rules of SPV.
 Argument Details
 
 + **chainTracker**
-  + An instance of ChainTracker, a Bitcoin block header tracker.
+  + An instance of ChainTracker, a Bitcoin block header tracker. If the value is set to 'scripts only', headers will not be verified.
 
 </details>
 

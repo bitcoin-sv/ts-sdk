@@ -6904,20 +6904,17 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ---
 ## Variables
 
-| | |
-| --- | --- |
-| [checkBit](#variable-checkbit) | [sha1](#variable-sha1) |
-| [encode](#variable-encode) | [sha256](#variable-sha256) |
-| [exclusiveOR](#variable-exclusiveor) | [sha256hmac](#variable-sha256hmac) |
-| [fromBase58](#variable-frombase58) | [sha512](#variable-sha512) |
-| [fromBase58Check](#variable-frombase58check) | [sha512hmac](#variable-sha512hmac) |
-| [getBytes](#variable-getbytes) | [sign](#variable-sign) |
-| [hash160](#variable-hash160) | [toArray](#variable-toarray) |
-| [hash256](#variable-hash256) | [toBase58](#variable-tobase58) |
-| [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [toBase58Check](#variable-tobase58check) |
-| [multiply](#variable-multiply) | [toHex](#variable-tohex) |
-| [rightShift](#variable-rightshift) | [verify](#variable-verify) |
-| [ripemd160](#variable-ripemd160) | [zero2](#variable-zero2) |
+| | | |
+| --- | --- | --- |
+| [checkBit](#variable-checkbit) | [multiply](#variable-multiply) | [toArray](#variable-toarray) |
+| [encode](#variable-encode) | [rightShift](#variable-rightshift) | [toBase58](#variable-tobase58) |
+| [exclusiveOR](#variable-exclusiveor) | [ripemd160](#variable-ripemd160) | [toBase58Check](#variable-tobase58check) |
+| [fromBase58](#variable-frombase58) | [sha1](#variable-sha1) | [toHex](#variable-tohex) |
+| [fromBase58Check](#variable-frombase58check) | [sha256](#variable-sha256) | [toUTF8](#variable-toutf8) |
+| [getBytes](#variable-getbytes) | [sha256hmac](#variable-sha256hmac) | [verify](#variable-verify) |
+| [hash160](#variable-hash160) | [sha512](#variable-sha512) | [zero2](#variable-zero2) |
+| [hash256](#variable-hash256) | [sha512hmac](#variable-sha512hmac) |  |
+| [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [sign](#variable-sign) |  |
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -7100,6 +7097,44 @@ toArray = (msg: any, enc?: "hex" | "utf8" | "base64"): any[] => {
         }
     }
     return res;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: toUTF8
+
+```ts
+toUTF8 = (arr: number[]): string => {
+    let result = "";
+    for (let i = 0; i < arr.length; i++) {
+        const byte = arr[i];
+        if (byte <= 127) {
+            result += String.fromCharCode(byte);
+        }
+        else if (byte >= 192 && byte <= 223) {
+            const byte2 = arr[++i];
+            const codePoint = ((byte & 31) << 6) | (byte2 & 63);
+            result += String.fromCharCode(codePoint);
+        }
+        else if (byte >= 224 && byte <= 239) {
+            const byte2 = arr[++i];
+            const byte3 = arr[++i];
+            const codePoint = ((byte & 15) << 12) | ((byte2 & 63) << 6) | (byte3 & 63);
+            result += String.fromCharCode(codePoint);
+        }
+        else if (byte >= 240 && byte <= 247) {
+            const byte2 = arr[++i];
+            const byte3 = arr[++i];
+            const byte4 = arr[++i];
+            const codePoint = ((byte & 7) << 18) | ((byte2 & 63) << 12) | ((byte3 & 63) << 6) | (byte4 & 63);
+            const surrogate1 = 55296 + ((codePoint - 65536) >> 10);
+            const surrogate2 = 56320 + ((codePoint - 65536) & 1023);
+            result += String.fromCharCode(surrogate1, surrogate2);
+        }
+    }
+    return result;
 }
 ```
 
