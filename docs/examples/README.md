@@ -10,3 +10,4 @@ Here, you will find documentation for common example usages of the library.
 - [Example: Creating the R-puzzle Script Template](EXAMPLE_SCRIPT_TEMPLATES.md)
 - [Example: Message Encryption and Decryption](EXAMPLE_ENCRYPT_DECRYPT_MESSAGE.md)
 - [Example: Message Signing](EXAMPLE_MESSAGE_SIGNING.md)
+- [Example: Building a Custom Transaction Broadcast Client](EXAMPLE_BUILDING_CUSTOM_TX_BROADCASTER.md)

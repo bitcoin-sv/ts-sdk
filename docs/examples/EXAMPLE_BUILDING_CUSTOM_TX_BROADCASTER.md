@@ -10,7 +10,7 @@ Our task will be to create a broadcaster that connects with the What's on Chain 
 
 ## Getting Started
 
-In order to build a compliant broadcast client, we need to first need to import the interfaces to implement.
+In order to build a compliant broadcast client, we first need to import the interfaces to implement.
 
 ```ts
 import { Transaction, BroadcastResponse, BroadcastFailure, Broadcaster } from '@bsv/sdk'
@@ -78,3 +78,10 @@ export default class WOC implements Broadcaster {
 }
 ```
 
+Now, you can make use of this broadcast client when sending transactions with the `.broadcast()` method:
+
+```typescript
+await exampleTX.broadcast(new WOC('main'))
+```
+
+The result will be one of the SDK's standard `BroadcastResponse` or `BroadcastFailure` types, indicating the status of your transaction.
