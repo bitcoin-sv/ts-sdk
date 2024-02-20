@@ -90,15 +90,39 @@ myTx.addOutput(txOutput)
 
 ## Change and Fee Computation
 
-Transactions pay fees to miners for their inclusion in the blockchain. These fees are expressed as a difference between the amounts of the inputs that 
+The transaction fee is the difference between the total inputs and total outputs of a transaction. Miners collect these fees as a reward for including transactions in a block. The amount of the fee paid will determine the quality of service provided my miners, subject to their policies.
+
+If the total value of the inputs exceeds the total value you wish to send (plus the transaction fee), the excess amount is returned to you as "change." Change is sent back to a destination controlled by the sender, ensuring that no value is lost. When you set the `change` property on an output to `true`, you don't need to define a number of satoshis. This is because the library computes the number of satoshis for you, when the `.fee()` method is called.
+
+In summary:
+
+1. After all funding sources and recipient outputs are added, add at least one output where `change` is `true`, so that you capture what's left over after you send. Set up a locking script you control so that you can later spend your change.
+
+2. Then, call the `.fee()` method to compute the change amounts across all change outputs, and leave the rest to the miner. You can specify a custom fee model if you wish, but the default should suffice for most use-cases.
+
+In our above code, we already added a change output — now, we can just compute the fees before transaction signing.
+
+```typescript
+myTx.fee()
+```
 
 ## Signing and Signature Validity
+
+Once you've defined your inputs and outputs, and once your change has been computed, the next step is to sign your transaction. There are a few things you should note when signing:
+
+- Only inputs with an unlocking template will be signed. If you provided an unlocking script yourself, the library assumes the signatures are already in place.
+- If you change the inputs or outputs after signing, certain signatures will need to be re-computd, depending on the SIGHASH flags used.
+- If your templates support it, you can produce partial signatures before serializing and sending to other parties. This is especially useful for multi-signature use-cases.
+
+With these considerations in mind, we can now sign our transaction. The `RPuzzle` unlocking templates we configured earlier will be used in this process.
 
 ```typescript
 myTx.sign()
 ```
 
 ## Serialization and Broadcast
+
+After a transaction is signed, it can be broadcast to the BSV Mining Network, or to relevant Overlay Networks through the SDK.
 
 ```typescript
 // get your api key from https://console.taal.com
@@ -114,10 +138,16 @@ myTx.toHex()
 
 ## SPV and Serialization Formats
 
-```typescript
-myTx.toHexEF()
-```
+Simplified Payment Verification is a mechanism that enables the recipient of a transaction to verify its legitimacy by providing necessary information, like input transactions and their associated merkle proofs.
+
+Earlier in this guide, we mentioned that you can either reference a `sourceTXID` or, preferably, a `sourceTransaction` when linking transaction inputs. The reason why it's preferable to link the entire source transaction is because serializing the transaction in an SPV-compliant way generally requires more information about the outputs being spent.
+
+When properly linked, you can serialize your transactions in the SPV formats as follows:
 
 ```typescript
 myTx.toHexBEEF()
+// or
+myTx.toHexEF()
 ```
+
+This enables the transactions to be verified properly by recipients, using the `.verify()` method.
