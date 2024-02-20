@@ -1,254 +1,24 @@
 # API
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
-## Interfaces
-
-| |
-| --- |
-| [BroadcastFailure](#interface-broadcastfailure) |
-| [BroadcastResponse](#interface-broadcastresponse) |
-| [Broadcaster](#interface-broadcaster) |
-| [ChainTracker](#interface-chaintracker) |
-| [FeeModel](#interface-feemodel) |
-| [ScriptChunk](#interface-scriptchunk) |
-| [ScriptTemplate](#interface-scripttemplate) |
-| [TransactionInput](#interface-transactioninput) |
-| [TransactionOutput](#interface-transactionoutput) |
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-
-### Interface: ScriptChunk
-
-A representation of a chunk of a script, which includes an opcode. For push operations, the associated data to push onto the stack is also included.
-
-```ts
-export default interface ScriptChunk {
-    op: number;
-    data?: number[];
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Interface: TransactionOutput
-
-Represents an output in a Bitcoin transaction.
-This interface defines the structure and components necessary to construct
-a transaction output, which secures owned Bitcoins to be unlocked later.
-
-Example
-
-```ts
-// Creating a simple transaction output
-let txOutput = {
-  satoshis: 1000,
-  lockingScript: LockingScript.fromASM('OP_DUP OP_HASH160 ... OP_EQUALVERIFY OP_CHECKSIG'),
-  change: false
-};
-```
-
-```ts
-export default interface TransactionOutput {
-    satoshis?: number;
-    lockingScript: LockingScript;
-    change?: boolean;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Interface: FeeModel
-
-Represents the interface for a transaction fee model.
-This interface defines a standard method for computing a fee when given a transaction.
-
-```ts
-export default interface FeeModel {
-    computeFee: (transaction: Transaction) => Promise<number>;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Interface: BroadcastResponse
-
-Defines the structure of a successful broadcast response.
-
-```ts
-export interface BroadcastResponse {
-    status: "success";
-    txid: string;
-    message: string;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Interface: BroadcastFailure
-
-Defines the structure of a failed broadcast response.
-
-```ts
-export interface BroadcastFailure {
-    status: "error";
-    code: string;
-    description: string;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Interface: Broadcaster
-
-Represents the interface for a transaction broadcaster.
-This interface defines a standard method for broadcasting transactions.
-
-```ts
-export interface Broadcaster {
-    broadcast: (transaction: Transaction) => Promise<BroadcastResponse | BroadcastFailure>;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Interface: ChainTracker
-
-The Chain Tracker is responsible for verifying the validity of a given Merkle root
-for a specific block height within the blockchain.
-
-Chain Trackers ensure the integrity of the blockchain by
-validating new headers against the chain's history. They use accumulated
-proof-of-work and protocol adherence as metrics to assess the legitimacy of blocks.
-
-Example
-
-```ts
-const chainTracker = {
-  isValidRootForHeight: async (root, height) => {
-    // Implementation to check if the Merkle root is valid for the specified block height.
-  }
-};
-```
-
-```ts
-export default interface ChainTracker {
-    isValidRootForHeight: (root: string, height: number) => Promise<boolean>;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Interface: TransactionInput
-
-Represents an input to a Bitcoin transaction.
-This interface defines the structure and components required to construct
-a transaction input in the Bitcoin blockchain.
-
-Example
-
-```ts
-// Creating a simple transaction input
-let txInput = {
-  sourceTXID: '123abc...',
-  sourceOutputIndex: 0,
-  sequence: 0xFFFFFFFF
-};
-
-// Using an unlocking script template
-txInput.unlockingScriptTemplate = {
-  sign: async (tx, index) => { ... },
-  estimateLength: async (tx, index) => { ... }
-};
-```
-
-```ts
-export default interface TransactionInput {
-    sourceTransaction?: Transaction;
-    sourceTXID?: string;
-    sourceOutputIndex: number;
-    unlockingScript?: UnlockingScript;
-    unlockingScriptTemplate?: {
-        sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-        estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
-    };
-    sequence: number;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Interface: ScriptTemplate
-
-```ts
-export default interface ScriptTemplate {
-    lock: (...params: any) => LockingScript;
-    unlock: (...params: any) => {
-        sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-        estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
-    };
-}
-```
-
-<details>
-
-<summary>Interface ScriptTemplate Details</summary>
-
-#### Property lock
-
-Creates a locking script with the given parameters.
-
-```ts
-lock: (...params: any) => LockingScript
-```
-
-#### Property unlock
-
-Creates a function that generates an unlocking script along with its signature and length estimation.
-
-This method returns an object containing two functions:
-1. `sign` - A function that, when called with a transaction and an input index, returns an UnlockingScript instance.
-2. `estimateLength` - A function that returns the estimated length of the unlocking script in bytes.
-
-```ts
-unlock: (...params: any) => {
-    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-    estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
-}
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
 ## Classes
 
-| | | |
-| --- | --- | --- |
-| [ARC](#class-arc) | [P2PKH](#class-p2pkh) | [SatoshisPerKilobyte](#class-satoshisperkilobyte) |
-| [BasePoint](#class-basepoint) | [Point](#class-point) | [Script](#class-script) |
-| [BigNumber](#class-bignumber) | [PrivateKey](#class-privatekey) | [Signature](#class-signature) |
-| [Curve](#class-curve) | [PublicKey](#class-publickey) | [Spend](#class-spend) |
-| [DRBG](#class-drbg) | [RIPEMD160](#class-ripemd160) | [SymmetricKey](#class-symmetrickey) |
-| [JacobianPoint](#class-jacobianpoint) | [RPuzzle](#class-rpuzzle) | [Transaction](#class-transaction) |
-| [K256](#class-k256) | [Reader](#class-reader) | [TransactionSignature](#class-transactionsignature) |
-| [LockingScript](#class-lockingscript) | [ReductionContext](#class-reductioncontext) | [UnlockingScript](#class-unlockingscript) |
-| [MerklePath](#class-merklepath) | [SHA1](#class-sha1) | [Writer](#class-writer) |
-| [Mersenne](#class-mersenne) | [SHA256](#class-sha256) |  |
-| [MontgomoryMethod](#class-montgomorymethod) | [SHA256HMAC](#class-sha256hmac) |  |
+| | |
+| --- | --- |
+| [BasePoint](#class-basepoint) | [RIPEMD160](#class-ripemd160) |
+| [BigNumber](#class-bignumber) | [Reader](#class-reader) |
+| [Curve](#class-curve) | [ReductionContext](#class-reductioncontext) |
+| [DRBG](#class-drbg) | [SHA1](#class-sha1) |
+| [JacobianPoint](#class-jacobianpoint) | [SHA256](#class-sha256) |
+| [K256](#class-k256) | [SHA256HMAC](#class-sha256hmac) |
+| [Mersenne](#class-mersenne) | [SHA512](#class-sha512) |
+| [MontgomoryMethod](#class-montgomorymethod) | [SHA512HMAC](#class-sha512hmac) |
+| [Point](#class-point) | [Signature](#class-signature) |
+| [PrivateKey](#class-privatekey) | [SymmetricKey](#class-symmetrickey) |
+| [PublicKey](#class-publickey) | [Writer](#class-writer) |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 
@@ -396,7 +166,7 @@ mersenne.split(new BigNumber('2345', 16), new BigNumber());
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: K256
@@ -489,7 +259,7 @@ k256.split(input, output);
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: ReductionContext
@@ -1022,7 +792,7 @@ this.verify2(new BigNumber(10).toRed(this), new BigNumber(20)); //throws an Erro
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: BigNumber
@@ -4408,7 +4178,7 @@ const zeroBits = bn.zeroBits(); // 3
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: MontgomoryMethod
@@ -4619,7 +4389,483 @@ const product = montMethod.mul(a, b);
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: RIPEMD160
+
+An implementation of RIPEMD160 cryptographic hash function. Extends the BaseHash class.
+It provides a way to compute a 'digest' for any kind of input data; transforming the data
+into a unique output of fixed size. The output is deterministic; it will always be
+the same for the same input.
+
+Example
+
+```ts
+const ripemd160 = new RIPEMD160();
+```
+
+```ts
+export class RIPEMD160 extends BaseHash {
+    h: number[];
+    constructor() 
+    _update(msg: number[], start: number): void 
+    _digest(enc?: "hex"): string | number[] 
+}
+```
+
+<details>
+
+<summary>Class RIPEMD160 Details</summary>
+
+#### Property h
+
+Array that is updated iteratively as part of hashing computation.
+
+```ts
+h: number[]
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: SHA256
+
+An implementation of SHA256 cryptographic hash function. Extends the BaseHash class.
+It provides a way to compute a 'digest' for any kind of input data; transforming the data
+into a unique output of fixed size. The output is deterministic; it will always be
+the same for the same input.
+
+Example
+
+```ts
+const sha256 = new SHA256();
+```
+
+```ts
+export class SHA256 extends BaseHash {
+    h: number[];
+    W: number[];
+    k: number[];
+    constructor() 
+    _update(msg: number[], start?: number): void 
+    ;
+    _digest(enc?: "hex"): number[] | string 
+}
+```
+
+<details>
+
+<summary>Class SHA256 Details</summary>
+
+#### Property W
+
+Provides a way to recycle usage of the array memory.
+
+```ts
+W: number[]
+```
+
+#### Property h
+
+The initial hash constants
+
+```ts
+h: number[]
+```
+
+#### Property k
+
+The round constants used for each round of SHA-256
+
+```ts
+k: number[]
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: SHA1
+
+An implementation of SHA1 cryptographic hash function. Extends the BaseHash class.
+It provides a way to compute a 'digest' for any kind of input data; transforming the data
+into a unique output of fixed size. The output is deterministic; it will always be
+the same for the same input.
+
+Example
+
+```ts
+const sha1 = new SHA1();
+```
+
+```ts
+export class SHA1 extends BaseHash {
+    h: number[];
+    W: number[];
+    k: number[];
+    constructor() 
+    _update(msg: number[], start?: number): void 
+    _digest(enc?: "hex"): number[] | string 
+}
+```
+
+<details>
+
+<summary>Class SHA1 Details</summary>
+
+#### Property W
+
+Provides a way to recycle usage of the array memory.
+
+```ts
+W: number[]
+```
+
+#### Property h
+
+The initial hash constants.
+
+```ts
+h: number[]
+```
+
+#### Property k
+
+The round constants used for each round of SHA-1.
+
+```ts
+k: number[]
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: SHA512
+
+An implementation of SHA512 cryptographic hash function. Extends the BaseHash class.
+It provides a way to compute a 'digest' for any kind of input data; transforming the data
+into a unique output of fixed size. The output is deterministic; it will always be
+the same for the same input.
+
+Example
+
+```ts
+const sha512 = new SHA512();
+```
+
+```ts
+export class SHA512 extends BaseHash {
+    h: number[];
+    W: number[];
+    k: number[];
+    constructor() 
+    _prepareBlock(msg, start) 
+    _update(msg, start) 
+    _digest(enc) 
+}
+```
+
+<details>
+
+<summary>Class SHA512 Details</summary>
+
+#### Property W
+
+Provides a way to recycle usage of the array memory.
+
+```ts
+W: number[]
+```
+
+#### Property h
+
+The initial hash constants.
+
+```ts
+h: number[]
+```
+
+#### Property k
+
+The round constants used for each round of SHA-512.
+
+```ts
+k: number[]
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: SHA256HMAC
+
+The `SHA256HMAC` class is used to create Hash-based Message Authentication Code (HMAC) using the SHA-256 cryptographic hash function.
+
+HMAC is a specific type of MAC involving a cryptographic hash function and a secret cryptographic key. It may be used to simultaneously verify both the data integrity and the authenticity of a message.
+
+This class also uses the SHA-256 cryptographic hash algorithm that produces a 256-bit (32-byte) hash value.
+
+```ts
+export class SHA256HMAC {
+    inner: SHA256;
+    outer: SHA256;
+    blockSize = 64;
+    outSize = 32;
+    constructor(key: number[] | string) 
+    update(msg: number[] | string, enc?: "hex"): SHA256HMAC 
+    digest(enc?: "hex"): number[] | string 
+}
+```
+
+<details>
+
+<summary>Class SHA256HMAC Details</summary>
+
+#### Constructor
+
+The constructor for the `SHA256HMAC` class.
+
+It initializes the `SHA256HMAC` object and sets up the inner and outer padded keys.
+If the key size is larger than the blockSize, it is digested using SHA-256.
+If the key size is less than the blockSize, it is padded with zeroes.
+
+```ts
+constructor(key: number[] | string) 
+```
+
+Argument Details
+
++ **key**
+  + The key to use to create the HMAC. Can be a number array or a string in hexadecimal format.
+
+Example
+
+```ts
+const myHMAC = new SHA256HMAC('deadbeef');
+```
+
+#### Property blockSize
+
+The block size for the SHA-256 hash function, in bytes. It's set to 64 bytes.
+
+```ts
+blockSize = 64
+```
+
+#### Property inner
+
+Represents the inner hash of SHA-256.
+
+```ts
+inner: SHA256
+```
+
+#### Property outSize
+
+The output size of the SHA-256 hash function, in bytes. It's set to 32 bytes.
+
+```ts
+outSize = 32
+```
+
+#### Property outer
+
+Represents the outer hash of SHA-256.
+
+```ts
+outer: SHA256
+```
+
+#### Method digest
+
+Finalizes the HMAC computation and returns the resultant hash.
+
+```ts
+digest(enc?: "hex"): number[] | string 
+```
+
+Returns
+
+Returns the digest of the hashed data. Can be a number array or a string.
+
+Argument Details
+
++ **enc**
+  + If 'hex', then the output is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+
+Example
+
+```ts
+let hashedMessage = myHMAC.digest('hex');
+```
+
+#### Method update
+
+Updates the `SHA256HMAC` object with part of the message to be hashed.
+
+```ts
+update(msg: number[] | string, enc?: "hex"): SHA256HMAC 
+```
+
+Returns
+
+Returns the instance of `SHA256HMAC` for chaining calls.
+
+Argument Details
+
++ **msg**
+  + Part of the message to hash. Can be a number array or a string.
++ **enc**
+  + If 'hex', then the input is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+
+Example
+
+```ts
+myHMAC.update('deadbeef', 'hex');
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: SHA512HMAC
+
+The `SHA512HMAC` class is used to create Hash-based Message Authentication Code (HMAC) using the SHA-512 cryptographic hash function.
+
+HMAC is a specific type of MAC involving a cryptographic hash function and a secret cryptographic key. It may be used to simultaneously verify both the data integrity and the authenticity of a message.
+
+This class also uses the SHA-512 cryptographic hash algorithm that produces a 512-bit (64-byte) hash value.
+
+```ts
+export class SHA512HMAC {
+    inner: SHA512;
+    outer: SHA512;
+    blockSize = 128;
+    outSize = 32;
+    constructor(key: number[] | string) 
+    update(msg: number[] | string, enc?: "hex"): SHA512HMAC 
+    digest(enc?: "hex"): number[] | string 
+}
+```
+
+<details>
+
+<summary>Class SHA512HMAC Details</summary>
+
+#### Constructor
+
+The constructor for the `SHA512HMAC` class.
+
+It initializes the `SHA512HMAC` object and sets up the inner and outer padded keys.
+If the key size is larger than the blockSize, it is digested using SHA-512.
+If the key size is less than the blockSize, it is padded with zeroes.
+
+```ts
+constructor(key: number[] | string) 
+```
+
+Argument Details
+
++ **key**
+  + The key to use to create the HMAC. Can be a number array or a string in hexadecimal format.
+
+Example
+
+```ts
+const myHMAC = new SHA512HMAC('deadbeef');
+```
+
+#### Property blockSize
+
+The block size for the SHA-512 hash function, in bytes. It's set to 128 bytes.
+
+```ts
+blockSize = 128
+```
+
+#### Property inner
+
+Represents the inner hash of SHA-512.
+
+```ts
+inner: SHA512
+```
+
+#### Property outSize
+
+The output size of the SHA-512 hash function, in bytes. It's set to 64 bytes.
+
+```ts
+outSize = 32
+```
+
+#### Property outer
+
+Represents the outer hash of SHA-512.
+
+```ts
+outer: SHA512
+```
+
+#### Method digest
+
+Finalizes the HMAC computation and returns the resultant hash.
+
+```ts
+digest(enc?: "hex"): number[] | string 
+```
+
+Returns
+
+Returns the digest of the hashed data. Can be a number array or a string.
+
+Argument Details
+
++ **enc**
+  + If 'hex', then the output is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+
+Example
+
+```ts
+let hashedMessage = myHMAC.digest('hex');
+```
+
+#### Method update
+
+Updates the `SHA512HMAC` object with part of the message to be hashed.
+
+```ts
+update(msg: number[] | string, enc?: "hex"): SHA512HMAC 
+```
+
+Returns
+
+Returns the instance of `SHA512HMAC` for chaining calls.
+
+Argument Details
+
++ **msg**
+  + Part of the message to hash. Can be a number array or a string.
++ **enc**
+  + If 'hex', then the input is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+
+Example
+
+```ts
+myHMAC.update('deadbeef', 'hex');
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: Writer
@@ -4652,7 +4898,7 @@ export class Writer {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: Reader
@@ -4683,7 +4929,7 @@ export class Reader {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: Curve
@@ -4751,7 +4997,7 @@ export default class Curve {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: BasePoint
@@ -4778,7 +5024,7 @@ export default abstract class BasePoint {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: JacobianPoint
@@ -5105,7 +5351,7 @@ const pointP = pointJ.toP();  // The point in affine coordinates.
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: Point
@@ -5686,293 +5932,7 @@ const isValid = aPoint.validate();
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: RIPEMD160
-
-An implementation of RIPEMD160 cryptographic hash function. Extends the BaseHash class.
-It provides a way to compute a 'digest' for any kind of input data; transforming the data
-into a unique output of fixed size. The output is deterministic; it will always be
-the same for the same input.
-
-Example
-
-```ts
-const ripemd160 = new RIPEMD160();
-```
-
-```ts
-export class RIPEMD160 extends BaseHash {
-    h: number[];
-    constructor() 
-    _update(msg: number[], start: number): void 
-    _digest(enc?: "hex"): string | number[] 
-}
-```
-
-<details>
-
-<summary>Class RIPEMD160 Details</summary>
-
-#### Property h
-
-Array that is updated iteratively as part of hashing computation.
-
-```ts
-h: number[]
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: SHA256
-
-An implementation of SHA256 cryptographic hash function. Extends the BaseHash class.
-It provides a way to compute a 'digest' for any kind of input data; transforming the data
-into a unique output of fixed size. The output is deterministic; it will always be
-the same for the same input.
-
-Example
-
-```ts
-const sha256 = new SHA256();
-```
-
-```ts
-export class SHA256 extends BaseHash {
-    h: number[];
-    W: number[];
-    k: number[];
-    constructor() 
-    _update(msg: number[], start?: number): void 
-    ;
-    _digest(enc?: "hex"): number[] | string 
-}
-```
-
-<details>
-
-<summary>Class SHA256 Details</summary>
-
-#### Property W
-
-Provides a way to recycle usage of the array memory.
-
-```ts
-W: number[]
-```
-
-#### Property h
-
-The initial hash constants
-
-```ts
-h: number[]
-```
-
-#### Property k
-
-The round constants used for each round of SHA-256
-
-```ts
-k: number[]
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: SHA1
-
-An implementation of SHA1 cryptographic hash function. Extends the BaseHash class.
-It provides a way to compute a 'digest' for any kind of input data; transforming the data
-into a unique output of fixed size. The output is deterministic; it will always be
-the same for the same input.
-
-Example
-
-```ts
-const sha1 = new SHA1();
-```
-
-```ts
-export class SHA1 extends BaseHash {
-    h: number[];
-    W: number[];
-    k: number[];
-    constructor() 
-    _update(msg: number[], start?: number): void 
-    _digest(enc?: "hex"): number[] | string 
-}
-```
-
-<details>
-
-<summary>Class SHA1 Details</summary>
-
-#### Property W
-
-Provides a way to recycle usage of the array memory.
-
-```ts
-W: number[]
-```
-
-#### Property h
-
-The initial hash constants.
-
-```ts
-h: number[]
-```
-
-#### Property k
-
-The round constants used for each round of SHA-1.
-
-```ts
-k: number[]
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: SHA256HMAC
-
-The `SHA256HMAC` class is used to create Hash-based Message Authentication Code (HMAC) using the SHA-256 cryptographic hash function.
-
-HMAC is a specific type of MAC involving a cryptographic hash function and a secret cryptographic key. It may be used to simultaneously verify both the data integrity and the authenticity of a message.
-
-This class also uses the SHA-256 cryptographic hash algorithm that produces a 256-bit (32-byte) hash value.
-
-```ts
-export class SHA256HMAC {
-    inner: SHA256;
-    outer: SHA256;
-    blockSize = 64;
-    outSize = 32;
-    constructor(key: number[] | string) 
-    update(msg: number[] | string, enc?: "hex"): SHA256HMAC 
-    digest(enc?: "hex"): number[] | string 
-}
-```
-
-<details>
-
-<summary>Class SHA256HMAC Details</summary>
-
-#### Constructor
-
-The constructor for the `SHA256HMAC` class.
-
-It initializes the `SHA256HMAC` object and sets up the inner and outer padded keys.
-If the key size is larger than the blockSize, it is digested using SHA-256.
-If the key size is less than the blockSize, it is padded with zeroes.
-
-```ts
-constructor(key: number[] | string) 
-```
-
-Argument Details
-
-+ **key**
-  + The key to use to create the HMAC. Can be a number array or a string in hexadecimal format.
-
-Example
-
-```ts
-const myHMAC = new SHA256HMAC('deadbeef');
-```
-
-#### Property blockSize
-
-The block size for the SHA-256 hash function, in bytes. It's set to 64 bytes.
-
-```ts
-blockSize = 64
-```
-
-#### Property inner
-
-Represents the inner hash of SHA-256.
-
-```ts
-inner: SHA256
-```
-
-#### Property outSize
-
-The output size of the SHA-256 hash function, in bytes. It's set to 32 bytes.
-
-```ts
-outSize = 32
-```
-
-#### Property outer
-
-Represents the outer hash of SHA-256.
-
-```ts
-outer: SHA256
-```
-
-#### Method digest
-
-Finalizes the HMAC computation and returns the resultant hash.
-
-```ts
-digest(enc?: "hex"): number[] | string 
-```
-
-Returns
-
-Returns the digest of the hashed data. Can be a number array or a string.
-
-Argument Details
-
-+ **enc**
-  + If 'hex', then the output is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
-
-Example
-
-```ts
-let hashedMessage = myHMAC.digest('hex');
-```
-
-#### Method update
-
-Updates the `SHA256HMAC` object with part of the message to be hashed.
-
-```ts
-update(msg: number[] | string, enc?: "hex"): SHA256HMAC 
-```
-
-Returns
-
-Returns the instance of `SHA256HMAC` for chaining calls.
-
-Argument Details
-
-+ **msg**
-  + Part of the message to hash. Can be a number array or a string.
-+ **enc**
-  + If 'hex', then the input is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
-
-Example
-
-```ts
-myHMAC.update('deadbeef', 'hex');
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: DRBG
@@ -6068,7 +6028,7 @@ drbg.update('e13af...');
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: Signature
@@ -6084,10 +6044,11 @@ Signatures are often serialized into a format known as '[DER encoding](https://e
 export default class Signature {
     r: BigNumber;
     s: BigNumber;
-    static fromDER(data: number[] | string, enc?: "hex"): Signature 
+    static fromDER(data: number[] | string, enc?: "hex" | "base64"): Signature 
     constructor(r: BigNumber, s: BigNumber) 
     verify(msg: number[] | string, key: PublicKey, enc?: "hex"): boolean 
-    toDER(enc?: "hex"): number[] | string 
+    toString(enc?: "hex" | "base64") 
+    toDER(enc?: "hex" | "base64"): number[] | string 
 }
 ```
 
@@ -6125,7 +6086,7 @@ This method will throw an error if the DER encoding is invalid.
 If a string is provided, it is assumed to represent a hexadecimal sequence.
 
 ```ts
-static fromDER(data: number[] | string, enc?: "hex"): Signature 
+static fromDER(data: number[] | string, enc?: "hex" | "base64"): Signature 
 ```
 
 Returns
@@ -6150,10 +6111,11 @@ const signature = Signature.fromDER('30440220018c1f5502f8...', 'hex');
 Converts an instance of Signature into DER encoding.
 
 If the encoding parameter is set to 'hex', the function will return a hex string.
+If 'base64', it will return a base64 string.
 Otherwise, it will return an array of numbers.
 
 ```ts
-toDER(enc?: "hex"): number[] | string 
+toDER(enc?: "hex" | "base64"): number[] | string 
 ```
 
 Returns
@@ -6169,6 +6131,36 @@ Example
 
 ```ts
 const der = signature.toDER('hex');
+```
+
+#### Method toString
+
+function toString() { [native code] }
+
+Converts an instance of Signature into DER encoding.
+An alias for the toDER method.
+
+If the encoding parameter is set to 'hex', the function will return a hex string.
+If 'base64', it will return a base64 string.
+Otherwise, it will return an array of numbers.
+
+```ts
+toString(enc?: "hex" | "base64") 
+```
+
+Returns
+
+The current instance in DER encoding.
+
+Argument Details
+
++ **enc**
+  + The encoding to use for the output.
+
+Example
+
+```ts
+const der = signature.toString('base64');
 ```
 
 #### Method verify
@@ -6205,7 +6197,7 @@ const isVerified = signature.verify(msg, publicKey);
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: PrivateKey
@@ -6219,9 +6211,12 @@ create a corresponding public key and derive a shared secret from a public key.
 export default class PrivateKey extends BigNumber {
     static fromRandom(): PrivateKey 
     static fromString(str: string, base: number | "hex"): PrivateKey 
+    static fromWif(wif: string, prefixLength: number = 1): PrivateKey 
     sign(msg: number[] | string, enc?: "hex", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toPublicKey(): PublicKey 
+    toWif(prefix: number[] = [128]): string 
+    toAddress(prefix: number[] = [0]): string 
     deriveSharedSecret(key: PublicKey): Point 
     deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
 }
@@ -6320,6 +6315,29 @@ Throws
 
 Will throw an error if the string is not valid.
 
+#### Method fromWif
+
+Generates a private key from a WIF (Wallet Import Format) string.
+
+```ts
+static fromWif(wif: string, prefixLength: number = 1): PrivateKey 
+```
+
+Returns
+
+The generated Private Key.
+
+Argument Details
+
++ **wif**
+  + The WIF string to generate the private key from.
++ **base**
+  + The base of the string.
+
+Throws
+
+Will throw an error if the string is not a valid WIF.
+
 #### Method sign
 
 Signs a message using the private key.
@@ -6350,6 +6368,31 @@ const privateKey = PrivateKey.fromRandom();
 const signature = privateKey.sign('Hello, World!');
 ```
 
+#### Method toAddress
+
+Base58Check encodes the hash of the public key associated with this private key with a prefix to indicate locking script type.
+Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
+
+```ts
+toAddress(prefix: number[] = [0]): string 
+```
+
+Returns
+
+Returns the address encoding associated with the hash of the public key associated with this private key.
+
+Argument Details
+
++ **prefix**
+  + defaults to [0x00] for mainnet, set to [0x6f] for testnet.
+
+Example
+
+```ts
+const address = pubkey.toAddress()
+const testnetAddress = pubkey.toAddress([0x6f])
+```
+
 #### Method toPublicKey
 
 Converts the private key to its corresponding public key.
@@ -6369,6 +6412,34 @@ Example
 ```ts
 const privateKey = PrivateKey.fromRandom();
 const publicKey = privateKey.toPublicKey();
+```
+
+#### Method toWif
+
+Converts the private key to a Wallet Import Format (WIF) string.
+
+Base58Check encoding is used for encoding the private key.
+The prefix
+
+```ts
+toWif(prefix: number[] = [128]): string 
+```
+
+Returns
+
+The WIF string.
+
+Argument Details
+
++ **prefix**
+  + defaults to [0x80] for mainnet, set it to [0xef] for testnet.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+const wif = privateKey.toWif();
+const testnetWif = privateKey.toWif([0xef]);
 ```
 
 #### Method verify
@@ -6402,7 +6473,7 @@ const isSignatureValid = privateKey.verify('Hello, World!', signature);
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: PublicKey
@@ -6418,6 +6489,7 @@ export default class PublicKey extends Point {
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toDER(): string 
     toHash(enc?: "hex"): number[] | string 
+    toAddress(prefix: number[] = [0]): string 
     deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey 
 }
 ```
@@ -6522,6 +6594,31 @@ Example
 const myPubKey = PublicKey.fromString("03....")
 ```
 
+#### Method toAddress
+
+Base58Check encodes the hash of the public key with a prefix to indicate locking script type.
+Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
+
+```ts
+toAddress(prefix: number[] = [0]): string 
+```
+
+Returns
+
+Returns the address encoding associated with the hash of the public key.
+
+Argument Details
+
++ **prefix**
+  + defaults to [0x00] for mainnet, set to [0x6f] for testnet.
+
+Example
+
+```ts
+const address = pubkey.toAddress()
+const testnetAddress = pubkey.toAddress([0x6f])
+```
+
 #### Method toDER
 
 Encode the public key to DER (Distinguished Encoding Rules) format.
@@ -6589,7 +6686,7 @@ const isVerified = myPubKey.verify(myMessage, mySignature)
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: SymmetricKey
@@ -6671,1337 +6768,7 @@ const encryptedMessage = key.encrypt('plainText', 'utf8');
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: Script
-
-The Script class represents a script in a Bitcoin SV transaction,
-encapsulating the functionality to construct, parse, and serialize
-scripts used in both locking (output) and unlocking (input) scripts.
-
-```ts
-export default class Script {
-    chunks: ScriptChunk[];
-    static fromASM(asm: string): Script 
-    static fromHex(hex: string): Script 
-    static fromBinary(bin: number[]): Script 
-    constructor(chunks: ScriptChunk[] = []) 
-    toASM(): string 
-    toHex(): string 
-    toBinary(): number[] 
-    writeScript(script: Script): Script 
-    writeOpCode(op: number): Script 
-    setChunkOpCode(i: number, op: number): Script 
-    writeBn(bn: BigNumber): Script 
-    writeBin(bin: number[]): Script 
-    writeNumber(num: number): Script 
-    removeCodeseparators(): Script 
-    findAndDelete(script: Script): Script 
-    isPushOnly(): boolean 
-    isLockingScript(): boolean 
-    isUnlockingScript(): boolean 
-}
-```
-
-<details>
-
-<summary>Class Script Details</summary>
-
-#### Constructor
-
-```ts
-constructor(chunks: ScriptChunk[] = []) 
-```
-
-Argument Details
-
-+ **chunks**
-  + =[] - An array of script chunks to directly initialize the script.
-
-#### Method findAndDelete
-
-Deletes the given item wherever it appears in the current script.
-
-```ts
-findAndDelete(script: Script): Script 
-```
-
-Returns
-
-This script instance for chaining.
-
-Argument Details
-
-+ **script**
-  + The script containing the item to delete from the current script.
-
-#### Method fromASM
-
-```ts
-static fromASM(asm: string): Script 
-```
-
-Returns
-
-A new Script instance.
-
-Argument Details
-
-+ **asm**
-  + The script in ASM string format.
-
-Example
-
-```ts
-const script = Script.fromASM("OP_DUP OP_HASH160 abcd... OP_EQUALVERIFY OP_CHECKSIG")
-```
-
-#### Method fromBinary
-
-```ts
-static fromBinary(bin: number[]): Script 
-```
-
-Returns
-
-A new Script instance.
-
-Argument Details
-
-+ **bin**
-  + The script in binary array format.
-
-Example
-
-```ts
-const script = Script.fromBinary([0x76, 0xa9, ...])
-```
-
-#### Method fromHex
-
-```ts
-static fromHex(hex: string): Script 
-```
-
-Returns
-
-A new Script instance.
-
-Argument Details
-
-+ **hex**
-  + The script in hexadecimal format.
-
-Example
-
-```ts
-const script = Script.fromHex("76a9...");
-```
-
-#### Method isLockingScript
-
-```ts
-isLockingScript(): boolean 
-```
-
-Returns
-
-True if the script is a locking script, otherwise false.
-
-#### Method isPushOnly
-
-```ts
-isPushOnly(): boolean 
-```
-
-Returns
-
-True if the script is push-only, otherwise false.
-
-#### Method isUnlockingScript
-
-```ts
-isUnlockingScript(): boolean 
-```
-
-Returns
-
-True if the script is an unlocking script, otherwise false.
-
-#### Method removeCodeseparators
-
-```ts
-removeCodeseparators(): Script 
-```
-
-Returns
-
-This script instance for chaining.
-
-#### Method setChunkOpCode
-
-```ts
-setChunkOpCode(i: number, op: number): Script 
-```
-
-Returns
-
-This script instance for chaining.
-
-Argument Details
-
-+ **i**
-  + The index of the chunk.
-+ **op**
-  + The opcode to set.
-
-#### Method toASM
-
-```ts
-toASM(): string 
-```
-
-Returns
-
-The script in ASM string format.
-
-#### Method toBinary
-
-```ts
-toBinary(): number[] 
-```
-
-Returns
-
-The script in binary array format.
-
-#### Method toHex
-
-```ts
-toHex(): string 
-```
-
-Returns
-
-The script in hexadecimal format.
-
-#### Method writeBin
-
-```ts
-writeBin(bin: number[]): Script 
-```
-
-Returns
-
-This script instance for chaining.
-
-Argument Details
-
-+ **bin**
-  + The binary data to append.
-
-Throws
-
-Throws an error if the data is too large to be pushed.
-
-#### Method writeBn
-
-```ts
-writeBn(bn: BigNumber): Script 
-```
-
-Returns
-
-This script instance for chaining.
-
-Argument Details
-
-+ **bn**
-  + The BigNumber to append.
-
-#### Method writeNumber
-
-```ts
-writeNumber(num: number): Script 
-```
-
-Returns
-
-This script instance for chaining.
-
-Argument Details
-
-+ **num**
-  + The number to append.
-
-#### Method writeOpCode
-
-```ts
-writeOpCode(op: number): Script 
-```
-
-Returns
-
-This script instance for chaining.
-
-Argument Details
-
-+ **op**
-  + The opcode to append.
-
-#### Method writeScript
-
-```ts
-writeScript(script: Script): Script 
-```
-
-Returns
-
-This script instance for chaining.
-
-Argument Details
-
-+ **script**
-  + The script to append.
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: LockingScript
-
-The LockingScript class represents a locking script in a Bitcoin SV transaction.
-It extends the Script class and is used specifically for output scripts that lock funds.
-
-Inherits all properties and methods from the Script class.
-
-```ts
-export default class LockingScript extends Script {
-    isLockingScript(): boolean 
-    isUnlockingScript(): boolean 
-}
-```
-
-<details>
-
-<summary>Class LockingScript Details</summary>
-
-#### Method isLockingScript
-
-```ts
-isLockingScript(): boolean 
-```
-
-Returns
-
-Always returns true for a LockingScript instance.
-
-#### Method isUnlockingScript
-
-```ts
-isUnlockingScript(): boolean 
-```
-
-Returns
-
-Always returns false for a LockingScript instance.
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: UnlockingScript
-
-The UnlockingScript class represents an unlocking script in a Bitcoin SV transaction.
-It extends the Script class and is used specifically for input scripts that unlock funds.
-
-Inherits all properties and methods from the Script class.
-
-```ts
-export default class UnlockingScript extends Script {
-    isLockingScript(): boolean 
-    isUnlockingScript(): boolean 
-}
-```
-
-<details>
-
-<summary>Class UnlockingScript Details</summary>
-
-#### Method isLockingScript
-
-```ts
-isLockingScript(): boolean 
-```
-
-Returns
-
-Always returns false for an UnlockingScript instance.
-
-#### Method isUnlockingScript
-
-```ts
-isUnlockingScript(): boolean 
-```
-
-Returns
-
-Always returns true for an UnlockingScript instance.
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: SatoshisPerKilobyte
-
-Represents the "satoshis per kilobyte" transaction fee model.
-
-```ts
-export default class SatoshisPerKilobyte implements FeeModel {
-    value: number;
-    constructor(value: number) 
-    async computeFee(tx: Transaction): Promise<number> 
-}
-```
-
-<details>
-
-<summary>Class SatoshisPerKilobyte Details</summary>
-
-#### Constructor
-
-Constructs an instance of the sat/kb fee model.
-
-```ts
-constructor(value: number) 
-```
-
-Argument Details
-
-+ **value**
-  + The number of satoshis per kilobyte to charge as a fee.
-
-#### Method computeFee
-
-Computes the fee for a given transaction.
-
-```ts
-async computeFee(tx: Transaction): Promise<number> 
-```
-
-Returns
-
-The fee in satoshis for the transaction, as a BigNumber.
-
-Argument Details
-
-+ **tx**
-  + The transaction for which a fee is to be computed.
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: MerklePath
-
-Represents a Merkle Path, which is used to provide a compact proof of inclusion for a
-transaction in a block. This class encapsulates all the details required for creating
-and verifying Merkle Proofs.
-
-Example
-
-```ts
-// Creating and verifying a Merkle Path
-const merklePath = MerklePath.fromHex('...');
-const isValid = merklePath.verify(txid, chainTracker);
-```
-
-```ts
-export default class MerklePath {
-    blockHeight: number;
-    path: Array<Array<{
-        offset: number;
-        hash?: string;
-        txid?: boolean;
-        duplicate?: boolean;
-    }>>;
-    static fromHex(hex: string): MerklePath 
-    static fromReader(reader: Reader): MerklePath 
-    static fromBinary(bump: number[]): MerklePath 
-    constructor(blockHeight: number, path: Array<Array<{
-        offset: number;
-        hash?: string;
-        txid?: boolean;
-        duplicate?: boolean;
-    }>>) 
-    toBinary(): number[] 
-    toHex(): string 
-    computeRoot(txid?: string): string 
-    async verify(txid: string, chainTracker: ChainTracker): Promise<boolean> 
-    combine(other: MerklePath): void 
-}
-```
-
-<details>
-
-<summary>Class MerklePath Details</summary>
-
-#### Method combine
-
-Combines this MerklePath with another to create a compound proof.
-
-```ts
-combine(other: MerklePath): void 
-```
-
-Argument Details
-
-+ **other**
-  + Another MerklePath to combine with this path.
-
-Throws
-
-- If the paths have different block heights or roots.
-
-#### Method computeRoot
-
-Computes the Merkle root from the provided transaction ID.
-
-```ts
-computeRoot(txid?: string): string 
-```
-
-Returns
-
-- The computed Merkle root as a hexadecimal string.
-
-Argument Details
-
-+ **txid**
-  + The transaction ID to compute the Merkle root for. If not provided, the root will be computed from an unspecified branch, and not all branches will be validated!
-
-Throws
-
-- If the transaction ID is not part of the Merkle Path.
-
-#### Method fromBinary
-
-Creates a MerklePath instance from a binary array.
-
-```ts
-static fromBinary(bump: number[]): MerklePath 
-```
-
-Returns
-
-- A new MerklePath instance.
-
-Argument Details
-
-+ **bump**
-  + The binary array representation of the Merkle Path.
-
-#### Method fromHex
-
-Creates a MerklePath instance from a hexadecimal string.
-
-```ts
-static fromHex(hex: string): MerklePath 
-```
-
-Returns
-
-- A new MerklePath instance.
-
-Argument Details
-
-+ **hex**
-  + The hexadecimal string representation of the Merkle Path.
-
-#### Method toBinary
-
-Converts the MerklePath to a binary array format.
-
-```ts
-toBinary(): number[] 
-```
-
-Returns
-
-- The binary array representation of the Merkle Path.
-
-#### Method toHex
-
-Converts the MerklePath to a hexadecimal string format.
-
-```ts
-toHex(): string 
-```
-
-Returns
-
-- The hexadecimal string representation of the Merkle Path.
-
-#### Method verify
-
-Verifies if the given transaction ID is part of the Merkle tree at the specified block height.
-
-```ts
-async verify(txid: string, chainTracker: ChainTracker): Promise<boolean> 
-```
-
-Returns
-
-- True if the transaction ID is valid within the Merkle Path at the specified block height.
-
-Argument Details
-
-+ **txid**
-  + The transaction ID to verify.
-+ **chainTracker**
-  + The ChainTracker instance used to verify the Merkle root.
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: Transaction
-
-Represents a complete Bitcoin transaction. This class encapsulates all the details
-required for creating, signing, and processing a Bitcoin transaction, including
-inputs, outputs, and various transaction-related methods.
-
-Example
-
-```ts
-// Creating a new transaction
-let tx = new Transaction();
-tx.addInput(...);
-tx.addOutput(...);
-await tx.fee();
-await tx.sign();
-await tx.broadcast();
-```
-
-```ts
-export default class Transaction {
-    version: number;
-    inputs: TransactionInput[];
-    outputs: TransactionOutput[];
-    lockTime: number;
-    metadata: Record<string, any>;
-    merklePath?: MerklePath;
-    static fromBEEF(beef: number[]): Transaction 
-    static fromBinary(bin: number[]): Transaction 
-    static fromHex(hex: string): Transaction 
-    static fromHexBEEF(hex: string): Transaction 
-    constructor(version: number = 1, inputs: TransactionInput[] = [], outputs: TransactionOutput[] = [], lockTime: number = 0, metadata: Record<string, any> = {}, merklePath?: MerklePath) 
-    addInput(input: TransactionInput): void 
-    addOutput(output: TransactionOutput): void 
-    updateMetadata(metadata: Record<string, any>): void 
-    async fee(model?: FeeModel, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
-    async sign(): Promise<void> 
-    async broadcast(broadcaster: Broadcaster): Promise<BroadcastResponse | BroadcastFailure> 
-    toBinary(): number[] 
-    toEF(): number[] 
-    toHexEF(): string 
-    toHex(): string 
-    toHexBEEF(): string 
-    hash(enc?: "hex"): number[] | string 
-    id(enc?: "hex"): number[] | string 
-    async verify(chainTracker: ChainTracker): Promise<boolean> 
-    toBEEF(): number[] 
-}
-```
-
-<details>
-
-<summary>Class Transaction Details</summary>
-
-#### Method addInput
-
-Adds a new input to the transaction.
-
-```ts
-addInput(input: TransactionInput): void 
-```
-
-Argument Details
-
-+ **input**
-  + The TransactionInput object to add to the transaction.
-
-Throws
-
-- If the input does not have a sourceTXID or sourceTransaction defined.
-
-#### Method addOutput
-
-Adds a new output to the transaction.
-
-```ts
-addOutput(output: TransactionOutput): void 
-```
-
-Argument Details
-
-+ **output**
-  + The TransactionOutput object to add to the transaction.
-
-#### Method broadcast
-
-Broadcasts a transaction.
-
-```ts
-async broadcast(broadcaster: Broadcaster): Promise<BroadcastResponse | BroadcastFailure> 
-```
-
-Returns
-
-A BroadcastResponse or BroadcastFailure from the Broadcaster
-
-Argument Details
-
-+ **broadcaster**
-  + The Broadcaster instance wwhere the transaction will be sent
-
-#### Method fee
-
-Computes fees prior to signing.
-If no fee model is provided, uses a SatoshisPerKilobyte fee model that pays 10 sat/kb.
-
-```ts
-async fee(model?: FeeModel, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
-```
-
-Argument Details
-
-+ **model**
-  + The initialized fee model to use
-+ **changeDistribution**
-  + Specifies how the change should be distributed
-amongst the change outputs
-
-TODO: Benford's law change distribution.
-
-#### Method fromBEEF
-
-Creates a new transaction, linked to its inputs and their associated merkle paths, from a BEEF (BRC-62) structure.
-
-```ts
-static fromBEEF(beef: number[]): Transaction 
-```
-
-Returns
-
-An anchored transaction, linked to its associated inputs populated with merkle paths.
-
-Argument Details
-
-+ **beef**
-  + A binary representation of a transaction in BEEF format.
-
-#### Method fromBinary
-
-Creates a Transaction instance from a binary array.
-
-```ts
-static fromBinary(bin: number[]): Transaction 
-```
-
-Returns
-
-- A new Transaction instance.
-
-Argument Details
-
-+ **bin**
-  + The binary array representation of the transaction.
-
-#### Method fromHex
-
-Creates a Transaction instance from a hexadecimal string.
-
-```ts
-static fromHex(hex: string): Transaction 
-```
-
-Returns
-
-- A new Transaction instance.
-
-Argument Details
-
-+ **hex**
-  + The hexadecimal string representation of the transaction.
-
-#### Method fromHexBEEF
-
-Creates a Transaction instance from a hexadecimal string encoded BEEF.
-
-```ts
-static fromHexBEEF(hex: string): Transaction 
-```
-
-Returns
-
-- A new Transaction instance.
-
-Argument Details
-
-+ **hex**
-  + The hexadecimal string representation of the transaction BEEF.
-
-#### Method hash
-
-Calculates the transaction's hash.
-
-```ts
-hash(enc?: "hex"): number[] | string 
-```
-
-Returns
-
-- The hash of the transaction in the specified format.
-
-Argument Details
-
-+ **enc**
-  + The encoding to use for the hash. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
-
-#### Method id
-
-Calculates the transaction's ID.
-
-```ts
-id(enc?: "hex"): number[] | string 
-```
-
-Returns
-
-- The ID of the transaction in the specified format.
-
-Argument Details
-
-+ **enc**
-  + The encoding to use for the ID. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
-
-#### Method sign
-
-Signs a transaction, hydrating all its unlocking scripts based on the provided script templates where they are available.
-
-```ts
-async sign(): Promise<void> 
-```
-
-#### Method toBEEF
-
-Serializes this transaction, together with its inputs and the respective merkle proofs, into the BEEF (BRC-62) format. This enables efficient verification of its compliance with the rules of SPV.
-
-```ts
-toBEEF(): number[] 
-```
-
-Returns
-
-The serialized BEEF structure
-
-#### Method toBinary
-
-Converts the transaction to a binary array format.
-
-```ts
-toBinary(): number[] 
-```
-
-Returns
-
-- The binary array representation of the transaction.
-
-#### Method toEF
-
-Converts the transaction to a BRC-30 EF format.
-
-```ts
-toEF(): number[] 
-```
-
-Returns
-
-- The BRC-30 EF representation of the transaction.
-
-#### Method toHex
-
-Converts the transaction to a hexadecimal string format.
-
-```ts
-toHex(): string 
-```
-
-Returns
-
-- The hexadecimal string representation of the transaction.
-
-#### Method toHexBEEF
-
-Converts the transaction to a hexadecimal string BEEF.
-
-```ts
-toHexBEEF(): string 
-```
-
-Returns
-
-- The hexadecimal string representation of the transaction BEEF.
-
-#### Method toHexEF
-
-Converts the transaction to a hexadecimal string EF.
-
-```ts
-toHexEF(): string 
-```
-
-Returns
-
-- The hexadecimal string representation of the transaction EF.
-
-#### Method updateMetadata
-
-Updates the transaction's metadata.
-
-```ts
-updateMetadata(metadata: Record<string, any>): void 
-```
-
-Argument Details
-
-+ **metadata**
-  + The metadata object to merge into the existing metadata.
-
-#### Method verify
-
-Verifies the legitimacy of the Bitcoin transaction according to the rules of SPV by ensuring all the input transactions link back to valid block headers, the chain of spends for all inputs are valid, and the sum of inputs is not less than the sum of outputs.
-
-```ts
-async verify(chainTracker: ChainTracker): Promise<boolean> 
-```
-
-Returns
-
-Whether the transaction is valid according to the rules of SPV.
-
-Argument Details
-
-+ **chainTracker**
-  + An instance of ChainTracker, a Bitcoin block header tracker.
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: TransactionSignature
-
-```ts
-export default class TransactionSignature extends Signature {
-    public static readonly SIGHASH_ALL = 1;
-    public static readonly SIGHASH_NONE = 2;
-    public static readonly SIGHASH_SINGLE = 3;
-    public static readonly SIGHASH_FORKID = 64;
-    public static readonly SIGHASH_ANYONECANPAY = 128;
-    scope: number;
-    static format(params: {
-        sourceTXID: string;
-        sourceOutputIndex: number;
-        sourceSatoshis: number;
-        transactionVersion: number;
-        otherInputs: TransactionInput[];
-        outputs: TransactionOutput[];
-        inputIndex: number;
-        subscript: Script;
-        inputSequence: number;
-        lockTime: number;
-        scope: number;
-    }): number[] 
-    static fromChecksigFormat(buf: number[]): TransactionSignature 
-    constructor(r: BigNumber, s: BigNumber, scope: number) 
-    public hasLowS(): boolean 
-    toChecksigFormat(): number[] 
-}
-```
-
-<details>
-
-<summary>Class TransactionSignature Details</summary>
-
-#### Method hasLowS
-
-Compares to bitcoind's IsLowDERSignature
-See also Ecdsa signature algorithm which enforces this.
-See also Bip 62, "low S values in signatures"
-
-```ts
-public hasLowS(): boolean 
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: Spend
-
-The Spend class represents a spend action within a Bitcoin SV transaction.
-It encapsulates all the necessary data required for spending a UTXO (Unspent Transaction Output)
-and includes details about the source transaction, output, and the spending transaction itself.
-
-```ts
-export default class Spend {
-    sourceTXID: string;
-    sourceOutputIndex: number;
-    sourceSatoshis: number;
-    lockingScript: LockingScript;
-    transactionVersion: number;
-    otherInputs: TransactionInput[];
-    outputs: TransactionOutput[];
-    inputIndex: number;
-    unlockingScript: UnlockingScript;
-    inputSequence: number;
-    lockTime: number;
-    context: "UnlockingScript" | "LockingScript";
-    programCounter: number;
-    lastCodeSeparator: number | null;
-    stack: number[][];
-    altStack: number[][];
-    ifStack: boolean[];
-    constructor(params: {
-        sourceTXID: string;
-        sourceOutputIndex: number;
-        sourceSatoshis: number;
-        lockingScript: LockingScript;
-        transactionVersion: number;
-        otherInputs: TransactionInput[];
-        outputs: TransactionOutput[];
-        unlockingScript: UnlockingScript;
-        inputSequence: number;
-        inputIndex: number;
-        lockTime: number;
-    }) 
-    reset(): void 
-    step(): void 
-    validate(): boolean 
-}
-```
-
-<details>
-
-<summary>Class Spend Details</summary>
-
-#### Constructor
-
-```ts
-constructor(params: {
-    sourceTXID: string;
-    sourceOutputIndex: number;
-    sourceSatoshis: number;
-    lockingScript: LockingScript;
-    transactionVersion: number;
-    otherInputs: TransactionInput[];
-    outputs: TransactionOutput[];
-    unlockingScript: UnlockingScript;
-    inputSequence: number;
-    inputIndex: number;
-    lockTime: number;
-}) 
-```
-
-Argument Details
-
-+ **params.sourceTXID**
-  + The transaction ID of the source UTXO.
-+ **params.sourceOutputIndex**
-  + The index of the output in the source transaction.
-+ **params.sourceSatoshis**
-  + The amount of satoshis in the source UTXO.
-+ **params.lockingScript**
-  + The locking script associated with the UTXO.
-+ **params.transactionVersion**
-  + The version of the current transaction.
-+ **params.otherInputs**
-  + -
-An array of other inputs in the transaction.
-+ **params.outputs**
-  + -
-The outputs of the current transaction.
-+ **params.inputIndex**
-  + The index of this input in the current transaction.
-+ **params.unlockingScript**
-  + The unlocking script for this spend.
-+ **params.inputSequence**
-  + The sequence number of this input.
-+ **params.lockTime**
-  + The lock time of the transaction.
-
-Example
-
-```ts
-const spend = new Spend({
-  sourceTXID: "abcd1234", // sourceTXID
-  sourceOutputIndex: 0, // sourceOutputIndex
-  sourceSatoshis: new BigNumber(1000), // sourceSatoshis
-  lockingScript: LockingScript.fromASM("OP_DUP OP_HASH160 abcd1234... OP_EQUALVERIFY OP_CHECKSIG"),
-  transactionVersion: 1, // transactionVersion
-  otherInputs: [{ sourceTXID: "abcd1234", sourceOutputIndex: 1, sequence: 0xffffffff }], // otherInputs
-  outputs: [{ satoshis: new BigNumber(500), lockingScript: LockingScript.fromASM("OP_DUP...") }], // outputs
-  inputIndex: 0, // inputIndex
-  unlockingScript: UnlockingScript.fromASM("3045... 02ab..."),
-  inputSequence: 0xffffffff // inputSequence
-});
-```
-
-#### Method validate
-
-```ts
-validate(): boolean 
-```
-
-Returns
-
-Returns true if the scripts are valid and the spend is legitimate, otherwise false.
-
-Example
-
-```ts
-if (spend.validate()) {
-  console.log("Spend is valid!");
-} else {
-  console.log("Invalid spend!");
-}
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: P2PKH
-
-P2PKH (Pay To Public Key Hash) class implementing ScriptTemplate.
-
-This class provides methods to create Pay To Public Key Hash locking and unlocking scripts, including the unlocking of P2PKH UTXOs with the private key.
-
-```ts
-export default class P2PKH implements ScriptTemplate {
-    lock(pubkeyhash: number[]): LockingScript 
-    unlock(privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false): {
-        sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-        estimateLength: () => Promise<106>;
-    } 
-}
-```
-
-<details>
-
-<summary>Class P2PKH Details</summary>
-
-#### Method lock
-
-Creates a P2PKH locking script for a given public key hash.
-
-```ts
-lock(pubkeyhash: number[]): LockingScript 
-```
-
-Returns
-
-- A P2PKH locking script.
-
-Argument Details
-
-+ **pubkeyhash**
-  + An array representing the public key hash.
-
-#### Method unlock
-
-Creates a function that generates a P2PKH unlocking script along with its signature and length estimation.
-
-The returned object contains:
-1. `sign` - A function that, when invoked with a transaction and an input index,
-   produces an unlocking script suitable for a P2PKH locked output.
-2. `estimateLength` - A function that returns the estimated length of the unlocking script in bytes.
-
-```ts
-unlock(privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false): {
-    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-    estimateLength: () => Promise<106>;
-} 
-```
-
-Returns
-
-- An object containing the `sign` and `estimateLength` functions.
-
-Argument Details
-
-+ **privateKey**
-  + The private key used for signing the transaction.
-+ **signOutputs**
-  + The signature scope for outputs.
-+ **anyoneCanPay**
-  + Flag indicating if the signature allows for other inputs to be added later.
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: RPuzzle
-
-RPuzzle class implementing ScriptTemplate.
-
-This class provides methods to create R Puzzle and R Puzzle Hash locking and unlocking scripts, including the unlocking of UTXOs with the correct K value.
-
-```ts
-export default class RPuzzle implements ScriptTemplate {
-    type: "raw" | "SHA1" | "SHA256" | "HASH256" | "RIPEMD160" | "HASH160" = "raw";
-    constructor(type: "raw" | "SHA1" | "SHA256" | "HASH256" | "RIPEMD160" | "HASH160" = "raw") 
-    lock(value: number[]): LockingScript 
-    unlock(k: BigNumber, privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false): {
-        sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-        estimateLength: () => Promise<106>;
-    } 
-}
-```
-
-<details>
-
-<summary>Class RPuzzle Details</summary>
-
-#### Constructor
-
-```ts
-constructor(type: "raw" | "SHA1" | "SHA256" | "HASH256" | "RIPEMD160" | "HASH160" = "raw") 
-```
-
-Argument Details
-
-+ **type**
-  + Denotes the type of puzzle to create
-
-#### Method lock
-
-Creates an R puzzle locking script for a given R value or R value hash.
-
-```ts
-lock(value: number[]): LockingScript 
-```
-
-Returns
-
-- An R puzzle locking script.
-
-Argument Details
-
-+ **value**
-  + An array representing the R value or its hash.
-
-#### Method unlock
-
-Creates a function that generates an R puzzle unlocking script along with its signature and length estimation.
-
-The returned object contains:
-1. `sign` - A function that, when invoked with a transaction and an input index,
-   produces an unlocking script suitable for an R puzzle locked output.
-2. `estimateLength` - A function that returns the estimated length of the unlocking script in bytes.
-
-```ts
-unlock(k: BigNumber, privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false): {
-    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-    estimateLength: () => Promise<106>;
-} 
-```
-
-Returns
-
-- An object containing the `sign` and `estimateLength` functions.
-
-Argument Details
-
-+ **k**
-  + — The K-value used to unlock the R-puzzle.
-+ **privateKey**
-  + The private key used for signing the transaction. If not provided, a random key will be generated.
-+ **signOutputs**
-  + The signature scope for outputs.
-+ **anyoneCanPay**
-  + Flag indicating if the signature allows for other inputs to be added later.
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: ARC
-
-Represents an ARC transaction broadcaster.
-
-```ts
-export default class ARC implements Broadcaster {
-    URL: string;
-    apiKey: string;
-    constructor(URL: string, apiKey: string) 
-    async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> 
-}
-```
-
-<details>
-
-<summary>Class ARC Details</summary>
-
-#### Constructor
-
-Constructs an instance of the ARC broadcaster.
-
-```ts
-constructor(URL: string, apiKey: string) 
-```
-
-Argument Details
-
-+ **URL**
-  + The URL endpoint for the ARC API.
-+ **apiKey**
-  + The API key used for authorization with the ARC API.
-
-#### Method broadcast
-
-Broadcasts a transaction via ARC.
-This method will attempt to use `window.fetch` if available (in browser environments).
-If running in a Node.js environment, it falls back to using the Node.js `https` module.
-
-```ts
-async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> 
-```
-
-Returns
-
-A promise that resolves to either a success or failure response.
-
-Argument Details
-
-+ **tx**
-  + The transaction to be broadcasted.
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ## Functions
@@ -8012,13 +6779,57 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [AESGCM](#function-aesgcm) |
 | [AESGCMDecrypt](#function-aesgcmdecrypt) |
 | [ghash](#function-ghash) |
+| [pbkdf2](#function-pbkdf2) |
 | [toArray](#function-toarray) |
 | [toBase64](#function-tobase64) |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 
+### Function: toArray
+
+```ts
+export function toArray(msg: number[] | string, enc?: "hex"): number[] 
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Function: pbkdf2
+
+Limited SHA-512-only PBKDF2 function for use in deprecated BIP39 code.
+
+```ts
+export function pbkdf2(password: number[], salt: number[], iterations: number, keylen: number, digest = "sha512"): number[] 
+```
+
+<details>
+
+<summary>Function pbkdf2 Details</summary>
+
+Returns
+
+The computed key
+
+Argument Details
+
++ **password**
+  + The PBKDF2 password
++ **salt**
+  + The PBKDF2 salt
++ **iterations**
+  + The number of of iterations to run
++ **keylen**
+  + The length of the key
++ **digest**
+  + The digest (must be sha512 for this implementation)
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ### Function: toBase64
 
 Converts an array of bytes (each between 0 and 255) into a base64 encoded string.
@@ -8049,16 +6860,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Function: toArray
-
-```ts
-export function toArray(msg: number[] | string, enc?: "hex"): number[] 
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Function: AES
@@ -8067,7 +6869,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export function AES(input: number[], key: number[]): number[] 
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Function: ghash
@@ -8076,7 +6878,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export function ghash(input: number[], hashSubKey: number[]): number[] 
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Function: AESGCM
@@ -8088,7 +6890,7 @@ export function AESGCM(plainText: number[], additionalAuthenticatedData: number[
 } 
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Function: AESGCMDecrypt
@@ -8097,29 +6899,120 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export function AESGCMDecrypt(cipherText: number[], additionalAuthenticatedData: number[], initializationVector: number[], authenticationTag: number[], key: number[]): number[] | null 
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ## Variables
 
 | | |
 | --- | --- |
-| [checkBit](#variable-checkbit) | [ripemd160](#variable-ripemd160) |
-| [decrypt](#variable-decrypt) | [sha1](#variable-sha1) |
+| [checkBit](#variable-checkbit) | [sha1](#variable-sha1) |
 | [encode](#variable-encode) | [sha256](#variable-sha256) |
-| [encrypt](#variable-encrypt) | [sha256hmac](#variable-sha256hmac) |
-| [exclusiveOR](#variable-exclusiveor) | [sign](#variable-sign) |
+| [exclusiveOR](#variable-exclusiveor) | [sha256hmac](#variable-sha256hmac) |
+| [fromBase58](#variable-frombase58) | [sha512](#variable-sha512) |
+| [fromBase58Check](#variable-frombase58check) | [sha512hmac](#variable-sha512hmac) |
 | [getBytes](#variable-getbytes) | [sign](#variable-sign) |
 | [hash160](#variable-hash160) | [toArray](#variable-toarray) |
-| [hash256](#variable-hash256) | [toHex](#variable-tohex) |
-| [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [verify](#variable-verify) |
-| [multiply](#variable-multiply) | [verify](#variable-verify) |
-| [rightShift](#variable-rightshift) | [zero2](#variable-zero2) |
+| [hash256](#variable-hash256) | [toBase58](#variable-tobase58) |
+| [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [toBase58Check](#variable-tobase58check) |
+| [multiply](#variable-multiply) | [toHex](#variable-tohex) |
+| [rightShift](#variable-rightshift) | [verify](#variable-verify) |
+| [ripemd160](#variable-ripemd160) | [zero2](#variable-zero2) |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 
+### Variable: ripemd160
+
+```ts
+ripemd160 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    return new RIPEMD160().update(msg, enc).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: sha1
+
+```ts
+sha1 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    return new SHA1().update(msg, enc).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: sha256
+
+```ts
+sha256 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    return new SHA256().update(msg, enc).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: sha512
+
+```ts
+sha512 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    return new SHA512().update(msg, enc).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: hash256
+
+```ts
+hash256 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    const first = new SHA256().update(msg, enc).digest();
+    return new SHA256().update(first).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: hash160
+
+```ts
+hash160 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+    const first = new SHA256().update(msg, enc).digest();
+    return new RIPEMD160().update(first).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: sha256hmac
+
+```ts
+sha256hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): number[] | string => {
+    return new SHA256HMAC(key).update(msg, enc).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: sha512hmac
+
+```ts
+sha512hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): number[] | string => {
+    return new SHA512HMAC(key).update(msg, enc).digest(enc);
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ### Variable: zero2
 
 ```ts
@@ -8133,7 +7026,7 @@ zero2 = (word: string): string => {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: toHex
@@ -8148,7 +7041,7 @@ toHex = (msg: number[]): string => {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: toArray
@@ -8210,7 +7103,7 @@ toArray = (msg: any, enc?: "hex" | "utf8" | "base64"): any[] => {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: encode
@@ -8228,75 +7121,112 @@ encode = (arr: number[], enc?: "hex" | "utf8"): string | number[] => {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
-### Variable: ripemd160
+### Variable: fromBase58
 
 ```ts
-ripemd160 = (msg: number[] | string, enc?: "hex"): number[] | string => {
-    return new RIPEMD160().update(msg, enc).digest(enc);
+fromBase58 = (str: string): number[] => {
+    if (!str || typeof str !== "string")
+        throw new Error(`Expected base58 string but got “${str}”`);
+    if (str.match(/[IOl0]/gmu))
+        throw new Error(`Invalid base58 character “${str.match(/[IOl0]/gmu)}”`);
+    const lz = str.match(/^1+/gmu);
+    const psz: number = lz ? lz[0].length : 0;
+    const size = ((str.length - psz) * (Math.log(58) / Math.log(256)) + 1) >>> 0;
+    const uint8 = new Uint8Array([
+        ...new Uint8Array(psz),
+        ...str
+            .match(/.{1}/gmu)
+            .map((i) => base58chars.indexOf(i))
+            .reduce((acc, i) => {
+            acc = acc.map((j) => {
+                const x = j * 58 + i;
+                i = x >> 8;
+                return x;
+            });
+            return acc;
+        }, new Uint8Array(size))
+            .reverse()
+            .filter(((lastValue) => (value) => (lastValue = lastValue || value))(false))
+    ]);
+    return [...uint8];
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
-### Variable: sha1
+### Variable: toBase58
 
 ```ts
-sha1 = (msg: number[] | string, enc?: "hex"): number[] | string => {
-    return new SHA1().update(msg, enc).digest(enc);
+toBase58 = (bin: number[]): string => {
+    const base58Map = Array(256).fill(-1);
+    for (let i = 0; i < base58chars.length; ++i)
+        base58Map[base58chars.charCodeAt(i)] = i;
+    const result = [];
+    for (const byte of bin) {
+        let carry = byte;
+        for (let j = 0; j < result.length; ++j) {
+            const x = (base58Map[result[j]] << 8) + carry;
+            result[j] = base58chars.charCodeAt(x % 58);
+            carry = (x / 58) | 0;
+        }
+        while (carry) {
+            result.push(base58chars.charCodeAt(carry % 58));
+            carry = (carry / 58) | 0;
+        }
+    }
+    for (const byte of bin)
+        if (byte)
+            break;
+        else
+            result.push("1".charCodeAt(0));
+    result.reverse();
+    return String.fromCharCode(...result);
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
-### Variable: sha256
+### Variable: toBase58Check
 
 ```ts
-sha256 = (msg: number[] | string, enc?: "hex"): number[] | string => {
-    return new SHA256().update(msg, enc).digest(enc);
+toBase58Check = (bin: number[], prefix: number[] = [0]) => {
+    let hash = hash256([...prefix, ...bin]) as number[];
+    hash = [...prefix, ...bin, ...hash.slice(0, 4)];
+    return toBase58(hash);
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
-### Variable: hash256
+### Variable: fromBase58Check
 
 ```ts
-hash256 = (msg: number[] | string, enc?: "hex"): number[] | string => {
-    const first = new SHA256().update(msg, enc).digest();
-    return new SHA256().update(first).digest(enc);
+fromBase58Check = (str: string, enc?: "hex", prefixLength: number = 1) => {
+    const bin = fromBase58(str);
+    let prefix: string | number[] = bin.slice(0, prefixLength);
+    let data: string | number[] = bin.slice(prefixLength, -4);
+    let hash = [...prefix, ...data];
+    hash = hash256(hash) as number[];
+    bin.slice(-4).forEach((check, index) => {
+        if (check !== hash[index]) {
+            throw new Error("Invalid checksum");
+        }
+    });
+    if (enc === "hex") {
+        prefix = toHex(prefix);
+        data = toHex(data);
+    }
+    return { prefix, data };
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Variable: hash160
-
-```ts
-hash160 = (msg: number[] | string, enc?: "hex"): number[] | string => {
-    const first = new SHA256().update(msg, enc).digest();
-    return new RIPEMD160().update(first).digest(enc);
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Variable: sha256hmac
-
-```ts
-sha256hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): number[] | string => {
-    return new SHA256HMAC(key).update(msg, enc).digest(enc);
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: sign
@@ -8362,7 +7292,7 @@ sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: Bi
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: verify
@@ -8390,7 +7320,7 @@ verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: checkBit
@@ -8401,7 +7331,7 @@ checkBit = function (byteArray: number[], byteIndex: number, bitIndex: number): 
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: getBytes
@@ -8417,7 +7347,7 @@ getBytes = function (numericValue: number): number[] {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: exclusiveOR
@@ -8433,7 +7363,7 @@ exclusiveOR = function (block0: number[], block1: number[]): number[] {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: rightShift
@@ -8455,7 +7385,7 @@ rightShift = function (block: number[]): number[] {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: multiply
@@ -8483,7 +7413,7 @@ multiply = function (block0: number[], block1: number[]): number[] {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: incrementLeastSignificantThirtyTwoBits
@@ -8505,131 +7435,6 @@ incrementLeastSignificantThirtyTwoBits = function (block: number[]): number[] {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Variable: sign
-
-```ts
-sign = (message: number[], signer: PrivateKey, verifier?: PublicKey): number[] => {
-    const recipientAnyone = typeof verifier !== "object";
-    if (recipientAnyone) {
-        const curve = new Curve();
-        const anyone = new PrivateKey(1);
-        const anyonePoint = curve.g.mul(anyone);
-        verifier = new PublicKey(anyonePoint.x, anyonePoint.y);
-    }
-    const keyID = Random(32);
-    const keyIDBase64 = toBase64(keyID);
-    const invoiceNumber = `2-message signing-${keyIDBase64}`;
-    const signingKey = signer.deriveChild(verifier, invoiceNumber);
-    const signature = signingKey.sign(message).toDER();
-    const senderPublicKey = signer.toPublicKey().encode(true);
-    const version = toArray(VERSION, "hex");
-    return [
-        ...version,
-        ...senderPublicKey,
-        ...(recipientAnyone ? [0] : verifier.encode(true)),
-        ...keyID,
-        ...signature
-    ];
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Variable: verify
-
-```ts
-verify = (message: number[], sig: number[], recipient?: PrivateKey): boolean => {
-    const reader = new Reader(sig);
-    const messageVersion = toHex(reader.read(4));
-    if (messageVersion !== VERSION) {
-        throw new Error(`Message version mismatch: Expected ${VERSION}, received ${messageVersion}`);
-    }
-    const signer = PublicKey.fromString(toHex(reader.read(33)));
-    const [verifierFirst] = reader.read(1);
-    if (verifierFirst === 0) {
-        recipient = new PrivateKey(1);
-    }
-    else {
-        const verifierRest = reader.read(32);
-        const verifierDER = toHex([verifierFirst, ...verifierRest]);
-        if (typeof recipient !== "object") {
-            throw new Error(`This signature can only be verified with knowledge of a specific private key. The associated public key is: ${verifierDER}`);
-        }
-        const recipientDER = recipient.toPublicKey().encode(true, "hex") as string;
-        if (verifierDER !== recipientDER) {
-            throw new Error(`The recipient public key is ${recipientDER} but the signature requres the recipient to have public key ${verifierDER}`);
-        }
-    }
-    const keyID = toBase64(reader.read(32));
-    const signatureDER = toHex(reader.read(reader.bin.length - reader.pos));
-    const signature = Signature.fromDER(signatureDER, "hex");
-    const invoiceNumber = `2-message signing-${keyID}`;
-    const signingKey = signer.deriveChild(recipient, invoiceNumber);
-    const verified = signingKey.verify(message, signature);
-    return verified;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Variable: encrypt
-
-```ts
-encrypt = (message: number[], sender: PrivateKey, recipient: PublicKey): number[] => {
-    const keyID = Random(32);
-    const keyIDBase64 = toBase64(keyID);
-    const invoiceNumber = `2-message encryption-${keyIDBase64}`;
-    const signingPriv = sender.deriveChild(recipient, invoiceNumber);
-    const recipientPub = recipient.deriveChild(sender, invoiceNumber);
-    const sharedSecret = signingPriv.deriveSharedSecret(recipientPub);
-    const symmetricKey = new SymmetricKey(sharedSecret.encode(true).slice(1));
-    const encrypted = symmetricKey.encrypt(message) as number[];
-    const senderPublicKey = sender.toPublicKey().encode(true);
-    const version = toArray(VERSION, "hex");
-    return [
-        ...version,
-        ...senderPublicKey,
-        ...recipient.encode(true),
-        ...keyID,
-        ...encrypted
-    ];
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Variable: decrypt
-
-```ts
-decrypt = (message: number[], recipient: PrivateKey): number[] => {
-    const reader = new Reader(message);
-    const messageVersion = toHex(reader.read(4));
-    if (messageVersion !== VERSION) {
-        throw new Error(`Message version mismatch: Expected ${VERSION}, received ${messageVersion}`);
-    }
-    const sender = PublicKey.fromString(toHex(reader.read(33)));
-    const expectedRecipientDER = toHex(reader.read(33));
-    const actualRecipientDER = recipient.toPublicKey().encode(true, "hex") as string;
-    if (expectedRecipientDER !== actualRecipientDER) {
-        throw new Error(`The encrypted message expects a recipient public key of ${expectedRecipientDER}, but the provided key is ${actualRecipientDER}`);
-    }
-    const keyID = toBase64(reader.read(32));
-    const encrypted = reader.read(reader.bin.length - reader.pos);
-    const invoiceNumber = `2-message encryption-${keyID}`;
-    const signingPriv = sender.deriveChild(recipient, invoiceNumber);
-    const recipientPub = recipient.deriveChild(sender, invoiceNumber);
-    const sharedSecret = signingPriv.deriveSharedSecret(recipientPub);
-    const symmetricKey = new SymmetricKey(sharedSecret.encode(true).slice(1));
-    return symmetricKey.decrypt(encrypted) as number[];
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---

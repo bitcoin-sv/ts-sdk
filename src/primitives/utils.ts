@@ -1,4 +1,5 @@
 import BigNumber from './BigNumber.js'
+import { hash256 } from './Hash.js'
 
 /**
  * Appends a '0' to a single-character word to ensure it has two characters.
@@ -98,7 +99,7 @@ export const toArray = (msg: any, enc?: 'hex' | 'utf8' | 'base64'): any[] => {
  * @param {number[]} arr - The input array of numbers.
  * @returns {string} - The UTF-8 encoded string.
  */
-const toUTF8 = (arr: number[]): string => {
+export const toUTF8 = (arr: number[]): string => {
   let result = ''
 
   for (let i = 0; i < arr.length; i++) {
@@ -187,6 +188,121 @@ export function toBase64(byteArray: number[]): string {
   }
 
   return result
+}
+
+const base58chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+
+/**
+ * Converts a string from base58 to a binary array
+ * @param str - The string representation
+ * @returns The binary representation
+ */
+export const fromBase58 = (str: string): number[] => {
+  if (!str || typeof str !== "string")
+    throw new Error(`Expected base58 string but got “${str}”`)
+  if (str.match(/[IOl0]/gmu))
+    throw new Error(
+      `Invalid base58 character “${str.match(/[IOl0]/gmu)}”`
+    )
+  const lz = str.match(/^1+/gmu)
+  const psz: number = lz ? lz[0].length : 0
+  const size =
+    ((str.length - psz) * (Math.log(58) / Math.log(256)) + 1) >>> 0
+
+  const uint8 = new Uint8Array([
+    ...new Uint8Array(psz),
+    ...str
+      .match(/.{1}/gmu)
+      .map((i) => base58chars.indexOf(i))
+      .reduce((acc, i) => {
+        acc = acc.map((j) => {
+          const x = j * 58 + i;
+          i = x >> 8;
+          return x;
+        });
+        return acc;
+      }, new Uint8Array(size))
+      .reverse()
+      .filter(
+        (
+          (lastValue) => (value) =>
+            // @ts-ignore
+            (lastValue = lastValue || value)
+        )(false)
+      )
+  ])
+  return [...uint8]
+}
+
+/**
+ * Converts a binary array into a base58 string
+ * @param bin - The binary array to convert to base58
+ * @returns The base58 string representation
+ */
+export const toBase58 = (bin: number[]): string => {
+  const base58Map = Array(256).fill(-1);
+  for (let i = 0; i < base58chars.length; ++i)
+    base58Map[base58chars.charCodeAt(i)] = i;
+
+  const result = []
+
+  for (const byte of bin) {
+    let carry = byte
+    for (let j = 0; j < result.length; ++j) {
+      // @ts-ignore
+      const x = (base58Map[result[j]] << 8) + carry
+      result[j] = base58chars.charCodeAt(x % 58)
+      carry = (x / 58) | 0
+    }
+    while (carry) {
+      result.push(base58chars.charCodeAt(carry % 58))
+      carry = (carry / 58) | 0
+    }
+  }
+
+  for (const byte of bin)
+    if (byte) break
+    else result.push("1".charCodeAt(0))
+
+  result.reverse()
+
+  return String.fromCharCode(...result)
+}
+
+/**
+ * Converts a binary array into a base58check string with a checksum
+ * @param bin - The binary array to convert to base58check
+ * @returns The base58check string representation
+ */
+export const toBase58Check = (bin: number[], prefix: number[] = [0]) => {
+  let hash = hash256([...prefix, ...bin]) as number[]
+  hash = [...prefix, ...bin, ...hash.slice(0, 4)]
+  return toBase58(hash)
+}
+
+/**
+ * Converts a base58check string into a binary array after validating the checksum
+ * @param str - The base58check string to convert to binary
+ * @param enc - If hex, the return values will be hex strings, arrays of numbers otherwise
+ * @param prefixLength - The length of the prefix. Optional, defaults to 1.
+ * @returns The binary array representation
+ */
+export const fromBase58Check = (str: string, enc?: 'hex', prefixLength: number = 1) => {
+  const bin = fromBase58(str)
+  let prefix: string | number[] = bin.slice(0, prefixLength)
+  let data: string | number[] = bin.slice(prefixLength, -4)
+  let hash = [...prefix, ...data]
+  hash = hash256(hash) as number[]
+  bin.slice(-4).forEach((check, index) => {
+    if (check !== hash[index]) {
+      throw new Error('Invalid checksum')
+    }
+  })
+  if (enc === 'hex') {
+    prefix = toHex(prefix)
+    data = toHex(data)
+  }
+  return { prefix, data }
 }
 
 export class Writer {

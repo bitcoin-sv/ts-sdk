@@ -28,14 +28,23 @@ export default class ARC implements Broadcaster {
    * @returns {Promise<BroadcastResponse | BroadcastFailure>} A promise that resolves to either a success or failure response.
    */
   async broadcast (tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> {
-    const txHex = tx.toHex()
+    let rawTx
+    try {
+      rawTx = tx.toHexEF()
+    } catch (error) {
+      if (error.message === 'All inputs must have source transactions when serializing to EF format') {
+        rawTx = tx.toHex()
+      } else {
+        throw error
+      }
+    } 
     const requestOptions = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${this.apiKey}`
       },
-      body: JSON.stringify({ rawTx: txHex })
+      body: JSON.stringify({ rawTx })
     }
 
     try {
