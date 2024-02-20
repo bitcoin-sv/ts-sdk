@@ -4577,7 +4577,7 @@ export default class BigNumber {
     num: number[], requireMinimal?: boolean, maxNumSize?: number
   ): BigNumber {
     if (maxNumSize === undefined) {
-      maxNumSize = 4
+      maxNumSize = Number.MAX_SAFE_INTEGER
     }
     if (num.length > maxNumSize) {
       throw new Error('script number overflow')

@@ -127,8 +127,8 @@ describe('BigNumber/Serializers', () => {
       expect(BigNumber.fromScriptNum(toArray('0180', 'hex')).toNumber()).toEqual(-1)
     })
 
-    it('should throw an error for a number over 4 bytes', () => {
-      expect(() => BigNumber.fromScriptNum(toArray('8100000000', 'hex'))).toThrow('script number overflow')
+    it('should allow a number over 4 bytes', () => {
+      expect(() => BigNumber.fromScriptNum(toArray('8100000000', 'hex'))).not.toThrow('script number overflow')
     })
 
     it('should throw an error for number that is not a minimal size representation', () => {

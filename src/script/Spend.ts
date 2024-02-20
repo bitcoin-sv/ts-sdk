@@ -179,9 +179,8 @@ export default class Spend {
       return true
     }
 
-    // NOTE: Is 4 still the default maximum number size?
-    // In Genesis, was it lifted to 750000?
-    const isMinimallyEncoded = (buf: number[], maxNumSize: number = 4): boolean => {
+    // Following example from sCrypt now using Number.MAX_SAFE_INTEGER (bsv/lib/transaction/input/input.js).
+    const isMinimallyEncoded = (buf: number[], maxNumSize: number = Number.MAX_SAFE_INTEGER): boolean => {
       if (buf.length > maxNumSize) {
         return false
       }
