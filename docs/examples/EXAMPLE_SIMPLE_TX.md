@@ -20,7 +20,7 @@ const tx = new Transaction()
 
 // Add the input
 tx.addInput({
-  sourceTransaction: Transaction.fromHex('...') // The source transaction where the output you are spending was created,
+  sourceTransaction: Transaction.fromHex('...'), // The source transaction where the output you are spending was created,
   sourceOutputIndex: 0, // The output index in the source transaction
   unlockingScriptTemplate: new P2PKH().unlock(privKey), // The script template you are using to unlock the output, in this case P2PKH
 })
