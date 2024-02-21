@@ -34,7 +34,7 @@ Now, let's create and sign a transaction. We'll follow the example provided in t
 Copy and paste the following code into your `index.js` file below your `require` statement:
 
 ```javascript
-const privKey = PrivateKey.fromWif('L5EY1SbTvvPNSdCYQe1EJHfXCBBT4PmnF6CDbzCm9iifZptUvDGB')
+const privKey = PrivateKey.fromWif('...')
 
 const sourceTransaction = Transaction.fromHex('...')
 
