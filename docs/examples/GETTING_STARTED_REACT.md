@@ -42,7 +42,7 @@ import { PrivateKey, Transaction, ARC, P2PKH } from '@bsv/sdk';
 ```typescript
 const BsvButton: React.FC = () => {
   const handleClick = async () => {
-    const privKey = PrivateKey.fromWif('L5EY1SbTvvPNSdCYQe1EJHfXCBBT4PmnF6CDbzCm9iifZptUvDGB')
+    const privKey = PrivateKey.fromWif('...')
     const sourceTransaction = Transaction.fromHex('...') // your source transaction goes here
 
     const version = 1
