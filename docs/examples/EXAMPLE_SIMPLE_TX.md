@@ -13,7 +13,7 @@ Consider the scenario where you need to create a transaction. The process involv
 ```typescript
 const privKey = PrivateKey.fromWif('...') // Your P2PKH private key
 const changePrivKey = PrivateKey.fromWif('...') // Change private key (never re-use addresses)
-const recipientPubkey = PublicKey.fromHex('...') // Public key of recipien
+const recipientPubkey = PublicKey.fromString('...') // Public key of recipien
 // Alternatively, you could use the public key hash directly instead
 
 const tx = new Transaction()
