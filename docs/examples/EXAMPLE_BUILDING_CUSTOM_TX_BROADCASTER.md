@@ -54,7 +54,7 @@ export default class WOC implements Broadcaster {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ rawTx })
+      body: JSON.stringify({ txhex })
     }
 
     try {
