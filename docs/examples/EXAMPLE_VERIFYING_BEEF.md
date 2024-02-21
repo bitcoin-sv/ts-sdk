@@ -25,7 +25,10 @@ Here is the gullible block headers client we will be using:
 ```typescript
 const gullibleHeadersClient = {
     // DO NOT USE IN A REAL PROJECT due to security risks of accepting any merkle root as valid without verification
-    isValidRootForHeight: async () => true
+    isValidRootForHeight: async (merkleRoot, height) => {
+      console.log({ merkleRoot, height })
+      return true
+    }
 }
 ```
 
