@@ -47,7 +47,7 @@ export default class WOC implements Broadcaster {
    * @returns {Promise<BroadcastResponse | BroadcastFailure>} A promise that resolves to either a success or failure response.
    */
   async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> {
-    const rawTx = tx.toHex()
+    const txhex = tx.toHex()
 
     const requestOptions = {
       method: 'POST',
