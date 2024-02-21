@@ -64,7 +64,7 @@ export default class WOC implements Broadcaster {
       const response = await window.fetch(`${this.URL}`, requestOptions)
       data = await response.json()
 
-      if (data.txid as boolean || response.ok as boolean || response.statusCode === 200) {
+      if (data.txid as boolean || response.ok as boolean || response.status === 200) {
         return {
           status: 'success',
           txid: data?.txid,
