@@ -11,6 +11,8 @@ Transactions in Bitcoin are mechanisms for transferring value and invoking smart
 Consider the scenario where you need to create a transaction. The process involves specifying inputs (where the bitcoins are coming from) and outputs (where they're going). Here's a simplified example:
 
 ```typescript
+import { Transaction, PrivateKey, PublicKey, P2PKH, ARC } from '@bsv/sdk'
+
 const privKey = PrivateKey.fromWif('...') // Your P2PKH private key
 const changePrivKey = PrivateKey.fromWif('...') // Change private key (never re-use addresses)
 const recipientPubkey = PublicKey.fromString('...') // Public key of recipien
