@@ -67,8 +67,8 @@ export default class WOC implements Broadcaster {
       if (data.txid as boolean || response.ok as boolean || response.statusCode === 200) {
         return {
           status: 'success',
-          txid: data.txid,
-          message: data?.txStatus + ' ' + data?.extraInfo
+          txid: data?.txid,
+          message: data?.messages
         }
       }
     } catch (e) {
