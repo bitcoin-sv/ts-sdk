@@ -21,6 +21,8 @@ Next, we create a new class that implements the Broadcaster interface which requ
 We will be implementing a What's on Chain (WOC) broadcaster that runs in a browser context and uses [window.fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) to send a POST request to the WOC broadcast API endpoint.
 
 ```ts
+import { Transaction } from '@bsv/sdk'
+import type { Broadcaster } from '@bsv/sdk/src/transaction/Broadcaster'
 
 /**
  * Represents an WOC transaction broadcaster.
