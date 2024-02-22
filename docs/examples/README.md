@@ -11,3 +11,4 @@ Here, you will find documentation for common example usages of the library.
 - [Example: Message Encryption and Decryption](EXAMPLE_ENCRYPT_DECRYPT_MESSAGE.md)
 - [Example: Message Signing](EXAMPLE_MESSAGE_SIGNING.md)
 - [Example: Building a Custom Transaction Broadcast Client](EXAMPLE_BUILDING_CUSTOM_TX_BROADCASTER.md)
+- [Example: Verifying Spends with Script Intrepreter](EXAMPLE_VERIFYING_SPENDS.md)
