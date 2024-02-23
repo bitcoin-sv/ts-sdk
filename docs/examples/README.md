@@ -12,3 +12,5 @@ Here, you will find documentation for common example usages of the library.
 - [Example: Message Signing](EXAMPLE_MESSAGE_SIGNING.md)
 - [Example: Building a Custom Transaction Broadcast Client](EXAMPLE_BUILDING_CUSTOM_TX_BROADCASTER.md)
 - [Example: Verifying Spends with Script Intrepreter](EXAMPLE_VERIFYING_SPENDS.md)
+- [Example: BIP32 Key Derivation with HD Wallets](EXAMPLE_HD_WALLETS.md)
+- [Example: Using Type 42 Key Derivation for Bitcoin Wallet Management](EXAMPLE_TYPE_42.md)
