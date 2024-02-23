@@ -2,7 +2,7 @@
 
 The SDK comes with a script interpreter that allows you to verify the chain of spends within Bitcoin. When coins are spent from one transaction to another, the process is carried out between a particular output of the source transaction and a particular input of the spending transaction. The `Spend` class sets up the necessary contextual information for this process, and then evaluates the scripts to determine if the transfer is legitimate.
 
-This guide will walk you through the verification of a real spend, with real data. You can apply this code to your own transactions to ensure thee transfer of coins from one state into the next is legitimate.
+This guide will walk you through the verification of a real spend, with real data. You can apply this code to your own transactions to ensure the transfer of coins from one state into the next is legitimate.
 
 ## Pre-requisites
 
