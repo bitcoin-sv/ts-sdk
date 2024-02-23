@@ -57,7 +57,7 @@ Once you've provided the context and constructed the Spend, you should have a ne
 
 ## Validating the Spend
 
-You can use the `validate()` method to run the scripts and validate thee spend, as follows:
+You can use the `validate()` method to run the scripts and validate the spend, as follows:
 
 ```typescript
 const validated = spend.validate()
