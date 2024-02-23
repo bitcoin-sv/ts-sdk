@@ -317,7 +317,7 @@ describe('Transaction', () => {
 
   describe('Verification', () => {
     it('Verifies the transaction from the BEEF spec', async () => {
-      const tx = Transaction.fromBEEF(toArray(BRC62Hex, 'hex'))
+      const tx = Transaction.fromHexBEEF(BRC62Hex)
       const alwaysYesChainTracker = {
         isValidRootForHeight: async () => true
       }

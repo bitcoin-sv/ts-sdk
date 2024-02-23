@@ -19,7 +19,7 @@ describe('Spend', () => {
     const hash = publicKey.toHash()
     const p2pkh = new P2PKH()
     const lockingScript = p2pkh.lock(hash)
-    const satoshis = new BigNumber(1)
+    const satoshis = 1
     const unlockingTemplate = p2pkh.unlock(privateKey)
     const sourceTx = new Transaction(1, [], [{
       lockingScript,
@@ -54,7 +54,7 @@ describe('Spend', () => {
     const hash = publicKey.toHash()
     const p2pkh = new P2PKH()
     const lockingScript = p2pkh.lock(hash)
-    const satoshis = new BigNumber(1)
+    const satoshis = 1
     const unlockingTemplate = p2pkh.unlock(wrongPrivateKey)
     const sourceTx = new Transaction(1, [], [{
       lockingScript,
@@ -88,7 +88,7 @@ describe('Spend', () => {
     r = r[0] > 127 ? [0, ...r] : r
     const puz = new RPuzzle()
     const lockingScript = puz.lock(r)
-    const satoshis = new BigNumber(1)
+    const satoshis = 1
     const unlockingTemplate = puz.unlock(k)
     const sourceTx = new Transaction(1, [], [{
       lockingScript,
@@ -124,7 +124,7 @@ describe('Spend', () => {
     r = hash256(r)
     const puz = new RPuzzle('HASH256')
     const lockingScript = puz.lock(r)
-    const satoshis = new BigNumber(1)
+    const satoshis = 1
     const unlockingTemplate = puz.unlock(k)
     const sourceTx = new Transaction(1, [], [{
       lockingScript,
@@ -161,7 +161,7 @@ describe('Spend', () => {
     r = hash256(r)
     const puz = new RPuzzle('HASH256')
     const lockingScript = puz.lock(r)
-    const satoshis = new BigNumber(1)
+    const satoshis = 1
     const unlockingTemplate = puz.unlock(wrongK)
     const sourceTx = new Transaction(1, [], [{
       lockingScript,
@@ -196,7 +196,7 @@ describe('Spend', () => {
     r = hash160(r)
     const puz = new RPuzzle('HASH256')
     const lockingScript = puz.lock(r)
-    const satoshis = new BigNumber(1)
+    const satoshis = 1
     const unlockingTemplate = puz.unlock(k)
     const sourceTx = new Transaction(1, [], [{
       lockingScript,
@@ -232,7 +232,7 @@ describe('Spend', () => {
       const spend = new Spend({
         sourceTXID: '0000000000000000000000000000000000000000000000000000000000000000',
         sourceOutputIndex: 0,
-        sourceSatoshis: new BigNumber(1),
+        sourceSatoshis: 1,
         lockingScript: new LockingScript(scriptFromVector(a[1]).chunks),
         transactionVersion: 1,
         otherInputs: [],
