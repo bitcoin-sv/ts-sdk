@@ -14,7 +14,7 @@ import { PrivateKey } from '@bsv/sdk'
 const privateKey = PrivateKey.fromRandom()
 ```
 
-Now, we cna move on to key derivation.
+Now, we can move on to key derivation.
 
 ## Type 42 Key Derivation
 
