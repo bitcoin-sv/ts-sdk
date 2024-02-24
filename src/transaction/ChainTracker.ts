@@ -1,3 +1,12 @@
+
+/**
+ * A RootHeight object represents a Merkle root and its corresponding block height.
+ */
+type RootHeight = {
+  merkleRoot: string,
+  blockHeight: number
+}
+
 /**
  * The Chain Tracker is responsible for verifying the validity of a given Merkle root
  * for a specific block height within the blockchain.
@@ -9,6 +18,8 @@
  * @interface ChainTracker
  * @function isValidRootForHeight - A method to verify the validity of a Merkle root
  *          for a given block height.
+ * @function areValidRootsForHeights - A method to verify the validity of a set of Merkle roots
+ *          given their corresponding block heights.
  *
  * @example
  * const chainTracker = {
@@ -18,5 +29,6 @@
  * };
  */
 export default interface ChainTracker {
-  isValidRootForHeight: (root: string, height: number) => Promise<boolean>
+  isValidRootForHeight: (root: string, height: number) => Promise<boolean>,
+  areValidRootsForHeights: (rootHeights: RootHeight[]) => Promise<boolean>
 }
