@@ -181,31 +181,26 @@ export default class BigNumber {
    *
    * @param number - The number (various types accepted) to construct a BigNumber from. Default is 0.
    *
-   * @param base - The base of number provided. By default is 10. Ignored if number is BigNumber.
+   * @param base - The base of number provided. By default is 10.
    *
-   * @param endian - The endianness provided. By default is 'big endian'. Ignored if number is BigNumber.
+   * @param endian - The endianness provided. By default is 'big endian'.
    *
    * @example
    * import BigNumber from './BigNumber';
    * const bn = new BigNumber('123456', 10, 'be');
    */
   constructor (
-    number: BigNumber | number | string | number[] = 0,
+    number: number | string | number[] = 0,
     base: number | 'be' | 'le' | 'hex' = 10,
     endian: 'be' | 'le' = 'be'
   ) {
+
     this.negative = 0
     this.words = []
     this.length = 0
 
     // Reduction context
     this.red = null
-
-    if (number instanceof BigNumber) {
-      number = number.words
-      base = 10
-      endian = 'be'
-    }
 
     if (number !== null) {
       if (base === 'le' || base === 'be') {
@@ -640,7 +635,7 @@ export default class BigNumber {
    * @returns - Returns the BigNumber after stripping leading zeros.
    *
    * @example
-   * const bn = new BigNumber('000000", 2, "be");
+   * const bn = new BigNumber("000000", 2, "be");
    * bn.strip();
    * // bn now represents 0
    */

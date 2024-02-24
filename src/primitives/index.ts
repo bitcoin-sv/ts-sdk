@@ -1,4 +1,5 @@
 export { default as BigNumber } from './BigNumber.js'
+export { default as Curve } from './Curve.js'
 export { default as Point } from './Point.js'
 export { default as PublicKey } from './PublicKey.js'
 export { default as Signature } from './Signature.js'
