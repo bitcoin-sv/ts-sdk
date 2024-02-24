@@ -194,6 +194,7 @@ export default class BigNumber {
     base: number | 'be' | 'le' | 'hex' = 10,
     endian: 'be' | 'le' = 'be'
   ) {
+
     this.negative = 0
     this.words = []
     this.length = 0
@@ -634,7 +635,7 @@ export default class BigNumber {
    * @returns - Returns the BigNumber after stripping leading zeros.
    *
    * @example
-   * const bn = new BigNumber('000000", 2, "be");
+   * const bn = new BigNumber("000000", 2, "be");
    * bn.strip();
    * // bn now represents 0
    */

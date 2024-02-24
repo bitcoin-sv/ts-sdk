@@ -68,6 +68,32 @@ export default class PrivateKey extends BigNumber {
   }
 
   /**
+   * @constructor
+   *
+   * @param number - The number (various types accepted) to construct a BigNumber from. Default is 0.
+   *
+   * @param base - The base of number provided. By default is 10. Ignored if number is BigNumber.
+   *
+   * @param endian - The endianness provided. By default is 'big endian'. Ignored if number is BigNumber.
+   *
+   * @example
+   * import BigNumber from './BigNumber';
+   * const bn = new BigNumber('123456', 10, 'be');
+   */
+  constructor (
+    number: BigNumber | number | string | number[] = 0,
+    base: number | 'be' | 'le' | 'hex' = 10,
+    endian: 'be' | 'le' = 'be'
+  ) {
+    if (number instanceof BigNumber) {
+      super()
+      number.copy(this)
+    } else {
+      super(number, base, endian)
+    }
+  }
+
+  /**
    * Signs a message using the private key.
    *
    * @method sign
