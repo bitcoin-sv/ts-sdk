@@ -16,3 +16,4 @@ Here, you will find documentation for common example usages of the library.
 - [Example: Using Type 42 Key Derivation for Bitcoin Wallet Management](EXAMPLE_TYPE_42.md)
 - [Example: Creating a Custom Transaction Fee Model](EXAMPLE_FEE_MODELING.md)
 - [Example: Building a Pulse Block Headers Client](EXAMPLE_PULSE_HEADERS.md)
+- [Example: Using ECIES Encryption](EXAMPLE_ECIES.md)
