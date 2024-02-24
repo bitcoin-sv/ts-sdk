@@ -9,8 +9,6 @@
  * @interface ChainTracker
  * @function isValidRootForHeight - A method to verify the validity of a Merkle root
  *          for a given block height.
- * @function areValidRootsForHeights - A method to verify the validity of a set of Merkle roots
- *          given their corresponding block heights.
  *
  * @example
  * const chainTracker = {
@@ -20,6 +18,5 @@
  * };
  */
 export default interface ChainTracker {
-  isValidRootForHeight: (root: string, height: number) => Promise<boolean>,
-  areValidRootsForHeights: (rootHeights: { merkleRoot: string; blockHeight: number }[]) => Promise<boolean>
+  isValidRootForHeight: (root: string, height: number) => Promise<boolean>
 }

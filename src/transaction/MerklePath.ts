@@ -219,13 +219,7 @@ export default class MerklePath {
   async verify (txid: string, chainTracker: ChainTracker): Promise<boolean> {
     const root = this.computeRoot(txid)
     // Use the chain tracker to determine whether this is a valid merkle root at the given block height
-    if (typeof chainTracker.isValidRootForHeight === 'function') {
-      return await chainTracker.isValidRootForHeight(root, this.blockHeight)
-    } else if (typeof chainTracker.areValidRootsForHeights === 'function') {
-      return await chainTracker.areValidRootsForHeights([{ merkleRoot: root, blockHeight: this.blockHeight }])
-    } else {
-      throw Error('ChainTracker does not support the required methods for verifying Merkle roots')
-    }
+    return await chainTracker.isValidRootForHeight(root, this.blockHeight)
   }
 
   /**
