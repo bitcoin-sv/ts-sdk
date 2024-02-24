@@ -23,7 +23,7 @@ const spend = new Spend({
     sourceSatoshis: 1,
 
     // Replace with the locking script you are spending
-    lockingScript: LockingScript.fromASM('3 OP_ADD 7 OP_EQUAL'),
+    lockingScript: LockingScript.fromASM('OP_3 OP_ADD OP_7 OP_EQUAL'),
 
     // Replace with the version of the new spending transaction
     transactionVersion: 1,
@@ -43,7 +43,7 @@ const spend = new Spend({
     inputIndex: 0,
 
     // This is the unlocking script that we are evaluating, to see if it unlocks the source output.
-    unlockingScript: UnlockingScript.fromASM('4'),
+    unlockingScript: UnlockingScript.fromASM('OP_4'),
 
     // This is the sequence number of the input whose script we are currently evaluating.
     inputSequence: 0xffffffff,
