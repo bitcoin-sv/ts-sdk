@@ -39,7 +39,7 @@ The SDK's `ChainTracker` interface defines the required structure for our implem
  */
 export default interface ChainTracker {
   isValidRootForHeight: (root: string, height: number) => Promise<boolean>,
-  areValidRootsForHeights: (rootHeights: RootHeight[]) => Promise<boolean>
+  areValidRootsForHeights: (rootHeights: { merkleRoot: string; blockHeight: number }[]) => Promise<boolean>
 }
 
 ```
@@ -118,10 +118,10 @@ export default class BlockHeadersClient implements ChainTracker {
   /**
    * Checks a set of merkle roots with corresponding heights.
    *
-   * @param {RootHeight[]} rootHeights - The merkle roots to check and their corresopnding heights.
+   * @param {{ merkleRoot: string; blockHeight: number }[]} rootHeights - The merkle roots to check and their corresopnding heights.
    * @returns {Promise<boolean>} A promise that resolves to either a success or failure response (true or false).
    */
-  async areValidRootsForHeights (rootHeights: RootHeight[]): Promise<boolean> {
+  async areValidRootsForHeights (rootHeights: { merkleRoot: string; blockHeight: number }[]): Promise<boolean> {
     try {
       const data = await httpsClient(`${this.URL}/api/v1/chain/merkleroot/verify`, {
         method: 'POST',
