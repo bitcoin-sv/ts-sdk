@@ -1,4 +1,6 @@
 import Script from '../../../dist/cjs/src/script/Script'
+import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
+import P2PKH from '../../../dist/cjs/src/script/templates/P2PKH'
 import OP from '../../../dist/cjs/src/script/OP'
 import { toHex } from '../../../dist/cjs/src/primitives/utils'
 import scriptFromVector from './scriptFromVector'
@@ -20,6 +22,38 @@ describe('Script', () => {
       const script = Script.fromHex(buf.toString('hex'))
       expect(script.chunks).toHaveLength(1)
       expect(script.chunks[0].op).toBe(buf[0])
+    })
+  })
+
+  describe('fromAddress', () => {
+    it('should parse this mainnet Base58Check encoded address string and result in a P2PKH Script', () => {
+      const priv = PrivateKey.fromRandom()
+      const address = priv.toAddress()
+      const publicKey = priv.toPublicKey()
+      const pkh = publicKey.toHash()
+      const lockingScriptFromTemplate = new P2PKH().lock(pkh).toASM()
+      const script = Script.fromAddress(address).toASM()
+      expect(script).toBe(lockingScriptFromTemplate)
+    })
+
+    it('should parse this testnet Base58Check encoded address string and result in a P2PKH Script', () => {
+      const priv = PrivateKey.fromRandom()
+      const address = priv.toAddress([0x6f])
+      const publicKey = priv.toPublicKey()
+      const pkh = publicKey.toHash()
+      const lockingScriptFromTemplate = new P2PKH().lock(pkh).toASM()
+      const script = Script.fromAddress(address).toASM()
+      expect(script).toBe(lockingScriptFromTemplate)
+    })
+
+    it('should error when attempting to parse this strange Base58Check encoded string', () => {
+      const priv = PrivateKey.fromRandom()
+      const address = priv.toAddress([0x88])
+      function attemptToDeriveAddress() {
+        const script = Script.fromAddress(address).toASM()
+        return script
+      }
+      expect(attemptToDeriveAddress).toThrow('only P2PKH is supported')
     })
   })
 

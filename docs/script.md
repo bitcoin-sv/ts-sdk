@@ -97,6 +97,7 @@ export default class Script {
     chunks: ScriptChunk[];
     static fromASM(asm: string): Script 
     static fromHex(hex: string): Script 
+    static fromAddress(address: string): Script 
     static fromBinary(bin: number[]): Script 
     constructor(chunks: ScriptChunk[] = []) 
     toASM(): string 
@@ -167,6 +168,27 @@ Example
 
 ```ts
 const script = Script.fromASM("OP_DUP OP_HASH160 abcd... OP_EQUALVERIFY OP_CHECKSIG")
+```
+
+#### Method fromAddress
+
+```ts
+static fromAddress(address: string): Script 
+```
+
+Returns
+
+A new Script instance.
+
+Argument Details
+
++ **address**
+  + The address in Base58Check encoded format.
+
+Example
+
+```ts
+const script = Script.fromAddress("16WgCMwb...");
 ```
 
 #### Method fromBinary

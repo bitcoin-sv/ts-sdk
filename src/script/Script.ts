@@ -114,7 +114,7 @@ export default class Script {
    */
   static fromAddress (address: string): Script {
     const hash = fromBase58Check(address, 'hex')
-    if (hash.prefix !== '00' && hash.prefix !== '6f') throw new Error('Only P2PKH is supported for now.')
+    if (hash.prefix !== '00' && hash.prefix !== '6f') throw new Error('only P2PKH is supported')
     return Script.fromBinary(toArray('76a914' + hash.data + '88ac', 'hex'))
   }
 
