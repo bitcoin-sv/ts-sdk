@@ -97,7 +97,6 @@ export default class Script {
     chunks: ScriptChunk[];
     static fromASM(asm: string): Script 
     static fromHex(hex: string): Script 
-    static fromAddress(address: string): Script 
     static fromBinary(bin: number[]): Script 
     constructor(chunks: ScriptChunk[] = []) 
     toASM(): string 
@@ -168,27 +167,6 @@ Example
 
 ```ts
 const script = Script.fromASM("OP_DUP OP_HASH160 abcd... OP_EQUALVERIFY OP_CHECKSIG")
-```
-
-#### Method fromAddress
-
-```ts
-static fromAddress(address: string): Script 
-```
-
-Returns
-
-A new Script instance.
-
-Argument Details
-
-+ **address**
-  + The address in Base58Check encoded format.
-
-Example
-
-```ts
-const script = Script.fromAddress("16WgCMwb...");
 ```
 
 #### Method fromBinary
@@ -633,7 +611,7 @@ This class provides methods to create Pay To Public Key Hash locking and unlocki
 
 ```ts
 export default class P2PKH implements ScriptTemplate {
-    lock(pubkeyhash: number[]): LockingScript 
+    lock(pubkeyhash: string | number[]): LockingScript 
     unlock(privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false): {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
         estimateLength: () => Promise<106>;
@@ -647,10 +625,10 @@ export default class P2PKH implements ScriptTemplate {
 
 #### Method lock
 
-Creates a P2PKH locking script for a given public key hash.
+Creates a P2PKH locking script for a given public key hash or address string
 
 ```ts
-lock(pubkeyhash: number[]): LockingScript 
+lock(pubkeyhash: string | number[]): LockingScript 
 ```
 
 Returns
@@ -660,7 +638,7 @@ Returns
 Argument Details
 
 + **pubkeyhash**
-  + An array representing the public key hash.
+  + or address - An array or address representing the public key hash.
 
 #### Method unlock
 

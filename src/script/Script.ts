@@ -1,6 +1,6 @@
 import ScriptChunk from './ScriptChunk.js'
 import OP from './OP.js'
-import { encode, toHex, Reader, Writer, toArray, fromBase58Check } from '../primitives/utils.js'
+import { encode, toHex, Reader, Writer, toArray } from '../primitives/utils.js'
 import BigNumber from '../primitives/BigNumber.js'
 
 /**
@@ -102,20 +102,6 @@ export default class Script {
    */
   static fromHex (hex: string): Script {
     return Script.fromBinary(toArray(hex, 'hex'))
-  }
-
-  /**
-   * @method fromAddress
-   * Static method to construct a Script instance from a Base58Check encoded string representing a locking script template.
-   * @param address - The address in Base58Check encoded format.
-   * @returns A new Script instance.
-   * @example
-   * const script = Script.fromAddress("16WgCMwb...");
-   */
-  static fromAddress (address: string): Script {
-    const hash = fromBase58Check(address, 'hex')
-    if (hash.prefix !== '00' && hash.prefix !== '6f') throw new Error('only P2PKH is supported')
-    return Script.fromBinary(toArray('76a914' + hash.data + '88ac', 'hex'))
   }
 
   /**

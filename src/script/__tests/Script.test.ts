@@ -32,7 +32,7 @@ describe('Script', () => {
       const publicKey = priv.toPublicKey()
       const pkh = publicKey.toHash()
       const lockingScriptFromTemplate = new P2PKH().lock(pkh).toASM()
-      const script = Script.fromAddress(address).toASM()
+      const script = new P2PKH().lock(address).toASM()
       expect(script).toBe(lockingScriptFromTemplate)
     })
 
@@ -42,7 +42,7 @@ describe('Script', () => {
       const publicKey = priv.toPublicKey()
       const pkh = publicKey.toHash()
       const lockingScriptFromTemplate = new P2PKH().lock(pkh).toASM()
-      const script = Script.fromAddress(address).toASM()
+      const script = new P2PKH().lock(address).toASM()
       expect(script).toBe(lockingScriptFromTemplate)
     })
 
@@ -50,7 +50,7 @@ describe('Script', () => {
       const priv = PrivateKey.fromRandom()
       const address = priv.toAddress([0x88])
       function attemptToDeriveAddress() {
-        const script = Script.fromAddress(address).toASM()
+        const script = new P2PKH().lock(address).toASM()
         return script
       }
       expect(attemptToDeriveAddress).toThrow('only P2PKH is supported')
