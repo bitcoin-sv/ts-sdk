@@ -166,6 +166,10 @@ const chainTracker = {
 ```ts
 export default interface ChainTracker {
     isValidRootForHeight: (root: string, height: number) => Promise<boolean>;
+    areValidRootsForHeights: (rootHeights: {
+        merkleRoot: string;
+        blockHeight: number;
+    }[]) => Promise<boolean>;
 }
 ```
 

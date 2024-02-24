@@ -324,6 +324,15 @@ describe('Transaction', () => {
       const verified = await tx.verify(alwaysYesChainTracker)
       expect(verified).toBe(true)
     })
+
+    it('Verifies the transaction from the BEEF spec if using areValidRootsForHeights function', async () => {
+      const tx = Transaction.fromHexBEEF(BRC62Hex)
+      const alwaysYesChainTracker = {
+        areValidRootsForHeights: async () => true
+      }
+      const verified = await tx.verify(alwaysYesChainTracker)
+      expect(verified).toBe(true)
+    })
   })
 
   describe('vectors: a 1mb transaction', () => {
