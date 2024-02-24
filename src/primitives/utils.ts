@@ -2,12 +2,12 @@ import BigNumber from './BigNumber.js'
 import { hash256 } from './Hash.js'
 
 /**
- * Appends a '0' to a single-character word to ensure it has two characters.
+ * Prepends a '0' to an odd character length word to ensure it has an even number of characters.
  * @param {string} word - The input word.
- * @returns {string} - The word with a leading '0' if it's a single character; otherwise, the original word.
+ * @returns {string} - The word with a leading '0' if it's an odd character length; otherwise, the original word.
  */
 export const zero2 = (word: string): string => {
-  if (word.length === 1) {
+  if (word.length % 2 === 1) {
     return '0' + word
   } else {
     return word
