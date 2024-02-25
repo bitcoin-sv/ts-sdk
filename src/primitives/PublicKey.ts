@@ -100,7 +100,7 @@ export default class PublicKey extends Point {
    *
    * @param msg - The message to verify. It can be a string or an array of numbers.
    * @param sig - The Signature of the message that needs verification.
-   * @param enc - The encoding of the message. It defaults to 'hex'.
+   * @param enc - The encoding of the message. It defaults to 'utf8'.
    *
    * @returns Returns true if the signature is verified successfully, otherwise false.
    *
@@ -109,7 +109,7 @@ export default class PublicKey extends Point {
    * const mySignature = new Signature(...)
    * const isVerified = myPubKey.verify(myMessage, mySignature)
    */
-  verify (msg: number[] | string, sig: Signature, enc?: 'hex'): boolean {
+  verify (msg: number[] | string, sig: Signature, enc?: 'hex' | 'utf8'): boolean {
     const msgHash = new BigNumber(sha256(msg, enc), 16)
     return verify(msgHash, sig, this)
   }
