@@ -77,8 +77,9 @@ export default class PrivateKey extends BigNumber {
    * @param endian - The endianness provided. By default is 'big endian'. Ignored if number is BigNumber.
    *
    * @example
+   * import PrivateKey from './PrivateKey';
    * import BigNumber from './BigNumber';
-   * const bn = new BigNumber('123456', 10, 'be');
+   * const privKey = new PrivateKey(new BigNumber('123456', 10, 'be'));
    */
   constructor (
     number: BigNumber | number | string | number[] = 0,
