@@ -108,7 +108,7 @@ export default class PrivateKey extends BigNumber {
    * const privateKey = PrivateKey.fromRandom();
    * const signature = privateKey.sign('Hello, World!');
    */
-  sign (msg: number[] | string, enc?: 'hex', forceLowS: boolean = true, customK?: Function | BigNumber): Signature {
+  sign (msg: number[] | string, enc?: 'hex' | 'utf8', forceLowS: boolean = true, customK?: Function | BigNumber): Signature {
     const msgHash = new BigNumber(sha256(msg, enc), 16)
     return sign(msgHash, this, forceLowS, customK)
   }
