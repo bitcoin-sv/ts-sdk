@@ -68,7 +68,11 @@ abstract class BaseHash {
     throw new Error('Not implemented')
   }
 
-  _digest(enc?: 'hex'): number[] | string {
+  _digest(): number[] {
+    throw new Error('Not implemented')
+  }
+
+  _digestHex(): string {
     throw new Error('Not implemented')
   }
 
@@ -85,7 +89,7 @@ abstract class BaseHash {
    * @example
    * sha256.update('Hello World', 'utf8');
    */
-  update(msg: number[] | string, enc?: 'hex'): this {
+  update(msg: number[] | string, enc?: 'hex' | 'utf8'): this {
     // Convert message to array, pad it, and join into 32bit blocks
     msg = toArray(msg, enc)
     if (this.pending == null) {
@@ -117,18 +121,34 @@ abstract class BaseHash {
    * Finalizes the hash computation and returns the hash value/result.
    *
    * @method digest
-   * @param enc - The encoding of the final hash. If 'hex' then a hex string will be provided, otherwise an array of numbers.
    *
    * @returns Returns the final hash value.
    *
    * @example
-   * const hash = sha256.digest('hex');
+   * const hash = sha256.digest();
    */
-  digest(enc?: 'hex'): number[] | string {
+  digest(): number[] {
     this.update(this._pad())
     assert(this.pending === null)
 
-    return this._digest(enc)
+    return this._digest()
+  };
+
+  /**
+   * Finalizes the hash computation and returns the hash value/result as a hex string.
+   *
+   * @method digest
+   *
+   * @returns Returns the final hash value as a hex string.
+   *
+   * @example
+   * const hash = sha256.digestHex();
+   */
+  digestHex(): string {
+    this.update(this._pad())
+    assert(this.pending === null)
+    
+    return this._digestHex()
   };
 
   /**
@@ -189,7 +209,13 @@ function isSurrogatePair(msg: string, i: number): boolean {
   return (msg.charCodeAt(i + 1) & 0xFC00) === 0xDC00
 }
 
-export function toArray(msg: number[] | string, enc?: 'hex'): number[] {
+/**
+ * 
+ * @param msg 
+ * @param enc Optional. Encoding to use if msg is string. Default is 'utf8'.
+ * @returns array of byte values from msg. If msg is an array, a copy is returned.
+ */
+export function toArray(msg: number[] | string, enc?: 'hex' | 'utf8'): number[] {
   if (Array.isArray(msg)) { return msg.slice() }
   if (!(msg as unknown as boolean)) { return [] }
   const res = []
@@ -563,12 +589,12 @@ export class RIPEMD160 extends BaseHash {
     this.h[0] = T
   }
 
-  _digest(enc?: 'hex'): string | number[] {
-    if (enc === 'hex') {
-      return toHex32(this.h, 'little')
-    } else {
+  _digest(): number[] {
       return split32(this.h, 'little')
-    }
+  }
+
+  _digestHex(): string {
+      return toHex32(this.h, 'little')
   }
 }
 
@@ -667,12 +693,12 @@ export class SHA256 extends BaseHash {
     this.h[7] = sum32(this.h[7], h)
   };
 
-  _digest(enc?: 'hex'): number[] | string {
-    if (enc === 'hex') {
-      return toHex32(this.h, 'big')
-    } else {
-      return split32(this.h, 'big')
-    }
+  _digest(): number[] {
+    return split32(this.h, 'big')
+  }
+
+  _digestHex(): string {
+    return toHex32(this.h, 'big')
   }
 }
 
@@ -745,12 +771,12 @@ export class SHA1 extends BaseHash {
     this.h[4] = sum32(this.h[4], e)
   }
 
-  _digest(enc?: 'hex'): number[] | string {
-    if (enc === 'hex') {
-      return toHex32(this.h, 'big')
-    } else {
-      return split32(this.h, 'big')
-    }
+  _digest(): number[] {
+    return split32(this.h, 'big')
+  }
+
+  _digestHex(): string {
+    return toHex32(this.h, 'big')
   }
 }
 
@@ -956,11 +982,12 @@ export class SHA512 extends BaseHash {
     sum64(this.h, 14, hh, hl);
   }
 
-  _digest(enc) {
-    if (enc === 'hex')
-      return toHex32(this.h, 'big');
-    else
-      return split32(this.h, 'big');
+  _digest() {
+    return split32(this.h, 'big');
+  }
+
+  _digestHex() {
+    return toHex32(this.h, 'big');
   }
 }
 
@@ -1151,15 +1178,28 @@ export class SHA256HMAC {
    * Finalizes the HMAC computation and returns the resultant hash.
    *
    * @method digest
-   * @param enc - If 'hex', then the output is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
    * @returns Returns the digest of the hashed data. Can be a number array or a string.
    *
    * @example
-   * let hashedMessage = myHMAC.digest('hex');
+   * let hashedMessage = myHMAC.digest();
    */
-  digest(enc?: 'hex'): number[] | string {
-    this.outer.update(this.inner.digest() as number[])
-    return this.outer.digest(enc)
+  digest(): number[] {
+    this.outer.update(this.inner.digest())
+    return this.outer.digest()
+  }
+
+  /**
+   * Finalizes the HMAC computation and returns the resultant hash as a hex string.
+   *
+   * @method digest
+   * @returns Returns the digest of the hashed data as a hex string
+   *
+   * @example
+   * let hashedMessage = myHMAC.digestHex();
+   */
+  digestHex(): string {
+    this.outer.update(this.inner.digest())
+    return this.outer.digestHex()
   }
 }
 
@@ -1225,7 +1265,7 @@ export class SHA512HMAC {
    * @example
    * myHMAC.update('deadbeef', 'hex');
    */
-  update(msg: number[] | string, enc?: 'hex'): SHA512HMAC {
+  update(msg: number[] | string, enc?: 'hex' | 'utf8'): SHA512HMAC {
     this.inner.update(msg, enc)
     return this
   }
@@ -1234,76 +1274,90 @@ export class SHA512HMAC {
    * Finalizes the HMAC computation and returns the resultant hash.
    *
    * @method digest
-   * @param enc - If 'hex', then the output is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
-   * @returns Returns the digest of the hashed data. Can be a number array or a string.
+   * @returns Returns the digest of the hashed data as a number array.
    *
    * @example
-   * let hashedMessage = myHMAC.digest('hex');
+   * let hashedMessage = myHMAC.digest();
    */
-  digest(enc?: 'hex'): number[] | string {
+  digest(): number[] {
     this.outer.update(this.inner.digest() as number[])
-    return this.outer.digest(enc)
+    return this.outer.digest()
   }
+
+  /**
+   * Finalizes the HMAC computation and returns the resultant hash as a hex string.
+   *
+   * @method digest
+   * @returns Returns the digest of the hashed data as a hex string
+   *
+   * @example
+   * let hashedMessage = myHMAC.digestHex();
+   */
+  digestHex(): string {
+    this.outer.update(this.inner.digest() as number[])
+    return this.outer.digestHex()
+  }
+
 }
 
 /**
  * Computes RIPEMD160 hash of a given message.
  * @function ripemd160
  * @param msg - The message to compute the hash for.
- * @param enc - The encoding of the message. If 'hex', the message is decoded from hexadecimal first.
+ * @param enc - The encoding of msg if string. Default is 'utf8'.
  *
  * @returns the computed RIPEMD160 hash of the message.
  *
  * @example
  * const digest = ripemd160('Hello, world!');
  */
-export const ripemd160 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
-  return new RIPEMD160().update(msg, enc).digest(enc)
+export const ripemd160 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] => {
+  return new RIPEMD160().update(msg, enc).digest()
 }
 
 /**
  * Computes SHA1 hash of a given message.
  * @function sha1
  * @param msg - The message to compute the hash for.
- * @param enc - The encoding of the message. If 'hex', the message is decoded from hexadecimal first.
+ * @param enc - The encoding of msg if string. Default is 'utf8'.
  *
  * @returns the computed SHA1 hash of the message.
  *
  * @example
  * const digest = sha1('Hello, world!');
  */
-export const sha1 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
-  return new SHA1().update(msg, enc).digest(enc)
+export const sha1 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] => {
+  return new SHA1().update(msg, enc).digest()
 }
 
 /**
  * Computes SHA256 hash of a given message.
  * @function sha256
  * @param msg - The message to compute the hash for.
- * @param enc - The encoding of the message. If 'hex', the message is decoded from hexadecimal first.
+ * @param enc - The encoding of msg if string. Default is 'utf8'.
  *
  * @returns the computed SHA256 hash of the message.
  *
  * @example
  * const digest = sha256('Hello, world!');
  */
-export const sha256 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
-  return new SHA256().update(msg, enc).digest(enc)
+export const sha256 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] => {
+  return new SHA256().update(msg, enc).digest()
 }
 
 /**
  * Computes SHA512 hash of a given message.
  * @function sha512
  * @param msg - The message to compute the hash for.
- * @param enc - The encoding of the message. If 'hex', the message is decoded from hexadecimal first.
+ * @param enc - The encoding of msg if string. Default is 'utf8'.
  *
  * @returns the computed SHA512 hash of the message.
  *
  * @example
  * const digest = sha512('Hello, world!');
  */
-export const sha512 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
-  return new SHA512().update(msg, enc).digest(enc)
+export const sha512 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] => {
+  return new SHA512().update(msg, enc).digest()
 }
 
 /**
@@ -1312,16 +1366,16 @@ export const sha512 = (msg: number[] | string, enc?: 'hex'): number[] | string =
  * SHA256 hash of the resulting hash is computed.
  * @function hash256
  * @param msg - The message to compute the hash for.
- * @param enc - Encoding of the message.If 'hex', the message is decoded from hexadecimal.
+ * @param enc - The encoding of msg if string. Default is 'utf8'.
  *
  * @returns the double hashed SHA256 output.
  *
  * @example
  * const doubleHash = hash256('Hello, world!');
  */
-export const hash256 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
+export const hash256 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] => {
   const first = new SHA256().update(msg, enc).digest()
-  return new SHA256().update(first).digest(enc)
+  return new SHA256().update(first).digest()
 }
 
 /**
@@ -1329,16 +1383,16 @@ export const hash256 = (msg: number[] | string, enc?: 'hex'): number[] | string 
  *
  * @function hash160
  * @param msg - The message to compute the hash for.
- * @param enc - The encoding of the message. If 'hex', the message is decoded from hexadecimal.
+ * @param enc - The encoding of msg if string. Default is 'utf8'.
  *
  * @returns the RIPEMD160 hash of the SHA256 hash of the input message.
  *
  * @example
  * const hash = hash160('Hello, world!');
  */
-export const hash160 = (msg: number[] | string, enc?: 'hex'): number[] | string => {
+export const hash160 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] => {
   const first = new SHA256().update(msg, enc).digest()
-  return new RIPEMD160().update(first).digest(enc)
+  return new RIPEMD160().update(first).digest()
 }
 
 /**
@@ -1346,15 +1400,15 @@ export const hash160 = (msg: number[] | string, enc?: 'hex'): number[] | string 
  * @function sha256hmac
  * @param key - The key used to compute the HMAC
  * @param msg - The message to compute the hash for.
- * @param enc - The encoding of the message. If 'hex', the message is decoded from hexadecimal first.
+ * @param enc - The encoding of msg if string. Default is 'utf8'.
  *
  * @returns the computed HMAC of the message.
  *
  * @example
  * const digest = sha256hmac('deadbeef', 'ffff001d');
  */
-export const sha256hmac = (key: number[] | string, msg: number[] | string, enc?: 'hex'): number[] | string => {
-  return new SHA256HMAC(key).update(msg, enc).digest(enc)
+export const sha256hmac = (key: number[] | string, msg: number[] | string, enc?: 'hex'): number[] => {
+  return new SHA256HMAC(key).update(msg, enc).digest()
 }
 
 /**
@@ -1362,15 +1416,15 @@ export const sha256hmac = (key: number[] | string, msg: number[] | string, enc?:
  * @function sha512hmac
  * @param key - The key used to compute the HMAC
  * @param msg - The message to compute the hash for.
- * @param enc - The encoding of the message. If 'hex', the message is decoded from hexadecimal first.
+ * @param enc - The encoding of msg if string. Default is 'utf8'.
  *
  * @returns the computed HMAC of the message.
  *
  * @example
  * const digest = sha512hmac('deadbeef', 'ffff001d');
  */
-export const sha512hmac = (key: number[] | string, msg: number[] | string, enc?: 'hex'): number[] | string => {
-  return new SHA512HMAC(key).update(msg, enc).digest(enc)
+export const sha512hmac = (key: number[] | string, msg: number[] | string, enc?: 'hex'): number[] => {
+  return new SHA512HMAC(key).update(msg, enc).digest()
 }
 
 /**
