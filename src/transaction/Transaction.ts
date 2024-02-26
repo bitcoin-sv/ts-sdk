@@ -438,7 +438,11 @@ export default class Transaction {
    * @returns {string | number[]} - The hash of the transaction in the specified format.
    */
   hash(enc?: 'hex'): number[] | string {
-    return hash256(this.toBinary(), enc)
+    const hash = hash256(this.toBinary()) as number[]
+    if (enc === 'hex') {
+      return toHex(hash)
+    }
+    return hash
   }
 
   /**
