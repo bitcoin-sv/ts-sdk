@@ -3586,7 +3586,7 @@ Returns
 Example
 
 ```ts
-const bn = new BigNumber('000000", 2, "be");
+const bn = new BigNumber("000000", 2, "be");
 bn.strip();
 // bn now represents 0
 ```
@@ -4392,6 +4392,360 @@ const product = montMethod.mul(a, b);
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
+### Class: BasePoint
+
+Base class for Point (affine coordinates) and JacobianPoint classes,
+defining their curve and type.
+
+```ts
+export default abstract class BasePoint {
+    curve: Curve;
+    type: "affine" | "jacobian";
+    precomputed: {
+        doubles: {
+            step: number;
+            points: any[];
+        } | undefined;
+        naf: {
+            wnd: any;
+            points: any[];
+        } | undefined;
+        beta: BasePoint | null | undefined;
+    } | null;
+    constructor(type: "affine" | "jacobian") 
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: JacobianPoint
+
+The `JacobianPoint` class extends the `BasePoint` class for handling Jacobian coordinates on an Elliptic Curve.
+This class defines the properties and the methods needed to work with points in Jacobian coordinates.
+
+The Jacobian coordinates represent a point (x, y, z) on an Elliptic Curve such that the usual (x, y) coordinates are given by (x/z^2, y/z^3).
+
+Example
+
+```ts
+const pointJ = new JacobianPoint('3', '4', '1');
+```
+
+```ts
+export default class JacobianPoint extends BasePoint {
+    x: BigNumber;
+    y: BigNumber;
+    z: BigNumber;
+    zOne: boolean;
+    constructor(x: string | BigNumber | null, y: string | BigNumber | null, z: string | BigNumber | null) 
+    toP(): Point 
+    neg(): JacobianPoint 
+    add(p: JacobianPoint): JacobianPoint 
+    mixedAdd(p: Point): JacobianPoint 
+    dblp(pow: number): JacobianPoint 
+    dbl(): JacobianPoint 
+    eq(p: Point | JacobianPoint): boolean 
+    eqXToP(x: BigNumber): boolean 
+    inspect(): string 
+    isInfinity(): boolean 
+}
+```
+
+<details>
+
+<summary>Class JacobianPoint Details</summary>
+
+#### Constructor
+
+Constructs a new `JacobianPoint` instance.
+
+```ts
+constructor(x: string | BigNumber | null, y: string | BigNumber | null, z: string | BigNumber | null) 
+```
+
+Argument Details
+
++ **x**
+  + If `null`, the x-coordinate will default to the curve's defined 'one' constant.
+If `x` is not a BigNumber, `x` will be converted to a `BigNumber` assuming it is a hex string.
++ **y**
+  + If `null`, the y-coordinate will default to the curve's defined 'one' constant.
+If `y` is not a BigNumber, `y` will be converted to a `BigNumber` assuming it is a hex string.
++ **z**
+  + If `null`, the z-coordinate will default to 0.
+If `z` is not a BigNumber, `z` will be converted to a `BigNumber` assuming it is a hex string.
+
+Example
+
+```ts
+const pointJ1 = new JacobianPoint(null, null, null); // creates point at infinity
+const pointJ2 = new JacobianPoint('3', '4', '1'); // creates point (3, 4, 1)
+```
+
+#### Property x
+
+The `x` coordinate of the point in the Jacobian form.
+
+```ts
+x: BigNumber
+```
+
+#### Property y
+
+The `y` coordinate of the point in the Jacobian form.
+
+```ts
+y: BigNumber
+```
+
+#### Property z
+
+The `z` coordinate of the point in the Jacobian form.
+
+```ts
+z: BigNumber
+```
+
+#### Property zOne
+
+Flag that indicates if the `z` coordinate is one.
+
+```ts
+zOne: boolean
+```
+
+#### Method add
+
+Addition operation in the Jacobian coordinates. It takes a Jacobian point as an argument
+and returns a new Jacobian point as a result of the addition. In the special cases,
+when either one of the points is the point at infinity, it will return the other point.
+
+```ts
+add(p: JacobianPoint): JacobianPoint 
+```
+
+Returns
+
+Returns a new Jacobian point as the result of the addition.
+
+Argument Details
+
++ **p**
+  + The Jacobian point to be added.
+
+Example
+
+```ts
+const p1 = new JacobianPoint(x1, y1, z1)
+const p2 = new JacobianPoint(x2, y2, z2)
+const result = p1.add(p2)
+```
+
+#### Method dbl
+
+Point doubling operation in the Jacobian coordinates. A special case is when the point is the point at infinity, in this case, this function will return the point itself.
+
+```ts
+dbl(): JacobianPoint 
+```
+
+Returns
+
+Returns a new Jacobian point as the result of the doubling.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x, y, z)
+const result = jp.dbl()
+```
+
+#### Method dblp
+
+Multiple doubling operation. It doubles the Jacobian point as many times as the pow parameter specifies. If pow is 0 or the point is the point at infinity, it will return the point itself.
+
+```ts
+dblp(pow: number): JacobianPoint 
+```
+
+Returns
+
+Returns a new Jacobian point as the result of multiple doublings.
+
+Argument Details
+
++ **pow**
+  + The number of times the point should be doubled.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x, y, z)
+const result = jp.dblp(3)
+```
+
+#### Method eq
+
+Equality check operation. It checks whether the affine or Jacobian point is equal to this Jacobian point.
+
+```ts
+eq(p: Point | JacobianPoint): boolean 
+```
+
+Returns
+
+Returns true if the points are equal, otherwise returns false.
+
+Argument Details
+
++ **p**
+  + The affine or Jacobian point to compare with.
+
+Example
+
+```ts
+const jp1 = new JacobianPoint(x1, y1, z1)
+const jp2 = new JacobianPoint(x2, y2, z2)
+const areEqual = jp1.eq(jp2)
+```
+
+#### Method eqXToP
+
+Equality check operation in relation to an x coordinate of a point in projective coordinates.
+It checks whether the x coordinate of the Jacobian point is equal to the provided x coordinate
+of a point in projective coordinates.
+
+```ts
+eqXToP(x: BigNumber): boolean 
+```
+
+Returns
+
+Returns true if the x coordinates are equal, otherwise returns false.
+
+Argument Details
+
++ **x**
+  + The x coordinate of a point in projective coordinates.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x1, y1, z1)
+const isXEqual = jp.eqXToP(x2)
+```
+
+#### Method inspect
+
+Returns the string representation of the JacobianPoint instance.
+
+```ts
+inspect(): string 
+```
+
+Returns
+
+Returns the string description of the JacobianPoint. If the JacobianPoint represents a point at infinity, the return value of this function is '<EC JPoint Infinity>'. For a normal point, it returns the string description format as '<EC JPoint x: x-coordinate y: y-coordinate z: z-coordinate>'.
+
+Example
+
+```ts
+const point = new JacobianPoint('5', '6', '1');
+console.log(point.inspect()); // Output: '<EC JPoint x: 5 y: 6 z: 1>'
+```
+
+#### Method isInfinity
+
+Checks whether the JacobianPoint instance represents a point at infinity.
+
+```ts
+isInfinity(): boolean 
+```
+
+Returns
+
+Returns true if the JacobianPoint's z-coordinate equals to zero (which represents the point at infinity in Jacobian coordinates). Returns false otherwise.
+
+Example
+
+```ts
+const point = new JacobianPoint('5', '6', '0');
+console.log(point.isInfinity()); // Output: true
+```
+
+#### Method mixedAdd
+
+Mixed addition operation. This function combines the standard point addition with
+the transformation from the affine to Jacobian coordinates. It first converts
+the affine point to Jacobian, and then preforms the addition.
+
+```ts
+mixedAdd(p: Point): JacobianPoint 
+```
+
+Returns
+
+Returns the result of the mixed addition as a new Jacobian point.
+
+Argument Details
+
++ **p**
+  + The affine point to be added.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x1, y1, z1)
+const ap = new Point(x2, y2)
+const result = jp.mixedAdd(ap)
+```
+
+#### Method neg
+
+Negation operation. It returns the additive inverse of the Jacobian point.
+
+```ts
+neg(): JacobianPoint 
+```
+
+Returns
+
+Returns a new Jacobian point as the result of the negation.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x, y, z)
+const result = jp.neg()
+```
+
+#### Method toP
+
+Converts the `JacobianPoint` object instance to standard affine `Point` format and returns `Point` type.
+
+```ts
+toP(): Point 
+```
+
+Returns
+
+The `Point`(affine) object representing the same point as the original `JacobianPoint`.
+
+If the initial `JacobianPoint` represents point at infinity, an instance of `Point` at infinity is returned.
+
+Example
+
+```ts
+const pointJ = new JacobianPoint('3', '4', '1');
+const pointP = pointJ.toP();  // The point in affine coordinates.
+```
+
+</details>
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ### Class: RIPEMD160
 
 An implementation of RIPEMD160 cryptographic hash function. Extends the BaseHash class.
@@ -4928,428 +5282,6 @@ export class Reader {
     public readVarIntBn(): BigNumber 
 }
 ```
-
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: Curve
-
-```ts
-export default class Curve {
-    p: BigNumber;
-    red: ReductionContext;
-    redN: BigNumber | null;
-    zero: BigNumber;
-    one: BigNumber;
-    two: BigNumber;
-    g: Point;
-    n: BigNumber;
-    a: BigNumber;
-    b: BigNumber;
-    tinv: BigNumber;
-    zeroA: boolean;
-    threeA: boolean;
-    endo: any;
-    _endoWnafT1: any[];
-    _endoWnafT2: any[];
-    _wnafT1: any[];
-    _wnafT2: any[];
-    _wnafT3: any[];
-    _wnafT4: any[];
-    _bitLength: number;
-    static assert(expression: unknown, message: string = "Elliptic curve assertion failed"): void 
-    getNAF(num: BigNumber, w: number, bits: number): number[] 
-    getJSF(k1: BigNumber, k2: BigNumber): number[][] 
-    static cachedProperty(obj, name: string, computer): void 
-    static parseBytes(bytes: string | number[]): number[] 
-    static intFromLE(bytes: number[]): BigNumber 
-    constructor() 
-    _getEndomorphism(conf): {
-        beta: BigNumber;
-        lambda: BigNumber;
-        basis: Array<{
-            a: BigNumber;
-            b: BigNumber;
-        }>;
-    } | undefined 
-    ;
-    _getEndoRoots(num: BigNumber): [
-        BigNumber,
-        BigNumber
-    ] 
-    ;
-    _getEndoBasis(lambda: BigNumber): [
-        {
-            a: BigNumber;
-            b: BigNumber;
-        },
-        {
-            a: BigNumber;
-            b: BigNumber;
-        }
-    ] 
-    _endoSplit(k: BigNumber): {
-        k1: BigNumber;
-        k2: BigNumber;
-    } 
-    validate(point: Point): boolean 
-    ;
-}
-```
-
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: BasePoint
-
-Base class for Point (affine coordinates) and JacobianPoint classes,
-defining their curve and type.
-
-```ts
-export default abstract class BasePoint {
-    curve: Curve;
-    type: "affine" | "jacobian";
-    precomputed: {
-        doubles: {
-            step: number;
-            points: any[];
-        } | undefined;
-        naf: {
-            wnd: any;
-            points: any[];
-        } | undefined;
-        beta: BasePoint | null | undefined;
-    } | null;
-    constructor(type: "affine" | "jacobian") 
-}
-```
-
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Class: JacobianPoint
-
-The `JacobianPoint` class extends the `BasePoint` class for handling Jacobian coordinates on an Elliptic Curve.
-This class defines the properties and the methods needed to work with points in Jacobian coordinates.
-
-The Jacobian coordinates represent a point (x, y, z) on an Elliptic Curve such that the usual (x, y) coordinates are given by (x/z^2, y/z^3).
-
-Example
-
-```ts
-const pointJ = new JacobianPoint('3', '4', '1');
-```
-
-```ts
-export default class JacobianPoint extends BasePoint {
-    x: BigNumber;
-    y: BigNumber;
-    z: BigNumber;
-    zOne: boolean;
-    constructor(x: string | BigNumber | null, y: string | BigNumber | null, z: string | BigNumber | null) 
-    toP(): Point 
-    neg(): JacobianPoint 
-    add(p: JacobianPoint): JacobianPoint 
-    mixedAdd(p: Point): JacobianPoint 
-    dblp(pow: number): JacobianPoint 
-    dbl(): JacobianPoint 
-    eq(p: Point | JacobianPoint): boolean 
-    eqXToP(x: BigNumber): boolean 
-    inspect(): string 
-    isInfinity(): boolean 
-}
-```
-
-<details>
-
-<summary>Class JacobianPoint Details</summary>
-
-#### Constructor
-
-Constructs a new `JacobianPoint` instance.
-
-```ts
-constructor(x: string | BigNumber | null, y: string | BigNumber | null, z: string | BigNumber | null) 
-```
-
-Argument Details
-
-+ **x**
-  + If `null`, the x-coordinate will default to the curve's defined 'one' constant.
-If `x` is not a BigNumber, `x` will be converted to a `BigNumber` assuming it is a hex string.
-+ **y**
-  + If `null`, the y-coordinate will default to the curve's defined 'one' constant.
-If `y` is not a BigNumber, `y` will be converted to a `BigNumber` assuming it is a hex string.
-+ **z**
-  + If `null`, the z-coordinate will default to 0.
-If `z` is not a BigNumber, `z` will be converted to a `BigNumber` assuming it is a hex string.
-
-Example
-
-```ts
-const pointJ1 = new JacobianPoint(null, null, null); // creates point at infinity
-const pointJ2 = new JacobianPoint('3', '4', '1'); // creates point (3, 4, 1)
-```
-
-#### Property x
-
-The `x` coordinate of the point in the Jacobian form.
-
-```ts
-x: BigNumber
-```
-
-#### Property y
-
-The `y` coordinate of the point in the Jacobian form.
-
-```ts
-y: BigNumber
-```
-
-#### Property z
-
-The `z` coordinate of the point in the Jacobian form.
-
-```ts
-z: BigNumber
-```
-
-#### Property zOne
-
-Flag that indicates if the `z` coordinate is one.
-
-```ts
-zOne: boolean
-```
-
-#### Method add
-
-Addition operation in the Jacobian coordinates. It takes a Jacobian point as an argument
-and returns a new Jacobian point as a result of the addition. In the special cases,
-when either one of the points is the point at infinity, it will return the other point.
-
-```ts
-add(p: JacobianPoint): JacobianPoint 
-```
-
-Returns
-
-Returns a new Jacobian point as the result of the addition.
-
-Argument Details
-
-+ **p**
-  + The Jacobian point to be added.
-
-Example
-
-```ts
-const p1 = new JacobianPoint(x1, y1, z1)
-const p2 = new JacobianPoint(x2, y2, z2)
-const result = p1.add(p2)
-```
-
-#### Method dbl
-
-Point doubling operation in the Jacobian coordinates. A special case is when the point is the point at infinity, in this case, this function will return the point itself.
-
-```ts
-dbl(): JacobianPoint 
-```
-
-Returns
-
-Returns a new Jacobian point as the result of the doubling.
-
-Example
-
-```ts
-const jp = new JacobianPoint(x, y, z)
-const result = jp.dbl()
-```
-
-#### Method dblp
-
-Multiple doubling operation. It doubles the Jacobian point as many times as the pow parameter specifies. If pow is 0 or the point is the point at infinity, it will return the point itself.
-
-```ts
-dblp(pow: number): JacobianPoint 
-```
-
-Returns
-
-Returns a new Jacobian point as the result of multiple doublings.
-
-Argument Details
-
-+ **pow**
-  + The number of times the point should be doubled.
-
-Example
-
-```ts
-const jp = new JacobianPoint(x, y, z)
-const result = jp.dblp(3)
-```
-
-#### Method eq
-
-Equality check operation. It checks whether the affine or Jacobian point is equal to this Jacobian point.
-
-```ts
-eq(p: Point | JacobianPoint): boolean 
-```
-
-Returns
-
-Returns true if the points are equal, otherwise returns false.
-
-Argument Details
-
-+ **p**
-  + The affine or Jacobian point to compare with.
-
-Example
-
-```ts
-const jp1 = new JacobianPoint(x1, y1, z1)
-const jp2 = new JacobianPoint(x2, y2, z2)
-const areEqual = jp1.eq(jp2)
-```
-
-#### Method eqXToP
-
-Equality check operation in relation to an x coordinate of a point in projective coordinates.
-It checks whether the x coordinate of the Jacobian point is equal to the provided x coordinate
-of a point in projective coordinates.
-
-```ts
-eqXToP(x: BigNumber): boolean 
-```
-
-Returns
-
-Returns true if the x coordinates are equal, otherwise returns false.
-
-Argument Details
-
-+ **x**
-  + The x coordinate of a point in projective coordinates.
-
-Example
-
-```ts
-const jp = new JacobianPoint(x1, y1, z1)
-const isXEqual = jp.eqXToP(x2)
-```
-
-#### Method inspect
-
-Returns the string representation of the JacobianPoint instance.
-
-```ts
-inspect(): string 
-```
-
-Returns
-
-Returns the string description of the JacobianPoint. If the JacobianPoint represents a point at infinity, the return value of this function is '<EC JPoint Infinity>'. For a normal point, it returns the string description format as '<EC JPoint x: x-coordinate y: y-coordinate z: z-coordinate>'.
-
-Example
-
-```ts
-const point = new JacobianPoint('5', '6', '1');
-console.log(point.inspect()); // Output: '<EC JPoint x: 5 y: 6 z: 1>'
-```
-
-#### Method isInfinity
-
-Checks whether the JacobianPoint instance represents a point at infinity.
-
-```ts
-isInfinity(): boolean 
-```
-
-Returns
-
-Returns true if the JacobianPoint's z-coordinate equals to zero (which represents the point at infinity in Jacobian coordinates). Returns false otherwise.
-
-Example
-
-```ts
-const point = new JacobianPoint('5', '6', '0');
-console.log(point.isInfinity()); // Output: true
-```
-
-#### Method mixedAdd
-
-Mixed addition operation. This function combines the standard point addition with
-the transformation from the affine to Jacobian coordinates. It first converts
-the affine point to Jacobian, and then preforms the addition.
-
-```ts
-mixedAdd(p: Point): JacobianPoint 
-```
-
-Returns
-
-Returns the result of the mixed addition as a new Jacobian point.
-
-Argument Details
-
-+ **p**
-  + The affine point to be added.
-
-Example
-
-```ts
-const jp = new JacobianPoint(x1, y1, z1)
-const ap = new Point(x2, y2)
-const result = jp.mixedAdd(ap)
-```
-
-#### Method neg
-
-Negation operation. It returns the additive inverse of the Jacobian point.
-
-```ts
-neg(): JacobianPoint 
-```
-
-Returns
-
-Returns a new Jacobian point as the result of the negation.
-
-Example
-
-```ts
-const jp = new JacobianPoint(x, y, z)
-const result = jp.neg()
-```
-
-#### Method toP
-
-Converts the `JacobianPoint` object instance to standard affine `Point` format and returns `Point` type.
-
-```ts
-toP(): Point 
-```
-
-Returns
-
-The `Point`(affine) object representing the same point as the original `JacobianPoint`.
-
-If the initial `JacobianPoint` represents point at infinity, an instance of `Point` at infinity is returned.
-
-Example
-
-```ts
-const pointJ = new JacobianPoint('3', '4', '1');
-const pointP = pointJ.toP();  // The point in affine coordinates.
-```
-
-</details>
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -5935,6 +5867,74 @@ const isValid = aPoint.validate();
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
+### Class: Curve
+
+```ts
+export default class Curve {
+    p: BigNumber;
+    red: ReductionContext;
+    redN: BigNumber | null;
+    zero: BigNumber;
+    one: BigNumber;
+    two: BigNumber;
+    g: Point;
+    n: BigNumber;
+    a: BigNumber;
+    b: BigNumber;
+    tinv: BigNumber;
+    zeroA: boolean;
+    threeA: boolean;
+    endo: any;
+    _endoWnafT1: any[];
+    _endoWnafT2: any[];
+    _wnafT1: any[];
+    _wnafT2: any[];
+    _wnafT3: any[];
+    _wnafT4: any[];
+    _bitLength: number;
+    static assert(expression: unknown, message: string = "Elliptic curve assertion failed"): void 
+    getNAF(num: BigNumber, w: number, bits: number): number[] 
+    getJSF(k1: BigNumber, k2: BigNumber): number[][] 
+    static cachedProperty(obj, name: string, computer): void 
+    static parseBytes(bytes: string | number[]): number[] 
+    static intFromLE(bytes: number[]): BigNumber 
+    constructor() 
+    _getEndomorphism(conf): {
+        beta: BigNumber;
+        lambda: BigNumber;
+        basis: Array<{
+            a: BigNumber;
+            b: BigNumber;
+        }>;
+    } | undefined 
+    ;
+    _getEndoRoots(num: BigNumber): [
+        BigNumber,
+        BigNumber
+    ] 
+    ;
+    _getEndoBasis(lambda: BigNumber): [
+        {
+            a: BigNumber;
+            b: BigNumber;
+        },
+        {
+            a: BigNumber;
+            b: BigNumber;
+        }
+    ] 
+    _endoSplit(k: BigNumber): {
+        k1: BigNumber;
+        k2: BigNumber;
+    } 
+    validate(point: Point): boolean 
+    ;
+}
+```
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ### Class: DRBG
 
 This class behaves as a HMAC-based deterministic random bit generator (DRBG). It implements a deterministic random number generator using SHA256HMAC HASH function. It takes an initial entropy and nonce when instantiated for seeding purpose.
@@ -6212,6 +6212,7 @@ export default class PrivateKey extends BigNumber {
     static fromRandom(): PrivateKey 
     static fromString(str: string, base: number | "hex"): PrivateKey 
     static fromWif(wif: string, prefixLength: number = 1): PrivateKey 
+    constructor(number: BigNumber | number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
     sign(msg: number[] | string, enc?: "hex", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toPublicKey(): PublicKey 
@@ -6225,6 +6226,28 @@ export default class PrivateKey extends BigNumber {
 <details>
 
 <summary>Class PrivateKey Details</summary>
+
+#### Constructor
+
+```ts
+constructor(number: BigNumber | number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
+```
+
+Argument Details
+
++ **number**
+  + The number (various types accepted) to construct a BigNumber from. Default is 0.
++ **base**
+  + The base of number provided. By default is 10. Ignored if number is BigNumber.
++ **endian**
+  + The endianness provided. By default is 'big endian'. Ignored if number is BigNumber.
+
+Example
+
+```ts
+import BigNumber from './BigNumber';
+const bn = new BigNumber('123456', 10, 'be');
+```
 
 #### Method deriveChild
 
@@ -7014,7 +7037,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 
 ```ts
 zero2 = (word: string): string => {
-    if (word.length === 1) {
+    if (word.length % 2 === 1) {
         return "0" + word;
     }
     else {
