@@ -4,7 +4,6 @@ import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
 //import { BigNumber } from '..'
 import Curve from '../../../dist/cjs/src/primitives/Curve'
 import Signature from '../../../dist/cjs/src/primitives/Signature'
-//import { Signature } from '..'
 
 const msg = new BigNumber('deadbeef', 16)
 const key = new BigNumber('1e5edd45de6d22deebef4596b80444ffcc29143839c1dce18db470e25b4be7b5', 16)
