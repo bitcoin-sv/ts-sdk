@@ -1,7 +1,6 @@
 import * as ECDSA from '../../../dist/cjs/src/primitives/ECDSA'
 //import * as ECDSA from '../ECDSA'
 import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
-//import { BigNumber } from '..'
 import Curve from '../../../dist/cjs/src/primitives/Curve'
 import Signature from '../../../dist/cjs/src/primitives/Signature'
 
