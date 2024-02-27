@@ -53,6 +53,28 @@ export default class PublicKey extends Point {
   }
 
   /**
+   * @constructor
+   * @param x - A point or the x-coordinate of the point. May be a number, a BigNumber, a string (which will be interpreted as hex), a number array, or null. If null, an "Infinity" point is constructed.
+   * @param y - If x is not a point, the y-coordinate of the point, similar to x.
+   * @param isRed - A boolean indicating if the point is a member of the field of integers modulo the k256 prime. Default is true.
+   *
+   * @example
+   * new PublicKey(point1);
+   * new PublicKey('abc123', 'def456');
+   */
+  constructor (
+    x: Point | BigNumber | number | number[] | string | null,
+    y: BigNumber | number | number[] | string | null = null,
+    isRed: boolean = true
+  ) {
+    if (x instanceof Point) {
+      super(x.getX(), x.getY())
+    } else {
+      super(x, y, isRed)
+    }
+  }
+
+  /**
    * Derive a shared secret from a public key and a private key for use in symmetric encryption.
    * This method multiplies the public key (an instance of Point) with a private key.
    *
@@ -78,7 +100,7 @@ export default class PublicKey extends Point {
    *
    * @param msg - The message to verify. It can be a string or an array of numbers.
    * @param sig - The Signature of the message that needs verification.
-   * @param enc - The encoding of the message. It defaults to 'hex'.
+   * @param enc - The encoding of the message. It defaults to 'utf8'.
    *
    * @returns Returns true if the signature is verified successfully, otherwise false.
    *
@@ -87,7 +109,7 @@ export default class PublicKey extends Point {
    * const mySignature = new Signature(...)
    * const isVerified = myPubKey.verify(myMessage, mySignature)
    */
-  verify (msg: number[] | string, sig: Signature, enc?: 'hex'): boolean {
+  verify (msg: number[] | string, sig: Signature, enc?: 'hex' | 'utf8'): boolean {
     const msgHash = new BigNumber(sha256(msg, enc), 16)
     return verify(msgHash, sig, this)
   }

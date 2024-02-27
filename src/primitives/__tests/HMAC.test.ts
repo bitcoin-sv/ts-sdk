@@ -47,12 +47,12 @@ describe('HMAC', function () {
     function test (opt): void {
       it(`should not fail at ${opt.name as string}`, function (): void {
         let h = new SHA256HMAC(opt.key)
-        expect(h.update(opt.msg, opt.msgEnc).digest('hex')).toEqual(opt.res)
+        expect(h.update(opt.msg, opt.msgEnc).digestHex()).toEqual(opt.res)
         h = h = new SHA256HMAC(opt.key)
         expect(h
           .update(opt.msg.slice(0, 10), opt.msgEnc)
           .update(opt.msg.slice(10), opt.msgEnc)
-          .digest('hex')).toEqual(opt.res)
+          .digestHex()).toEqual(opt.res)
       })
     }
   })

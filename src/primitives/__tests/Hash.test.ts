@@ -11,13 +11,13 @@ describe('Hash', function () {
       const res = cases[i][1]
       const enc = cases[i][2]
 
-      let dgst = new Hash().update(msg, enc).digest('hex')
+      let dgst = new Hash().update(msg, enc).digestHex()
       expect(dgst).toEqual(res)
 
       // Split message
       dgst = new Hash().update(msg.slice(0, 2), enc)
         .update(msg.slice(2), enc)
-        .digest('hex')
+        .digestHex()
       expect(dgst).toEqual(res)
     }
   }

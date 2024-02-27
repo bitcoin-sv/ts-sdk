@@ -77,8 +77,9 @@ export default class PrivateKey extends BigNumber {
    * @param endian - The endianness provided. By default is 'big endian'. Ignored if number is BigNumber.
    *
    * @example
+   * import PrivateKey from './PrivateKey';
    * import BigNumber from './BigNumber';
-   * const bn = new BigNumber('123456', 10, 'be');
+   * const privKey = new PrivateKey(new BigNumber('123456', 10, 'be'));
    */
   constructor (
     number: BigNumber | number | string | number[] = 0,
@@ -107,7 +108,7 @@ export default class PrivateKey extends BigNumber {
    * const privateKey = PrivateKey.fromRandom();
    * const signature = privateKey.sign('Hello, World!');
    */
-  sign (msg: number[] | string, enc?: 'hex', forceLowS: boolean = true, customK?: Function | BigNumber): Signature {
+  sign (msg: number[] | string, enc?: 'hex' | 'utf8', forceLowS: boolean = true, customK?: Function | BigNumber): Signature {
     const msgHash = new BigNumber(sha256(msg, enc), 16)
     return sign(msgHash, this, forceLowS, customK)
   }
