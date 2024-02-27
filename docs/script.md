@@ -611,7 +611,7 @@ This class provides methods to create Pay To Public Key Hash locking and unlocki
 
 ```ts
 export default class P2PKH implements ScriptTemplate {
-    lock(pubkeyhash: number[]): LockingScript 
+    lock(pubkeyhash: string | number[]): LockingScript 
     unlock(privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false): {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
         estimateLength: () => Promise<106>;
@@ -625,10 +625,10 @@ export default class P2PKH implements ScriptTemplate {
 
 #### Method lock
 
-Creates a P2PKH locking script for a given public key hash.
+Creates a P2PKH locking script for a given public key hash or address string
 
 ```ts
-lock(pubkeyhash: number[]): LockingScript 
+lock(pubkeyhash: string | number[]): LockingScript 
 ```
 
 Returns
@@ -638,7 +638,7 @@ Returns
 Argument Details
 
 + **pubkeyhash**
-  + An array representing the public key hash.
+  + or address - An array or address representing the public key hash.
 
 #### Method unlock
 

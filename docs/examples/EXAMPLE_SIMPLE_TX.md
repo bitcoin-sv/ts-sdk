@@ -15,8 +15,7 @@ import { Transaction, PrivateKey, PublicKey, P2PKH, ARC } from '@bsv/sdk'
 
 const privKey = PrivateKey.fromWif('...') // Your P2PKH private key
 const changePrivKey = PrivateKey.fromWif('...') // Change private key (never re-use addresses)
-const recipientPubkey = PublicKey.fromString('...') // Public key of recipien
-// Alternatively, you could use the public key hash directly instead
+const recipientAddress = '1Fd5F7XR8LYHPmshLNs8cXSuVAAQzGp7Hc' // Address of the recipient
 
 const tx = new Transaction()
 
@@ -29,7 +28,7 @@ tx.addInput({
 
 // Pay an output to a recipient using the P2PKH locking template
 tx.addOutput({
-  lockingScript: new P2PKH().lock(recipientPubkey.toHash()),
+  lockingScript: new P2PKH().lock(recipientAddress),
   satoshis: 2500
 })
 

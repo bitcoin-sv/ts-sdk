@@ -1,5 +1,6 @@
 import OP from '../OP.js'
 import ScriptTemplate from '../ScriptTemplate.js'
+import { fromBase58Check } from '../../primitives/utils.js'
 import LockingScript from '../LockingScript.js'
 import UnlockingScript from '../UnlockingScript.js'
 import Transaction from '../../transaction/Transaction.js'
@@ -14,16 +15,24 @@ import { sha256 } from '../../primitives/Hash.js'
  */
 export default class P2PKH implements ScriptTemplate {
   /**
-   * Creates a P2PKH locking script for a given public key hash.
+   * Creates a P2PKH locking script for a given public key hash or address string
    *
-   * @param {number[]} pubkeyhash - An array representing the public key hash.
+   * @param {number[] | string} pubkeyhash or address - An array or address representing the public key hash.
    * @returns {LockingScript} - A P2PKH locking script.
    */
-  lock(pubkeyhash: number[]): LockingScript {
+  lock(pubkeyhash: string | number[]): LockingScript {
+    let data: number[]
+    if (typeof pubkeyhash === 'string') {
+      const hash = fromBase58Check(pubkeyhash)
+      if (hash.prefix[0] !== 0x00 && hash.prefix[0] !== 0x6f) throw new Error('only P2PKH is supported')
+      data = hash.data as number[]
+    } else {
+      data = pubkeyhash
+    }
     return new LockingScript([
       { op: OP.OP_DUP },
       { op: OP.OP_HASH160 },
-      { op: pubkeyhash.length, data: pubkeyhash },
+      { op: pubkeyhash.length, data },
       { op: OP.OP_EQUALVERIFY },
       { op: OP.OP_CHECKSIG }
     ])
