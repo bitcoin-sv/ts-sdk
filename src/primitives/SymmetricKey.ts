@@ -13,6 +13,20 @@ import { toArray, encode } from './utils.js'
  */
 export default class SymmetricKey extends BigNumber {
   /**
+   * Generates a symmetric key randomly.
+   *
+   * @method fromRandom
+   * @static
+   * @returns The newly generated Symmetric Key.
+   *
+   * @example
+   * const symmetricKey = SymmetricKey.fromRandom();
+   */
+  static fromRandom(): SymmetricKey {
+    return new SymmetricKey(Random(32))
+  }
+
+  /**
   * Encrypts a given message using AES-GCM encryption.
   * The generated Initialization Vector (IV) is attached to the encrypted message for decryption purposes.
   * The OpenSSL format of |IV|encryptedContent|authTag| is used.
