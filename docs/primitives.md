@@ -4764,7 +4764,8 @@ export class RIPEMD160 extends BaseHash {
     h: number[];
     constructor() 
     _update(msg: number[], start: number): void 
-    _digest(enc?: "hex"): string | number[] 
+    _digest(): number[] 
+    _digestHex(): string 
 }
 ```
 
@@ -4806,7 +4807,8 @@ export class SHA256 extends BaseHash {
     constructor() 
     _update(msg: number[], start?: number): void 
     ;
-    _digest(enc?: "hex"): number[] | string 
+    _digest(): number[] 
+    _digestHex(): string 
 }
 ```
 
@@ -4863,7 +4865,8 @@ export class SHA1 extends BaseHash {
     k: number[];
     constructor() 
     _update(msg: number[], start?: number): void 
-    _digest(enc?: "hex"): number[] | string 
+    _digest(): number[] 
+    _digestHex(): string 
 }
 ```
 
@@ -4921,7 +4924,8 @@ export class SHA512 extends BaseHash {
     constructor() 
     _prepareBlock(msg, start) 
     _update(msg, start) 
-    _digest(enc) 
+    _digest() 
+    _digestHex() 
 }
 ```
 
@@ -4974,7 +4978,8 @@ export class SHA256HMAC {
     outSize = 32;
     constructor(key: number[] | string) 
     update(msg: number[] | string, enc?: "hex"): SHA256HMAC 
-    digest(enc?: "hex"): number[] | string 
+    digest(): number[] 
+    digestHex(): string 
 }
 ```
 
@@ -5042,22 +5047,35 @@ outer: SHA256
 Finalizes the HMAC computation and returns the resultant hash.
 
 ```ts
-digest(enc?: "hex"): number[] | string 
+digest(): number[] 
 ```
 
 Returns
 
 Returns the digest of the hashed data. Can be a number array or a string.
 
-Argument Details
+Example
 
-+ **enc**
-  + If 'hex', then the output is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+```ts
+let hashedMessage = myHMAC.digest();
+```
+
+#### Method digestHex
+
+Finalizes the HMAC computation and returns the resultant hash as a hex string.
+
+```ts
+digestHex(): string 
+```
+
+Returns
+
+Returns the digest of the hashed data as a hex string
 
 Example
 
 ```ts
-let hashedMessage = myHMAC.digest('hex');
+let hashedMessage = myHMAC.digestHex();
 ```
 
 #### Method update
@@ -5105,8 +5123,9 @@ export class SHA512HMAC {
     blockSize = 128;
     outSize = 32;
     constructor(key: number[] | string) 
-    update(msg: number[] | string, enc?: "hex"): SHA512HMAC 
-    digest(enc?: "hex"): number[] | string 
+    update(msg: number[] | string, enc?: "hex" | "utf8"): SHA512HMAC 
+    digest(): number[] 
+    digestHex(): string 
 }
 ```
 
@@ -5174,22 +5193,35 @@ outer: SHA512
 Finalizes the HMAC computation and returns the resultant hash.
 
 ```ts
-digest(enc?: "hex"): number[] | string 
+digest(): number[] 
 ```
 
 Returns
 
-Returns the digest of the hashed data. Can be a number array or a string.
-
-Argument Details
-
-+ **enc**
-  + If 'hex', then the output is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+Returns the digest of the hashed data as a number array.
 
 Example
 
 ```ts
-let hashedMessage = myHMAC.digest('hex');
+let hashedMessage = myHMAC.digest();
+```
+
+#### Method digestHex
+
+Finalizes the HMAC computation and returns the resultant hash as a hex string.
+
+```ts
+digestHex(): string 
+```
+
+Returns
+
+Returns the digest of the hashed data as a hex string
+
+Example
+
+```ts
+let hashedMessage = myHMAC.digestHex();
 ```
 
 #### Method update
@@ -5197,7 +5229,7 @@ let hashedMessage = myHMAC.digest('hex');
 Updates the `SHA512HMAC` object with part of the message to be hashed.
 
 ```ts
-update(msg: number[] | string, enc?: "hex"): SHA512HMAC 
+update(msg: number[] | string, enc?: "hex" | "utf8"): SHA512HMAC 
 ```
 
 Returns
@@ -6213,7 +6245,7 @@ export default class PrivateKey extends BigNumber {
     static fromString(str: string, base: number | "hex"): PrivateKey 
     static fromWif(wif: string, prefixLength: number = 1): PrivateKey 
     constructor(number: BigNumber | number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
-    sign(msg: number[] | string, enc?: "hex", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
+    sign(msg: number[] | string, enc?: "hex" | "utf8", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toPublicKey(): PublicKey 
     toWif(prefix: number[] = [128]): string 
@@ -6245,8 +6277,9 @@ Argument Details
 Example
 
 ```ts
+import PrivateKey from './PrivateKey';
 import BigNumber from './BigNumber';
-const bn = new BigNumber('123456', 10, 'be');
+const privKey = new PrivateKey(new BigNumber('123456', 10, 'be'));
 ```
 
 #### Method deriveChild
@@ -6366,7 +6399,7 @@ Will throw an error if the string is not a valid WIF.
 Signs a message using the private key.
 
 ```ts
-sign(msg: number[] | string, enc?: "hex", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
+sign(msg: number[] | string, enc?: "hex" | "utf8", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
 ```
 
 Returns
@@ -6508,8 +6541,9 @@ The class comes with static methods to generate PublicKey instances from private
 export default class PublicKey extends Point {
     static fromPrivateKey(key: PrivateKey): PublicKey 
     static fromString(str: string): PublicKey 
+    constructor(x: Point | BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null = null, isRed: boolean = true) 
     deriveSharedSecret(priv: PrivateKey): Point 
-    verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
+    verify(msg: number[] | string, sig: Signature, enc?: "hex" | "utf8"): boolean 
     toDER(): string 
     toHash(enc?: "hex"): number[] | string 
     toAddress(prefix: number[] = [0]): string 
@@ -6520,6 +6554,28 @@ export default class PublicKey extends Point {
 <details>
 
 <summary>Class PublicKey Details</summary>
+
+#### Constructor
+
+```ts
+constructor(x: Point | BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null = null, isRed: boolean = true) 
+```
+
+Argument Details
+
++ **x**
+  + A point or the x-coordinate of the point. May be a number, a BigNumber, a string (which will be interpreted as hex), a number array, or null. If null, an "Infinity" point is constructed.
++ **y**
+  + If x is not a point, the y-coordinate of the point, similar to x.
++ **isRed**
+  + A boolean indicating if the point is a member of the field of integers modulo the k256 prime. Default is true.
+
+Example
+
+```ts
+new PublicKey(point1);
+new PublicKey('abc123', 'def456');
+```
 
 #### Method deriveChild
 
@@ -6683,7 +6739,7 @@ const publicKeyHash = pubkey.toHash()
 Verify a signature of a message using this public key.
 
 ```ts
-verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
+verify(msg: number[] | string, sig: Signature, enc?: "hex" | "utf8"): boolean 
 ```
 
 Returns
@@ -6697,7 +6753,7 @@ Argument Details
 + **sig**
   + The Signature of the message that needs verification.
 + **enc**
-  + The encoding of the message. It defaults to 'hex'.
+  + The encoding of the message. It defaults to 'utf8'.
 
 Example
 
@@ -6720,6 +6776,7 @@ It leverages the Advanced Encryption Standard Galois/Counter Mode (AES-GCM) for 
 
 ```ts
 export default class SymmetricKey extends BigNumber {
+    static fromRandom(): SymmetricKey 
     encrypt(msg: number[] | string, enc?: "hex"): string | number[] 
     decrypt(msg: number[] | string, enc?: "hex" | "utf8"): string | number[] 
 }
@@ -6789,6 +6846,24 @@ const key = new SymmetricKey(1234);
 const encryptedMessage = key.encrypt('plainText', 'utf8');
 ```
 
+#### Method fromRandom
+
+Generates a symmetric key randomly.
+
+```ts
+static fromRandom(): SymmetricKey 
+```
+
+Returns
+
+The newly generated Symmetric Key.
+
+Example
+
+```ts
+const symmetricKey = SymmetricKey.fromRandom();
+```
+
 </details>
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
@@ -6813,8 +6888,23 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ### Function: toArray
 
 ```ts
-export function toArray(msg: number[] | string, enc?: "hex"): number[] 
+export function toArray(msg: number[] | string, enc?: "hex" | "utf8"): number[] 
 ```
+
+<details>
+
+<summary>Function toArray Details</summary>
+
+Returns
+
+array of byte values from msg. If msg is an array, a copy is returned.
+
+Argument Details
+
++ **enc**
+  + Optional. Encoding to use if msg is string. Default is 'utf8'.
+
+</details>
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -6946,8 +7036,8 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ### Variable: ripemd160
 
 ```ts
-ripemd160 = (msg: number[] | string, enc?: "hex"): number[] | string => {
-    return new RIPEMD160().update(msg, enc).digest(enc);
+ripemd160 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
+    return new RIPEMD160().update(msg, enc).digest();
 }
 ```
 
@@ -6957,8 +7047,8 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ### Variable: sha1
 
 ```ts
-sha1 = (msg: number[] | string, enc?: "hex"): number[] | string => {
-    return new SHA1().update(msg, enc).digest(enc);
+sha1 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
+    return new SHA1().update(msg, enc).digest();
 }
 ```
 
@@ -6968,8 +7058,8 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ### Variable: sha256
 
 ```ts
-sha256 = (msg: number[] | string, enc?: "hex"): number[] | string => {
-    return new SHA256().update(msg, enc).digest(enc);
+sha256 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
+    return new SHA256().update(msg, enc).digest();
 }
 ```
 
@@ -6979,8 +7069,8 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ### Variable: sha512
 
 ```ts
-sha512 = (msg: number[] | string, enc?: "hex"): number[] | string => {
-    return new SHA512().update(msg, enc).digest(enc);
+sha512 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
+    return new SHA512().update(msg, enc).digest();
 }
 ```
 
@@ -6990,9 +7080,9 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ### Variable: hash256
 
 ```ts
-hash256 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+hash256 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
     const first = new SHA256().update(msg, enc).digest();
-    return new SHA256().update(first).digest(enc);
+    return new SHA256().update(first).digest();
 }
 ```
 
@@ -7002,9 +7092,9 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ### Variable: hash160
 
 ```ts
-hash160 = (msg: number[] | string, enc?: "hex"): number[] | string => {
+hash160 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
     const first = new SHA256().update(msg, enc).digest();
-    return new RIPEMD160().update(first).digest(enc);
+    return new RIPEMD160().update(first).digest();
 }
 ```
 
@@ -7014,8 +7104,8 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ### Variable: sha256hmac
 
 ```ts
-sha256hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): number[] | string => {
-    return new SHA256HMAC(key).update(msg, enc).digest(enc);
+sha256hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): number[] => {
+    return new SHA256HMAC(key).update(msg, enc).digest();
 }
 ```
 
@@ -7025,8 +7115,8 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ### Variable: sha512hmac
 
 ```ts
-sha512hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): number[] | string => {
-    return new SHA512HMAC(key).update(msg, enc).digest(enc);
+sha512hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): number[] => {
+    return new SHA512HMAC(key).update(msg, enc).digest();
 }
 ```
 
