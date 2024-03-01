@@ -4399,19 +4399,22 @@ export default class BigNumber {
    * const bigNumber = BigNumber.fromSm(num, { endian: 'little' }); // equivalent to BigNumber from '-1'
    */
   static fromSm (num: number[], endian: 'big' | 'little' = 'big'): BigNumber {
+    let n = num
     if (num.length === 0) {
       return new BigNumber(0)
     }
 
     if (endian === 'little') {
-      num = num.reverse()
+      n = [...n]
+      n = n.reverse()
     }
 
-    if ((num[0] & 0x80) !== 0) {
-      num[0] = num[0] & 0x7f
-      return new BigNumber(num).neg()
+    if ((n[0] & 0x80) !== 0) {
+      n = [...n]
+      n[0] = n[0] & 0x7f
+      return new BigNumber(n).neg()
     } else {
-      return new BigNumber(num)
+      return new BigNumber(n)
     }
   }
 
