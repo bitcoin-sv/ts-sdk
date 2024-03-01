@@ -1,11 +1,3 @@
-/* imports with typescript
-import Transaction from '../../transaction/Transaction'
-import Script from '../Script'
-import Spend from '../Spend'
-*/
-
-/* imports without typescript
-*/
 import Script from "../../../dist/cjs/src/script/Script"
 import Spend from "../../../dist/cjs/src/script/Spend"
 import Transaction from "../../../dist/cjs/src/transaction/Transaction"
@@ -25,30 +17,30 @@ describe('SpendComplex', () => {
   })
 })
 
-function verifyTruthy<T>(v: T | undefined) : T { if (v == null) throw new Error('must have value'); return v }
+function verifyTruthy<T>(v: T | undefined): T { if (v == null) throw new Error('must have value'); return v }
 
 export function validateUnlockScript(spendingRawTx: string, vin: number, lockingScript: string, amount: number): boolean {
-    const spendingTx = Transaction.fromHex(spendingRawTx)
-    const ls = Script.fromHex(lockingScript)
+  const spendingTx = Transaction.fromHex(spendingRawTx)
+  const ls = Script.fromHex(lockingScript)
 
-    const us = spendingTx.inputs[0].unlockingScript?.toASM()
-    const lsh = ls.toHex()
-    const lsa = ls.toASM()
+  const us = spendingTx.inputs[0].unlockingScript?.toASM()
+  const lsh = ls.toHex()
+  const lsa = ls.toASM()
 
-    const spend = new Spend({
-        sourceTXID: verifyTruthy(spendingTx.inputs[vin].sourceTXID),
-        sourceOutputIndex: spendingTx.inputs[vin].sourceOutputIndex,
-        sourceSatoshis: amount,
-        lockingScript: ls,
-        transactionVersion: spendingTx.version,
-        otherInputs: spendingTx.inputs.filter((v, i) => i !== vin),
-        inputIndex: vin,
-        unlockingScript: verifyTruthy(spendingTx.inputs[vin].unlockingScript),
-        outputs: spendingTx.outputs,
-        inputSequence: spendingTx.inputs[vin].sequence,
-        lockTime: spendingTx.lockTime
-    })
+  const spend = new Spend({
+    sourceTXID: verifyTruthy(spendingTx.inputs[vin].sourceTXID),
+    sourceOutputIndex: spendingTx.inputs[vin].sourceOutputIndex,
+    sourceSatoshis: amount,
+    lockingScript: ls,
+    transactionVersion: spendingTx.version,
+    otherInputs: spendingTx.inputs.filter((v, i) => i !== vin),
+    inputIndex: vin,
+    unlockingScript: verifyTruthy(spendingTx.inputs[vin].unlockingScript),
+    outputs: spendingTx.outputs,
+    inputSequence: spendingTx.inputs[vin].sequence,
+    lockTime: spendingTx.lockTime
+  })
 
-    const valid = spend.validate()
-    return valid
+  const valid = spend.validate()
+  return valid
 }
