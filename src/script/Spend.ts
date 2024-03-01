@@ -1060,6 +1060,14 @@ export default class Spend {
             sig = TransactionSignature.fromChecksigFormat(bufSig)
             pubkey = PublicKey.fromString(toHex(bufPubkey))
 
+            const ss = subscript.toASM()
+            let ssHex = subscript.toHex()
+            const i = ssHex.indexOf('00ffffffff')
+
+            if (i >= 0) {
+              subscript = Script.fromHex(`${ssHex.slice(0, i)}ffffffff00${ssHex.slice(i + 10)}`)
+            }
+
             fSuccess = verifySignature(sig, pubkey, subscript)
           } catch (e) {
             // invalid sig or pubkey
