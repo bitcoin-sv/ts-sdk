@@ -1,4 +1,3 @@
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
 import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
 import { hash160, hash256 } from '../../../dist/cjs/src/primitives/Hash'
 import Curve from '../../../dist/cjs/src/primitives/Curve'
@@ -6,7 +5,6 @@ import Spend from '../../../dist/cjs/src/script/Spend'
 import P2PKH from '../../../dist/cjs/src/script/templates/P2PKH'
 import RPuzzle from '../../../dist/cjs/src/script/templates/RPuzzle'
 import Transaction from '../../../dist/cjs/src/transaction/Transaction'
-import scriptFromVector from './scriptFromVector'
 import LockingScript from '../../../dist/cjs/src/script/LockingScript'
 import UnlockingScript from '../../../dist/cjs/src/script/UnlockingScript'
 
@@ -233,12 +231,12 @@ describe('Spend', () => {
         sourceTXID: '0000000000000000000000000000000000000000000000000000000000000000',
         sourceOutputIndex: 0,
         sourceSatoshis: 1,
-        lockingScript: new LockingScript(scriptFromVector(a[1]).chunks),
+        lockingScript: LockingScript.fromHex(a[1]),
         transactionVersion: 1,
         otherInputs: [],
         outputs: [],
         inputIndex: 0,
-        unlockingScript: new UnlockingScript(scriptFromVector(a[0]).chunks),
+        unlockingScript: UnlockingScript.fromHex(a[0]),
         inputSequence: 0xffffffff,
         lockTime: 0
       })

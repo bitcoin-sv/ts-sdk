@@ -1,2288 +1,2290 @@
 export default [
-  ['Format is: [scriptSig, scriptPubKey, comment]'],
   [
-    '',
-    'DEPTH 0 EQUAL',
-    'Test the test: we should have an empty stack after scriptSig evaluation'
+    "Format is: [scriptSig, scriptPubKey, comment]"
   ],
   [
-    '  ',
-    'DEPTH 0 EQUAL',
-    'and multiple spaces should not change that.'
+    "",
+    "740087",
+    "Test the test: we should have an empty stack after scriptSig evaluation"
   ],
   [
-    '   ',
-    'DEPTH 0 EQUAL',
-    'test'
+    "",
+    "740087",
+    "and multiple spaces should not change that."
   ],
   [
-    '    ',
-    'DEPTH 0 EQUAL',
-    'test'
+    "",
+    "740087",
+    "test"
   ],
   [
-    '1 2',
-    '2 EQUALVERIFY 1 EQUAL',
-    'Similarly whitespace around and between symbols'
+    "",
+    "740087",
+    "test"
   ],
   [
-    '1  2',
-    '2 EQUALVERIFY 1 EQUAL',
-    'test'
+    "5152",
+    "52885187",
+    "Similarly whitespace around and between symbols"
   ],
   [
-    '  1  2',
-    '2 EQUALVERIFY 1 EQUAL',
-    'test'
+    "5152",
+    "52885187",
+    "test"
   ],
   [
-    '1  2  ',
-    '2 EQUALVERIFY 1 EQUAL',
-    'test'
+    "5152",
+    "52885187",
+    "test"
   ],
   [
-    '  1  2  ',
-    '2 EQUALVERIFY 1 EQUAL',
-    'test'
+    "5152",
+    "52885187",
+    "test"
   ],
   [
-    '0',
-    'IF 0x50 ENDIF 1',
-    '0x50 is reserved (ok if not executed)'
+    "5152",
+    "52885187",
+    "test"
   ],
   [
-    '0x51',
-    '0x5f ADD 0x60 EQUAL',
-    '0x51 through 0x60 push 1 through 16 onto stack'
+    "00",
+    "63506851",
+    "0x50 is reserved (ok if not executed)"
   ],
   [
-    '1',
-    'NOP',
-    'test'
+    "51",
+    "5f936087",
+    "0x51 through 0x60 push 1 through 16 onto stack"
   ],
   [
-    '0',
-    'IF VER ELSE 1 ENDIF',
-    'VER non-functional (ok if not executed)'
+    "51",
+    "61",
+    "test"
   ],
   [
-    '0',
-    'IF RESERVED RESERVED1 RESERVED2 ELSE 1 ENDIF',
-    'RESERVED ok in un-executed IF'
+    "00",
+    "6362675168",
+    "VER non-functional (ok if not executed)"
   ],
   [
-    '1',
-    'DUP IF ENDIF',
-    'test'
+    "00",
+    "6350898a675168",
+    "RESERVED ok in un-executed IF"
   ],
   [
-    '1',
-    'IF 1 ENDIF',
-    'test'
+    "51",
+    "766368",
+    "test"
   ],
   [
-    '1',
-    'DUP IF ELSE ENDIF',
-    'test'
+    "51",
+    "635168",
+    "test"
   ],
   [
-    '1',
-    'IF 1 ELSE ENDIF',
-    'test'
+    "51",
+    "76636768",
+    "test"
   ],
   [
-    '0',
-    'IF ELSE 1 ENDIF',
-    'test'
+    "51",
+    "63516768",
+    "test"
   ],
   [
-    '1 1',
-    'IF IF 1 ELSE 0 ENDIF ENDIF',
-    'test'
+    "00",
+    "63675168",
+    "test"
   ],
   [
-    '1 0',
-    'IF IF 1 ELSE 0 ENDIF ENDIF',
-    'test'
+    "5151",
+    "63635167006868",
+    "test"
   ],
   [
-    '1 1',
-    'IF IF 1 ELSE 0 ENDIF ELSE IF 0 ELSE 1 ENDIF ENDIF',
-    'test'
+    "5100",
+    "63635167006868",
+    "test"
   ],
   [
-    '0 0',
-    'IF IF 1 ELSE 0 ENDIF ELSE IF 0 ELSE 1 ENDIF ENDIF',
-    'test'
+    "5151",
+    "63635167006867630067516868",
+    "test"
   ],
   [
-    '1 0',
-    'NOTIF IF 1 ELSE 0 ENDIF ENDIF',
-    'test'
+    "0000",
+    "63635167006867630067516868",
+    "test"
   ],
   [
-    '1 1',
-    'NOTIF IF 1 ELSE 0 ENDIF ENDIF',
-    'test'
+    "5100",
+    "64635167006868",
+    "test"
   ],
   [
-    '1 0',
-    'NOTIF IF 1 ELSE 0 ENDIF ELSE IF 0 ELSE 1 ENDIF ENDIF',
-    'test'
+    "5151",
+    "64635167006868",
+    "test"
   ],
   [
-    '0 1',
-    'NOTIF IF 1 ELSE 0 ENDIF ELSE IF 0 ELSE 1 ENDIF ENDIF',
-    'test'
+    "5100",
+    "64635167006867630067516868",
+    "test"
   ],
   [
-    '0',
-    'IF 0 ELSE 1 ELSE 0 ENDIF',
+    "0051",
+    "64635167006867630067516868",
+    "test"
+  ],
+  [
+    "00",
+    "63006751670068",
     "Multiple ELSE's are valid and executed inverts on each ELSE encountered"
   ],
   [
-    '1',
-    'IF 1 ELSE 0 ELSE ENDIF',
-    'test'
+    "51",
+    "635167006768",
+    "test"
   ],
   [
-    '1',
-    'IF ELSE 0 ELSE 1 ENDIF',
-    'test'
+    "51",
+    "636700675168",
+    "test"
   ],
   [
-    '1',
-    'IF 1 ELSE 0 ELSE 1 ENDIF ADD 2 EQUAL',
-    'test'
+    "51",
+    "63516700675168935287",
+    "test"
   ],
   [
-    '1',
-    'NOTIF 0 ELSE 1 ELSE 0 ENDIF',
+    "51",
+    "64006751670068",
     "Multiple ELSE's are valid and execution inverts on each ELSE encountered"
   ],
   [
-    '0',
-    'NOTIF 1 ELSE 0 ELSE ENDIF',
-    'test'
+    "00",
+    "645167006768",
+    "test"
   ],
   [
-    '0',
-    'NOTIF ELSE 0 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "646700675168",
+    "test"
   ],
   [
-    '0',
-    'NOTIF 1 ELSE 0 ELSE 1 ENDIF ADD 2 EQUAL',
-    'test'
+    "00",
+    "64516700675168935287",
+    "test"
   ],
   [
-    '0',
-    'IF 1 IF RETURN ELSE RETURN ELSE RETURN ENDIF ELSE 1 IF 1 ELSE RETURN ELSE 1 ENDIF ELSE RETURN ENDIF ADD 2 EQUAL',
-    'Nested ELSE ELSE'
+    "00",
+    "6351636a676a676a6867516351676a675168676a68935287",
+    "Nested ELSE ELSE"
   ],
   [
-    '1',
-    'NOTIF 0 NOTIF RETURN ELSE RETURN ELSE RETURN ENDIF ELSE 0 NOTIF 1 ELSE RETURN ELSE 1 ENDIF ELSE RETURN ENDIF ADD 2 EQUAL',
-    'test'
+    "51",
+    "6400646a676a676a6867006451676a675168676a68935287",
+    "test"
   ],
   [
-    '0',
-    'IF RETURN ENDIF 1',
-    'RETURN only works if executed'
+    "00",
+    "636a6851",
+    "RETURN only works if executed"
   ],
   [
-    '1 1',
-    'VERIFY',
-    'test'
+    "5151",
+    "69",
+    "test"
   ],
   [
-    '1 0x05 0x01 0x00 0x00 0x00 0x00',
-    'VERIFY',
-    'values >4 bytes can be cast to boolean'
+    "51050100000000",
+    "69",
+    "values >4 bytes can be cast to boolean"
   ],
   [
-    '1 0x01 0x80',
-    'IF 0 ENDIF',
-    'negative 0 is false'
+    "510180",
+    "630068",
+    "negative 0 is false"
   ],
   [
-    '0',
-    'DUP 1 ADD 1 EQUALVERIFY 0 EQUAL',
-    'test'
+    "00",
+    "76519351880087",
+    "test"
   ],
   [
-    '0 1',
-    'NIP',
-    'test'
+    "0051",
+    "77",
+    "test"
   ],
   [
-    '22 21 20',
-    'ROT DROP DROP 21 EQUAL',
-    'test'
+    "011601150114",
+    "7b7575011587",
+    "test"
   ],
   [
-    '25 24 23 22 21 20',
-    '2ROT 2DROP 2DROP DROP 23 EQUAL',
-    'test'
+    "011901180117011601150114",
+    "716d6d75011787",
+    "test"
   ],
   [
-    '1 0',
-    'SWAP 1 EQUALVERIFY 0 EQUAL',
-    'test'
+    "5100",
+    "7c51880087",
+    "test"
   ],
   [
-    '0 1',
-    'TUCK DEPTH 3 EQUALVERIFY SWAP 2DROP',
-    'test'
+    "0051",
+    "7d7453887c6d",
+    "test"
   ],
   [
-    '13 14',
-    '2DUP ROT EQUALVERIFY EQUAL',
-    'test'
+    "5d5e",
+    "6e7b8887",
+    "test"
   ],
   [
-    '-1 0 1 2',
-    '3DUP DEPTH 7 EQUALVERIFY ADD ADD 3 EQUALVERIFY 2DROP 0 EQUALVERIFY',
-    'test'
+    "4f005152",
+    "6f745788939353886d0088",
+    "test"
   ],
   [
-    '1 2 3 5',
-    '2OVER ADD ADD 8 EQUALVERIFY ADD ADD 6 EQUAL',
-    'test'
+    "51525355",
+    "709393588893935687",
+    "test"
   ],
   [
-    '1 3 5 7',
-    '2SWAP ADD 4 EQUALVERIFY ADD 12 EQUAL',
-    'test'
+    "51535557",
+    "72935488935c87",
+    "test"
   ],
   [
-    '42',
-    'SIZE 1 EQUALVERIFY 42 EQUAL',
-    'SIZE does not consume argument'
+    "012a",
+    "825188012a87",
+    "SIZE does not consume argument"
   ],
   [
-    '0 0',
-    'EQUAL',
-    'test'
+    "0000",
+    "87",
+    "test"
   ],
   [
-    '11 10',
-    'LESSTHAN NOT',
-    'test'
+    "5b5a",
+    "9f91",
+    "test"
   ],
   [
-    '4 4',
-    'LESSTHAN NOT',
-    'test'
+    "5454",
+    "9f91",
+    "test"
   ],
   [
-    '10 11',
-    'LESSTHAN',
-    'test'
+    "5a5b",
+    "9f",
+    "test"
   ],
   [
-    '-11 11',
-    'LESSTHAN',
-    'test'
+    "018b5b",
+    "9f",
+    "test"
   ],
   [
-    '-11 -10',
-    'LESSTHAN',
-    'test'
+    "018b018a",
+    "9f",
+    "test"
   ],
   [
-    '11 10',
-    'GREATERTHAN',
-    'test'
+    "5b5a",
+    "a0",
+    "test"
   ],
   [
-    '4 4',
-    'GREATERTHAN NOT',
-    'test'
+    "5454",
+    "a091",
+    "test"
   ],
   [
-    '10 11',
-    'GREATERTHAN NOT',
-    'test'
+    "5a5b",
+    "a091",
+    "test"
   ],
   [
-    '-11 11',
-    'GREATERTHAN NOT',
-    'test'
+    "018b5b",
+    "a091",
+    "test"
   ],
   [
-    '-11 -10',
-    'GREATERTHAN NOT',
-    'test'
+    "018b018a",
+    "a091",
+    "test"
   ],
   [
-    '11 10',
-    'LESSTHANOREQUAL NOT',
-    'test'
+    "5b5a",
+    "a191",
+    "test"
   ],
   [
-    '4 4',
-    'LESSTHANOREQUAL',
-    'test'
+    "5454",
+    "a1",
+    "test"
   ],
   [
-    '10 11',
-    'LESSTHANOREQUAL',
-    'test'
+    "5a5b",
+    "a1",
+    "test"
   ],
   [
-    '-11 11',
-    'LESSTHANOREQUAL',
-    'test'
+    "018b5b",
+    "a1",
+    "test"
   ],
   [
-    '-11 -10',
-    'LESSTHANOREQUAL',
-    'test'
+    "018b018a",
+    "a1",
+    "test"
   ],
   [
-    '11 10',
-    'GREATERTHANOREQUAL',
-    'test'
+    "5b5a",
+    "a2",
+    "test"
   ],
   [
-    '4 4',
-    'GREATERTHANOREQUAL',
-    'test'
+    "5454",
+    "a2",
+    "test"
   ],
   [
-    '10 11',
-    'GREATERTHANOREQUAL NOT',
-    'test'
+    "5a5b",
+    "a291",
+    "test"
   ],
   [
-    '-11 11',
-    'GREATERTHANOREQUAL NOT',
-    'test'
+    "018b5b",
+    "a291",
+    "test"
   ],
   [
-    '-11 -10',
-    'GREATERTHANOREQUAL NOT',
-    'test'
+    "018b018a",
+    "a291",
+    "test"
   ],
   [
-    '0 0 1',
-    'WITHIN',
-    'test'
+    "000051",
+    "a5",
+    "test"
   ],
   [
-    '1 0 1',
-    'WITHIN NOT',
-    'test'
+    "510051",
+    "a591",
+    "test"
   ],
   [
-    '0 -2147483647 2147483647',
-    'WITHIN',
-    'test'
+    "0004ffffffff04ffffff7f",
+    "a5",
+    "test"
   ],
   [
-    '-1 -100 100',
-    'WITHIN',
-    'test'
+    "4f01e40164",
+    "a5",
+    "test"
   ],
   [
-    '11 -100 100',
-    'WITHIN',
-    'test'
+    "5b01e40164",
+    "a5",
+    "test"
   ],
   [
-    '-2147483647 -100 100',
-    'WITHIN NOT',
-    'test'
+    "04ffffffff01e40164",
+    "a591",
+    "test"
   ],
   [
-    '2147483647 -100 100',
-    'WITHIN NOT',
-    'test'
+    "04ffffff7f01e40164",
+    "a591",
+    "test"
   ],
   [
-    '1',
-    'NOP1 NOP2 NOP3 NOP4 NOP5 NOP6 NOP7 NOP8 NOP9 NOP10 1 EQUAL',
-    'test'
+    "51",
+    "b0b1b2b3b4b5b6b7b8b95187",
+    "test"
   ],
   [
-    '1',
-    'NOP',
-    'Discourage NOPx flag allows OP_NOP'
+    "51",
+    "61",
+    "Discourage NOPx flag allows OP_NOP"
   ],
   [
-    '0',
-    'IF NOP10 ENDIF 1',
-    'Discouraged NOPs are allowed if not executed'
+    "00",
+    "63b96851",
+    "Discouraged NOPs are allowed if not executed"
   ],
   [
-    '0',
-    'IF 0xba ELSE 1 ENDIF',
-    'opcodes above NOP10 invalid if executed'
+    "00",
+    "63ba675168",
+    "opcodes above NOP10 invalid if executed"
   ],
   [
-    '0',
-    'IF 0xbb ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63bb675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xbc ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63bc675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xbd ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63bd675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xbe ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63be675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xbf ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63bf675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc0 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c0675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc1 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c1675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc2 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c2675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc3 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c3675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc4 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c4675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc5 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c5675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc6 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c6675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc7 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c7675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc8 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c8675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc9 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c9675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xca ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ca675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xcb ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63cb675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xcc ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63cc675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xcd ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63cd675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xce ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ce675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xcf ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63cf675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd0 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d0675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd1 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d1675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd2 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d2675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd3 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d3675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd4 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d4675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd5 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d5675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd6 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d6675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd7 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d7675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd8 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d8675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd9 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d9675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xda ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63da675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xdb ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63db675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xdc ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63dc675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xdd ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63dd675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xde ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63de675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xdf ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63df675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe0 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e0675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe1 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e1675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe2 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e2675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe3 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e3675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe4 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e4675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe5 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e5675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe6 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e6675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe7 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e7675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe8 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e8675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe9 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e9675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xea ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ea675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xeb ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63eb675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xec ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ec675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xed ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ed675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xee ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ee675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xef ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ef675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf0 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f0675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf1 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f1675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf2 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f2675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf3 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f3675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf4 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f4675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf5 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f5675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf6 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f6675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf7 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f7675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf8 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f8675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf9 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f9675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xfa ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63fa675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xfb ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63fb675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xfc ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63fc675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xfd ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63fd675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xfe ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63fe675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xff ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ff675168",
+    "test"
   ],
   [
-    '1',
-    '0x616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161',
-    '201 opcodes executed. 0x61 is NOP'
+    "51",
+    "616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161",
+    "201 opcodes executed. 0x61 is NOP"
   ],
   [
-    '0',
-    'IF 0x5050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050 ENDIF 1',
+    "00",
+    "6350505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050506851",
     ">201 opcodes, but RESERVED (0x50) doesn't count towards opcode limit."
   ],
   [
-    '127',
-    '0x01 0x7F EQUAL',
-    'test'
+    "017f",
+    "017f87",
+    "test"
   ],
   [
-    '128',
-    '0x02 0x8000 EQUAL',
-    'Leave room for the sign bit'
+    "028000",
+    "02800087",
+    "Leave room for the sign bit"
   ],
   [
-    '32767',
-    '0x02 0xFF7F EQUAL',
-    'test'
+    "02ff7f",
+    "02ff7f87",
+    "test"
   ],
   [
-    '32768',
-    '0x03 0x008000 EQUAL',
-    'test'
+    "03008000",
+    "0300800087",
+    "test"
   ],
   [
-    '8388607',
-    '0x03 0xFFFF7F EQUAL',
-    'test'
+    "03ffff7f",
+    "03ffff7f87",
+    "test"
   ],
   [
-    '8388608',
-    '0x04 0x00008000 EQUAL',
-    'test'
+    "0400008000",
+    "040000800087",
+    "test"
   ],
   [
-    '2147483647',
-    '0x04 0xFFFFFF7F EQUAL',
-    'test'
+    "04ffffff7f",
+    "04ffffff7f87",
+    "test"
   ],
   [
-    '2147483648',
-    '0x05 0x0000008000 EQUAL',
-    'test'
+    "050000008000",
+    "05000000800087",
+    "test"
   ],
   [
-    '549755813887',
-    '0x05 0xFFFFFFFF7F EQUAL',
-    'test'
+    "05ffffffff7f",
+    "05ffffffff7f87",
+    "test"
   ],
   [
-    '9223372036854775807',
-    '0x08 0xFFFFFFFFFFFFFF7F EQUAL',
-    'test'
+    "08ffffffffffffff7f",
+    "08ffffffffffffff7f87",
+    "test"
   ],
   [
-    '-127',
-    '0x01 0xFF EQUAL',
-    'test'
+    "01ff",
+    "01ff87",
+    "test"
   ],
   [
-    '-128',
-    '0x02 0x8080 EQUAL',
-    'test'
+    "028080",
+    "02808087",
+    "test"
   ],
   [
-    '-32767',
-    '0x02 0xFFFF EQUAL',
-    'test'
+    "02ffff",
+    "02ffff87",
+    "test"
   ],
   [
-    '-32768',
-    '0x03 0x008080 EQUAL',
-    'test'
+    "03008080",
+    "0300808087",
+    "test"
   ],
   [
-    '-8388607',
-    '0x03 0xFFFFFF EQUAL',
-    'test'
+    "03ffffff",
+    "03ffffff87",
+    "test"
   ],
   [
-    '-8388608',
-    '0x04 0x00008080 EQUAL',
-    'test'
+    "0400008080",
+    "040000808087",
+    "test"
   ],
   [
-    '-2147483647',
-    '0x04 0xFFFFFFFF EQUAL',
-    'test'
+    "04ffffffff",
+    "04ffffffff87",
+    "test"
   ],
   [
-    '-2147483648',
-    '0x05 0x0000008080 EQUAL',
-    'test'
+    "050000008080",
+    "05000000808087",
+    "test"
   ],
   [
-    '-4294967295',
-    '0x05 0xFFFFFFFF80 EQUAL',
-    'test'
+    "05ffffffff80",
+    "05ffffffff8087",
+    "test"
   ],
   [
-    '-549755813887',
-    '0x05 0xFFFFFFFFFF EQUAL',
-    'test'
+    "05ffffffffff",
+    "05ffffffffff87",
+    "test"
   ],
   [
-    '-549755813888',
-    '0x06 0x000000008080 EQUAL',
-    'test'
+    "06000000008080",
+    "0600000000808087",
+    "test"
   ],
   [
-    '-9223372036854775807',
-    '0x08 0xFFFFFFFFFFFFFFFF EQUAL',
-    'test'
+    "08ffffffffffffffff",
+    "08ffffffffffffffff87",
+    "test"
   ],
   [
-    '2147483647',
-    '1ADD 2147483648 EQUAL',
-    'We can do math on 4-byte integers, and compare 5-byte ones'
+    "04ffffff7f",
+    "8b05000000800087",
+    "We can do math on 4-byte integers, and compare 5-byte ones"
   ],
   [
-    '1',
-    '0x02 0x0100 EQUAL NOT',
-    'Not the same byte array...'
+    "51",
+    "0201008791",
+    "Not the same byte array..."
   ],
   [
-    '0',
-    '0x01 0x80 EQUAL NOT',
-    'test'
+    "00",
+    "01808791",
+    "test"
   ],
   [
-    '1',
-    'IF 1 ENDIF',
-    'They are here to catch copy-and-paste errors'
+    "51",
+    "635168",
+    "They are here to catch copy-and-paste errors"
   ],
   [
-    '0',
-    'NOTIF 1 ENDIF',
-    'Most of them are duplicated elsewhere,'
+    "00",
+    "645168",
+    "Most of them are duplicated elsewhere,"
   ],
   [
-    '1',
-    'VERIFY 1',
-    'but, hey, more is always better, right?'
+    "51",
+    "6951",
+    "but, hey, more is always better, right?"
   ],
   [
-    '0',
-    'TOALTSTACK 1',
-    'test'
+    "00",
+    "6b51",
+    "test"
   ],
   [
-    '1',
-    'TOALTSTACK FROMALTSTACK',
-    'test'
+    "51",
+    "6b6c",
+    "test"
   ],
   [
-    '0 0',
-    '2DROP 1',
-    'test'
+    "0000",
+    "6d51",
+    "test"
   ],
   [
-    '0',
-    'DROP 1',
-    'test'
+    "00",
+    "7551",
+    "test"
   ],
   [
-    '0 1',
-    'NIP',
-    'test'
+    "0051",
+    "77",
+    "test"
   ],
   [
-    '1 0',
-    'ROLL',
-    'test'
+    "5100",
+    "7a",
+    "test"
   ],
   [
-    '0 0',
-    'EQUAL',
-    'test'
+    "0000",
+    "87",
+    "test"
   ],
   [
-    '0 0',
-    'EQUALVERIFY 1',
-    'test'
+    "0000",
+    "8851",
+    "test"
   ],
   [
-    '0 0 1',
-    'EQUAL EQUAL',
-    'OP_0 and bools must have identical byte representations'
+    "000051",
+    "8787",
+    "OP_0 and bools must have identical byte representations"
   ],
   [
-    '0',
-    '1ADD',
-    'test'
+    "00",
+    "8b",
+    "test"
   ],
   [
-    '2',
-    '1SUB',
-    'test'
+    "52",
+    "8c",
+    "test"
   ],
   [
-    '-1',
-    'NEGATE',
-    'test'
+    "4f",
+    "8f",
+    "test"
   ],
   [
-    '-1',
-    'ABS',
-    'test'
+    "4f",
+    "90",
+    "test"
   ],
   [
-    '0',
-    'NOT',
-    'test'
+    "00",
+    "91",
+    "test"
   ],
   [
-    '-1',
-    '0NOTEQUAL',
-    'test'
+    "4f",
+    "92",
+    "test"
   ],
   [
-    '1 0',
-    'ADD',
-    'test'
+    "5100",
+    "93",
+    "test"
   ],
   [
-    '1 0',
-    'SUB',
-    'test'
+    "5100",
+    "94",
+    "test"
   ],
   [
-    '-1 -1',
-    'BOOLAND',
-    'test'
+    "4f4f",
+    "9a",
+    "test"
   ],
   [
-    '-1 0',
-    'BOOLOR',
-    'test'
+    "4f00",
+    "9b",
+    "test"
   ],
   [
-    '0 0',
-    'NUMEQUAL',
-    'test'
+    "0000",
+    "9c",
+    "test"
   ],
   [
-    '0 0',
-    'NUMEQUALVERIFY 1',
-    'test'
+    "0000",
+    "9d51",
+    "test"
   ],
   [
-    '-1 0',
-    'NUMNOTEQUAL',
-    'test'
+    "4f00",
+    "9e",
+    "test"
   ],
   [
-    '-1 0',
-    'LESSTHAN',
-    'test'
+    "4f00",
+    "9f",
+    "test"
   ],
   [
-    '1 0',
-    'GREATERTHAN',
-    'test'
+    "5100",
+    "a0",
+    "test"
   ],
   [
-    '0 0',
-    'LESSTHANOREQUAL',
-    'test'
+    "0000",
+    "a1",
+    "test"
   ],
   [
-    '0 0',
-    'GREATERTHANOREQUAL',
-    'test'
+    "0000",
+    "a2",
+    "test"
   ],
   [
-    '-1 0',
-    'MIN',
-    'test'
+    "4f00",
+    "a3",
+    "test"
   ],
   [
-    '1 0',
-    'MAX',
-    'test'
+    "5100",
+    "a4",
+    "test"
   ],
   [
-    '-1 -1 0',
-    'WITHIN',
-    'test'
+    "4f4f00",
+    "a5",
+    "test"
   ],
   [
-    '0',
-    'RIPEMD160',
-    'test'
+    "00",
+    "a6",
+    "test"
   ],
   [
-    '0',
-    'SHA1',
-    'test'
+    "00",
+    "a7",
+    "test"
   ],
   [
-    '0',
-    'SHA256',
-    'test'
+    "00",
+    "a8",
+    "test"
   ],
   [
-    '0',
-    'HASH160',
-    'test'
+    "00",
+    "a9",
+    "test"
   ],
   [
-    '0',
-    'HASH256',
-    'test'
+    "00",
+    "aa",
+    "test"
   ],
   [
-    '',
-    '0 0 0 CHECKMULTISIG VERIFY DEPTH 0 EQUAL',
-    'CHECKMULTISIG is allowed to have zero keys and/or sigs'
+    "",
+    "000000ae69740087",
+    "CHECKMULTISIG is allowed to have zero keys and/or sigs"
   ],
   [
-    '',
-    '0 0 0 CHECKMULTISIGVERIFY DEPTH 0 EQUAL',
-    'test'
+    "",
+    "000000af740087",
+    "test"
   ],
   [
-    '',
-    '0 0 0 1 CHECKMULTISIG VERIFY DEPTH 0 EQUAL',
-    'Zero sigs means no sigs are checked'
+    "",
+    "00000051ae69740087",
+    "Zero sigs means no sigs are checked"
   ],
   [
-    '',
-    '0 0 0 1 CHECKMULTISIGVERIFY DEPTH 0 EQUAL',
-    'test'
+    "",
+    "00000051af740087",
+    "test"
   ],
   [
-    '',
-    '0 0 0 CHECKMULTISIG VERIFY DEPTH 0 EQUAL',
-    'CHECKMULTISIG is allowed to have zero keys and/or sigs'
+    "",
+    "000000ae69740087",
+    "CHECKMULTISIG is allowed to have zero keys and/or sigs"
   ],
   [
-    '',
-    '0 0 0 CHECKMULTISIGVERIFY DEPTH 0 EQUAL',
-    'test'
+    "",
+    "000000af740087",
+    "test"
   ],
   [
-    '',
-    '0 0 0 1 CHECKMULTISIG VERIFY DEPTH 0 EQUAL',
-    'Zero sigs means no sigs are checked'
+    "",
+    "00000051ae69740087",
+    "Zero sigs means no sigs are checked"
   ],
   [
-    '',
-    '0 0 0 1 CHECKMULTISIGVERIFY DEPTH 0 EQUAL',
-    'test'
+    "",
+    "00000051af740087",
+    "test"
   ],
   [
-    '1',
-    '0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY',
-    'test'
+    "51",
+    "000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af",
+    "test"
   ],
   [
-    '0x02 0x8000',
-    '128 NUMEQUAL',
-    '0x8000 equals 128'
+    "028000",
+    "0280009c",
+    "0x8000 equals 128"
   ],
   [
-    '0',
-    '0x21 0x02865c40293a680cb9c020e7b1e106d8c1916d3cef99aa431a56d253e69256dac0 CHECKSIG NOT',
-    'test'
+    "00",
+    "2102865c40293a680cb9c020e7b1e106d8c1916d3cef99aa431a56d253e69256dac0ac91",
+    "test"
   ],
   [
-    '0 0',
-    '1 0x21 0x02865c40293a680cb9c020e7b1e106d8c1916d3cef99aa431a56d253e69256dac0 1 CHECKMULTISIG NOT',
-    'test'
+    "0000",
+    "512102865c40293a680cb9c020e7b1e106d8c1916d3cef99aa431a56d253e69256dac051ae91",
+    "test"
   ],
   [
-    '0',
-    '0x21 0x038282263212c609d9ea2a6e3e172de238d8c39cabd5ac1ca10646e23fd5f51508 CHECKSIG NOT',
-    'BIP66 example 4, without DERSIG'
+    "00",
+    "21038282263212c609d9ea2a6e3e172de238d8c39cabd5ac1ca10646e23fd5f51508ac91",
+    "BIP66 example 4, without DERSIG"
   ],
   [
-    '0',
-    '0x21 0x038282263212c609d9ea2a6e3e172de238d8c39cabd5ac1ca10646e23fd5f51508 CHECKSIG NOT',
-    'BIP66 example 4, with DERSIG'
+    "00",
+    "21038282263212c609d9ea2a6e3e172de238d8c39cabd5ac1ca10646e23fd5f51508ac91",
+    "BIP66 example 4, with DERSIG"
   ],
   [
-    '',
-    'DEPTH 0 EQUAL',
-    'Test the test: we should have an empty stack after scriptSig evaluation'
+    "",
+    "740087",
+    "Test the test: we should have an empty stack after scriptSig evaluation"
   ],
   [
-    '  ',
-    'DEPTH 0 EQUAL',
-    'and multiple spaces should not change that.'
+    "",
+    "740087",
+    "and multiple spaces should not change that."
   ],
   [
-    '   ',
-    'DEPTH 0 EQUAL',
-    'test'
+    "",
+    "740087",
+    "test"
   ],
   [
-    '    ',
-    'DEPTH 0 EQUAL',
-    'test'
+    "",
+    "740087",
+    "test"
   ],
   [
-    '1 2',
-    '2 EQUALVERIFY 1 EQUAL',
-    'Similarly whitespace around and between symbols'
+    "5152",
+    "52885187",
+    "Similarly whitespace around and between symbols"
   ],
   [
-    '1  2',
-    '2 EQUALVERIFY 1 EQUAL',
-    'test'
+    "5152",
+    "52885187",
+    "test"
   ],
   [
-    '  1  2',
-    '2 EQUALVERIFY 1 EQUAL',
-    'test'
+    "5152",
+    "52885187",
+    "test"
   ],
   [
-    '1  2  ',
-    '2 EQUALVERIFY 1 EQUAL',
-    'test'
+    "5152",
+    "52885187",
+    "test"
   ],
   [
-    '  1  2  ',
-    '2 EQUALVERIFY 1 EQUAL',
-    'test'
+    "5152",
+    "52885187",
+    "test"
   ],
   [
-    '0',
-    'IF 0x50 ENDIF 1',
-    '0x50 is reserved (ok if not executed)'
+    "00",
+    "63506851",
+    "0x50 is reserved (ok if not executed)"
   ],
   [
-    '0x51',
-    '0x5f ADD 0x60 EQUAL',
-    '0x51 through 0x60 push 1 through 16 onto stack'
+    "51",
+    "5f936087",
+    "0x51 through 0x60 push 1 through 16 onto stack"
   ],
   [
-    '1',
-    'NOP',
-    'test'
+    "51",
+    "61",
+    "test"
   ],
   [
-    '0',
-    'IF VER ELSE 1 ENDIF',
-    'VER non-functional (ok if not executed)'
+    "00",
+    "6362675168",
+    "VER non-functional (ok if not executed)"
   ],
   [
-    '0',
-    'IF RESERVED RESERVED1 RESERVED2 ELSE 1 ENDIF',
-    'RESERVED ok in un-executed IF'
+    "00",
+    "6350898a675168",
+    "RESERVED ok in un-executed IF"
   ],
   [
-    '1',
-    'DUP IF ENDIF',
-    'test'
+    "51",
+    "766368",
+    "test"
   ],
   [
-    '1',
-    'IF 1 ENDIF',
-    'test'
+    "51",
+    "635168",
+    "test"
   ],
   [
-    '1',
-    'DUP IF ELSE ENDIF',
-    'test'
+    "51",
+    "76636768",
+    "test"
   ],
   [
-    '1',
-    'IF 1 ELSE ENDIF',
-    'test'
+    "51",
+    "63516768",
+    "test"
   ],
   [
-    '0',
-    'IF ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63675168",
+    "test"
   ],
   [
-    '1 1',
-    'IF IF 1 ELSE 0 ENDIF ENDIF',
-    'test'
+    "5151",
+    "63635167006868",
+    "test"
   ],
   [
-    '1 0',
-    'IF IF 1 ELSE 0 ENDIF ENDIF',
-    'test'
+    "5100",
+    "63635167006868",
+    "test"
   ],
   [
-    '1 1',
-    'IF IF 1 ELSE 0 ENDIF ELSE IF 0 ELSE 1 ENDIF ENDIF',
-    'test'
+    "5151",
+    "63635167006867630067516868",
+    "test"
   ],
   [
-    '0 0',
-    'IF IF 1 ELSE 0 ENDIF ELSE IF 0 ELSE 1 ENDIF ENDIF',
-    'test'
+    "0000",
+    "63635167006867630067516868",
+    "test"
   ],
   [
-    '1 0',
-    'NOTIF IF 1 ELSE 0 ENDIF ENDIF',
-    'test'
+    "5100",
+    "64635167006868",
+    "test"
   ],
   [
-    '1 1',
-    'NOTIF IF 1 ELSE 0 ENDIF ENDIF',
-    'test'
+    "5151",
+    "64635167006868",
+    "test"
   ],
   [
-    '1 0',
-    'NOTIF IF 1 ELSE 0 ENDIF ELSE IF 0 ELSE 1 ENDIF ENDIF',
-    'test'
+    "5100",
+    "64635167006867630067516868",
+    "test"
   ],
   [
-    '0 1',
-    'NOTIF IF 1 ELSE 0 ENDIF ELSE IF 0 ELSE 1 ENDIF ENDIF',
-    'test'
+    "0051",
+    "64635167006867630067516868",
+    "test"
   ],
   [
-    '0',
-    'IF 0 ELSE 1 ELSE 0 ENDIF',
+    "00",
+    "63006751670068",
     "Multiple ELSE's are valid and executed inverts on each ELSE encountered"
   ],
   [
-    '1',
-    'IF 1 ELSE 0 ELSE ENDIF',
-    'test'
+    "51",
+    "635167006768",
+    "test"
   ],
   [
-    '1',
-    'IF ELSE 0 ELSE 1 ENDIF',
-    'test'
+    "51",
+    "636700675168",
+    "test"
   ],
   [
-    '1',
-    'IF 1 ELSE 0 ELSE 1 ENDIF ADD 2 EQUAL',
-    'test'
+    "51",
+    "63516700675168935287",
+    "test"
   ],
   [
-    '1',
-    'NOTIF 0 ELSE 1 ELSE 0 ENDIF',
+    "51",
+    "64006751670068",
     "Multiple ELSE's are valid and execution inverts on each ELSE encountered"
   ],
   [
-    '0',
-    'NOTIF 1 ELSE 0 ELSE ENDIF',
-    'test'
+    "00",
+    "645167006768",
+    "test"
   ],
   [
-    '0',
-    'NOTIF ELSE 0 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "646700675168",
+    "test"
   ],
   [
-    '0',
-    'NOTIF 1 ELSE 0 ELSE 1 ENDIF ADD 2 EQUAL',
-    'test'
+    "00",
+    "64516700675168935287",
+    "test"
   ],
   [
-    '0',
-    'IF 1 IF RETURN ELSE RETURN ELSE RETURN ENDIF ELSE 1 IF 1 ELSE RETURN ELSE 1 ENDIF ELSE RETURN ENDIF ADD 2 EQUAL',
-    'Nested ELSE ELSE'
+    "00",
+    "6351636a676a676a6867516351676a675168676a68935287",
+    "Nested ELSE ELSE"
   ],
   [
-    '1',
-    'NOTIF 0 NOTIF RETURN ELSE RETURN ELSE RETURN ENDIF ELSE 0 NOTIF 1 ELSE RETURN ELSE 1 ENDIF ELSE RETURN ENDIF ADD 2 EQUAL',
-    'test'
+    "51",
+    "6400646a676a676a6867006451676a675168676a68935287",
+    "test"
   ],
   [
-    '0',
-    'IF RETURN ENDIF 1',
-    'RETURN only works if executed'
+    "00",
+    "636a6851",
+    "RETURN only works if executed"
   ],
   [
-    '1 1',
-    'VERIFY',
-    'test'
+    "5151",
+    "69",
+    "test"
   ],
   [
-    '1 0x05 0x01 0x00 0x00 0x00 0x00',
-    'VERIFY',
-    'values >4 bytes can be cast to boolean'
+    "51050100000000",
+    "69",
+    "values >4 bytes can be cast to boolean"
   ],
   [
-    '1 0x01 0x80',
-    'IF 0 ENDIF',
-    'negative 0 is false'
+    "510180",
+    "630068",
+    "negative 0 is false"
   ],
   [
-    '0',
-    'DUP 1 ADD 1 EQUALVERIFY 0 EQUAL',
-    'test'
+    "00",
+    "76519351880087",
+    "test"
   ],
   [
-    '0 1',
-    'NIP',
-    'test'
+    "0051",
+    "77",
+    "test"
   ],
   [
-    '22 21 20',
-    'ROT DROP DROP 21 EQUAL',
-    'test'
+    "011601150114",
+    "7b7575011587",
+    "test"
   ],
   [
-    '25 24 23 22 21 20',
-    '2ROT 2DROP 2DROP DROP 23 EQUAL',
-    'test'
+    "011901180117011601150114",
+    "716d6d75011787",
+    "test"
   ],
   [
-    '1 0',
-    'SWAP 1 EQUALVERIFY 0 EQUAL',
-    'test'
+    "5100",
+    "7c51880087",
+    "test"
   ],
   [
-    '0 1',
-    'TUCK DEPTH 3 EQUALVERIFY SWAP 2DROP',
-    'test'
+    "0051",
+    "7d7453887c6d",
+    "test"
   ],
   [
-    '13 14',
-    '2DUP ROT EQUALVERIFY EQUAL',
-    'test'
+    "5d5e",
+    "6e7b8887",
+    "test"
   ],
   [
-    '-1 0 1 2',
-    '3DUP DEPTH 7 EQUALVERIFY ADD ADD 3 EQUALVERIFY 2DROP 0 EQUALVERIFY',
-    'test'
+    "4f005152",
+    "6f745788939353886d0088",
+    "test"
   ],
   [
-    '1 2 3 5',
-    '2OVER ADD ADD 8 EQUALVERIFY ADD ADD 6 EQUAL',
-    'test'
+    "51525355",
+    "709393588893935687",
+    "test"
   ],
   [
-    '1 3 5 7',
-    '2SWAP ADD 4 EQUALVERIFY ADD 12 EQUAL',
-    'test'
+    "51535557",
+    "72935488935c87",
+    "test"
   ],
   [
-    '42',
-    'SIZE 1 EQUALVERIFY 42 EQUAL',
-    'SIZE does not consume argument'
+    "012a",
+    "825188012a87",
+    "SIZE does not consume argument"
   ],
   [
-    '0 0',
-    'EQUAL',
-    'test'
+    "0000",
+    "87",
+    "test"
   ],
   [
-    '11 10',
-    'LESSTHAN NOT',
-    'test'
+    "5b5a",
+    "9f91",
+    "test"
   ],
   [
-    '4 4',
-    'LESSTHAN NOT',
-    'test'
+    "5454",
+    "9f91",
+    "test"
   ],
   [
-    '10 11',
-    'LESSTHAN',
-    'test'
+    "5a5b",
+    "9f",
+    "test"
   ],
   [
-    '-11 11',
-    'LESSTHAN',
-    'test'
+    "018b5b",
+    "9f",
+    "test"
   ],
   [
-    '-11 -10',
-    'LESSTHAN',
-    'test'
+    "018b018a",
+    "9f",
+    "test"
   ],
   [
-    '11 10',
-    'GREATERTHAN',
-    'test'
+    "5b5a",
+    "a0",
+    "test"
   ],
   [
-    '4 4',
-    'GREATERTHAN NOT',
-    'test'
+    "5454",
+    "a091",
+    "test"
   ],
   [
-    '10 11',
-    'GREATERTHAN NOT',
-    'test'
+    "5a5b",
+    "a091",
+    "test"
   ],
   [
-    '-11 11',
-    'GREATERTHAN NOT',
-    'test'
+    "018b5b",
+    "a091",
+    "test"
   ],
   [
-    '-11 -10',
-    'GREATERTHAN NOT',
-    'test'
+    "018b018a",
+    "a091",
+    "test"
   ],
   [
-    '11 10',
-    'LESSTHANOREQUAL NOT',
-    'test'
+    "5b5a",
+    "a191",
+    "test"
   ],
   [
-    '4 4',
-    'LESSTHANOREQUAL',
-    'test'
+    "5454",
+    "a1",
+    "test"
   ],
   [
-    '10 11',
-    'LESSTHANOREQUAL',
-    'test'
+    "5a5b",
+    "a1",
+    "test"
   ],
   [
-    '-11 11',
-    'LESSTHANOREQUAL',
-    'test'
+    "018b5b",
+    "a1",
+    "test"
   ],
   [
-    '-11 -10',
-    'LESSTHANOREQUAL',
-    'test'
+    "018b018a",
+    "a1",
+    "test"
   ],
   [
-    '11 10',
-    'GREATERTHANOREQUAL',
-    'test'
+    "5b5a",
+    "a2",
+    "test"
   ],
   [
-    '4 4',
-    'GREATERTHANOREQUAL',
-    'test'
+    "5454",
+    "a2",
+    "test"
   ],
   [
-    '10 11',
-    'GREATERTHANOREQUAL NOT',
-    'test'
+    "5a5b",
+    "a291",
+    "test"
   ],
   [
-    '-11 11',
-    'GREATERTHANOREQUAL NOT',
-    'test'
+    "018b5b",
+    "a291",
+    "test"
   ],
   [
-    '-11 -10',
-    'GREATERTHANOREQUAL NOT',
-    'test'
+    "018b018a",
+    "a291",
+    "test"
   ],
   [
-    '0 0 1',
-    'WITHIN',
-    'test'
+    "000051",
+    "a5",
+    "test"
   ],
   [
-    '1 0 1',
-    'WITHIN NOT',
-    'test'
+    "510051",
+    "a591",
+    "test"
   ],
   [
-    '0 -2147483647 2147483647',
-    'WITHIN',
-    'test'
+    "0004ffffffff04ffffff7f",
+    "a5",
+    "test"
   ],
   [
-    '-1 -100 100',
-    'WITHIN',
-    'test'
+    "4f01e40164",
+    "a5",
+    "test"
   ],
   [
-    '11 -100 100',
-    'WITHIN',
-    'test'
+    "5b01e40164",
+    "a5",
+    "test"
   ],
   [
-    '-2147483647 -100 100',
-    'WITHIN NOT',
-    'test'
+    "04ffffffff01e40164",
+    "a591",
+    "test"
   ],
   [
-    '2147483647 -100 100',
-    'WITHIN NOT',
-    'test'
+    "04ffffff7f01e40164",
+    "a591",
+    "test"
   ],
   [
-    '1',
-    'NOP1 NOP2 NOP3 NOP4 NOP5 NOP6 NOP7 NOP8 NOP9 NOP10 1 EQUAL',
-    'test'
+    "51",
+    "b0b1b2b3b4b5b6b7b8b95187",
+    "test"
   ],
   [
-    '1',
-    'NOP',
-    'Discourage NOPx flag allows OP_NOP'
+    "51",
+    "61",
+    "Discourage NOPx flag allows OP_NOP"
   ],
   [
-    '0',
-    'IF NOP10 ENDIF 1',
-    'Discouraged NOPs are allowed if not executed'
+    "00",
+    "63b96851",
+    "Discouraged NOPs are allowed if not executed"
   ],
   [
-    '0',
-    'IF 0xba ELSE 1 ENDIF',
-    'opcodes above NOP10 invalid if executed'
+    "00",
+    "63ba675168",
+    "opcodes above NOP10 invalid if executed"
   ],
   [
-    '0',
-    'IF 0xbb ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63bb675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xbc ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63bc675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xbd ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63bd675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xbe ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63be675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xbf ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63bf675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc0 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c0675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc1 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c1675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc2 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c2675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc3 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c3675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc4 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c4675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc5 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c5675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc6 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c6675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc7 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c7675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc8 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c8675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xc9 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63c9675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xca ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ca675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xcb ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63cb675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xcc ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63cc675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xcd ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63cd675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xce ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ce675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xcf ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63cf675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd0 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d0675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd1 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d1675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd2 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d2675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd3 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d3675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd4 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d4675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd5 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d5675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd6 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d6675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd7 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d7675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd8 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d8675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xd9 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63d9675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xda ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63da675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xdb ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63db675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xdc ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63dc675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xdd ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63dd675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xde ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63de675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xdf ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63df675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe0 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e0675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe1 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e1675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe2 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e2675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe3 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e3675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe4 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e4675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe5 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e5675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe6 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e6675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe7 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e7675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe8 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e8675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xe9 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63e9675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xea ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ea675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xeb ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63eb675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xec ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ec675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xed ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ed675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xee ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ee675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xef ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ef675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf0 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f0675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf1 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f1675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf2 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f2675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf3 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f3675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf4 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f4675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf5 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f5675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf6 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f6675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf7 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f7675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf8 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f8675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xf9 ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63f9675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xfa ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63fa675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xfb ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63fb675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xfc ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63fc675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xfd ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63fd675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xfe ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63fe675168",
+    "test"
   ],
   [
-    '0',
-    'IF 0xff ELSE 1 ENDIF',
-    'test'
+    "00",
+    "63ff675168",
+    "test"
   ],
   [
-    '1',
-    '0x616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161',
-    '201 opcodes executed. 0x61 is NOP'
+    "51",
+    "616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161",
+    "201 opcodes executed. 0x61 is NOP"
   ],
   [
-    '0',
-    'IF 0x5050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050 ENDIF 1',
+    "00",
+    "6350505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050506851",
     ">201 opcodes, but RESERVED (0x50) doesn't count towards opcode limit."
   ],
   [
-    '127',
-    '0x01 0x7F EQUAL',
-    'test'
+    "017f",
+    "017f87",
+    "test"
   ],
   [
-    '128',
-    '0x02 0x8000 EQUAL',
-    'Leave room for the sign bit'
+    "028000",
+    "02800087",
+    "Leave room for the sign bit"
   ],
   [
-    '32767',
-    '0x02 0xFF7F EQUAL',
-    'test'
+    "02ff7f",
+    "02ff7f87",
+    "test"
   ],
   [
-    '32768',
-    '0x03 0x008000 EQUAL',
-    'test'
+    "03008000",
+    "0300800087",
+    "test"
   ],
   [
-    '8388607',
-    '0x03 0xFFFF7F EQUAL',
-    'test'
+    "03ffff7f",
+    "03ffff7f87",
+    "test"
   ],
   [
-    '8388608',
-    '0x04 0x00008000 EQUAL',
-    'test'
+    "0400008000",
+    "040000800087",
+    "test"
   ],
   [
-    '2147483647',
-    '0x04 0xFFFFFF7F EQUAL',
-    'test'
+    "04ffffff7f",
+    "04ffffff7f87",
+    "test"
   ],
   [
-    '2147483648',
-    '0x05 0x0000008000 EQUAL',
-    'test'
+    "050000008000",
+    "05000000800087",
+    "test"
   ],
   [
-    '549755813887',
-    '0x05 0xFFFFFFFF7F EQUAL',
-    'test'
+    "05ffffffff7f",
+    "05ffffffff7f87",
+    "test"
   ],
   [
-    '9223372036854775807',
-    '0x08 0xFFFFFFFFFFFFFF7F EQUAL',
-    'test'
+    "08ffffffffffffff7f",
+    "08ffffffffffffff7f87",
+    "test"
   ],
   [
-    '-127',
-    '0x01 0xFF EQUAL',
-    'test'
+    "01ff",
+    "01ff87",
+    "test"
   ],
   [
-    '-128',
-    '0x02 0x8080 EQUAL',
-    'test'
+    "028080",
+    "02808087",
+    "test"
   ],
   [
-    '-32767',
-    '0x02 0xFFFF EQUAL',
-    'test'
+    "02ffff",
+    "02ffff87",
+    "test"
   ],
   [
-    '-32768',
-    '0x03 0x008080 EQUAL',
-    'test'
+    "03008080",
+    "0300808087",
+    "test"
   ],
   [
-    '-8388607',
-    '0x03 0xFFFFFF EQUAL',
-    'test'
+    "03ffffff",
+    "03ffffff87",
+    "test"
   ],
   [
-    '-8388608',
-    '0x04 0x00008080 EQUAL',
-    'test'
+    "0400008080",
+    "040000808087",
+    "test"
   ],
   [
-    '-2147483647',
-    '0x04 0xFFFFFFFF EQUAL',
-    'test'
+    "04ffffffff",
+    "04ffffffff87",
+    "test"
   ],
   [
-    '-2147483648',
-    '0x05 0x0000008080 EQUAL',
-    'test'
+    "050000008080",
+    "05000000808087",
+    "test"
   ],
   [
-    '-4294967295',
-    '0x05 0xFFFFFFFF80 EQUAL',
-    'test'
+    "05ffffffff80",
+    "05ffffffff8087",
+    "test"
   ],
   [
-    '-549755813887',
-    '0x05 0xFFFFFFFFFF EQUAL',
-    'test'
+    "05ffffffffff",
+    "05ffffffffff87",
+    "test"
   ],
   [
-    '-549755813888',
-    '0x06 0x000000008080 EQUAL',
-    'test'
+    "06000000008080",
+    "0600000000808087",
+    "test"
   ],
   [
-    '-9223372036854775807',
-    '0x08 0xFFFFFFFFFFFFFFFF EQUAL',
-    'test'
+    "08ffffffffffffffff",
+    "08ffffffffffffffff87",
+    "test"
   ],
   [
-    '2147483647',
-    '1ADD 2147483648 EQUAL',
-    'We can do math on 4-byte integers, and compare 5-byte ones'
+    "04ffffff7f",
+    "8b05000000800087",
+    "We can do math on 4-byte integers, and compare 5-byte ones"
   ],
   [
-    '1',
-    '0x02 0x0100 EQUAL NOT',
-    'Not the same byte array...'
+    "51",
+    "0201008791",
+    "Not the same byte array..."
   ],
   [
-    '0',
-    '0x01 0x80 EQUAL NOT',
-    'test'
+    "00",
+    "01808791",
+    "test"
   ],
   [
-    '1',
-    'IF 1 ENDIF',
-    'They are here to catch copy-and-paste errors'
+    "51",
+    "635168",
+    "They are here to catch copy-and-paste errors"
   ],
   [
-    '0',
-    'NOTIF 1 ENDIF',
-    'Most of them are duplicated elsewhere,'
+    "00",
+    "645168",
+    "Most of them are duplicated elsewhere,"
   ],
   [
-    '1',
-    'VERIFY 1',
-    'but, hey, more is always better, right?'
+    "51",
+    "6951",
+    "but, hey, more is always better, right?"
   ],
   [
-    '0',
-    'TOALTSTACK 1',
-    'test'
+    "00",
+    "6b51",
+    "test"
   ],
   [
-    '1',
-    'TOALTSTACK FROMALTSTACK',
-    'test'
+    "51",
+    "6b6c",
+    "test"
   ],
   [
-    '0 0',
-    '2DROP 1',
-    'test'
+    "0000",
+    "6d51",
+    "test"
   ],
   [
-    '0',
-    'DROP 1',
-    'test'
+    "00",
+    "7551",
+    "test"
   ],
   [
-    '0 1',
-    'NIP',
-    'test'
+    "0051",
+    "77",
+    "test"
   ],
   [
-    '1 0',
-    'ROLL',
-    'test'
+    "5100",
+    "7a",
+    "test"
   ],
   [
-    '0 0',
-    'EQUAL',
-    'test'
+    "0000",
+    "87",
+    "test"
   ],
   [
-    '0 0',
-    'EQUALVERIFY 1',
-    'test'
+    "0000",
+    "8851",
+    "test"
   ],
   [
-    '0 0 1',
-    'EQUAL EQUAL',
-    'OP_0 and bools must have identical byte representations'
+    "000051",
+    "8787",
+    "OP_0 and bools must have identical byte representations"
   ],
   [
-    '0',
-    '1ADD',
-    'test'
+    "00",
+    "8b",
+    "test"
   ],
   [
-    '2',
-    '1SUB',
-    'test'
+    "52",
+    "8c",
+    "test"
   ],
   [
-    '-1',
-    'NEGATE',
-    'test'
+    "4f",
+    "8f",
+    "test"
   ],
   [
-    '-1',
-    'ABS',
-    'test'
+    "4f",
+    "90",
+    "test"
   ],
   [
-    '0',
-    'NOT',
-    'test'
+    "00",
+    "91",
+    "test"
   ],
   [
-    '-1',
-    '0NOTEQUAL',
-    'test'
+    "4f",
+    "92",
+    "test"
   ],
   [
-    '1 0',
-    'ADD',
-    'test'
+    "5100",
+    "93",
+    "test"
   ],
   [
-    '1 0',
-    'SUB',
-    'test'
+    "5100",
+    "94",
+    "test"
   ],
   [
-    '-1 -1',
-    'BOOLAND',
-    'test'
+    "4f4f",
+    "9a",
+    "test"
   ],
   [
-    '-1 0',
-    'BOOLOR',
-    'test'
+    "4f00",
+    "9b",
+    "test"
   ],
   [
-    '0 0',
-    'NUMEQUAL',
-    'test'
+    "0000",
+    "9c",
+    "test"
   ],
   [
-    '0 0',
-    'NUMEQUALVERIFY 1',
-    'test'
+    "0000",
+    "9d51",
+    "test"
   ],
   [
-    '-1 0',
-    'NUMNOTEQUAL',
-    'test'
+    "4f00",
+    "9e",
+    "test"
   ],
   [
-    '-1 0',
-    'LESSTHAN',
-    'test'
+    "4f00",
+    "9f",
+    "test"
   ],
   [
-    '1 0',
-    'GREATERTHAN',
-    'test'
+    "5100",
+    "a0",
+    "test"
   ],
   [
-    '0 0',
-    'LESSTHANOREQUAL',
-    'test'
+    "0000",
+    "a1",
+    "test"
   ],
   [
-    '0 0',
-    'GREATERTHANOREQUAL',
-    'test'
+    "0000",
+    "a2",
+    "test"
   ],
   [
-    '-1 0',
-    'MIN',
-    'test'
+    "4f00",
+    "a3",
+    "test"
   ],
   [
-    '1 0',
-    'MAX',
-    'test'
+    "5100",
+    "a4",
+    "test"
   ],
   [
-    '-1 -1 0',
-    'WITHIN',
-    'test'
+    "4f4f00",
+    "a5",
+    "test"
   ],
   [
-    '0',
-    'RIPEMD160',
-    'test'
+    "00",
+    "a6",
+    "test"
   ],
   [
-    '0',
-    'SHA1',
-    'test'
+    "00",
+    "a7",
+    "test"
   ],
   [
-    '0',
-    'SHA256',
-    'test'
+    "00",
+    "a8",
+    "test"
   ],
   [
-    '0',
-    'HASH160',
-    'test'
+    "00",
+    "a9",
+    "test"
   ],
   [
-    '0',
-    'HASH256',
-    'test'
+    "00",
+    "aa",
+    "test"
   ],
   [
-    '',
-    '0 0 0 CHECKMULTISIG VERIFY DEPTH 0 EQUAL',
-    'CHECKMULTISIG is allowed to have zero keys and/or sigs'
+    "",
+    "000000ae69740087",
+    "CHECKMULTISIG is allowed to have zero keys and/or sigs"
   ],
   [
-    '',
-    '0 0 0 CHECKMULTISIGVERIFY DEPTH 0 EQUAL',
-    'test'
+    "",
+    "000000af740087",
+    "test"
   ],
   [
-    '',
-    '0 0 0 1 CHECKMULTISIG VERIFY DEPTH 0 EQUAL',
-    'Zero sigs means no sigs are checked'
+    "",
+    "00000051ae69740087",
+    "Zero sigs means no sigs are checked"
   ],
   [
-    '',
-    '0 0 0 1 CHECKMULTISIGVERIFY DEPTH 0 EQUAL',
-    'test'
+    "",
+    "00000051af740087",
+    "test"
   ],
   [
-    '',
-    '0 0 0 CHECKMULTISIG VERIFY DEPTH 0 EQUAL',
-    'CHECKMULTISIG is allowed to have zero keys and/or sigs'
+    "",
+    "000000ae69740087",
+    "CHECKMULTISIG is allowed to have zero keys and/or sigs"
   ],
   [
-    '',
-    '0 0 0 CHECKMULTISIGVERIFY DEPTH 0 EQUAL',
-    'test'
+    "",
+    "000000af740087",
+    "test"
   ],
   [
-    '',
-    '0 0 0 1 CHECKMULTISIG VERIFY DEPTH 0 EQUAL',
-    'Zero sigs means no sigs are checked'
+    "",
+    "00000051ae69740087",
+    "Zero sigs means no sigs are checked"
   ],
   [
-    '',
-    '0 0 0 1 CHECKMULTISIGVERIFY DEPTH 0 EQUAL',
-    'test'
+    "",
+    "00000051af740087",
+    "test"
   ],
   [
-    '1',
-    '0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY 0 0 0 CHECKMULTISIGVERIFY',
-    'test'
+    "51",
+    "000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af000000af",
+    "test"
   ]
 ]

@@ -3,7 +3,6 @@ import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
 import P2PKH from '../../../dist/cjs/src/script/templates/P2PKH'
 import OP from '../../../dist/cjs/src/script/OP'
 import { toHex } from '../../../dist/cjs/src/primitives/utils'
-import scriptFromVector from './scriptFromVector'
 
 import scriptInvalid from './script.invalid.vectors'
 import scriptValid from './script.valid.vectors'
@@ -353,19 +352,19 @@ describe('Script', () => {
       }
       it(`should not fail when reading scriptValid vector ${i}`, () => {
         expect(() => {
-          scriptFromVector(a[0]).toHex()
-          scriptFromVector(a[0]).toASM()
+          Script.fromHex(a[0]).toHex()
+          Script.fromHex(a[0]).toASM()
         }).not.toThrow()
 
         expect(() => {
-          scriptFromVector(a[1]).toHex()
-          scriptFromVector(a[1]).toASM()
+          Script.fromHex(a[1]).toHex()
+          Script.fromHex(a[1]).toASM()
         }).not.toThrow()
 
         // should be able to return the same output over and over
-        let str = scriptFromVector(a[0]).toASM()
+        let str = Script.fromHex(a[0]).toASM()
         expect(Script.fromASM(str).toASM()).toEqual(str)
-        str = scriptFromVector(a[1]).toASM()
+        str = Script.fromHex(a[1]).toASM()
         expect(Script.fromASM(str).toASM()).toEqual(str)
       })
     })
@@ -376,26 +375,26 @@ describe('Script', () => {
       }
 
       it(`should not fail when reading scriptInvalid vector ${i}`, () => {
-      // Test that no errors are thrown for the first item
+        // Test that no errors are thrown for the first item
         expect(() => {
-          const scriptA = scriptFromVector(a[0])
+          const scriptA = Script.fromHex(a[0])
           scriptA.toHex()
           scriptA.toASM()
         }).not.toThrow()
 
         // Test that no errors are thrown for the second item
         expect(() => {
-          const scriptB = scriptFromVector(a[1])
+          const scriptB = Script.fromHex(a[1])
           scriptB.toHex()
           scriptB.toASM()
         }).not.toThrow()
 
         // Test that it should be able to return the same output over and over for the first item
-        const strA = scriptFromVector(a[0]).toASM()
+        const strA = Script.fromHex(a[0]).toASM()
         expect(Script.fromASM(strA).toASM()).toEqual(strA)
 
         // Test that it should be able to return the same output over and over for the second item
-        const strB = scriptFromVector(a[1]).toASM()
+        const strB = Script.fromHex(a[1]).toASM()
         expect(Script.fromASM(strB).toASM()).toEqual(strB)
       })
     })
