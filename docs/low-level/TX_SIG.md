@@ -27,6 +27,8 @@ The `TransactionSignature` encapsulates the complexity of transaction signing an
 Here's an example of formatting a signature preimage for use in a Transaction:
 
 ```typescript
+import { P2PKH, Transaction, PrivateKey, TransactionSignature, UnlockingScript, Hash } from '@bsv/sdk'
+
 // Initialize the script template, source TX, and the TX we'll be working on adding a signature for.
 const p2pkh = new P2PKH()
 const sourceTx = Transaction.fromHex('0200000001849c6419aec8b65d747cb72282cc02f3fc26dd018b46962f5de48957fac50528020000006a473044022008a60c611f3b48eaf0d07b5425d75f6ce65c3730bd43e6208560648081f9661b0220278fa51877100054d0d08e38e069b0afdb4f0f9d38844c68ee2233ace8e0de2141210360cd30f72e805be1f00d53f9ccd47dfd249cbb65b0d4aee5cfaf005a5258be37ffffffff03d0070000000000001976a914acc4d7c37bc9d0be0a4987483058a2d842f2265d88ac75330100000000001976a914db5b7964eecb19fcab929bf6bd29297ec005d52988ac809f7c09000000001976a914c0b0a42e92f062bdbc6a881b1777eed1213c19eb88ac00000000')
@@ -34,10 +36,11 @@ const tx = new Transaction(
     1, //version
     [{
         sourceTransaction: sourceTx,
-        outputIndex: 0
+        sourceOutputIndex: 0,
+        sequence: 0xffffffff
     }],
     [{ // outputs
-        script: p2pkh.lock('176ayvhKue1C5StD31cTsdN1hwotw59jsR'),
+        lockingScript: p2pkh.lock('176ayvhKue1C5StD31cTsdN1hwotw59jsR'),
         satoshis: 1000
     }],
     0 // lock time
@@ -56,7 +59,7 @@ const otherInputs = [...tx.inputs]
 const [input] = otherInputs.splice(inputIndex, 1)
 if (typeof input.sourceTransaction !== 'object') {
     throw new Error(
-    'The source transaction is needed for transaction signing.'
+        'The source transaction is needed for transaction signing.'
     )
 }
 
@@ -70,7 +73,7 @@ const preimage = TransactionSignature.format({
     sourceOutputIndex: input.sourceOutputIndex,
 
     // Identify the amount of satoshis that are in the source output.
-    sourceSatoshis: input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis,
+    sourceSatoshis: input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis as number,
 
     // Identify the version of the new transaction you are creating, that will spend the source output.
     transactionVersion: tx.version,
@@ -105,7 +108,7 @@ const preimage = TransactionSignature.format({
 
 // We sign the hash of the preimage.
 // Because the `.sign()` method also performs a hash, the result is the "double-hash" needed by Bitcoin.
-const rawSignature = privateKey.sign(sha256(preimage))
+const rawSignature = privateKey.sign(Hash.sha256(preimage))
 
 // Now, we construct a TransactionSignature from the ECDSA signature, for conversion to Checksig format.
 const sig = new TransactionSignature(
@@ -123,7 +126,7 @@ const script = new UnlockingScript([
     { op: sigForScript.length, data: sigForScript },
     { op: pubkeyForScript.length, data: pubkeyForScript }
 ])
-console.log('Created unlocking script with signature:', script.toHex())
+console.log('Signature was computed! P2PKH Unlocking Script:', script.toHex())
 ```
 
 First, we set up the data we wanted to sign. Then, we created a pre-image, hashed it, and signed it with a private key using ECSA. Then, we created a new `TransactionSignature` instance with the ECDSA signature, so that we could convert it into Checksig format. At this point, you could use the transaction signature in a script to help unlock a UTXO, enabling you to unlock and spend the associated Bitcoins or other digital assets.
