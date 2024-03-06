@@ -22,7 +22,7 @@ Here is an example of how this can be done:
   const privKeyFromHex = PrivateKey.fromHex('08dcced21ebf831cb1b1d320c5de2dee690ebea9b4930a7f1af9b7bde8f7858a')
   const privKeyFromHex2 = PrivateKey.fromString('08dcced21ebf831cb1b1d320c5de2dee690ebea9b4930a7f1af9b7bde8f7858a', 'hex')
   const privKeyFromWif = PrivateKey.fromWif('L3dyA911FSFwSpgzRFhncUTRPk57aNTHkEhRtXoi4W7fz63bR45W')
-  const pkFromBinary = new PrivateKey(Utils.toArray('e0f6f9084f02a59cdc0aa9498b28fe8e20d0d4eeeb19af629761099210990894', 'hex'))
+  const privKeyFromBinary = new PrivateKey(Utils.toArray('e0f6f9084f02a59cdc0aa9498b28fe8e20d0d4eeeb19af629761099210990894', 'hex'))
 ```
 
 We can then transform these to find the corresponding public key  as follows:
