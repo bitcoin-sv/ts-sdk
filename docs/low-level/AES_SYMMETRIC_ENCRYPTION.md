@@ -1,4 +1,4 @@
-# Low-Level: Using AES for the Symmetric Encryption of Data
+# Using AES for the Symmetric Encryption of Data
 
 The goal of this tutorial is to explore the encryption of data using symmetric keys with the Advanced Encryption Standard (AES). We will make use of the functions provided by the SDK in order to encrypt data with a key, and then decrypt it again.
 

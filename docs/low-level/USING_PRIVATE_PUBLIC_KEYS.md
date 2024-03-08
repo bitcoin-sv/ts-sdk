@@ -1,12 +1,13 @@
-# Low-level: Generating, Serializing, and Deserializing Private and Public Keys
+# Generating, Serializing, and Deserializing Private and Public Keys
 
-In this low-level tutorial, we will learn how to make use of public and private keys using the functions provided by the SDK.
+Private keys protect Bitcoins, enable secure message signing, among other vital roles in the BSV ecosystem. Public keys enable ownership tracking, message attestation, and attribution for signed messages, among other use-cases. In this low-level tutorial, we will learn how to generate, serialize and deserialize public and private keys using the functions provided by the SDK.
 
+## Getting Set Up
 
-First, you will want to make sure you have installed the required dependencies.
+We'll be making use of two SDK modules in this guide. Make sure you've installed the `@bsv/sdk` package in your project, then import the modules we'll be using:
 
-- **PrivateKey** - this static class will enable to you create a new PrivateKey from various sources such as random, hex string, and wif.
-- **Utils** - the SDK provides several helpful utility functions such as toArray and and toUTF8 which allow you to serialize and deserialize data as needed.
+- **PrivateKey** - this class will enable to you create a new PrivateKey from various sources such as random, hex string, and WIP. It can also transform a private key into a public key.
+- **Utils** - the SDK provides several helpful utility functions such as `toArray` and and `toUTF8` which allow you to serialize and deserialize data as needed.
 
 ```ts
 import { PrivateKey, Utils } from '@bsv/sdk'
@@ -56,7 +57,8 @@ Public keys can be serialized as well, and include helper functions to serialize
 
 ```ts
   
-  const publicKey = PrivateKey.fromRandom()
+  const privateKey = PrivateKey.fromRandom()
+  const publicKey = privateKey.toPublicKey()
   const publicKeyHex = publicKey.toString()
   const publicKeyAddress = publicKey.toAddress()
   const publicKeyDER = publicKey.toDER()

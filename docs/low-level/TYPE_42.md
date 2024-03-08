@@ -10,7 +10,7 @@ The process starts with two users, who each generate a "master key" from which e
 
 Next, they make use of [ECDH](./ECDH.md) to arrive at a shared secret between themselves. They agree on the "invoice number" they will be using to communicate. We call it an invoice number because type-42 has historically been used for Bitcoin payments. In reality, this is just the unique identifier for the keys to derive.
 
-Now, they compute an [HMAC](./HMAC.md) over the invoice number, using the shared secret as the HMAC key. Because the shared secret is private, the HMAC hash function initialized with its value is only usable by the two parties. This means only these two people can hash the invoice number in this unique way.
+Now, they compute an [HMAC](./USING_HASHES_AND_HMACS.md) over the invoice number, using the shared secret as the HMAC key. Because the shared secret is private, the HMAC hash function initialized with its value is only usable by the two parties. This means only these two people can hash the invoice number in this unique way.
 
 Finally, the output of the HMAC function over the invoice number is used for key derivation. If Alice wants to derive a key from Bob, she will add this HMAC output to Bob's master public key. Conversely, if Bob wants to derive his own private key to match, he can add the same vlue to his original master private key.
 

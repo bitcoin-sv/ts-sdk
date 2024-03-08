@@ -1,8 +1,10 @@
-# Low-level: Serializing and Deserializing Bitcoin Scripts
+# Serializing and Deserializing Bitcoin Scripts
+
+Bitcoin scripts are the mechanism by which coins are locked and unlocked. They define the constraints and rules that govern transfers, and are therefore instrumental in the functionality of Bitcoin.
 
 In this low-level tutorial, we will learn how to serialize and deserialize Bitcoin scripts within your applications using the functions provided by the SDK.
 
-First, you will want to make sure you have installed the required dependencies for this tutorial.
+First, you will want to make sure you have installed the `@bsv/sdk` library and imported the necessary modules for this tutorial:
 
 - **Script** - this class will enable to you create a Bitcoin Script from various sources.
 - **PrivateKey** - Used in the demo of creating a P2PKH locking script.
