@@ -75,6 +75,8 @@ export default class PrivateKey extends BigNumber {
    * @param base - The base of number provided. By default is 10. Ignored if number is BigNumber.
    *
    * @param endian - The endianness provided. By default is 'big endian'. Ignored if number is BigNumber.
+   * 
+   * @param modN - Optional. Default 'apply. If 'apply', apply modN to input to guarantee a valid PrivateKey. If 'error', if input is out of field throw Error('Input is out of field'). If 'nocheck', assumes input is in field.
    *
    * @example
    * import PrivateKey from './PrivateKey';
@@ -84,7 +86,8 @@ export default class PrivateKey extends BigNumber {
   constructor (
     number: BigNumber | number | string | number[] = 0,
     base: number | 'be' | 'le' | 'hex' = 10,
-    endian: 'be' | 'le' = 'be'
+    endian: 'be' | 'le' = 'be',
+    modN: 'apply' | 'nocheck' | 'error' = 'apply'
   ) {
     if (number instanceof BigNumber) {
       super()
@@ -92,6 +95,35 @@ export default class PrivateKey extends BigNumber {
     } else {
       super(number, base, endian)
     }
+
+    if (modN !== 'nocheck') {
+      const check = this.checkInField()
+      if (!check.inField) {
+        if (modN === 'error') {
+          throw new Error('Input is out of field') 
+        }
+        // Force the PrivateKey BigNumber value to lie in the field limited by curve.n
+        BigNumber.move(this, check.modN)
+      }
+    }
+  }
+
+  /**
+   * A utility function to check that the value of this PrivateKey lies in the field limited by curve.n
+   * @returns { inField, modN } where modN is this PrivateKey's current BigNumber value mod curve.n, and inField is true only if modN equals current BigNumber value.
+   */
+  checkInField() : { inField: boolean, modN: BigNumber } {
+    const curve = new Curve()
+    const modN = this.mod(curve.n)
+    const inField = this.cmp(modN) === 0
+    return { inField, modN }
+  }
+
+  /**
+   * @returns true if the PrivateKey's current BigNumber value lies in the field limited by curve.n
+   */
+  isValid() : boolean {
+    return this.checkInField().inField
   }
 
   /**
@@ -161,13 +193,17 @@ export default class PrivateKey extends BigNumber {
    * 
    * @param prefix defaults to [0x80] for mainnet, set it to [0xef] for testnet.
    * 
+   * @throws Error('Value is out of field') if current BigNumber value is out of field limited by curve.n
+   * 
    * @example
    * const privateKey = PrivateKey.fromRandom();
    * const wif = privateKey.toWif();
    * const testnetWif = privateKey.toWif([0xef]);
    */
   toWif (prefix : number[] = [0x80]): string {
-    return toBase58Check([...this.toArray(), 1], prefix)
+    if (!this.isValid())
+      throw new Error('Value is out of field')
+    return toBase58Check([...this.toArray("be", 32), 1], prefix)
   }
 
   /**
