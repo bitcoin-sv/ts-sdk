@@ -552,15 +552,15 @@ export default class BigNumber {
   }
 
   /**
-   * The copy method creates and returns a separate identical copy of the BigNumber.
+   * The copy method copies the state of this BigNumber into an exsiting `dest` BigNumber.
    *
    * @method copy
-   * @param dest - The BigNumber instance that will be made into a copy.
+   * @param dest - The BigNumber instance that will be updated to become a copy.
    *
    * @example
    * const bn1 = new BigNumber('123456', 10, 'be');
    * const bn2 = new BigNumber();
-   * bn1.cop(bn2);
+   * bn1.copy(bn2);
    * // bn2 is now a BigNumber representing 123456
    */
   copy (dest: BigNumber): void {
