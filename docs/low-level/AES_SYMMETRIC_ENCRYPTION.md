@@ -34,14 +34,7 @@ We will use the `encrypt` and `decrypt` methods of the SymmetricKey class to tra
 
 ```ts
   const encryptedMessage = SymmetricKey.encrypt(messageToEncrypt)
-  const plaintext = SymmetricKey.decrypt(encryptedMessage) as number[]
-```
-
-Finally, to parse out the text as a UTF8 string from a number array, we'll use the `Utils.toUTF8()` function:
-
-```ts
-  const plaintextMessage = Utils.toUTF8(plaintext)
-  // console.log(plaintextMessage) --> 'Hello Alice, this is Bob!'
-```
+  const plaintext = SymmetricKey.decrypt(encryptedMessage, 'utf8')
+  // console.log(plaintext) --> 'Hello Alice, this is Bob!'
 
 This is just a basic demonstration of symmetric encryption/decryption using the BSV SDK, however the possibilities of what you can do are endless once you understand these fundamentals.
