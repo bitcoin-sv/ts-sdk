@@ -23,7 +23,7 @@ Next, we wil define the keys to be used and the data to encrypt. They `.encrypt(
 
 ```ts
   const symmetricKey = SymmetricKey.fromRandom()
-  const messageToEncrypt: number[] = Utils.toArray('Hello Alice, this is Bob!', 'utf8')
+  const messageToEncrypt = 'Hello Alice, this is Bob!'
 ```
 
 ### Encrypting and Decrypting
