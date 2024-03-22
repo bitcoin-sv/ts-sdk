@@ -321,9 +321,12 @@ export class Writer {
   }
 
   toArray(): number[] {
-    const ret = []
+    let ret = []
     for (const x of this.bufs) {
-      ret.push(...x)
+      if (x.length < 65536)
+        ret.push(...x)
+      else
+        ret = ret.concat(x)
     }
     return ret
   }
