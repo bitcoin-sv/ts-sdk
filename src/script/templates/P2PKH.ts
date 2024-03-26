@@ -74,8 +74,8 @@ export default class P2PKH implements ScriptTemplate {
         if (anyoneCanPay) {
           signatureScope |= TransactionSignature.SIGHASH_ANYONECANPAY
         }
-        const otherInputs = [...tx.inputs]
-        const [input] = otherInputs.splice(inputIndex, 1)
+        const input = tx.inputs[inputIndex]
+        const otherInputs = tx.inputs.filter((_, index) => index !== inputIndex)
         if (typeof input.sourceTransaction !== 'object') {
           // Question: Should the library support use-cases where the source transaction is not provided? This is to say, is it ever acceptable for someone to sign an input spending some output from a transaction they have not provided? Some elements (such as the satoshi value and output script) are always required. A merkle proof is also always required, and verifying it (while also verifying that the claimed output is contained within the claimed transaction) is also always required. This seems to require the entire input transaction.
           throw new Error(

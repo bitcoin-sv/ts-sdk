@@ -145,7 +145,7 @@ describe('Transaction', () => {
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(1, [], [{
         lockingScript: p2pkh.lock(publicKeyHash),
-        satoshis: new BigNumber(4000)
+        satoshis: 4000
       }], 0)
       const spendTx = new Transaction(1, [{
         sourceTransaction: sourceTx,
@@ -166,6 +166,53 @@ describe('Transaction', () => {
       // P2PKH unlocking scripts have two chunks (the signature and public key)
       expect(spendTx.inputs[0].unlockingScript.chunks.length).toBe(2)
     })
+    it('Signs a large number of unlocking script templates in a timely manner', async () => {
+      const privateKey = new PrivateKey(134)
+      const publicKey = new Curve().g.mul(privateKey)
+      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const p2pkh = new P2PKH()
+      const spendCount = 30
+      const output = {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        satoshis: 4000
+      }
+      const manyOutputs = [output]
+      for (let i = 1; i < spendCount; i++) {
+        manyOutputs[i] = {
+          lockingScript: p2pkh.lock(publicKeyHash),
+          satoshis: 4000
+        }
+      }
+      const sourceTx = new Transaction(1, [], manyOutputs, 0)
+      const input = {
+        sourceTransaction: sourceTx,
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: p2pkh.unlock(privateKey),
+        sequence: 0xffffffff
+      }
+      const manyInputs = [input]
+      for (let i = 1; i < spendCount; i++) {
+        manyInputs[i] = {
+          sourceTransaction: sourceTx,
+          sourceOutputIndex: i,
+          unlockingScriptTemplate: p2pkh.unlock(privateKey),
+          sequence: 0xffffffff
+        }
+      }
+      const spendTx = new Transaction(1, manyInputs, [{
+        satoshis: new BigNumber(1000),
+        lockingScript: p2pkh.lock(publicKeyHash)
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }], 0)
+      expect(spendTx.inputs[0].unlockingScript).not.toBeDefined()
+      await spendTx.fee()
+      await spendTx.sign()
+      expect(spendTx.inputs[0].unlockingScript).toBeDefined()
+      // P2PKH unlocking scripts have two chunks (the signature and public key)
+      expect(spendTx.inputs[0].unlockingScript.chunks.length).toBe(2)
+    })
     it('Throws an Error if signing before the fee is computed', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
@@ -173,7 +220,7 @@ describe('Transaction', () => {
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(1, [], [{
         lockingScript: p2pkh.lock(publicKeyHash),
-        satoshis: new BigNumber(4000)
+        satoshis: 4000
       }], 0)
       const spendTx = new Transaction(1, [{
         sourceTransaction: sourceTx,
