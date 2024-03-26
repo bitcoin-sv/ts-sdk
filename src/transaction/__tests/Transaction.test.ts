@@ -128,7 +128,7 @@ describe('Transaction', () => {
     it('should add an output', () => {
       const txOut = {
         lockingScript: new LockingScript(),
-        satoshis: new BigNumber(0)
+        satoshis: 1
       }
       const tx = new Transaction()
       expect(tx.outputs.length).toEqual(0)
@@ -153,7 +153,7 @@ describe('Transaction', () => {
         unlockingScriptTemplate: p2pkh.unlock(privateKey),
         sequence: 0xffffffff
       }], [{
-        satoshis: new BigNumber(1000),
+        satoshis: 1000,
         lockingScript: p2pkh.lock(publicKeyHash)
       }, {
         lockingScript: p2pkh.lock(publicKeyHash),
@@ -200,7 +200,7 @@ describe('Transaction', () => {
         }
       }
       const spendTx = new Transaction(1, manyInputs, [{
-        satoshis: new BigNumber(1000),
+        satoshis: 1000,
         lockingScript: p2pkh.lock(publicKeyHash)
       }, {
         lockingScript: p2pkh.lock(publicKeyHash),
@@ -228,7 +228,7 @@ describe('Transaction', () => {
         unlockingScriptTemplate: p2pkh.unlock(privateKey),
         sequence: 0xffffffff
       }], [{
-        satoshis: new BigNumber(1000),
+        satoshis: 1000,
         lockingScript: p2pkh.lock(publicKeyHash)
       }, {
         lockingScript: p2pkh.lock(publicKeyHash),
@@ -254,7 +254,7 @@ describe('Transaction', () => {
         unlockingScriptTemplate: p2pkh.unlock(privateKey),
         sequence: 0xffffffff
       }], [{
-        satoshis: new BigNumber(1000),
+        satoshis: 1000,
         lockingScript: p2pkh.lock(publicKeyHash)
       }, {
         lockingScript: p2pkh.lock(publicKeyHash),

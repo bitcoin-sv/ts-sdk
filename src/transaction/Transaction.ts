@@ -4,7 +4,6 @@ import UnlockingScript from '../script/UnlockingScript.js'
 import LockingScript from '../script/LockingScript.js'
 import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
 import { hash256 } from '../primitives/Hash.js'
-import BigNumber from '../primitives/BigNumber.js'
 import FeeModel from './FeeModel.js'
 import SatoshisPerKilobyte from './fee-models/SatoshisPerKilobyte.js'
 import { Broadcaster, BroadcastResponse, BroadcastFailure } from './Broadcaster.js'
@@ -54,6 +53,7 @@ export default class Transaction {
   lockTime: number
   metadata: Record<string, any>
   merklePath?: MerklePath
+  private cachedHash?: number[]
 
   /**
    * Creates a new transaction, linked to its inputs and their associated merkle paths, from a BEEF (BRC-62) structure.
@@ -221,6 +221,7 @@ export default class Transaction {
     if (typeof input.sequence === 'undefined') {
       input.sequence = 0xFFFFFFFF
     }
+    this.cachedHash = undefined
     this.inputs.push(input)
   }
 
@@ -230,6 +231,7 @@ export default class Transaction {
    * @param {TransactionOutput} output - The TransactionOutput object to add to the transaction.
    */
   addOutput(output: TransactionOutput): void {
+    this.cachedHash = undefined
     this.outputs.push(output)
   }
 
@@ -256,6 +258,7 @@ export default class Transaction {
    * TODO: Benford's law change distribution.
    */
   async fee(model?: FeeModel, changeDistribution: 'equal' | 'random' = 'equal'): Promise<void> {
+    this.cachedHash = undefined
     if (typeof model === 'undefined') {
       model = new SatoshisPerKilobyte(10)
     }
@@ -308,6 +311,7 @@ export default class Transaction {
    * Signs a transaction, hydrating all its unlocking scripts based on the provided script templates where they are available.
    */
   async sign(): Promise<void> {
+    this.cachedHash = undefined
     for (const out of this.outputs) {
       if (typeof out.satoshis === 'undefined') {
         if (out.change) {
@@ -443,7 +447,13 @@ export default class Transaction {
    * @returns {string | number[]} - The hash of the transaction in the specified format.
    */
   hash(enc?: 'hex'): number[] | string {
-    let hash = hash256(this.toBinary())
+    let hash
+    if (this.cachedHash) {
+      hash = this.cachedHash
+    } else {
+      hash = hash256(this.toBinary())
+      this.cachedHash = hash
+    }
     if (enc === 'hex') {
       return toHex(hash)
     } else {
@@ -458,7 +468,7 @@ export default class Transaction {
    * @returns {string | number[]} - The ID of the transaction in the specified format.
    */
   id(enc?: 'hex'): number[] | string {
-    const id = hash256(this.toBinary()) as number[]
+    const id = [...this.hash() as number[]]
     id.reverse()
     if (enc === 'hex') {
       return toHex(id)
