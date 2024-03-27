@@ -32,7 +32,7 @@ export default class P2PKH implements ScriptTemplate {
     return new LockingScript([
       { op: OP.OP_DUP },
       { op: OP.OP_HASH160 },
-      { op: pubkeyhash.length, data },
+      { op: data.length, data },
       { op: OP.OP_EQUALVERIFY },
       { op: OP.OP_CHECKSIG }
     ])
