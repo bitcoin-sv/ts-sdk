@@ -97,7 +97,7 @@ export default class MerklePath {
     this.path = path
 
     // store all of the legal offsets which we expect given the txid indices.
-    let legalOffsets = Array(this.path.length).fill(0).map(() => new Set())
+    const legalOffsets = Array(this.path.length).fill(0).map(() => new Set())
     this.path.map((leaves, height) => {
       if (leaves.length === 0) {
         throw new Error(`Empty level at height: ${height}`)
@@ -107,7 +107,7 @@ export default class MerklePath {
         if (offsetsAtThisHeight.has(leaf.offset)) throw new Error(`Duplicate offset: ${leaf.offset}, at height: ${height}`)
         offsetsAtThisHeight.add(leaf.offset)
         if (height === 0) {
-          if (leaf.duplicate !== true) {
+          if (!leaf.duplicate) {
             for (let h = 1; h < this.path.length; h++) {
               legalOffsets[h].add(leaf.offset >> h ^ 1)
             }
@@ -188,7 +188,7 @@ export default class MerklePath {
     }
     // Calculate the root using the index as a way to determine which direction to concatenate.
     const hash = (m: string): string => toHex((
-      hash256(toArray(m, 'hex').reverse()) as number[]
+      hash256(toArray(m, 'hex').reverse())
     ).reverse())
     let workingHash = txid
     for (let height = 0; height < this.path.length; height++) {

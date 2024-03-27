@@ -194,7 +194,6 @@ export default class BigNumber {
     base: number | 'be' | 'le' | 'hex' = 10,
     endian: 'be' | 'le' = 'be'
   ) {
-
     this.negative = 0
     this.words = []
     this.length = 0

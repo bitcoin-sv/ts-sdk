@@ -39,7 +39,7 @@ export default class Signature {
    * @example
    * const signature = Signature.fromDER('30440220018c1f5502f8...', 'hex');
    */
-  static fromDER(data: number[] | string, enc?: 'hex' | 'base64'): Signature {
+  static fromDER (data: number[] | string, enc?: 'hex' | 'base64'): Signature {
     const getLength = (buf, p): number => {
       const initial = buf[p.place++]
       if ((initial & 0x80) === 0) {
@@ -51,7 +51,7 @@ export default class Signature {
 
     class Position {
       place: number
-      constructor() {
+      constructor () {
         this.place = 0
       }
     }
@@ -120,7 +120,7 @@ export default class Signature {
    * const s = new BigNumber('564745627577...');
    * const signature = new Signature(r, s);
    */
-  constructor(r: BigNumber, s: BigNumber) {
+  constructor (r: BigNumber, s: BigNumber) {
     this.r = r
     this.s = s
   }
@@ -142,7 +142,7 @@ export default class Signature {
    * const publicKey = PublicKey.fromString('04188ca1050...');
    * const isVerified = signature.verify(msg, publicKey);
    */
-  verify(msg: number[] | string, key: PublicKey, enc?: 'hex'): boolean {
+  verify (msg: number[] | string, key: PublicKey, enc?: 'hex'): boolean {
     const msgHash = new BigNumber(sha256(msg, enc), 16)
     return verify(msgHash, this, key)
   }
@@ -162,7 +162,7 @@ export default class Signature {
    * @example
    * const der = signature.toString('base64');
    */
-  toString(enc?: 'hex' | 'base64') {
+  toString (enc?: 'hex' | 'base64') {
     return this.toDER(enc)
   }
 
@@ -180,7 +180,7 @@ export default class Signature {
    * @example
    * const der = signature.toDER('hex');
    */
-  toDER(enc?: 'hex' | 'base64'): number[] | string {
+  toDER (enc?: 'hex' | 'base64'): number[] | string {
     const constructLength = (arr, len): void => {
       if (len < 0x80) {
         arr.push(len)
