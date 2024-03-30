@@ -57,14 +57,6 @@ export default class Signature {
     }
     data = toArray(data, enc)
 
-    // Support compact signatures
-    if (data.length === 65) {
-      return new Signature(
-        new BigNumber(data.slice(1, 33)),
-        new BigNumber(data.slice(33, 65))
-      )
-    }
-
     const p = new Position()
     if (data[p.place++] !== 0x30) {
       throw new Error('Signature DER must start with 0x30')
@@ -105,6 +97,40 @@ export default class Signature {
     return new Signature(
       new BigNumber(r),
       new BigNumber(s)
+    )
+  }
+
+
+  /**
+   * Takes an array of numbers or a string and returns a new Signature instance.
+   * This method will throw an error if the Compact encoding is invalid.
+   * If a string is provided, it is assumed to represent a hexadecimal sequence.
+   * compactByte value 27-31 means compressed public key.
+   * 32-35 means uncompressed public key.
+   * The range represents the recovery param which can be 0,1,2,3,4.
+   * We could support recovery functions in future if there's demand.
+   *
+   * @static
+   * @method fromCompact
+   * @param data - The sequence to decode from Compact encoding.
+   * @param enc - The encoding of the data string.
+   * @returns The decoded data in the form of Signature instance.
+   *
+   * @example
+   * const signature = Signature.fromCompact('1b18c1f5502f8...', 'hex');
+   */
+  static fromCompact(data: number[] | string, enc?: 'hex' | 'base64'): Signature {
+    data = toArray(data, enc)
+    if (data.length !== 65) {
+      throw new Error('Invalid Compact Signature')
+    }
+    const compactByte = data[0]
+    if (compactByte < 27 || compactByte >= 35) {
+      throw new Error('Invalid Compact Byte')
+    }
+    return new Signature(
+      new BigNumber(data.slice(1, 33)),
+      new BigNumber(data.slice(33, 65))
     )
   }
 
