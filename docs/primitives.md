@@ -6080,10 +6080,14 @@ export default class Signature {
     r: BigNumber;
     s: BigNumber;
     static fromDER(data: number[] | string, enc?: "hex" | "base64"): Signature 
+    static fromCompact(data: number[] | string, enc?: "hex" | "base64"): Signature 
     constructor(r: BigNumber, s: BigNumber) 
     verify(msg: number[] | string, key: PublicKey, enc?: "hex"): boolean 
     toString(enc?: "hex" | "base64") 
     toDER(enc?: "hex" | "base64"): number[] | string 
+    toCompact(recovery: number, compressed: boolean, enc?: "hex" | "base64"): number[] | string 
+    RecoverPublicKey(recovery: number, e: BigNumber): PublicKey 
+    CalculateRecoveryFactor(pubkey: PublicKey, msgHash: BigNumber): number 
 }
 ```
 
@@ -6114,6 +6118,92 @@ const s = new BigNumber('564745627577...');
 const signature = new Signature(r, s);
 ```
 
+#### Method CalculateRecoveryFactor
+
+Calculates the recovery factor which will work for a particular public key and message hash.
+This method will return the recovery factor if it finds a valid recovery factor.
+If it does not find a valid recovery factor, it will throw an error.
+The recovery factor is a number between 0 and 3.
+
+```ts
+CalculateRecoveryFactor(pubkey: PublicKey, msgHash: BigNumber): number 
+```
+
+Returns
+
+the recovery factor: number
+/
+
+Argument Details
+
++ **msgHash**
+  + The message hash.
+
+Example
+
+```ts
+const recovery = signature.CalculateRecoveryFactor(publicKey, msgHash);
+```
+
+#### Method RecoverPublicKey
+
+Recovers the public key from a signature.
+This method will return the public key if it finds a valid public key.
+If it does not find a valid public key, it will throw an error.
+The recovery factor is a number between 0 and 3.
+
+```ts
+RecoverPublicKey(recovery: number, e: BigNumber): PublicKey 
+```
+
+Returns
+
+The public key associated with the signature.
+
+Argument Details
+
++ **recovery**
+  + The recovery factor.
++ **e**
+  + The message hash.
+
+Example
+
+```ts
+const publicKey = signature.RecoverPublicKey(0, msgHash);
+```
+
+#### Method fromCompact
+
+Takes an array of numbers or a string and returns a new Signature instance.
+This method will throw an error if the Compact encoding is invalid.
+If a string is provided, it is assumed to represent a hexadecimal sequence.
+compactByte value 27-31 means compressed public key.
+32-35 means uncompressed public key.
+The range represents the recovery param which can be 0,1,2,3,4.
+We could support recovery functions in future if there's demand.
+
+```ts
+static fromCompact(data: number[] | string, enc?: "hex" | "base64"): Signature 
+```
+
+Returns
+
+The decoded data in the form of Signature instance.
+
+Argument Details
+
++ **data**
+  + The sequence to decode from Compact encoding.
++ **enc**
+  + The encoding of the data string.
+
+Example
+
+```ts
+const signature = Signature.fromCompact('1b18c1f5502f8...', 'hex');
+```
+
 #### Method fromDER
 
 Takes an array of numbers or a string and returns a new Signature instance.
@@ -6139,6 +6229,33 @@ Example
 
 ```ts
 const signature = Signature.fromDER('30440220018c1f5502f8...', 'hex');
+```
+
+#### Method toCompact
+
+Converts an instance of Signature into Compact encoding.
+
+If the encoding parameter is set to 'hex', the function will return a hex string.
+If 'base64', it will return a base64 string.
+Otherwise, it will return an array of numbers.
+
+```ts
+toCompact(recovery: number, compressed: boolean, enc?: "hex" | "base64"): number[] | string 
+```
+
+Returns
+
+The current instance in DER encoding.
+
+Argument Details
+
++ **enc**
+  + The encoding to use for the output.
+
+Example
+
+```ts
+const compact = signature.toCompact(3, true, 'base64');
 ```
 
 #### Method toDER
@@ -7364,10 +7481,12 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 fromBase58 = (str: string): number[] => {
-    if (!str || typeof str !== "string")
+    if (!str || typeof str !== "string") {
         throw new Error(`Expected base58 string but got “${str}”`);
-    if (str.match(/[IOl0]/gmu))
+    }
+    if (str.match(/[IOl0]/gmu)) {
         throw new Error(`Invalid base58 character “${str.match(/[IOl0]/gmu)}”`);
+    }
     const lz = str.match(/^1+/gmu);
     const psz: number = lz ? lz[0].length : 0;
     const size = ((str.length - psz) * (Math.log(58) / Math.log(256)) + 1) >>> 0;
@@ -7399,8 +7518,9 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 toBase58 = (bin: number[]): string => {
     const base58Map = Array(256).fill(-1);
-    for (let i = 0; i < base58chars.length; ++i)
+    for (let i = 0; i < base58chars.length; ++i) {
         base58Map[base58chars.charCodeAt(i)] = i;
+    }
     const result = [];
     for (const byte of bin) {
         let carry = byte;
@@ -7414,11 +7534,12 @@ toBase58 = (bin: number[]): string => {
             carry = (carry / 58) | 0;
         }
     }
-    for (const byte of bin)
+    for (const byte of bin) {
         if (byte)
             break;
         else
             result.push("1".charCodeAt(0));
+    }
     result.reverse();
     return String.fromCharCode(...result);
 }
@@ -7431,7 +7552,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 toBase58Check = (bin: number[], prefix: number[] = [0]) => {
-    let hash = hash256([...prefix, ...bin]) as number[];
+    let hash = hash256([...prefix, ...bin]);
     hash = [...prefix, ...bin, ...hash.slice(0, 4)];
     return toBase58(hash);
 }
@@ -7448,7 +7569,7 @@ fromBase58Check = (str: string, enc?: "hex", prefixLength: number = 1) => {
     let prefix: string | number[] = bin.slice(0, prefixLength);
     let data: string | number[] = bin.slice(prefixLength, -4);
     let hash = [...prefix, ...data];
-    hash = hash256(hash) as number[];
+    hash = hash256(hash);
     bin.slice(-4).forEach((check, index) => {
         if (check !== hash[index]) {
             throw new Error("Invalid checksum");

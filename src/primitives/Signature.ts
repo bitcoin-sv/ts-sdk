@@ -3,6 +3,8 @@ import PublicKey from './PublicKey.js'
 import { verify } from './ECDSA.js'
 import { sha256 } from './Hash.js'
 import { toArray, toHex, toBase64 } from './utils.js'
+import Point from './Point.js'
+import Curve from './Curve.js'
 
 /**
  * Represents a digital signature.
@@ -57,14 +59,6 @@ export default class Signature {
     }
     data = toArray(data, enc)
 
-    // Support compact signatures
-    if (data.length === 65) {
-      return new Signature(
-        new BigNumber(data.slice(1, 33)),
-        new BigNumber(data.slice(33, 65))
-      )
-    }
-
     const p = new Position()
     if (data[p.place++] !== 0x30) {
       throw new Error('Signature DER must start with 0x30')
@@ -105,6 +99,39 @@ export default class Signature {
     return new Signature(
       new BigNumber(r),
       new BigNumber(s)
+    )
+  }
+
+  /**
+   * Takes an array of numbers or a string and returns a new Signature instance.
+   * This method will throw an error if the Compact encoding is invalid.
+   * If a string is provided, it is assumed to represent a hexadecimal sequence.
+   * compactByte value 27-31 means compressed public key.
+   * 32-35 means uncompressed public key.
+   * The range represents the recovery param which can be 0,1,2,3,4.
+   * We could support recovery functions in future if there's demand.
+   *
+   * @static
+   * @method fromCompact
+   * @param data - The sequence to decode from Compact encoding.
+   * @param enc - The encoding of the data string.
+   * @returns The decoded data in the form of Signature instance.
+   *
+   * @example
+   * const signature = Signature.fromCompact('1b18c1f5502f8...', 'hex');
+   */
+  static fromCompact (data: number[] | string, enc?: 'hex' | 'base64'): Signature {
+    data = toArray(data, enc)
+    if (data.length !== 65) {
+      throw new Error('Invalid Compact Signature')
+    }
+    const compactByte = data[0]
+    if (compactByte < 27 || compactByte >= 35) {
+      throw new Error('Invalid Compact Byte')
+    }
+    return new Signature(
+      new BigNumber(data.slice(1, 33)),
+      new BigNumber(data.slice(33, 65))
     )
   }
 
@@ -231,5 +258,122 @@ export default class Signature {
     } else {
       return res
     }
+  }
+
+  /**
+   * Converts an instance of Signature into Compact encoding.
+   *
+   * If the encoding parameter is set to 'hex', the function will return a hex string.
+   * If 'base64', it will return a base64 string.
+   * Otherwise, it will return an array of numbers.
+   *
+   * @method toCompact
+   * @param enc - The encoding to use for the output.
+   * @returns The current instance in DER encoding.
+   *
+   * @example
+   * const compact = signature.toCompact(3, true, 'base64');
+   */
+  toCompact (recovery: number, compressed: boolean, enc?: 'hex' | 'base64'): number[] | string {
+    if (recovery < 0 || recovery > 3) throw new Error('Invalid recovery param')
+    if (typeof compressed !== 'boolean') throw new Error('Invalid compressed param')
+    let compactByte = 27 + recovery
+    if (compressed) {
+      compactByte += 4
+    }
+    let arr = [compactByte]
+    arr = arr.concat(this.r.toArray())
+    arr = arr.concat(this.s.toArray())
+    if (enc === 'hex') {
+      return toHex(arr)
+    } else if (enc === 'base64') {
+      return toBase64(arr)
+    } else {
+      return arr
+    }
+  }
+
+  /**
+   * Recovers the public key from a signature.
+   * This method will return the public key if it finds a valid public key.
+   * If it does not find a valid public key, it will throw an error.
+   * The recovery factor is a number between 0 and 3.
+   * @method RecoverPublicKey
+   * @param recovery - The recovery factor.
+   * @param e - The message hash.
+   * @returns The public key associated with the signature.
+   *
+   * @example
+   * const publicKey = signature.RecoverPublicKey(0, msgHash);
+   */
+  RecoverPublicKey (recovery: number, e: BigNumber): PublicKey {
+    const r = this.r
+    const s = this.s
+
+    // A set LSB signifies that the y-coordinate is odd
+    const isYOdd = !!(recovery & 1)
+
+    // The more significant bit specifies whether we should use the
+    // first or second candidate key.
+    const isSecondKey = recovery >> 1
+
+    const curve = new Curve()
+    const n = curve.n
+    const G = curve.g
+
+    // 1.1 LEt x = r + jn
+    const x = isSecondKey ? r.add(n) : r
+    const R = Point.fromX(x, isYOdd)
+
+    // 1.4 Check that nR is at infinity
+    const nR = R.mul(n)
+    if (!nR.isInfinity()) {
+      throw new Error('nR is not at infinity')
+    }
+
+    // Compute -e from e
+    const eNeg = e.neg().umod(n)
+
+    // 1.6.1 Compute Q = r^-1 (sR - eG)
+    // Q = r^-1 (sR + -eG)
+    const rInv = r.invm(n)
+
+    // const Q = R.multiplyTwo(s, G, eNeg).mul(rInv)
+    const Q = R.mul(s)
+      .add(G.mul(eNeg))
+      .mul(rInv)
+
+    const pubKey = new PublicKey(Q)
+    pubKey.validate()
+
+    return pubKey
+  }
+
+  /**
+   * Calculates the recovery factor which will work for a particular public key and message hash.
+   * This method will return the recovery factor if it finds a valid recovery factor.
+   * If it does not find a valid recovery factor, it will throw an error.
+   * The recovery factor is a number between 0 and 3.
+   *
+   * @method CalculateRecoveryFactor
+   * @param msgHash - The message hash.
+   * @returns the recovery factor: number
+   * /
+   * @example
+   * const recovery = signature.CalculateRecoveryFactor(publicKey, msgHash);
+   */
+  CalculateRecoveryFactor (pubkey: PublicKey, msgHash: BigNumber): number {
+    for (let recovery = 0; recovery < 4; recovery++) {
+      let Qprime
+      try {
+        Qprime = this.RecoverPublicKey(recovery, msgHash)
+      } catch (e) {
+        continue
+      }
+      if (pubkey.eq(Qprime)) {
+        return recovery
+      }
+    }
+    throw new Error('Unable to find valid recovery factor')
   }
 }
