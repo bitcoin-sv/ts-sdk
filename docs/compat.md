@@ -709,7 +709,7 @@ Argument Details
 
 #### Method ivkEkM
 
-Generates the initialization vector (iv), encryption key (kE), and MAC key (kM) 
+Generates the initialization vector (iv), encryption key (kE), and MAC key (kM)
 using the sender's private key and receiver's public key.
 
 ```ts
@@ -761,7 +761,7 @@ magicHash = (messageBuf: number[]): number[] => {
     bw.writeVarIntNum(messageBuf.length);
     bw.write(messageBuf);
     const buf = bw.toArray();
-    const hashBuf = Hash.hash256(buf) as number[];
+    const hashBuf = Hash.hash256(buf);
     return hashBuf;
 }
 ```
@@ -2845,9 +2845,9 @@ wordList = {
         "zebra",
         "zero",
         "zone",
-        "zoo",
+        "zoo"
     ],
-    space: " ",
+    space: " "
 }
 ```
 

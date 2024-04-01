@@ -23,7 +23,7 @@ import DRBG from './DRBG.js'
  * let msg = new BigNumber('1234567890abcdef', 16);
  * let truncatedMsg = truncateToN(msg);
  */
-function truncateToN(msg: BigNumber, truncOnly?: boolean): BigNumber {
+function truncateToN (msg: BigNumber, truncOnly?: boolean): BigNumber {
   const curve = new Curve()
   const delta = msg.byteLength() * 8 - curve.n.bitLength()
   if (delta > 0) { msg = msg.ushrn(delta) }

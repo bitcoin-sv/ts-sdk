@@ -3,6 +3,7 @@ import { toArray } from '../../../dist/cjs/src/primitives/utils'
 import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
 import PublicKey from '../../../dist/cjs/src/primitives/PublicKey'
 import Signature from '../../../dist/cjs/src/primitives/Signature'
+import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
 
 describe('BSM', () => {
     describe('magicHash', () => {
@@ -33,6 +34,16 @@ describe('BSM', () => {
             const signature = Signature.fromCompact('IAV89EkfHSzAIA8cEWbbKHUYzJqcShkpWaXGJ5+mf4+YIlf3XNlr0bj9X60sNe1A7+x9qyk+zmXropMDY4370n8=', 'base64')
             const publicKey = PublicKey.fromString('03d4d1a6c5d8c03b0e671bc1891b69afaecb40c0686188fe9019f93581b43e8334')
             expect(verify(message, signature, publicKey)).toBe(true)
+        })
+        it('Should be able to calculate the recovery number for a signature and public key', () => {
+            const message = toArray("Texas", 'utf8')
+            const signature = Signature.fromCompact('IAV89EkfHSzAIA8cEWbbKHUYzJqcShkpWaXGJ5+mf4+YIlf3XNlr0bj9X60sNe1A7+x9qyk+zmXropMDY4370n8=', 'base64')
+            const publicKey = PublicKey.fromString('03d4d1a6c5d8c03b0e671bc1891b69afaecb40c0686188fe9019f93581b43e8334')
+            const msgHash = new BigNumber(magicHash(message))
+            const recovery = signature.CalculateRecoveryFactor(publicKey, msgHash)
+            expect(recovery).toBe(1)
+            const recoveredPubkey = signature.RecoverPublicKey(recovery, msgHash) as PublicKey
+            expect(recoveredPubkey.toDER()).toEqual(publicKey.toDER())
         })
     })
 })

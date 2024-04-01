@@ -1,24 +1,27 @@
 # API
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+## Interfaces
 
 ## Classes
 
 | | |
 | --- | --- |
-| [BasePoint](#class-basepoint) | [RIPEMD160](#class-ripemd160) |
-| [BigNumber](#class-bignumber) | [Reader](#class-reader) |
-| [Curve](#class-curve) | [ReductionContext](#class-reductioncontext) |
-| [DRBG](#class-drbg) | [SHA1](#class-sha1) |
-| [JacobianPoint](#class-jacobianpoint) | [SHA256](#class-sha256) |
-| [K256](#class-k256) | [SHA256HMAC](#class-sha256hmac) |
-| [Mersenne](#class-mersenne) | [SHA512](#class-sha512) |
-| [MontgomoryMethod](#class-montgomorymethod) | [SHA512HMAC](#class-sha512hmac) |
-| [Point](#class-point) | [Signature](#class-signature) |
-| [PrivateKey](#class-privatekey) | [SymmetricKey](#class-symmetrickey) |
+| [BasePoint](#class-basepoint) | [Reader](#class-reader) |
+| [BigNumber](#class-bignumber) | [ReductionContext](#class-reductioncontext) |
+| [Curve](#class-curve) | [SHA1](#class-sha1) |
+| [DRBG](#class-drbg) | [SHA256](#class-sha256) |
+| [JacobianPoint](#class-jacobianpoint) | [SHA256HMAC](#class-sha256hmac) |
+| [K256](#class-k256) | [SHA512](#class-sha512) |
+| [Mersenne](#class-mersenne) | [SHA512HMAC](#class-sha512hmac) |
+| [MontgomoryMethod](#class-montgomorymethod) | [Signature](#class-signature) |
+| [Point](#class-point) | [SymmetricKey](#class-symmetrickey) |
+| [PrivateKey](#class-privatekey) | [TransactionSignature](#class-transactionsignature) |
 | [PublicKey](#class-publickey) | [Writer](#class-writer) |
+| [RIPEMD160](#class-ripemd160) |  |
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 
@@ -166,7 +169,7 @@ mersenne.split(new BigNumber('2345', 16), new BigNumber());
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: K256
@@ -259,7 +262,7 @@ k256.split(input, output);
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: ReductionContext
@@ -792,7 +795,7 @@ this.verify2(new BigNumber(10).toRed(this), new BigNumber(20)); //throws an Erro
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: BigNumber
@@ -1350,7 +1353,7 @@ let result = a.cmpn(10); // 1
 
 #### Method copy
 
-The copy method creates and returns a separate identical copy of the BigNumber.
+The copy method copies the state of this BigNumber into an exsiting `dest` BigNumber.
 
 ```ts
 copy(dest: BigNumber): void 
@@ -1359,14 +1362,14 @@ copy(dest: BigNumber): void
 Argument Details
 
 + **dest**
-  + The BigNumber instance that will be made into a copy.
+  + The BigNumber instance that will be updated to become a copy.
 
 Example
 
 ```ts
 const bn1 = new BigNumber('123456', 10, 'be');
 const bn2 = new BigNumber();
-bn1.cop(bn2);
+bn1.copy(bn2);
 // bn2 is now a BigNumber representing 123456
 ```
 
@@ -4178,7 +4181,7 @@ const zeroBits = bn.zeroBits(); // 3
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: MontgomoryMethod
@@ -4389,7 +4392,7 @@ const product = montMethod.mul(a, b);
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: BasePoint
@@ -4416,7 +4419,7 @@ export default abstract class BasePoint {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: JacobianPoint
@@ -4743,7 +4746,7 @@ const pointP = pointJ.toP();  // The point in affine coordinates.
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: RIPEMD160
@@ -4783,7 +4786,7 @@ h: number[]
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: SHA256
@@ -4842,7 +4845,7 @@ k: number[]
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: SHA1
@@ -4900,7 +4903,7 @@ k: number[]
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: SHA512
@@ -4959,7 +4962,7 @@ k: number[]
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: SHA256HMAC
@@ -5105,7 +5108,7 @@ myHMAC.update('deadbeef', 'hex');
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: SHA512HMAC
@@ -5251,7 +5254,7 @@ myHMAC.update('deadbeef', 'hex');
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: Writer
@@ -5284,7 +5287,7 @@ export class Writer {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: Reader
@@ -5315,7 +5318,7 @@ export class Reader {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: Point
@@ -5896,7 +5899,7 @@ const isValid = aPoint.validate();
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: Curve
@@ -5964,7 +5967,7 @@ export default class Curve {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: DRBG
@@ -6060,7 +6063,7 @@ drbg.update('e13af...');
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: Signature
@@ -6077,10 +6080,14 @@ export default class Signature {
     r: BigNumber;
     s: BigNumber;
     static fromDER(data: number[] | string, enc?: "hex" | "base64"): Signature 
+    static fromCompact(data: number[] | string, enc?: "hex" | "base64"): Signature 
     constructor(r: BigNumber, s: BigNumber) 
     verify(msg: number[] | string, key: PublicKey, enc?: "hex"): boolean 
     toString(enc?: "hex" | "base64") 
     toDER(enc?: "hex" | "base64"): number[] | string 
+    toCompact(recovery: number, compressed: boolean, enc?: "hex" | "base64"): number[] | string 
+    RecoverPublicKey(recovery: number, e: BigNumber): PublicKey 
+    CalculateRecoveryFactor(pubkey: PublicKey, msgHash: BigNumber): number 
 }
 ```
 
@@ -6111,6 +6118,92 @@ const s = new BigNumber('564745627577...');
 const signature = new Signature(r, s);
 ```
 
+#### Method CalculateRecoveryFactor
+
+Calculates the recovery factor which will work for a particular public key and message hash.
+This method will return the recovery factor if it finds a valid recovery factor.
+If it does not find a valid recovery factor, it will throw an error.
+The recovery factor is a number between 0 and 3.
+
+```ts
+CalculateRecoveryFactor(pubkey: PublicKey, msgHash: BigNumber): number 
+```
+
+Returns
+
+the recovery factor: number
+/
+
+Argument Details
+
++ **msgHash**
+  + The message hash.
+
+Example
+
+```ts
+const recovery = signature.CalculateRecoveryFactor(publicKey, msgHash);
+```
+
+#### Method RecoverPublicKey
+
+Recovers the public key from a signature.
+This method will return the public key if it finds a valid public key.
+If it does not find a valid public key, it will throw an error.
+The recovery factor is a number between 0 and 3.
+
+```ts
+RecoverPublicKey(recovery: number, e: BigNumber): PublicKey 
+```
+
+Returns
+
+The public key associated with the signature.
+
+Argument Details
+
++ **recovery**
+  + The recovery factor.
++ **e**
+  + The message hash.
+
+Example
+
+```ts
+const publicKey = signature.RecoverPublicKey(0, msgHash);
+```
+
+#### Method fromCompact
+
+Takes an array of numbers or a string and returns a new Signature instance.
+This method will throw an error if the Compact encoding is invalid.
+If a string is provided, it is assumed to represent a hexadecimal sequence.
+compactByte value 27-31 means compressed public key.
+32-35 means uncompressed public key.
+The range represents the recovery param which can be 0,1,2,3,4.
+We could support recovery functions in future if there's demand.
+
+```ts
+static fromCompact(data: number[] | string, enc?: "hex" | "base64"): Signature 
+```
+
+Returns
+
+The decoded data in the form of Signature instance.
+
+Argument Details
+
++ **data**
+  + The sequence to decode from Compact encoding.
++ **enc**
+  + The encoding of the data string.
+
+Example
+
+```ts
+const signature = Signature.fromCompact('1b18c1f5502f8...', 'hex');
+```
+
 #### Method fromDER
 
 Takes an array of numbers or a string and returns a new Signature instance.
@@ -6136,6 +6229,33 @@ Example
 
 ```ts
 const signature = Signature.fromDER('30440220018c1f5502f8...', 'hex');
+```
+
+#### Method toCompact
+
+Converts an instance of Signature into Compact encoding.
+
+If the encoding parameter is set to 'hex', the function will return a hex string.
+If 'base64', it will return a base64 string.
+Otherwise, it will return an array of numbers.
+
+```ts
+toCompact(recovery: number, compressed: boolean, enc?: "hex" | "base64"): number[] | string 
+```
+
+Returns
+
+The current instance in DER encoding.
+
+Argument Details
+
++ **enc**
+  + The encoding to use for the output.
+
+Example
+
+```ts
+const compact = signature.toCompact(3, true, 'base64');
 ```
 
 #### Method toDER
@@ -6229,7 +6349,7 @@ const isVerified = signature.verify(msg, publicKey);
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: PrivateKey
@@ -6244,7 +6364,12 @@ export default class PrivateKey extends BigNumber {
     static fromRandom(): PrivateKey 
     static fromString(str: string, base: number | "hex"): PrivateKey 
     static fromWif(wif: string, prefixLength: number = 1): PrivateKey 
-    constructor(number: BigNumber | number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
+    constructor(number: BigNumber | number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be", modN: "apply" | "nocheck" | "error" = "apply") 
+    checkInField(): {
+        inField: boolean;
+        modN: BigNumber;
+    } 
+    isValid(): boolean 
     sign(msg: number[] | string, enc?: "hex" | "utf8", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toPublicKey(): PublicKey 
@@ -6262,7 +6387,7 @@ export default class PrivateKey extends BigNumber {
 #### Constructor
 
 ```ts
-constructor(number: BigNumber | number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
+constructor(number: BigNumber | number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be", modN: "apply" | "nocheck" | "error" = "apply") 
 ```
 
 Argument Details
@@ -6273,6 +6398,8 @@ Argument Details
   + The base of number provided. By default is 10. Ignored if number is BigNumber.
 + **endian**
   + The endianness provided. By default is 'big endian'. Ignored if number is BigNumber.
++ **modN**
+  + Optional. Default 'apply. If 'apply', apply modN to input to guarantee a valid PrivateKey. If 'error', if input is out of field throw Error('Input is out of field'). If 'nocheck', assumes input is in field.
 
 Example
 
@@ -6281,6 +6408,21 @@ import PrivateKey from './PrivateKey';
 import BigNumber from './BigNumber';
 const privKey = new PrivateKey(new BigNumber('123456', 10, 'be'));
 ```
+
+#### Method checkInField
+
+A utility function to check that the value of this PrivateKey lies in the field limited by curve.n
+
+```ts
+checkInField(): {
+    inField: boolean;
+    modN: BigNumber;
+} 
+```
+
+Returns
+
+, modN } where modN is this PrivateKey's current BigNumber value mod curve.n, and inField is true only if modN equals current BigNumber value.
 
 #### Method deriveChild
 
@@ -6394,6 +6536,16 @@ Throws
 
 Will throw an error if the string is not a valid WIF.
 
+#### Method isValid
+
+```ts
+isValid(): boolean 
+```
+
+Returns
+
+true if the PrivateKey's current BigNumber value lies in the field limited by curve.n
+
 #### Method sign
 
 Signs a message using the private key.
@@ -6490,6 +6642,10 @@ Argument Details
 + **prefix**
   + defaults to [0x80] for mainnet, set it to [0xef] for testnet.
 
+Throws
+
+Error('Value is out of field') if current BigNumber value is out of field limited by curve.n
+
 Example
 
 ```ts
@@ -6529,7 +6685,7 @@ const isSignatureValid = privateKey.verify('Hello, World!', signature);
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: PublicKey
@@ -6765,7 +6921,7 @@ const isVerified = myPubKey.verify(myMessage, mySignature)
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: SymmetricKey
@@ -6866,7 +7022,56 @@ const symmetricKey = SymmetricKey.fromRandom();
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Class: TransactionSignature
+
+```ts
+export default class TransactionSignature extends Signature {
+    public static readonly SIGHASH_ALL = 1;
+    public static readonly SIGHASH_NONE = 2;
+    public static readonly SIGHASH_SINGLE = 3;
+    public static readonly SIGHASH_FORKID = 64;
+    public static readonly SIGHASH_ANYONECANPAY = 128;
+    scope: number;
+    static format(params: {
+        sourceTXID: string;
+        sourceOutputIndex: number;
+        sourceSatoshis: number;
+        transactionVersion: number;
+        otherInputs: TransactionInput[];
+        outputs: TransactionOutput[];
+        inputIndex: number;
+        subscript: Script;
+        inputSequence: number;
+        lockTime: number;
+        scope: number;
+    }): number[] 
+    static fromChecksigFormat(buf: number[]): TransactionSignature 
+    constructor(r: BigNumber, s: BigNumber, scope: number) 
+    public hasLowS(): boolean 
+    toChecksigFormat(): number[] 
+}
+```
+
+<details>
+
+<summary>Class TransactionSignature Details</summary>
+
+#### Method hasLowS
+
+Compares to bitcoind's IsLowDERSignature
+See also Ecdsa signature algorithm which enforces this.
+See also Bip 62, "low S values in signatures"
+
+```ts
+public hasLowS(): boolean 
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ## Functions
@@ -6881,7 +7086,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 | [toArray](#function-toarray) |
 | [toBase64](#function-tobase64) |
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 
@@ -6906,7 +7111,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Function: pbkdf2
@@ -6940,7 +7145,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Function: toBase64
@@ -6973,7 +7178,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Function: AES
@@ -6982,7 +7187,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 export function AES(input: number[], key: number[]): number[] 
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Function: ghash
@@ -6991,7 +7196,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 export function ghash(input: number[], hashSubKey: number[]): number[] 
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Function: AESGCM
@@ -7003,7 +7208,7 @@ export function AESGCM(plainText: number[], additionalAuthenticatedData: number[
 } 
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Function: AESGCMDecrypt
@@ -7012,7 +7217,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 export function AESGCMDecrypt(cipherText: number[], additionalAuthenticatedData: number[], initializationVector: number[], authenticationTag: number[], key: number[]): number[] | null 
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ## Variables
@@ -7029,7 +7234,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 | [hash256](#variable-hash256) | [sha512hmac](#variable-sha512hmac) |  |
 | [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [sign](#variable-sign) |  |
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 
@@ -7041,7 +7246,7 @@ ripemd160 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: sha1
@@ -7052,7 +7257,7 @@ sha1 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: sha256
@@ -7063,7 +7268,7 @@ sha256 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: sha512
@@ -7074,7 +7279,7 @@ sha512 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: hash256
@@ -7086,7 +7291,7 @@ hash256 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: hash160
@@ -7098,7 +7303,7 @@ hash160 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: sha256hmac
@@ -7109,7 +7314,7 @@ sha256hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): numb
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: sha512hmac
@@ -7120,7 +7325,7 @@ sha512hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): numb
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: zero2
@@ -7136,7 +7341,7 @@ zero2 = (word: string): string => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: toHex
@@ -7151,7 +7356,7 @@ toHex = (msg: number[]): string => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: toArray
@@ -7213,7 +7418,7 @@ toArray = (msg: any, enc?: "hex" | "utf8" | "base64"): any[] => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: toUTF8
@@ -7251,7 +7456,7 @@ toUTF8 = (arr: number[]): string => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: encode
@@ -7269,17 +7474,19 @@ encode = (arr: number[], enc?: "hex" | "utf8"): string | number[] => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: fromBase58
 
 ```ts
 fromBase58 = (str: string): number[] => {
-    if (!str || typeof str !== "string")
+    if (!str || typeof str !== "string") {
         throw new Error(`Expected base58 string but got “${str}”`);
-    if (str.match(/[IOl0]/gmu))
+    }
+    if (str.match(/[IOl0]/gmu)) {
         throw new Error(`Invalid base58 character “${str.match(/[IOl0]/gmu)}”`);
+    }
     const lz = str.match(/^1+/gmu);
     const psz: number = lz ? lz[0].length : 0;
     const size = ((str.length - psz) * (Math.log(58) / Math.log(256)) + 1) >>> 0;
@@ -7303,7 +7510,7 @@ fromBase58 = (str: string): number[] => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: toBase58
@@ -7311,8 +7518,9 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 ```ts
 toBase58 = (bin: number[]): string => {
     const base58Map = Array(256).fill(-1);
-    for (let i = 0; i < base58chars.length; ++i)
+    for (let i = 0; i < base58chars.length; ++i) {
         base58Map[base58chars.charCodeAt(i)] = i;
+    }
     const result = [];
     for (const byte of bin) {
         let carry = byte;
@@ -7326,30 +7534,31 @@ toBase58 = (bin: number[]): string => {
             carry = (carry / 58) | 0;
         }
     }
-    for (const byte of bin)
+    for (const byte of bin) {
         if (byte)
             break;
         else
             result.push("1".charCodeAt(0));
+    }
     result.reverse();
     return String.fromCharCode(...result);
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: toBase58Check
 
 ```ts
 toBase58Check = (bin: number[], prefix: number[] = [0]) => {
-    let hash = hash256([...prefix, ...bin]) as number[];
+    let hash = hash256([...prefix, ...bin]);
     hash = [...prefix, ...bin, ...hash.slice(0, 4)];
     return toBase58(hash);
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: fromBase58Check
@@ -7360,7 +7569,7 @@ fromBase58Check = (str: string, enc?: "hex", prefixLength: number = 1) => {
     let prefix: string | number[] = bin.slice(0, prefixLength);
     let data: string | number[] = bin.slice(prefixLength, -4);
     let hash = [...prefix, ...data];
-    hash = hash256(hash) as number[];
+    hash = hash256(hash);
     bin.slice(-4).forEach((check, index) => {
         if (check !== hash[index]) {
             throw new Error("Invalid checksum");
@@ -7374,7 +7583,7 @@ fromBase58Check = (str: string, enc?: "hex", prefixLength: number = 1) => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: sign
@@ -7440,7 +7649,7 @@ sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: Bi
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: verify
@@ -7468,7 +7677,7 @@ verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: checkBit
@@ -7479,7 +7688,7 @@ checkBit = function (byteArray: number[], byteIndex: number, bitIndex: number): 
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: getBytes
@@ -7495,7 +7704,7 @@ getBytes = function (numericValue: number): number[] {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: exclusiveOR
@@ -7511,7 +7720,7 @@ exclusiveOR = function (block0: number[], block1: number[]): number[] {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: rightShift
@@ -7533,7 +7742,7 @@ rightShift = function (block: number[]): number[] {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: multiply
@@ -7561,7 +7770,7 @@ multiply = function (block0: number[], block1: number[]): number[] {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: incrementLeastSignificantThirtyTwoBits
@@ -7583,6 +7792,6 @@ incrementLeastSignificantThirtyTwoBits = function (block: number[]): number[] {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
