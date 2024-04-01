@@ -3,10 +3,9 @@ import PrivateKey from './PrivateKey.js'
 import Curve from './Curve.js'
 import { verify } from './ECDSA.js'
 import BigNumber from './BigNumber.js'
-import { sha256, sha256hmac } from './Hash.js'
+import { sha256, sha256hmac, hash160 } from './Hash.js'
 import Signature from './Signature.js'
 import { toArray, toBase58Check, toHex } from './utils.js'
-import { hash160 } from './Hash.js'
 
 /**
  * The PublicKey class extends the Point class. It is used in public-key cryptography to derive shared secret, verify message signatures, and encode the public key in the DER format.
@@ -128,14 +127,14 @@ export default class PublicKey extends Point {
 
   /**
    * Hash sha256 and ripemd160 of the public key.
-   * 
+   *
    * @returns Returns the hash of the public key.
-   * 
+   *
    * @example
    * const publicKeyHash = pubkey.toHash()
    */
   toHash (enc?: 'hex'): number[] | string {
-    const pkh = hash160(this.encode(true)) as number[]
+    const pkh = hash160(this.encode(true))
     if (enc === 'hex') {
       return toHex(pkh)
     }
@@ -145,16 +144,16 @@ export default class PublicKey extends Point {
   /**
    * Base58Check encodes the hash of the public key with a prefix to indicate locking script type.
    * Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
-   * 
+   *
    * @param prefix defaults to [0x00] for mainnet, set to [0x6f] for testnet.
-   * 
-   * @returns Returns the address encoding associated with the hash of the public key. 
-   * 
+   *
+   * @returns Returns the address encoding associated with the hash of the public key.
+   *
    * @example
    * const address = pubkey.toAddress()
    * const testnetAddress = pubkey.toAddress([0x6f])
    */
-  toAddress (prefix : number[] = [0x00]): string {
+  toAddress (prefix: number[] = [0x00]): string {
     return toBase58Check(this.toHash() as number[], prefix)
   }
 

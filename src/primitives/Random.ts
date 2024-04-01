@@ -1,7 +1,7 @@
 class Rand {
   _rand: Function
-  constructor() {
-    let noRand = () => {
+  constructor () {
+    const noRand = () => {
       throw new Error('No secure random number generator is available in this environment.')
     }
     if (typeof self === 'object') {
@@ -13,7 +13,7 @@ class Rand {
           self.crypto.getRandomValues(arr)
           return [...arr]
         }
-      } else /*if (typeof window === 'object')*/ {
+      } else /* if (typeof window === 'object') */ {
         this._rand = noRand
       }
     } else {
@@ -29,7 +29,7 @@ class Rand {
     }
   }
 
-  generate(len: number): number[] {
+  generate (len: number): number[] {
     return this._rand(len)
   }
 }

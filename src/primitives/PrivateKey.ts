@@ -75,7 +75,7 @@ export default class PrivateKey extends BigNumber {
    * @param base - The base of number provided. By default is 10. Ignored if number is BigNumber.
    *
    * @param endian - The endianness provided. By default is 'big endian'. Ignored if number is BigNumber.
-   * 
+   *
    * @param modN - Optional. Default 'apply. If 'apply', apply modN to input to guarantee a valid PrivateKey. If 'error', if input is out of field throw Error('Input is out of field'). If 'nocheck', assumes input is in field.
    *
    * @example
@@ -100,7 +100,7 @@ export default class PrivateKey extends BigNumber {
       const check = this.checkInField()
       if (!check.inField) {
         if (modN === 'error') {
-          throw new Error('Input is out of field') 
+          throw new Error('Input is out of field')
         }
         // Force the PrivateKey BigNumber value to lie in the field limited by curve.n
         BigNumber.move(this, check.modN)
@@ -112,7 +112,7 @@ export default class PrivateKey extends BigNumber {
    * A utility function to check that the value of this PrivateKey lies in the field limited by curve.n
    * @returns { inField, modN } where modN is this PrivateKey's current BigNumber value mod curve.n, and inField is true only if modN equals current BigNumber value.
    */
-  checkInField() : { inField: boolean, modN: BigNumber } {
+  checkInField (): { inField: boolean, modN: BigNumber } {
     const curve = new Curve()
     const modN = this.mod(curve.n)
     const inField = this.cmp(modN) === 0
@@ -122,7 +122,7 @@ export default class PrivateKey extends BigNumber {
   /**
    * @returns true if the PrivateKey's current BigNumber value lies in the field limited by curve.n
    */
-  isValid() : boolean {
+  isValid (): boolean {
     return this.checkInField().inField
   }
 
@@ -184,41 +184,40 @@ export default class PrivateKey extends BigNumber {
 
   /**
    * Converts the private key to a Wallet Import Format (WIF) string.
-   * 
+   *
    * Base58Check encoding is used for encoding the private key.
-   * The prefix 
-   * 
+   * The prefix
+   *
    * @method toWif
    * @returns The WIF string.
-   * 
+   *
    * @param prefix defaults to [0x80] for mainnet, set it to [0xef] for testnet.
-   * 
+   *
    * @throws Error('Value is out of field') if current BigNumber value is out of field limited by curve.n
-   * 
+   *
    * @example
    * const privateKey = PrivateKey.fromRandom();
    * const wif = privateKey.toWif();
    * const testnetWif = privateKey.toWif([0xef]);
    */
-  toWif (prefix : number[] = [0x80]): string {
-    if (!this.isValid())
-      throw new Error('Value is out of field')
-    return toBase58Check([...this.toArray("be", 32), 1], prefix)
+  toWif (prefix: number[] = [0x80]): string {
+    if (!this.isValid()) { throw new Error('Value is out of field') }
+    return toBase58Check([...this.toArray('be', 32), 1], prefix)
   }
 
   /**
    * Base58Check encodes the hash of the public key associated with this private key with a prefix to indicate locking script type.
    * Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
-   * 
+   *
    * @param prefix defaults to [0x00] for mainnet, set to [0x6f] for testnet.
-   * 
-   * @returns Returns the address encoding associated with the hash of the public key associated with this private key. 
-   * 
+   *
+   * @returns Returns the address encoding associated with the hash of the public key associated with this private key.
+   *
    * @example
    * const address = pubkey.toAddress()
    * const testnetAddress = pubkey.toAddress([0x6f])
    */
-  toAddress (prefix : number[] = [0x00]): string {
+  toAddress (prefix: number[] = [0x00]): string {
     return this.toPublicKey().toAddress(prefix)
   }
 

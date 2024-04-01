@@ -15,14 +15,14 @@ const prefix = 'Bitcoin Signed Message:\n'
  * @returns The double-hash of the prefixed message as a number array.
  */
 export const magicHash = (messageBuf: number[]): number[] => {
-    const bw = new Writer()
-    bw.writeVarIntNum(prefix.length)
-    bw.write(toArray(prefix, 'utf8'))
-    bw.writeVarIntNum(messageBuf.length)
-    bw.write(messageBuf)
-    const buf = bw.toArray()
-    const hashBuf = Hash.hash256(buf) as number[]
-    return hashBuf
+  const bw = new Writer()
+  bw.writeVarIntNum(prefix.length)
+  bw.write(toArray(prefix, 'utf8'))
+  bw.writeVarIntNum(messageBuf.length)
+  bw.write(messageBuf)
+  const buf = bw.toArray()
+  const hashBuf = Hash.hash256(buf)
+  return hashBuf
 }
 
 /**
@@ -33,8 +33,8 @@ export const magicHash = (messageBuf: number[]): number[] => {
  * @returns The signature object.
  */
 export const sign = (message: number[], privateKey: PrivateKey): Signature => {
-    const hashBuf = magicHash(message)
-    return ECDSA.sign(new BigNumber(hashBuf), privateKey, true)
+  const hashBuf = magicHash(message)
+  return ECDSA.sign(new BigNumber(hashBuf), privateKey, true)
 }
 
 /**
@@ -46,6 +46,6 @@ export const sign = (message: number[], privateKey: PrivateKey): Signature => {
  * @returns True if the signature is valid, false otherwise.
  */
 export const verify = (message: number[], sig: Signature, pubKey: PublicKey): boolean => {
-    const hashBuf = magicHash(message)
-    return ECDSA.verify(new BigNumber(hashBuf), sig, pubKey)
+  const hashBuf = magicHash(message)
+  return ECDSA.verify(new BigNumber(hashBuf), sig, pubKey)
 }

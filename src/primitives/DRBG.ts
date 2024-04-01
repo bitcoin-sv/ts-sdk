@@ -65,16 +65,16 @@ export default class DRBG {
       .update(this.V)
       .update([0x00])
     if (seed !== undefined) { kmac = kmac.update(seed) }
-    this.K = kmac.digest() as number[]
-    this.V = this.hmac().update(this.V).digest() as number[]
+    this.K = kmac.digest()
+    this.V = this.hmac().update(this.V).digest()
     if (seed === undefined) { return }
 
     this.K = this.hmac()
       .update(this.V)
       .update([0x01])
       .update(seed)
-      .digest() as number[]
-    this.V = this.hmac().update(this.V).digest() as number[]
+      .digest()
+    this.V = this.hmac().update(this.V).digest()
   }
 
   /**
@@ -91,7 +91,7 @@ export default class DRBG {
   generate (len: number): string {
     let temp = []
     while (temp.length < len) {
-      this.V = this.hmac().update(this.V).digest() as number[]
+      this.V = this.hmac().update(this.V).digest()
       temp = temp.concat(this.V)
     }
 
