@@ -2,7 +2,7 @@
   "name": "@bsv/sdk",
   "version": "1.0.14",
   "type": "module",
-  "description": "BSV Blockchain Standard Development Kit",
+  "description": "BSV Blockchain Software Development Kit",
   "main": "dist/cjs/mod.js",
   "module": "dist/esm/mod.js",
   "types": "dist/types/mod.d.ts",
