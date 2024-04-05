@@ -9,7 +9,9 @@
   "files": [
     "dist",
     "src",
-    "docs"
+    "docs",
+    "mod.ts",
+    "LICENSE.txt"
   ],
   "exports": {
     ".": {
