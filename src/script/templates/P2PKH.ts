@@ -7,6 +7,7 @@ import Transaction from '../../transaction/Transaction.js'
 import PrivateKey from '../../primitives/PrivateKey.js'
 import TransactionSignature from '../../primitives/TransactionSignature.js'
 import { sha256 } from '../../primitives/Hash.js'
+import Script from '../Script.js'
 
 /**
  * P2PKH (Pay To Public Key Hash) class implementing ScriptTemplate.
@@ -49,12 +50,16 @@ export default class P2PKH implements ScriptTemplate {
    * @param {PrivateKey} privateKey - The private key used for signing the transaction.
    * @param {'all'|'none'|'single'} signOutputs - The signature scope for outputs.
    * @param {boolean} anyoneCanPay - Flag indicating if the signature allows for other inputs to be added later.
+   * @param {number} sourceSatoshis - Optional. The amount being unlocked. Otherwise the input.sourceTransaction is required.
+   * @param {Script} lockingScript - Optional. The lockinScript. Otherwise the input.sourceTransaction is required.
    * @returns {Object} - An object containing the `sign` and `estimateLength` functions.
    */
   unlock(
     privateKey: PrivateKey,
     signOutputs: 'all' | 'none' | 'single' = 'all',
-    anyoneCanPay: boolean = false
+    anyoneCanPay: boolean = false,
+    sourceSatoshis?: number,
+    lockingScript?: Script
   ): {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
     estimateLength: () => Promise<106>
@@ -74,24 +79,40 @@ export default class P2PKH implements ScriptTemplate {
         if (anyoneCanPay) {
           signatureScope |= TransactionSignature.SIGHASH_ANYONECANPAY
         }
+
         const input = tx.inputs[inputIndex]
+
         const otherInputs = tx.inputs.filter((_, index) => index !== inputIndex)
-        if (typeof input.sourceTransaction !== 'object') {
-          // Question: Should the library support use-cases where the source transaction is not provided? This is to say, is it ever acceptable for someone to sign an input spending some output from a transaction they have not provided? Some elements (such as the satoshi value and output script) are always required. A merkle proof is also always required, and verifying it (while also verifying that the claimed output is contained within the claimed transaction) is also always required. This seems to require the entire input transaction.
+
+        const sourceTXID = input.sourceTXID ? input.sourceTXID : input.sourceTransaction?.id('hex') as string
+        if (!sourceTXID) {
           throw new Error(
-            'The source transaction is needed for transaction signing.'
+            'The input sourceTXID or sourceTransaction is required for transaction signing.'
           )
         }
+        sourceSatoshis ||= input.sourceTransaction?.outputs[input.sourceOutputIndex].satoshis
+        if (!sourceSatoshis) {
+          throw new Error(
+            'The sourceSatoshis or input sourceTransaction is required for transaction signing.'
+          )
+        }
+        lockingScript ||= input.sourceTransaction?.outputs[input.sourceOutputIndex].lockingScript
+        if (!lockingScript) {
+          throw new Error(
+            'The lockingScript or input sourceTransaction is required for transaction signing.'
+          )
+        }
+
         const preimage = TransactionSignature.format({
-          sourceTXID: input.sourceTransaction.id('hex') as string,
+          sourceTXID,
           sourceOutputIndex: input.sourceOutputIndex,
-          sourceSatoshis: input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis,
+          sourceSatoshis,
           transactionVersion: tx.version,
           otherInputs,
           inputIndex,
           outputs: tx.outputs,
           inputSequence: input.sequence,
-          subscript: input.sourceTransaction.outputs[input.sourceOutputIndex].lockingScript,
+          subscript: lockingScript,
           lockTime: tx.lockTime,
           scope: signatureScope
         })
