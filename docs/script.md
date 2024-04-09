@@ -612,7 +612,7 @@ This class provides methods to create Pay To Public Key Hash locking and unlocki
 ```ts
 export default class P2PKH implements ScriptTemplate {
     lock(pubkeyhash: string | number[]): LockingScript 
-    unlock(privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false): {
+    unlock(privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false, sourceSatoshis?: number, lockingScript?: Script): {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
         estimateLength: () => Promise<106>;
     } 
@@ -650,7 +650,7 @@ The returned object contains:
 2. `estimateLength` - A function that returns the estimated length of the unlocking script in bytes.
 
 ```ts
-unlock(privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false): {
+unlock(privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false, sourceSatoshis?: number, lockingScript?: Script): {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
     estimateLength: () => Promise<106>;
 } 
@@ -668,6 +668,10 @@ Argument Details
   + The signature scope for outputs.
 + **anyoneCanPay**
   + Flag indicating if the signature allows for other inputs to be added later.
++ **sourceSatoshis**
+  + Optional. The amount being unlocked. Otherwise the input.sourceTransaction is required.
++ **lockingScript**
+  + Optional. The lockinScript. Otherwise the input.sourceTransaction is required.
 
 </details>
 
