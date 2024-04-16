@@ -13,9 +13,9 @@ export default interface ScriptTemplate {
    * Creates a locking script with the given parameters.
    *
    * @param {...any} params - The parameters required to create the locking script.
-   * @returns {LockingScript} - An instance of LockingScript.
+   * @returns {LockingScript} - An instance of LockingScript, or a Promise for one.
    */
-  lock: (...params: any) => LockingScript
+  lock: (...params: any) => LockingScript | Promise<LockingScript>
 
   /**
    * Creates a function that generates an unlocking script along with its signature and length estimation.
@@ -28,9 +28,9 @@ export default interface ScriptTemplate {
    * @returns {Object} - An object containing the `sign` and `estimateLength` functions.
    */
   unlock: (...params: any) =>
-  {
-    sign: (tx: Transaction, inputIndex: number) =>
-    Promise<UnlockingScript>
-    estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>
-  }
+    {
+      sign: (tx: Transaction, inputIndex: number) =>
+        Promise<UnlockingScript>
+      estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>
+    }
 }

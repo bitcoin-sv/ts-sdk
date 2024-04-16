@@ -31,7 +31,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export default interface ScriptTemplate {
-    lock: (...params: any) => LockingScript;
+    lock: (...params: any) => LockingScript | Promise<LockingScript>;
     unlock: (...params: any) => {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
         estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
@@ -48,7 +48,7 @@ export default interface ScriptTemplate {
 Creates a locking script with the given parameters.
 
 ```ts
-lock: (...params: any) => LockingScript
+lock: (...params: any) => LockingScript | Promise<LockingScript>
 ```
 
 #### Property unlock
