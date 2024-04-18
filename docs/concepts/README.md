@@ -6,3 +6,4 @@ These documents cover high-level conceptual information that will augment develo
 - [What is a Transaction Signature?](TX_SIG.md)
 - [What is Type-42 and How Does it Enable Private Signatures?](./42.md)
 - [What are Script Templates Used for?](TEMPLATES.md)
+- [How are Transactions Built with Inputs and Outputs?](HOW_TX.md)
