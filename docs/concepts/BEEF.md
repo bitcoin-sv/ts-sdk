@@ -1,6 +1,6 @@
 # What is BEEF and Why is it Useful?
 
-The Background Evaluation Extended Format (BEEF) is a binary format designed for sending transactions across the Bitcoin SV (BSV) network. This document aims to demystify BEEF, outlining its structure, purpose, and the compelling advantages it offers to the BSV ecosystem.
+The Background Evaluation Extended Format ([BEEF](https://github.com/bitcoin-sv/BRCs/blob/master/transactions/0062.md)) is a binary format designed for sending transactions across the Bitcoin SV (BSV) network. This document aims to demystify BEEF, outlining its structure, purpose, and the compelling advantages it offers to the BSV ecosystem.
 
 ## Introduction to BEEF
 
@@ -35,4 +35,4 @@ With its versioned format, BEEF is designed for future improvements and iteratio
 
 ## Conclusion
 
-The Background Evaluation Extended Format represents a significant advancement in the Bitcoin SV ecosystem. By combining transactions with their ancestral data and SPV proofs in a compact, binary format, BEEF addresses key challenges in transaction verification and validation. By aligning across the ecosystem, BEEF maximizes interoperability among wallets and network services. It offers a scalable, secure, and efficient mechanism for ensuring the integrity of transactions across the blockchain.
+The Background Evaluation Extended Format represents a significant advancement in the BSV ecosystem. By combining transactions with their ancestral data and SPV proofs in a compact, binary format, BEEF addresses key challenges in transaction verification and validation. By aligning across the ecosystem, BEEF maximizes interoperability among wallets and network services. It offers a scalable, secure, and efficient mechanism for ensuring the integrity of transactions across the blockchain. You can check out an example of how to verify BEEF transactions with the TypeScript SDK [here](../examples/EXAMPLE_VERIFYING_BEEF.md).

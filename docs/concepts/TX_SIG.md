@@ -31,4 +31,4 @@ Transaction signatures serve two primary purposes on the BSV network:
 
 ## Conclusion
 
-Transaction signatures are at the heart of the security and trust model of blockchain technology. They enable the secure transfer of digital assets between parties without the need for a central authority. By understanding the components and functionality of transaction signatures, users and developers can better appreciate the sophisticated mechanisms that keep the BSV network secure and trustworthy.
+Transaction signatures are at the heart of the security and trust model of blockchain technology. They enable the secure transfer of digital assets between parties without the need for a central authority. By understanding the components and functionality of transaction signatures, users and developers can better appreciate the sophisticated mechanisms that keep the BSV network secure and trustworthy. You can learn more about how transaction signatures work within the TypeScript BSV SDK [here](../low-level/TX_SIG.md).
