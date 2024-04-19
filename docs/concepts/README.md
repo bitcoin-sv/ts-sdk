@@ -9,3 +9,4 @@ These documents cover high-level conceptual information that will augment develo
 - [How are Transactions Built with Inputs and Outputs?](HOW_TX.md)
 - [The Role of Chain Trackers within the SPV Ecosystem](CHAIN_SPV.md)
 - [How Does Transaction Fee Modeling Work?](FEE.md)
+- [How are Bitcoin Transactions Validated?](TX_VALID.md)
