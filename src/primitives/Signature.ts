@@ -282,8 +282,8 @@ export default class Signature {
       compactByte += 4
     }
     let arr = [compactByte]
-    arr = arr.concat(this.r.toArray())
-    arr = arr.concat(this.s.toArray())
+    arr = arr.concat(this.r.toArray('be', 32))
+    arr = arr.concat(this.s.toArray('be', 32))
     if (enc === 'hex') {
       return toHex(arr)
     } else if (enc === 'base64') {
