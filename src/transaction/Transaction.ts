@@ -462,6 +462,19 @@ export default class Transaction {
   }
 
   /**
+   * Calculates the transaction's ID in binary array.
+   *
+   * @returns {number[]} - The ID of the transaction in the binary array format.
+   */
+  id(): number[];
+  /**
+   * Calculates the transaction's ID in hexadecimal format.
+   *
+   * @param {'hex'} enc - The encoding to use for the ID. If 'hex', returns a hexadecimal string.
+   * @returns {string} - The ID of the transaction in the hex format.
+   */
+  id(enc: "hex"): string;
+  /**
    * Calculates the transaction's ID.
    *
    * @param {'hex' | undefined} enc - The encoding to use for the ID. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
