@@ -1,5 +1,5 @@
 import HD from '../../../dist/cjs/src/compat/HD'
-import { fromBase58Check, toBase58Check, toArray, toHex } from '../../../dist/cjs/src/primitives/utils'
+import { fromBase58Check, toArray, toHex } from '../../../dist/cjs/src/primitives/utils'
 
 describe('HD', () => {
     it('should satisfy these basic API features', () => {
@@ -64,232 +64,231 @@ describe('HD', () => {
         let bip32
         bip32 = new HD()
         expect(bip32).toBeDefined()
-        expect(new HD().fromString(vector1mPrivate).toString()).toEqual(vector1mPrivate)
-        expect(new HD()
-            .fromString(new HD().fromString(vector1mPrivate).toString())
+        expect(HD.fromString(vector1mPrivate).toString()).toEqual(vector1mPrivate)
+        expect(HD.fromString(HD.fromString(vector1mPrivate).toString())
             .toString())
             .toEqual(vector1mPrivate)
     })
 
     it('should initialize test vector 1 from the extended public key', () => {
-        const bip32 = new HD().fromString(vector1mPublic)
+        const bip32 = HD.fromString(vector1mPublic)
         expect(bip32).toBeDefined()
     })
 
     it('should initialize test vector 1 from the extended private key', () => {
-        const bip32 = new HD().fromString(vector1mPrivate)
+        const bip32 = HD.fromString(vector1mPrivate)
         expect(bip32).toBeDefined()
     })
 
     it('should get the extended public key from the extended private key for test vector 1', () => {
-        const bip32 = new HD().fromString(vector1mPrivate)
+        const bip32 = HD.fromString(vector1mPrivate)
         expect(bip32.toPublic().toString()).toEqual(vector1mPublic)
     })
 
     it("should get m/0' ext. private key from test vector 1", () => {
-        const bip32 = new HD().fromString(vector1mPrivate)
+        const bip32 = HD.fromString(vector1mPrivate)
         const child = bip32.derive("m/0'")
         expect(child).toBeDefined()
         expect(child.toString()).toEqual(vector1m0hPrivate)
     })
 
     it("should get m/0' ext. public key from test vector 1", () => {
-        const bip32 = new HD().fromString(vector1mPrivate)
+        const bip32 = HD.fromString(vector1mPrivate)
         const child = bip32.derive("m/0'")
         expect(child).toBeDefined()
         expect(child.toPublic().toString()).toEqual(vector1m0hPublic)
     })
 
     it("should get m/0'/1 ext. private key from test vector 1", () => {
-        const bip32 = new HD().fromString(vector1mPrivate)
+        const bip32 = HD.fromString(vector1mPrivate)
         const child = bip32.derive("m/0'/1")
         expect(child).toBeDefined()
         expect(child.toString()).toEqual(vector1m0h1Private)
     })
 
     it("should get m/0'/1 ext. public key from test vector 1", () => {
-        const bip32 = new HD().fromString(vector1mPrivate)
+        const bip32 = HD.fromString(vector1mPrivate)
         const child = bip32.derive("m/0'/1")
         expect(child).toBeDefined()
         expect(child.toPublic().toString()).toEqual(vector1m0h1Public)
     })
 
     it("should get m/0'/1 ext. public key from m/0' public key from test vector 1", () => {
-        const bip32 = new HD().fromString(vector1mPrivate)
+        const bip32 = HD.fromString(vector1mPrivate)
         const child = bip32.derive("m/0'")
-        const childPub = new HD().fromString(child.toPublic().toString())
+        const childPub = HD.fromString(child.toPublic().toString())
         const child2 = childPub.derive('m/1')
         expect(child2).toBeDefined()
         expect(child2.toPublic().toString()).toEqual(vector1m0h1Public)
     })
 
     it("should get m/0'/1/2h ext. private key from test vector 1", () => {
-        const bip32 = new HD().fromString(vector1mPrivate)
+        const bip32 = HD.fromString(vector1mPrivate)
         const child = bip32.derive("m/0'/1/2'")
         expect(child).toBeDefined()
         expect(child.toString()).toEqual(vector1m0h12hPrivate)
     })
 
     it("should get m/0'/1/2h ext. public key from test vector 1", () => {
-        const bip32 = new HD().fromString(vector1mPrivate)
+        const bip32 = HD.fromString(vector1mPrivate)
         const child = bip32.derive("m/0'/1/2'")
         expect(child).toBeDefined()
         expect(child.toPublic().toString()).toEqual(vector1m0h12hPublic)
     })
 
     it("should get m/0'/1/2h/2 ext. private key from test vector 1", () => {
-        const bip32 = new HD().fromString(vector1mPrivate)
+        const bip32 = HD.fromString(vector1mPrivate)
         const child = bip32.derive("m/0'/1/2'/2")
         expect(child).toBeDefined()
         expect(child.toString()).toEqual(vector1m0h12h2Private)
     })
 
     it("should get m/0'/1/2'/2 ext. public key from m/0'/1/2' public key from test vector 1", () => {
-        const bip32 = new HD().fromString(vector1mPrivate)
+        const bip32 = HD.fromString(vector1mPrivate)
         const child = bip32.derive("m/0'/1/2'")
-        const childPub = new HD().fromString(child.toPublic().toString())
+        const childPub = HD.fromString(child.toPublic().toString())
         const child2 = childPub.derive('m/2')
         expect(child2).toBeDefined()
         expect(child2.toPublic().toString()).toEqual(vector1m0h12h2Public)
     })
 
     it("should get m/0'/1/2h/2 ext. public key from test vector 1", () => {
-        const bip32 = new HD().fromString(vector1mPrivate)
+        const bip32 = HD.fromString(vector1mPrivate)
         const child = bip32.derive("m/0'/1/2'/2")
         expect(child).toBeDefined()
         expect(child.toPublic().toString()).toEqual(vector1m0h12h2Public)
     })
 
     it("should get m/0'/1/2h/2/1000000000 ext. private key from test vector 1", () => {
-        const bip32 = new HD().fromString(vector1mPrivate)
+        const bip32 = HD.fromString(vector1mPrivate)
         const child = bip32.derive("m/0'/1/2'/2/1000000000")
         expect(child).toBeDefined()
         expect(child.toString()).toEqual(vector1m0h12h21000000000Private)
     })
 
     it("should get m/0'/1/2h/2/1000000000 ext. public key from test vector 1", () => {
-        const bip32 = new HD().fromString(vector1mPrivate)
+        const bip32 = HD.fromString(vector1mPrivate)
         const child = bip32.derive("m/0'/1/2'/2/1000000000")
         expect(child).toBeDefined()
         expect(child.toPublic().toString()).toEqual(vector1m0h12h21000000000Public)
     })
 
     it("should get m/0'/1/2'/2/1000000000 ext. public key from m/0'/1/2'/2 public key from test vector 1", () => {
-        const bip32 = new HD().fromString(vector1mPrivate)
+        const bip32 = HD.fromString(vector1mPrivate)
         const child = bip32.derive("m/0'/1/2'/2")
-        const childPub = new HD().fromString(child.toPublic().toString())
+        const childPub = HD.fromString(child.toPublic().toString())
         const child2 = childPub.derive('m/1000000000')
         expect(child2).toBeDefined()
         expect(child2.toPublic().toString()).toEqual(vector1m0h12h21000000000Public)
     })
 
     it('should initialize test vector 2 from the extended public key', () => {
-        const bip32 = new HD().fromString(vector2mPublic)
+        const bip32 = HD.fromString(vector2mPublic)
         expect(bip32).toBeDefined()
     })
 
     it('should initialize test vector 2 from the extended private key', () => {
-        const bip32 = new HD().fromString(vector2mPrivate)
+        const bip32 = HD.fromString(vector2mPrivate)
         expect(bip32).toBeDefined()
     })
 
     it('should get the extended public key from the extended private key for test vector 2', () => {
-        const bip32 = new HD().fromString(vector2mPrivate)
+        const bip32 = HD.fromString(vector2mPrivate)
         expect(bip32.toPublic().toString()).toEqual(vector2mPublic)
     })
 
     it('should get m/0 ext. private key from test vector 2', () => {
-        const bip32 = new HD().fromString(vector2mPrivate)
+        const bip32 = HD.fromString(vector2mPrivate)
         const child = bip32.derive('m/0')
         expect(child).toBeDefined()
         expect(child.toString()).toEqual(vector2m0Private)
     })
 
     it('should get m/0 ext. public key from test vector 2', () => {
-        const bip32 = new HD().fromString(vector2mPrivate)
+        const bip32 = HD.fromString(vector2mPrivate)
         const child = bip32.derive('m/0')
         expect(child).toBeDefined()
         expect(child.toPublic().toString()).toEqual(vector2m0Public)
     })
 
     it('should get m/0 ext. public key from m public key from test vector 2', () => {
-        const bip32 = new HD().fromString(vector2mPrivate)
+        const bip32 = HD.fromString(vector2mPrivate)
         const child = bip32.derive('m')
-        const childPub = new HD().fromString(child.toPublic().toString())
+        const childPub = HD.fromString(child.toPublic().toString())
         const child2 = childPub.derive('m/0')
         expect(child2).toBeDefined()
         expect(child2.toPublic().toString()).toEqual(vector2m0Public)
     })
 
     it('should get m/0/2147483647h ext. private key from test vector 2', () => {
-        const bip32 = new HD().fromString(vector2mPrivate)
+        const bip32 = HD.fromString(vector2mPrivate)
         const child = bip32.derive("m/0/2147483647'")
         expect(child).toBeDefined()
         expect(child.toString()).toEqual(vector2m02147483647hPrivate)
     })
 
     it('should get m/0/2147483647h ext. public key from test vector 2', () => {
-        const bip32 = new HD().fromString(vector2mPrivate)
+        const bip32 = HD.fromString(vector2mPrivate)
         const child = bip32.derive("m/0/2147483647'")
         expect(child).toBeDefined()
         expect(child.toPublic().toString()).toEqual(vector2m02147483647hPublic)
     })
 
     it('should get m/0/2147483647h/1 ext. private key from test vector 2', () => {
-        const bip32 = new HD().fromString(vector2mPrivate)
+        const bip32 = HD.fromString(vector2mPrivate)
         const child = bip32.derive("m/0/2147483647'/1")
         expect(child).toBeDefined()
         expect(child.toString()).toEqual(vector2m02147483647h1Private)
     })
 
     it('should get m/0/2147483647h/1 ext. public key from test vector 2', () => {
-        const bip32 = new HD().fromString(vector2mPrivate)
+        const bip32 = HD.fromString(vector2mPrivate)
         const child = bip32.derive("m/0/2147483647'/1")
         expect(child).toBeDefined()
         expect(child.toPublic().toString()).toEqual(vector2m02147483647h1Public)
     })
 
     it('should get m/0/2147483647h/1 ext. public key from m/0/2147483647h public key from test vector 2', () => {
-        const bip32 = new HD().fromString(vector2mPrivate)
+        const bip32 = HD.fromString(vector2mPrivate)
         const child = bip32.derive("m/0/2147483647'")
-        const childPub = new HD().fromString(child.toPublic().toString())
+        const childPub = HD.fromString(child.toPublic().toString())
         const child2 = childPub.derive('m/1')
         expect(child2).toBeDefined()
         expect(child2.toPublic().toString()).toEqual(vector2m02147483647h1Public)
     })
 
     it('should get m/0/2147483647h/1/2147483646h ext. private key from test vector 2', () => {
-        const bip32 = new HD().fromString(vector2mPrivate)
+        const bip32 = HD.fromString(vector2mPrivate)
         const child = bip32.derive("m/0/2147483647'/1/2147483646'")
         expect(child).toBeDefined()
         expect(child.toString()).toEqual(vector2m02147483647h12147483646hPrivate)
     })
 
     it('should get m/0/2147483647h/1/2147483646h ext. public key from test vector 2', () => {
-        const bip32 = new HD().fromString(vector2mPrivate)
+        const bip32 = HD.fromString(vector2mPrivate)
         const child = bip32.derive("m/0/2147483647'/1/2147483646'")
         expect(child).toBeDefined()
         expect(child.toPublic().toString()).toEqual(vector2m02147483647h12147483646hPublic)
     })
 
     it('should get m/0/2147483647h/1/2147483646h/2 ext. private key from test vector 2', () => {
-        const bip32 = new HD().fromString(vector2mPrivate)
+        const bip32 = HD.fromString(vector2mPrivate)
         const child = bip32.derive("m/0/2147483647'/1/2147483646'/2")
         expect(child).toBeDefined()
         expect(child.toString()).toEqual(vector2m02147483647h12147483646h2Private)
     })
 
     it('should get m/0/2147483647h/1/2147483646h/2 ext. public key from test vector 2', () => {
-        const bip32 = new HD().fromString(vector2mPrivate)
+        const bip32 = HD.fromString(vector2mPrivate)
         const child = bip32.derive("m/0/2147483647'/1/2147483646'/2")
         expect(child).toBeDefined()
         expect(child.toPublic().toString()).toEqual(vector2m02147483647h12147483646h2Public)
     })
 
     it('should get m/0/2147483647h/1/2147483646h/2 ext. public key from m/0/2147483647h/2147483646h public key from test vector 2', () => {
-        const bip32 = new HD().fromString(vector2mPrivate)
+        const bip32 = HD.fromString(vector2mPrivate)
         const child = bip32.derive("m/0/2147483647'/1/2147483646'")
-        const childPub = new HD().fromString(child.toPublic().toString())
+        const childPub = HD.fromString(child.toPublic().toString())
         const child2 = childPub.derive('m/2')
         expect(child2).toBeDefined()
         expect(child2.toPublic().toString()).toEqual(vector2m02147483647h12147483646h2Public)
@@ -297,8 +296,8 @@ describe('HD', () => {
 
     describe('#fromRandom', () => {
         it('should not return the same one twice', () => {
-            const bip32a = new HD().fromRandom()
-            const bip32b = new HD().fromRandom()
+            const bip32a = HD.fromRandom()
+            const bip32b = HD.fromRandom()
             expect(bip32a.toString()).not.toEqual(bip32b.toString())
         })
     })
@@ -314,7 +313,7 @@ describe('HD', () => {
     describe('#fromSeed', () => {
         it('should initialize a new Bip32 correctly from test vector 1 seed', () => {
             const hex = vector1master
-            const bip32 = new HD().fromSeed(toArray(hex, 'hex'))
+            const bip32 = HD.fromSeed(toArray(hex, 'hex'))
             expect(bip32).toBeDefined()
             expect(bip32.toString()).toEqual(vector1mPrivate)
             expect(bip32.toPublic().toString()).toEqual(vector1mPublic)
@@ -322,7 +321,7 @@ describe('HD', () => {
 
         it('should initialize a new Bip32 correctly from test vector 2 seed', () => {
             const hex = vector2master
-            const bip32 = new HD().fromSeed(toArray(hex, 'hex'))
+            const bip32 = HD.fromSeed(toArray(hex, 'hex'))
             expect(bip32).toBeDefined()
             expect(bip32.toString()).toEqual(vector2mPrivate)
             expect(bip32.toPublic().toString()).toEqual(vector2mPublic)
@@ -352,12 +351,12 @@ describe('HD', () => {
             const str =
                 'xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi'
             const buf = fromBase58Check(str)
-            let bip32 = new HD().fromBinary([...buf.prefix, ...buf.data])
+            let bip32 = HD.fromBinary([...buf.prefix, ...buf.data])
             expect(bip32).toBeDefined()
             expect(bip32.toString()).toEqual(str)
             bip32 = bip32.toPublic()
             const xpub = bip32.toString()
-            bip32 = new HD().fromBinary(bip32.toBinary())
+            bip32 = HD.fromBinary(bip32.toBinary())
             expect(bip32.toString()).toEqual(xpub)
         })
     })
@@ -367,7 +366,7 @@ describe('HD', () => {
             const str =
                 'xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi'
             const buf = fromBase58Check(str)
-            const bip32 = new HD().fromString(str)
+            const bip32 = HD.fromString(str)
             expect(toHex(bip32.toBinary())).toEqual(toHex([...buf.prefix, ...buf.data]))
         })
     })
@@ -376,7 +375,7 @@ describe('HD', () => {
         it('should make a bip32 from a string', () => {
             const str =
                 'xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi'
-            const bip32 = new HD().fromString(str)
+            const bip32 = HD.fromString(str)
             expect(bip32).toBeDefined()
             expect(bip32.toString()).toEqual(str)
         })
@@ -396,7 +395,7 @@ describe('HD', () => {
 
     describe('#isPrivate', () => {
         it('should know if this bip32 is private', () => {
-            const bip32priv = new HD().fromRandom()
+            const bip32priv = HD.fromRandom()
             const bip32pub = bip32priv.toPublic()
             expect(bip32priv.isPrivate()).toEqual(true)
             expect(bip32pub.isPrivate()).toEqual(false)

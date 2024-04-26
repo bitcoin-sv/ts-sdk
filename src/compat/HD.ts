@@ -85,6 +85,16 @@ export default class HD {
   }
 
   /**
+   * Initializes the HD wallet from a given base58 encoded string.
+   * This method decodes a provided string to set up the HD wallet's properties.
+   * @param str - A base58 encoded string representing the wallet.
+   * @returns {HD} The new instance with properties set from the string.
+   */
+  public static fromString (str: string): HD {
+    return new this().fromString(str)
+  }
+
+  /**
      * Initializes the HD wallet from a given base58 encoded string.
      * This method decodes a provided string to set up the HD wallet's properties.
      * @param str - A base58 encoded string representing the wallet.
@@ -96,13 +106,13 @@ export default class HD {
   }
 
   /**
-     * Converts the HD wallet to a base58 encoded string.
-     * This method provides a string representation of the HD wallet's current state.
-     * @returns {string} A base58 encoded string of the HD wallet.
-     */
-  public toString (): string {
-    const bin = this.toBinary()
-    return toBase58Check(bin, [])
+   * Initializes the HD wallet from a seed.
+   * This method generates keys and other properties from a given seed, conforming to the BIP32 specification.
+   * @param bytes - An array of bytes representing the seed.
+   * @returns {HD} The current instance with properties set from the seed.
+   */
+  public static fromSeed (bytes: number[]): HD {
+    return new this().fromSeed(bytes)
   }
 
   /**
@@ -132,21 +142,21 @@ export default class HD {
   }
 
   /**
-     * Initializes the HD wallet from a seed.
-     * This method generates keys and other properties from a given seed, conforming to the BIP32 specification.
-     * @param bytes - An array of bytes representing the seed.
-     * @returns {HD} The current instance with properties set from the seed.
-     */
-  public static fromSeed (bytes: number[]): HD {
-    return new this().fromSeed(bytes)
+   * Initializes the HD wallet from a binary buffer.
+   * Parses a binary buffer to set up the wallet's properties.
+   * @param buf - A buffer containing the wallet data.
+   * @returns {HD} The new instance with properties set from the buffer.
+   */
+  public static fromBinary (buf: number[]): HD {
+    return new this().fromBinary(buf)
   }
 
   /**
-     * Initializes the HD wallet from a binary buffer.
-     * Parses a binary buffer to set up the wallet's properties.
-     * @param buf - A buffer containing the wallet data.
-     * @returns {HD} The current instance with properties set from the buffer.
-     */
+   * Initializes the HD wallet from a binary buffer.
+   * Parses a binary buffer to set up the wallet's properties.
+   * @param buf - A buffer containing the wallet data.
+   * @returns {HD} The current instance with properties set from the buffer.
+   */
   public fromBinary (buf: number[]): this {
     // Both pub and private extended keys are 78 buf
     if (buf.length !== 78) {
@@ -174,6 +184,16 @@ export default class HD {
     }
 
     return this
+  }
+
+  /**
+   * Converts the HD wallet to a base58 encoded string.
+   * This method provides a string representation of the HD wallet's current state.
+   * @returns {string} A base58 encoded string of the HD wallet.
+   */
+  public toString (): string {
+    const bin = this.toBinary()
+    return toBase58Check(bin, [])
   }
 
   /**
