@@ -42,7 +42,7 @@ export default class TransactionSignature extends Signature {
         if (typeof input.sourceTransaction === 'undefined') {
           writer.writeReverse(toArray(input.sourceTXID, 'hex'))
         } else {
-          writer.writeReverse(input.sourceTransaction.id() as number[])
+          writer.writeReverse(input.sourceTransaction.id())
         }
         writer.writeUInt32LE(input.sourceOutputIndex)
       }

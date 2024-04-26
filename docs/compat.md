@@ -32,11 +32,13 @@ export default class HD {
     constructor(versionBytesNum?: number, depth?: number, parentFingerPrint?: number[], childIndex?: number, chainCode?: number[], privKey?: PrivateKey, pubKey?: PublicKey) 
     public fromRandom(): this 
     public static fromRandom(): HD 
+    public static fromString(str: string): HD 
     public fromString(str: string): this 
-    public toString(): string 
-    public fromSeed(bytes: number[]): this 
     public static fromSeed(bytes: number[]): HD 
+    public fromSeed(bytes: number[]): this 
+    public static fromBinary(buf: number[]): HD 
     public fromBinary(buf: number[]): this 
+    public toString(): string 
     public derive(path: string): HD 
     public deriveChild(i: number): HD 
     public toPublic(): HD 
@@ -117,6 +119,24 @@ Initializes the HD wallet from a binary buffer.
 Parses a binary buffer to set up the wallet's properties.
 
 ```ts
+public static fromBinary(buf: number[]): HD 
+```
+
+Returns
+
+The new instance with properties set from the buffer.
+
+Argument Details
+
++ **buf**
+  + A buffer containing the wallet data.
+
+#### Method fromBinary
+
+Initializes the HD wallet from a binary buffer.
+Parses a binary buffer to set up the wallet's properties.
+
+```ts
 public fromBinary(buf: number[]): this 
 ```
 
@@ -161,7 +181,7 @@ Initializes the HD wallet from a seed.
 This method generates keys and other properties from a given seed, conforming to the BIP32 specification.
 
 ```ts
-public fromSeed(bytes: number[]): this 
+public static fromSeed(bytes: number[]): HD 
 ```
 
 Returns
@@ -179,7 +199,7 @@ Initializes the HD wallet from a seed.
 This method generates keys and other properties from a given seed, conforming to the BIP32 specification.
 
 ```ts
-public static fromSeed(bytes: number[]): HD 
+public fromSeed(bytes: number[]): this 
 ```
 
 Returns
@@ -190,6 +210,24 @@ Argument Details
 
 + **bytes**
   + An array of bytes representing the seed.
+
+#### Method fromString
+
+Initializes the HD wallet from a given base58 encoded string.
+This method decodes a provided string to set up the HD wallet's properties.
+
+```ts
+public static fromString(str: string): HD 
+```
+
+Returns
+
+The new instance with properties set from the string.
+
+Argument Details
+
++ **str**
+  + A base58 encoded string representing the wallet.
 
 #### Method fromString
 

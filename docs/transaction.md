@@ -442,6 +442,8 @@ export default class Transaction {
     toHex(): string 
     toHexBEEF(): string 
     hash(enc?: "hex"): number[] | string 
+    id(): number[];
+    id(enc: "hex"): string;
     id(enc?: "hex"): number[] | string 
     async verify(chainTracker: ChainTracker | "scripts only"): Promise<boolean> 
     toBEEF(): number[] 
@@ -602,6 +604,35 @@ Argument Details
 
 + **enc**
   + The encoding to use for the hash. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
+
+#### Method id
+
+Calculates the transaction's ID in binary array.
+
+```ts
+id(): number[]
+```
+
+Returns
+
+- The ID of the transaction in the binary array format.
+
+#### Method id
+
+Calculates the transaction's ID in hexadecimal format.
+
+```ts
+id(enc: "hex"): string
+```
+
+Returns
+
+- The ID of the transaction in the hex format.
+
+Argument Details
+
++ **enc**
+  + The encoding to use for the ID. If 'hex', returns a hexadecimal string.
 
 #### Method id
 

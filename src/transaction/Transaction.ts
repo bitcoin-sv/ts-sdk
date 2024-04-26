@@ -83,7 +83,7 @@ export default class Transaction {
     for (let i = 0; i < numberOfTransactions; i++) {
       const tx = Transaction.fromReader(reader)
       const obj: { pathIndex?: number, tx: Transaction } = { tx }
-      const txid = tx.id('hex') as string
+      const txid = tx.id('hex')
       if (i + 1 === numberOfTransactions) { // The last tXID is stored for later
         lastTXID = txid
       }
@@ -466,14 +466,14 @@ export default class Transaction {
    *
    * @returns {number[]} - The ID of the transaction in the binary array format.
    */
-  id(): number[];
+  id (): number[]
   /**
    * Calculates the transaction's ID in hexadecimal format.
    *
    * @param {'hex'} enc - The encoding to use for the ID. If 'hex', returns a hexadecimal string.
    * @returns {string} - The ID of the transaction in the hex format.
    */
-  id(enc: "hex"): string;
+  id (enc: 'hex'): string
   /**
    * Calculates the transaction's ID.
    *
@@ -500,7 +500,7 @@ export default class Transaction {
     // If the transaction has a valid merkle path, verification is complete.
     if (typeof this.merklePath === 'object' && chainTracker !== 'scripts only') {
       const proofValid = await this.merklePath.verify(
-        this.id('hex') as string,
+        this.id('hex'),
         chainTracker
       )
       // Note that if the proof is provided but not valid, the transaction could still be verified by proving all inputs (if they are available) and checking the associated spends.
@@ -515,10 +515,10 @@ export default class Transaction {
     for (let i = 0; i < this.inputs.length; i++) {
       const input = this.inputs[i]
       if (typeof input.sourceTransaction !== 'object') {
-        throw new Error(`Verification failed because the input at index ${i} of transaction ${this.id('hex') as string} is missing an associated source transaction. This source transaction is required for transaction verification because there is no merkle proof for the transaction spending a UTXO it contains.`)
+        throw new Error(`Verification failed because the input at index ${i} of transaction ${this.id('hex')} is missing an associated source transaction. This source transaction is required for transaction verification because there is no merkle proof for the transaction spending a UTXO it contains.`)
       }
       if (typeof input.unlockingScript !== 'object') {
-        throw new Error(`Verification failed because the input at index ${i} of transaction ${this.id('hex') as string} is missing an associated unlocking script. This script is required for transaction verification because there is no merkle proof for the transaction spending the UTXO.`)
+        throw new Error(`Verification failed because the input at index ${i} of transaction ${this.id('hex')} is missing an associated unlocking script. This script is required for transaction verification because there is no merkle proof for the transaction spending the UTXO.`)
       }
       const sourceOutput = input.sourceTransaction.outputs[input.sourceOutputIndex]
       inputTotal += sourceOutput.satoshis
@@ -529,7 +529,7 @@ export default class Transaction {
       const otherInputs = [...this.inputs]
       otherInputs.splice(i, 1)
       const spend = new Spend({
-        sourceTXID: input.sourceTransaction.id('hex') as string,
+        sourceTXID: input.sourceTransaction.id('hex'),
         sourceOutputIndex: input.sourceOutputIndex,
         lockingScript: sourceOutput.lockingScript,
         sourceSatoshis: sourceOutput.satoshis,
