@@ -10,7 +10,7 @@ A **transaction** in BSV is a record that transfers some outputs containing Bitc
 
 Each transaction consists of the following components:
 
-- **Version**: Indicates the ruleset under which the transaction is validated, overlays may only accept transactions of a specific version, they verify and process them based on a specific super-ruleset, and when processed, these transaction types can then trigger an event or carry data that the overlay or application(s) using the overlay can incorporate the information being communicated.
+- **Version**: Indicates the ruleset under which the transaction is validated or which overlay it belongs to.
 - **Inputs**: List of references to outputs from previous transactions, showing where the bitcoins being sent were previously stored.
 - **Outputs**: List of allocations of bitcoins, specifying the amount and conditions under which they can be spent in the future.
 - **Lock Time**: An optional setting that specifies the earliest time or block number at which the transaction can be valid.
