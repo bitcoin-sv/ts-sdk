@@ -39,7 +39,7 @@ A **Transaction Output** consists of:
 - **Satoshis**: The amount of BSV being transferred.
 - **Locking Script**: Defines the conditions under which the output can be spent, such as requiring a digital signature from the recipient's public key.
 
-Outputs transfer the ownership of satoshi commodity tokens or colloquially, coins, so their new owner use them as inputs in future transactions.
+Outputs transfer the ownership of satoshi commodity tokens or colloquially, coins, so their new owner can use them as inputs in future transactions.
 
 ## Constructing a Transaction
 
