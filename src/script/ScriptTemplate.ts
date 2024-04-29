@@ -28,9 +28,9 @@ export default interface ScriptTemplate {
    * @returns {Object} - An object containing the `sign` and `estimateLength` functions.
    */
   unlock: (...params: any) =>
-    {
-      sign: (tx: Transaction, inputIndex: number) =>
-        Promise<UnlockingScript>
-      estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>
-    }
+  {
+    sign: (tx: Transaction, inputIndex: number) =>
+    Promise<UnlockingScript>
+    estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>
+  }
 }

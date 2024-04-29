@@ -21,7 +21,7 @@ console.log(randomKey.toString())
 You can also import an existing key as follows:
 
 ```typescript
-const importedKey = new HD().fromString('xprv...')
+const importedKey = HD.fromString('xprv...')
 ```
 
 Now that you've generated or imported your key, you're ready to derive child keys.
@@ -31,7 +31,7 @@ Now that you've generated or imported your key, you're ready to derive child key
 BIP32 child keys can be derived from a key using the `.derive()` method. Here's a full example:
 
 ```typescript
-const key = new bsv.HD().fromString('xprv9s21ZrQH143K2vF2szsDFhrRehet4iHNCBPWprjymByU9mzN7n687qj3ULQ2YYXdNqFwhVSsKv9W9fM675whM9ATaYrmsLpykQSxMc6RN8V')
+const key = HD.fromString('xprv9s21ZrQH143K2vF2szsDFhrRehet4iHNCBPWprjymByU9mzN7n687qj3ULQ2YYXdNqFwhVSsKv9W9fM675whM9ATaYrmsLpykQSxMc6RN8V')
 const child = key.derive('m/0/1/2')
 console.log(child.toString())
 // 'xprv9yGx5dNDfq8pt1DJ9SFCK3gNFhjrL3kTqEj98oDs6xvfaUAUs3nyvVakQzwHAEMrc6gg1c3iaNCDubUruhX75gNHC7HAnFxHuxeiMVgLEqS'
@@ -44,7 +44,7 @@ Any of the standard derivation paths can be passed into the `.derive()` method.
 XPRIV keys can be converted to normal `PrivateKey` instances, and from there to WIF keys. XPUB keys can be converted to normal `PublicKey` instances, and from there to Bitcoin addresses. XPRIV keys can also be converted to XPUB keys:
 
 ```typescript
-const key = new bsv.HD().fromString('xprv9s21ZrQH143K2vF2szsDFhrRehet4iHNCBPWprjymByU9mzN7n687qj3ULQ2YYXdNqFwhVSsKv9W9fM675whM9ATaYrmsLpykQSxMc6RN8V')
+const key = HD.fromString('xprv9s21ZrQH143K2vF2szsDFhrRehet4iHNCBPWprjymByU9mzN7n687qj3ULQ2YYXdNqFwhVSsKv9W9fM675whM9ATaYrmsLpykQSxMc6RN8V')
 
 // Convert XPRIV to XPUB
 const xpubKey = key.toPublic()
