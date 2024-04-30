@@ -1,10 +1,10 @@
-import BigNumber from './BigNumber.js'
-import PublicKey from './PublicKey.js'
-import { verify } from './ECDSA.js'
-import { sha256 } from './Hash.js'
-import { toArray, toHex, toBase64 } from './utils.js'
-import Point from './Point.js'
-import Curve from './Curve.js'
+import BigNumber from './BigNumber'
+import PublicKey from './PublicKey'
+import { verify } from './ECDSA'
+import { sha256 } from './Hash'
+import { toArray, toHex, toBase64 } from './utils'
+import Point from './Point'
+import Curve from './Curve'
 
 /**
  * Represents a digital signature.
@@ -41,7 +41,7 @@ export default class Signature {
    * @example
    * const signature = Signature.fromDER('30440220018c1f5502f8...', 'hex');
    */
-  static fromDER (data: number[] | string, enc?: 'hex' | 'base64'): Signature {
+  static fromDER(data: number[] | string, enc?: 'hex' | 'base64'): Signature {
     const getLength = (buf, p): number => {
       const initial = buf[p.place++]
       if ((initial & 0x80) === 0) {
@@ -53,7 +53,7 @@ export default class Signature {
 
     class Position {
       place: number
-      constructor () {
+      constructor() {
         this.place = 0
       }
     }
@@ -120,7 +120,7 @@ export default class Signature {
    * @example
    * const signature = Signature.fromCompact('1b18c1f5502f8...', 'hex');
    */
-  static fromCompact (data: number[] | string, enc?: 'hex' | 'base64'): Signature {
+  static fromCompact(data: number[] | string, enc?: 'hex' | 'base64'): Signature {
     data = toArray(data, enc)
     if (data.length !== 65) {
       throw new Error('Invalid Compact Signature')
@@ -147,7 +147,7 @@ export default class Signature {
    * const s = new BigNumber('564745627577...');
    * const signature = new Signature(r, s);
    */
-  constructor (r: BigNumber, s: BigNumber) {
+  constructor(r: BigNumber, s: BigNumber) {
     this.r = r
     this.s = s
   }
@@ -169,7 +169,7 @@ export default class Signature {
    * const publicKey = PublicKey.fromString('04188ca1050...');
    * const isVerified = signature.verify(msg, publicKey);
    */
-  verify (msg: number[] | string, key: PublicKey, enc?: 'hex'): boolean {
+  verify(msg: number[] | string, key: PublicKey, enc?: 'hex'): boolean {
     const msgHash = new BigNumber(sha256(msg, enc), 16)
     return verify(msgHash, this, key)
   }
@@ -189,7 +189,7 @@ export default class Signature {
    * @example
    * const der = signature.toString('base64');
    */
-  toString (enc?: 'hex' | 'base64') {
+  toString(enc?: 'hex' | 'base64') {
     return this.toDER(enc)
   }
 
@@ -207,7 +207,7 @@ export default class Signature {
    * @example
    * const der = signature.toDER('hex');
    */
-  toDER (enc?: 'hex' | 'base64'): number[] | string {
+  toDER(enc?: 'hex' | 'base64'): number[] | string {
     const constructLength = (arr, len): void => {
       if (len < 0x80) {
         arr.push(len)
@@ -274,7 +274,7 @@ export default class Signature {
    * @example
    * const compact = signature.toCompact(3, true, 'base64');
    */
-  toCompact (recovery: number, compressed: boolean, enc?: 'hex' | 'base64'): number[] | string {
+  toCompact(recovery: number, compressed: boolean, enc?: 'hex' | 'base64'): number[] | string {
     if (recovery < 0 || recovery > 3) throw new Error('Invalid recovery param')
     if (typeof compressed !== 'boolean') throw new Error('Invalid compressed param')
     let compactByte = 27 + recovery
@@ -306,7 +306,7 @@ export default class Signature {
    * @example
    * const publicKey = signature.RecoverPublicKey(0, msgHash);
    */
-  RecoverPublicKey (recovery: number, e: BigNumber): PublicKey {
+  RecoverPublicKey(recovery: number, e: BigNumber): PublicKey {
     const r = this.r
     const s = this.s
 
@@ -362,7 +362,7 @@ export default class Signature {
    * @example
    * const recovery = signature.CalculateRecoveryFactor(publicKey, msgHash);
    */
-  CalculateRecoveryFactor (pubkey: PublicKey, msgHash: BigNumber): number {
+  CalculateRecoveryFactor(pubkey: PublicKey, msgHash: BigNumber): number {
     for (let recovery = 0; recovery < 4; recovery++) {
       let Qprime
       try {

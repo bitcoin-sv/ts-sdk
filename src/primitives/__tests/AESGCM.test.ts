@@ -1,6 +1,6 @@
 /* eslint-env jest */
-import { AES, AESGCM, ghash, rightShift, multiply, incrementLeastSignificantThirtyTwoBits, checkBit, getBytes, exclusiveOR } from '../../../dist/cjs/src/primitives/AESGCM'
-import { toArray } from '../../../dist/cjs/src/primitives/utils'
+import { AES, AESGCM, ghash, rightShift, multiply, incrementLeastSignificantThirtyTwoBits, checkBit, getBytes, exclusiveOR } from '../../primitives/AESGCM'
+import { toArray } from '../../primitives/utils'
 
 describe('AES', () => {
   it('should encrypt: AES-128', () => {

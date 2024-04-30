@@ -1,5 +1,5 @@
-import { encrypt, decrypt } from '../../../dist/cjs/src/messages/EncryptedMessage'
-import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
+import { encrypt, decrypt } from '../../messages/EncryptedMessage'
+import PrivateKey from '../../primitives/PrivateKey'
 
 describe('EncryptedMessage', () => {
   it('Encrypts a message for a recipient', () => {

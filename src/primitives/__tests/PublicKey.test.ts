@@ -1,7 +1,7 @@
-import PublicKey from '../../../dist/cjs/src/primitives/PublicKey'
-import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
-import Point from '../../../dist/cjs/src/primitives/Point'
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
+import PublicKey from '../../primitives/PublicKey'
+import PrivateKey from '../../primitives/PrivateKey'
+import Point from '../../primitives/Point'
+import BigNumber from '../../primitives/BigNumber'
 import BRC42Public from './BRC42.public.vectors'
 
 describe('PublicKey', () => {

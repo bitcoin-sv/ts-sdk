@@ -1,8 +1,8 @@
 /* eslint-env jest */
-import Curve from '../../../dist/cjs/src/primitives/Curve.js'
-import Point from '../../../dist/cjs/src/primitives/Point'
-import JPoint from '../../../dist/cjs/src/primitives/JacobianPoint'
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
+import Curve from '../../primitives/Curve'
+import Point from '../../primitives/Point'
+import JPoint from '../../primitives/JacobianPoint'
+import BigNumber from '../../primitives/BigNumber'
 
 describe('Curve', () => {
   it('should work with secp256k1', () => {
@@ -57,7 +57,7 @@ describe('Curve', () => {
 
     const a = new BigNumber(
       '6d1229a6b24c2e775c062870ad26bc26' +
-            '1051e0198c67203167273c7c6253884612345678',
+      '1051e0198c67203167273c7c6253884612345678',
       16)
     const p1 = g1.mul(a)
     const p2 = g2.mul(a)
@@ -146,16 +146,16 @@ describe('Point codec', () => {
       y: '483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8'
     },
     compactEncoded:
-        '02' +
-        '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798',
+      '02' +
+      '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798',
     encoded:
-        '04' +
-        '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798' +
-        '483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8',
+      '04' +
+      '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798' +
+      '483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8',
     hybrid:
-        '06' +
-        '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798' +
-        '483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8'
+      '06' +
+      '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798' +
+      '483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8'
   }
 
   const shortPointOddY = {
@@ -164,16 +164,16 @@ describe('Point codec', () => {
       y: 'ae12777aacfbb620f3be96017f45c560de80f0f6518fe4a03c870c36b075f297'
     },
     compactEncoded:
-        '03' +
-        'fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556',
+      '03' +
+      'fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556',
     encoded:
-        '04' +
-        'fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556' +
-        'ae12777aacfbb620f3be96017f45c560de80f0f6518fe4a03c870c36b075f297',
+      '04' +
+      'fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556' +
+      'ae12777aacfbb620f3be96017f45c560de80f0f6518fe4a03c870c36b075f297',
     hybrid:
-        '07' +
-        'fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556' +
-        'ae12777aacfbb620f3be96017f45c560de80f0f6518fe4a03c870c36b075f297'
+      '07' +
+      'fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556' +
+      'ae12777aacfbb620f3be96017f45c560de80f0f6518fe4a03c870c36b075f297'
   }
 
   it('should throw when trying to decode random bytes', () => {

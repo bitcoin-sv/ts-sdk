@@ -1,5 +1,5 @@
-import { sign, verify } from '../../../dist/cjs/src/messages/SignedMessage'
-import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
+import { sign, verify } from '../../messages/SignedMessage'
+import PrivateKey from '../../primitives/PrivateKey'
 
 describe('SignedMessage', () => {
   it('Signs a message for a recipient', () => {

@@ -1,5 +1,5 @@
-import BigNumber from '../primitives/BigNumber.js'
-import LockingScript from '../script/LockingScript.js'
+import BigNumber from '../primitives/BigNumber'
+import LockingScript from '../script/LockingScript'
 
 /**
  * Represents an output in a Bitcoin transaction.

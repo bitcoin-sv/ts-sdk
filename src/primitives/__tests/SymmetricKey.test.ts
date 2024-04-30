@@ -1,4 +1,4 @@
-import SymmetricKey from '../../../dist/cjs/src/primitives/SymmetricKey'
+import SymmetricKey from '../../primitives/SymmetricKey'
 import vectors from './SymmetricKey.vectors'
 
 const KEYS: SymmetricKey[] = [

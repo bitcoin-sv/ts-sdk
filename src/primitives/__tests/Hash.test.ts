@@ -1,8 +1,8 @@
 /* eslint-env jest */
-import * as hash from '../../../dist/cjs/src/primitives/Hash'
+import * as hash from '../../primitives/Hash'
 import * as crypto from 'crypto'
 import PBKDF2Vectors from './PBKDF2.vectors'
-import { toArray, toHex } from '../../../dist/cjs/src/primitives/utils'
+import { toArray, toHex } from '../../primitives/utils'
 
 describe('Hash', function () {
   function test(Hash, cases): void {

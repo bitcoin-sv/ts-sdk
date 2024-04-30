@@ -1,9 +1,9 @@
-import PublicKey from '../primitives/PublicKey.js'
-import PrivateKey from '../primitives/PrivateKey.js'
-import Signature from '../primitives/Signature.js'
-import Curve from '../primitives/Curve.js'
-import Random from '../primitives/Random.js'
-import { toBase64, toArray, Reader, toHex } from '../primitives/utils.js'
+import PublicKey from '../primitives/PublicKey'
+import PrivateKey from '../primitives/PrivateKey'
+import Signature from '../primitives/Signature'
+import Curve from '../primitives/Curve'
+import Random from '../primitives/Random'
+import { toBase64, toArray, Reader, toHex } from '../primitives/utils'
 
 const VERSION = '42423301'
 
@@ -59,7 +59,7 @@ export const verify = (message: number[], sig: number[], recipient?: PrivateKey)
   const messageVersion = toHex(reader.read(4))
   if (messageVersion !== VERSION) {
     throw new Error(
-        `Message version mismatch: Expected ${VERSION}, received ${messageVersion}`
+      `Message version mismatch: Expected ${VERSION}, received ${messageVersion}`
     )
   }
   const signer = PublicKey.fromString(toHex(reader.read(33)))

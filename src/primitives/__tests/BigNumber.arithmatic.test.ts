@@ -1,9 +1,9 @@
 /* global describe, it */
 
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
+import BigNumber from '../../primitives/BigNumber'
 import * as fixtures from './BigNumber.fixtures'
 
-describe('BN.js/Arithmetic', () => {
+describe('BN/Arithmetic', () => {
   describe('.add()', () => {
     it('should add numbers', () => {
       expect(new BigNumber(14).add(new BigNumber(26)).toString(16)).toBe('28')
@@ -167,7 +167,7 @@ describe('BN.js/Arithmetic', () => {
     })
   })
 
-  function testMethod (name, mul): void {
+  function testMethod(name, mul): void {
     describe(name, () => {
       it('should multiply numbers of different signs', () => {
         const offsets = [
@@ -350,7 +350,7 @@ describe('BN.js/Arithmetic', () => {
       const as = a.sqr()
       expect(
         as.div(p).toString(16)).toEqual(
-        '39e58a8055b6fb264b75ec8c646509784204ac15a8c24e05babc9729e58090b9')
+          '39e58a8055b6fb264b75ec8c646509784204ac15a8c24e05babc9729e58090b9')
 
       p = new BigNumber(
         'ffffffff00000001000000000000000000000000ffffffffffffffffffffffff',
@@ -361,7 +361,7 @@ describe('BN.js/Arithmetic', () => {
         16)
       expect(
         a.div(p).toString(16)).toEqual(
-        'ffffffff00000002000000000000000000000001000000000000000000000001')
+          'ffffffff00000002000000000000000000000001000000000000000000000001')
     })
   })
 

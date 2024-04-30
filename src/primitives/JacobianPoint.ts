@@ -1,6 +1,6 @@
-import BasePoint from './BasePoint.js'
-import BigNumber from './BigNumber.js'
-import Point from './Point.js'
+import BasePoint from './BasePoint'
+import BigNumber from './BigNumber'
+import Point from './Point'
 
 /**
  * The `JacobianPoint` class extends the `BasePoint` class for handling Jacobian coordinates on an Elliptic Curve.
@@ -38,7 +38,7 @@ export default class JacobianPoint extends BasePoint {
    * const pointJ1 = new JacobianPoint(null, null, null); // creates point at infinity
    * const pointJ2 = new JacobianPoint('3', '4', '1'); // creates point (3, 4, 1)
    */
-  constructor (
+  constructor(
     x: string | BigNumber | null,
     y: string | BigNumber | null,
     z: string | BigNumber | null
@@ -80,7 +80,7 @@ export default class JacobianPoint extends BasePoint {
    * const pointJ = new JacobianPoint('3', '4', '1');
    * const pointP = pointJ.toP();  // The point in affine coordinates.
    */
-  toP (): Point {
+  toP(): Point {
     if (this.isInfinity()) {
       return new Point(null, null)
     }
@@ -103,7 +103,7 @@ export default class JacobianPoint extends BasePoint {
    * const jp = new JacobianPoint(x, y, z)
    * const result = jp.neg()
    */
-  neg (): JacobianPoint {
+  neg(): JacobianPoint {
     return new JacobianPoint(this.x, this.y.redNeg(), this.z)
   }
 
@@ -121,7 +121,7 @@ export default class JacobianPoint extends BasePoint {
    * const p2 = new JacobianPoint(x2, y2, z2)
    * const result = p1.add(p2)
    */
-  add (p: JacobianPoint): JacobianPoint {
+  add(p: JacobianPoint): JacobianPoint {
     // O + P = P
     if (this.isInfinity()) { return p }
 
@@ -171,7 +171,7 @@ export default class JacobianPoint extends BasePoint {
    * const ap = new Point(x2, y2)
    * const result = jp.mixedAdd(ap)
    */
-  mixedAdd (p: Point): JacobianPoint {
+  mixedAdd(p: Point): JacobianPoint {
     // O + P = P
     if (this.isInfinity()) { return p.toJ() }
 
@@ -217,7 +217,7 @@ export default class JacobianPoint extends BasePoint {
    * const jp = new JacobianPoint(x, y, z)
    * const result = jp.dblp(3)
    */
-  dblp (pow: number): JacobianPoint {
+  dblp(pow: number): JacobianPoint {
     if (pow === 0) {
       return this
     }
@@ -244,7 +244,7 @@ export default class JacobianPoint extends BasePoint {
    * const jp = new JacobianPoint(x, y, z)
    * const result = jp.dbl()
    */
-  dbl (): JacobianPoint {
+  dbl(): JacobianPoint {
     if (this.isInfinity()) {
       return this
     }
@@ -331,7 +331,7 @@ export default class JacobianPoint extends BasePoint {
    * const jp2 = new JacobianPoint(x2, y2, z2)
    * const areEqual = jp1.eq(jp2)
    */
-  eq (p: Point | JacobianPoint): boolean {
+  eq(p: Point | JacobianPoint): boolean {
     if (p.type === 'affine') { return this.eq((p as Point).toJ()) }
 
     if (this === p) { return true }
@@ -363,7 +363,7 @@ export default class JacobianPoint extends BasePoint {
    * const jp = new JacobianPoint(x1, y1, z1)
    * const isXEqual = jp.eqXToP(x2)
    */
-  eqXToP (x: BigNumber): boolean {
+  eqXToP(x: BigNumber): boolean {
     const zs = this.z.redSqr()
     const rx = x.toRed(this.curve.red).redMul(zs)
     if (this.x.cmp(rx) === 0) { return true }
@@ -388,7 +388,7 @@ export default class JacobianPoint extends BasePoint {
    * const point = new JacobianPoint('5', '6', '1');
    * console.log(point.inspect()); // Output: '<EC JPoint x: 5 y: 6 z: 1>'
    */
-  inspect (): string {
+  inspect(): string {
     if (this.isInfinity()) { return '<EC JPoint Infinity>' }
     return '<EC JPoint x: ' + this.x.toString(16, 2) +
       ' y: ' + this.y.toString(16, 2) +
@@ -404,7 +404,7 @@ export default class JacobianPoint extends BasePoint {
    * const point = new JacobianPoint('5', '6', '0');
    * console.log(point.isInfinity()); // Output: true
    */
-  isInfinity (): boolean {
+  isInfinity(): boolean {
     return this.z.cmpn(0) === 0
   }
 }

@@ -1,5 +1,5 @@
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
-import { Reader, Writer, encode } from '../../../dist/cjs/src/primitives/utils'
+import BigNumber from '../../primitives/BigNumber'
+import { Reader, Writer, encode } from '../../primitives/utils'
 
 describe('Writer', () => {
   it('should create a new buffer writer', () => {

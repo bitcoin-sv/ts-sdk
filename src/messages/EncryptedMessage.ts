@@ -1,8 +1,8 @@
-import PublicKey from '../primitives/PublicKey.js'
-import PrivateKey from '../primitives/PrivateKey.js'
-import SymmetricKey from '../primitives/SymmetricKey.js'
-import Random from '../primitives/Random.js'
-import { toBase64, toArray, Reader, toHex } from '../primitives/utils.js'
+import PublicKey from '../primitives/PublicKey'
+import PrivateKey from '../primitives/PrivateKey'
+import SymmetricKey from '../primitives/SymmetricKey'
+import Random from '../primitives/Random'
+import { toBase64, toArray, Reader, toHex } from '../primitives/utils'
 
 const VERSION = '42421033'
 

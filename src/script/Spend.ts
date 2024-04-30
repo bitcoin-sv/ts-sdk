@@ -1,16 +1,16 @@
-import LockingScript from './LockingScript.js'
-import UnlockingScript from './UnlockingScript.js'
-import Script from './Script.js'
-import BigNumber from '../primitives/BigNumber.js'
-import OP from './OP.js'
-import ScriptChunk from './ScriptChunk.js'
-import { toHex } from '../primitives/utils.js'
-import * as Hash from '../primitives/Hash.js'
-import TransactionSignature from '../primitives/TransactionSignature.js'
-import PublicKey from '../primitives/PublicKey.js'
-import { verify } from '../primitives/ECDSA.js'
-import TransactionInput from '../transaction/TransactionInput.js'
-import TransactionOutput from '../transaction/TransactionOutput.js'
+import LockingScript from './LockingScript'
+import UnlockingScript from './UnlockingScript'
+import Script from './Script'
+import BigNumber from '../primitives/BigNumber'
+import OP from './OP'
+import ScriptChunk from './ScriptChunk'
+import { toHex } from '../primitives/utils'
+import * as Hash from '../primitives/Hash'
+import TransactionSignature from '../primitives/TransactionSignature'
+import PublicKey from '../primitives/PublicKey'
+import { verify } from '../primitives/ECDSA'
+import TransactionInput from '../transaction/TransactionInput'
+import TransactionOutput from '../transaction/TransactionOutput'
 
 // These constants control the current behavior of the interpreter.
 // In the future, all of them will go away.
@@ -89,7 +89,7 @@ export default class Spend {
    *   inputSequence: 0xffffffff // inputSequence
    * });
    */
-  constructor (params: {
+  constructor(params: {
     sourceTXID: string
     sourceOutputIndex: number
     sourceSatoshis: number
@@ -116,7 +116,7 @@ export default class Spend {
     this.reset()
   }
 
-  reset (): void {
+  reset(): void {
     this.context = 'UnlockingScript'
     this.programCounter = 0
     this.lastCodeSeparator = null
@@ -125,7 +125,7 @@ export default class Spend {
     this.ifStack = []
   }
 
-  step (): void {
+  step(): void {
     // If the context is UnlockingScript and we have reached the end,
     // set the context to LockingScript and zero the program counter
     if (
@@ -179,7 +179,7 @@ export default class Spend {
       return true
     }
 
-    // Following example from sCrypt now using Number.MAX_SAFE_INTEGER (bsv/lib/transaction/input/input.js).
+    // Following example from sCrypt now using Number.MAX_SAFE_INTEGER (bsv/lib/transaction/input/input).
     const isMinimallyEncoded = (buf: number[], maxNumSize: number = Number.MAX_SAFE_INTEGER): boolean => {
       if (buf.length > maxNumSize) {
         return false
@@ -1330,7 +1330,7 @@ export default class Spend {
    *   console.log("Invalid spend!");
    * }
    */
-  validate (): boolean {
+  validate(): boolean {
     if (requirePushOnlyUnlockingScripts && !this.unlockingScript.isPushOnly()) {
       this.scriptEvaluationError('Unlocking scripts can only contain push operations, and no other opcodes.')
     }
@@ -1354,11 +1354,11 @@ export default class Spend {
     return true
   }
 
-  private stacktop (i: number): number[] {
+  private stacktop(i: number): number[] {
     return this.stack[this.stack.length + i]
   }
 
-  private castToBool (val: number[]): boolean {
+  private castToBool(val: number[]): boolean {
     for (let i = 0; i < val.length; i++) {
       if (val[i] !== 0) {
         // can be negative zero
@@ -1371,7 +1371,7 @@ export default class Spend {
     return false
   }
 
-  private scriptEvaluationError (str: string): void {
+  private scriptEvaluationError(str: string): void {
     throw new Error(`Script evaluation error: ${str}\n\nSource TXID: ${this.sourceTXID}\nSource output index: ${this.sourceOutputIndex}\nContext: ${this.context}\nProgram counter: ${this.programCounter}\nStack size: ${this.stack.length}\nAlt stack size: ${this.altStack.length}`)
   }
 }

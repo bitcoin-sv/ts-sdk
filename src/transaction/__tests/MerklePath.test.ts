@@ -1,4 +1,4 @@
-import MerklePath from '../../../dist/cjs/src/transaction/MerklePath'
+import MerklePath from '../../transaction/MerklePath'
 import invalidBumps from './bump.invalid.vectors'
 import validBumps from './bump.valid.vectors'
 

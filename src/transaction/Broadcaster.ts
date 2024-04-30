@@ -1,4 +1,4 @@
-import Transaction from './Transaction.js'
+import Transaction from './Transaction'
 
 /**
  * Defines the structure of a successful broadcast response.
@@ -38,5 +38,5 @@ export interface BroadcastFailure {
  */
 export interface Broadcaster {
   broadcast: (transaction: Transaction) =>
-  Promise<BroadcastResponse | BroadcastFailure>
+    Promise<BroadcastResponse | BroadcastFailure>
 }

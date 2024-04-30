@@ -1,6 +1,6 @@
-import FeeModel from '../FeeModel.js'
-import Transaction from '../Transaction.js'
-import BigNumber from '../../primitives/BigNumber.js'
+import FeeModel from '../FeeModel'
+import Transaction from '../Transaction'
+import BigNumber from '../../primitives/BigNumber'
 
 /**
  * Represents the "satoshis per kilobyte" transaction fee model.

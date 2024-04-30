@@ -1,9 +1,9 @@
-import { sign, verify, magicHash } from '../../../dist/cjs/src/compat/BSM'
-import { toArray } from '../../../dist/cjs/src/primitives/utils'
-import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
-import PublicKey from '../../../dist/cjs/src/primitives/PublicKey'
-import Signature from '../../../dist/cjs/src/primitives/Signature'
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
+import { sign, verify, magicHash } from '../BSM'
+import { toArray } from '../../primitives/utils'
+import PrivateKey from '../../primitives/PrivateKey'
+import PublicKey from '../../primitives/PublicKey'
+import Signature from '../../primitives/Signature'
+import BigNumber from '../../primitives/BigNumber'
 
 describe('BSM', () => {
     describe('magicHash', () => {

@@ -1,5 +1,5 @@
-import HD from '../../../dist/cjs/src/compat/HD'
-import { fromBase58Check, toArray, toHex } from '../../../dist/cjs/src/primitives/utils'
+import HD from '../HD'
+import { fromBase58Check, toArray, toHex } from '../../primitives/utils'
 
 describe('HD', () => {
     it('should satisfy these basic API features', () => {
@@ -351,7 +351,7 @@ describe('HD', () => {
             const str =
                 'xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi'
             const buf = fromBase58Check(str)
-            let bip32 = HD.fromBinary([...buf.prefix, ...buf.data])
+            let bip32 = HD.fromBinary([...buf.prefix as number[], ...buf.data as number[]])
             expect(bip32).toBeDefined()
             expect(bip32.toString()).toEqual(str)
             bip32 = bip32.toPublic()
@@ -367,7 +367,7 @@ describe('HD', () => {
                 'xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi'
             const buf = fromBase58Check(str)
             const bip32 = HD.fromString(str)
-            expect(toHex(bip32.toBinary())).toEqual(toHex([...buf.prefix, ...buf.data]))
+            expect(toHex(bip32.toBinary())).toEqual(toHex([...buf.prefix as number[], ...buf.data as number[]]))
         })
     })
 

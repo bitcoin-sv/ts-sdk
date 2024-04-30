@@ -1,7 +1,7 @@
 /* eslint-env jest */
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
+import BigNumber from '../../primitives/BigNumber'
 
-describe('BN.js/Utils', () => {
+describe('BN/Utils', () => {
   describe('.toString()', () => {
     describe('hex no padding', () => {
       it('should have same length as input', () => {
@@ -297,12 +297,12 @@ describe('BN.js/Utils', () => {
         'ffffffffffffffffffffffffffffffff', 16).fromTwos(256).toNumber()).toEqual(-1)
       expect(
         new BigNumber('7fffffffffffffffffffffffffffffff' +
-        'ffffffffffffffffffffffffffffffff', 16).fromTwos(256).toString(10)).toEqual(new BigNumber('5789604461865809771178549250434395392663499' +
-        '2332820282019728792003956564819967', 10).toString(10))
+          'ffffffffffffffffffffffffffffffff', 16).fromTwos(256).toString(10)).toEqual(new BigNumber('5789604461865809771178549250434395392663499' +
+            '2332820282019728792003956564819967', 10).toString(10))
       expect(
         new BigNumber('80000000000000000000000000000000' +
-        '00000000000000000000000000000000', 16).fromTwos(256).toString(10)).toEqual(new BigNumber('-578960446186580977117854925043439539266349' +
-        '92332820282019728792003956564819968', 10).toString(10))
+          '00000000000000000000000000000000', 16).fromTwos(256).toString(10)).toEqual(new BigNumber('-578960446186580977117854925043439539266349' +
+            '92332820282019728792003956564819968', 10).toString(10))
     })
   })
 
@@ -324,12 +324,12 @@ describe('BN.js/Utils', () => {
         'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
       expect(
         new BigNumber('5789604461865809771178549250434395392663' +
-        '4992332820282019728792003956564819967', 10).toTwos(256).toString(16)).toEqual(
-        '7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
+          '4992332820282019728792003956564819967', 10).toTwos(256).toString(16)).toEqual(
+            '7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
       expect(
         new BigNumber('-578960446186580977117854925043439539266' +
-        '34992332820282019728792003956564819968', 10).toTwos(256).toString(16)).toEqual(
-        '8000000000000000000000000000000000000000000000000000000000000000')
+          '34992332820282019728792003956564819968', 10).toTwos(256).toString(16)).toEqual(
+            '8000000000000000000000000000000000000000000000000000000000000000')
     })
   })
 

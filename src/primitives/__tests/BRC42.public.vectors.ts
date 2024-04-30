@@ -1,4 +1,4 @@
-// Source: https://github.com/p2ppsr/sendover/blob/master/test/getPaymentpublicKey.vectors.js
+// Source: https://github.com/p2ppsr/sendover/blob/master/test/getPaymentpublicKey.vectors
 export default [
   {
     senderPrivateKey: '583755110a8c059de5cd81b8a04e1be884c46083ade3f779c1e022f6f89da94c',

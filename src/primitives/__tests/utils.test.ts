@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import { toArray, zero2, toHex, encode, fromBase58, toBase58, fromBase58Check, toBase58Check } from '../../../dist/cjs/src/primitives/utils'
+import { toArray, zero2, toHex, encode, fromBase58, toBase58, fromBase58Check, toBase58Check } from '../../primitives/utils'
 
 describe('utils', () => {
   it('should convert to array', () => {
