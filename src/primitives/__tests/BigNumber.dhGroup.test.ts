@@ -1,9 +1,9 @@
 /* eslint-env jest */
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
-import ReductionContext from '../../../dist/cjs/src/primitives/ReductionContext'
+import BigNumber from '../../primitives/BigNumber'
+import ReductionContext from '../../primitives/ReductionContext'
 import { dhGroups } from './BigNumber.fixtures'
 
-describe('BN.js/Slow DH test', () => {
+describe('BN/Slow DH test', () => {
   Object.keys(dhGroups).forEach(function (name) {
     it('should match public key for ' + name + ' group', () => {
       const group = dhGroups[name]

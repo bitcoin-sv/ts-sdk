@@ -49,7 +49,7 @@ abstract class BaseHash {
   padLength: number
   hmacStrength: number
 
-  constructor (
+  constructor(
     blockSize: number, outSize: number, hmacStrength: number, padLength: number
   ) {
     this.pending = null
@@ -64,15 +64,15 @@ abstract class BaseHash {
     this._delta32 = this.blockSize / 32
   }
 
-  _update (msg: number[], start: number): void {
+  _update(msg: number[], start: number): void {
     throw new Error('Not implemented')
   }
 
-  _digest (): number[] {
+  _digest(): number[] {
     throw new Error('Not implemented')
   }
 
-  _digestHex (): string {
+  _digestHex(): string {
     throw new Error('Not implemented')
   }
 
@@ -89,7 +89,7 @@ abstract class BaseHash {
    * @example
    * sha256.update('Hello World', 'utf8');
    */
-  update (msg: number[] | string, enc?: 'hex' | 'utf8'): this {
+  update(msg: number[] | string, enc?: 'hex' | 'utf8'): this {
     // Convert message to array, pad it, and join into 32bit blocks
     msg = toArray(msg, enc)
     if (this.pending == null) {
@@ -127,7 +127,7 @@ abstract class BaseHash {
    * @example
    * const hash = sha256.digest();
    */
-  digest (): number[] {
+  digest(): number[] {
     this.update(this._pad())
     assert(this.pending === null)
 
@@ -144,7 +144,7 @@ abstract class BaseHash {
    * @example
    * const hash = sha256.digestHex();
    */
-  digestHex (): string {
+  digestHex(): string {
     this.update(this._pad())
     assert(this.pending === null)
 
@@ -159,7 +159,7 @@ abstract class BaseHash {
    *
    * @returns Returns an array denoting the padding.
    */
-  private _pad (): number[] { //
+  private _pad(): number[] { //
     let len = this.pendingTotal
     const bytes = this._delta8
     const k = bytes - ((len + this.padLength) % bytes)
@@ -199,7 +199,7 @@ abstract class BaseHash {
   }
 }
 
-function isSurrogatePair (msg: string, i: number): boolean {
+function isSurrogatePair(msg: string, i: number): boolean {
   if ((msg.charCodeAt(i) & 0xFC00) !== 0xD800) {
     return false
   }
@@ -215,14 +215,14 @@ function isSurrogatePair (msg: string, i: number): boolean {
  * @param enc Optional. Encoding to use if msg is string. Default is 'utf8'.
  * @returns array of byte values from msg. If msg is an array, a copy is returned.
  */
-export function toArray (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] {
+export function toArray(msg: number[] | string, enc?: 'hex' | 'utf8'): number[] {
   if (Array.isArray(msg)) { return msg.slice() }
   if (!(msg as unknown as boolean)) { return [] }
   const res = []
   if (typeof msg === 'string') {
     if (enc !== 'hex') {
       // Inspired by stringToUtf8ByteArray() in closure-library by Google
-      // https://github.com/google/closure-library/blob/8598d87242af59aac233270742c8984e2b2bdbe0/closure/goog/crypt/crypt.js#L117-L143
+      // https://github.com/google/closure-library/blob/8598d87242af59aac233270742c8984e2b2bdbe0/closure/goog/crypt/crypt#L117-L143
       // Apache License 2.0
       // https://github.com/google/closure-library/blob/master/LICENSE
       let p = 0
@@ -261,7 +261,7 @@ export function toArray (msg: number[] | string, enc?: 'hex' | 'utf8'): number[]
   return res
 }
 
-function htonl (w: number): number {
+function htonl(w: number): number {
   const res = (w >>> 24) |
     ((w >>> 8) & 0xff00) |
     ((w << 8) & 0xff0000) |
@@ -269,7 +269,7 @@ function htonl (w: number): number {
   return res >>> 0
 }
 
-function toHex32 (msg: number[], endian?: 'little' | 'big'): string {
+function toHex32(msg: number[], endian?: 'little' | 'big'): string {
   let res = ''
   for (let i = 0; i < msg.length; i++) {
     let w = msg[i]
@@ -279,7 +279,7 @@ function toHex32 (msg: number[], endian?: 'little' | 'big'): string {
   return res
 }
 
-function zero8 (word: string): string {
+function zero8(word: string): string {
   if (word.length === 7) {
     return '0' + word
   } else if (word.length === 6) {
@@ -299,7 +299,7 @@ function zero8 (word: string): string {
   }
 }
 
-function join32 (msg, start, end, endian): number[] {
+function join32(msg, start, end, endian): number[] {
   const len = end - start
   assert(len % 4 === 0)
   const res = new Array(len / 4)
@@ -315,7 +315,7 @@ function join32 (msg, start, end, endian): number[] {
   return res
 }
 
-function split32 (msg: number[], endian: 'big' | 'little'): number[] {
+function split32(msg: number[], endian: 'big' | 'little'): number[] {
   const res = new Array(msg.length * 4)
   for (let i = 0, k = 0; i < msg.length; i++, k += 4) {
     const m = msg[i]
@@ -334,63 +334,63 @@ function split32 (msg: number[], endian: 'big' | 'little'): number[] {
   return res
 }
 
-function rotr32 (w: number, b: number): number {
+function rotr32(w: number, b: number): number {
   return (w >>> b) | (w << (32 - b))
 }
 
-function rotl32 (w: number, b: number): number {
+function rotl32(w: number, b: number): number {
   return (w << b) | (w >>> (32 - b))
 }
 
-function sum32 (a: number, b: number): number {
+function sum32(a: number, b: number): number {
   return (a + b) >>> 0
 }
 
-function SUM32_3 (a: number, b: number, c: number): number {
+function SUM32_3(a: number, b: number, c: number): number {
   return (a + b + c) >>> 0
 }
 
-function SUM32_4 (a: number, b: number, c: number, d: number): number {
+function SUM32_4(a: number, b: number, c: number, d: number): number {
   return (a + b + c + d) >>> 0
 }
 
-function SUM32_5 (
+function SUM32_5(
   a: number, b: number, c: number, d: number, e: number
 ): number {
   return (a + b + c + d + e) >>> 0
 }
 
-function FT_1 (s, x, y, z): number {
+function FT_1(s, x, y, z): number {
   if (s === 0) { return ch32(x, y, z) }
   if (s === 1 || s === 3) { return p32(x, y, z) }
   if (s === 2) { return maj32(x, y, z) }
 }
 
-function ch32 (x, y, z): number {
+function ch32(x, y, z): number {
   return (x & y) ^ ((~x) & z)
 }
 
-function maj32 (x, y, z): number {
+function maj32(x, y, z): number {
   return (x & y) ^ (x & z) ^ (y & z)
 }
 
-function p32 (x, y, z): number {
+function p32(x, y, z): number {
   return x ^ y ^ z
 }
 
-function S0_256 (x): number {
+function S0_256(x): number {
   return rotr32(x, 2) ^ rotr32(x, 13) ^ rotr32(x, 22)
 }
 
-function S1_256 (x): number {
+function S1_256(x): number {
   return rotr32(x, 6) ^ rotr32(x, 11) ^ rotr32(x, 25)
 }
 
-function G0_256 (x): number {
+function G0_256(x): number {
   return rotr32(x, 7) ^ rotr32(x, 18) ^ (x >>> 3)
 }
 
-function G1_256 (x): number {
+function G1_256(x): number {
   return rotr32(x, 17) ^ rotr32(x, 19) ^ (x >>> 10)
 }
 
@@ -426,19 +426,19 @@ const sh = [
   8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11
 ]
 
-function f (j, x, y, z): number {
+function f(j, x, y, z): number {
   if (j <= 15) { return x ^ y ^ z } else if (j <= 31) { return (x & y) | ((~x) & z) } else if (j <= 47) { return (x | (~y)) ^ z } else if (j <= 63) { return (x & z) | (y & (~z)) } else { return x ^ (y | (~z)) }
 }
 
-function K (j): number {
+function K(j): number {
   if (j <= 15) { return 0x00000000 } else if (j <= 31) { return 0x5a827999 } else if (j <= 47) { return 0x6ed9eba1 } else if (j <= 63) { return 0x8f1bbcdc } else { return 0xa953fd4e }
 }
 
-function Kh (j): number {
+function Kh(j): number {
   if (j <= 15) { return 0x50a28be6 } else if (j <= 31) { return 0x5c4dd124 } else if (j <= 47) { return 0x6d703ef3 } else if (j <= 63) { return 0x7a6d76e9 } else { return 0x00000000 }
 }
 
-function sum64 (buf, pos, ah, al) {
+function sum64(buf, pos, ah, al) {
   const bh = buf[pos]
   const bl = buf[pos + 1]
 
@@ -448,18 +448,18 @@ function sum64 (buf, pos, ah, al) {
   buf[pos + 1] = lo
 }
 
-function sum64_hi (ah, al, bh, bl) {
+function sum64_hi(ah, al, bh, bl) {
   const lo = (al + bl) >>> 0
   const hi = (lo < al ? 1 : 0) + ah + bh
   return hi >>> 0
 }
 
-function sum64_lo (ah, al, bh, bl) {
+function sum64_lo(ah, al, bh, bl) {
   const lo = al + bl
   return lo >>> 0
 }
 
-function sum64_4_hi (ah, al, bh, bl, ch, cl, dh, dl) {
+function sum64_4_hi(ah, al, bh, bl, ch, cl, dh, dl) {
   let carry = 0
   let lo = al
   lo = (lo + bl) >>> 0
@@ -473,12 +473,12 @@ function sum64_4_hi (ah, al, bh, bl, ch, cl, dh, dl) {
   return hi >>> 0
 }
 
-function sum64_4_lo (ah, al, bh, bl, ch, cl, dh, dl) {
+function sum64_4_lo(ah, al, bh, bl, ch, cl, dh, dl) {
   const lo = al + bl + cl + dl
   return lo >>> 0
 }
 
-function sum64_5_hi (ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
+function sum64_5_hi(ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
   let carry = 0
   let lo = al
   lo = (lo + bl) >>> 0
@@ -494,27 +494,27 @@ function sum64_5_hi (ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
   return hi >>> 0
 }
 
-function sum64_5_lo (ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
+function sum64_5_lo(ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
   const lo = al + bl + cl + dl + el
 
   return lo >>> 0
 }
 
-function rotr64_hi (ah, al, num) {
+function rotr64_hi(ah, al, num) {
   const r = (al << (32 - num)) | (ah >>> num)
   return r >>> 0
 }
 
-function rotr64_lo (ah, al, num) {
+function rotr64_lo(ah, al, num) {
   const r = (ah << (32 - num)) | (al >>> num)
   return r >>> 0
 }
 
-function shr64_hi (ah, al, num) {
+function shr64_hi(ah, al, num) {
   return ah >>> num
 }
 
-function shr64_lo (ah, al, num) {
+function shr64_lo(ah, al, num) {
   const r = (ah << (32 - num)) | (al >>> num)
   return r >>> 0
 }
@@ -539,7 +539,7 @@ function shr64_lo (ah, al, num) {
 export class RIPEMD160 extends BaseHash {
   h: number[]
 
-  constructor () {
+  constructor() {
     super(512, 160, 192, 64)
     this.endian = 'little'
 
@@ -547,7 +547,7 @@ export class RIPEMD160 extends BaseHash {
     this.endian = 'little'
   }
 
-  _update (msg: number[], start: number): void {
+  _update(msg: number[], start: number): void {
     let A = this.h[0]
     let B = this.h[1]
     let C = this.h[2]
@@ -589,11 +589,11 @@ export class RIPEMD160 extends BaseHash {
     this.h[0] = T
   }
 
-  _digest (): number[] {
+  _digest(): number[] {
     return split32(this.h, 'little')
   }
 
-  _digestHex (): string {
+  _digestHex(): string {
     return toHex32(this.h, 'little')
   }
 }
@@ -622,7 +622,7 @@ export class SHA256 extends BaseHash {
   W: number[]
   k: number[]
 
-  constructor () {
+  constructor() {
     super(512, 256, 192, 64)
     this.h = [
       0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
@@ -649,7 +649,7 @@ export class SHA256 extends BaseHash {
     this.W = new Array(64)
   }
 
-  _update (msg: number[], start?: number): void {
+  _update(msg: number[], start?: number): void {
     const W = this.W
 
     let i: number
@@ -693,11 +693,11 @@ export class SHA256 extends BaseHash {
     this.h[7] = sum32(this.h[7], h)
   };
 
-  _digest (): number[] {
+  _digest(): number[] {
     return split32(this.h, 'big')
   }
 
-  _digestHex (): string {
+  _digestHex(): string {
     return toHex32(this.h, 'big')
   }
 }
@@ -726,7 +726,7 @@ export class SHA1 extends BaseHash {
   W: number[]
   k: number[]
 
-  constructor () {
+  constructor() {
     super(512, 160, 80, 64)
     this.k = [
       0x5A827999, 0x6ED9EBA1,
@@ -738,7 +738,7 @@ export class SHA1 extends BaseHash {
     this.W = new Array(80)
   }
 
-  _update (msg: number[], start?: number): void {
+  _update(msg: number[], start?: number): void {
     const W = this.W
 
     let i: number
@@ -771,11 +771,11 @@ export class SHA1 extends BaseHash {
     this.h[4] = sum32(this.h[4], e)
   }
 
-  _digest (): number[] {
+  _digest(): number[] {
     return split32(this.h, 'big')
   }
 
-  _digestHex (): string {
+  _digestHex(): string {
     return toHex32(this.h, 'big')
   }
 }
@@ -804,7 +804,7 @@ export class SHA512 extends BaseHash {
   W: number[]
   k: number[]
 
-  constructor () {
+  constructor() {
     super(1024, 512, 192, 128)
     this.h = [
       0x6a09e667, 0xf3bcc908,
@@ -860,7 +860,7 @@ export class SHA512 extends BaseHash {
     this.W = new Array(160)
   }
 
-  _prepareBlock (msg, start) {
+  _prepareBlock(msg, start) {
     const W = this.W
 
     // 32 x 32bit words
@@ -889,7 +889,7 @@ export class SHA512 extends BaseHash {
     }
   }
 
-  _update (msg, start) {
+  _update(msg, start) {
     this._prepareBlock(msg, start)
 
     const W = this.W
@@ -980,40 +980,40 @@ export class SHA512 extends BaseHash {
     sum64(this.h, 14, hh, hl)
   }
 
-  _digest () {
+  _digest() {
     return split32(this.h, 'big')
   }
 
-  _digestHex () {
+  _digestHex() {
     return toHex32(this.h, 'big')
   }
 }
 
-function ch64_hi (xh, xl, yh, yl, zh, zl) {
+function ch64_hi(xh, xl, yh, yl, zh, zl) {
   let r = (xh & yh) ^ ((~xh) & zh)
   if (r < 0) { r += 0x100000000 }
   return r
 }
 
-function ch64_lo (xh, xl, yh, yl, zh, zl) {
+function ch64_lo(xh, xl, yh, yl, zh, zl) {
   let r = (xl & yl) ^ ((~xl) & zl)
   if (r < 0) { r += 0x100000000 }
   return r
 }
 
-function maj64_hi (xh, xl, yh, yl, zh, zl) {
+function maj64_hi(xh, xl, yh, yl, zh, zl) {
   let r = (xh & yh) ^ (xh & zh) ^ (yh & zh)
   if (r < 0) { r += 0x100000000 }
   return r
 }
 
-function maj64_lo (xh, xl, yh, yl, zh, zl) {
+function maj64_lo(xh, xl, yh, yl, zh, zl) {
   let r = (xl & yl) ^ (xl & zl) ^ (yl & zl)
   if (r < 0) { r += 0x100000000 }
   return r
 }
 
-function s0_512_hi (xh, xl) {
+function s0_512_hi(xh, xl) {
   const c0_hi = rotr64_hi(xh, xl, 28)
   const c1_hi = rotr64_hi(xl, xh, 2) // 34
   const c2_hi = rotr64_hi(xl, xh, 7) // 39
@@ -1023,7 +1023,7 @@ function s0_512_hi (xh, xl) {
   return r
 }
 
-function s0_512_lo (xh, xl) {
+function s0_512_lo(xh, xl) {
   const c0_lo = rotr64_lo(xh, xl, 28)
   const c1_lo = rotr64_lo(xl, xh, 2) // 34
   const c2_lo = rotr64_lo(xl, xh, 7) // 39
@@ -1033,7 +1033,7 @@ function s0_512_lo (xh, xl) {
   return r
 }
 
-function s1_512_hi (xh, xl) {
+function s1_512_hi(xh, xl) {
   const c0_hi = rotr64_hi(xh, xl, 14)
   const c1_hi = rotr64_hi(xh, xl, 18)
   const c2_hi = rotr64_hi(xl, xh, 9) // 41
@@ -1043,7 +1043,7 @@ function s1_512_hi (xh, xl) {
   return r
 }
 
-function s1_512_lo (xh, xl) {
+function s1_512_lo(xh, xl) {
   const c0_lo = rotr64_lo(xh, xl, 14)
   const c1_lo = rotr64_lo(xh, xl, 18)
   const c2_lo = rotr64_lo(xl, xh, 9) // 41
@@ -1053,7 +1053,7 @@ function s1_512_lo (xh, xl) {
   return r
 }
 
-function g0_512_hi (xh, xl) {
+function g0_512_hi(xh, xl) {
   const c0_hi = rotr64_hi(xh, xl, 1)
   const c1_hi = rotr64_hi(xh, xl, 8)
   const c2_hi = shr64_hi(xh, xl, 7)
@@ -1063,7 +1063,7 @@ function g0_512_hi (xh, xl) {
   return r
 }
 
-function g0_512_lo (xh, xl) {
+function g0_512_lo(xh, xl) {
   const c0_lo = rotr64_lo(xh, xl, 1)
   const c1_lo = rotr64_lo(xh, xl, 8)
   const c2_lo = shr64_lo(xh, xl, 7)
@@ -1073,7 +1073,7 @@ function g0_512_lo (xh, xl) {
   return r
 }
 
-function g1_512_hi (xh, xl) {
+function g1_512_hi(xh, xl) {
   const c0_hi = rotr64_hi(xh, xl, 19)
   const c1_hi = rotr64_hi(xl, xh, 29) // 61
   const c2_hi = shr64_hi(xh, xl, 6)
@@ -1083,7 +1083,7 @@ function g1_512_hi (xh, xl) {
   return r
 }
 
-function g1_512_lo (xh, xl) {
+function g1_512_lo(xh, xl) {
   const c0_lo = rotr64_lo(xh, xl, 19)
   const c1_lo = rotr64_lo(xl, xh, 29) // 61
   const c2_lo = shr64_lo(xh, xl, 6)
@@ -1124,7 +1124,7 @@ export class SHA256HMAC {
    * @example
    * const myHMAC = new SHA256HMAC('deadbeef');
    */
-  constructor (key: number[] | string) {
+  constructor(key: number[] | string) {
     key = toArray(key, 'hex')
     // Shorten key, if needed
     if (key.length > this.blockSize) {
@@ -1155,7 +1155,7 @@ export class SHA256HMAC {
    * @example
    * myHMAC.update('deadbeef', 'hex');
    */
-  update (msg: number[] | string, enc?: 'hex'): SHA256HMAC {
+  update(msg: number[] | string, enc?: 'hex'): SHA256HMAC {
     this.inner.update(msg, enc)
     return this
   }
@@ -1169,7 +1169,7 @@ export class SHA256HMAC {
    * @example
    * let hashedMessage = myHMAC.digest();
    */
-  digest (): number[] {
+  digest(): number[] {
     this.outer.update(this.inner.digest())
     return this.outer.digest()
   }
@@ -1183,7 +1183,7 @@ export class SHA256HMAC {
    * @example
    * let hashedMessage = myHMAC.digestHex();
    */
-  digestHex (): string {
+  digestHex(): string {
     this.outer.update(this.inner.digest())
     return this.outer.digestHex()
   }
@@ -1220,7 +1220,7 @@ export class SHA512HMAC {
    * @example
    * const myHMAC = new SHA512HMAC('deadbeef');
    */
-  constructor (key: number[] | string) {
+  constructor(key: number[] | string) {
     key = toArray(key, 'hex')
     // Shorten key, if needed
     if (key.length > this.blockSize) {
@@ -1251,7 +1251,7 @@ export class SHA512HMAC {
    * @example
    * myHMAC.update('deadbeef', 'hex');
    */
-  update (msg: number[] | string, enc?: 'hex' | 'utf8'): SHA512HMAC {
+  update(msg: number[] | string, enc?: 'hex' | 'utf8'): SHA512HMAC {
     this.inner.update(msg, enc)
     return this
   }
@@ -1265,7 +1265,7 @@ export class SHA512HMAC {
    * @example
    * let hashedMessage = myHMAC.digest();
    */
-  digest (): number[] {
+  digest(): number[] {
     this.outer.update(this.inner.digest())
     return this.outer.digest()
   }
@@ -1279,7 +1279,7 @@ export class SHA512HMAC {
    * @example
    * let hashedMessage = myHMAC.digestHex();
    */
-  digestHex (): string {
+  digestHex(): string {
     this.outer.update(this.inner.digest())
     return this.outer.digestHex()
   }
@@ -1423,7 +1423,7 @@ export const sha512hmac = (key: number[] | string, msg: number[] | string, enc?:
  *
  * @returns The computed key
  */
-export function pbkdf2 (password: number[], salt: number[], iterations: number, keylen: number, digest = 'sha512'): number[] {
+export function pbkdf2(password: number[], salt: number[], iterations: number, keylen: number, digest = 'sha512'): number[] {
   if (digest !== 'sha512') {
     throw new Error('Only sha512 is supported in this PBKDF2 implementation')
   }

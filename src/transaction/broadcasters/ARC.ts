@@ -1,5 +1,5 @@
-import { BroadcastResponse, BroadcastFailure, Broadcaster } from '../Broadcaster.js'
-import Transaction from '../Transaction.js'
+import { BroadcastResponse, BroadcastFailure, Broadcaster } from '../Broadcaster'
+import Transaction from '../Transaction'
 
 /**
  * Represents an ARC transaction broadcaster.
@@ -14,7 +14,7 @@ export default class ARC implements Broadcaster {
    * @param {string} URL - The URL endpoint for the ARC API.
    * @param {string} apiKey - The API key used for authorization with the ARC API.
    */
-  constructor (URL: string, apiKey: string) {
+  constructor(URL: string, apiKey: string) {
     this.URL = URL
     this.apiKey = apiKey
   }
@@ -22,12 +22,12 @@ export default class ARC implements Broadcaster {
   /**
    * Broadcasts a transaction via ARC.
    * This method will attempt to use `window.fetch` if available (in browser environments).
-   * If running in a Node.js environment, it falls back to using the Node.js `https` module.
+   * If running in a Node environment, it falls back to using the Node `https` module.
    *
    * @param {Transaction} tx - The transaction to be broadcasted.
    * @returns {Promise<BroadcastResponse | BroadcastFailure>} A promise that resolves to either a success or failure response.
    */
-  async broadcast (tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> {
+  async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> {
     let rawTx
     try {
       rawTx = tx.toHexEF()
@@ -37,7 +37,7 @@ export default class ARC implements Broadcaster {
       } else {
         throw error
       }
-    } 
+    }
     const requestOptions = {
       method: 'POST',
       headers: {
@@ -56,7 +56,7 @@ export default class ARC implements Broadcaster {
         response = await window.fetch(`${this.URL}/v1/tx`, requestOptions)
         data = await response.json()
       } else if (typeof require !== 'undefined') {
-        // Use Node.js https module
+        // Use Node https module
         // eslint-disable-next-line
         const https = require('https')
         response = await this.nodeFetch(https, requestOptions)
@@ -89,8 +89,8 @@ export default class ARC implements Broadcaster {
     }
   }
 
-  /** Helper function for Node.js HTTPS requests */
-  private async nodeFetch (https, requestOptions): Promise<any> {
+  /** Helper function for Node HTTPS requests */
+  private async nodeFetch(https, requestOptions): Promise<any> {
     return await new Promise((resolve, reject) => {
       const req = https.request(`${this.URL}/v1/tx`, requestOptions, res => {
         let data = ''

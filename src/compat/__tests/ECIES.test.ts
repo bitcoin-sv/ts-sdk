@@ -1,7 +1,7 @@
-import ECIES from '../../../dist/cjs/src/compat/ECIES'
-import * as Hash from '../../../dist/cjs/src/primitives/Hash'
-import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
-import { toArray, toHex, encode, toBase64 } from '../../../dist/cjs/src/primitives/utils'
+import ECIES from '../ECIES'
+import * as Hash from '../../primitives/Hash'
+import PrivateKey from '../../primitives/PrivateKey'
+import { toArray, toHex, encode, toBase64 } from '../../primitives/utils'
 
 describe('#ECIES', () => {
     it('should make a new ECIES object', () => {

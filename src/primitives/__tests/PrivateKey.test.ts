@@ -1,5 +1,5 @@
-import PublicKey from '../../../dist/cjs/src/primitives/PublicKey'
-import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
+import PublicKey from '../../primitives/PublicKey'
+import PrivateKey from '../../primitives/PrivateKey'
 import BRC42Private from './BRC42.private.vectors'
 
 describe('PrivateKey', () => {

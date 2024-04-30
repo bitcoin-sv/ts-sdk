@@ -1,11 +1,11 @@
-import Point from './Point.js'
-import PrivateKey from './PrivateKey.js'
-import Curve from './Curve.js'
-import { verify } from './ECDSA.js'
-import BigNumber from './BigNumber.js'
-import { sha256, sha256hmac, hash160 } from './Hash.js'
-import Signature from './Signature.js'
-import { toArray, toBase58Check, toHex } from './utils.js'
+import Point from './Point'
+import PrivateKey from './PrivateKey'
+import Curve from './Curve'
+import { verify } from './ECDSA'
+import BigNumber from './BigNumber'
+import { sha256, sha256hmac, hash160 } from './Hash'
+import Signature from './Signature'
+import { toArray, toBase58Check, toHex } from './utils'
 
 /**
  * The PublicKey class extends the Point class. It is used in public-key cryptography to derive shared secret, verify message signatures, and encode the public key in the DER format.
@@ -30,7 +30,7 @@ export default class PublicKey extends Point {
    * const myPrivKey = new PrivateKey(...)
    * const myPubKey = PublicKey.fromPrivateKey(myPrivKey)
    */
-  static fromPrivateKey (key: PrivateKey): PublicKey {
+  static fromPrivateKey(key: PrivateKey): PublicKey {
     const c = new Curve()
     const p = c.g.mul(key)
     return new PublicKey(p.x, p.y)
@@ -46,7 +46,7 @@ export default class PublicKey extends Point {
    * @example
    * const myPubKey = PublicKey.fromString("03....")
    */
-  static fromString (str: string): PublicKey {
+  static fromString(str: string): PublicKey {
     const p = Point.fromString(str)
     return new PublicKey(p.x, p.y)
   }
@@ -61,7 +61,7 @@ export default class PublicKey extends Point {
    * new PublicKey(point1);
    * new PublicKey('abc123', 'def456');
    */
-  constructor (
+  constructor(
     x: Point | BigNumber | number | number[] | string | null,
     y: BigNumber | number | number[] | string | null = null,
     isRed: boolean = true
@@ -87,7 +87,7 @@ export default class PublicKey extends Point {
    * const myPrivKey = new PrivateKey(...)
    * const sharedSecret = myPubKey.deriveSharedSecret(myPrivKey)
    */
-  deriveSharedSecret (priv: PrivateKey): Point {
+  deriveSharedSecret(priv: PrivateKey): Point {
     if (!this.validate()) {
       throw new Error('Public key not valid for ECDH secret derivation')
     }
@@ -108,7 +108,7 @@ export default class PublicKey extends Point {
    * const mySignature = new Signature(...)
    * const isVerified = myPubKey.verify(myMessage, mySignature)
    */
-  verify (msg: number[] | string, sig: Signature, enc?: 'hex' | 'utf8'): boolean {
+  verify(msg: number[] | string, sig: Signature, enc?: 'hex' | 'utf8'): boolean {
     const msgHash = new BigNumber(sha256(msg, enc), 16)
     return verify(msgHash, sig, this)
   }
@@ -121,7 +121,7 @@ export default class PublicKey extends Point {
    * @example
    * const derPublicKey = myPubKey.toDER()
    */
-  toDER (): string {
+  toDER(): string {
     return this.encode(true, 'hex') as string
   }
 
@@ -133,7 +133,7 @@ export default class PublicKey extends Point {
    * @example
    * const publicKeyHash = pubkey.toHash()
    */
-  toHash (enc?: 'hex'): number[] | string {
+  toHash(enc?: 'hex'): number[] | string {
     const pkh = hash160(this.encode(true))
     if (enc === 'hex') {
       return toHex(pkh)
@@ -153,7 +153,7 @@ export default class PublicKey extends Point {
    * const address = pubkey.toAddress()
    * const testnetAddress = pubkey.toAddress([0x6f])
    */
-  toAddress (prefix: number[] = [0x00]): string {
+  toAddress(prefix: number[] = [0x00]): string {
     return toBase58Check(this.toHash() as number[], prefix)
   }
 
@@ -163,7 +163,7 @@ export default class PublicKey extends Point {
    * @param invoiceNumber The invoice number used to derive the child key
    * @returns The derived child key.
    */
-  deriveChild (privateKey: PrivateKey, invoiceNumber: string): PublicKey {
+  deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey {
     const sharedSecret = this.deriveSharedSecret(privateKey)
     const invoiceNumberBin = toArray(invoiceNumber, 'utf8')
     const hmac = sha256hmac(sharedSecret.encode(true), invoiceNumberBin)

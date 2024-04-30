@@ -1,13 +1,13 @@
-import OP from '../OP.js'
-import ScriptTemplate from '../ScriptTemplate.js'
-import { fromBase58Check } from '../../primitives/utils.js'
-import LockingScript from '../LockingScript.js'
-import UnlockingScript from '../UnlockingScript.js'
-import Transaction from '../../transaction/Transaction.js'
-import PrivateKey from '../../primitives/PrivateKey.js'
-import TransactionSignature from '../../primitives/TransactionSignature.js'
-import { sha256 } from '../../primitives/Hash.js'
-import Script from '../Script.js'
+import OP from '../OP'
+import ScriptTemplate from '../ScriptTemplate'
+import { fromBase58Check } from '../../primitives/utils'
+import LockingScript from '../LockingScript'
+import UnlockingScript from '../UnlockingScript'
+import Transaction from '../../transaction/Transaction'
+import PrivateKey from '../../primitives/PrivateKey'
+import TransactionSignature from '../../primitives/TransactionSignature'
+import { sha256 } from '../../primitives/Hash'
+import Script from '../Script'
 
 /**
  * P2PKH (Pay To Public Key Hash) class implementing ScriptTemplate.

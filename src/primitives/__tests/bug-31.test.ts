@@ -1,9 +1,9 @@
 //import { PrivateKey, PublicKey, Curve, Hash, BigNumber } from '..';
-import PublicKey from '../../../dist/cjs/src/primitives/PublicKey'
+import PublicKey from '../../primitives/PublicKey'
 //import { PrivateKey } from '..';
-import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
-import Curve from '../../../dist/cjs/src/primitives/Curve'
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
+import PrivateKey from '../../primitives/PrivateKey'
+import Curve from '../../primitives/Curve'
+import BigNumber from '../../primitives/BigNumber'
 
 describe("bug-31 tests", () => {
 

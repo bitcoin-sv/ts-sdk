@@ -1,5 +1,5 @@
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
-import { Reader, Writer, toHex } from '../../../dist/cjs/src/primitives/utils'
+import BigNumber from '../../primitives/BigNumber'
+import { Reader, Writer, toHex } from '../../primitives/utils'
 
 describe('Reader', () => {
   it('should make a new Br', () => {
@@ -18,7 +18,7 @@ describe('Reader', () => {
 
   describe('#eof', () => {
     it('should return true for a blank br', () => {
-      const br = new Reader(Buffer.from([]))
+      const br = new Reader([Buffer.from([])])
       expect(br.eof()).toBeTruthy()
     })
   })

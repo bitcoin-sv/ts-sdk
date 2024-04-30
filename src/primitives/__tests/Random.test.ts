@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import Random from '../../../dist/cjs/src/primitives/Random'
+import Random from '../../primitives/Random'
 
 describe('Random', () => {
   it('Produces random bytes of correct length', () => {

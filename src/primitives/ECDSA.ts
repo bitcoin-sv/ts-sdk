@@ -1,8 +1,8 @@
-import BigNumber from './BigNumber.js'
-import Signature from './Signature.js'
-import Curve from './Curve.js'
-import Point from './Point.js'
-import DRBG from './DRBG.js'
+import BigNumber from './BigNumber'
+import Signature from './Signature'
+import Curve from './Curve'
+import Point from './Point'
+import DRBG from './DRBG'
 
 /**
  * Truncates a BigNumber message to the length of the curve order n, in the context of the Elliptic Curve Digital Signature Algorithm (ECDSA).
@@ -23,7 +23,7 @@ import DRBG from './DRBG.js'
  * let msg = new BigNumber('1234567890abcdef', 16);
  * let truncatedMsg = truncateToN(msg);
  */
-function truncateToN (msg: BigNumber, truncOnly?: boolean): BigNumber {
+function truncateToN(msg: BigNumber, truncOnly?: boolean): BigNumber {
   const curve = new Curve()
   const delta = msg.byteLength() * 8 - curve.n.bitLength()
   if (delta > 0) { msg = msg.ushrn(delta) }

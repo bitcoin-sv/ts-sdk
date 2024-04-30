@@ -1,6 +1,6 @@
-import Script from "../../../dist/cjs/src/script/Script"
-import Spend from "../../../dist/cjs/src/script/Spend"
-import Transaction from "../../../dist/cjs/src/transaction/Transaction"
+import Script from "../../script/Script"
+import Spend from "../../script/Spend"
+import Transaction from "../../transaction/Transaction"
 
 describe('SpendComplex', () => {
   it('complex unlock script validation', () => {

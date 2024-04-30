@@ -1,8 +1,8 @@
-import Script from '../../../dist/cjs/src/script/Script'
-import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
-import P2PKH from '../../../dist/cjs/src/script/templates/P2PKH'
-import OP from '../../../dist/cjs/src/script/OP'
-import { toHex } from '../../../dist/cjs/src/primitives/utils'
+import Script from '../Script'
+import PrivateKey from '../../primitives/PrivateKey'
+import P2PKH from '../templates/P2PKH'
+import OP from '../OP'
+import { toHex } from '../../primitives/utils'
 
 import scriptInvalid from './script.invalid.vectors'
 import scriptValid from './script.valid.vectors'

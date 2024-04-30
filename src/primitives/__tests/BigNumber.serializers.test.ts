@@ -1,5 +1,5 @@
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
-import { toArray, encode } from '../../../dist/cjs/src/primitives/utils'
+import BigNumber from '../../primitives/BigNumber'
+import { toArray, encode } from '../../primitives/utils'
 
 describe('BigNumber/Serializers', () => {
   describe('#fromJSON', () => {

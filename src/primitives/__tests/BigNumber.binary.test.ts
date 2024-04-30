@@ -1,7 +1,7 @@
 /* eslint-env jest */
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
+import BigNumber from '../../primitives/BigNumber'
 
-describe('BN.js/Binary', function () {
+describe('BN/Binary', function () {
   describe('.shl()', function () {
     it('should shl numbers', function () {
       expect(new BigNumber('69527932928').shln(13).toString(16)).toEqual('2060602000000')

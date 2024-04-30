@@ -1,5 +1,5 @@
-import ARC from '../../../../dist/cjs/src/transaction/broadcasters/ARC.js'
-import Transaction from '../../../../dist/cjs/src/transaction/Transaction.js'
+import ARC from '../../../transaction/broadcasters/ARC'
+import Transaction from '../../../transaction/Transaction'
 
 // Mock Transaction
 jest.mock('../../Transaction', () => {
@@ -45,8 +45,8 @@ describe('ARC Broadcaster', () => {
     })
   })
 
-  it('should broadcast successfully using Node.js https', async () => {
-    // Mocking Node.js https module
+  it('should broadcast successfully using Node https', async () => {
+    // Mocking Node https module
     jest.mock('https', () => ({
       request: (url, options, callback) => {
         // eslint-disable-next-line

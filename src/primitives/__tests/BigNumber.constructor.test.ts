@@ -1,6 +1,6 @@
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
+import BigNumber from '../../primitives/BigNumber'
 
-describe('BN.js/Constructor', () => {
+describe('BN/Constructor', () => {
   describe('with Smi input', () => {
     it('should accept one limb number', () => {
       expect(new BigNumber(12345).toString(16)).toEqual('3039')

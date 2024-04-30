@@ -1,13 +1,13 @@
-import OP from '../OP.js'
-import ScriptTemplate from '../ScriptTemplate.js'
-import LockingScript from '../LockingScript.js'
-import UnlockingScript from '../UnlockingScript.js'
-import Transaction from '../../transaction/Transaction.js'
-import PrivateKey from '../../primitives/PrivateKey.js'
-import TransactionSignature from '../../primitives/TransactionSignature.js'
-import { sha256 } from '../../primitives/Hash.js'
-import ScriptChunk from '../ScriptChunk.js'
-import BigNumber from '../../primitives/BigNumber.js'
+import OP from '../OP'
+import ScriptTemplate from '../ScriptTemplate'
+import LockingScript from '../LockingScript'
+import UnlockingScript from '../UnlockingScript'
+import Transaction from '../../transaction/Transaction'
+import PrivateKey from '../../primitives/PrivateKey'
+import TransactionSignature from '../../primitives/TransactionSignature'
+import { sha256 } from '../../primitives/Hash'
+import ScriptChunk from '../ScriptChunk'
+import BigNumber from '../../primitives/BigNumber'
 
 /**
  * RPuzzle class implementing ScriptTemplate.
@@ -23,7 +23,7 @@ export default class RPuzzle implements ScriptTemplate {
    *
    * @param {'raw'|'SHA1'|'SHA256'|'HASH256'|'RIPEMD160'|'HASH160'} type Denotes the type of puzzle to create
    */
-  constructor (type: 'raw' | 'SHA1' | 'SHA256' | 'HASH256' | 'RIPEMD160' | 'HASH160' = 'raw') {
+  constructor(type: 'raw' | 'SHA1' | 'SHA256' | 'HASH256' | 'RIPEMD160' | 'HASH160' = 'raw') {
     this.type = type
   }
 
@@ -33,7 +33,7 @@ export default class RPuzzle implements ScriptTemplate {
    * @param {number[]} value - An array representing the R value or its hash.
    * @returns {LockingScript} - An R puzzle locking script.
    */
-  lock (value: number[]): LockingScript {
+  lock(value: number[]): LockingScript {
     const chunks: ScriptChunk[] = [
       { op: OP.OP_OVER },
       { op: OP.OP_3 },
@@ -70,15 +70,15 @@ export default class RPuzzle implements ScriptTemplate {
    * @param {boolean} anyoneCanPay - Flag indicating if the signature allows for other inputs to be added later.
    * @returns {Object} - An object containing the `sign` and `estimateLength` functions.
    */
-  unlock (
+  unlock(
     k: BigNumber,
     privateKey: PrivateKey,
     signOutputs: 'all' | 'none' | 'single' = 'all',
     anyoneCanPay: boolean = false
   ): {
-      sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
-      estimateLength: () => Promise<106>
-    } {
+    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
+    estimateLength: () => Promise<106>
+  } {
     return {
       sign: async (tx: Transaction, inputIndex: number) => {
         if (typeof privateKey === 'undefined') {

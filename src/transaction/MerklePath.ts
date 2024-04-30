@@ -1,6 +1,6 @@
-import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
-import { hash256 } from '../primitives/Hash.js'
-import ChainTracker from './ChainTracker.js'
+import { Reader, Writer, toHex, toArray } from '../primitives/utils'
+import { hash256 } from '../primitives/Hash'
+import ChainTracker from './ChainTracker'
 
 /**
  * Represents a Merkle Path, which is used to provide a compact proof of inclusion for a
@@ -39,11 +39,11 @@ export default class MerklePath {
    * @param {string} hex - The hexadecimal string representation of the Merkle Path.
    * @returns {MerklePath} - A new MerklePath instance.
    */
-  static fromHex (hex: string): MerklePath {
+  static fromHex(hex: string): MerklePath {
     return MerklePath.fromBinary(toArray(hex, 'hex'))
   }
 
-  static fromReader (reader: Reader): MerklePath {
+  static fromReader(reader: Reader): MerklePath {
     const blockHeight = reader.readVarIntNum()
     const treeHeight = reader.readUInt8()
     const path = Array(treeHeight).fill(0).map(() => ([]))
@@ -82,12 +82,12 @@ export default class MerklePath {
    * @param {number[]} bump - The binary array representation of the Merkle Path.
    * @returns {MerklePath} - A new MerklePath instance.
    */
-  static fromBinary (bump: number[]): MerklePath {
+  static fromBinary(bump: number[]): MerklePath {
     const reader = new Reader(bump)
     return MerklePath.fromReader(reader)
   }
 
-  constructor (blockHeight: number, path: Array<Array<{
+  constructor(blockHeight: number, path: Array<Array<{
     offset: number
     hash?: string
     txid?: boolean
@@ -135,7 +135,7 @@ export default class MerklePath {
    *
    * @returns {number[]} - The binary array representation of the Merkle Path.
    */
-  toBinary (): number[] {
+  toBinary(): number[] {
     const writer = new Writer()
     writer.writeVarIntNum(this.blockHeight)
     const treeHeight = this.path.length
@@ -166,7 +166,7 @@ export default class MerklePath {
    *
    * @returns {string} - The hexadecimal string representation of the Merkle Path.
    */
-  toHex (): string {
+  toHex(): string {
     return toHex(this.toBinary())
   }
 
@@ -177,7 +177,7 @@ export default class MerklePath {
    * @returns {string} - The computed Merkle root as a hexadecimal string.
    * @throws {Error} - If the transaction ID is not part of the Merkle Path.
    */
-  computeRoot (txid?: string): string {
+  computeRoot(txid?: string): string {
     if (typeof txid !== 'string') {
       txid = this.path[0].find(leaf => Boolean(leaf?.hash)).hash
     }
@@ -216,7 +216,7 @@ export default class MerklePath {
    * @param {ChainTracker} chainTracker - The ChainTracker instance used to verify the Merkle root.
    * @returns {boolean} - True if the transaction ID is valid within the Merkle Path at the specified block height.
    */
-  async verify (txid: string, chainTracker: ChainTracker): Promise<boolean> {
+  async verify(txid: string, chainTracker: ChainTracker): Promise<boolean> {
     const root = this.computeRoot(txid)
     // Use the chain tracker to determine whether this is a valid merkle root at the given block height
     return await chainTracker.isValidRootForHeight(root, this.blockHeight)
@@ -228,7 +228,7 @@ export default class MerklePath {
    * @param {MerklePath} other - Another MerklePath to combine with this path.
    * @throws {Error} - If the paths have different block heights or roots.
    */
-  combine (other: MerklePath): void {
+  combine(other: MerklePath): void {
     if (this.blockHeight !== other.blockHeight) {
       throw Error('You cannot combine paths which do not have the same block height.')
     }
