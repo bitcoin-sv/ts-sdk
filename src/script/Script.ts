@@ -101,6 +101,8 @@ export default class Script {
    * const script = Script.fromHex("76a9...");
    */
   static fromHex (hex: string): Script {
+    if (hex.length % 2 !== 0) throw Error('There is an uneven number of characters in the string which suggests it is not hex encoded.')
+    if(!/^[0-9a-fA-F]+$/.test(hex)) throw Error('Some elements in this string are not hex encoded.')
     return Script.fromBinary(toArray(hex, 'hex'))
   }
 
