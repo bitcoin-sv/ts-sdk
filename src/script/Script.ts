@@ -29,7 +29,7 @@ export default class Script {
       const token = tokens[i]
       let opCode
       let opCodeNum: number
-      if (typeof OP[token] !== 'undefined') {
+      if (token.startsWith('OP_') && typeof OP[token] !== 'undefined') {
         opCode = token
         opCodeNum = OP[token]
       }
