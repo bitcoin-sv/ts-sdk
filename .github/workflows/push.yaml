@@ -63,3 +63,5 @@ jobs:
       run: npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
+    - name: Push version
+      run: git push
