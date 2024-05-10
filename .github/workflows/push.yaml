@@ -1,5 +1,5 @@
 on: [push, pull_request]
-name: Build, Test and maybe Publish
+name: Build, Test and Publish
 jobs:
   test:
     name: Build & Test
@@ -24,7 +24,6 @@ jobs:
       run: npm install
     - name: Test
       run: npm run test
-
   publish:
     name: Publish
     needs: test
@@ -56,39 +55,9 @@ jobs:
         git config --local user.email "support@bsvblockchain.org"
         git config --local user.name "Automated Version Bump"
         npm version patch
-        git checkout -b version-bump
-        git add package.json
-        git commit -m "Automated version bump"
-        git push origin version-bump
       env:
         NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v3
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        commit-message: "Automated version bump"
-        branch: version-bump
-        title: "Automated version bump"
-        body: "Automated version bump"
-    - name: Merge Pull Request
-      uses: actions/github-script@v5
-      with:
-        script: |
-          const { pull_request } = await github.pulls.create({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            head: 'version-bump',
-            base: 'master',
-            title: 'Automated version bump'
-          });
-          await github.pulls.merge({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: pull_request.number,
-            merge_method: 'squash'
-          });
     - name: Publish to NPM
-      if: github.ref == 'refs/heads/master'
       run: npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
