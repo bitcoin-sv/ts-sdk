@@ -83,6 +83,26 @@ describe('Transaction', () => {
     })
   })
 
+  describe('#parseScriptOffsets', () => {
+      it('should match sliced scripts to parsed scripts', async () => {
+        const tx = Transaction.fromBinary(tx2buf)
+        expect(tx.id("hex")).toBe(tx2idhex)
+        const r = Transaction.parseScriptOffsets(tx2buf)
+        expect(r.inputs.length).toBe(2)
+        expect(r.outputs.length).toBe(2)
+        for (let vin = 0; vin < 2; vin++) {
+            const i = r.inputs[vin]
+            const script = tx2buf.slice(i.offset, i.length + i.offset)
+            expect(script).toEqual(tx.inputs[vin].unlockingScript?.toBinary())
+        }
+        for (let vout = 0; vout < 2; vout++) {
+            const o = r.outputs[vout]
+            const script = tx2buf.slice(o.offset, o.length + o.offset)
+            expect(script).toEqual(tx.outputs[vout].lockingScript?.toBinary())
+        }
+      })
+  })
+
   describe('#toHex', () => {
     it('should produce this known tx', () => {
       expect(Transaction.fromHex(txhex).toHex()).toEqual(txhex)

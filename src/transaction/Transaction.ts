@@ -120,6 +120,49 @@ export default class Transaction {
     return transactions[lastTXID].tx
   }
 
+  /**
+   * Since the validation of blockchain data is atomically transaction data validation,
+   * any application seeking to validate data in output scripts must store the entire transaction as well.
+   * Since the transaction data includes the output script data, saving a second copy of potentially
+   * large scripts can bloat application storage requirements.
+   * 
+   * This function efficiently parses binary transaction data to determine the offsets and lengths of each script.
+   * This supports the efficient retreival of script data from transaction data.
+   * 
+   * @param bin binary transaction data
+   * @returns {
+   *   inputs: { vin: number, offset: number, length: number }[]
+   *   outputs: { vout: number, offset: number, length: number }[]
+   * }
+   */
+  static parseScriptOffsets(bin: number[])
+  : {
+    inputs: { vin: number, offset: number, length: number }[]
+    outputs: { vout: number, offset: number, length: number }[]
+  }
+  {
+    const br = new Reader(bin)
+    const inputs: { vin: number, offset: number, length: number }[] = []
+    const outputs: { vout: number, offset: number, length: number }[] = []
+
+    br.pos += 4 // version
+    const inputsLength = br.readVarIntNum()
+    for (let i = 0; i < inputsLength; i++) {
+      br.pos += 36 // txid and vout
+      const scriptLength = br.readVarIntNum()
+      inputs.push({ vin: i, offset: br.pos, length: scriptLength })
+      br.pos += scriptLength + 4 // script and sequence
+    }
+    const outputsLength = br.readVarIntNum()
+    for (let i = 0; i < outputsLength; i++) {
+      br.pos += 8 // satoshis
+      const scriptLength = br.readVarIntNum()
+      outputs.push({ vout: i, offset: br.pos, length: scriptLength })
+      br.pos += scriptLength
+    }
+    return { inputs, outputs }
+  }
+
   private static fromReader (br: Reader): Transaction {
     const version = br.readUInt32LE()
     const inputsLength = br.readVarIntNum()
