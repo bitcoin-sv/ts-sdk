@@ -13,8 +13,6 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
     - name: Cache node_modules
       id: cache-modules
       uses: actions/cache@v1
@@ -32,13 +30,17 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
+    - name: Authenticate with registry
+      run: echo "//registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN" > ~/.npmrc
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
     - uses: actions/checkout@v2
     - name: Use Node.js 20.x
       uses: actions/setup-node@v1
       with:
         node-version: 20.x
       env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
     - name: Cache node_modules
       id: cache-modules
       uses: actions/cache@v1
@@ -50,7 +52,14 @@ jobs:
       run: npm install
     - name: Test
       run: npm run test
+    - name: Version Bump
+      run: |
+        git config --local user.email "support@bsvblockchain.org"
+        git config --local user.name "Automated Version Bump"
+        npm version patch
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
     - name: Publish to NPM
       run: npm publish
       env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
