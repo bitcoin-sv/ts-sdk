@@ -213,7 +213,6 @@ const OP = {
 
 for (const name in OP) {
   OP[OP[name]] = name
-  OP[String(OP[name])] = name
 }
 
 export default OP
