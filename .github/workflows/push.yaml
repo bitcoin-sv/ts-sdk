@@ -24,40 +24,42 @@ jobs:
       run: npm install
     - name: Test
       run: npm run test
-  # publish:
-  #   name: Publish
-  #   needs: test
-  #   runs-on: ubuntu-latest
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-  #   steps:
-  #   - name: Authenticate with registry
-  #     run: echo "//registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN" > ~/.npmrc
-  #     env:
-  #       NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
-  #   - uses: actions/checkout@v2
-  #   - name: Use Node.js 20.x
-  #     uses: actions/setup-node@v1
-  #     with:
-  #       node-version: 20.x
-  #     env:
-  #       NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
-  #   - name: Cache node_modules
-  #     id: cache-modules
-  #     uses: actions/cache@v1
-  #     with:
-  #       path: node_modules
-  #       key: 20.x-${{ runner.OS }}-build-${{ hashFiles('package.json') }}
-  #   - name: Build
-  #     if: steps.cache-modules.outputs.cache-hit != 'true'
-  #     run: npm install
-  #   - name: Version Bump
-  #     run: |
-  #       git config --local user.email "support@bsvblockchain.org"
-  #       git config --local user.name "Automated Version Bump"
-  #       npm version patch
-  #     env:
-  #       NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
-  #   - name: Publish to NPM
-  #     run: npm publish
-  #     env:
-  #       NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
+  publish:
+    name: Publish
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+    - name: Authenticate with registry
+      run: echo "//registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN" > ~/.npmrc
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
+    - uses: actions/checkout@v2
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 20.x
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
+    - name: Cache node_modules
+      id: cache-modules
+      uses: actions/cache@v1
+      with:
+        path: node_modules
+        key: 20.x-${{ runner.OS }}-build-${{ hashFiles('package.json') }}
+    - name: Install deps
+      if: steps.cache-modules.outputs.cache-hit != 'true'
+      run: npm install
+    - name: Build
+      run: npm run build
+    - name: Version Bump
+      run: |
+        git config --local user.email "support@bsvblockchain.org"
+        git config --local user.name "Automated Version Bump"
+        npm version patch
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
+    - name: Publish to NPM
+      run: npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
