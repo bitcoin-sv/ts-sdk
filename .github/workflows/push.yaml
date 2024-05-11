@@ -52,14 +52,7 @@ jobs:
       run: npm install
     - name: Build
       run: npm run build
-    - name: Version Bump
-      run: |
-        git config --local user.email "support@bsvblockchain.org"
-        git config --local user.name "Automated Version Bump"
-        npm version patch
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
-    - name: Publish to NPM
+    - name: Publish to NPM (expected to fail if version was not bumped manually)
       run: npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
