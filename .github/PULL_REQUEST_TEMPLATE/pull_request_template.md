@@ -21,3 +21,4 @@ Describe the tests you've added or any testing steps you've taken.
 - [ ] My changes generate no new warnings
 - [ ] I have updated `CHANGELOG.md` with my changes
 - [ ] I have run `npm run doc` and `npm run lint` one final time before requesting a review
+- [ ] I have run `npm version patch` so that my changes will trigger a new version to be released when they are merged
