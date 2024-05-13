@@ -1,7 +1,7 @@
 import { HttpClient } from "../../primitives/utils.js"
 import ChainTracker from "../ChainTracker.js"
 
-export default class WoC implements ChainTracker {
+export default class WoChain implements ChainTracker {
     URL: string
     apiKey: string
 

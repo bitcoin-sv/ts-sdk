@@ -3,21 +3,19 @@ import { BroadcastResponse, BroadcastFailure, Broadcaster } from '../Broadcaster
 import Transaction from '../Transaction.js'
 
 /**
- * Represents an ARC transaction broadcaster.
+ * Represents an Whats on Chain transaction broadcaster.
  */
-export default class ARC implements Broadcaster {
+export default class WoCast implements Broadcaster {
   URL: string
   apiKey: string
 
   /**
-   * Constructs an instance of the ARC broadcaster.
+   * Constructs an instance of the WhatsOnChain broadcaster.
    *
-   * @param {string} URL - The URL endpoint for the ARC API.
-   * @param {string} apiKey - The API key used for authorization with the ARC API.
+   * @param {string} network - The URL endpoint for the WhatsOnChain API.
    */
-  constructor (URL: string, apiKey: string) {
-    this.URL = URL
-    this.apiKey = apiKey
+  constructor (network: string = 'main') {
+    this.URL = `https://api.whatsonchain.com/v1/bsv/${network}/tx/raw`
   }
 
   /**
@@ -29,41 +27,32 @@ export default class ARC implements Broadcaster {
    * @returns {Promise<BroadcastResponse | BroadcastFailure>} A promise that resolves to either a success or failure response.
    */
   async broadcast (tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> {
-    let rawTx
-    try {
-      rawTx = tx.toHexEF()
-    } catch (error) {
-      if (error.message === 'All inputs must have source transactions when serializing to EF format') {
-        rawTx = tx.toHex()
-      } else {
-        throw error
-      }
-    } 
+    let txhex
+    txhex = tx.toHex()
     const requestOptions = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.apiKey}`,
-        Accept: 'application/json'
+        'Accept': 'text/plain'
       },
-      body: JSON.stringify({ rawTx })
+      body: JSON.stringify({ txhex })
     }
 
     try {
       const http = new HttpClient()
-      const { response, data } = await http.request(`${this.URL}/tx/broadcast`, requestOptions)
-
+      const { response, data } = await http.request(this.URL, requestOptions)
+      console.log({ response, data })
       if (data.txid as boolean || response.ok as boolean || response.statusCode === 200) {
         return {
           status: 'success',
-          txid: data.txid,
-          message: data?.txStatus + ' ' + data?.extraInfo
+          txid: data,
+          message: 'broadcast successful'
         }
       } else {
         return {
           status: 'error',
-          code: data.status as boolean ? data.status : 'ERR_UNKNOWN',
-          description: data.detail as boolean ? data.detail : 'Unknown error'
+          code: response.status ?? 'ERR_UNKNOWN',
+          description: data ?? 'Unknown error'
         }
       }
     } catch (error) {

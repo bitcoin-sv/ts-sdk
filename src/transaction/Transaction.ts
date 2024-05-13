@@ -10,6 +10,7 @@ import { Broadcaster, BroadcastResponse, BroadcastFailure } from './Broadcaster.
 import MerklePath from './MerklePath.js'
 import Spend from '../script/Spend.js'
 import ChainTracker from './ChainTracker.js'
+import WoCast from './broadcasters/WoCast.js'
 
 /**
  * Represents a complete Bitcoin transaction. This class encapsulates all the details
@@ -384,7 +385,10 @@ export default class Transaction {
    * @param broadcaster The Broadcaster instance wwhere the transaction will be sent
    * @returns A BroadcastResponse or BroadcastFailure from the Broadcaster
    */
-  async broadcast (broadcaster: Broadcaster): Promise<BroadcastResponse | BroadcastFailure> {
+  async broadcast (broadcaster?: Broadcaster): Promise<BroadcastResponse | BroadcastFailure> {
+    if (broadcaster === undefined) {
+      broadcaster = new WoCast()
+    }
     return await broadcaster.broadcast(this)
   }
 

@@ -1,1 +1,1 @@
-export { default as WoC } from './woc.js'
+export { default as WoChain } from './WoChain.js'

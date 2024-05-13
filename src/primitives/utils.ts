@@ -694,14 +694,22 @@ export class HttpClient {
     if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
       // Use fetch in a browser environment
       response = await window.fetch(url, options)
-      data = await response.json()
+      if (options.headers['Accept'] === 'application/json') {
+        data = await response.json()
+      } else {
+        data = await response.text()
+      }
       return { response, data }
     } else if (typeof require !== 'undefined') {
       // Use Node.js https module
       // eslint-disable-next-line
       const https = require('https')
       response = await this.nodeFetch(https, url, options)
-      data = JSON.parse(response)
+      if (options.headers['Accept'] === 'application/json') {
+        data = JSON.parse(response)
+      } else {
+        data = response
+      }
       return { response, data }
     } else {
       throw new Error('No method available to perform HTTP request')
