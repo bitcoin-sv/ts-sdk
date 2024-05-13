@@ -172,4 +172,43 @@ export default class PublicKey extends Point {
     const finalPoint = this.add(point)
     return new PublicKey(finalPoint.x, finalPoint.y)
   }
+
+  /**
+   * Takes an array of numbers or a string and returns a new PublicKey instance.
+   * This method will throw an error if the Compact encoding is invalid.
+   * If a string is provided, it is assumed to represent a hexadecimal sequence.
+   * compactByte value 27-30 means uncompressed public key.
+   * 31-34 means compressed public key.
+   * The range represents the recovery param which can be 0,1,2,3.
+   *
+   * @static
+   * @method fromMsgHashAndCompactSignature
+   * @param msgHash - The message hash which was signed.
+   * @param signature - The signature in compact format.
+   * @param enc - The encoding of the signature string.
+   * @returns A PublicKey instance derived from the message hash and compact signature.
+   * @example
+   * const publicKey = Signature.fromMsgHashAndCompactSignature(msgHash, 'IMOl2mVKfDgsSsHT4uIYBNN4e...', 'base64');
+   */
+  static fromMsgHashAndCompactSignature (msgHash: BigNumber, signature: number[] | string, enc?: 'hex' | 'base64'): PublicKey {
+    const data = toArray(signature, enc)
+    if (data.length !== 65) {
+      throw new Error('Invalid Compact Signature')
+    }
+    const compactByte = data[0]
+    if (compactByte < 27 || compactByte >= 35) {
+      throw new Error('Invalid Compact Byte')
+    }
+    let r = data[0] - 27
+    let compressed = false // we don't really use this in the modern era, always use compressed.
+    if (r > 3) {
+      compressed = true
+      r -= 4
+    }
+    const s = new Signature(
+      new BigNumber(data.slice(1, 33)),
+      new BigNumber(data.slice(33, 65))
+    )
+    return s.RecoverPublicKey(r, msgHash)
+  }
 }

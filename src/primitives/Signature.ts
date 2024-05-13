@@ -106,9 +106,9 @@ export default class Signature {
    * Takes an array of numbers or a string and returns a new Signature instance.
    * This method will throw an error if the Compact encoding is invalid.
    * If a string is provided, it is assumed to represent a hexadecimal sequence.
-   * compactByte value 27-31 means compressed public key.
-   * 32-35 means uncompressed public key.
-   * The range represents the recovery param which can be 0,1,2,3,4.
+   * compactByte value 27-30 means uncompressed public key.
+   * 31-34 means compressed public key.
+   * The range represents the recovery param which can be 0,1,2,3.
    * We could support recovery functions in future if there's demand.
    *
    * @static
@@ -339,9 +339,13 @@ export default class Signature {
     const rInv = r.invm(n)
 
     // const Q = R.multiplyTwo(s, G, eNeg).mul(rInv)
-    const Q = R.mul(s)
-      .add(G.mul(eNeg))
-      .mul(rInv)
+    // const Q = R.mul(s)
+    //   .add(G.mul(eNeg))
+    //   .mul(rInv)
+
+    const srInv = rInv.mul(s).umod(n)
+    const eInvrInv = rInv.mul(eNeg).umod(n)
+    const Q = G.mul(eInvrInv).add(R.mul(srInv))
 
     const pubKey = new PublicKey(Q)
     pubKey.validate()
