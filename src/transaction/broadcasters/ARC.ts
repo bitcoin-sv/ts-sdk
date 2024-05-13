@@ -1,3 +1,4 @@
+import { HttpClient } from '../../primitives/utils.js'
 import { BroadcastResponse, BroadcastFailure, Broadcaster } from '../Broadcaster.js'
 import Transaction from '../Transaction.js'
 
@@ -48,22 +49,8 @@ export default class ARC implements Broadcaster {
     }
 
     try {
-      let response
-      let data: any = {}
-
-      if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
-        // Use fetch in a browser environment
-        response = await window.fetch(`${this.URL}/v1/tx`, requestOptions)
-        data = await response.json()
-      } else if (typeof require !== 'undefined') {
-        // Use Node.js https module
-        // eslint-disable-next-line
-        const https = require('https')
-        response = await this.nodeFetch(https, requestOptions)
-        data = JSON.parse(response)
-      } else {
-        throw new Error('No method available to perform HTTP request')
-      }
+      const http = new HttpClient()
+      const { response, data } = await http.request(`${this.URL}/tx/broadcast`, requestOptions)
 
       if (data.txid as boolean || response.ok as boolean || response.statusCode === 200) {
         return {
@@ -87,29 +74,5 @@ export default class ARC implements Broadcaster {
           : 'Internal Server Error'
       }
     }
-  }
-
-  /** Helper function for Node.js HTTPS requests */
-  private async nodeFetch (https, requestOptions): Promise<any> {
-    return await new Promise((resolve, reject) => {
-      const req = https.request(`${this.URL}/v1/tx`, requestOptions, res => {
-        let data = ''
-        res.on('data', (chunk: string) => {
-          data += chunk
-        })
-        res.on('end', () => {
-          resolve(data)
-        })
-      })
-
-      req.on('error', error => {
-        reject(error)
-      })
-
-      if (requestOptions.body as boolean) {
-        req.write(requestOptions.body)
-      }
-      req.end()
-    })
   }
 }

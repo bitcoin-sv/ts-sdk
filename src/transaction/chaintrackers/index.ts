@@ -1,0 +1,1 @@
+export { default as WoC } from './woc.js'
