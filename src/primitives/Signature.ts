@@ -339,10 +339,6 @@ export default class Signature {
     const rInv = r.invm(n)
 
     // const Q = R.multiplyTwo(s, G, eNeg).mul(rInv)
-    // const Q = R.mul(s)
-    //   .add(G.mul(eNeg))
-    //   .mul(rInv)
-
     const srInv = rInv.mul(s).umod(n)
     const eInvrInv = rInv.mul(eNeg).umod(n)
     const Q = G.mul(eInvrInv).add(R.mul(srInv))
