@@ -18,7 +18,7 @@ export default class ARC implements Broadcaster {
    * @param {string} apiKey - The API key used for authorization with the ARC API.
    * @param {HttpClient} httpClient - The HTTP client used to make requests to the ARC API.
    */
-  constructor (URL: string, apiKey: string, httpClient: HttpClient) {
+  constructor (URL: string, apiKey: string, httpClient: HttpClient = defaultHttpClient()) {
     this.URL = URL
     this.apiKey = apiKey
     this.httpClient = httpClient
