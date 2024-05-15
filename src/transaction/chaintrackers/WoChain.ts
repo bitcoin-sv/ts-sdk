@@ -7,7 +7,6 @@ export default class WoChain implements ChainTracker {
 
     constructor(network: string, apiKey?: string) {
         this.URL = `https://api.whatsonchain.com/v1/bsv/${network}`
-        return this
     }
 
     async isValidRootForHeight(root: string, height: number): Promise<boolean> {
