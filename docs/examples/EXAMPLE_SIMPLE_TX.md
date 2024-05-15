@@ -62,3 +62,45 @@ transaction.addOutput({
 ```
 
 The `Transaction` class abstracts the complexity of Bitcoin's transaction structure. It handles inputs, outputs, scripts, and serialization, offering methods to easily modify and interrogate the transaction. Check out the full code-level documentation, refer to other examples, or reach out to the community to learn more.
+
+## Configuring the ARC with http client
+
+The ARC broadcaster requires an HTTP client to broadcast transactions. By default, the SDK will try to search for `window.fetch` in browser or `https` module on Node.js. 
+If you want to use a custom (or preconfigured) HTTP client, you can pass it as an argument to the ARC constructor:
+
+### fetch
+
+```typescript
+// In this example we're assuming you have variable fetch holding the fetch function`
+
+const arc = new ARC('https://api.taal.com/arc', apiKey, {fetch})
+```
+
+### https
+
+Because ARC is assuming concrete interface of the http client, we're providing an adapter for https module. 
+You can use it as follows:
+
+```typescript
+// In this example we're assuming you have variable https holding the https module loaded for example with `require('https')`
+
+const arc = new ARC('https://api.taal.com/arc', apiKey, new NodejsHttpClient(https))
+
+```
+
+### axios
+
+Although the SDK is not providing adapters for axios, it can be easily used with the ARC broadcaster. 
+You can make your own "adapter" for axios as follows:
+
+```typescript
+const axiosHttpClient = { fetch: (url, options) => axios(url, {...options, data: options.body})}
+
+new ARC('https://api.taal.com/arc', apiKey, axiosHttpClient) 
+```
+
+### other libraries
+
+Although the SDK is not providing adapters for other libraries, 
+you can easily create your own adapter by implementing the `HttpClient` interface.
+Please look at the example for axios above to see how easy it can be done.

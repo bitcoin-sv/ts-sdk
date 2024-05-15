@@ -1,5 +1,7 @@
 import { BroadcastResponse, BroadcastFailure, Broadcaster } from '../Broadcaster.js'
 import Transaction from '../Transaction.js'
+import {HttpClient} from "./HttpClient.js";
+import defaultHttpClient from "./DefaultHttpClient.js";
 
 /**
  * Represents an ARC transaction broadcaster.
@@ -7,16 +9,19 @@ import Transaction from '../Transaction.js'
 export default class ARC implements Broadcaster {
   URL: string
   apiKey: string
+  private httpClient: HttpClient;
 
   /**
    * Constructs an instance of the ARC broadcaster.
    *
    * @param {string} URL - The URL endpoint for the ARC API.
    * @param {string} apiKey - The API key used for authorization with the ARC API.
+   * @param {HttpClient} httpClient - The HTTP client used to make requests to the ARC API.
    */
-  constructor (URL: string, apiKey: string) {
+  constructor (URL: string, apiKey: string, httpClient: HttpClient = defaultHttpClient()) {
     this.URL = URL
     this.apiKey = apiKey
+    this.httpClient = httpClient
   }
 
   /**
@@ -48,23 +53,8 @@ export default class ARC implements Broadcaster {
     }
 
     try {
-      let response
-      let data: any = {}
-
-      if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
-        // Use fetch in a browser environment
-        response = await window.fetch(`${this.URL}/v1/tx`, requestOptions)
-        data = await response.json()
-      } else if (typeof require !== 'undefined') {
-        // Use Node.js https module
-        // eslint-disable-next-line
-        const https = require('https')
-        response = await this.nodeFetch(https, requestOptions)
-        data = JSON.parse(response)
-      } else {
-        throw new Error('No method available to perform HTTP request')
-      }
-
+      const response = await this.httpClient.fetch(`${this.URL}/v1/tx`, requestOptions)
+      const data = await response.json()
       if (data.txid as boolean || response.ok as boolean || response.statusCode === 200) {
         return {
           status: 'success',
@@ -87,29 +77,5 @@ export default class ARC implements Broadcaster {
           : 'Internal Server Error'
       }
     }
-  }
-
-  /** Helper function for Node.js HTTPS requests */
-  private async nodeFetch (https, requestOptions): Promise<any> {
-    return await new Promise((resolve, reject) => {
-      const req = https.request(`${this.URL}/v1/tx`, requestOptions, res => {
-        let data = ''
-        res.on('data', (chunk: string) => {
-          data += chunk
-        })
-        res.on('end', () => {
-          resolve(data)
-        })
-      })
-
-      req.on('error', error => {
-        reject(error)
-      })
-
-      if (requestOptions.body as boolean) {
-        req.write(requestOptions.body)
-      }
-      req.end()
-    })
   }
 }
