@@ -41,7 +41,6 @@ export default class WoCast implements Broadcaster {
     try {
       const http = new HttpClient()
       const { response, data } = await http.request(this.URL, requestOptions)
-      console.log({ response, data })
       if (data.txid as boolean || response.ok as boolean || response.statusCode === 200) {
         return {
           status: 'success',
