@@ -125,25 +125,23 @@ export default class Transaction {
    * any application seeking to validate data in output scripts must store the entire transaction as well.
    * Since the transaction data includes the output script data, saving a second copy of potentially
    * large scripts can bloat application storage requirements.
-   * 
+   *
    * This function efficiently parses binary transaction data to determine the offsets and lengths of each script.
    * This supports the efficient retreival of script data from transaction data.
-   * 
+   *
    * @param bin binary transaction data
    * @returns {
    *   inputs: { vin: number, offset: number, length: number }[]
    *   outputs: { vout: number, offset: number, length: number }[]
    * }
    */
-  static parseScriptOffsets(bin: number[])
-  : {
-    inputs: { vin: number, offset: number, length: number }[]
-    outputs: { vout: number, offset: number, length: number }[]
-  }
-  {
+  static parseScriptOffsets (bin: number[]): {
+    inputs: Array<{ vin: number, offset: number, length: number }>
+    outputs: Array<{ vout: number, offset: number, length: number }>
+  } {
     const br = new Reader(bin)
-    const inputs: { vin: number, offset: number, length: number }[] = []
-    const outputs: { vout: number, offset: number, length: number }[] = []
+    const inputs: Array<{ vin: number, offset: number, length: number }> = []
+    const outputs: Array<{ vout: number, offset: number, length: number }> = []
 
     br.pos += 4 // version
     const inputsLength = br.readVarIntNum()

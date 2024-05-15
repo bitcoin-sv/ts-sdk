@@ -426,6 +426,18 @@ export default class Transaction {
     metadata: Record<string, any>;
     merklePath?: MerklePath;
     static fromBEEF(beef: number[]): Transaction 
+    static parseScriptOffsets(bin: number[]): {
+        inputs: {
+            vin: number;
+            offset: number;
+            length: number;
+        }[];
+        outputs: {
+            vout: number;
+            offset: number;
+            length: number;
+        }[];
+    } 
     static fromBinary(bin: number[]): Transaction 
     static fromHex(hex: string): Transaction 
     static fromHexBEEF(hex: string): Transaction 
@@ -650,6 +662,42 @@ Argument Details
 
 + **enc**
   + The encoding to use for the ID. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
+
+#### Method parseScriptOffsets
+
+Since the validation of blockchain data is atomically transaction data validation,
+any application seeking to validate data in output scripts must store the entire transaction as well.
+Since the transaction data includes the output script data, saving a second copy of potentially
+large scripts can bloat application storage requirements.
+
+This function efficiently parses binary transaction data to determine the offsets and lengths of each script.
+This supports the efficient retreival of script data from transaction data.
+
+```ts
+static parseScriptOffsets(bin: number[]): {
+    inputs: {
+        vin: number;
+        offset: number;
+        length: number;
+    }[];
+    outputs: {
+        vout: number;
+        offset: number;
+        length: number;
+    }[];
+} 
+```
+
+Returns
+
+inputs: { vin: number, offset: number, length: number }[]
+outputs: { vout: number, offset: number, length: number }[]
+}
+
+Argument Details
+
++ **bin**
+  + binary transaction data
 
 #### Method sign
 

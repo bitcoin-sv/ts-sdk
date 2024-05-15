@@ -6178,9 +6178,9 @@ const publicKey = signature.RecoverPublicKey(0, msgHash);
 Takes an array of numbers or a string and returns a new Signature instance.
 This method will throw an error if the Compact encoding is invalid.
 If a string is provided, it is assumed to represent a hexadecimal sequence.
-compactByte value 27-31 means compressed public key.
-32-35 means uncompressed public key.
-The range represents the recovery param which can be 0,1,2,3,4.
+compactByte value 27-30 means uncompressed public key.
+31-34 means compressed public key.
+The range represents the recovery param which can be 0,1,2,3.
 We could support recovery functions in future if there's demand.
 
 ```ts
@@ -6704,6 +6704,7 @@ export default class PublicKey extends Point {
     toHash(enc?: "hex"): number[] | string 
     toAddress(prefix: number[] = [0]): string 
     deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey 
+    static fromMsgHashAndCompactSignature(msgHash: BigNumber, signature: number[] | string, enc?: "hex" | "base64"): PublicKey 
 }
 ```
 
@@ -6779,6 +6780,38 @@ Example
 ```ts
 const myPrivKey = new PrivateKey(...)
 const sharedSecret = myPubKey.deriveSharedSecret(myPrivKey)
+```
+
+#### Method fromMsgHashAndCompactSignature
+
+Takes an array of numbers or a string and returns a new PublicKey instance.
+This method will throw an error if the Compact encoding is invalid.
+If a string is provided, it is assumed to represent a hexadecimal sequence.
+compactByte value 27-30 means uncompressed public key.
+31-34 means compressed public key.
+The range represents the recovery param which can be 0,1,2,3.
+
+```ts
+static fromMsgHashAndCompactSignature(msgHash: BigNumber, signature: number[] | string, enc?: "hex" | "base64"): PublicKey 
+```
+
+Returns
+
+A PublicKey instance derived from the message hash and compact signature.
+
+Argument Details
+
++ **msgHash**
+  + The message hash which was signed.
++ **signature**
+  + The signature in compact format.
++ **enc**
+  + The encoding of the signature string.
+
+Example
+
+```ts
+const publicKey = Signature.fromMsgHashAndCompactSignature(msgHash, 'IMOl2mVKfDgsSsHT4uIYBNN4e...', 'base64');
 ```
 
 #### Method fromPrivateKey
