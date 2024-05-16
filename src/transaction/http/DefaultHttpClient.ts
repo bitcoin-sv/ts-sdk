@@ -3,6 +3,8 @@ import {NodejsHttpClient} from "./NodejsHttpClient.js";
 
 /**
  * Returns a default HttpClient implementation based on the environment that it is run on.
+ * This method will attempt to use `window.fetch` if available (in browser environments).
+ * If running in a Node.js environment, it falls back to using the Node.js `https` module
  */
 export default function defaultHttpClient(): HttpClient {
     const noHttpClient:HttpClient = {
