@@ -1,6 +1,6 @@
 import ARC from '../../../../dist/cjs/src/transaction/broadcasters/ARC.js'
 import Transaction from '../../../../dist/cjs/src/transaction/Transaction.js'
-import {NodejsHttpClient} from "../NodejsHttpClient";
+import {NodejsHttpClient} from "../../http/NodejsHttpClient";
 
 // Mock Transaction
 jest.mock('../../Transaction', () => {

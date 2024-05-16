@@ -74,6 +74,16 @@
       "require": "./dist/cjs/src/transaction/broadcaster/*.js",
       "types": "./dist/types/src/transaction/broadcaster/*.d.ts"
     },
+    "./transaction/http": {
+      "import": "./dist/esm/src/transaction/http/index.js",
+      "require": "./dist/cjs/src/transaction/http/index.js",
+      "types": "./dist/types/src/transaction/http/index.d.ts"
+    },
+    "./transaction/http/*": {
+      "import": "./dist/esm/src/transaction/http/*.js",
+      "require": "./dist/cjs/src/transaction/http/*.js",
+      "types": "./dist/types/src/transaction/http/*.d.ts"
+    },
     "./transaction/fee-model": {
       "import": "./dist/esm/src/transaction/fee-model/index.js",
       "require": "./dist/cjs/src/transaction/fee-model/index.js",

@@ -1,7 +1,7 @@
 import { BroadcastResponse, BroadcastFailure, Broadcaster } from '../Broadcaster.js'
 import Transaction from '../Transaction.js'
-import {HttpClient} from "./HttpClient.js";
-import defaultHttpClient from "./DefaultHttpClient.js";
+import {HttpClient} from "../http/HttpClient.js";
+import defaultHttpClient from "../http/DefaultHttpClient.js";
 
 /**
  * Represents an ARC transaction broadcaster.
