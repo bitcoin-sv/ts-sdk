@@ -26,8 +26,6 @@ export default class ARC implements Broadcaster {
 
   /**
    * Broadcasts a transaction via ARC.
-   * This method will attempt to use `window.fetch` if available (in browser environments).
-   * If running in a Node.js environment, it falls back to using the Node.js `https` module.
    *
    * @param {Transaction} tx - The transaction to be broadcasted.
    * @returns {Promise<BroadcastResponse | BroadcastFailure>} A promise that resolves to either a success or failure response.
