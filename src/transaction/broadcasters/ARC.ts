@@ -1,7 +1,7 @@
-import { BroadcastResponse, BroadcastFailure, Broadcaster } from '../Broadcaster.js'
+import {BroadcastResponse, BroadcastFailure, Broadcaster} from '../Broadcaster.js'
 import Transaction from '../Transaction.js'
-import {HttpClient} from "../http/HttpClient.js";
-import defaultHttpClient from "../http/DefaultHttpClient.js";
+import {HttpClient, HttpClientRequestOptions} from "../http/HttpClient.js";
+import { defaultHttpClient } from "../http/DefaultHttpClient.js";
 
 /**
  * Represents an ARC transaction broadcaster.
@@ -18,7 +18,7 @@ export default class ARC implements Broadcaster {
    * @param {string} apiKey - The API key used for authorization with the ARC API.
    * @param {HttpClient} httpClient - The HTTP client used to make requests to the ARC API.
    */
-  constructor (URL: string, apiKey: string, httpClient: HttpClient = defaultHttpClient()) {
+  constructor(URL: string, apiKey: string, httpClient: HttpClient = defaultHttpClient()) {
     this.URL = URL
     this.apiKey = apiKey
     this.httpClient = httpClient
@@ -30,7 +30,7 @@ export default class ARC implements Broadcaster {
    * @param {Transaction} tx - The transaction to be broadcasted.
    * @returns {Promise<BroadcastResponse | BroadcastFailure>} A promise that resolves to either a success or failure response.
    */
-  async broadcast (tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> {
+  async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> {
     let rawTx
     try {
       rawTx = tx.toHexEF()
@@ -40,30 +40,30 @@ export default class ARC implements Broadcaster {
       } else {
         throw error
       }
-    } 
-    const requestOptions = {
+    }
+    const requestOptions: HttpClientRequestOptions = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${this.apiKey}`
       },
-      body: JSON.stringify({ rawTx })
+      data: {rawTx}
     }
 
     try {
-      const response = await this.httpClient.fetch(`${this.URL}/v1/tx`, requestOptions)
-      const data = await response.json()
-      if (data.txid as boolean || response.ok as boolean || response.statusCode === 200) {
+      const response = await this.httpClient.request<ArcResponse>(`${this.URL}/v1/tx`, requestOptions)
+      if (response.ok) {
+        const {txid, extraInfo, txStatus} = response.data
         return {
           status: 'success',
-          txid: data.txid,
-          message: data?.txStatus + ' ' + data?.extraInfo
+          txid: txid,
+          message: `${txStatus} ${extraInfo}`
         }
       } else {
         return {
           status: 'error',
-          code: data.status as boolean ? data.status : 'ERR_UNKNOWN',
-          description: data.detail as boolean ? data.detail : 'Unknown error'
+          code: response.status.toString() ?? 'ERR_UNKNOWN',
+          description: response.data?.detail ?? 'Unknown error'
         }
       }
     } catch (error) {
@@ -76,4 +76,10 @@ export default class ARC implements Broadcaster {
       }
     }
   }
+}
+
+interface ArcResponse {
+  txid: string
+  extraInfo: string
+  txStatus: string
 }
