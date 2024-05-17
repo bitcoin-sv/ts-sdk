@@ -1,7 +1,7 @@
 import {BroadcastResponse, BroadcastFailure, Broadcaster} from '../Broadcaster.js'
 import Transaction from '../Transaction.js'
 import {HttpClient} from "../http/HttpClient.js";
-import defaultHttpClient from "../http/DefaultHttpClient.js";
+import {defaultHttpClient} from "../http/DefaultHttpClient.js";
 
 /**
  * Represents an WhatsOnChain transaction broadcaster.
@@ -38,24 +38,23 @@ export default class WhatsOnChainBroadcaster implements Broadcaster {
                 'Content-Type': 'application/json',
                 'Accept': 'text/plain'
             },
-            body: JSON.stringify({rawTx})
+            data: {txhex: rawTx}
         }
 
         try {
-            const response = await this.httpClient.fetch(this.URL, requestOptions)
-            const data = await response.json()
-
-            if (data.txid as boolean || response.ok as boolean || response.statusCode === 200) {
+            const response = await this.httpClient.request<string>(this.URL, requestOptions)
+            if (response.ok) {
+                const txid = response.data
                 return {
                     status: 'success',
-                    txid: data.txid,
-                    message: 'broadcast successful'
+                    txid: txid,
+                    message: 'broadcast success'
                 }
             } else {
                 return {
                     status: 'error',
-                    code: data.status ?? 'ERR_UNKNOWN',
-                    description: data ?? 'Unknown error'
+                    code: response.statusText ?? 'ERR_UNKNOWN',
+                    description: response.data?.detail ?? 'Unknown error'
                 }
             }
         } catch (error) {
