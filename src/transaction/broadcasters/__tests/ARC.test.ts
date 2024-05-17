@@ -1,6 +1,7 @@
 import ARC from '../../../../dist/cjs/src/transaction/broadcasters/ARC.js'
 import Transaction from '../../../../dist/cjs/src/transaction/Transaction.js'
-import {NodejsHttpClient} from "../../http/NodejsHttpClient";
+import {NodejsHttpClient} from "../../../../dist/cjs/src/transaction/http/NodejsHttpClient.js";
+import {FetchHttpClient} from "../../../../dist/cjs/src/transaction/http/FetchHttpClient.js";
 
 // Mock Transaction
 jest.mock('../../Transaction', () => {
@@ -17,9 +18,12 @@ describe('ARC Broadcaster', () => {
   const URL = 'https://example.com'
   const apiKey = 'test_api_key'
   const successResponse = {
-    txid: 'mocked_txid',
-    txStatus: 'success',
-    extraInfo: 'received'
+    status: 200,
+    data: {
+      txid: 'mocked_txid',
+      txStatus: 'success',
+      extraInfo: 'received'
+    }
   }
 
   let transaction: Transaction
@@ -63,7 +67,7 @@ describe('ARC Broadcaster', () => {
 
     const mockFetch = mockedFetch(successResponse)
 
-    const broadcaster = new ARC(URL, apiKey, { fetch: mockFetch })
+    const broadcaster = new ARC(URL, apiKey, new FetchHttpClient(mockFetch))
     const response = await broadcaster.broadcast(transaction)
 
     expect(mockFetch).toHaveBeenCalled()
@@ -106,11 +110,12 @@ describe('ARC Broadcaster', () => {
   it('should handle non-200 responses', async () => {
     const mockFetch = mockedFetch({
       status: '400',
-      detail: 'Bad request'
+      data: {
+        detail: 'Bad request'
+      }
     })
-    global.window = { fetch: mockFetch } as any
 
-    const broadcaster = new ARC(URL, apiKey)
+    const broadcaster = new ARC(URL, apiKey, new FetchHttpClient(mockFetch))
     const response = await broadcaster.broadcast(transaction)
 
     expect(mockFetch).toHaveBeenCalled()
@@ -123,8 +128,17 @@ describe('ARC Broadcaster', () => {
 
   function mockedFetch(response) {
     return jest.fn().mockResolvedValue({
-      ok: response.status === '200',
-      json: async () => response
+      ok: response.status === 200,
+      status: response.status,
+      statusText: response.status === 200 ? 'OK' : 'Bad request',
+      headers: {
+        get(key: string) {
+            if (key === 'Content-Type') {
+                return 'application/json'
+            }
+        }
+      },
+      json: async () => response.data
     });
   }
 
@@ -133,9 +147,13 @@ describe('ARC Broadcaster', () => {
       request: (url, options, callback) => {
         // eslint-disable-next-line
         callback({
-          statusCode: 200,
+          statusCode: response.status,
+          statusMessage: response.status == 200 ? 'OK' : 'Bad request',
+          headers: {
+            'content-type': 'application/json'
+          },
           on: (event, handler) => {
-            if (event === 'data') handler(JSON.stringify(response))
+            if (event === 'data') handler(JSON.stringify(response.data))
             if (event === 'end') handler()
           }
         })
