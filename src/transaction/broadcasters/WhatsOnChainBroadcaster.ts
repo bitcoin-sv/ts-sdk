@@ -17,7 +17,7 @@ export default class WhatsOnChainBroadcaster implements Broadcaster {
    * @param {string} network - The URL endpoint for the WhatsOnChain API.
    * @param {HttpClient} httpClient - The HTTP client used to make requests to the ARC API.
    */
-  constructor(network: string = 'main', httpClient: HttpClient = defaultHttpClient()) {
+  constructor(network: 'main' | 'test' | 'stn' = 'main', httpClient: HttpClient = defaultHttpClient()) {
     this.network = network
     this.URL = `https://api.whatsonchain.com/v1/bsv/${network}/tx/raw`
     this.httpClient = httpClient

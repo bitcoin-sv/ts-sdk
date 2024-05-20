@@ -63,17 +63,36 @@ transaction.addOutput({
 
 The `Transaction` class abstracts the complexity of Bitcoin's transaction structure. It handles inputs, outputs, scripts, and serialization, offering methods to easily modify and interrogate the transaction. Check out the full code-level documentation, refer to other examples, or reach out to the community to learn more.
 
-## Configuring the ARC with http client
+## Choosing broadcasting target (ARC or WhatsOnChain)
+
+### ARC
+
+You can broadcast via selected ARC by providing ARC instance to the `broadcast` method.
+
+```typescript
+await tx.broadcast(new ARC('https://api.taal.com/arc', apiKey))
+```
+
+### WhatsOnChain
+
+You can broadcast via What's On Chain by providing WhatsOnChainBroadcaster instance to the `broadcast` method.
+
+```typescript
+const network = 'main' // or 'test'
+await tx.broadcast(new WhatsOnChainBroadcaster(network))
+```
+
+## Use custom http client for broadcasting
 
 The ARC broadcaster requires an HTTP client to broadcast transactions. By default, the SDK will try to search for `window.fetch` in browser or `https` module on Node.js. 
-If you want to use a custom (or preconfigured) HTTP client, you can pass it as an argument to the ARC constructor:
+If you want to use a custom (or preconfigured) HTTP client, you can pass it with use of the adapter the ARC constructor:
 
 ### fetch
 
 ```typescript
 // In this example we're assuming you have variable fetch holding the fetch function`
 
-const arc = new ARC('https://api.taal.com/arc', apiKey, {fetch})
+const arc = new ARC('https://api.taal.com/arc', apiKey, new FetchHttpClient(mockFetch))
 ```
 
 ### https
@@ -94,7 +113,27 @@ Although the SDK is not providing adapters for axios, it can be easily used with
 You can make your own "adapter" for axios as follows:
 
 ```typescript
-const axiosHttpClient = { fetch: (url, options) => axios(url, {...options, data: options.body})}
+const axiosHttpClient =   const httpClient: HttpClient = {
+  request: async (...args) => {
+    let res;
+    try {
+      res = await axios(...args);
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        res = e.response;
+      } else {
+        throw e;
+      }
+    }
+    if (!res) {
+      throw new Error('No response');
+    }
+    return {
+      ok: res.status >= 200 && res.status <= 299,
+      ...res
+    };
+  },
+};
 
 new ARC('https://api.taal.com/arc', apiKey, axiosHttpClient) 
 ```
