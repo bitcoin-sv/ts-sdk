@@ -47,7 +47,7 @@ The TypeScript BSV SDK does provides default implementation of the chain tracker
 The default network for the chain tracker is `main`. You can change it to other network by providing the instance of WhatsOnChain ChainTracker configured for other network to `.verify()` method.
 
 ```typescript
-tx.verify(new WhatsOnChain('test'))
+tx.verify(new WhatsOnChain())
 ```
 
 #### Api Key
