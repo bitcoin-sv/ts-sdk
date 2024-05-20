@@ -10,8 +10,8 @@ import { Broadcaster, BroadcastResponse, BroadcastFailure } from './Broadcaster.
 import MerklePath from './MerklePath.js'
 import Spend from '../script/Spend.js'
 import ChainTracker from './ChainTracker.js'
-import {defaultBroadcaster} from "./broadcasters/DefaultBroadcaster.js";
-import {defaultChainTracker} from "./chaintrackers/DefaultChainTracker.js";
+import { defaultBroadcaster } from './broadcasters/DefaultBroadcaster.js'
+import { defaultChainTracker } from './chaintrackers/DefaultChainTracker.js'
 
 /**
  * Represents a complete Bitcoin transaction. This class encapsulates all the details

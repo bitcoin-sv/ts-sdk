@@ -1,20 +1,21 @@
 # API
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ## Interfaces
 
-| |
-| --- |
-| [BroadcastFailure](#interface-broadcastfailure) |
-| [BroadcastResponse](#interface-broadcastresponse) |
-| [Broadcaster](#interface-broadcaster) |
-| [ChainTracker](#interface-chaintracker) |
-| [FeeModel](#interface-feemodel) |
-| [TransactionInput](#interface-transactioninput) |
-| [TransactionOutput](#interface-transactionoutput) |
+| | |
+| --- | --- |
+| [ArcConfig](#interface-arcconfig) | [HttpClient](#interface-httpclient) |
+| [BroadcastFailure](#interface-broadcastfailure) | [HttpClientRequestOptions](#interface-httpclientrequestoptions) |
+| [BroadcastResponse](#interface-broadcastresponse) | [HttpsNodejs](#interface-httpsnodejs) |
+| [Broadcaster](#interface-broadcaster) | [NodejsHttpClientRequest](#interface-nodejshttpclientrequest) |
+| [ChainTracker](#interface-chaintracker) | [TransactionInput](#interface-transactioninput) |
+| [FeeModel](#interface-feemodel) | [TransactionOutput](#interface-transactionoutput) |
+| [Fetch](#interface-fetch) | [WhatsOnChainConfig](#interface-whatsonchainconfig) |
+| [FetchOptions](#interface-fetchoptions) |  |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 
@@ -55,7 +56,7 @@ export default interface TransactionInput {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Interface: TransactionOutput
@@ -83,7 +84,7 @@ export default interface TransactionOutput {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Interface: FeeModel
@@ -97,7 +98,7 @@ export default interface FeeModel {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Interface: BroadcastResponse
@@ -112,7 +113,7 @@ export interface BroadcastResponse {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Interface: BroadcastFailure
@@ -127,7 +128,7 @@ export interface BroadcastFailure {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Interface: Broadcaster
@@ -141,7 +142,7 @@ export interface Broadcaster {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Interface: ChainTracker
@@ -169,18 +170,270 @@ export default interface ChainTracker {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Interface: HttpClient
+
+An interface for HTTP client used to make HTTP requests.
+
+```ts
+export interface HttpClient {
+    request<T = any, D = any>(url: string, options: HttpClientRequestOptions<D>): Promise<HttpClientResponse<T>>;
+}
+```
+
+<details>
+
+<summary>Interface HttpClient Details</summary>
+
+#### Method request
+
+Makes a request to the server.
+
+```ts
+request<T = any, D = any>(url: string, options: HttpClientRequestOptions<D>): Promise<HttpClientResponse<T>>
+```
+
+Argument Details
+
++ **url**
+  + The URL to make the request to.
++ **options**
+  + The request configuration.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Interface: HttpClientRequestOptions
+
+An interface for configuration of the request to be passed to the request method.
+
+```ts
+export interface HttpClientRequestOptions<Data = any> {
+    method?: string;
+    headers?: Record<string, string>;
+    data?: Data;
+}
+```
+
+<details>
+
+<summary>Interface HttpClientRequestOptions Details</summary>
+
+#### Property data
+
+An object or null to set request's body.
+
+```ts
+data?: Data
+```
+
+#### Property headers
+
+An object literal set request's headers.
+
+```ts
+headers?: Record<string, string>
+```
+
+#### Property method
+
+A string to set request's method.
+
+```ts
+method?: string
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Interface: HttpsNodejs
+
+Node.js Https module interface limited to options needed by ts-sdk
+
+```ts
+export interface HttpsNodejs {
+    request(url: string, options: HttpClientRequestOptions, callback: (res: any) => void): NodejsHttpClientRequest;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Interface: NodejsHttpClientRequest
+
+Nodejs result of the Node.js https.request call limited to options needed by ts-sdk
+
+```ts
+export interface NodejsHttpClientRequest {
+    write(chunk: string): void;
+    end(): void;
+    on(event: string, callback: (data: any) => void): void;
+    end(): void;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Interface: Fetch
+
+fetch function interface limited to options needed by ts-sdk
+
+```ts
+export interface Fetch {
+    (url: string, options: FetchOptions): Promise<Response>;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Interface: FetchOptions
+
+An interface for configuration of the request to be passed to the fetch method
+limited to options needed by ts-sdk.
+
+```ts
+export interface FetchOptions {
+    method?: string;
+    headers?: Record<string, string>;
+    body?: string | null;
+}
+```
+
+<details>
+
+<summary>Interface FetchOptions Details</summary>
+
+#### Property body
+
+An object or null to set request's body.
+
+```ts
+body?: string | null
+```
+
+#### Property headers
+
+An object literal set request's headers.
+
+```ts
+headers?: Record<string, string>
+```
+
+#### Property method
+
+A string to set request's method.
+
+```ts
+method?: string
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Interface: ArcConfig
+
+Configuration options for the ARC broadcaster.
+
+```ts
+export interface ArcConfig {
+    apiKey?: string;
+    deploymentId?: string;
+    httpClient?: HttpClient;
+}
+```
+
+<details>
+
+<summary>Interface ArcConfig Details</summary>
+
+#### Property apiKey
+
+Authentication token for the ARC API
+
+```ts
+apiKey?: string
+```
+
+#### Property deploymentId
+
+Deployment id used annotating api calls in XDeployment-ID header - this value will be randomly generated if not set
+
+```ts
+deploymentId?: string
+```
+
+#### Property httpClient
+
+The HTTP client used to make requests to the ARC API.
+
+```ts
+httpClient?: HttpClient
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Interface: WhatsOnChainConfig
+
+Configuration options for the WhatsOnChain ChainTracker.
+
+```ts
+export interface WhatsOnChainConfig {
+    apiKey?: string;
+    httpClient?: HttpClient;
+}
+```
+
+<details>
+
+<summary>Interface WhatsOnChainConfig Details</summary>
+
+#### Property apiKey
+
+Authentication token for the WhatsOnChain API
+
+```ts
+apiKey?: string
+```
+
+#### Property httpClient
+
+The HTTP client used to make requests to the API.
+
+```ts
+httpClient?: HttpClient
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ## Classes
 
 | |
 | --- |
+| [ARC](#class-arc) |
+| [FetchHttpClient](#class-fetchhttpclient) |
 | [MerklePath](#class-merklepath) |
+| [NodejsHttpClient](#class-nodejshttpclient) |
 | [SatoshisPerKilobyte](#class-satoshisperkilobyte) |
 | [Transaction](#class-transaction) |
+| [WhatsOnChain](#class-whatsonchain) |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 
@@ -232,7 +485,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Class: MerklePath
@@ -396,7 +649,144 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: NodejsHttpClient
+
+Adapter for Node.js Https module to be used as HttpClient
+
+```ts
+export class NodejsHttpClient implements HttpClient {
+    constructor(private https: HttpsNodejs) 
+    async request(url: string, requestOptions: HttpClientRequestOptions): Promise<HttpClientResponse> 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: FetchHttpClient
+
+Adapter for Node.js Https module to be used as HttpClient
+
+```ts
+export class FetchHttpClient implements HttpClient {
+    constructor(private fetch: Fetch) 
+    async request<D>(url: string, options: HttpClientRequestOptions): Promise<HttpClientResponse<D>> 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: ARC
+
+Represents an ARC transaction broadcaster.
+
+```ts
+export default class ARC implements Broadcaster {
+    readonly URL: string;
+    readonly apiKey: string | undefined;
+    readonly deploymentId: string;
+    constructor(URL: string, config?: ArcConfig);
+    constructor(URL: string, apiKey?: string);
+    constructor(URL: string, config?: string | ArcConfig) 
+    async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> 
+}
+```
+
+<details>
+
+<summary>Class ARC Details</summary>
+
+#### Constructor
+
+Constructs an instance of the ARC broadcaster.
+
+```ts
+constructor(URL: string, config?: ArcConfig)
+```
+
+Argument Details
+
++ **URL**
+  + The URL endpoint for the ARC API.
++ **config**
+  + Configuration options for the ARC broadcaster.
+
+#### Constructor
+
+Constructs an instance of the ARC broadcaster.
+
+```ts
+constructor(URL: string, apiKey?: string)
+```
+
+Argument Details
+
++ **URL**
+  + The URL endpoint for the ARC API.
++ **apiKey**
+  + The API key used for authorization with the ARC API.
+
+#### Method broadcast
+
+Broadcasts a transaction via ARC.
+
+```ts
+async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> 
+```
+
+Returns
+
+A promise that resolves to either a success or failure response.
+
+Argument Details
+
++ **tx**
+  + The transaction to be broadcasted.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: WhatsOnChain
+
+Represents a chain tracker based on What's On Chain .
+
+```ts
+export default class WhatsOnChain implements ChainTracker {
+    readonly network: string;
+    readonly apiKey: string;
+    constructor(network: "main" | "test" | "stn" = "main", config: WhatsOnChainConfig = {}) 
+    async isValidRootForHeight(root: string, height: number): Promise<boolean> 
+}
+```
+
+<details>
+
+<summary>Class WhatsOnChain Details</summary>
+
+#### Constructor
+
+Constructs an instance of the WhatsOnChain ChainTracker.
+
+```ts
+constructor(network: "main" | "test" | "stn" = "main", config: WhatsOnChainConfig = {}) 
+```
+
+Argument Details
+
++ **network**
+  + The BSV network to use when calling the WhatsOnChain API.
++ **config**
+  + Configuration options for the WhatsOnChain ChainTracker.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Class: Transaction
@@ -427,16 +817,16 @@ export default class Transaction {
     merklePath?: MerklePath;
     static fromBEEF(beef: number[]): Transaction 
     static parseScriptOffsets(bin: number[]): {
-        inputs: {
+        inputs: Array<{
             vin: number;
             offset: number;
             length: number;
-        }[];
-        outputs: {
+        }>;
+        outputs: Array<{
             vout: number;
             offset: number;
             length: number;
-        }[];
+        }>;
     } 
     static fromBinary(bin: number[]): Transaction 
     static fromHex(hex: string): Transaction 
@@ -447,7 +837,7 @@ export default class Transaction {
     updateMetadata(metadata: Record<string, any>): void 
     async fee(model?: FeeModel, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
     async sign(): Promise<void> 
-    async broadcast(broadcaster: Broadcaster): Promise<BroadcastResponse | BroadcastFailure> 
+    async broadcast(broadcaster: Broadcaster = defaultBroadcaster()): Promise<BroadcastResponse | BroadcastFailure> 
     toBinary(): number[] 
     toEF(): number[] 
     toHexEF(): string 
@@ -457,7 +847,7 @@ export default class Transaction {
     id(): number[];
     id(enc: "hex"): string;
     id(enc?: "hex"): number[] | string 
-    async verify(chainTracker: ChainTracker | "scripts only"): Promise<boolean> 
+    async verify(chainTracker: ChainTracker | "scripts only" = defaultChainTracker()): Promise<boolean> 
     toBEEF(): number[] 
 }
 ```
@@ -501,7 +891,7 @@ Argument Details
 Broadcasts a transaction.
 
 ```ts
-async broadcast(broadcaster: Broadcaster): Promise<BroadcastResponse | BroadcastFailure> 
+async broadcast(broadcaster: Broadcaster = defaultBroadcaster()): Promise<BroadcastResponse | BroadcastFailure> 
 ```
 
 Returns
@@ -675,16 +1065,16 @@ This supports the efficient retreival of script data from transaction data.
 
 ```ts
 static parseScriptOffsets(bin: number[]): {
-    inputs: {
+    inputs: Array<{
         vin: number;
         offset: number;
         length: number;
-    }[];
-    outputs: {
+    }>;
+    outputs: Array<{
         vout: number;
         offset: number;
         length: number;
-    }[];
+    }>;
 } 
 ```
 
@@ -797,7 +1187,7 @@ Argument Details
 Verifies the legitimacy of the Bitcoin transaction according to the rules of SPV by ensuring all the input transactions link back to valid block headers, the chain of spends for all inputs are valid, and the sum of inputs is not less than the sum of outputs.
 
 ```ts
-async verify(chainTracker: ChainTracker | "scripts only"): Promise<boolean> 
+async verify(chainTracker: ChainTracker | "scripts only" = defaultChainTracker()): Promise<boolean> 
 ```
 
 Returns
@@ -807,14 +1197,78 @@ Whether the transaction is valid according to the rules of SPV.
 Argument Details
 
 + **chainTracker**
-  + An instance of ChainTracker, a Bitcoin block header tracker. If the value is set to 'scripts only', headers will not be verified.
+  + An instance of ChainTracker, a Bitcoin block header tracker. If the value is set to 'scripts only', headers will not be verified. If not provided then the default chain tracker will be used.
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ## Functions
 
+| |
+| --- |
+| [defaultBroadcaster](#function-defaultbroadcaster) |
+| [defaultChainTracker](#function-defaultchaintracker) |
+| [defaultHttpClient](#function-defaulthttpclient) |
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+
+### Function: defaultHttpClient
+
+Returns a default HttpClient implementation based on the environment that it is run on.
+This method will attempt to use `window.fetch` if available (in browser environments).
+If running in a Node.js environment, it falls back to using the Node.js `https` module
+
+```ts
+export function defaultHttpClient(): HttpClient 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Function: defaultBroadcaster
+
+```ts
+export function defaultBroadcaster(): Broadcaster 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Function: defaultChainTracker
+
+```ts
+export function defaultChainTracker(): ChainTracker 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+## Types
+
+### Type: HttpClientResponse
+
+An interface for the response returned by the request method.
+
+```ts
+export type HttpClientResponse<T = any> = {
+    data: T;
+    status: number;
+    statusText: string;
+    ok: true;
+} | {
+    data: any;
+    status: number;
+    statusText: string;
+    ok: false;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 ## Variables
 
