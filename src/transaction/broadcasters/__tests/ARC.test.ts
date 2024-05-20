@@ -2,6 +2,7 @@ import ARC from '../../../../dist/cjs/src/transaction/broadcasters/ARC.js'
 import Transaction from '../../../../dist/cjs/src/transaction/Transaction.js'
 import {NodejsHttpClient} from "../../../../dist/cjs/src/transaction/http/NodejsHttpClient.js";
 import {FetchHttpClient} from "../../../../dist/cjs/src/transaction/http/FetchHttpClient.js";
+import {HttpClientRequestOptions} from "../../http";
 
 // Mock Transaction
 jest.mock('../../Transaction', () => {
@@ -16,7 +17,6 @@ jest.mock('../../Transaction', () => {
 
 describe('ARC Broadcaster', () => {
   const URL = 'https://example.com'
-  const apiKey = 'test_api_key'
   const successResponse = {
     status: 200,
     data: {
@@ -35,9 +35,9 @@ describe('ARC Broadcaster', () => {
   it('should broadcast successfully using window.fetch', async () => {
     // Mocking window.fetch
     const mockFetch = mockedFetch(successResponse)
-    global.window = { fetch: mockFetch } as any
+    global.window = {fetch: mockFetch} as any
 
-    const broadcaster = new ARC(URL, apiKey)
+    const broadcaster = new ARC(URL)
     const response = await broadcaster.broadcast(transaction)
 
     expect(mockFetch).toHaveBeenCalled()
@@ -53,7 +53,7 @@ describe('ARC Broadcaster', () => {
     mockedHttps(successResponse)
     delete global.window
 
-    const broadcaster = new ARC(URL, apiKey)
+    const broadcaster = new ARC(URL)
     const response = await broadcaster.broadcast(transaction)
 
     expect(response).toEqual({
@@ -67,7 +67,7 @@ describe('ARC Broadcaster', () => {
 
     const mockFetch = mockedFetch(successResponse)
 
-    const broadcaster = new ARC(URL, apiKey, new FetchHttpClient(mockFetch))
+    const broadcaster = new ARC(URL, {httpClient: new FetchHttpClient(mockFetch)})
     const response = await broadcaster.broadcast(transaction)
 
     expect(mockFetch).toHaveBeenCalled()
@@ -81,7 +81,7 @@ describe('ARC Broadcaster', () => {
   it('should broadcast successfully using provided https', async () => {
 
     const mockHttps = mockedHttps(successResponse)
-    const broadcaster = new ARC(URL, apiKey, new NodejsHttpClient(mockHttps))
+    const broadcaster = new ARC(URL, {httpClient: new NodejsHttpClient(mockHttps)})
 
     const response = await broadcaster.broadcast(transaction)
 
@@ -92,11 +92,66 @@ describe('ARC Broadcaster', () => {
     })
   })
 
-  it('should handle network errors', async () => {
-    const mockFetch = jest.fn().mockRejectedValue(new Error('Network error'))
-    global.window = { fetch: mockFetch } as any
+  it('should send default request headers when broadcasting', async () => {
+    const mockFetch = mockedFetch(successResponse)
+
+    const broadcaster = new ARC(URL, {httpClient: new FetchHttpClient(mockFetch)})
+    await broadcaster.broadcast(transaction)
+
+    const {headers} = (mockFetch as jest.Mock).mock.calls[0][1] as HttpClientRequestOptions
+
+    expect(headers['Content-Type']).toEqual('application/json')
+    expect(headers['XDeployment-ID']).toBeDefined()
+    expect(headers['XDeployment-ID']).toMatch(/ts-sdk-.*/)
+    expect(headers['Authorization']).toBeUndefined()
+  })
+
+  it('should send authorization header when api key is provided', async () => {
+    const mockFetch = mockedFetch(successResponse)
+    const apiKey = 'mainnet_1234567890'
+
+    const broadcaster = new ARC(URL, {apiKey, httpClient: new FetchHttpClient(mockFetch)})
+    await broadcaster.broadcast(transaction)
+
+    const {headers} = (mockFetch as jest.Mock).mock.calls[0][1] as HttpClientRequestOptions
+
+    expect(headers['XDeployment-ID']).toBeDefined()
+    expect(headers['XDeployment-ID']).toMatch(/ts-sdk-.*/)
+    expect(headers['Authorization']).toEqual(`Bearer ${apiKey}`)
+  })
+
+  it('should handle api key as second argument', async () => {
+    const mockFetch = mockedFetch(successResponse)
+    global.window = {fetch: mockFetch} as any
+
+    const apiKey = 'mainnet_1234567890'
 
     const broadcaster = new ARC(URL, apiKey)
+    await broadcaster.broadcast(transaction)
+
+    const {headers} = (mockFetch as jest.Mock).mock.calls[0][1] as HttpClientRequestOptions
+
+    expect(headers['Authorization']).toEqual(`Bearer ${apiKey}`)
+  })
+
+
+  it('should send provided deployment id', async () => {
+    const mockFetch = mockedFetch(successResponse)
+    const deploymentId = 'custom_deployment_id'
+
+    const broadcaster = new ARC(URL, {deploymentId, httpClient: new FetchHttpClient(mockFetch)})
+    await broadcaster.broadcast(transaction)
+
+    const {headers} = (mockFetch as jest.Mock).mock.calls[0][1] as HttpClientRequestOptions
+
+    expect(headers['XDeployment-ID']).toEqual(deploymentId)
+  })
+
+  it('should handle network errors', async () => {
+    const mockFetch = jest.fn().mockRejectedValue(new Error('Network error'))
+    global.window = {fetch: mockFetch} as any
+
+    const broadcaster = new ARC(URL, {httpClient: new FetchHttpClient(mockFetch)})
     const response = await broadcaster.broadcast(transaction)
 
     expect(mockFetch).toHaveBeenCalled()
@@ -115,7 +170,7 @@ describe('ARC Broadcaster', () => {
       }
     })
 
-    const broadcaster = new ARC(URL, apiKey, new FetchHttpClient(mockFetch))
+    const broadcaster = new ARC(URL, {httpClient: new FetchHttpClient(mockFetch)})
     const response = await broadcaster.broadcast(transaction)
 
     expect(mockFetch).toHaveBeenCalled()
@@ -133,9 +188,9 @@ describe('ARC Broadcaster', () => {
       statusText: response.status === 200 ? 'OK' : 'Bad request',
       headers: {
         get(key: string) {
-            if (key === 'Content-Type') {
-                return 'application/json'
-            }
+          if (key === 'Content-Type') {
+            return 'application/json'
+          }
         }
       },
       json: async () => response.data
