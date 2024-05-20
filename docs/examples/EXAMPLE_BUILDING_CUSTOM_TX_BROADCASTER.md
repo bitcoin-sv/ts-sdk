@@ -4,7 +4,7 @@ This guide walks through the necessary steps for building a custom transaction b
 
 ## Overview
 
-⚠️ It's important to notice that SDK is already providing broadcaster implementation that communicates with What's on Chain service. This example is for educational purposes only.
+⚠️ It's important to notice that SDK is already providing broadcaster implementation that communicates with TAAL's ARC instance. This example is for educational purposes only.
 
 A transaction broadcast client is a crucial component in any Bitcoin SV application, allowing it to communicate with the Bitcoin SV network. Implementing a transaction broadcaster can be accomplished using the clearly defined Broadcast interface.
 
