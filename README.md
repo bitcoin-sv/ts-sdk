@@ -53,9 +53,7 @@ const tx = new Transaction(version, [input], [output])
 await tx.fee()
 await tx.sign()
 
-// get your api key from https://console.taal.com
-const apiKey = 'mainnet_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' // replace
-await tx.broadcast(new ARC('https://api.taal.com/arc', apiKey))
+await tx.broadcast()
 ```
 
 For a more detailed tutorial and advanced examples, check our [Documentation](#documentation).
