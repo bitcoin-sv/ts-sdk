@@ -60,9 +60,7 @@ const BsvButton: React.FC = () => {
     await tx.fee()
     await tx.sign()
 
-    // grab your api key from https://console.taal.com
-    const apiKey = 'mainnet_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' // replace
-    await tx.broadcast(new ARC('https://api.taal.com/arc', apiKey))
+    await tx.broadcast()
   }
 
   return (

@@ -127,9 +127,7 @@ myTx.sign()
 After a transaction is signed, it can be broadcast to the BSV Mining Network, or to relevant Overlay Networks through the SDK.
 
 ```typescript
-// get your api key from https://console.taal.com
-const apiKey = 'mainnet_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' // replace
-await tx.broadcast(new ARC('https://api.taal.com/arc', apiKey))
+await tx.broadcast()
 ```
 
 Alternatively, if you don't want to use the SDK's built-in broadcasting system, you can simply serialize your transaction into a hex string as follows:
@@ -158,7 +156,7 @@ This enables the transactions to be verified properly by recipients, using the `
 
 ```typescript
 const incomingTX = Transaction.fromHexBEEF('...')
-incomingTX.verify(chainTracker) // Provide a source of BSV block headers to verify
+incomingTX.verify() // Provide a source of BSV block headers to verify
 ```
 
 Recipients, with nothing other than a source of BSV block headers, can verify that the transaction properly unlocks and redeems its inputs, thereby creating its outputs. To learn more about setting up a chain tracker with a source of block headers, check out the Pulse example (link to be provided once completed).
