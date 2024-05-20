@@ -7,15 +7,15 @@ import {defaultHttpClient} from "../http/DefaultHttpClient.js";
  * Represents an WhatsOnChain transaction broadcaster.
  */
 export default class WhatsOnChainBroadcaster implements Broadcaster {
-  network: string
-  URL: string
-  private httpClient: HttpClient;
+  readonly network: string
+  private readonly URL: string
+  private readonly httpClient: HttpClient;
 
   /**
    * Constructs an instance of the WhatsOnChain broadcaster.
    *
-   * @param {string} network - The URL endpoint for the WhatsOnChain API.
-   * @param {HttpClient} httpClient - The HTTP client used to make requests to the ARC API.
+   * @param {'main' | 'test' | 'stn'} network - The BSV network to use when calling the WhatsOnChain API.
+   * @param {HttpClient} httpClient - The HTTP client used to make requests to the API.
    */
   constructor(network: 'main' | 'test' | 'stn' = 'main', httpClient: HttpClient = defaultHttpClient()) {
     this.network = network

@@ -104,7 +104,7 @@ describe('WhatsOnChainBroadcaster', () => {
 
   it('should handle non-200 responses', async () => {
     const mockFetch = mockedFetch({
-      status: '400',
+      status: 400,
       data: 'Bad request'
     })
     global.window = { fetch: mockFetch } as any

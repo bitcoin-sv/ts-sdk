@@ -24,10 +24,10 @@ function defaultDeploymentId() {
  * Represents an ARC transaction broadcaster.
  */
 export default class ARC implements Broadcaster {
-  URL: string
-  apiKey: string | undefined
-  deploymentId: string
-  private httpClient: HttpClient;
+  readonly URL: string
+  readonly apiKey: string | undefined
+  readonly deploymentId: string
+  private readonly httpClient: HttpClient;
 
   /**
    * Constructs an instance of the ARC broadcaster.
