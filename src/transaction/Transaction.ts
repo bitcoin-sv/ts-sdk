@@ -11,6 +11,7 @@ import MerklePath from './MerklePath.js'
 import Spend from '../script/Spend.js'
 import ChainTracker from './ChainTracker.js'
 import {defaultBroadcaster} from "./broadcasters/DefaultBroadcaster.js";
+import {defaultChainTracker} from "./chaintrackers/DefaultChainTracker.js";
 
 /**
  * Represents a complete Bitcoin transaction. This class encapsulates all the details
@@ -534,11 +535,11 @@ export default class Transaction {
   /**
    * Verifies the legitimacy of the Bitcoin transaction according to the rules of SPV by ensuring all the input transactions link back to valid block headers, the chain of spends for all inputs are valid, and the sum of inputs is not less than the sum of outputs.
    *
-   * @param chainTracker - An instance of ChainTracker, a Bitcoin block header tracker. If the value is set to 'scripts only', headers will not be verified.
+   * @param chainTracker - An instance of ChainTracker, a Bitcoin block header tracker. If the value is set to 'scripts only', headers will not be verified. If not provided then the default chain tracker will be used.
    *
    * @returns Whether the transaction is valid according to the rules of SPV.
    */
-  async verify (chainTracker: ChainTracker | 'scripts only'): Promise<boolean> {
+  async verify (chainTracker: ChainTracker | 'scripts only' = defaultChainTracker()): Promise<boolean> {
     // If the transaction has a valid merkle path, verification is complete.
     if (typeof this.merklePath === 'object' && chainTracker !== 'scripts only') {
       const proofValid = await this.merklePath.verify(
