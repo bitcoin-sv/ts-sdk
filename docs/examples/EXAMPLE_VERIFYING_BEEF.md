@@ -12,26 +12,6 @@ Merkle proofs are simply a way for someone to prove the existence of a given tra
 
 The process for SPV is detailed in [BRC-67](https://github.com/bitcoin-sv/BRCs/blob/master/transactions/0067.md), but the main idea is that when a sender sends a transaction, they include merkle proofs on all of the input transactions. This allows anyone with a copy of the Bitcoin block headers to check that the input transactions are included in the blockchain. Verifiers then check that all the input and output scripts correctly transfer value from one party to the next, ensuring an unbroken chain of spends. The [BEEF data structure](https://github.com/bitcoin-sv/BRCs/blob/master/transactions/0062.md) provides a compact and efficient way for people to represent the data required to perform SPV. 
 
-## Block Headers Client
-
-To verify BEEF structures with the BSV SDK, you'll need to provide a block headers client that, given a merkle root, will indicate to the library whether the merkle root is correct for the block that's in the active chain at the given block height.
-
-For simplicity in this example, we are going to use a mock headers client that always indicates every merkle root as valid no matter what. However, in any real project, **you MUST always use an actual block headers client or attackers will be able to easily fool you with fraudulent transactions!**
-
-The TypeScript BSV SDK does not ship with a block headers client, but check out this example (link to be provided once complete) for setting up Pulse.
-
-Here is the gullible block headers client we will be using:
-
-```typescript
-const gullibleHeadersClient = {
-    // DO NOT USE IN A REAL PROJECT due to security risks of accepting any merkle root as valid without verification
-    isValidRootForHeight: async (merkleRoot, height) => {
-      console.log({ merkleRoot, height })
-      return true
-    }
-}
-```
-
 ## Verifying a BEEF Structure
 
 Now that you have access to a block headers client (either Pulse on a real project or the above code for a toy example), we can proceed to verifying the BEEF structure with the following code:
@@ -46,10 +26,37 @@ const BEEFHex = '0100beef01fe636d0c0007021400fe507c0c7aa754cef1f7889d5fd395cf1f7
 const tx = Transaction.fromHexBEEF(BEEFHex)
 
 // This ensures the BEEF structure is legitimate
-const verified = await tx.verify(gullibleHeadersClient)
+const verified = await tx.verify()
 
 // Print the results
 console.log(verified)
 ```
 
 The above code allows you to ensure that a given BEEF structure is valid according to the rules of SPV.
+
+## Chain tracker
+
+To verify BEEF structures with the BSV SDK, you'll need to provide a block headers client that, given a merkle root, will indicate to the library whether the merkle root is correct for the block that's in the active chain at the given block height.
+
+The TypeScript BSV SDK does provides default implementation of the chain tracker that use What's On Chain API. 
+
+### What's On Chain configuration
+
+#### BSV network
+
+The default network for the chain tracker is `main`. You can change it to other network by providing the instance of WhatsOnChain ChainTracker configured for other network to `.verify()` method.
+
+```typescript
+tx.verify(new WhatsOnChain('test'))
+```
+
+#### Api Key
+
+It is possible to use WhatsOnChain ChainTracker with obtained API KEY of [WhatsOnChain](https://docs.taal.com/core-products/whatsonchain). 
+To do so, you need to provide to `.verify()` method the custom instance of WhatsOnChain ChainTracker with the API KEY.
+
+```typescript
+import { Transaction, WhatsOnChain } from '@bsv/sdk'
+
+tx.verify(new WhatsOnChain('main', {apiKey: 'YOUR_API_KEY'}))
+```

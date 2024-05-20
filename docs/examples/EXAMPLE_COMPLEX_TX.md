@@ -156,7 +156,7 @@ This enables the transactions to be verified properly by recipients, using the `
 
 ```typescript
 const incomingTX = Transaction.fromHexBEEF('...')
-incomingTX.verify(chainTracker) // Provide a source of BSV block headers to verify
+incomingTX.verify() // Provide a source of BSV block headers to verify
 ```
 
 Recipients, with nothing other than a source of BSV block headers, can verify that the transaction properly unlocks and redeems its inputs, thereby creating its outputs. To learn more about setting up a chain tracker with a source of block headers, check out the Pulse example (link to be provided once completed).
