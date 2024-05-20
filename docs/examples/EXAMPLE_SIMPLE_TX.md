@@ -45,7 +45,7 @@ await tx.sign()
 // Finally, we broadcast it with ARC.
 // get your api key from https://console.taal.com
 const apiKey = 'mainnet_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' // replace
-await tx.broadcast(new ARC('https://api.taal.com/arc', apiKey))
+await tx.broadcast()
 ```
 
 This code snippet demonstrates creating a transaction, adding an input and an output, setting a change script, configuring the fee, signing the transaction, and broadcasting with the ARC broadcaster. It uses the P2PKH Template, which is a specific type of Bitcoin locking program. To learn more about templates, check out this example (link to be provided once cmpplete).

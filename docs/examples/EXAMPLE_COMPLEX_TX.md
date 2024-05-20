@@ -127,9 +127,7 @@ myTx.sign()
 After a transaction is signed, it can be broadcast to the BSV Mining Network, or to relevant Overlay Networks through the SDK.
 
 ```typescript
-// get your api key from https://console.taal.com
-const apiKey = 'mainnet_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' // replace
-await tx.broadcast(new ARC('https://api.taal.com/arc', apiKey))
+await tx.broadcast()
 ```
 
 Alternatively, if you don't want to use the SDK's built-in broadcasting system, you can simply serialize your transaction into a hex string as follows:
