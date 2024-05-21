@@ -6374,7 +6374,7 @@ export default class PrivateKey extends BigNumber {
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toPublicKey(): PublicKey 
     toWif(prefix: number[] = [128]): string 
-    toAddress(prefix: number[] = [0]): string 
+    toAddress(prefix: number[] | "testnet" = [0]): string 
     deriveSharedSecret(key: PublicKey): Point 
     deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
 }
@@ -6582,7 +6582,7 @@ Base58Check encodes the hash of the public key associated with this private key 
 Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
 
 ```ts
-toAddress(prefix: number[] = [0]): string 
+toAddress(prefix: number[] | "testnet" = [0]): string 
 ```
 
 Returns
@@ -6592,13 +6592,14 @@ Returns the address encoding associated with the hash of the public key associat
 Argument Details
 
 + **prefix**
-  + defaults to [0x00] for mainnet, set to [0x6f] for testnet.
+  + defaults to [0x00] for mainnet, set to [0x6f] for testnet or use the string 'testnet'
 
 Example
 
 ```ts
 const address = pubkey.toAddress()
 const testnetAddress = pubkey.toAddress([0x6f])
+const testnetAddress = pubkey.toAddress('testnet')
 ```
 
 #### Method toPublicKey
@@ -6702,7 +6703,7 @@ export default class PublicKey extends Point {
     verify(msg: number[] | string, sig: Signature, enc?: "hex" | "utf8"): boolean 
     toDER(): string 
     toHash(enc?: "hex"): number[] | string 
-    toAddress(prefix: number[] = [0]): string 
+    toAddress(prefix: number[] | "testnet" = [0]): string 
     deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey 
     static fromMsgHashAndCompactSignature(msgHash: BigNumber, signature: number[] | string, enc?: "hex" | "base64"): PublicKey 
 }
@@ -6868,7 +6869,7 @@ Base58Check encodes the hash of the public key with a prefix to indicate locking
 Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
 
 ```ts
-toAddress(prefix: number[] = [0]): string 
+toAddress(prefix: number[] | "testnet" = [0]): string 
 ```
 
 Returns
@@ -6878,13 +6879,14 @@ Returns the address encoding associated with the hash of the public key.
 Argument Details
 
 + **prefix**
-  + defaults to [0x00] for mainnet, set to [0x6f] for testnet.
+  + defaults to [0x00] for mainnet, set to [0x6f] for testnet or use the string 'testnet'
 
 Example
 
 ```ts
 const address = pubkey.toAddress()
 const testnetAddress = pubkey.toAddress([0x6f])
+const testnetAddress = pubkey.toAddress('testnet')
 ```
 
 #### Method toDER
