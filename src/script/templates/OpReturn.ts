@@ -28,7 +28,7 @@ export default class OpReturn implements ScriptTemplate {
       data = [data]
     }
 
-    if (typeof data[0] === 'number') {
+    if (data.length && typeof data[0] === 'number') {
       script.push({ op: data.length, data })
     }
     else {
