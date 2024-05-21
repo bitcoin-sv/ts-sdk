@@ -6,7 +6,6 @@ import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
 import { hash256 } from '../primitives/Hash.js'
 import FeeModel from './FeeModel.js'
 import SatoshisPerKilobyte from './fee-models/SatoshisPerKilobyte.js'
-import FixedFee from './fee-models/FixedFee.js'
 import { Broadcaster, BroadcastResponse, BroadcastFailure } from './Broadcaster.js'
 import MerklePath from './MerklePath.js'
 import Spend from '../script/Spend.js'
@@ -308,7 +307,10 @@ export default class Transaction {
       modelOrFee = new SatoshisPerKilobyte(10)
     }
     if (typeof modelOrFee == 'number') {
-      modelOrFee = new FixedFee(modelOrFee)
+      const sats = modelOrFee
+      modelOrFee = {
+        computeFee: () => Promise.resolve(sats)
+      }
     }
     const fee = await modelOrFee.computeFee(this)
     // change = inputs - fee - non-change outputs

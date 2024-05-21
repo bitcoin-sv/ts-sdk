@@ -427,7 +427,6 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | --- |
 | [ARC](#class-arc) |
 | [FetchHttpClient](#class-fetchhttpclient) |
-| [FixedFee](#class-fixedfee) |
 | [MerklePath](#class-merklepath) |
 | [NodejsHttpClient](#class-nodejshttpclient) |
 | [SatoshisPerKilobyte](#class-satoshisperkilobyte) |
@@ -466,57 +465,6 @@ Argument Details
 
 + **value**
   + The number of satoshis per kilobyte to charge as a fee.
-
-#### Method computeFee
-
-Computes the fee for a given transaction.
-
-```ts
-async computeFee(tx: Transaction): Promise<number> 
-```
-
-Returns
-
-The fee in satoshis for the transaction, as a BigNumber.
-
-Argument Details
-
-+ **tx**
-  + The transaction for which a fee is to be computed.
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: FixedFee
-
-Represents the fixed fee model.
-
-```ts
-export default class FixedFee implements FeeModel {
-    value: number;
-    constructor(value: number) 
-    async computeFee(tx: Transaction): Promise<number> 
-}
-```
-
-<details>
-
-<summary>Class FixedFee Details</summary>
-
-#### Constructor
-
-Constructs an instance of the fixed fee model.
-
-```ts
-constructor(value: number) 
-```
-
-Argument Details
-
-+ **value**
-  + The number of satoshis to charge as fee.
 
 #### Method computeFee
 
