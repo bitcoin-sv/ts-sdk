@@ -47,6 +47,7 @@ export default interface TransactionInput {
     sourceTransaction?: Transaction;
     sourceTXID?: string;
     sourceOutputIndex: number;
+    sourceSatoshis?: number;
     unlockingScript?: UnlockingScript;
     unlockingScriptTemplate?: {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
