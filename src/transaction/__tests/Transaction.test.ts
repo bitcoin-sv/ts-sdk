@@ -340,7 +340,7 @@ describe('Transaction', () => {
         change: true
       }], 0)
       expect(spendTx.outputs[1].satoshis).not.toBeDefined()
-      await spendTx.fee(new FixedFee(1033))
+      await spendTx.fee(1033)
       // 4000 sats in - 1000 sats out - 1033 sats fee = expected 1967 sats change
       expect(spendTx.outputs[1].satoshis).toEqual(1967)
     })

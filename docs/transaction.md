@@ -427,6 +427,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | --- |
 | [ARC](#class-arc) |
 | [FetchHttpClient](#class-fetchhttpclient) |
+| [FixedFee](#class-fixedfee) |
 | [MerklePath](#class-merklepath) |
 | [NodejsHttpClient](#class-nodejshttpclient) |
 | [SatoshisPerKilobyte](#class-satoshisperkilobyte) |
@@ -465,6 +466,57 @@ Argument Details
 
 + **value**
   + The number of satoshis per kilobyte to charge as a fee.
+
+#### Method computeFee
+
+Computes the fee for a given transaction.
+
+```ts
+async computeFee(tx: Transaction): Promise<number> 
+```
+
+Returns
+
+The fee in satoshis for the transaction, as a BigNumber.
+
+Argument Details
+
++ **tx**
+  + The transaction for which a fee is to be computed.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: FixedFee
+
+Represents the fixed fee model.
+
+```ts
+export default class FixedFee implements FeeModel {
+    value: number;
+    constructor(value: number) 
+    async computeFee(tx: Transaction): Promise<number> 
+}
+```
+
+<details>
+
+<summary>Class FixedFee Details</summary>
+
+#### Constructor
+
+Constructs an instance of the fixed fee model.
+
+```ts
+constructor(value: number) 
+```
+
+Argument Details
+
++ **value**
+  + The number of satoshis to charge as fee.
 
 #### Method computeFee
 
@@ -835,7 +887,7 @@ export default class Transaction {
     addInput(input: TransactionInput): void 
     addOutput(output: TransactionOutput): void 
     updateMetadata(metadata: Record<string, any>): void 
-    async fee(model?: FeeModel, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
+    async fee(modelOrFee?: FeeModel | number, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
     async sign(): Promise<void> 
     async broadcast(broadcaster: Broadcaster = defaultBroadcaster()): Promise<BroadcastResponse | BroadcastFailure> 
     toBinary(): number[] 
@@ -907,15 +959,16 @@ Argument Details
 
 Computes fees prior to signing.
 If no fee model is provided, uses a SatoshisPerKilobyte fee model that pays 10 sat/kb.
+If fee is a number, the transaction uses that value as fee.
 
 ```ts
-async fee(model?: FeeModel, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
+async fee(modelOrFee?: FeeModel | number, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
 ```
 
 Argument Details
 
-+ **model**
-  + The initialized fee model to use
++ **modelOrFee**
+  + The initialized fee model to use or fixed fee for the transaction
 + **changeDistribution**
   + Specifies how the change should be distributed
 amongst the change outputs
