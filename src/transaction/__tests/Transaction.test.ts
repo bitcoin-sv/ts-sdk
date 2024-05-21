@@ -9,7 +9,6 @@ import { hash256, hash160 } from '../../../dist/cjs/src/primitives/Hash'
 import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
 import Curve from '../../../dist/cjs/src/primitives/Curve'
 import P2PKH from '../../../dist/cjs/src/script/templates/P2PKH'
-import { FixedFee } from '../../../dist/cjs/src/transaction/fee-models'
 
 import sighashVectors from '../../primitives/__tests/sighash.vectors'
 import invalidTransactions from './tx.invalid.vectors'
