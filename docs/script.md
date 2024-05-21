@@ -76,6 +76,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | |
 | --- |
 | [LockingScript](#class-lockingscript) |
+| [OpReturn](#class-opreturn) |
 | [P2PKH](#class-p2pkh) |
 | [RPuzzle](#class-rpuzzle) |
 | [Script](#class-script) |
@@ -758,6 +759,61 @@ Argument Details
   + The signature scope for outputs.
 + **anyoneCanPay**
   + Flag indicating if the signature allows for other inputs to be added later.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: OpReturn
+
+OpReturn class implementing ScriptTemplate.
+
+This class provides methods to create OpReturn scripts from data. Only lock script is available.
+
+```ts
+export default class OpReturn implements ScriptTemplate {
+    lock(data: string | string[] | number[], enc?: "hex" | "utf8" | "base64"): LockingScript 
+    unlock(): {
+        sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
+        estimateLength: () => Promise<106>;
+    } 
+}
+```
+
+<details>
+
+<summary>Class OpReturn Details</summary>
+
+#### Method lock
+
+Creates an OpReturn script
+
+```ts
+lock(data: string | string[] | number[], enc?: "hex" | "utf8" | "base64"): LockingScript 
+```
+
+Returns
+
+- An OpReturn locking script.
+
+Argument Details
+
++ **data**
+  + The data or array of data to push after OP_RETURN.
++ **enc**
+  + The data encoding type, defaults to utf8.
+
+#### Method unlock
+
+Unlock method is not available for OpReturn scripts, throws exception.
+
+```ts
+unlock(): {
+    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
+    estimateLength: () => Promise<106>;
+} 
+```
 
 </details>
 
