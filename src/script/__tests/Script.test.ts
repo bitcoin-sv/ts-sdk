@@ -1,6 +1,7 @@
 import Script from '../../../dist/cjs/src/script/Script'
 import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
 import P2PKH from '../../../dist/cjs/src/script/templates/P2PKH'
+import OpReturn from '../../../dist/cjs/src/script/templates/OpReturn'
 import OP from '../../../dist/cjs/src/script/OP'
 import { toHex } from '../../../dist/cjs/src/primitives/utils'
 
@@ -397,6 +398,16 @@ describe('Script', () => {
         const strB = Script.fromHex(a[1]).toASM()
         expect(Script.fromASM(strB).toASM()).toEqual(strB)
       })
+    })
+  })
+
+  describe('OpReturn script', () => {
+    it('locks OpReturn data', () => {
+      expect(new OpReturn().lock('1234').toASM()).toEqual('OP_0 OP_RETURN 31323334')
+      expect(new OpReturn().lock(['1234', '5678']).toASM()).toEqual('OP_0 OP_RETURN 31323334 35363738')
+    })
+    it ('does not support unlocking', () => {
+      expect(() => new OpReturn().unlock()).toThrow()
     })
   })
 })
