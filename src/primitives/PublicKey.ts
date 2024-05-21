@@ -158,8 +158,7 @@ export default class PublicKey extends Point {
   toAddress (prefix: number[] | string = [0x00]): string {
     if (prefix === 'testnet' || prefix === 'test') {
       prefix = [0x6f]
-    }
-    else if (prefix === 'mainnet' || prefix === 'main') {
+    } else if (prefix === 'mainnet' || prefix === 'main') {
       prefix = [0x00]
     } else {
       throw new Error(`Invalid prefix ${prefix}`)
