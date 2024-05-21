@@ -306,10 +306,10 @@ export default class Transaction {
     if (typeof modelOrFee === 'undefined') {
       modelOrFee = new SatoshisPerKilobyte(10)
     }
-    if (typeof modelOrFee == 'number') {
+    if (typeof modelOrFee === 'number') {
       const sats = modelOrFee
       modelOrFee = {
-        computeFee: () => Promise.resolve(sats)
+        computeFee: async () => sats
       }
     }
     const fee = await modelOrFee.computeFee(this)
