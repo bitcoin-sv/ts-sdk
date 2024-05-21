@@ -4,7 +4,7 @@ import Transaction from '../Transaction.js'
 /**
  * Represents the fixed fee model.
  */
-export default class SatoshisPerKilobyte implements FeeModel {
+export default class FixedFee implements FeeModel {
   /**
    * @property
    * Denotes the fixed fee value in satoshis.
