@@ -1,6 +1,6 @@
 import BigNumber from './BigNumber.js'
 import { hash256 } from './Hash.js'
-import type Script from '../script/Script.js'
+import Script from '../script/Script.js'
 
 /**
  * Prepends a '0' to an odd character length word to ensure it has an even number of characters.
