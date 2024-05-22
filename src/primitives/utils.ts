@@ -1,5 +1,6 @@
 import BigNumber from './BigNumber.js'
 import { hash256 } from './Hash.js'
+import Script from '../script/Script.js'
 
 /**
  * Prepends a '0' to an odd character length word to ensure it has an even number of characters.
@@ -155,6 +156,16 @@ export const encode = (arr: number[], enc?: 'hex' | 'utf8'): string | number[] =
     default:
       return arr
   }
+}
+
+/**
+ * Decodes an OpReturn script data to utf8
+ * @param script The opreturn script
+ * @returns An array of UTF8 encoded strings
+ */
+export const decodeOpReturn = (script: Script): string[] => {
+  const tokens = script.toASM().split(' ').slice(2)
+  return tokens.map(token => toUTF8(toArray(token, 'hex')))
 }
 
 /**

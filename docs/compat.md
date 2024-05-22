@@ -1,6 +1,8 @@
 # API
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+## Interfaces
 
 ## Classes
 
@@ -10,7 +12,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 | [HD](#class-hd) |
 | [Mnemonic](#class-mnemonic) |
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 
@@ -303,7 +305,7 @@ A base58 encoded string of the HD wallet.
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: Mnemonic
@@ -636,7 +638,7 @@ The mnemonic phrase as a string.
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Class: ECIES
@@ -771,7 +773,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ## Functions
@@ -785,7 +787,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 | [verify](#variable-verify) |
 | [wordList](#variable-wordlist) |
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 
@@ -804,7 +806,7 @@ magicHash = (messageBuf: number[]): number[] => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: sign
@@ -816,7 +818,7 @@ sign = (message: number[], privateKey: PrivateKey): Signature => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: verify
@@ -828,7 +830,7 @@ verify = (message: number[], sig: Signature, pubKey: PublicKey): boolean => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: wordList
@@ -2889,6 +2891,6 @@ wordList = {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---

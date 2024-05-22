@@ -1,6 +1,8 @@
 # API
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+## Interfaces
 
 ## Classes
 
@@ -15,7 +17,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 | [sign](#variable-sign) |
 | [verify](#variable-verify) |
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 
@@ -47,7 +49,7 @@ sign = (message: number[], signer: PrivateKey, verifier?: PublicKey): number[] =
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: verify
@@ -85,7 +87,7 @@ verify = (message: number[], sig: number[], recipient?: PrivateKey): boolean => 
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: encrypt
@@ -112,7 +114,7 @@ encrypt = (message: number[], sender: PrivateKey, recipient: PublicKey): number[
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---
 ### Variable: decrypt
@@ -141,6 +143,6 @@ decrypt = (message: number[], recipient: PrivateKey): number[] => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
 ---

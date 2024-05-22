@@ -7259,7 +7259,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [checkBit](#variable-checkbit) | [multiply](#variable-multiply) | [toArray](#variable-toarray) |
+| [checkBit](#variable-checkbit) | [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [sign](#variable-sign) |
+| [decodeOpReturn](#variable-decodeopreturn) | [multiply](#variable-multiply) | [toArray](#variable-toarray) |
 | [encode](#variable-encode) | [rightShift](#variable-rightshift) | [toBase58](#variable-tobase58) |
 | [exclusiveOR](#variable-exclusiveor) | [ripemd160](#variable-ripemd160) | [toBase58Check](#variable-tobase58check) |
 | [fromBase58](#variable-frombase58) | [sha1](#variable-sha1) | [toHex](#variable-tohex) |
@@ -7267,7 +7268,6 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [getBytes](#variable-getbytes) | [sha256hmac](#variable-sha256hmac) | [verify](#variable-verify) |
 | [hash160](#variable-hash160) | [sha512](#variable-sha512) | [zero2](#variable-zero2) |
 | [hash256](#variable-hash256) | [sha512hmac](#variable-sha512hmac) |  |
-| [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [sign](#variable-sign) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -7506,6 +7506,18 @@ encode = (arr: number[], enc?: "hex" | "utf8"): string | number[] => {
         default:
             return arr;
     }
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: decodeOpReturn
+
+```ts
+decodeOpReturn = (script: Script): string[] => {
+    const tokens = script.toASM().split(" ").slice(2);
+    return tokens.map(token => toUTF8(toArray(token, "hex")));
 }
 ```
 
