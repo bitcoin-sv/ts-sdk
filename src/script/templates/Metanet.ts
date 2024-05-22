@@ -21,7 +21,7 @@ export default class Metanet implements ScriptTemplate {
    * @returns {LockingScript} - A Metanet locking script.
    *
    * @example
-   * // creates a root metanet return with 'subprotocol' and 'filename' metadata followed by data
+   * // creates a root metanet output with 'subprotocol' and 'filename' metadata followed by data
    * lock(pubkey, null, txid, ['subprotocol', 'filename', data ])
    */
   lock(pubkey: PublicKey, parentTXID: string | null, data: string[] | string = []): LockingScript {
