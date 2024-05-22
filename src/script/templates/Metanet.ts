@@ -36,7 +36,7 @@ export default class Metanet implements ScriptTemplate {
       parentTXID || 'null'
     ].concat(data)
 
-    for (const field of fields) {
+    for (const field of fields.filter(Boolean)) {
       script.push({ op: field.length, data: toArray(field) })
     }
 
