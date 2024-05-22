@@ -6597,10 +6597,10 @@ Argument Details
 Example
 
 ```ts
-const address = privKey.toAddress()
-const address = privKey.toAddress('mainnet')
-const testnetAddress = privKey.toAddress([0x6f])
-const testnetAddress = privKey.toAddress('testnet')
+const address = privkey.toAddress()
+const address = privkey.toAddress('mainnet')
+const testnetAddress = privkey.toAddress([0x6f])
+const testnetAddress = privkey.toAddress('testnet')
 ```
 
 #### Method toPublicKey

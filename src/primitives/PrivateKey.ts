@@ -214,10 +214,10 @@ export default class PrivateKey extends BigNumber {
    * @returns Returns the address encoding associated with the hash of the public key associated with this private key.
    *
    * @example
-   * const address = privKey.toAddress()
-   * const address = privKey.toAddress('mainnet')
-   * const testnetAddress = privKey.toAddress([0x6f])
-   * const testnetAddress = privKey.toAddress('testnet')
+   * const address = privkey.toAddress()
+   * const address = privkey.toAddress('mainnet')
+   * const testnetAddress = privkey.toAddress([0x6f])
+   * const testnetAddress = privkey.toAddress('testnet')
    */
   toAddress (prefix: number[] | string = [0x00]): string {
     return this.toPublicKey().toAddress(prefix)
