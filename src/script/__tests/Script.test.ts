@@ -409,7 +409,7 @@ describe('Script', () => {
       expect(tokens[0]).toEqual('OP_0')
       expect(tokens[1]).toEqual('OP_RETURN')
       expect(toUTF8(toArray(tokens[2], 'hex'))).toEqual('meta')
-      expect(tokens[3]).toEqual(priv.toPublicKey().toString())
+      expect(toUTF8(toArray(tokens[3], 'hex'))).toEqual(priv.toPublicKey().toString())
       expect(toUTF8(toArray(tokens[4], 'hex'))).toEqual('null')
       expect(toUTF8(toArray(tokens[5], 'hex'))).toEqual('subprotocol')
       expect(toUTF8(toArray(tokens[6], 'hex'))).toEqual('data')

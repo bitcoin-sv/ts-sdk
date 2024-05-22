@@ -773,7 +773,7 @@ This class provides methods to create Metanet outputs from data. Only lock scrip
 
 ```ts
 export default class Metanet implements ScriptTemplate {
-    lock(pubkey: PublicKey, parentTXID: string | null, data: string[] | string = [], enc?: "hex" | "utf8" | "base64"): LockingScript 
+    lock(pubkey: PublicKey, parentTXID: string | null, data: string[] | string = []): LockingScript 
     unlock(): {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
         estimateLength: () => Promise<number>;
@@ -790,7 +790,7 @@ export default class Metanet implements ScriptTemplate {
 Creates a Metanet output script
 
 ```ts
-lock(pubkey: PublicKey, parentTXID: string | null, data: string[] | string = [], enc?: "hex" | "utf8" | "base64"): LockingScript 
+lock(pubkey: PublicKey, parentTXID: string | null, data: string[] | string = []): LockingScript 
 ```
 
 Returns

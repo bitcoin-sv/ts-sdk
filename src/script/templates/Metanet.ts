@@ -25,28 +25,20 @@ export default class Metanet implements ScriptTemplate {
    * // creates a root metanet return with 'subprotocol' and 'filename' metadata followed by data
    * lock(pubkey, null, txid, ['subprotocol', 'filename', data ])
    */
-  lock(pubkey: PublicKey, parentTXID: string | null, data: string[] | string = [], enc?: 'hex' | 'utf8' | 'base64'): LockingScript {
+  lock(pubkey: PublicKey, parentTXID: string | null, data: string[] | string = []): LockingScript {
     const script : {op: number, data? }[] = [
       { op: OP.OP_FALSE },
       { op: OP.OP_RETURN }
     ]
 
     const fields = [
-      toArray('meta'),
-      toArray(pubkey.toString(), 'hex'),
-      parentTXID ? toArray(parentTXID, 'hex') : toArray('null')
-    ]
-
-    if (typeof data === 'string') {
-      data = [data]
-    }
-
-    for (const entry of data) {
-      fields.push(toArray(entry, enc))
-    }
+      'meta',
+      pubkey.toString(),
+      parentTXID || 'null'
+    ].concat(data)
 
     for (const field of fields) {
-      script.push({ op: field.length, data: field })
+      script.push({ op: field.length, data: toArray(field) })
     }
 
     return new LockingScript(script)
