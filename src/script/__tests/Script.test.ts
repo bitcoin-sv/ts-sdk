@@ -1,8 +1,9 @@
 import Script from '../../../dist/cjs/src/script/Script'
 import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
 import P2PKH from '../../../dist/cjs/src/script/templates/P2PKH'
+import Metanet from '../../../dist/cjs/src/script/templates/Metanet'
 import OP from '../../../dist/cjs/src/script/OP'
-import { toHex } from '../../../dist/cjs/src/primitives/utils'
+import { toHex, toUTF8, toArray } from '../../../dist/cjs/src/primitives/utils'
 
 import scriptInvalid from './script.invalid.vectors'
 import scriptValid from './script.valid.vectors'
@@ -397,6 +398,25 @@ describe('Script', () => {
         const strB = Script.fromHex(a[1]).toASM()
         expect(Script.fromASM(strB).toASM()).toEqual(strB)
       })
+    })
+  })
+
+  describe('Metanet template', () => {
+    it('creates metanet output', () => {
+      const priv = PrivateKey.fromRandom()
+      const script = new Metanet().lock(priv.toPublicKey(), null, ['subprotocol', 'data'])
+      const tokens = script.toASM().split(' ')
+      expect(tokens[0]).toEqual('OP_0')
+      expect(tokens[1]).toEqual('OP_RETURN')
+      expect(toUTF8(toArray(tokens[2], 'hex'))).toEqual('meta')
+      expect(tokens[3]).toEqual(priv.toPublicKey().toString())
+      expect(toUTF8(toArray(tokens[4], 'hex'))).toEqual('null')
+      expect(toUTF8(toArray(tokens[5], 'hex'))).toEqual('subprotocol')
+      expect(toUTF8(toArray(tokens[6], 'hex'))).toEqual('data')
+    })
+
+    it('fails to create metanet input', () => {
+      expect(() => new Metanet().unlock()).toThrow()
     })
   })
 })

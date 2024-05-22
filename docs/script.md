@@ -76,6 +76,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | |
 | --- |
 | [LockingScript](#class-lockingscript) |
+| [Metanet](#class-metanet) |
 | [P2PKH](#class-p2pkh) |
 | [RPuzzle](#class-rpuzzle) |
 | [Script](#class-script) |
@@ -758,6 +759,72 @@ Argument Details
   + The signature scope for outputs.
 + **anyoneCanPay**
   + Flag indicating if the signature allows for other inputs to be added later.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: Metanet
+
+Metanet class implementing ScriptTemplate.
+
+This class provides methods to create Metanet outputs from data. Only lock script is available.
+
+```ts
+export default class Metanet implements ScriptTemplate {
+    lock(pubkey: PublicKey, parentTXID: string | null, data: string[] | string = [], enc?: "hex" | "utf8" | "base64"): LockingScript 
+    unlock(): {
+        sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
+        estimateLength: () => Promise<number>;
+    } 
+}
+```
+
+<details>
+
+<summary>Class Metanet Details</summary>
+
+#### Method lock
+
+Creates a Metanet output script
+
+```ts
+lock(pubkey: PublicKey, parentTXID: string | null, data: string[] | string = [], enc?: "hex" | "utf8" | "base64"): LockingScript 
+```
+
+Returns
+
+- A Metanet locking script.
+
+Argument Details
+
++ **pubkey**
+  + the public key responsible for the metanet node
++ **parentTXID**
+  + the TXID of the parent metanet transaction or null for root node
++ **data**
+  + the output data, an array of metadata ending in data payload
++ **enc**
+  + The data encoding type, defaults to utf8.
+
+Example
+
+```ts
+// creates a root metanet return with 'subprotocol' and 'filename' metadata followed by data
+lock(pubkey, null, txid, ['subprotocol', 'filename', data ])
+```
+
+#### Method unlock
+
+Unlock method is not available for Metanet scripts, throws exception.
+
+```ts
+unlock(): {
+    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
+    estimateLength: () => Promise<number>;
+} 
+```
 
 </details>
 
