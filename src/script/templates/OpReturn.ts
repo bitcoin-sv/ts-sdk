@@ -46,7 +46,7 @@ export default class OpReturn implements ScriptTemplate {
    */
   unlock(): {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
-    estimateLength: () => Promise<106>
+    estimateLength: () => Promise<number>
   } {
     throw new Error('Unlock is not supported for OpReturn scripts')
   }

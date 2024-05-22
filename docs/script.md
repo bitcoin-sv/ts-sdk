@@ -776,7 +776,7 @@ export default class OpReturn implements ScriptTemplate {
     lock(data: string | string[] | number[], enc?: "hex" | "utf8" | "base64"): LockingScript 
     unlock(): {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-        estimateLength: () => Promise<106>;
+        estimateLength: () => Promise<number>;
     } 
 }
 ```
@@ -811,7 +811,7 @@ Unlock method is not available for OpReturn scripts, throws exception.
 ```ts
 unlock(): {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-    estimateLength: () => Promise<106>;
+    estimateLength: () => Promise<number>;
 } 
 ```
 
