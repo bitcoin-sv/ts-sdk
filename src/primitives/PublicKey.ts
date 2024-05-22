@@ -156,12 +156,14 @@ export default class PublicKey extends Point {
    * const testnetAddress = pubkey.toAddress('testnet')
    */
   toAddress (prefix: number[] | string = [0x00]): string {
-    if (prefix === 'testnet' || prefix === 'test') {
-      prefix = [0x6f]
-    } else if (prefix === 'mainnet' || prefix === 'main') {
-      prefix = [0x00]
-    } else {
-      throw new Error(`Invalid prefix ${prefix}`)
+    if (typeof prefix === 'string') {
+      if (prefix === 'testnet' || prefix === 'test') {
+        prefix = [0x6f]
+      } else if (prefix === 'mainnet' || prefix === 'main') {
+        prefix = [0x00]
+      } else {
+        throw new Error(`Invalid prefix ${prefix}`)
+      }
     }
     return toBase58Check(this.toHash() as number[], prefix)
   }
