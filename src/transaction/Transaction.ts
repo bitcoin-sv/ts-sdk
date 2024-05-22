@@ -360,6 +360,9 @@ export default class Transaction {
   getFee (): number {
     let totalIn = 0
     for (const input of this.inputs) {
+      if (typeof input.sourceTransaction !== 'object' && typeof input.sourceSatoshis !== 'number') {
+        throw new Error('Source transactions or sourceSatoshis are required for all inputs to calculate fee')
+      }
       totalIn += input.sourceTransaction
         ? input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
         : input.sourceSatoshis || 0
