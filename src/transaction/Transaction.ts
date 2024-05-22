@@ -353,6 +353,25 @@ export default class Transaction {
   }
 
   /**
+   * Utility method that returns the current fee based on inputs and outputs
+   *
+   * @returns The current transaction fee
+   */
+  getFee (): number {
+    let totalIn = 0
+    for (const input of this.inputs) {
+      totalIn += input.sourceTransaction
+        ? input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
+        : input.sourceSatoshis || 0
+    }
+    let totalOut = 0
+    for (const output of this.outputs) {
+      totalOut += output.satoshis || 0
+    }
+    return totalIn - totalOut
+  }
+
+  /**
    * Signs a transaction, hydrating all its unlocking scripts based on the provided script templates where they are available.
    */
   async sign (): Promise<void> {

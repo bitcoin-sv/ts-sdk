@@ -385,6 +385,7 @@ describe('Transaction', () => {
       })
       await tx.fee({ computeFee: async () => 10 })
       expect(tx.outputs[0].satoshis).toEqual(20000 - 10)
+      expect(tx.getFee()).toEqual(10)
     })
   })
 
