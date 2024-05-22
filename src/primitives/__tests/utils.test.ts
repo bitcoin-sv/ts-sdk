@@ -1,5 +1,6 @@
 /* eslint-env jest */
-import { toArray, zero2, toHex, encode, fromBase58, toBase58, fromBase58Check, toBase58Check } from '../../../dist/cjs/src/primitives/utils'
+import { toArray, zero2, toHex, encode, fromBase58, toBase58, fromBase58Check, toBase58Check, decodeOpReturn } from '../../../dist/cjs/src/primitives/utils'
+import Script from '../../../dist/cjs/src/script/Script'
 
 describe('utils', () => {
   it('should convert to array', () => {
@@ -103,6 +104,14 @@ describe('utils', () => {
 
       const address = '1mayif3H2JDC62S4N3rLNtBNRAiUUP99k'
       expect(fromBase58Check(address, 'hex')).toEqual({ prefix: '00', data: dataHex })
+    })
+
+    it('should decode opreturn scripts', () => {
+      const s1 = toHex(toArray('12345'))
+      const s2 = toHex(toArray('67890'))
+      const script = Script.fromASM(`OP_0 OP_RETURN ${s1} ${s2}`)
+      const decoded = decodeOpReturn(script)
+      expect(decoded).toStrictEqual(['12345', '67890'])
     })
   })
 })
