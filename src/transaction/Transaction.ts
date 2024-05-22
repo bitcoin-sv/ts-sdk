@@ -309,12 +309,12 @@ export default class Transaction {
     // change = inputs - fee - non-change outputs
     let change = 0
     for (const input of this.inputs) {
-      if (typeof input.sourceSatoshis !== 'number' && typeof input.sourceTransaction !== 'object') {
+      if (typeof input.sourceTransaction !== 'object' && typeof input.sourceSatoshis !== 'number') {
         throw new Error('Source transactions or sourceSatoshis are required for all inputs during fee computation')
       }
-      change += typeof input.sourceSatoshis === 'number'
-        ? input.sourceSatoshis
-        : input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
+      change += input.sourceTransaction
+        ? input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
+        : input.sourceSatoshis
     }
     change -= fee
     let changeCount = 0
