@@ -805,8 +805,6 @@ Argument Details
   + the TXID of the parent metanet transaction or null for root node
 + **data**
   + the output data, an array of metadata ending in data payload
-+ **enc**
-  + The data encoding type, defaults to utf8.
 
 Example
 

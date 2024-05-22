@@ -18,7 +18,6 @@ export default class Metanet implements ScriptTemplate {
    * @param {PublicKey} pubkey the public key responsible for the metanet node
    * @param {string} parentTXID the TXID of the parent metanet transaction or null for root node
    * @param {string[]} data the output data, an array of metadata ending in data payload
-   * @param {'hex' | 'utf8' | 'base64'} enc The data encoding type, defaults to utf8.
    * @returns {LockingScript} - A Metanet locking script.
    *
    * @example
