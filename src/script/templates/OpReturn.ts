@@ -30,9 +30,8 @@ export default class OpReturn implements ScriptTemplate {
 
     if (data.length && typeof data[0] === 'number') {
       script.push({ op: data.length, data })
-    }
-    else {
-      for (const entry of data) {
+    } else {
+      for (const entry of data.filter(Boolean)) {
         const arr = toArray(entry, enc)
         script.push({ op: arr.length, data: arr })
       }
