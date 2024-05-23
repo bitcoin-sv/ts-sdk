@@ -17,7 +17,7 @@ import Transaction from './Transaction.js'
  *           that this input is spending. It is zero-based, indicating the position of the
  *           output in the array of outputs of the source transaction.
  * @property {number} [sourceSatoshis] - The amount of satoshis of the source transaction
- *           output that this input is spending, used for fee calculation when source
+ *           output that this input is spending, used for fee calculation and signing when source
  *           transaction is not present
  * @property {UnlockingScript} [unlockingScript] - Optional. The script that 'unlocks' the
  *           source output for spending. This script typically contains signatures and
