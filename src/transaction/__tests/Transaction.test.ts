@@ -317,6 +317,32 @@ describe('Transaction', () => {
       // 4000 sats in - 1000 sats out - 1033 sats fee = expected 1967 sats change
       expect(spendTx.outputs[1].satoshis).toEqual(1967)
     })
+    it('Computes fee using FixedFee model', async () => {
+      const privateKey = new PrivateKey(1)
+      const publicKey = new Curve().g.mul(privateKey)
+      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const p2pkh = new P2PKH()
+      const sourceTx = new Transaction(1, [], [{
+        lockingScript: p2pkh.lock(publicKeyHash),
+        satoshis: 4000
+      }], 0)
+      const spendTx = new Transaction(1, [{
+        sourceTransaction: sourceTx,
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: p2pkh.unlock(privateKey),
+        sequence: 0xffffffff
+      }], [{
+        satoshis: 1000,
+        lockingScript: p2pkh.lock(publicKeyHash)
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }], 0)
+      expect(spendTx.outputs[1].satoshis).not.toBeDefined()
+      await spendTx.fee(1033)
+      // 4000 sats in - 1000 sats out - 1033 sats fee = expected 1967 sats change
+      expect(spendTx.outputs[1].satoshis).toEqual(1967)
+    })
     it('Distributes change among multiple change outputs', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)

@@ -836,7 +836,7 @@ export default class Transaction {
     addInput(input: TransactionInput): void 
     addOutput(output: TransactionOutput): void 
     updateMetadata(metadata: Record<string, any>): void 
-    async fee(model?: FeeModel, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
+    async fee(modelOrFee?: FeeModel | number, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
     getFee(): number 
     async sign(): Promise<void> 
     async broadcast(broadcaster: Broadcaster = defaultBroadcaster()): Promise<BroadcastResponse | BroadcastFailure> 
@@ -909,15 +909,16 @@ Argument Details
 
 Computes fees prior to signing.
 If no fee model is provided, uses a SatoshisPerKilobyte fee model that pays 10 sat/kb.
+If fee is a number, the transaction uses that value as fee.
 
 ```ts
-async fee(model?: FeeModel, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
+async fee(modelOrFee?: FeeModel | number, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
 ```
 
 Argument Details
 
-+ **model**
-  + The initialized fee model to use
++ **modelOrFee**
+  + The initialized fee model to use or fixed fee for the transaction
 + **changeDistribution**
   + Specifies how the change should be distributed
 amongst the change outputs
