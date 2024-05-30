@@ -209,15 +209,17 @@ export default class PrivateKey extends BigNumber {
    * Base58Check encodes the hash of the public key associated with this private key with a prefix to indicate locking script type.
    * Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
    *
-   * @param prefix defaults to [0x00] for mainnet, set to [0x6f] for testnet.
+   * @param prefix defaults to [0x00] for mainnet, set to [0x6f] for testnet or use the strings 'testnet' or 'mainnet'
    *
    * @returns Returns the address encoding associated with the hash of the public key associated with this private key.
    *
    * @example
-   * const address = pubkey.toAddress()
-   * const testnetAddress = pubkey.toAddress([0x6f])
+   * const address = privkey.toAddress()
+   * const address = privkey.toAddress('mainnet')
+   * const testnetAddress = privkey.toAddress([0x6f])
+   * const testnetAddress = privkey.toAddress('testnet')
    */
-  toAddress (prefix: number[] = [0x00]): string {
+  toAddress (prefix: number[] | string = [0x00]): string {
     return this.toPublicKey().toAddress(prefix)
   }
 

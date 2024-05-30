@@ -145,15 +145,26 @@ export default class PublicKey extends Point {
    * Base58Check encodes the hash of the public key with a prefix to indicate locking script type.
    * Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
    *
-   * @param prefix defaults to [0x00] for mainnet, set to [0x6f] for testnet.
+   * @param prefix defaults to [0x00] for mainnet, set to [0x6f] for testnet or use the strings 'mainnet' or 'testnet'
    *
    * @returns Returns the address encoding associated with the hash of the public key.
    *
    * @example
    * const address = pubkey.toAddress()
+   * const address = pubkey.toAddress('mainnet')
    * const testnetAddress = pubkey.toAddress([0x6f])
+   * const testnetAddress = pubkey.toAddress('testnet')
    */
-  toAddress (prefix: number[] = [0x00]): string {
+  toAddress (prefix: number[] | string = [0x00]): string {
+    if (typeof prefix === 'string') {
+      if (prefix === 'testnet' || prefix === 'test') {
+        prefix = [0x6f]
+      } else if (prefix === 'mainnet' || prefix === 'main') {
+        prefix = [0x00]
+      } else {
+        throw new Error(`Invalid prefix ${prefix}`)
+      }
+    }
     return toBase58Check(this.toHash() as number[], prefix)
   }
 
