@@ -122,6 +122,59 @@ export default class Transaction {
     return transactions[lastTXID].tx
   }
 
+
+  /**
+   * Creates a new transaction, linked to its inputs and their associated merkle paths, from a EF (BRC-30) structure.
+   * @param ef A binary representation of a transaction in EF format.
+   * @returns An extended transaction, linked to its associated inputs by locking script and satoshis amounts only.
+   */
+  static fromEF (ef: number[]): Transaction {
+    const br = new Reader(ef)
+    const version = br.readUInt32LE()
+    if (toHex(br.read(6)) !== '0000000000ef') throw new Error('Invalid EF marker')
+    const inputsLength = br.readVarIntNum()
+    const inputs: TransactionInput[] = []
+    for (let i = 0; i < inputsLength; i++) {
+      const sourceTXID = toHex(br.readReverse(32))
+      const sourceOutputIndex = br.readUInt32LE()
+      const scriptLength = br.readVarIntNum()
+      const scriptBin = br.read(scriptLength)
+      const unlockingScript = UnlockingScript.fromBinary(scriptBin)
+      const sequence = br.readUInt32LE()
+      const satoshis = br.readUInt64LEBn().toNumber()
+      const lockingScriptLength = br.readVarIntNum()
+      const lockingScriptBin = br.read(lockingScriptLength)
+      const lockingScript = LockingScript.fromBinary(lockingScriptBin)
+      const sourceTransaction = new Transaction(null, [], [], null)
+      sourceTransaction.outputs = Array(sourceOutputIndex + 1).fill(null)
+      sourceTransaction.outputs[sourceOutputIndex] = {
+        satoshis,
+        lockingScript
+      }
+      inputs.push({
+        sourceTransaction,
+        sourceTXID,
+        sourceOutputIndex,
+        unlockingScript,
+        sequence
+      })
+    }
+    const outputsLength = br.readVarIntNum()
+    const outputs: TransactionOutput[] = []
+    for (let i = 0; i < outputsLength; i++) {
+      const satoshis = br.readUInt64LEBn().toNumber()
+      const scriptLength = br.readVarIntNum()
+      const scriptBin = br.read(scriptLength)
+      const lockingScript = LockingScript.fromBinary(scriptBin)
+      outputs.push({
+        satoshis,
+        lockingScript
+      })
+    }
+    const lockTime = br.readUInt32LE()
+    return new Transaction(version, inputs, outputs, lockTime)
+  }
+
   /**
    * Since the validation of blockchain data is atomically transaction data validation,
    * any application seeking to validate data in output scripts must store the entire transaction as well.
@@ -218,6 +271,17 @@ export default class Transaction {
    */
   static fromHex (hex: string): Transaction {
     return Transaction.fromBinary(toArray(hex, 'hex'))
+  }
+
+  /**
+   * Creates a Transaction instance from a hexadecimal string encoded EF.
+   *
+   * @static
+   * @param {string} hex - The hexadecimal string representation of the transaction EF.
+   * @returns {Transaction} - A new Transaction instance.
+   */
+  static fromHexEF (hex: string): Transaction {
+    return Transaction.fromEF(toArray(hex, 'hex'))
   }
 
   /**
@@ -465,7 +529,7 @@ export default class Transaction {
       if (typeof i.sourceTransaction === 'undefined') {
         throw new Error('All inputs must have source transactions when serializing to EF format')
       }
-      writer.write(i.sourceTransaction.hash() as number[])
+      writer.write(toArray(i.sourceTXID, 'hex').reverse() as number[])
       writer.writeUInt32LE(i.sourceOutputIndex)
       const scriptBin = i.unlockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
