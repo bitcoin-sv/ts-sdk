@@ -780,12 +780,9 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ### Function: fromUtxo
 
-fromUtxo
+Example
 
-This function creates a transaction input from a utxo json object
-The idea being old code that uses utxos rather than sourceTranactions can convert using this.
-
-example:
+```ts
 const i = fromUtxo({
   txid: '434555433eaca96dff6e71a4d02febd0dd3832e5ca4e5734623ca914522e17d5',
   vout: 0,
@@ -794,6 +791,7 @@ const i = fromUtxo({
 }, new P2PKH().unlock(p))
 
 tx.addInput(i)
+```
 
 ```ts
 export default function fromUtxo(utxo: jsonUtxo, unlockingScriptTemplate: {
