@@ -47,7 +47,6 @@ export default interface TransactionInput {
     sourceTransaction?: Transaction;
     sourceTXID?: string;
     sourceOutputIndex: number;
-    sourceSatoshis?: number;
     unlockingScript?: UnlockingScript;
     unlockingScriptTemplate?: {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
@@ -847,6 +846,7 @@ export default class Transaction {
     metadata: Record<string, any>;
     merklePath?: MerklePath;
     static fromBEEF(beef: number[]): Transaction 
+    static fromEF(ef: number[]): Transaction 
     static parseScriptOffsets(bin: number[]): {
         inputs: Array<{
             vin: number;
@@ -861,6 +861,7 @@ export default class Transaction {
     } 
     static fromBinary(bin: number[]): Transaction 
     static fromHex(hex: string): Transaction 
+    static fromHexEF(hex: string): Transaction 
     static fromHexBEEF(hex: string): Transaction 
     constructor(version: number = 1, inputs: TransactionInput[] = [], outputs: TransactionOutput[] = [], lockTime: number = 0, metadata: Record<string, any> = {}, merklePath?: MerklePath) 
     addInput(input: TransactionInput): void 
@@ -989,6 +990,23 @@ Argument Details
 + **bin**
   + The binary array representation of the transaction.
 
+#### Method fromEF
+
+Creates a new transaction, linked to its inputs and their associated merkle paths, from a EF (BRC-30) structure.
+
+```ts
+static fromEF(ef: number[]): Transaction 
+```
+
+Returns
+
+An extended transaction, linked to its associated inputs by locking script and satoshis amounts only.
+
+Argument Details
+
++ **ef**
+  + A binary representation of a transaction in EF format.
+
 #### Method fromHex
 
 Creates a Transaction instance from a hexadecimal string.
@@ -1022,6 +1040,23 @@ Argument Details
 
 + **hex**
   + The hexadecimal string representation of the transaction BEEF.
+
+#### Method fromHexEF
+
+Creates a Transaction instance from a hexadecimal string encoded EF.
+
+```ts
+static fromHexEF(hex: string): Transaction 
+```
+
+Returns
+
+- A new Transaction instance.
+
+Argument Details
+
++ **hex**
+  + The hexadecimal string representation of the transaction EF.
 
 #### Method getFee
 
