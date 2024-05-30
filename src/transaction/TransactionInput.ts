@@ -16,6 +16,9 @@ import Transaction from './Transaction.js'
  * @property {number} sourceOutputIndex - The index of the output in the source transaction
  *           that this input is spending. It is zero-based, indicating the position of the
  *           output in the array of outputs of the source transaction.
+ * @property {number} [sourceSatoshis] - The amount of satoshis of the source transaction
+ *           output that this input is spending, used for fee calculation and signing when
+ *           source transaction is not present
  * @property {UnlockingScript} [unlockingScript] - Optional. The script that 'unlocks' the
  *           source output for spending. This script typically contains signatures and
  *           public keys that evidence the ownership of the output.
@@ -54,6 +57,7 @@ export default interface TransactionInput {
   sourceTransaction?: Transaction
   sourceTXID?: string
   sourceOutputIndex: number
+  sourceSatoshis?: number
   unlockingScript?: UnlockingScript
   unlockingScriptTemplate?: {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>

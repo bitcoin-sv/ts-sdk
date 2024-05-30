@@ -91,6 +91,7 @@ export default class P2PKH implements ScriptTemplate {
           )
         }
         sourceSatoshis ||= input.sourceTransaction?.outputs[input.sourceOutputIndex].satoshis
+        sourceSatoshis ||= input.sourceSatoshis
         if (!sourceSatoshis) {
           throw new Error(
             'The sourceSatoshis or input sourceTransaction is required for transaction signing.'

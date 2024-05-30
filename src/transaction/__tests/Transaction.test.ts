@@ -378,6 +378,41 @@ describe('Transaction', () => {
       expect(spendTx.outputs[1].satoshis).toEqual(983)
       expect(spendTx.outputs[2].satoshis).toEqual(983)
     })
+    it('Calculates fee for utxo based transaction', async () => {
+      const utxos = [ // WoC format utxos
+        {
+          height: 1600000,
+          tx_pos: 0,
+          tx_hash: '672dd6a93fa5d7ba6794e0bdf8b479440b95a55ec10ad3d9e03585ecb5628d8d',
+          value: 10000
+        },
+        {
+          height: 1600000,
+          tx_pos: 0,
+          tx_hash: 'f33505acf37a7726cc37d391bc6f889b8684ac2a2d581c4be2a4b1c8b46609bc',
+          value: 10000
+        },
+      ]
+      const priv = PrivateKey.fromRandom()
+      const tx = new Transaction()
+      utxos.forEach(utxo => {
+        const script = new P2PKH().lock(priv.toPublicKey().toHash())
+        tx.addInput({
+          sourceTXID: utxo.tx_hash,
+          sourceOutputIndex: utxo.tx_pos,
+          sourceSatoshis: utxo.value,
+          unlockingScriptTemplate: new P2PKH()
+            .unlock(priv, 'all', false, utxo.value, script)
+        })
+      })
+      tx.addOutput({
+        lockingScript: new P2PKH().lock(priv.toAddress()),
+        change: true
+      })
+      await tx.fee({ computeFee: async () => 10 })
+      expect(tx.outputs[0].satoshis).toEqual(20000 - 10)
+      expect(tx.getFee()).toEqual(10)
+    })
   })
 
   describe('Broadcast', () => {

@@ -47,6 +47,7 @@ export default interface TransactionInput {
     sourceTransaction?: Transaction;
     sourceTXID?: string;
     sourceOutputIndex: number;
+    sourceSatoshis?: number;
     unlockingScript?: UnlockingScript;
     unlockingScriptTemplate?: {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
@@ -836,6 +837,7 @@ export default class Transaction {
     addOutput(output: TransactionOutput): void 
     updateMetadata(metadata: Record<string, any>): void 
     async fee(modelOrFee?: FeeModel | number, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
+    getFee(): number 
     async sign(): Promise<void> 
     async broadcast(broadcaster: Broadcaster = defaultBroadcaster()): Promise<BroadcastResponse | BroadcastFailure> 
     toBinary(): number[] 
@@ -990,6 +992,18 @@ Argument Details
 
 + **hex**
   + The hexadecimal string representation of the transaction BEEF.
+
+#### Method getFee
+
+Utility method that returns the current fee based on inputs and outputs
+
+```ts
+getFee(): number 
+```
+
+Returns
+
+The current transaction fee
 
 #### Method hash
 
