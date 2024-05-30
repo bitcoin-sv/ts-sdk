@@ -293,19 +293,26 @@ export default class Transaction {
   /**
    * Computes fees prior to signing.
    * If no fee model is provided, uses a SatoshisPerKilobyte fee model that pays 10 sat/kb.
+   * If fee is a number, the transaction uses that value as fee.
    *
-   * @param model - The initialized fee model to use
+   * @param modelOrFee - The initialized fee model to use or fixed fee for the transaction
    * @param changeDistribution - Specifies how the change should be distributed
    * amongst the change outputs
    *
    * TODO: Benford's law change distribution.
    */
-  async fee (model?: FeeModel, changeDistribution: 'equal' | 'random' = 'equal'): Promise<void> {
+  async fee (modelOrFee?: FeeModel | number, changeDistribution: 'equal' | 'random' = 'equal'): Promise<void> {
     this.cachedHash = undefined
-    if (typeof model === 'undefined') {
-      model = new SatoshisPerKilobyte(10)
+    if (typeof modelOrFee === 'undefined') {
+      modelOrFee = new SatoshisPerKilobyte(10)
     }
-    const fee = await model.computeFee(this)
+    if (typeof modelOrFee === 'number') {
+      const sats = modelOrFee
+      modelOrFee = {
+        computeFee: async () => sats
+      }
+    }
+    const fee = await modelOrFee.computeFee(this)
     // change = inputs - fee - non-change outputs
     let change = 0
     for (const input of this.inputs) {
