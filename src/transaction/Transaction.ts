@@ -529,7 +529,11 @@ export default class Transaction {
       if (typeof i.sourceTransaction === 'undefined') {
         throw new Error('All inputs must have source transactions when serializing to EF format')
       }
-      writer.write(toArray(i.sourceTXID, 'hex').reverse() as number[])
+      if (typeof i.sourceTXID === 'undefined') {
+        writer.write(i.sourceTransaction.hash() as number[])
+      } else {
+        writer.write(toArray(i.sourceTXID, 'hex').reverse() as number[])
+      }
       writer.writeUInt32LE(i.sourceOutputIndex)
       const scriptBin = i.unlockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
