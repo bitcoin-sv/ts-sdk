@@ -397,11 +397,10 @@ describe('Transaction', () => {
       const priv = PrivateKey.fromRandom()
       const tx = new Transaction()
       utxos.forEach(utxo => {
-        const script = new P2PKH().lock(priv.toPublicKey().toHash()).toHex()
         const u = {
           txid: utxo.tx_hash,
           vout: utxo.tx_pos,
-          script,
+          script: new P2PKH().lock(priv.toPublicKey().toHash()).toHex(),
           satoshis: utxo.value
         }
         tx.addInput(fromUtxo(u, new P2PKH().unlock(priv)))
