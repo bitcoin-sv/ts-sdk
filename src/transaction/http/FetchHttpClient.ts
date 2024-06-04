@@ -38,7 +38,7 @@ export class FetchHttpClient implements HttpClient {
 
     const res = await this.fetch(url, fetchOptions);
     const mediaType = res.headers.get('Content-Type');
-    const data = mediaType === 'application/json' ? await res.json() : await res.text();
+    const data = mediaType.startsWith('application/json') ? await res.json() : await res.text();
 
     return {
       ok: res.ok,
