@@ -189,7 +189,7 @@ describe('ARC Broadcaster', () => {
       headers: {
         get(key: string) {
           if (key === 'Content-Type') {
-            return 'application/json'
+            return 'application/json; charset=UTF-8'
           }
         }
       },
@@ -205,7 +205,7 @@ describe('ARC Broadcaster', () => {
           statusCode: response.status,
           statusMessage: response.status == 200 ? 'OK' : 'Bad request',
           headers: {
-            'content-type': 'application/json'
+            'content-type': 'application/json; charset=UTF-8'
           },
           on: (event, handler) => {
             if (event === 'data') handler(JSON.stringify(response.data))
