@@ -350,6 +350,7 @@ export interface ArcConfig {
     apiKey?: string;
     deploymentId?: string;
     httpClient?: HttpClient;
+    headers?: Record<string, string>;
 }
 ```
 
@@ -371,6 +372,14 @@ Deployment id used annotating api calls in XDeployment-ID header - this value wi
 
 ```ts
 deploymentId?: string
+```
+
+#### Property headers
+
+The headers to be attached to all tx submissions.
+
+```ts
+headers?: Record<string, string>
 ```
 
 #### Property httpClient
@@ -690,6 +699,7 @@ export default class ARC implements Broadcaster {
     readonly URL: string;
     readonly apiKey: string | undefined;
     readonly deploymentId: string;
+    readonly headers: Record<string, string> | undefined;
     constructor(URL: string, config?: ArcConfig);
     constructor(URL: string, apiKey?: string);
     constructor(URL: string, config?: string | ArcConfig) 
