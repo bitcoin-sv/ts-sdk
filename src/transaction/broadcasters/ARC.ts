@@ -13,6 +13,10 @@ export interface ArcConfig {
   deploymentId?: string
   /** The HTTP client used to make requests to the ARC API. */
   httpClient?: HttpClient
+  /** notification callback endpoint for proofs and double spend notification */
+  callbackUrl?: string
+  /** default access token for notification callback endpoint. It will be used as a Authorization header for the http callback */
+  callbackToken?: string
 }
 
 
@@ -27,6 +31,8 @@ export default class ARC implements Broadcaster {
   readonly URL: string
   readonly apiKey: string | undefined
   readonly deploymentId: string
+  readonly callbackUrl: string | undefined
+  readonly callbackToken: string | undefined
   private readonly httpClient: HttpClient;
 
   /**
@@ -50,11 +56,15 @@ export default class ARC implements Broadcaster {
       this.apiKey = config
       this.httpClient = defaultHttpClient()
       this.deploymentId = defaultDeploymentId()
+      this.callbackToken = undefined
+      this.callbackUrl = undefined
     } else {
       const {apiKey, deploymentId, httpClient} = config ?? {} as ArcConfig
       this.httpClient = httpClient ?? defaultHttpClient()
       this.deploymentId = deploymentId ?? defaultDeploymentId()
       this.apiKey = apiKey
+      this.callbackToken = config.callbackToken
+      this.callbackUrl = config.callbackUrl
     }
   }
 
@@ -126,6 +136,14 @@ export default class ARC implements Broadcaster {
 
     if (this.apiKey) {
       headers['Authorization'] = `Bearer ${this.apiKey}`
+    }
+
+    if (this.callbackUrl) {
+      headers['X-CallbackUrl'] = this.callbackUrl
+    }
+
+    if (this.callbackToken) {
+      headers['X-CallbackToken'] = this.callbackToken
     }
 
     return headers
