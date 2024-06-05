@@ -59,12 +59,12 @@ export default class ARC implements Broadcaster {
       this.callbackToken = undefined
       this.callbackUrl = undefined
     } else {
-      const {apiKey, deploymentId, httpClient} = config ?? {} as ArcConfig
+      const {apiKey, deploymentId, httpClient, callbackToken, callbackUrl } = config ?? {} as ArcConfig
       this.httpClient = httpClient ?? defaultHttpClient()
       this.deploymentId = deploymentId ?? defaultDeploymentId()
       this.apiKey = apiKey
-      this.callbackToken = config.callbackToken
-      this.callbackUrl = config.callbackUrl
+      this.callbackToken = callbackToken
+      this.callbackUrl = callbackUrl
     }
   }
 
