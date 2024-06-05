@@ -1,6 +1,8 @@
 # API
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+## Interfaces
 
 ## Classes
 
@@ -10,7 +12,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 | [HD](#class-hd) |
 | [Mnemonic](#class-mnemonic) |
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 
@@ -303,7 +305,7 @@ A base58 encoded string of the HD wallet.
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Class: Mnemonic
@@ -636,7 +638,7 @@ The mnemonic phrase as a string.
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Class: ECIES
@@ -771,10 +773,50 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ## Functions
+
+### Function: fromUtxo
+
+Example
+
+```ts
+const i = fromUtxo({
+  txid: '434555433eaca96dff6e71a4d02febd0dd3832e5ca4e5734623ca914522e17d5',
+  vout: 0,
+  script: '51',
+  satoshis: 1234
+}, new P2PKH().unlock(p))
+
+tx.addInput(i)
+```
+
+```ts
+export default function fromUtxo(utxo: jsonUtxo, unlockingScriptTemplate: {
+    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
+    estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
+}): TransactionInput 
+```
+
+<details>
+
+<summary>Function fromUtxo Details</summary>
+
+Argument Details
+
++ **utxo**
+  + : jsonUtxo
++ **unlockingScriptTemplate**
+  + : { sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>, estimateLength: (tx: Transaction, inputIndex: number) => Promise<number> }
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+## Types
 
 ## Variables
 
@@ -785,7 +827,7 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 | [verify](#variable-verify) |
 | [wordList](#variable-wordlist) |
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 
@@ -804,7 +846,7 @@ magicHash = (messageBuf: number[]): number[] => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Variable: sign
@@ -816,7 +858,7 @@ sign = (message: number[], privateKey: PrivateKey): Signature => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Variable: verify
@@ -828,7 +870,7 @@ verify = (message: number[], sig: Signature, pubKey: PublicKey): boolean => {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Variable: wordList
@@ -2889,6 +2931,6 @@ wordList = {
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
