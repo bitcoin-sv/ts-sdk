@@ -348,8 +348,10 @@ Configuration options for the ARC broadcaster.
 ```ts
 export interface ArcConfig {
     apiKey?: string;
-    deploymentId?: string;
     httpClient?: HttpClient;
+    deploymentId?: string;
+    callbackUrl?: string;
+    callbackToken?: string;
     headers?: Record<string, string>;
 }
 ```
@@ -366,6 +368,22 @@ Authentication token for the ARC API
 apiKey?: string
 ```
 
+#### Property callbackToken
+
+default access token for notification callback endpoint. It will be used as a Authorization header for the http callback
+
+```ts
+callbackToken?: string
+```
+
+#### Property callbackUrl
+
+notification callback endpoint for proofs and double spend notification
+
+```ts
+callbackUrl?: string
+```
+
 #### Property deploymentId
 
 Deployment id used annotating api calls in XDeployment-ID header - this value will be randomly generated if not set
@@ -376,7 +394,7 @@ deploymentId?: string
 
 #### Property headers
 
-The headers to be attached to all tx submissions.
+additional headers to be attached to all tx submissions.
 
 ```ts
 headers?: Record<string, string>
@@ -699,6 +717,8 @@ export default class ARC implements Broadcaster {
     readonly URL: string;
     readonly apiKey: string | undefined;
     readonly deploymentId: string;
+    readonly callbackUrl: string | undefined;
+    readonly callbackToken: string | undefined;
     readonly headers: Record<string, string> | undefined;
     constructor(URL: string, config?: ArcConfig);
     constructor(URL: string, apiKey?: string);
@@ -1236,11 +1256,35 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [defaultBroadcaster](#function-defaultbroadcaster) |
 | [defaultChainTracker](#function-defaultchaintracker) |
 | [defaultHttpClient](#function-defaulthttpclient) |
+| [isBroadcastFailure](#function-isbroadcastfailure) |
+| [isBroadcastResponse](#function-isbroadcastresponse) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 
+### Function: isBroadcastResponse
+
+Convenience type guard for response from `Broadcaster.broadcast`
+
+```ts
+export function isBroadcastResponse(r: BroadcastResponse | BroadcastFailure): r is BroadcastResponse 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Function: isBroadcastFailure
+
+Convenience type guard for response from `Broadcaster.broadcast`
+
+```ts
+export function isBroadcastFailure(r: BroadcastResponse | BroadcastFailure): r is BroadcastFailure 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 ### Function: defaultHttpClient
 
 Returns a default HttpClient implementation based on the environment that it is run on.
