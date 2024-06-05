@@ -13,6 +13,8 @@ export interface ArcConfig {
   deploymentId?: string
   /** The HTTP client used to make requests to the ARC API. */
   httpClient?: HttpClient
+  /** The headers to be attached to all tx submissions. */
+  headers?: Record<string, string>
 }
 
 
@@ -27,6 +29,7 @@ export default class ARC implements Broadcaster {
   readonly URL: string
   readonly apiKey: string | undefined
   readonly deploymentId: string
+  readonly headers: Record<string, string> | undefined
   private readonly httpClient: HttpClient;
 
   /**
@@ -50,10 +53,11 @@ export default class ARC implements Broadcaster {
       this.apiKey = config
       this.httpClient = defaultHttpClient()
     } else {
-      const {apiKey, deploymentId, httpClient} = config ?? {} as ArcConfig
+      const {apiKey, deploymentId, headers, httpClient} = config ?? {} as ArcConfig
       this.httpClient = httpClient ?? defaultHttpClient()
       this.deploymentId = deploymentId ?? defaultDeploymentId()
       this.apiKey = apiKey
+      this.headers = headers
     }
   }
 
@@ -116,6 +120,12 @@ export default class ARC implements Broadcaster {
 
     if (this.apiKey) {
       headers['Authorization'] = `Bearer ${this.apiKey}`
+    }
+
+    if (!!this.headers) {
+      for (const key in this.headers) {
+        headers[key] = this.headers[key]
+      }
     }
 
     return headers
