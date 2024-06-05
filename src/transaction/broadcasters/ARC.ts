@@ -9,11 +9,15 @@ import {toHex} from "../../primitives/utils.js";
 export interface ArcConfig {
   /** Authentication token for the ARC API */
   apiKey?: string
-  /** Deployment id used annotating api calls in XDeployment-ID header - this value will be randomly generated if not set */
-  deploymentId?: string
   /** The HTTP client used to make requests to the ARC API. */
   httpClient?: HttpClient
-  /** The headers to be attached to all tx submissions. */
+  /** Deployment id used annotating api calls in XDeployment-ID header - this value will be randomly generated if not set */
+  deploymentId?: string
+  /** notification callback endpoint for proofs and double spend notification */
+  callbackUrl?: string
+  /** default access token for notification callback endpoint. It will be used as a Authorization header for the http callback */
+  callbackToken?: string
+  /** additional headers to be attached to all tx submissions. */
   headers?: Record<string, string>
 }
 
@@ -29,6 +33,8 @@ export default class ARC implements Broadcaster {
   readonly URL: string
   readonly apiKey: string | undefined
   readonly deploymentId: string
+  readonly callbackUrl: string | undefined
+  readonly callbackToken: string | undefined
   readonly headers: Record<string, string> | undefined
   private readonly httpClient: HttpClient;
 
@@ -52,11 +58,16 @@ export default class ARC implements Broadcaster {
     if (typeof config === 'string') {
       this.apiKey = config
       this.httpClient = defaultHttpClient()
+      this.deploymentId = defaultDeploymentId()
+      this.callbackToken = undefined
+      this.callbackUrl = undefined
     } else {
-      const {apiKey, deploymentId, headers, httpClient} = config ?? {} as ArcConfig
+      const {apiKey, deploymentId, httpClient, callbackToken, callbackUrl, headers } = config ?? {} as ArcConfig
+      this.apiKey = apiKey
       this.httpClient = httpClient ?? defaultHttpClient()
       this.deploymentId = deploymentId ?? defaultDeploymentId()
-      this.apiKey = apiKey
+      this.callbackToken = callbackToken
+      this.callbackUrl = callbackUrl
       this.headers = headers
     }
   }
@@ -95,11 +106,20 @@ export default class ARC implements Broadcaster {
           message: `${txStatus} ${extraInfo}`
         }
       } else {
-        return {
+        const r: BroadcastFailure = {
           status: 'error',
           code: response.status.toString() ?? 'ERR_UNKNOWN',
-          description: response.data?.detail ?? 'Unknown error'
+          description: 'Unknown error'
         }
+        if (typeof response.data === 'string') {
+          try {
+            const data = JSON.parse(response.data)
+            if (typeof data.detail === 'string') {
+              r.description = data.detail
+            }
+          } catch {}
+        }
+        return r
       }
     } catch (error) {
       return {
@@ -120,6 +140,14 @@ export default class ARC implements Broadcaster {
 
     if (this.apiKey) {
       headers['Authorization'] = `Bearer ${this.apiKey}`
+    }
+
+    if (this.callbackUrl) {
+      headers['X-CallbackUrl'] = this.callbackUrl
+    }
+
+    if (this.callbackToken) {
+      headers['X-CallbackToken'] = this.callbackToken
     }
 
     if (!!this.headers) {
