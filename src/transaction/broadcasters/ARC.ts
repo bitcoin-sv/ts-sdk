@@ -49,6 +49,7 @@ export default class ARC implements Broadcaster {
     if (typeof config === 'string') {
       this.apiKey = config
       this.httpClient = defaultHttpClient()
+      this.deploymentId = defaultDeploymentId()
     } else {
       const {apiKey, deploymentId, httpClient} = config ?? {} as ArcConfig
       this.httpClient = httpClient ?? defaultHttpClient()
@@ -91,11 +92,20 @@ export default class ARC implements Broadcaster {
           message: `${txStatus} ${extraInfo}`
         }
       } else {
-        return {
+        const r: BroadcastFailure = {
           status: 'error',
           code: response.status.toString() ?? 'ERR_UNKNOWN',
-          description: response.data?.detail ?? 'Unknown error'
+          description: 'Unknown error'
         }
+        if (typeof response.data === 'string') {
+          try {
+            const data = JSON.parse(response.data)
+            if (typeof data.detail === 'string') {
+              r.description = data.detail
+            }
+          } catch {}
+        }
+        return r
       }
     } catch (error) {
       return {

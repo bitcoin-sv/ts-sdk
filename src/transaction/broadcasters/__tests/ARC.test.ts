@@ -165,9 +165,9 @@ describe('ARC Broadcaster', () => {
   it('should handle non-200 responses', async () => {
     const mockFetch = mockedFetch({
       status: '400',
-      data: {
+      data: JSON.stringify({
         detail: 'Bad request'
-      }
+      })
     })
 
     const broadcaster = new ARC(URL, {httpClient: new FetchHttpClient(mockFetch)})
