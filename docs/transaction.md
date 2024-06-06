@@ -47,7 +47,6 @@ export default interface TransactionInput {
     sourceTransaction?: Transaction;
     sourceTXID?: string;
     sourceOutputIndex: number;
-    sourceSatoshis?: number;
     unlockingScript?: UnlockingScript;
     unlockingScriptTemplate?: {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
@@ -348,8 +347,10 @@ Configuration options for the ARC broadcaster.
 ```ts
 export interface ArcConfig {
     apiKey?: string;
-    deploymentId?: string;
     httpClient?: HttpClient;
+    deploymentId?: string;
+    callbackUrl?: string;
+    callbackToken?: string;
     headers?: Record<string, string>;
 }
 ```
@@ -366,6 +367,22 @@ Authentication token for the ARC API
 apiKey?: string
 ```
 
+#### Property callbackToken
+
+default access token for notification callback endpoint. It will be used as a Authorization header for the http callback
+
+```ts
+callbackToken?: string
+```
+
+#### Property callbackUrl
+
+notification callback endpoint for proofs and double spend notification
+
+```ts
+callbackUrl?: string
+```
+
 #### Property deploymentId
 
 Deployment id used annotating api calls in XDeployment-ID header - this value will be randomly generated if not set
@@ -376,7 +393,7 @@ deploymentId?: string
 
 #### Property headers
 
-The headers to be attached to all tx submissions.
+additional headers to be attached to all tx submissions.
 
 ```ts
 headers?: Record<string, string>
@@ -699,6 +716,8 @@ export default class ARC implements Broadcaster {
     readonly URL: string;
     readonly apiKey: string | undefined;
     readonly deploymentId: string;
+    readonly callbackUrl: string | undefined;
+    readonly callbackToken: string | undefined;
     readonly headers: Record<string, string> | undefined;
     constructor(URL: string, config?: ArcConfig);
     constructor(URL: string, apiKey?: string);
@@ -827,6 +846,7 @@ export default class Transaction {
     metadata: Record<string, any>;
     merklePath?: MerklePath;
     static fromBEEF(beef: number[]): Transaction 
+    static fromEF(ef: number[]): Transaction 
     static parseScriptOffsets(bin: number[]): {
         inputs: Array<{
             vin: number;
@@ -841,6 +861,7 @@ export default class Transaction {
     } 
     static fromBinary(bin: number[]): Transaction 
     static fromHex(hex: string): Transaction 
+    static fromHexEF(hex: string): Transaction 
     static fromHexBEEF(hex: string): Transaction 
     constructor(version: number = 1, inputs: TransactionInput[] = [], outputs: TransactionOutput[] = [], lockTime: number = 0, metadata: Record<string, any> = {}, merklePath?: MerklePath) 
     addInput(input: TransactionInput): void 
@@ -969,6 +990,23 @@ Argument Details
 + **bin**
   + The binary array representation of the transaction.
 
+#### Method fromEF
+
+Creates a new transaction, linked to its inputs and their associated merkle paths, from a EF (BRC-30) structure.
+
+```ts
+static fromEF(ef: number[]): Transaction 
+```
+
+Returns
+
+An extended transaction, linked to its associated inputs by locking script and satoshis amounts only.
+
+Argument Details
+
++ **ef**
+  + A binary representation of a transaction in EF format.
+
 #### Method fromHex
 
 Creates a Transaction instance from a hexadecimal string.
@@ -1002,6 +1040,23 @@ Argument Details
 
 + **hex**
   + The hexadecimal string representation of the transaction BEEF.
+
+#### Method fromHexEF
+
+Creates a Transaction instance from a hexadecimal string encoded EF.
+
+```ts
+static fromHexEF(hex: string): Transaction 
+```
+
+Returns
+
+- A new Transaction instance.
+
+Argument Details
+
++ **hex**
+  + The hexadecimal string representation of the transaction EF.
 
 #### Method getFee
 
@@ -1236,11 +1291,35 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [defaultBroadcaster](#function-defaultbroadcaster) |
 | [defaultChainTracker](#function-defaultchaintracker) |
 | [defaultHttpClient](#function-defaulthttpclient) |
+| [isBroadcastFailure](#function-isbroadcastfailure) |
+| [isBroadcastResponse](#function-isbroadcastresponse) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 
+### Function: isBroadcastResponse
+
+Convenience type guard for response from `Broadcaster.broadcast`
+
+```ts
+export function isBroadcastResponse(r: BroadcastResponse | BroadcastFailure): r is BroadcastResponse 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Function: isBroadcastFailure
+
+Convenience type guard for response from `Broadcaster.broadcast`
+
+```ts
+export function isBroadcastFailure(r: BroadcastResponse | BroadcastFailure): r is BroadcastFailure 
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 ### Function: defaultHttpClient
 
 Returns a default HttpClient implementation based on the environment that it is run on.

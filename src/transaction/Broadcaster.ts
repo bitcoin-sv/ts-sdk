@@ -44,13 +44,13 @@ export interface Broadcaster {
 /**
  * Convenience type guard for response from `Broadcaster.broadcast`
  */
-export function isBroadcastResponse(r: BroadcastResponse | BroadcastFailure): r is BroadcastResponse {
+export function isBroadcastResponse (r: BroadcastResponse | BroadcastFailure): r is BroadcastResponse {
   return r.status === 'success'
 }
 
 /**
  * Convenience type guard for response from `Broadcaster.broadcast`
  */
-export function isBroadcastFailure(r: BroadcastResponse | BroadcastFailure): r is BroadcastFailure {
+export function isBroadcastFailure (r: BroadcastResponse | BroadcastFailure): r is BroadcastFailure {
   return r.status === 'error'
 }
