@@ -86,23 +86,23 @@ describe('Transaction', () => {
   })
 
   describe('#parseScriptOffsets', () => {
-      it('should match sliced scripts to parsed scripts', async () => {
-        const tx = Transaction.fromBinary(tx2buf)
-        expect(tx.id("hex")).toBe(tx2idhex)
-        const r = Transaction.parseScriptOffsets(tx2buf)
-        expect(r.inputs.length).toBe(2)
-        expect(r.outputs.length).toBe(2)
-        for (let vin = 0; vin < 2; vin++) {
-            const i = r.inputs[vin]
-            const script = tx2buf.slice(i.offset, i.length + i.offset)
-            expect(script).toEqual(tx.inputs[vin].unlockingScript?.toBinary())
-        }
-        for (let vout = 0; vout < 2; vout++) {
-            const o = r.outputs[vout]
-            const script = tx2buf.slice(o.offset, o.length + o.offset)
-            expect(script).toEqual(tx.outputs[vout].lockingScript?.toBinary())
-        }
-      })
+    it('should match sliced scripts to parsed scripts', async () => {
+      const tx = Transaction.fromBinary(tx2buf)
+      expect(tx.id("hex")).toBe(tx2idhex)
+      const r = Transaction.parseScriptOffsets(tx2buf)
+      expect(r.inputs.length).toBe(2)
+      expect(r.outputs.length).toBe(2)
+      for (let vin = 0; vin < 2; vin++) {
+        const i = r.inputs[vin]
+        const script = tx2buf.slice(i.offset, i.length + i.offset)
+        expect(script).toEqual(tx.inputs[vin].unlockingScript?.toBinary())
+      }
+      for (let vout = 0; vout < 2; vout++) {
+        const o = r.outputs[vout]
+        const script = tx2buf.slice(o.offset, o.length + o.offset)
+        expect(script).toEqual(tx.outputs[vout].lockingScript?.toBinary())
+      }
+    })
   })
 
   describe('#toHex', () => {
@@ -417,7 +417,7 @@ describe('Transaction', () => {
 
   describe('Broadcast', () => {
     it('Broadcasts with the default Broadcaster instance', async () => {
-      const mockedFetch =  jest.fn().mockResolvedValue({
+      const mockedFetch = jest.fn().mockResolvedValue({
         ok: true,
         status: 200,
         statusText: 'OK',
@@ -430,12 +430,12 @@ describe('Transaction', () => {
         },
         json: async () => ({
           txid: 'mocked_txid',
-            txStatus: 'success',
-            extraInfo: 'received'
+          txStatus: 'success',
+          extraInfo: 'received'
         })
       });
 
-      (global as any).window = {fetch: mockedFetch} as any
+      (global as any).window = { fetch: mockedFetch } as any
 
       const tx = new Transaction()
       const rv = await tx.broadcast()
@@ -468,6 +468,13 @@ describe('Transaction', () => {
       const beef = toHex(tx.toBEEF())
       expect(beef).toEqual(BRC62Hex)
     })
+    it('Does not double-encode transactions', () => {
+      // Source: https://github.com/bitcoin-sv/ts-sdk/issues/77
+      const correct = '0100beef01fe76eb0c000e02c402deff5437203e0b5cb22646cbada24a60349bf45c8b280ffb755868f2955c3111c500f4076b7f48031fc467f87d5e99d9c3c0b59e4dca5e3049f58b735c59b413a8b6016300bad9c2d948e8a2ca647fdb50f2fd36641c4adf937b41134405a3e7f734b8beb201300053604a579558b5f7030e618d5c726a19229e0ff677f6edf109f41c5cfdafc93e0119005f8465c2a8d1558afbfa80c2395f3f8866a2fa5015e54fab778b0149da58376c010d00cd452b4e74f57d199cdb81b8a0e4a62dcdaf89504d6c63a5a65d5b866912b8c0010700d2ae7e2ce76da560509172066f1a1cf81faf81d73f9c0f6fd5af0904973dcfb10102006e5e077bcaa35c0240d61c1f3bba8d789223711ec035ef88b0911fc569d2b95a010000c961038959b9d404297a180c066816562dd2a34986c0960121a87ba91a51262f010100a50e381b4e8812479ea561e5bab7dcaa80078652b1b39ee5410966c515a3442b010100383ce8891ca7bf1ddefa5e0d8a1ba9ab01cb4e18046e9d7d0d438b5aaecc38b2010100c694be322b4e74acca8a5ef7703afedb708281321fd674f1221eebc743b0e01c0101000f3cc61f2b3d762cfecdd977ba768a5cbb0a4b402ad4f0d1bd3a98a582794c35010100094ad56eeea3b47edb2b298775f2efabe48172612cb3419962632251d8cdb78e010100de84bf9dd8873f37decbda1b5188e24ead978b147a63c809691702d19c47e8cb030200000001b67f1b6a6c3e70742a39b82ba45d51c983f598963ebf237101cc372da1144b83020000006b483045022100d14c3eb0c1438747c124f099bc664bf945cd27cbd96915027057e508bbc9e03302203c73f79d4e00f8018783e1008ce0fbb8e8c58bff6bd8042ab7e3966a66c8788c41210356762156ee9347c3e2ceca17d13713028d5446f453e9cbcb0ea170b4ca7fab52ffffffff037c660000000000001976a91417c85798ff61f7ec8af257f672d973b6ec6d88fd88ac75330100000000001976a914eb645f9ea7e4e232e54b9651474c100026698c3088acf2458005000000001976a914802737e30c85b6fe86e26fb28e03140058aca65e88ac0000000001000100000001deff5437203e0b5cb22646cbada24a60349bf45c8b280ffb755868f2955c3111000000006a473044022076da9f61380c208f43652587c219b4452a7b803a0407c2c7c0f3bc27612c4e88022021a9eb02da5529873a5986933f9c35965aa78537b9e2aef9382de33cfb1ab4bb41210314793e1758db3caa7d2bce97b347ae3ced2f8a402b797ed986be63473d4644a0ffffffff023c330000000000001976a91417c85798ff61f7ec8af257f672d973b6ec6d88fd88ac3c330000000000001976a91417c85798ff61f7ec8af257f672d973b6ec6d88fd88ac000000000001000000022e7f69f3e1e17e22cfb8818577b3c83a4fbbbc1bab55c70ffcdd994ae30ea48b000000006b483045022100d9a2d1efea4896b36b2eb5af42cf52009982c7c31b446213fe37f26835d9d72202203e4dee0ceb068a4936e79b0bf69f72203906a00a4256cb1a7b30a40764616e8441210314793e1758db3caa7d2bce97b347ae3ced2f8a402b797ed986be63473d4644a0ffffffff2e7f69f3e1e17e22cfb8818577b3c83a4fbbbc1bab55c70ffcdd994ae30ea48b010000006b483045022100b57a09145c57b7b5efb4b546f1b0bfb7adbc5e64d35d9d6989345d4c60c483940220280998a210a49a6efaacda6fb73670001bb7269d069be80eb14ea2227a73e82241210314793e1758db3caa7d2bce97b347ae3ced2f8a402b797ed986be63473d4644a0ffffffff0174660000000000001976a91417c85798ff61f7ec8af257f672d973b6ec6d88fd88ac0000000000'
+      const incorrect = '0100beef01fe77eb0c000e02fdd8140017899f90c0513b78b832ea9b25596cdd5132c570addd0f4cf40d23030243b36afdd914022e7f69f3e1e17e22cfb8818577b3c83a4fbbbc1bab55c70ffcdd994ae30ea48b01fd6d0a0004307f45c624b6f19e6f85ce0e9b56931aae58affef11a225bb564aa5f785bc101fd370500952937347592ef6df9d578da0d04c889193e7a3c807638549b49c697098596de01fd9a020035c7831b6f5088ca905b169ff33814284f6a27aa7362db5b7f0de517c3853fa901fd4c01004123b25530fe6a11b16cb3725e0b1ffff109e3ed8993116ff025a97b2cbcd46601a700adefed13a8d2a1a091b9b1807c1434611a5403845b6fa78bbb5d660af4e81602015200d0967c10ee6fd2b74e8989dc7e36eeb3ae13fe6cae0dcbb39ca79782ec729bbf0128003ff7aeff8cdb8ffecc82465ec67d64a29bbf81f725cf1da2911e9741e1667e1c011500d0e20a1598a95a7df7b54ac2e82325b0f5ae7924ce8f4b55520b42547c4dc1b1010b003642e6fd39340cf8626cff5aefb8dffb7483d0936ca241b4cef7cd819813b2820104000589e88fae5f2d465f2e7a5edaef98ebcd7d0b39f848fba1e86f0f3a93d4898b010300a161114db7317b74e1f535b8dc0bccd3c7c64c2812d6efbd7dbcdd5d5fc55012010000726acffff2f3cb821c418c81c6329360ea7a88c37d2bf8eba01bd4eb9ca32210010100bc8e959a21ffe2c6fcc64f292d8023557c1b4d52ff4ff829840ca5091d00c31b020100000001deff5437203e0b5cb22646cbada24a60349bf45c8b280ffb755868f2955c3111000000006a473044022076da9f61380c208f43652587c219b4452a7b803a0407c2c7c0f3bc27612c4e88022021a9eb02da5529873a5986933f9c35965aa78537b9e2aef9382de33cfb1ab4bb41210314793e1758db3caa7d2bce97b347ae3ced2f8a402b797ed986be63473d4644a0ffffffff023c330000000000001976a91417c85798ff61f7ec8af257f672d973b6ec6d88fd88ac3c330000000000001976a91417c85798ff61f7ec8af257f672d973b6ec6d88fd88ac00000000010001000000012e7f69f3e1e17e22cfb8818577b3c83a4fbbbc1bab55c70ffcdd994ae30ea48b000000006b483045022100fbfd5d1969c455d0a8d8c5a78809b9fe4a98531d2ebaafc84b0d3411b577573f02204f8e945b76495ad46e57db3d09e8284d7859e8b6f7595808c56fef29356e313c41210314793e1758db3caa7d2bce97b347ae3ced2f8a402b797ed986be63473d4644a0ffffffff013a330000000000001976a91417c85798ff61f7ec8af257f672d973b6ec6d88fd88ac0000000000'
+      const tx1 = Transaction.fromHexBEEF(correct)
+      expect(tx1.toHexBEEF()).toEqual(correct)
+    })
   })
 
   describe('EF', () => {
@@ -489,7 +496,7 @@ describe('Transaction', () => {
     })
 
     it('Verifies the transaction from the BEEF spec with a default chain tracker', async () => {
-      const mockFetch =  jest.fn().mockResolvedValue({
+      const mockFetch = jest.fn().mockResolvedValue({
         ok: true,
         status: 200,
         statusText: 'OK',
@@ -504,7 +511,7 @@ describe('Transaction', () => {
           merkleroot: MerkleRootFromBEEF,
         })
       });
-      (global as any).window = {fetch: mockFetch}
+      (global as any).window = { fetch: mockFetch }
 
 
       const tx = Transaction.fromHexBEEF(BRC62Hex)
