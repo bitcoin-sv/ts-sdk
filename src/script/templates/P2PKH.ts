@@ -8,6 +8,7 @@ import PrivateKey from '../../primitives/PrivateKey.js'
 import TransactionSignature from '../../primitives/TransactionSignature.js'
 import { sha256 } from '../../primitives/Hash.js'
 import Script from '../Script.js'
+import { Signature } from 'mod.js'
 
 /**
  * P2PKH (Pay To Public Key Hash) class implementing ScriptTemplate.
@@ -37,6 +38,40 @@ export default class P2PKH implements ScriptTemplate {
       { op: OP.OP_EQUALVERIFY },
       { op: OP.OP_CHECKSIG }
     ])
+  }
+
+  /**
+   * Determines if the script is a P2PKH locking script.
+   *
+   * @param {Script} script
+   * @returns {boolean}
+   */
+  isLockingScript(script: Script): boolean {
+    return (
+      script.chunks.length === 5 &&
+      script.chunks[0].op === OP.OP_DUP &&
+      script.chunks[1].op === OP.OP_HASH160 &&
+      script.chunks[2].op === 20 &&
+      script.chunks[3].op === OP.OP_EQUALVERIFY &&
+      script.chunks[4].op === OP.OP_CHECKSIG
+    )
+  }
+
+
+  /**
+   * Determines if the script is a P2PKH unlocking script.
+   *
+   * @param {Script} script
+   * @returns {boolean}
+   */
+  isUnlockingScript(script: Script): boolean {
+    if (script.chunks.length != 2) return false
+    try {
+      Signature.fromDER(script.chunks[0].data)
+      return true
+    } catch {
+      return false
+    }
   }
 
   /**
