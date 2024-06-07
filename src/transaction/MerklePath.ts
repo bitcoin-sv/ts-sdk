@@ -249,7 +249,8 @@ export default class MerklePath {
         } else {
           // Ensure that any elements which appear in both are not downgraded to a non txid.
           if (other.path[h][l]?.txid) {
-            combinedPath[h].find(leaf => leaf.offset === other.path[h][l]).txid = true
+            const target = combinedPath[h].find(leaf => leaf.offset === other.path[h][l].offset)
+            target.txid = true
           }
         }
       }
