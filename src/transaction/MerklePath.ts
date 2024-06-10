@@ -309,7 +309,8 @@ export default class MerklePath {
 
   /**
    * Remove all internal nodes that are not required by level zero txid nodes.
-   * Assumes that at least all required nodes are present, properly sorted by increasing offsets.
+   * Assumes that at least all required nodes are present.
+   * Leaves all levels sorted by increasing offset.
    */
   trim() {
     const pushIfNew = (v: number, a: number[]) => {
