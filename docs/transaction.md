@@ -9,11 +9,11 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [ArcConfig](#interface-arcconfig) | [HttpClient](#interface-httpclient) |
 | [BroadcastFailure](#interface-broadcastfailure) | [HttpClientRequestOptions](#interface-httpclientrequestoptions) |
 | [BroadcastResponse](#interface-broadcastresponse) | [HttpsNodejs](#interface-httpsnodejs) |
-| [Broadcaster](#interface-broadcaster) | [NodejsHttpClientRequest](#interface-nodejshttpclientrequest) |
-| [ChainTracker](#interface-chaintracker) | [TransactionInput](#interface-transactioninput) |
-| [FeeModel](#interface-feemodel) | [TransactionOutput](#interface-transactionoutput) |
-| [Fetch](#interface-fetch) | [WhatsOnChainConfig](#interface-whatsonchainconfig) |
-| [FetchOptions](#interface-fetchoptions) |  |
+| [Broadcaster](#interface-broadcaster) | [MerklePathLeaf](#interface-merklepathleaf) |
+| [ChainTracker](#interface-chaintracker) | [NodejsHttpClientRequest](#interface-nodejshttpclientrequest) |
+| [FeeModel](#interface-feemodel) | [TransactionInput](#interface-transactioninput) |
+| [Fetch](#interface-fetch) | [TransactionOutput](#interface-transactionoutput) |
+| [FetchOptions](#interface-fetchoptions) | [WhatsOnChainConfig](#interface-whatsonchainconfig) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -167,6 +167,20 @@ const chainTracker = {
 ```ts
 export default interface ChainTracker {
     isValidRootForHeight: (root: string, height: number) => Promise<boolean>;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Interface: MerklePathLeaf
+
+```ts
+export interface MerklePathLeaf {
+    offset: number;
+    hash?: string;
+    txid?: boolean;
+    duplicate?: boolean;
 }
 ```
 
@@ -550,8 +564,10 @@ export default class MerklePath {
     toBinary(): number[] 
     toHex(): string 
     computeRoot(txid?: string): string 
+    findOrComputeLeaf(height: number, offset: number): MerklePathLeaf | undefined 
     async verify(txid: string, chainTracker: ChainTracker): Promise<boolean> 
     combine(other: MerklePath): void 
+    trim() 
 }
 ```
 
@@ -596,6 +612,16 @@ Argument Details
 Throws
 
 - If the transaction ID is not part of the Merkle Path.
+
+#### Method findOrComputeLeaf
+
+Find leaf with `offset` at `height` or compute from level below, recursively.
+
+Does not add computed leaves to path.
+
+```ts
+findOrComputeLeaf(height: number, offset: number): MerklePathLeaf | undefined 
+```
 
 #### Method fromBinary
 
@@ -654,6 +680,16 @@ toHex(): string
 Returns
 
 - The hexadecimal string representation of the Merkle Path.
+
+#### Method trim
+
+Remove all internal nodes that are not required by level zero txid nodes.
+Assumes that at least all required nodes are present.
+Leaves all levels sorted by increasing offset.
+
+```ts
+trim() 
+```
 
 #### Method verify
 
