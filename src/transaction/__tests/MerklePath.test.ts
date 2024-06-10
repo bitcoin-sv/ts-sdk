@@ -100,6 +100,12 @@ const BRC74JSON = {
   ]
 }
 
+const BRC74JSONTrimmed = {
+  blockHeight: 813706,
+  path: [...BRC74JSON.path]
+}
+BRC74JSONTrimmed.path[1] = []
+
 const BRC74Root = '57aab6e6fb1b697174ffb64e062c4728f2ffd33ddcfa02a43b64d8cd29b483b4'
 const BRC74TXID1 = '304e737fdfcb017a1a322e78b067ecebb5e07b44f0a36ed1f01264d2014f7711'
 const BRC74TXID2 = 'd888711d588021e588984e8278a2decf927298173a06737066e43f3e75534e00'
@@ -165,6 +171,7 @@ describe('MerklePath', () => {
     expect(() => pathB.computeRoot(BRC74TXID2)).toThrow()
     expect(pathB.computeRoot(BRC74TXID3)).toEqual(BRC74Root)
     pathA.combine(pathB)
+    expect(pathA).toEqual(BRC74JSONTrimmed)
     expect(pathA.computeRoot(BRC74TXID2)).toEqual(BRC74Root)
     expect(pathA.computeRoot(BRC74TXID3)).toEqual(BRC74Root)
   })
