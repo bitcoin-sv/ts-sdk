@@ -132,8 +132,7 @@ export default class MerklePath {
     this.path[0].map((leaf, idx) => {
       if (idx === 0) root = this.computeRoot(leaf.hash)
       if (root !== this.computeRoot(leaf.hash)) {
-        console.log(`Mismatch at index ${idx}: computed ${this.computeRoot(leaf.hash)}, expected ${root}`)
-        // throw new Error('Mismatched roots')
+        throw new Error('Mismatched roots')
       }
     })
   }
