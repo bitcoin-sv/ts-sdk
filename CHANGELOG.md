@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
-- [1.1.1 - 2024-05-10](#111---2024-05-10)
+- [1.1.4 - 2024-05-10](#114---2024-05-10)
 - [1.1.0 - 2024-05-06](#110---2024-05-06)
 - [1.0.0 - 2024-02-10](#100---2024-02-10)
 
@@ -31,7 +31,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-## [1.1.1] - 2024-05-10
+## [1.1.4] - 2024-05-10
 ### Added
 - MerklePath trim function which removes data if it can be calculated. Backported from go-sdk by tonesnotes. Only affects compound Merkle paths which are not yet widely used.
 
