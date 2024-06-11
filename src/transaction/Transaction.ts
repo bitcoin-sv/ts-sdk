@@ -647,7 +647,12 @@ export default class Transaction {
       }
     }
 
-    if (this.getFee() <= 0) throw new Error(`Verification failed because the transaction ${this.id('hex')} has an insufficient fee and has not been mined.`)
+    if (typeof feeModel !== 'undefined') {
+      const cpTx = Transaction.fromHex(this.toHex())
+      await cpTx.fee(feeModel)
+      if (this.getFee() < cpTx.getFee()) throw new Error(`Verification failed because the transaction ${this.id('hex')} has an insufficient fee and has not been mined.`)
+    }
+
 
     // Verify each input transaction and evaluate the spend events.
     // Also, keep a total of the input amounts for later.
