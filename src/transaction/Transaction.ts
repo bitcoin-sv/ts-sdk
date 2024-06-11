@@ -633,6 +633,8 @@ export default class Transaction {
    * @param chainTracker - An instance of ChainTracker, a Bitcoin block header tracker. If the value is set to 'scripts only', headers will not be verified. If not provided then the default chain tracker will be used.
    *
    * @returns Whether the transaction is valid according to the rules of SPV.
+   * 
+   * @example tx.verify(new WhatsOnChain(), new SatoshisPerKilobyte(1))
    */
   async verify(chainTracker: ChainTracker | 'scripts only' = defaultChainTracker(), feeModel?: FeeModel): Promise<boolean> {
     // If the transaction has a valid merkle path, verification is complete.
@@ -648,7 +650,9 @@ export default class Transaction {
     }
 
     if (typeof feeModel !== 'undefined') {
-      const cpTx = Transaction.fromHex(this.toHex())
+      const cpTx = Transaction.fromHexEF(this.toHexEF())
+      delete cpTx.outputs[0].satoshis
+      cpTx.outputs[0].change = true
       await cpTx.fee(feeModel)
       if (this.getFee() < cpTx.getFee()) throw new Error(`Verification failed because the transaction ${this.id('hex')} has an insufficient fee and has not been mined.`)
     }
@@ -667,7 +671,7 @@ export default class Transaction {
       }
       const sourceOutput = input.sourceTransaction.outputs[input.sourceOutputIndex]
       inputTotal += sourceOutput.satoshis
-      const inputVerified = await input.sourceTransaction.verify(chainTracker)
+      const inputVerified = await input.sourceTransaction.verify(chainTracker, feeModel)
       if (!inputVerified) {
         return false
       }
