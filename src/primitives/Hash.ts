@@ -1429,7 +1429,6 @@ export function pbkdf2 (password: number[], salt: number[], iterations: number, 
   }
   const DK = new Array(keylen)
   const block1 = [...salt, 0, 0, 0, 0]
-  const s = Buffer.from('hello')
 
   let destPos = 0
   const hLen = 64
