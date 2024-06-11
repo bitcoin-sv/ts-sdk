@@ -1315,6 +1315,12 @@ Argument Details
 + **chainTracker**
   + An instance of ChainTracker, a Bitcoin block header tracker. If the value is set to 'scripts only', headers will not be verified. If not provided then the default chain tracker will be used.
 
+Example
+
+```ts
+tx.verify(new WhatsOnChain(), new SatoshisPerKilobyte(1))
+```
+
 </details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)

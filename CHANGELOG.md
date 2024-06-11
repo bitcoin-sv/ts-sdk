@@ -12,22 +12,17 @@ All notable changes to this project will be documented in this file. The format 
 ## [Unreleased]
 
 ### Added
-- PR Template Test
+- Allow Fees in historic transaction to be validated against a FeeModel.
 
 ### Changed
-- (Detail modifications that are non-breaking but relevant to the end-users.)
 
 ### Deprecated
-- (List features that are in the process of being phased out or replaced.)
 
 ### Removed
-- (Indicate features or capabilities that were taken out of the project.)
 
 ### Fixed
-- (Document bugs that were fixed since the last release.)
 
 ### Security
-- (Notify of any improvements related to security vulnerabilities or potential risks.)
 
 ---
 
