@@ -634,7 +634,7 @@ export default class Transaction {
    *
    * @returns Whether the transaction is valid according to the rules of SPV.
    */
-  async verify(chainTracker: ChainTracker | 'scripts only' = defaultChainTracker()): Promise<boolean> {
+  async verify(chainTracker: ChainTracker | 'scripts only' = defaultChainTracker(), feeModel?: FeeModel): Promise<boolean> {
     // If the transaction has a valid merkle path, verification is complete.
     if (typeof this.merklePath === 'object' && chainTracker !== 'scripts only') {
       const proofValid = await this.merklePath.verify(
@@ -646,6 +646,8 @@ export default class Transaction {
         return true
       }
     }
+
+    if (this.getFee() <= 0) throw new Error(`Verification failed because the transaction ${this.id('hex')} has an insufficient fee and has not been mined.`)
 
     // Verify each input transaction and evaluate the spend events.
     // Also, keep a total of the input amounts for later.
