@@ -3,10 +3,10 @@ import { hash256 } from '../primitives/Hash.js'
 import ChainTracker from './ChainTracker.js'
 
 export interface MerklePathLeaf {
-    offset: number
-    hash?: string
-    txid?: boolean
-    duplicate?: boolean
+  offset: number
+  hash?: string
+  txid?: boolean
+  duplicate?: boolean
 }
 
 /**
@@ -218,13 +218,13 @@ export default class MerklePath {
 
   /**
    * Find leaf with `offset` at `height` or compute from level below, recursively.
-   * 
+   *
    * Does not add computed leaves to path.
-   * 
+   *
    * @param height
-   * @param offset 
+   * @param offset
    */
-  findOrComputeLeaf(height: number, offset: number) : MerklePathLeaf | undefined {
+  findOrComputeLeaf (height: number, offset: number): MerklePathLeaf | undefined {
     const hash = (m: string): string => toHex((
       hash256(toArray(m, 'hex').reverse())
     ).reverse())
@@ -245,10 +245,7 @@ export default class MerklePath {
     if (!leaf1) return undefined
 
     let workinghash: string
-    if (leaf1.duplicate)
-      workinghash = hash(leaf0.hash + leaf0.hash)
-    else
-      workinghash = hash(leaf1.hash + leaf0.hash)
+    if (leaf1.duplicate) { workinghash = hash(leaf0.hash + leaf0.hash) } else { workinghash = hash(leaf1.hash + leaf0.hash) }
     leaf = {
       offset,
       hash: workinghash
@@ -312,21 +309,19 @@ export default class MerklePath {
    * Assumes that at least all required nodes are present.
    * Leaves all levels sorted by increasing offset.
    */
-  trim() {
+  trim () {
     const pushIfNew = (v: number, a: number[]) => {
-      if (a.length === 0 || a.slice(-1)[0] !== v)
-        a.push(v)
+      if (a.length === 0 || a.slice(-1)[0] !== v) { a.push(v) }
     }
 
     const dropOffsetsFromLevel = (dropOffsets: number[], level: number) => {
       for (let i = dropOffsets.length; i >= 0; i--) {
         const l = this.path[level].findIndex(n => n.offset === dropOffsets[i])
-        if (l >= 0)
-          this.path[level].splice(l, 1)
+        if (l >= 0) { this.path[level].splice(l, 1) }
       }
     }
 
-    const nextComputedOffsets = (cos: number[]) : number[] => {
+    const nextComputedOffsets = (cos: number[]): number[] => {
       const ncos: number[] = []
       for (const o of cos) {
         pushIfNew(o >> 1, ncos)
@@ -334,25 +329,25 @@ export default class MerklePath {
       return ncos
     }
 
-    let computedOffsets: number[] = []; // in next level
+    let computedOffsets: number[] = [] // in next level
     let dropOffsets: number[] = []
     for (let h = 0; h < this.path.length; h++) {
       // Sort each level by increasing offset order
       this.path[h].sort((a, b) => a.offset - b.offset)
     }
     for (let l = 0; l < this.path[0].length; l++) {
-        const n = this.path[0][l]
-        if (n.txid) {
-            // level 0 must enable computing level 1 for txid nodes
-            pushIfNew(n.offset >> 1, computedOffsets)
-        } else {
-            const isOdd = n.offset % 2 === 1
-            const peer = this.path[0][l + (isOdd ? -1 : 1)]
-            if (!peer.txid) {
-                // drop non-txid level 0 nodes without a txid peer
-                pushIfNew(peer.offset, dropOffsets)
-            }
+      const n = this.path[0][l]
+      if (n.txid) {
+        // level 0 must enable computing level 1 for txid nodes
+        pushIfNew(n.offset >> 1, computedOffsets)
+      } else {
+        const isOdd = n.offset % 2 === 1
+        const peer = this.path[0][l + (isOdd ? -1 : 1)]
+        if (!peer.txid) {
+          // drop non-txid level 0 nodes without a txid peer
+          pushIfNew(peer.offset, dropOffsets)
         }
+      }
     }
     dropOffsetsFromLevel(dropOffsets, 0)
     for (let h = 1; h < this.path.length; h++) {
@@ -361,5 +356,4 @@ export default class MerklePath {
       dropOffsetsFromLevel(dropOffsets, h)
     }
   }
-
 }
