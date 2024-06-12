@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
-- [1.1.5 - 2024-05-10](#115---2024-05-10)
+- [1.1.6 - 2024-06-12](#116---2024-06-12)
+- [1.1.5 - 2024-06-11](#115---2024-06-11)
 - [1.1.4 - 2024-05-10](#114---2024-05-10)
 - [1.1.0 - 2024-05-06](#110---2024-05-06)
 - [1.0.0 - 2024-02-10](#100---2024-02-10)
@@ -26,10 +27,13 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-
-## [1.1.5] - 2024-05-10
+## [1.1.6] - 2024-06-12
 ### Added
 - Allow Fees in historic transaction to be validated against a FeeModel.
+
+## [1.1.5] - 2024-06-11
+### Fixed
+- Unnecessary `Buffer.from` in pbkdf2 function has been removed.
 
 ## [1.1.4] - 2024-05-10
 ### Added
