@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.1.6 - 2024-06-12](#116---2024-06-12)
 - [1.1.5 - 2024-06-11](#115---2024-06-11)
 - [1.1.4 - 2024-05-10](#114---2024-05-10)
 - [1.1.0 - 2024-05-06](#110---2024-05-06)
@@ -13,24 +14,22 @@ All notable changes to this project will be documented in this file. The format 
 ## [Unreleased]
 
 ### Added
-- PR Template Test
 
 ### Changed
-- (Detail modifications that are non-breaking but relevant to the end-users.)
 
 ### Deprecated
-- (List features that are in the process of being phased out or replaced.)
 
 ### Removed
-- (Indicate features or capabilities that were taken out of the project.)
 
 ### Fixed
-- (Document bugs that were fixed since the last release.)
 
 ### Security
-- (Notify of any improvements related to security vulnerabilities or potential risks.)
 
 ---
+
+## [1.1.6] - 2024-06-12
+### Added
+- Allow Fees in historic transaction to be validated against a FeeModel.
 
 ## [1.1.5] - 2024-06-11
 ### Fixed
