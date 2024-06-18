@@ -28,27 +28,27 @@ export type TOTPValidateOptions = TOTPOptions & {
 export class TOTP {
   /**
    * Generates a Time-based One-Time Password (TOTP).
-   * @param {Uint8Array} rawKey - The secret key for TOTP.
+   * @param {number[]} secret - The secret key for TOTP.
    * @param {TOTPOptions} options - Optional parameters for TOTP.
    * @returns {string} The generated TOTP.
    */
-  static generate (rawKey: Uint8Array, options?: TOTPOptions): string {
+  static generate (secret: number[], options?: TOTPOptions): string {
     const _options = this.withDefaultOptions(options)
 
     const counter = this.getCounter(_options.timestamp, _options.period)
-    const otp = generateHOTP(rawKey, counter, _options)
+    const otp = generateHOTP(secret, counter, _options)
     return otp
   }
 
   /**
    * Validates a Time-based One-Time Password (TOTP).
-   * @param {Uint8Array} rawKey - The secret key for TOTP.
+   * @param {number[]} secret - The secret key for TOTP.
    * @param {string} passcode - The passcode to validate.
    * @param {TOTPValidateOptions} options - Optional parameters for TOTP validation.
    * @returns {boolean} A boolean indicating whether the passcode is valid.
    */
   static validate (
-    rawKey: Uint8Array,
+    secret: number[],
     passcode: string,
     options?: TOTPValidateOptions
   ): boolean {
@@ -67,7 +67,7 @@ export class TOTP {
     }
 
     for (const c of counters) {
-      if (passcode === generateHOTP(rawKey, c, _options)) {
+      if (passcode === generateHOTP(secret, c, _options)) {
         return true
       }
     }
@@ -101,13 +101,12 @@ export class TOTP {
 }
 
 function generateHOTP (
-  rawKey: Uint8Array,
+  secret: number[],
   counter: number,
   options: Required<TOTPOptions>
 ): string {
-  const keyArray = Array.from(rawKey)
   const timeHex = dec2hex(counter).padStart(16, '0')
-  const hmac = calcHMAC(keyArray, timeHex, options.algorithm)
+  const hmac = calcHMAC(secret, timeHex, options.algorithm)
 
   const signatureHex = hmac.digestHex()
 
@@ -121,17 +120,17 @@ function generateHOTP (
 }
 
 function calcHMAC (
-  keyArray: number[],
+  secret: number[],
   timeHex: string,
   algorithm: TOTPAlgorithm
 ) {
   switch (algorithm) {
     case 'SHA-1':
-      return new SHA1HMAC(keyArray).update(timeHex, 'hex')
+      return new SHA1HMAC(secret).update(timeHex, 'hex')
     case 'SHA-256':
-      return new SHA256HMAC(keyArray).update(timeHex, 'hex')
+      return new SHA256HMAC(secret).update(timeHex, 'hex')
     case 'SHA-512':
-      return new SHA512HMAC(keyArray).update(timeHex, 'hex')
+      return new SHA512HMAC(secret).update(timeHex, 'hex')
     default:
       throw new Error('unsupported HMAC algorithm')
   }

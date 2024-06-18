@@ -1,7 +1,7 @@
 import { toArray } from "../../../dist/cjs/src/primitives/utils.js";
 import { TOTP } from "../../../dist/cjs/src/totp/totp.js";
 
-const hexKey = toArray("48656c6c6f21deadbeef", 'hex');
+const secret = toArray("48656c6c6f21deadbeef", 'hex');
 const period = 30; //sec
 const periodMS = 30 * 1000; //ms
 const options = {
@@ -44,26 +44,26 @@ describe("totp generation and validation", () => {
     jest.setSystemTime(time);
 
     //check if expected passcode is generated
-    const passcode = TOTP.generate(hexKey, options);
+    const passcode = TOTP.generate(secret, options);
     expect(passcode).toEqual(expected);
 
-    expect(TOTP.validate(hexKey, "000000", options)).toEqual(false); //this passcode should not be valid for any of above test cases
+    expect(TOTP.validate(secret, "000000", options)).toEqual(false); //this passcode should not be valid for any of above test cases
 
     //should not be valid for only a part of passcode
-    expect(TOTP.validate(hexKey, passcode.slice(1), options)).toEqual(false);
+    expect(TOTP.validate(secret, passcode.slice(1), options)).toEqual(false);
 
-    expect(TOTP.validate(hexKey, passcode, options)).toEqual(true);
+    expect(TOTP.validate(secret, passcode, options)).toEqual(true);
 
     const checkAdjacentWindow = (
       timeOfGeneration: number,
       expected: boolean
     ) => {
       jest.setSystemTime(timeOfGeneration);
-      const adjacentTimewindowPasscode = TOTP.generate(hexKey, options);
+      const adjacentTimewindowPasscode = TOTP.generate(secret, options);
 
       jest.setSystemTime(time);
       expect(
-        TOTP.validate(hexKey, adjacentTimewindowPasscode, options)
+        TOTP.validate(secret, adjacentTimewindowPasscode, options)
       ).toEqual(expected);
     };
 
