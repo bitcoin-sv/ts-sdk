@@ -1,5 +1,5 @@
 import { SHA1HMAC, SHA256HMAC, SHA512HMAC } from '../primitives/Hash.js'
-import { dec2hex, hex2dec } from './converters.js'
+import BigNumber from '../primitives/BigNumber.js'
 
 export type TOTPAlgorithm = 'SHA-1' | 'SHA-256' | 'SHA-512'
 
@@ -105,32 +105,37 @@ function generateHOTP (
   counter: number,
   options: Required<TOTPOptions>
 ): string {
-  const timeHex = dec2hex(counter).padStart(16, '0')
-  const hmac = calcHMAC(secret, timeHex, options.algorithm)
+  const timePad = new BigNumber(counter).toArray('be', 8)
+  console.log({ timePad })
+  const hmac = calcHMAC(secret, timePad, options.algorithm)
 
+  const signature = hmac.digest()
   const signatureHex = hmac.digestHex()
 
   // RFC 4226 https://datatracker.ietf.org/doc/html/rfc4226#section-5.4
-  const offset = hex2dec(signatureHex.slice(-1)) * 2 // offset should point to hex-pair in hex string - that's why "x2 multiplification"
-  const fourBytesRange = signatureHex.slice(offset, offset + 8) // starting from offset, get 4. pairs of hex. (Dynamic Truncation)
+  const offset = signature[signature.length - 1] & 0x0f // offset is the last byte in the hmac
+  const fourBytesRange = signature.slice(offset, offset + 4) // starting from offset, get 4 bytes
   const mask = 0x7fffffff // 32-bit number with a leading 0 followed by 31 ones [0111 (...) 1111]
-  const masked = hex2dec(fourBytesRange) & mask
+  const masked = new BigNumber(fourBytesRange).toNumber() & mask
+
+  console.log({ signatureHex, signature, offset, fourBytesRange, mask, masked })
+
   const otp = masked.toString().slice(-options.digits)
   return otp
 }
 
 function calcHMAC (
   secret: number[],
-  timeHex: string,
+  timePad: number[],
   algorithm: TOTPAlgorithm
 ) {
   switch (algorithm) {
     case 'SHA-1':
-      return new SHA1HMAC(secret).update(timeHex, 'hex')
+      return new SHA1HMAC(secret).update(timePad)
     case 'SHA-256':
-      return new SHA256HMAC(secret).update(timeHex, 'hex')
+      return new SHA256HMAC(secret).update(timePad)
     case 'SHA-512':
-      return new SHA512HMAC(secret).update(timeHex, 'hex')
+      return new SHA512HMAC(secret).update(timePad)
     default:
       throw new Error('unsupported HMAC algorithm')
   }
