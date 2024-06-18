@@ -11,15 +11,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [BasePoint](#class-basepoint) | [Reader](#class-reader) |
 | [BigNumber](#class-bignumber) | [ReductionContext](#class-reductioncontext) |
 | [Curve](#class-curve) | [SHA1](#class-sha1) |
-| [DRBG](#class-drbg) | [SHA256](#class-sha256) |
-| [JacobianPoint](#class-jacobianpoint) | [SHA256HMAC](#class-sha256hmac) |
-| [K256](#class-k256) | [SHA512](#class-sha512) |
-| [Mersenne](#class-mersenne) | [SHA512HMAC](#class-sha512hmac) |
-| [MontgomoryMethod](#class-montgomorymethod) | [Signature](#class-signature) |
-| [Point](#class-point) | [SymmetricKey](#class-symmetrickey) |
-| [PrivateKey](#class-privatekey) | [TransactionSignature](#class-transactionsignature) |
-| [PublicKey](#class-publickey) | [Writer](#class-writer) |
-| [RIPEMD160](#class-ripemd160) |  |
+| [DRBG](#class-drbg) | [SHA1HMAC](#class-sha1hmac) |
+| [JacobianPoint](#class-jacobianpoint) | [SHA256](#class-sha256) |
+| [K256](#class-k256) | [SHA256HMAC](#class-sha256hmac) |
+| [Mersenne](#class-mersenne) | [SHA512](#class-sha512) |
+| [MontgomoryMethod](#class-montgomorymethod) | [SHA512HMAC](#class-sha512hmac) |
+| [Point](#class-point) | [Signature](#class-signature) |
+| [PrivateKey](#class-privatekey) | [SymmetricKey](#class-symmetrickey) |
+| [PublicKey](#class-publickey) | [TransactionSignature](#class-transactionsignature) |
+| [RIPEMD160](#class-ripemd160) | [Writer](#class-writer) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -5107,6 +5107,23 @@ myHMAC.update('deadbeef', 'hex');
 ```
 
 </details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: SHA1HMAC
+
+```ts
+export class SHA1HMAC {
+    inner: SHA1;
+    outer: SHA1;
+    blockSize = 64;
+    constructor(key: number[] | string) 
+    update(msg: number[] | string, enc?: "hex"): SHA1HMAC 
+    digest(): number[] 
+    digestHex(): string 
+}
+```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
