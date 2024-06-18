@@ -1,8 +1,7 @@
-import { SHA1HMAC } from './sha1hmac';
-import { Hash } from '@bsv/sdk';
-import { dec2hex, hex2dec } from './converters';
+import { SHA1HMAC, SHA256HMAC, SHA512HMAC } from "../primitives/Hash.js";
+import { dec2hex, hex2dec } from "./converters.js";
 
-export type TOTPAlgorithm = 'SHA-1' | 'SHA-256' | 'SHA-512';
+export type TOTPAlgorithm = "SHA-1" | "SHA-256" | "SHA-512";
 
 /**
  * Options for TOTP generation.
@@ -48,7 +47,11 @@ export class TOTP {
    * @param {TOTPValidateOptions} options - Optional parameters for TOTP validation.
    * @returns {boolean} A boolean indicating whether the passcode is valid.
    */
-  static validate(rawKey: Uint8Array, passcode: string, options?: TOTPValidateOptions): boolean {
+  static validate(
+    rawKey: Uint8Array,
+    passcode: string,
+    options?: TOTPValidateOptions
+  ): boolean {
     const _options = this.withDefaultValidateOptions(options);
     passcode = passcode.trim();
     if (passcode.length != _options.digits) {
@@ -78,24 +81,32 @@ export class TOTP {
     return counter;
   }
 
-  private static withDefaultOptions(options?: TOTPOptions): Required<TOTPOptions> {
+  private static withDefaultOptions(
+    options?: TOTPOptions
+  ): Required<TOTPOptions> {
     return {
       digits: 2,
-      algorithm: 'SHA-1',
+      algorithm: "SHA-1",
       period: 30,
       timestamp: Date.now(),
       ...options,
     };
   }
 
-  private static withDefaultValidateOptions(options?: TOTPValidateOptions): Required<TOTPValidateOptions> {
+  private static withDefaultValidateOptions(
+    options?: TOTPValidateOptions
+  ): Required<TOTPValidateOptions> {
     return { skew: 1, ...this.withDefaultOptions(options) };
   }
 }
 
-function generateHOTP(rawKey: Uint8Array, counter: number, options: Required<TOTPOptions>): string {
+function generateHOTP(
+  rawKey: Uint8Array,
+  counter: number,
+  options: Required<TOTPOptions>
+): string {
   const keyArray = Array.from(rawKey);
-  const timeHex = dec2hex(counter).padStart(16, '0');
+  const timeHex = dec2hex(counter).padStart(16, "0");
   const hmac = calcHMAC(keyArray, timeHex, options.algorithm);
 
   const signatureHex = hmac.digestHex();
@@ -109,17 +120,19 @@ function generateHOTP(rawKey: Uint8Array, counter: number, options: Required<TOT
   return otp;
 }
 
-function calcHMAC(keyArray: number[], timeHex: string, algorithm: TOTPAlgorithm) {
+function calcHMAC(
+  keyArray: number[],
+  timeHex: string,
+  algorithm: TOTPAlgorithm
+) {
   switch (algorithm) {
-    case 'SHA-1':
-      // Because SHA1HMAC is missing in @bsv/sdk, we had to implement it (using SHA1 from @bsv/sdk)
-      // TODO: Consider adding SHA1HMAC to @bsv/sdk
-      return new SHA1HMAC(keyArray).update(timeHex, 'hex');
-    case 'SHA-256':
-      return new Hash.SHA256HMAC(keyArray).update(timeHex, 'hex');
-    case 'SHA-512':
-      return new Hash.SHA512HMAC(keyArray).update(timeHex, 'hex');
+    case "SHA-1":
+      return new SHA1HMAC(keyArray).update(timeHex, "hex");
+    case "SHA-256":
+      return new SHA256HMAC(keyArray).update(timeHex, "hex");
+    case "SHA-512":
+      return new SHA512HMAC(keyArray).update(timeHex, "hex");
     default:
-      throw new Error('unsupported HMAC algorithm');
+      throw new Error("unsupported HMAC algorithm");
   }
 }

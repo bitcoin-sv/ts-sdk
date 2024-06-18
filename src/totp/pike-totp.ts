@@ -1,10 +1,8 @@
-import { HD, PublicKey } from '@bsv/sdk';
-import { Contact } from '../types';
-import { TOTP, TOTPOptions } from './totp';
-import { hexToUint8Array } from './converters';
-
-export const DEFAULT_TOTP_PERIOD = 30;
-export const DEFAULT_TOTP_DIGITS = 2;
+import HD from "../compat/HD.js";
+import PublicKey from "../primitives/PublicKey.js";
+import { Contact } from "./types.js";
+import { TOTP, TOTPOptions } from "./totp.js";
+import { hexToUint8Array } from "./converters.js";
 
 /*
 Basic flow:
@@ -27,8 +25,8 @@ The flow looks the same for Bob generating passcodeForAlice.
 export const generateTotpForContact = (
   clientXPriv: HD,
   contact: Contact,
-  period: number = DEFAULT_TOTP_PERIOD,
-  digits: number = DEFAULT_TOTP_DIGITS,
+  period: number,
+  digits: number
 ): string => {
   const sharedSecret = makeSharedSecret(contact, clientXPriv);
   let secret = directedSecret(sharedSecret, contact.paymail);
@@ -52,8 +50,8 @@ export const validateTotpForContact = (
   contact: Contact,
   passcode: string,
   requesterPaymail: string,
-  period: number = DEFAULT_TOTP_PERIOD,
-  digits: number = DEFAULT_TOTP_DIGITS,
+  period: number,
+  digits: number
 ): boolean => {
   const sharedSecret = makeSharedSecret(contact, clientXPriv);
   const secret = directedSecret(sharedSecret, requesterPaymail);
@@ -64,17 +62,17 @@ export const validateTotpForContact = (
 const getTotpOps = (period: number, digits: number): TOTPOptions => ({
   digits,
   period,
-  algorithm: 'SHA-1',
+  algorithm: "SHA-1",
 });
 
 const makeSharedSecret = (contact: Contact, clientXPriv: HD) => {
-  const xprivKey = new HD().fromString(clientXPriv.toString());
+  const xprivKey = HD.fromString(clientXPriv.toString());
 
   const pubKey = PublicKey.fromString(contact.pubKey);
 
   // PKI derivation path: m/0/0/0
   // NOTICE: we currently do not support PKI rotation; however, adjustments will be made if and when we decide to implement it
-  const hd = xprivKey.derive('m/0/0/0');
+  const hd = xprivKey.derive("m/0/0/0");
   const privKey = hd.privKey;
   const ss = privKey.deriveSharedSecret(pubKey);
   return ss.getX().toHex(32);
@@ -85,7 +83,9 @@ const directedSecret = (sharedSecret: string, paymail: string): Uint8Array => {
   const sharedSecretEncoded = hexToUint8Array(sharedSecret);
 
   // Concatenate sharedSecretEncoded and paymailEncoded
-  const concatenated = new Uint8Array(sharedSecretEncoded.length + paymailEncoded.length);
+  const concatenated = new Uint8Array(
+    sharedSecretEncoded.length + paymailEncoded.length
+  );
   concatenated.set(sharedSecretEncoded, 0);
   concatenated.set(paymailEncoded, sharedSecretEncoded.length);
 
