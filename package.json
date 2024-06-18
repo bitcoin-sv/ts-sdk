@@ -123,6 +123,16 @@
       "import": "./dist/esm/src/compat/*.js",
       "require": "./dist/cjs/src/compat/*.js",
       "types": "./dist/types/src/compat/*.d.ts"
+    },
+    "./totp": {
+      "import": "./dist/esm/src/totp/index.js",
+      "require": "./dist/cjs/src/totp/index.js",
+      "types": "./dist/types/src/totp/index.d.ts"
+    },
+    "./totp/*": {
+      "import": "./dist/esm/src/totp/*.js",
+      "require": "./dist/cjs/src/totp/*.js",
+      "types": "./dist/types/src/totp/*.d.ts"
     }
   },
   "scripts": {
