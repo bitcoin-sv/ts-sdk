@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.1.8 - 2024-06-12](#118---2024-06-19)
 - [1.1.6 - 2024-06-12](#116---2024-06-12)
 - [1.1.5 - 2024-06-11](#115---2024-06-11)
 - [1.1.4 - 2024-05-10](#114---2024-05-10)
@@ -26,6 +27,12 @@ All notable changes to this project will be documented in this file. The format 
 ### Security
 
 ---
+
+
+## [1.1.8] - 2024-06-19
+
+### Added
+TOTP class which allows the generation of time based pass codes. Use varies but originally included for validating shared secrets between remote counterparties over a secure channel.
 
 ## [1.1.6] - 2024-06-12
 ### Added
