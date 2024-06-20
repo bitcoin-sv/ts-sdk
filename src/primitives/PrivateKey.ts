@@ -256,4 +256,46 @@ export default class PrivateKey extends BigNumber {
     const curve = new Curve()
     return new PrivateKey(this.add(new BigNumber(hmac)).mod(curve.n).toArray())
   }
+      
+  /**
+   * Splits the private key into shares using Shamir's Secret Sharing Scheme.
+   * 
+   * @param threshold The minimum number of shares required to reconstruct the private key.
+   * @param totalShares The total number of shares to generate.
+   * @param prime The prime number to be used in Shamir's Secret Sharing Scheme.
+   * @returns An array of shares.
+   * 
+   * @example
+   * const key = PrivateKey.fromRandom()
+   * const shares = key.split(2, 5)
+   */
+  split(threshold: number, totalShares: number): BigNumber[] {
+
+    if (threshold < 2 || threshold > totalShares || threshold > 100) {
+      throw new Error('Invalid threshold value')
+    }
+    
+    const Prime = BigNumber.fromHex('fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f')
+    const coefficientList = []
+    const shareList = []
+    const key = this;
+
+    //build coefficiants
+    for (let i = 1; i < threshold; i++) {
+      let coefficiant = new BigNumber(Random(32))
+      while(coefficiant.cmp(Prime) == 1){coefficiant = new BigNumber(Random(32))}
+      coefficientList.push(coefficiant)
+    }
+
+    //build shareList by calculating each share = Polynomial(j)mod(Prime)
+    for (let i = 1; i <= totalShares; i++){
+      let share = new BigNumber(0) 
+      share.iadd(key)
+      for (let j = 0; j < threshold - 1; j++){share.iadd(new BigNumber(coefficientList[j]*i^(j+1)))}
+      share = share.mod(Prime)
+      shareList.push(share)
+    }
+
+    return shareList
+  } 
 }
