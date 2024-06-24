@@ -392,7 +392,7 @@ describe('Transaction', () => {
           tx_pos: 0,
           tx_hash: 'f33505acf37a7726cc37d391bc6f889b8684ac2a2d581c4be2a4b1c8b46609bc',
           value: 10000
-        },
+        }
       ]
       const priv = PrivateKey.fromRandom()
       const tx = new Transaction()
@@ -422,7 +422,7 @@ describe('Transaction', () => {
         status: 200,
         statusText: 'OK',
         headers: {
-          get(key: string) {
+          get (key: string) {
             if (key === 'Content-Type') {
               return 'application/json'
             }
@@ -501,14 +501,14 @@ describe('Transaction', () => {
         status: 200,
         statusText: 'OK',
         headers: {
-          get(key: string) {
+          get (key: string) {
             if (key === 'Content-Type') {
               return 'application/json'
             }
           }
         },
         json: async () => ({
-          merkleroot: MerkleRootFromBEEF,
+          merkleroot: MerkleRootFromBEEF
         })
       });
       (global as any).window = { fetch: mockFetch }

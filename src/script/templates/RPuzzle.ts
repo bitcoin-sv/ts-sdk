@@ -105,7 +105,7 @@ export default class RPuzzle implements ScriptTemplate {
           )
         }
         const preimage = TransactionSignature.format({
-          sourceTXID: input.sourceTransaction.id('hex') as string,
+          sourceTXID: input.sourceTransaction.id('hex'),
           sourceOutputIndex: input.sourceOutputIndex,
           sourceSatoshis: input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis,
           transactionVersion: tx.version,

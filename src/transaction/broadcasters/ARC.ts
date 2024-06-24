@@ -1,9 +1,9 @@
-import {BroadcastResponse, BroadcastFailure, Broadcaster} from '../Broadcaster.js'
+import { BroadcastResponse, BroadcastFailure, Broadcaster } from '../Broadcaster.js'
 import Transaction from '../Transaction.js'
-import {HttpClient, HttpClientRequestOptions} from "../http/HttpClient.js";
-import {defaultHttpClient} from "../http/DefaultHttpClient.js";
-import Random from "../../primitives/Random.js";
-import {toHex} from "../../primitives/utils.js";
+import { HttpClient, HttpClientRequestOptions } from '../http/HttpClient.js'
+import { defaultHttpClient } from '../http/DefaultHttpClient.js'
+import Random from '../../primitives/Random.js'
+import { toHex } from '../../primitives/utils.js'
 
 /** Configuration options for the ARC broadcaster. */
 export interface ArcConfig {
@@ -21,9 +21,8 @@ export interface ArcConfig {
   headers?: Record<string, string>
 }
 
-
-function defaultDeploymentId() {
-  return `ts-sdk-${toHex(Random(16))}`;
+function defaultDeploymentId () {
+  return `ts-sdk-${toHex(Random(16))}`
 }
 
 /**
@@ -36,7 +35,7 @@ export default class ARC implements Broadcaster {
   readonly callbackUrl: string | undefined
   readonly callbackToken: string | undefined
   readonly headers: Record<string, string> | undefined
-  private readonly httpClient: HttpClient;
+  private readonly httpClient: HttpClient
 
   /**
    * Constructs an instance of the ARC broadcaster.
@@ -44,16 +43,16 @@ export default class ARC implements Broadcaster {
    * @param {string} URL - The URL endpoint for the ARC API.
    * @param {ArcConfig} config - Configuration options for the ARC broadcaster.
    */
-  constructor(URL: string, config?: ArcConfig)
+  constructor (URL: string, config?: ArcConfig)
   /**
    * Constructs an instance of the ARC broadcaster.
    *
    * @param {string} URL - The URL endpoint for the ARC API.
    * @param {string} apiKey - The API key used for authorization with the ARC API.
    */
-  constructor(URL: string, apiKey?: string)
+  constructor (URL: string, apiKey?: string)
 
-  constructor(URL: string, config?: string | ArcConfig) {
+  constructor (URL: string, config?: string | ArcConfig) {
     this.URL = URL
     if (typeof config === 'string') {
       this.apiKey = config
@@ -62,7 +61,7 @@ export default class ARC implements Broadcaster {
       this.callbackToken = undefined
       this.callbackUrl = undefined
     } else {
-      const {apiKey, deploymentId, httpClient, callbackToken, callbackUrl, headers } = config ?? {} as ArcConfig
+      const { apiKey, deploymentId, httpClient, callbackToken, callbackUrl, headers } = config ?? {} as ArcConfig
       this.apiKey = apiKey
       this.httpClient = httpClient ?? defaultHttpClient()
       this.deploymentId = deploymentId ?? defaultDeploymentId()
@@ -78,7 +77,7 @@ export default class ARC implements Broadcaster {
    * @param {Transaction} tx - The transaction to be broadcasted.
    * @returns {Promise<BroadcastResponse | BroadcastFailure>} A promise that resolves to either a success or failure response.
    */
-  async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> {
+  async broadcast (tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> {
     let rawTx
     try {
       rawTx = tx.toHexEF()
@@ -93,16 +92,16 @@ export default class ARC implements Broadcaster {
     const requestOptions: HttpClientRequestOptions = {
       method: 'POST',
       headers: this.requestHeaders(),
-      data: {rawTx}
+      data: { rawTx }
     }
 
     try {
       const response = await this.httpClient.request<ArcResponse>(`${this.URL}/v1/tx`, requestOptions)
       if (response.ok) {
-        const {txid, extraInfo, txStatus} = response.data
+        const { txid, extraInfo, txStatus } = response.data
         return {
           status: 'success',
-          txid: txid,
+          txid,
           message: `${txStatus} ${extraInfo}`
         }
       } else {
@@ -132,14 +131,14 @@ export default class ARC implements Broadcaster {
     }
   }
 
-  private requestHeaders() {
+  private requestHeaders () {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'XDeployment-ID': this.deploymentId,
+      'XDeployment-ID': this.deploymentId
     }
 
     if (this.apiKey) {
-      headers['Authorization'] = `Bearer ${this.apiKey}`
+      headers.Authorization = `Bearer ${this.apiKey}`
     }
 
     if (this.callbackUrl) {
@@ -150,7 +149,7 @@ export default class ARC implements Broadcaster {
       headers['X-CallbackToken'] = this.callbackToken
     }
 
-    if (!!this.headers) {
+    if (this.headers) {
       for (const key in this.headers) {
         headers[key] = this.headers[key]
       }
