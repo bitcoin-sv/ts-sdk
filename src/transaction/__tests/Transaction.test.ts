@@ -86,23 +86,23 @@ describe('Transaction', () => {
   })
 
   describe('#parseScriptOffsets', () => {
-      it('should match sliced scripts to parsed scripts', async () => {
-        const tx = Transaction.fromBinary(tx2buf)
-        expect(tx.id("hex")).toBe(tx2idhex)
-        const r = Transaction.parseScriptOffsets(tx2buf)
-        expect(r.inputs.length).toBe(2)
-        expect(r.outputs.length).toBe(2)
-        for (let vin = 0; vin < 2; vin++) {
-            const i = r.inputs[vin]
-            const script = tx2buf.slice(i.offset, i.length + i.offset)
-            expect(script).toEqual(tx.inputs[vin].unlockingScript?.toBinary())
-        }
-        for (let vout = 0; vout < 2; vout++) {
-            const o = r.outputs[vout]
-            const script = tx2buf.slice(o.offset, o.length + o.offset)
-            expect(script).toEqual(tx.outputs[vout].lockingScript?.toBinary())
-        }
-      })
+    it('should match sliced scripts to parsed scripts', async () => {
+      const tx = Transaction.fromBinary(tx2buf)
+      expect(tx.id('hex')).toBe(tx2idhex)
+      const r = Transaction.parseScriptOffsets(tx2buf)
+      expect(r.inputs.length).toBe(2)
+      expect(r.outputs.length).toBe(2)
+      for (let vin = 0; vin < 2; vin++) {
+        const i = r.inputs[vin]
+        const script = tx2buf.slice(i.offset, i.length + i.offset)
+        expect(script).toEqual(tx.inputs[vin].unlockingScript?.toBinary())
+      }
+      for (let vout = 0; vout < 2; vout++) {
+        const o = r.outputs[vout]
+        const script = tx2buf.slice(o.offset, o.length + o.offset)
+        expect(script).toEqual(tx.outputs[vout].lockingScript?.toBinary())
+      }
+    })
   })
 
   describe('#toHex', () => {
@@ -392,7 +392,7 @@ describe('Transaction', () => {
           tx_pos: 0,
           tx_hash: 'f33505acf37a7726cc37d391bc6f889b8684ac2a2d581c4be2a4b1c8b46609bc',
           value: 10000
-        },
+        }
       ]
       const priv = PrivateKey.fromRandom()
       const tx = new Transaction()
@@ -417,12 +417,12 @@ describe('Transaction', () => {
 
   describe('Broadcast', () => {
     it('Broadcasts with the default Broadcaster instance', async () => {
-      const mockedFetch =  jest.fn().mockResolvedValue({
+      const mockedFetch = jest.fn().mockResolvedValue({
         ok: true,
         status: 200,
         statusText: 'OK',
         headers: {
-          get(key: string) {
+          get (key: string) {
             if (key === 'Content-Type') {
               return 'application/json'
             }
@@ -430,12 +430,12 @@ describe('Transaction', () => {
         },
         json: async () => ({
           txid: 'mocked_txid',
-            txStatus: 'success',
-            extraInfo: 'received'
+          txStatus: 'success',
+          extraInfo: 'received'
         })
       });
 
-      (global as any).window = {fetch: mockedFetch} as any
+      (global as any).window = { fetch: mockedFetch } as any
 
       const tx = new Transaction()
       const rv = await tx.broadcast()
@@ -489,23 +489,22 @@ describe('Transaction', () => {
     })
 
     it('Verifies the transaction from the BEEF spec with a default chain tracker', async () => {
-      const mockFetch =  jest.fn().mockResolvedValue({
+      const mockFetch = jest.fn().mockResolvedValue({
         ok: true,
         status: 200,
         statusText: 'OK',
         headers: {
-          get(key: string) {
+          get (key: string) {
             if (key === 'Content-Type') {
               return 'application/json'
             }
           }
         },
         json: async () => ({
-          merkleroot: MerkleRootFromBEEF,
+          merkleroot: MerkleRootFromBEEF
         })
       });
-      (global as any).window = {fetch: mockFetch}
-
+      (global as any).window = { fetch: mockFetch }
 
       const tx = Transaction.fromHexBEEF(BRC62Hex)
 

@@ -122,7 +122,6 @@ export default class Transaction {
     return transactions[lastTXID].tx
   }
 
-
   /**
    * Creates a new transaction, linked to its inputs and their associated merkle paths, from a EF (BRC-30) structure.
    * @param ef A binary representation of a transaction in EF format.

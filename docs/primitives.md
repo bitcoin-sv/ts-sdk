@@ -6377,6 +6377,7 @@ export default class PrivateKey extends BigNumber {
     toAddress(prefix: number[] | string = [0]): string 
     deriveSharedSecret(key: PublicKey): Point 
     deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
+    split(threshold: number, totalShares: number): BigNumber[] 
 }
 ```
 
@@ -6574,6 +6575,34 @@ Example
 ```ts
 const privateKey = PrivateKey.fromRandom();
 const signature = privateKey.sign('Hello, World!');
+```
+
+#### Method split
+
+Splits the private key into shares using Shamir's Secret Sharing Scheme.
+
+```ts
+split(threshold: number, totalShares: number): BigNumber[] 
+```
+
+Returns
+
+An array of shares.
+
+Argument Details
+
++ **threshold**
+  + The minimum number of shares required to reconstruct the private key.
++ **totalShares**
+  + The total number of shares to generate.
++ **prime**
+  + The prime number to be used in Shamir's Secret Sharing Scheme.
+
+Example
+
+```ts
+const key = PrivateKey.fromRandom()
+const shares = key.split(2, 5)
 ```
 
 #### Method toAddress
