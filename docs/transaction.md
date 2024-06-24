@@ -12,8 +12,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [Broadcaster](#interface-broadcaster) | [NodejsHttpClientRequest](#interface-nodejshttpclientrequest) |
 | [ChainTracker](#interface-chaintracker) | [TransactionInput](#interface-transactioninput) |
 | [FeeModel](#interface-feemodel) | [TransactionOutput](#interface-transactionoutput) |
-| [Fetch](#interface-fetch) | [WhatsOnChainConfig](#interface-whatsonchainconfig) |
-| [FetchOptions](#interface-fetchoptions) |  |
+| [FetchOptions](#interface-fetchoptions) | [WhatsOnChainConfig](#interface-whatsonchainconfig) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -179,7 +178,7 @@ An interface for HTTP client used to make HTTP requests.
 
 ```ts
 export interface HttpClient {
-    request<T = any, D = any>(url: string, options: HttpClientRequestOptions<D>): Promise<HttpClientResponse<T>>;
+    request: <T = any, D = any>(url: string, options: HttpClientRequestOptions<D>) => Promise<HttpClientResponse<T>>;
 }
 ```
 
@@ -187,20 +186,13 @@ export interface HttpClient {
 
 <summary>Interface HttpClient Details</summary>
 
-#### Method request
+#### Property request
 
 Makes a request to the server.
 
 ```ts
-request<T = any, D = any>(url: string, options: HttpClientRequestOptions<D>): Promise<HttpClientResponse<T>>
+request: <T = any, D = any>(url: string, options: HttpClientRequestOptions<D>) => Promise<HttpClientResponse<T>>
 ```
-
-Argument Details
-
-+ **url**
-  + The URL to make the request to.
-+ **options**
-  + The request configuration.
 
 </details>
 
@@ -258,7 +250,7 @@ Node.js Https module interface limited to options needed by ts-sdk
 
 ```ts
 export interface HttpsNodejs {
-    request(url: string, options: HttpClientRequestOptions, callback: (res: any) => void): NodejsHttpClientRequest;
+    request: (url: string, options: HttpClientRequestOptions, callback: (res: any) => void) => NodejsHttpClientRequest;
 }
 ```
 
@@ -271,23 +263,9 @@ Nodejs result of the Node.js https.request call limited to options needed by ts-
 
 ```ts
 export interface NodejsHttpClientRequest {
-    write(chunk: string): void;
-    end(): void;
-    on(event: string, callback: (data: any) => void): void;
-    end(): void;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Interface: Fetch
-
-fetch function interface limited to options needed by ts-sdk
-
-```ts
-export interface Fetch {
-    (url: string, options: FetchOptions): Promise<Response>;
+    write: (chunk: string) => void;
+    on: (event: string, callback: (data: any) => void) => void;
+    end: (() => void) & (() => void);
 }
 ```
 
@@ -685,7 +663,7 @@ Adapter for Node.js Https module to be used as HttpClient
 
 ```ts
 export class NodejsHttpClient implements HttpClient {
-    constructor(private https: HttpsNodejs) 
+    constructor(private readonly https: HttpsNodejs) 
     async request(url: string, requestOptions: HttpClientRequestOptions): Promise<HttpClientResponse> 
 }
 ```
@@ -699,7 +677,7 @@ Adapter for Node.js Https module to be used as HttpClient
 
 ```ts
 export class FetchHttpClient implements HttpClient {
-    constructor(private fetch: Fetch) 
+    constructor(private readonly fetch: Fetch) 
     async request<D>(url: string, options: HttpClientRequestOptions): Promise<HttpClientResponse<D>> 
 }
 ```
@@ -1353,6 +1331,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ## Types
 
+| |
+| --- |
+| [Fetch](#type-fetch) |
+| [HttpClientResponse](#type-httpclientresponse) |
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+
 ### Type: HttpClientResponse
 
 An interface for the response returned by the request method.
@@ -1369,6 +1356,19 @@ export type HttpClientResponse<T = any> = {
     statusText: string;
     ok: false;
 }
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Type: Fetch
+
+fetch function interface limited to options needed by ts-sdk
+
+Makes a request to the server.
+
+```ts
+export type Fetch = (url: string, options: FetchOptions) => Promise<Response>
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
