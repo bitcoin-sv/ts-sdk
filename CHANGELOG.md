@@ -16,6 +16,10 @@ All notable changes to this project will be documented in this file. The format 
 ## [Unreleased]
 
 ### Added
+- ability to split a private key into shares using Shamir's Secret Sharing Scheme.
+    Use like this:
+        const key = PrivateKey.fromRandom()
+        const shares = key.split(2, 5)
 
 ### Changed
 
