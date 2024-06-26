@@ -1,11 +1,13 @@
 import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
+import Point from '../../../dist/cjs/src/primitives/Point'
 
 describe('PrivateKey', () => {
   it('should split the private key into shares correctly', () => {
     const privateKey = PrivateKey.fromRandom()
     const threshold = 2
     const totalShares = 5
+
+    const og = privateKey.toWif()
 
     // Split the private key
     const shares = privateKey.split(threshold, totalShares)
@@ -15,8 +17,12 @@ describe('PrivateKey', () => {
 
     // Check that each share is a BigNumber
     shares.forEach(share => {
-      expect(share).toBeInstanceOf(BigNumber)
+      expect(share).toBeInstanceOf(Point)
     })
+
+    // recombine
+    const recombined = PrivateKey.fromShares(shares.slice(0, threshold))
+    expect(recombined.toWif()).toBe(og)
   })
 
   it('should throw an error for invalid threshold values', () => {
