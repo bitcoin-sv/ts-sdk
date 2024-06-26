@@ -270,31 +270,84 @@ export default class PrivateKey extends BigNumber {
    * const shares = key.split(2, 5)
    */
   split (threshold: number, totalShares: number): BigNumber[] {
-    if (threshold < 2 || threshold > totalShares || threshold > 100) {
-      throw new Error('Invalid threshold value')
-    }
+    if (threshold < 2 || threshold > totalShares || threshold > 99) throw new Error('threshold should be between 2 and 99')
+    if (totalShares < 3 || totalShares > 100) throw new Error('totalShares should be between 3 and 100')
 
-    const Prime = BigNumber.fromHex('fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f')
-    const coefficientList = []
-    const shareList = []
-    const key = this
-
-    // build coefficiants
+    const Prime = new Curve().p
+    // define a polynomial with the private key as the x=0 intercept and the rest of the coefficients random
+    const points = [new Point(0, new BigNumber(this.toArray()))]
     for (let i = 1; i < threshold; i++) {
-      let coefficiant = new BigNumber(Random(32))
-      while (coefficiant.cmp(Prime) == 1) { coefficiant = new BigNumber(Random(32)) }
-      coefficientList.push(coefficiant)
+      points.push(new Point(new BigNumber(Random(32)), new BigNumber(Random(32))))
     }
 
-    // build shareList by calculating each share = Polynomial(j)mod(Prime)
-    for (let i = 1; i <= totalShares; i++) {
-      let share = new BigNumber(0)
-      share.iadd(key)
-      for (let j = 0; j < threshold - 1; j++) { share.iadd(new BigNumber(coefficientList[j] * i ^ (j + 1))) }
-      share = share.mod(Prime)
-      shareList.push(share)
+    // define the polynomial as a line which interpolates each of the points.
+    const poly = (x: BigNumber) => {
+      let y = new BigNumber(0)
+      for (let i = 0; i < threshold; i++) {
+        let num = new BigNumber(1)
+        let den = new BigNumber(1)
+        for (let j = 0; j < threshold; j++) {
+          if (i !== j) {
+            num = num.mul(x.sub(points[j].x))
+            den = den.mul(points[i].x.sub(points[j].x))
+          }
+        }
+        y = y.add(points[i].y.mul(num).div(den))
+      }
+      return y.mod(Prime)
+    }
+
+    // choose random x values for the shares
+    const xValues = []
+    for (let i = 0; i < totalShares; i++) {
+      xValues.push(new BigNumber(Random(32)).mod(Prime))
+    }
+
+    // calculate the shares
+    const shareList = []
+    for (let i = 0; i < totalShares; i++) {
+      const x = xValues[i]
+      const y = poly(x)
+      shareList.push(new Point(x, y))
     }
 
     return shareList
+  }
+
+  /**
+   * Combines shares to reconstruct the private key.
+   *
+   * @param shares An array of Points.
+   * @returns The reconstructed private key.
+   * @throws Will throw an error if the number of shares is less than the threshold.
+   * @throws Will throw an error if the shares are not valid.
+   * 
+   * @example
+   * const key = PrivateKey.fromRandom()
+   * const shares = key.split(2, 5)
+   * const reconstructedKey = PrivateKey.combine(shares.slice(0, 2))
+   * 
+   **/
+  static fromShares (points: Point[]): PrivateKey {
+    if (points.length < 2) throw new Error('At least 2 shares are required to reconstruct the private key')
+    const Prime = new Curve().p
+    const threshold = points.length
+    // define the polynomial as a line which interpolates each of the shares, and return the y value at x=0.
+    let y = new BigNumber(0)
+    for (let i = 0; i < threshold; i++) {
+      let num = new BigNumber(1)
+      let den = new BigNumber(1)
+      for (let j = 0; j < threshold; j++) {
+        if (i !== j) {
+          // Corrected to use points[i].x for numerator calculation
+          num = num.mul(points[i].x.sub(points[j].x)).mod(Prime)
+          den = den.mul(points[i].x.sub(points[j].x)).mod(Prime)
+        }
+      }
+      // Modular division might require using a modular inverse function
+      let term = points[i].y.mul(num).mul(den).mod(Prime)
+      y = y.add(term).mod(Prime)
+    }
+    return new PrivateKey(y.toArray())
   }
 }
