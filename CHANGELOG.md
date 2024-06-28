@@ -28,9 +28,11 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.1.9] - 2024-06-28
+### Fixed
+ARC Broadcaster correctly parses status -> code, details -> description. Adds txid to error response if provided.
 
 ## [1.1.8] - 2024-06-19
-
 ### Added
 TOTP class which allows the generation of time based pass codes. Use varies but originally included for validating shared secrets between remote counterparties over a secure channel.
 
