@@ -177,15 +177,22 @@ describe('ARC Broadcaster', () => {
     expect(response).toEqual({
       status: 'error',
       code: '400',
-      description: 'Bad request'
+      description: 'Bad request',
+      more: {
+        detail: 'Bad request'
+      }
     })
   })
 
   it('handles error 460', async () => {
     // Model the actual response format received from...
-    //const URL = 'https://arc.taal.com'
-    //const apiKey = 'mainnet_9596de07e92300c6287e4393594ae39c'
-    //const arc = new ARC(URL, apiKey)
+    const apiKey: string = '...'
+    if (apiKey !== '...') {
+      const URL = 'https://arc.taal.com'
+      const arc = new ARC(URL, apiKey)
+      const response = await arc.broadcast(transaction)
+      expect(response.more).toBeTruthy()
+    }
 
     const mockFetch = mockedFetch({
       status: 460,

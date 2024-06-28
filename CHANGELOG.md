@@ -28,9 +28,9 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-## [1.1.9] - 2024-06-28
+## [1.1.10] - 2024-06-28
 ### Fixed
-ARC Broadcaster correctly parses status -> code, details -> description. Adds txid to error response if provided.
+ARC Broadcaster correctly parses status -> code, details -> description. Adds optional txid and more to error response if provided.
 
 ## [1.1.8] - 2024-06-19
 ### Added

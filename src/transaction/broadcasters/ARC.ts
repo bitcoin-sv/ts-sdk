@@ -119,6 +119,7 @@ export default class ARC implements Broadcaster {
           } catch { }
         }
         if (typeof d === 'object') {
+          r.more = d
           if (typeof d.txid === 'string') {
             r.txid = d.txid
           }

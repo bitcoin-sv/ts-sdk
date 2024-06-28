@@ -126,6 +126,7 @@ export interface BroadcastFailure {
     code: string;
     txid?: string;
     description: string;
+    more?: object;
 }
 ```
 
