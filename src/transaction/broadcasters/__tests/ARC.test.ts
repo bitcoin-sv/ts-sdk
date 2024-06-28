@@ -177,8 +177,38 @@ describe('ARC Broadcaster', () => {
     expect(response).toEqual({
       status: 'error',
       code: '400',
-      description: 'Bad request'
+      description: 'Bad request',
+      more: {
+        detail: 'Bad request'
+      }
     })
+  })
+
+  it('handles error 460', async () => {
+    // Model the actual response format received from...
+    const apiKey: string = '...'
+    if (apiKey !== '...') {
+      const URL = 'https://arc.taal.com'
+      const arc = new ARC(URL, apiKey)
+      const response = await arc.broadcast(transaction)
+      expect(response.more).toBeTruthy()
+    }
+
+    const mockFetch = mockedFetch({
+      status: 460,
+      data: {
+        status: 460,
+        detail: 'Transaction is not in extended format, missing input scripts',
+        txid: 'd21633ba23f70118185227be58a63527675641ad37967e2aa461559f577aec43'
+      }
+    })
+
+    const broadcaster = new ARC(URL, {httpClient: new FetchHttpClient(mockFetch)})
+    const response = await broadcaster.broadcast(transaction)
+    expect(response.status).toBe('error')
+    expect(response.code).toBe('460')
+    expect(response.description).toBe('Transaction is not in extended format, missing input scripts')
+    expect(response.txid).toBe('d21633ba23f70118185227be58a63527675641ad37967e2aa461559f577aec43')
   })
 
   function mockedFetch(response) {
@@ -223,4 +253,3 @@ describe('ARC Broadcaster', () => {
     return https
   }
 })
-

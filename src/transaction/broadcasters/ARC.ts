@@ -106,18 +106,26 @@ export default class ARC implements Broadcaster {
           message: `${txStatus} ${extraInfo}`
         }
       } else {
+        const st = typeof response.status
         const r: BroadcastFailure = {
           status: 'error',
-          code: response.status.toString() ?? 'ERR_UNKNOWN',
+          code: st === 'number' || st === 'string' ? response.status.toString() : 'ERR_UNKNOWN',
           description: 'Unknown error'
         }
-        if (typeof response.data === 'string') {
+        let d = response.data
+        if (typeof d === 'string') {
           try {
-            const data = JSON.parse(response.data)
-            if (typeof data.detail === 'string') {
-              r.description = data.detail
-            }
-          } catch {}
+            d = JSON.parse(response.data)
+          } catch { }
+        }
+        if (typeof d === 'object') {
+          r.more = d
+          if (typeof d.txid === 'string') {
+            r.txid = d.txid
+          }
+          if (typeof d.detail === 'string') {
+            r.description = d.detail
+          }
         }
         return r
       }

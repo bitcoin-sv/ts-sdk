@@ -124,7 +124,9 @@ Defines the structure of a failed broadcast response.
 export interface BroadcastFailure {
     status: "error";
     code: string;
+    txid?: string;
     description: string;
+    more?: object;
 }
 ```
 
