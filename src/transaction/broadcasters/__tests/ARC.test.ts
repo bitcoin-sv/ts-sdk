@@ -181,6 +181,29 @@ describe('ARC Broadcaster', () => {
     })
   })
 
+  it('handles error 460', async () => {
+    // Model the actual response format received from...
+    //const URL = 'https://arc.taal.com'
+    //const apiKey = 'mainnet_9596de07e92300c6287e4393594ae39c'
+    //const arc = new ARC(URL, apiKey)
+
+    const mockFetch = mockedFetch({
+      status: 460,
+      data: {
+        status: 460,
+        detail: 'Transaction is not in extended format, missing input scripts',
+        txid: 'd21633ba23f70118185227be58a63527675641ad37967e2aa461559f577aec43'
+      }
+    })
+
+    const broadcaster = new ARC(URL, {httpClient: new FetchHttpClient(mockFetch)})
+    const response = await broadcaster.broadcast(transaction)
+    expect(response.status).toBe('error')
+    expect(response.code).toBe('460')
+    expect(response.description).toBe('Transaction is not in extended format, missing input scripts')
+    expect(response.txid).toBe('d21633ba23f70118185227be58a63527675641ad37967e2aa461559f577aec43')
+  })
+
   function mockedFetch(response) {
     return jest.fn().mockResolvedValue({
       ok: response.status === 200,
@@ -223,4 +246,3 @@ describe('ARC Broadcaster', () => {
     return https
   }
 })
-

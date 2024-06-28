@@ -20,11 +20,13 @@ export interface BroadcastResponse {
  * @interface
  * @property {string} status - The status of the response, indicating an error.
  * @property {string} code - A machine-readable error code representing the type of error encountered.
+ * @property {string} txid - The transaction ID of the broadcasted transaction.
  * @property {string} description - A detailed description of the error.
  */
 export interface BroadcastFailure {
   status: 'error'
   code: string
+  txid?: string
   description: string
 }
 
