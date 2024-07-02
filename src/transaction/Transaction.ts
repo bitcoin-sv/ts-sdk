@@ -488,7 +488,7 @@ export default class Transaction {
     writer.writeUInt32LE(this.version)
     writer.writeVarIntNum(this.inputs.length)
     for (const i of this.inputs) {
-      if (typeof i.sourceTransaction !== 'undefined') {
+      if (typeof i.sourceTXID === 'undefined') {
         writer.write(i.sourceTransaction.hash() as number[])
       } else {
         writer.writeReverse(toArray(i.sourceTXID, 'hex'))
@@ -675,8 +675,11 @@ export default class Transaction {
       }
       const otherInputs = [...this.inputs]
       otherInputs.splice(i, 1)
+      if (typeof input.sourceTXID === 'undefined') {
+        input.sourceTXID = input.sourceTransaction.id('hex')
+      }
       const spend = new Spend({
-        sourceTXID: input.sourceTransaction.id('hex'),
+        sourceTXID: input.sourceTXID,
         sourceOutputIndex: input.sourceOutputIndex,
         lockingScript: sourceOutput.lockingScript,
         sourceSatoshis: sourceOutput.satoshis,
