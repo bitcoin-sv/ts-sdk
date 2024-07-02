@@ -48,6 +48,7 @@ export default function fromUtxo (utxo: jsonUtxo, unlockingScriptTemplate: {
   }
   return {
     sourceTransaction,
+    sourceTXID: utxo.txid,
     sourceOutputIndex: utxo.vout,
     unlockingScriptTemplate,
     sequence: 0xFFFFFFFF
