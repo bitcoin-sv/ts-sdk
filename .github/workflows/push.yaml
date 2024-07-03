@@ -34,7 +34,7 @@ jobs:
       run: echo "//registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN" > ~/.npmrc
       env:
         NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Use Node.js 20.x
       uses: actions/setup-node@v1
       with:
@@ -43,7 +43,7 @@ jobs:
         NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}
     - name: Cache node_modules
       id: cache-modules
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: node_modules
         key: 20.x-${{ runner.OS }}-build-${{ hashFiles('package.json') }}
