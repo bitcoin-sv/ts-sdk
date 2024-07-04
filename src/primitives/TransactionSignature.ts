@@ -39,10 +39,10 @@ export default class TransactionSignature extends Signature {
     const getPrevoutHash = (): number[] => {
       const writer = new Writer()
       for (const input of inputs) {
-        if (typeof input.sourceTransaction === 'undefined') {
-          writer.writeReverse(toArray(input.sourceTXID, 'hex'))
-        } else {
+        if (typeof input.sourceTXID === 'undefined') {
           writer.writeReverse(input.sourceTransaction.id())
+        } else {
+          writer.writeReverse(toArray(input.sourceTXID, 'hex'))
         }
         writer.writeUInt32LE(input.sourceOutputIndex)
       }
