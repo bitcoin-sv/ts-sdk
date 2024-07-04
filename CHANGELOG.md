@@ -24,8 +24,8 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Fixed
 - Utxo.fromUtxo now correctly sets sourceTXID on the input it returns.
-- Transaction.toBinary and Transaction.verify now check first if a sourceTXID is populated and use that before falling back to sourceTransaction.id()/sourceTransaction.hash().
-
+- Transaction.toBinary, .verify, and TransactionSignature.format now check first if a sourceTXID is populated and use that before falling back to sourceTransaction.id()/sourceTransaction.hash().
+- 
 ### Security
 
 ---
