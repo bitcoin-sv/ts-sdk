@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.1.13 - 2024-07-19](#1113---2024-07-19)
 - [1.1.8 - 2024-06-12](#118---2024-06-19)
 - [1.1.6 - 2024-06-12](#116---2024-06-12)
 - [1.1.5 - 2024-06-11](#115---2024-06-11)
@@ -29,6 +30,10 @@ All notable changes to this project will be documented in this file. The format 
 ### Security
 
 ---
+
+## [1.1.13] - 2024-07-19
+### Fixed
+Transaction SPV verification now correctly returns true for "scripts only" verification when a merkle proof is found.
 
 ## [1.1.10] - 2024-06-28
 ### Fixed

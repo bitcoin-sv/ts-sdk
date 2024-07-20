@@ -32,7 +32,7 @@ export const toHex = (msg: number[]): string => {
  * Supports arrays, hexadecimal strings, base64 strings, and UTF-8 strings.
  *
  * @param {any} msg - The input message (array or string).
- * @param {('hex' | 'utf8')} enc - Specifies the string encoding, if applicable.
+ * @param {('hex' | 'utf8' | 'base64')} enc - Specifies the string encoding, if applicable.
  * @returns {any[]} - Array representation of the input.
  */
 export const toArray = (msg: any, enc?: 'hex' | 'utf8' | 'base64'): any[] => {

@@ -637,14 +637,18 @@ export default class Transaction {
    */
   async verify (chainTracker: ChainTracker | 'scripts only' = defaultChainTracker(), feeModel?: FeeModel): Promise<boolean> {
     // If the transaction has a valid merkle path, verification is complete.
-    if (typeof this.merklePath === 'object' && chainTracker !== 'scripts only') {
-      const proofValid = await this.merklePath.verify(
-        this.id('hex'),
-        chainTracker
-      )
-      // Note that if the proof is provided but not valid, the transaction could still be verified by proving all inputs (if they are available) and checking the associated spends.
-      if (proofValid) {
+    if (typeof this.merklePath === 'object') {
+      if (chainTracker === 'scripts only') {
         return true
+      } else {
+        const proofValid = await this.merklePath.verify(
+          this.id('hex'),
+          chainTracker
+        )
+        // Note that if the proof is provided but not valid, the transaction could still be verified by proving all inputs (if they are available) and checking the associated spends.
+        if (proofValid) {
+          return true
+        }
       }
     }
 
@@ -678,6 +682,7 @@ export default class Transaction {
       if (typeof input.sourceTXID === 'undefined') {
         input.sourceTXID = input.sourceTransaction.id('hex')
       }
+
       const spend = new Spend({
         sourceTXID: input.sourceTXID,
         sourceOutputIndex: input.sourceOutputIndex,
@@ -692,6 +697,7 @@ export default class Transaction {
         lockTime: this.lockTime
       })
       const spendValid = spend.validate()
+
       if (!spendValid) {
         return false
       }
