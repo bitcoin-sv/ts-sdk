@@ -1,11 +1,6 @@
-import Random from './Random.js'
 import PrivateKey from './PrivateKey.js'
 import BigNumber from './BigNumber.js'
 import Point from './Point.js'
-import Curve from './Curve.js'
-
-// We use the prime number from the secp256k1 curve to define the finite field.
-const finiteField = new Curve().p
 
 /**
  * Polynomial class
@@ -36,7 +31,7 @@ export default class Polynomial {
         const poly = new Polynomial([new Point(new BigNumber(0), new BigNumber(key.toArray()))], threshold)
         // The other values are random
         for (let i = 1; i < threshold; i++) {
-            poly.points.push(new Point(new BigNumber(Random(32)).umod(finiteField), new BigNumber(Random(32)).umod(finiteField)))
+            poly.points.push(new Point(new BigNumber(PrivateKey.fromRandom().toArray()), new BigNumber(PrivateKey.fromRandom().toArray())))
         }
         return poly
     }

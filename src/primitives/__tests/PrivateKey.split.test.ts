@@ -7,8 +7,6 @@ describe('PrivateKey', () => {
     const threshold = 2
     const totalShares = 5
 
-    const og = privateKey.toWif()
-
     // Split the private key
     const recovery = privateKey.split(threshold, totalShares)
 
@@ -19,9 +17,20 @@ describe('PrivateKey', () => {
     recovery.shares.forEach(share => {
       expect(share).toBeInstanceOf(Point)
     })
+  })
+
+  it('should recombine the shares into a private key correctly', () => {
+    const privateKey = PrivateKey.fromRandom()
+    const threshold = 2
+    const totalShares = 5
+
+    const og = privateKey.toWif()
+
+    // Split the private key
+    const recovery = privateKey.split(threshold, totalShares)
 
     // recombine
-    const recombined = PrivateKey.fromShares(recovery.shares.slice(0, threshold))
+    const recombined = PrivateKey.fromShares(recovery.shares, threshold)
     expect(recombined.toWif()).toBe(og)
   })
 
