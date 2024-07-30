@@ -5,7 +5,7 @@ import Point from './Point.js'
 import Curve from './Curve.js'
 
 // We use the prime number from the secp256k1 curve to define the finite field.
-const finiteField = new Curve().n
+const finiteField = new Curve().p
 
 /**
  * Polynomial class
@@ -53,6 +53,6 @@ export default class Polynomial {
             }
             y = y.add(term)
         }
-      return y.umod(finiteField)
+      return y
     }
 }
