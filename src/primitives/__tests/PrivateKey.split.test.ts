@@ -10,18 +10,18 @@ describe('PrivateKey', () => {
     const og = privateKey.toWif()
 
     // Split the private key
-    const shares = privateKey.split(threshold, totalShares)
+    const recovery = privateKey.split(threshold, totalShares)
 
     // Check the number of shares
-    expect(shares.length).toBe(totalShares)
+    expect(recovery.shares.length).toBe(totalShares)
 
     // Check that each share is a BigNumber
-    shares.forEach(share => {
+    recovery.shares.forEach(share => {
       expect(share).toBeInstanceOf(Point)
     })
 
     // recombine
-    const recombined = PrivateKey.fromShares(shares.slice(0, threshold))
+    const recombined = PrivateKey.fromShares(recovery.shares.slice(0, threshold))
     expect(recombined.toWif()).toBe(og)
   })
 
@@ -30,6 +30,6 @@ describe('PrivateKey', () => {
     const invalidThreshold = 101
     const totalShares = 5
 
-    expect(() => privateKey.split(invalidThreshold, totalShares)).toThrow('Invalid threshold value')
+    expect(() => privateKey.split(invalidThreshold, totalShares)).toThrow('threshold should be between 2 and 99')
   })
 })

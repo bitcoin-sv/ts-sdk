@@ -238,7 +238,7 @@ describe('Transaction', () => {
     it('Throws an Error if signing before the fee is computed', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true), 'hex') as unknown as number[]
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(1, [], [{
         lockingScript: p2pkh.lock(publicKeyHash),

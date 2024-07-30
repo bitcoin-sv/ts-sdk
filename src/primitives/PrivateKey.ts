@@ -7,6 +7,7 @@ import { sign, verify } from './ECDSA.js'
 import { sha256, sha256hmac } from './Hash.js'
 import Random from './Random.js'
 import { fromBase58Check, toArray, toBase58Check } from './utils.js'
+import Polynomial from './Polynomial.js'
 
 /**
  * Represents a Private Key, which is a secret that can be used to generate signatures in a cryptographic system.
@@ -269,85 +270,43 @@ export default class PrivateKey extends BigNumber {
    * const key = PrivateKey.fromRandom()
    * const shares = key.split(2, 5)
    */
-  split (threshold: number, totalShares: number): BigNumber[] {
+  split (threshold: number, totalShares: number): { shares: BigNumber[], threshold: number } {
     if (threshold < 2 || threshold > totalShares || threshold > 99) throw new Error('threshold should be between 2 and 99')
     if (totalShares < 3 || totalShares > 100) throw new Error('totalShares should be between 3 and 100')
 
-    const Prime = new Curve().p
-    // define a polynomial with the private key as the x=0 intercept and the rest of the coefficients random
-    const points = [new Point(0, new BigNumber(this.toArray()))]
-    for (let i = 1; i < threshold; i++) {
-      points.push(new Point(new BigNumber(Random(32)), new BigNumber(Random(32))))
-    }
-
-    // define the polynomial as a line which interpolates each of the points.
-    const poly = (x: BigNumber) => {
-      let y = new BigNumber(0)
-      for (let i = 0; i < threshold; i++) {
-        let num = new BigNumber(1)
-        let den = new BigNumber(1)
-        for (let j = 0; j < threshold; j++) {
-          if (i !== j) {
-            num = num.mul(x.sub(points[j].x))
-            den = den.mul(points[i].x.sub(points[j].x))
-          }
-        }
-        y = y.add(points[i].y.mul(num).div(den))
-      }
-      return y.mod(Prime)
-    }
-
-    // choose random x values for the shares
-    const xValues = []
+    const poly = Polynomial.fromPrivateKey(this, threshold)
+    
+    const shares = []
     for (let i = 0; i < totalShares; i++) {
-      xValues.push(new BigNumber(Random(32)).mod(Prime))
+      const x = new BigNumber(PrivateKey.fromRandom().toArray())
+      const y = poly.valueAt(x)
+      shares.push(new Point(x, y))
     }
 
-    // calculate the shares
-    const shareList = []
-    for (let i = 0; i < totalShares; i++) {
-      const x = xValues[i]
-      const y = poly(x)
-      shareList.push(new Point(x, y))
-    }
-
-    return shareList
+    return { shares, threshold }
   }
 
   /**
    * Combines shares to reconstruct the private key.
    *
-   * @param shares An array of Points.
+   * @param points An array of points (shares) to be used to reconstruct the private key.
+   * @param threshold The minimum number of shares required to reconstruct the private key.
+   * 
    * @returns The reconstructed private key.
-   * @throws Will throw an error if the number of shares is less than the threshold.
-   * @throws Will throw an error if the shares are not valid.
    * 
    * @example
    * const key = PrivateKey.fromRandom()
-   * const shares = key.split(2, 5)
-   * const reconstructedKey = PrivateKey.combine(shares.slice(0, 2))
+   * const recovery = key.split(2, 5)
+   * const reconstructedKey = PrivateKey.fromShares(recovery.shares)
    * 
    **/
-  static fromShares (points: Point[]): PrivateKey {
-    if (points.length < 2) throw new Error('At least 2 shares are required to reconstruct the private key')
-    const Prime = new Curve().p
-    const threshold = points.length
-    // define the polynomial as a line which interpolates each of the shares, and return the y value at x=0.
-    let y = new BigNumber(0)
-    for (let i = 0; i < threshold; i++) {
-      let num = new BigNumber(1)
-      let den = new BigNumber(1)
-      for (let j = 0; j < threshold; j++) {
-        if (i !== j) {
-          // Corrected to use points[i].x for numerator calculation
-          num = num.mul(points[i].x.sub(points[j].x)).mod(Prime)
-          den = den.mul(points[i].x.sub(points[j].x)).mod(Prime)
-        }
-      }
-      // Modular division might require using a modular inverse function
-      let term = points[i].y.mul(num).mul(den).mod(Prime)
-      y = y.add(term).mod(Prime)
-    }
+  static fromShares (points: Point[], threshold?: number): PrivateKey {
+    const recombinant = threshold || points.length
+    if (recombinant < 2) throw new Error('At least 2 shares are required to reconstruct the private key')
+
+    const poly = new Polynomial(points, recombinant)
+    const y = poly.valueAt(new BigNumber(0))
+    
     return new PrivateKey(y.toArray())
   }
 }
