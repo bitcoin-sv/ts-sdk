@@ -6,17 +6,14 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | |
 | --- | --- |
-| [ArcConfig](#interface-arcconfig) | [HttpClient](#interface-httpclient) |
-| [BroadcastFailure](#interface-broadcastfailure) | [HttpClientRequestOptions](#interface-httpclientrequestoptions) |
-| [BroadcastResponse](#interface-broadcastresponse) | [HttpsNodejs](#interface-httpsnodejs) |
-| [Broadcaster](#interface-broadcaster) | [MerklePathLeaf](#interface-merklepathleaf) |
-| [ChainTracker](#interface-chaintracker) | [NodejsHttpClientRequest](#interface-nodejshttpclientrequest) |
-| [FeeModel](#interface-feemodel) | [TransactionInput](#interface-transactioninput) |
-| [Fetch](#interface-fetch) | [TransactionOutput](#interface-transactionoutput) |
+| [ArcConfig](#interface-arcconfig) | [HttpClientRequestOptions](#interface-httpclientrequestoptions) |
+| [BroadcastFailure](#interface-broadcastfailure) | [HttpsNodejs](#interface-httpsnodejs) |
+| [BroadcastResponse](#interface-broadcastresponse) | [MerklePathLeaf](#interface-merklepathleaf) |
 | [Broadcaster](#interface-broadcaster) | [NodejsHttpClientRequest](#interface-nodejshttpclientrequest) |
 | [ChainTracker](#interface-chaintracker) | [TransactionInput](#interface-transactioninput) |
 | [FeeModel](#interface-feemodel) | [TransactionOutput](#interface-transactionoutput) |
 | [FetchOptions](#interface-fetchoptions) | [WhatsOnChainConfig](#interface-whatsonchainconfig) |
+| [HttpClient](#interface-httpclient) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 

@@ -6,20 +6,17 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ## Classes
 
-| | |
-| --- | --- |
-| [BasePoint](#class-basepoint) | [Reader](#class-reader) |
-| [BigNumber](#class-bignumber) | [ReductionContext](#class-reductioncontext) |
-| [Curve](#class-curve) | [SHA1](#class-sha1) |
-| [DRBG](#class-drbg) | [SHA1HMAC](#class-sha1hmac) |
-| [JacobianPoint](#class-jacobianpoint) | [SHA256](#class-sha256) |
-| [K256](#class-k256) | [SHA256HMAC](#class-sha256hmac) |
-| [Mersenne](#class-mersenne) | [SHA512](#class-sha512) |
-| [MontgomoryMethod](#class-montgomorymethod) | [SHA512HMAC](#class-sha512hmac) |
-| [Point](#class-point) | [Signature](#class-signature) |
-| [PrivateKey](#class-privatekey) | [SymmetricKey](#class-symmetrickey) |
-| [PublicKey](#class-publickey) | [TransactionSignature](#class-transactionsignature) |
-| [RIPEMD160](#class-ripemd160) | [Writer](#class-writer) |
+| | | |
+| --- | --- | --- |
+| [BasePoint](#class-basepoint) | [Polynomial](#class-polynomial) | [SHA256HMAC](#class-sha256hmac) |
+| [BigNumber](#class-bignumber) | [PrivateKey](#class-privatekey) | [SHA512](#class-sha512) |
+| [Curve](#class-curve) | [PublicKey](#class-publickey) | [SHA512HMAC](#class-sha512hmac) |
+| [DRBG](#class-drbg) | [RIPEMD160](#class-ripemd160) | [Signature](#class-signature) |
+| [JacobianPoint](#class-jacobianpoint) | [Reader](#class-reader) | [SymmetricKey](#class-symmetrickey) |
+| [K256](#class-k256) | [ReductionContext](#class-reductioncontext) | [TransactionSignature](#class-transactionsignature) |
+| [Mersenne](#class-mersenne) | [SHA1](#class-sha1) | [Writer](#class-writer) |
+| [MontgomoryMethod](#class-montgomorymethod) | [SHA1HMAC](#class-sha1hmac) |  |
+| [Point](#class-point) | [SHA256](#class-sha256) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -6369,6 +6366,32 @@ const isVerified = signature.verify(msg, publicKey);
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+### Class: Polynomial
+
+Polynomial class
+
+This class is used to create a polynomial with a given threshold and a private key.
+The polynomial is used to create shares of the private key.
+
+Example
+
+```ts
+const key = new PrivateKey()
+const threshold = 2
+const polynomial = new Polynomial(key, threshold)
+```
+
+```ts
+export default class Polynomial {
+    constructor(points: Point[], threshold: number) 
+    static fromPrivateKey(key: PrivateKey, threshold: number): Polynomial 
+    valueAt(x: BigNumber): BigNumber 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 ### Class: PrivateKey
 
 Represents a Private Key, which is a secret that can be used to generate signatures in a cryptographic system.
@@ -6394,7 +6417,11 @@ export default class PrivateKey extends BigNumber {
     toAddress(prefix: number[] | string = [0]): string 
     deriveSharedSecret(key: PublicKey): Point 
     deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
-    split(threshold: number, totalShares: number): BigNumber[] 
+    split(threshold: number, totalShares: number): {
+        shares: BigNumber[];
+        threshold: number;
+    } 
+    static fromShares(points: Point[], threshold?: number): PrivateKey 
 }
 ```
 
@@ -6508,6 +6535,33 @@ Example
 const privateKey = PrivateKey.fromRandom();
 ```
 
+#### Method fromShares
+
+Combines shares to reconstruct the private key.
+
+```ts
+static fromShares(points: Point[], threshold?: number): PrivateKey 
+```
+
+Returns
+
+The reconstructed private key.
+
+Argument Details
+
++ **points**
+  + An array of points (shares) to be used to reconstruct the private key.
++ **threshold**
+  + The minimum number of shares required to reconstruct the private key.
+
+Example
+
+```ts
+const key = PrivateKey.fromRandom()
+const recovery = key.split(2, 5)
+const reconstructedKey = PrivateKey.fromShares(recovery.shares)
+```
+
 #### Method fromString
 
 Generates a private key from a string.
@@ -6599,7 +6653,10 @@ const signature = privateKey.sign('Hello, World!');
 Splits the private key into shares using Shamir's Secret Sharing Scheme.
 
 ```ts
-split(threshold: number, totalShares: number): BigNumber[] 
+split(threshold: number, totalShares: number): {
+    shares: BigNumber[];
+    threshold: number;
+} 
 ```
 
 Returns

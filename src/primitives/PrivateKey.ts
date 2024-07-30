@@ -275,7 +275,7 @@ export default class PrivateKey extends BigNumber {
     if (totalShares < 3 || totalShares > 100) throw new Error('totalShares should be between 3 and 100')
 
     const poly = Polynomial.fromPrivateKey(this, threshold)
-    
+
     const shares = []
     for (let i = 0; i < totalShares; i++) {
       const x = new BigNumber(PrivateKey.fromRandom().toArray())
@@ -291,14 +291,14 @@ export default class PrivateKey extends BigNumber {
    *
    * @param points An array of points (shares) to be used to reconstruct the private key.
    * @param threshold The minimum number of shares required to reconstruct the private key.
-   * 
+   *
    * @returns The reconstructed private key.
-   * 
+   *
    * @example
    * const key = PrivateKey.fromRandom()
    * const recovery = key.split(2, 5)
    * const reconstructedKey = PrivateKey.fromShares(recovery.shares)
-   * 
+   *
    **/
   static fromShares (points: Point[], threshold?: number): PrivateKey {
     const recombinant = threshold || points.length
@@ -306,7 +306,7 @@ export default class PrivateKey extends BigNumber {
 
     const poly = new Polynomial(points, recombinant)
     const y = poly.valueAt(new BigNumber(0))
-    
+
     return new PrivateKey(y.toArray())
   }
 }
