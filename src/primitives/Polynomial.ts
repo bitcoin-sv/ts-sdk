@@ -1,6 +1,11 @@
 import PrivateKey from './PrivateKey.js'
 import BigNumber from './BigNumber.js'
 import Point from './Point.js'
+import Curve from './Curve.js'
+import Random from './Random.js'
+
+// prime for the finite field must be larger than any key value.
+const P = new Curve().p
 
 /**
  * Polynomial class
@@ -31,7 +36,7 @@ export default class Polynomial {
     const poly = new Polynomial([new Point(new BigNumber(0), new BigNumber(key.toArray()))], threshold)
     // The other values are random
     for (let i = 1; i < threshold; i++) {
-      poly.points.push(new Point(new BigNumber(PrivateKey.fromRandom().toArray()), new BigNumber(PrivateKey.fromRandom().toArray())))
+      poly.points.push(new Point(new BigNumber(Random(32)).mod(P), new BigNumber(Random(32)).mod(P)))
     }
     return poly
   }
@@ -43,10 +48,18 @@ export default class Polynomial {
       let term = this.points[i].y
       for (let j = 0; j < this.threshold; j++) {
         if (i !== j) {
-          term = term.mul(x.sub(this.points[j].x)).div(this.points[i].x.sub(this.points[j].x))
+          const xj = this.points[j].x
+          const xi = this.points[i].x
+          
+          const numerator = x.sub(xj)
+          const denominator = xi.sub(xj)
+          const denominatorInverse = denominator.invm(P)
+          
+          const fraction = numerator.mul(denominatorInverse).mod(P)
+          term = term.mul(fraction).mod(P)
         }
       }
-      y = y.add(term)
+      y = y.add(term).mod(P)
     }
     return y
   }
