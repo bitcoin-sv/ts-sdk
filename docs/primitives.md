@@ -6420,7 +6420,7 @@ export default class PrivateKey extends BigNumber {
     deriveSharedSecret(key: PublicKey): Point 
     deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
     split(threshold: number, totalShares: number): BigNumber[] 
-    static fromShares(points: Point[], threshold?: number): PrivateKey 
+    static fromShares(shares: Point[], threshold?: number): PrivateKey 
 }
 ```
 
@@ -6539,7 +6539,7 @@ const privateKey = PrivateKey.fromRandom();
 Combines shares to reconstruct the private key.
 
 ```ts
-static fromShares(points: Point[], threshold?: number): PrivateKey 
+static fromShares(shares: Point[], threshold?: number): PrivateKey 
 ```
 
 Returns
@@ -6548,7 +6548,7 @@ The reconstructed private key.
 
 Argument Details
 
-+ **points**
++ **shares**
   + An array of points (shares) to be used to reconstruct the private key.
 + **threshold**
   + The minimum number of shares required to reconstruct the private key.
@@ -6557,8 +6557,8 @@ Example
 
 ```ts
 const key = PrivateKey.fromRandom()
-const recovery = key.split(2, 5)
-const reconstructedKey = PrivateKey.fromShares(recovery.shares)
+const shares = key.split(2, 5)
+const reconstructedKey = PrivateKey.fromShares([shares[1], shares[3]])
 ```
 
 #### Method fromString

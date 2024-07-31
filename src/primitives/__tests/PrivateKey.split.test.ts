@@ -45,4 +45,10 @@ describe('PrivateKey', () => {
 
     expect(() => privateKey.split(invalidThreshold, totalShares)).toThrow('threshold should be between 2 and 99')
   })
+
+  it('should throw an error if the same share is included twice during recovery', () => {
+    const privateKey = PrivateKey.fromRandom()
+    const shares = privateKey.split(2, 5)
+    expect(() => PrivateKey.fromShares([shares[1], shares[1]], 2)).toThrow('Duplicate share detected, each must be unique.')
+  })
 })

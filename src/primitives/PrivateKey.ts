@@ -289,22 +289,29 @@ export default class PrivateKey extends BigNumber {
   /**
    * Combines shares to reconstruct the private key.
    *
-   * @param points An array of points (shares) to be used to reconstruct the private key.
+   * @param shares An array of points (shares) to be used to reconstruct the private key.
    * @param threshold The minimum number of shares required to reconstruct the private key.
    *
    * @returns The reconstructed private key.
    *
    * @example
    * const key = PrivateKey.fromRandom()
-   * const recovery = key.split(2, 5)
-   * const reconstructedKey = PrivateKey.fromShares(recovery.shares)
+   * const shares = key.split(2, 5)
+   * const reconstructedKey = PrivateKey.fromShares([shares[1], shares[3]])
    *
    **/
-  static fromShares (points: Point[], threshold?: number): PrivateKey {
-    const recombinant = threshold || points.length
+  static fromShares (shares: Point[], threshold?: number): PrivateKey {
+    const recombinant = threshold || shares.length
     if (recombinant < 2) throw new Error('At least 2 shares are required to reconstruct the private key')
-
-    const poly = new Polynomial(points, recombinant)
+    // check to see if two points have the same x value
+    for (let i = 0; i < recombinant; i++) {
+      for (let j = i + 1; j < recombinant; j++) {
+        if (shares[i].x.eq(shares[j].x)) {
+          throw new Error('Duplicate share detected, each must be unique.')
+        }
+      }
+    }
+    const poly = new Polynomial(shares, recombinant)
     const y = poly.valueAt(new BigNumber(0))
 
     return new PrivateKey(y.toArray())
