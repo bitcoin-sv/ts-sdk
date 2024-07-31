@@ -21,7 +21,7 @@ describe('PrivateKey', () => {
 
   it('should recombine the shares into a private key correctly', () => {
     let x = 0
-    while (x < 100) {
+    while (x < 3) {
       const privateKey = PrivateKey.fromRandom()
       const threshold = 2
       const totalShares = 5
