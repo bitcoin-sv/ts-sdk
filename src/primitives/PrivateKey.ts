@@ -270,7 +270,7 @@ export default class PrivateKey extends BigNumber {
    * const key = PrivateKey.fromRandom()
    * const shares = key.split(2, 5)
    */
-  split (threshold: number, totalShares: number): { shares: BigNumber[], threshold: number } {
+  split (threshold: number, totalShares: number): BigNumber[] {
     if (threshold < 2 || threshold > totalShares || threshold > 99) throw new Error('threshold should be between 2 and 99')
     if (totalShares < 3 || totalShares > 100) throw new Error('totalShares should be between 3 and 100')
 
@@ -283,7 +283,7 @@ export default class PrivateKey extends BigNumber {
       shares.push(new Point(x, y))
     }
 
-    return { shares, threshold }
+    return shares
   }
 
   /**

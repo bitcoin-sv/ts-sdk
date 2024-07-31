@@ -26,12 +26,12 @@ export default class Polynomial {
   readonly points: Point[]
   readonly threshold: number
 
-  constructor(points: Point[], threshold: number) {
+  constructor (points: Point[], threshold: number) {
     this.points = points
     this.threshold = threshold
   }
 
-  static fromPrivateKey(key: PrivateKey, threshold: number): Polynomial {
+  static fromPrivateKey (key: PrivateKey, threshold: number): Polynomial {
     // The key is the y-intercept of the polynomial where x=0.
     const poly = new Polynomial(
       [new Point(new BigNumber(0), new BigNumber(key.toArray()))],
@@ -48,7 +48,7 @@ export default class Polynomial {
   }
 
   // Evaluate the polynomial at x by using Lagrange interpolation
-  valueAt(x: BigNumber): BigNumber {
+  valueAt (x: BigNumber): BigNumber {
     let y = new BigNumber(0)
     for (let i = 0; i < this.threshold; i++) {
       let term = this.points[i].y

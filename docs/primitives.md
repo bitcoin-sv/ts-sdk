@@ -6383,6 +6383,8 @@ const polynomial = new Polynomial(key, threshold)
 
 ```ts
 export default class Polynomial {
+    readonly points: Point[];
+    readonly threshold: number;
     constructor(points: Point[], threshold: number) 
     static fromPrivateKey(key: PrivateKey, threshold: number): Polynomial 
     valueAt(x: BigNumber): BigNumber 
@@ -6417,10 +6419,7 @@ export default class PrivateKey extends BigNumber {
     toAddress(prefix: number[] | string = [0]): string 
     deriveSharedSecret(key: PublicKey): Point 
     deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
-    split(threshold: number, totalShares: number): {
-        shares: BigNumber[];
-        threshold: number;
-    } 
+    split(threshold: number, totalShares: number): BigNumber[] 
     static fromShares(points: Point[], threshold?: number): PrivateKey 
 }
 ```
@@ -6653,10 +6652,7 @@ const signature = privateKey.sign('Hello, World!');
 Splits the private key into shares using Shamir's Secret Sharing Scheme.
 
 ```ts
-split(threshold: number, totalShares: number): {
-    shares: BigNumber[];
-    threshold: number;
-} 
+split(threshold: number, totalShares: number): BigNumber[] 
 ```
 
 Returns
