@@ -20,18 +20,22 @@ describe('PrivateKey', () => {
   })
 
   it('should recombine the shares into a private key correctly', () => {
-    const privateKey = PrivateKey.fromRandom()
-    const threshold = 2
-    const totalShares = 5
+    let x = 0
+    while (x < 100) {
+      const privateKey = PrivateKey.fromRandom()
+      const threshold = 2
+      const totalShares = 5
 
-    const og = privateKey.toWif()
+      const og = privateKey.toWif()
 
-    // Split the private key
-    const recovery = privateKey.split(threshold, totalShares)
+      // Split the private key
+      const recovery = privateKey.split(threshold, totalShares)
 
-    // recombine
-    const recombined = PrivateKey.fromShares(recovery.shares, threshold)
-    expect(recombined.toWif()).toBe(og)
+      // recombine
+      const recombined = PrivateKey.fromShares(recovery.shares, threshold)
+      expect(recombined.toWif()).toBe(og)
+      x++
+    }
   })
 
   it('should throw an error for invalid threshold values', () => {
