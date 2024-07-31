@@ -23,8 +23,8 @@ const P = new Curve().p
  *
  */
 export default class Polynomial {
-  private readonly points: Point[]
-  private readonly threshold: number
+  readonly points: Point[]
+  readonly threshold: number
 
   constructor(points: Point[], threshold: number) {
     this.points = points
@@ -39,10 +39,11 @@ export default class Polynomial {
     )
     // The other values are random
     for (let i = 1; i < threshold; i++) {
-      const randomX = new BigNumber(Random(32)).mod(P)
-      const randomY = new BigNumber(Random(32)).mod(P)
+      const randomX = new BigNumber(Random(32)).umod(P)
+      const randomY = new BigNumber(Random(32)).umod(P)
       poly.points.push(new Point(randomX, randomY))
     }
+
     return poly
   }
 
@@ -56,15 +57,15 @@ export default class Polynomial {
           const xj = this.points[j].x
           const xi = this.points[i].x
 
-          const numerator = x.sub(xj).mod(P)
-          const denominator = xi.sub(xj).mod(P)
+          const numerator = x.sub(xj).umod(P)
+          const denominator = xi.sub(xj).umod(P)
           const denominatorInverse = denominator.invm(P)
 
-          const fraction = numerator.mul(denominatorInverse).mod(P)
-          term = term.mul(fraction).mod(P)
+          const fraction = numerator.mul(denominatorInverse).umod(P)
+          term = term.mul(fraction).umod(P)
         }
       }
-      y = y.add(term).mod(P)
+      y = y.add(term).umod(P)
     }
     return y
   }

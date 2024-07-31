@@ -276,12 +276,15 @@ export default class PrivateKey extends BigNumber {
 
     const poly = Polynomial.fromPrivateKey(this, threshold)
 
+    console.log(poly.points.reduce((a, point) => a + `${point.x.toString(10)}, ${point.y.toString(10)}\n`, ''))
+
     const shares = []
     for (let i = 0; i < totalShares; i++) {
       const x = new BigNumber(PrivateKey.fromRandom().toArray())
       const y = poly.valueAt(x)
       shares.push(new Point(x, y))
     }
+    console.log(shares.reduce((a, share) => a + `${share.x.toString(10)}, ${share.y.toString(10)}\n`, ''))
 
     return { shares, threshold }
   }
