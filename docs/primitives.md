@@ -6385,7 +6385,7 @@ const polynomial = new Polynomial(key, threshold)
 export default class Polynomial {
     readonly points: Point[];
     readonly threshold: number;
-    constructor(points: Point[], threshold: number) 
+    constructor(points: Point[]) 
     static fromPrivateKey(key: PrivateKey, threshold: number): Polynomial 
     valueAt(x: BigNumber): BigNumber 
 }
@@ -6420,7 +6420,7 @@ export default class PrivateKey extends BigNumber {
     deriveSharedSecret(key: PublicKey): Point 
     deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
     split(threshold: number, totalShares: number): BigNumber[] 
-    static fromShares(shares: Point[], threshold?: number): PrivateKey 
+    static fromShares(shares: Point[]): PrivateKey 
 }
 ```
 
@@ -6539,7 +6539,7 @@ const privateKey = PrivateKey.fromRandom();
 Combines shares to reconstruct the private key.
 
 ```ts
-static fromShares(shares: Point[], threshold?: number): PrivateKey 
+static fromShares(shares: Point[]): PrivateKey 
 ```
 
 Returns
