@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.1.14 - 2024-07-30](#1114---2024-07-30)
 - [1.1.13 - 2024-07-19](#1113---2024-07-19)
 - [1.1.8 - 2024-06-12](#118---2024-06-19)
 - [1.1.6 - 2024-06-12](#116---2024-06-12)
@@ -16,10 +17,6 @@ All notable changes to this project will be documented in this file. The format 
 ## [Unreleased]
 
 ### Added
-- ability to split a private key into shares using Shamir's Secret Sharing Scheme.
-    Use like this:
-        const key = PrivateKey.fromRandom()
-        const shares = key.split(2, 5)
 
 ### Changed
 
@@ -28,12 +25,19 @@ All notable changes to this project will be documented in this file. The format 
 ### Removed
 
 ### Fixed
-- Utxo.fromUtxo now correctly sets sourceTXID on the input it returns.
-- Transaction.toBinary, .verify, and TransactionSignature.format now check first if a sourceTXID is populated and use that before falling back to sourceTransaction.id()/sourceTransaction.hash().
-- 
+
 ### Security
 
 ---
+
+## [1.1.14] - 2024-07-30
+### Added
+Ability to split a private key into shares using Shamir's Secret Sharing Scheme. Use like this:
+```javascript
+const key = PrivateKey.fromRandom()
+const recovery = key.split(2, 5)
+const sameKey = PrivateKey.fromShares(recovery.shares, recovery.threshold)
+```
 
 ## [1.1.13] - 2024-07-19
 ### Fixed
