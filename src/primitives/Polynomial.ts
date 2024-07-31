@@ -26,23 +26,28 @@ export default class Polynomial {
   private readonly points: Point[]
   private readonly threshold: number
 
-  constructor (points: Point[], threshold: number) {
+  constructor(points: Point[], threshold: number) {
     this.points = points
     this.threshold = threshold
   }
 
-  static fromPrivateKey (key: PrivateKey, threshold: number): Polynomial {
+  static fromPrivateKey(key: PrivateKey, threshold: number): Polynomial {
     // The key is the y-intercept of the polynomial where x=0.
-    const poly = new Polynomial([new Point(new BigNumber(0), new BigNumber(key.toArray()))], threshold)
+    const poly = new Polynomial(
+      [new Point(new BigNumber(0), new BigNumber(key.toArray()))],
+      threshold
+    )
     // The other values are random
     for (let i = 1; i < threshold; i++) {
-      poly.points.push(new Point(new BigNumber(Random(32)).mod(P), new BigNumber(Random(32)).mod(P)))
+      const randomX = new BigNumber(Random(32)).mod(P)
+      const randomY = new BigNumber(Random(32)).mod(P)
+      poly.points.push(new Point(randomX, randomY))
     }
     return poly
   }
 
-  // Evaluate the polynomial at x by using lagrange interpolation
-  valueAt (x: BigNumber): BigNumber {
+  // Evaluate the polynomial at x by using Lagrange interpolation
+  valueAt(x: BigNumber): BigNumber {
     let y = new BigNumber(0)
     for (let i = 0; i < this.threshold; i++) {
       let term = this.points[i].y
@@ -50,11 +55,11 @@ export default class Polynomial {
         if (i !== j) {
           const xj = this.points[j].x
           const xi = this.points[i].x
-          
-          const numerator = x.sub(xj)
-          const denominator = xi.sub(xj)
+
+          const numerator = x.sub(xj).mod(P)
+          const denominator = xi.sub(xj).mod(P)
           const denominatorInverse = denominator.invm(P)
-          
+
           const fraction = numerator.mul(denominatorInverse).mod(P)
           term = term.mul(fraction).mod(P)
         }
