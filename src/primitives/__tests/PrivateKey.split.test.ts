@@ -32,7 +32,7 @@ describe('PrivateKey', () => {
       const shares = privateKey.split(threshold, totalShares)
 
       // recombine
-      const recombined = PrivateKey.fromShares(shares, threshold)
+      const recombined = PrivateKey.fromShares(shares)
       expect(recombined.toWif()).toBe(og)
       x++
     }
@@ -49,6 +49,6 @@ describe('PrivateKey', () => {
   it('should throw an error if the same share is included twice during recovery', () => {
     const privateKey = PrivateKey.fromRandom()
     const shares = privateKey.split(2, 5)
-    expect(() => PrivateKey.fromShares([shares[1], shares[1]], 2)).toThrow('Duplicate share detected, each must be unique.')
+    expect(() => PrivateKey.fromShares([shares[1], shares[1]])).toThrow('Duplicate share detected, each must be unique.')
   })
 })
