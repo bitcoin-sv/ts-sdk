@@ -8,22 +8,22 @@ import { fromBase58, toBase58 } from './utils.js'
 const P = new Curve().p
 
 export class PointInFiniteField {
-    x: BigNumber
-    y: BigNumber
-    
-    constructor (x: BigNumber, y: BigNumber) {
-        this.x = x.umod(P)
-        this.y = y.umod(P)
-    }
+  x: BigNumber
+  y: BigNumber
 
-    toString(): string {
-        return toBase58(this.x.toArray()) + '.' + toBase58(this.y.toArray())
-    }
+  constructor (x: BigNumber, y: BigNumber) {
+    this.x = x.umod(P)
+    this.y = y.umod(P)
+  }
 
-    static fromString(str: string): PointInFiniteField {
-        const [x, y] = str.split('.')
-        return new PointInFiniteField(new BigNumber(fromBase58(x)), new BigNumber(fromBase58(y)))
-    }
+  toString (): string {
+    return toBase58(this.x.toArray()) + '.' + toBase58(this.y.toArray())
+  }
+
+  static fromString (str: string): PointInFiniteField {
+    const [x, y] = str.split('.')
+    return new PointInFiniteField(new BigNumber(fromBase58(x)), new BigNumber(fromBase58(y)))
+  }
 }
 
 /**

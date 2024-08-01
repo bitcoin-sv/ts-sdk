@@ -8,15 +8,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [BasePoint](#class-basepoint) | [Polynomial](#class-polynomial) | [SHA256HMAC](#class-sha256hmac) |
-| [BigNumber](#class-bignumber) | [PrivateKey](#class-privatekey) | [SHA512](#class-sha512) |
-| [Curve](#class-curve) | [PublicKey](#class-publickey) | [SHA512HMAC](#class-sha512hmac) |
-| [DRBG](#class-drbg) | [RIPEMD160](#class-ripemd160) | [Signature](#class-signature) |
-| [JacobianPoint](#class-jacobianpoint) | [Reader](#class-reader) | [SymmetricKey](#class-symmetrickey) |
-| [K256](#class-k256) | [ReductionContext](#class-reductioncontext) | [TransactionSignature](#class-transactionsignature) |
-| [Mersenne](#class-mersenne) | [SHA1](#class-sha1) | [Writer](#class-writer) |
-| [MontgomoryMethod](#class-montgomorymethod) | [SHA1HMAC](#class-sha1hmac) |  |
-| [Point](#class-point) | [SHA256](#class-sha256) |  |
+| [BasePoint](#class-basepoint) | [Point](#class-point) | [SHA1HMAC](#class-sha1hmac) |
+| [BigNumber](#class-bignumber) | [PointInFiniteField](#class-pointinfinitefield) | [SHA256](#class-sha256) |
+| [Curve](#class-curve) | [Polynomial](#class-polynomial) | [SHA256HMAC](#class-sha256hmac) |
+| [DRBG](#class-drbg) | [PrivateKey](#class-privatekey) | [SHA512](#class-sha512) |
+| [JacobianPoint](#class-jacobianpoint) | [PublicKey](#class-publickey) | [SHA512HMAC](#class-sha512hmac) |
+| [K256](#class-k256) | [RIPEMD160](#class-ripemd160) | [Signature](#class-signature) |
+| [KeyShares](#class-keyshares) | [Reader](#class-reader) | [SymmetricKey](#class-symmetrickey) |
+| [Mersenne](#class-mersenne) | [ReductionContext](#class-reductioncontext) | [TransactionSignature](#class-transactionsignature) |
+| [MontgomoryMethod](#class-montgomorymethod) | [SHA1](#class-sha1) | [Writer](#class-writer) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -6366,6 +6366,35 @@ const isVerified = signature.verify(msg, publicKey);
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+### Class: PointInFiniteField
+
+```ts
+export class PointInFiniteField {
+    x: BigNumber;
+    y: BigNumber;
+    constructor(x: BigNumber, y: BigNumber) 
+    toString(): string 
+    static fromString(str: string): PointInFiniteField 
+}
+```
+
+<details>
+
+<summary>Class PointInFiniteField Details</summary>
+
+#### Method toString
+
+function toString() { [native code] }
+
+```ts
+toString(): string 
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 ### Class: Polynomial
 
 Polynomial class
@@ -6383,11 +6412,33 @@ const polynomial = new Polynomial(key, threshold)
 
 ```ts
 export default class Polynomial {
-    readonly points: Point[];
+    readonly points: PointInFiniteField[];
     readonly threshold: number;
-    constructor(points: Point[]) 
+    constructor(points: PointInFiniteField[], threshold?: number) 
     static fromPrivateKey(key: PrivateKey, threshold: number): Polynomial 
     valueAt(x: BigNumber): BigNumber 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: KeyShares
+
+Example
+
+```ts
+const key = PrivateKey.fromShares(shares)
+```
+
+```ts
+export class KeyShares {
+    points: PointInFiniteField[];
+    threshold: number;
+    integrity: string;
+    constructor(points: PointInFiniteField[], threshold: number, integrity: string) 
+    static fromBackupFormat(shares: string[]): KeyShares 
+    toBackupFormat() 
 }
 ```
 
@@ -6419,8 +6470,8 @@ export default class PrivateKey extends BigNumber {
     toAddress(prefix: number[] | string = [0]): string 
     deriveSharedSecret(key: PublicKey): Point 
     deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
-    split(threshold: number, totalShares: number): BigNumber[] 
-    static fromShares(shares: Point[]): PrivateKey 
+    toKeyShares(threshold: number, totalShares: number): KeyShares 
+    static fromKeyShares(keyShares: KeyShares): PrivateKey 
 }
 ```
 
@@ -6516,30 +6567,12 @@ const publicKey = privateKey.toPublicKey();
 const sharedSecret = privateKey.deriveSharedSecret(publicKey);
 ```
 
-#### Method fromRandom
-
-Generates a private key randomly.
-
-```ts
-static fromRandom(): PrivateKey 
-```
-
-Returns
-
-The newly generated Private Key.
-
-Example
-
-```ts
-const privateKey = PrivateKey.fromRandom();
-```
-
-#### Method fromShares
+#### Method fromKeyShares
 
 Combines shares to reconstruct the private key.
 
 ```ts
-static fromShares(shares: Point[]): PrivateKey 
+static fromKeyShares(keyShares: KeyShares): PrivateKey 
 ```
 
 Returns
@@ -6556,9 +6589,27 @@ Argument Details
 Example
 
 ```ts
-const key = PrivateKey.fromRandom()
-const shares = key.split(2, 5)
-const reconstructedKey = PrivateKey.fromShares([shares[1], shares[3]])
+const share1 = '2NWeap6SDBTL5jVnvk9yUxyfLqNrDs2Bw85KNDfLJwRT.4yLtSm327NApsbuP7QXVW3CWDuBRgmS6rRiFkAkTukic'
+const share2 = '7NbgGA8iAsxg2s6mBLkLFtGKQrnc4aCbooHJJV31cWs4.GUgXtudthawE3Eevc1waT3Atr1Ft7j1XxdUguVo3B7x3'
+const reconstructedKey = PrivateKey.fromKeyShares({ shares: [share1, share2], threshold: 2, integrity: '23409547' })
+```
+
+#### Method fromRandom
+
+Generates a private key randomly.
+
+```ts
+static fromRandom(): PrivateKey 
+```
+
+Returns
+
+The newly generated Private Key.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
 ```
 
 #### Method fromString
@@ -6647,34 +6698,6 @@ const privateKey = PrivateKey.fromRandom();
 const signature = privateKey.sign('Hello, World!');
 ```
 
-#### Method split
-
-Splits the private key into shares using Shamir's Secret Sharing Scheme.
-
-```ts
-split(threshold: number, totalShares: number): BigNumber[] 
-```
-
-Returns
-
-An array of shares.
-
-Argument Details
-
-+ **threshold**
-  + The minimum number of shares required to reconstruct the private key.
-+ **totalShares**
-  + The total number of shares to generate.
-+ **prime**
-  + The prime number to be used in Shamir's Secret Sharing Scheme.
-
-Example
-
-```ts
-const key = PrivateKey.fromRandom()
-const shares = key.split(2, 5)
-```
-
 #### Method toAddress
 
 Base58Check encodes the hash of the public key associated with this private key with a prefix to indicate locking script type.
@@ -6700,6 +6723,34 @@ const address = privkey.toAddress()
 const address = privkey.toAddress('mainnet')
 const testnetAddress = privkey.toAddress([0x6f])
 const testnetAddress = privkey.toAddress('testnet')
+```
+
+#### Method toKeyShares
+
+Splits the private key into shares using Shamir's Secret Sharing Scheme.
+
+```ts
+toKeyShares(threshold: number, totalShares: number): KeyShares 
+```
+
+Returns
+
+An array of shares.
+
+Argument Details
+
++ **threshold**
+  + The minimum number of shares required to reconstruct the private key.
++ **totalShares**
+  + The total number of shares to generate.
++ **prime**
+  + The prime number to be used in Shamir's Secret Sharing Scheme.
+
+Example
+
+```ts
+const key = PrivateKey.fromRandom()
+const shares = key.toKeyShares(2, 5)
 ```
 
 #### Method toPublicKey

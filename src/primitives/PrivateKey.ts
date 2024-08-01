@@ -11,52 +11,52 @@ import Polynomial, { PointInFiniteField } from './Polynomial.js'
 
 /**
  * @class KeyShares
- * 
+ *
  * This class is used to store the shares of a private key.
- * 
+ *
  * @param shares - An array of shares
  * @param threshold - The number of shares required to recombine the private key
- * 
+ *
  * @returns KeyShares
- * 
+ *
  * @example
  * const key = PrivateKey.fromShares(shares)
- * 
+ *
  */
 
 export class KeyShares {
-    points: PointInFiniteField[]
-    threshold: number
-    integrity: string
-    
-    constructor(points: PointInFiniteField[], threshold: number, integrity: string) {
-        this.points = points
-        this.threshold = threshold
-        this.integrity = integrity
-    }
+  points: PointInFiniteField[]
+  threshold: number
+  integrity: string
 
-    static fromBackupFormat(shares: string[]): KeyShares {
-      let threshold = 0
-      let integrity = ''
-        const points = shares.map((share, idx) => {
-          const shareParts = share.split('.')
-          if (shareParts.length !== 4) throw Error('Invalid share format in share ' + idx + '. Expected format: "x.y.t.i" - received ' + share)
-          const [x, y, t, i] = shareParts
-          if (!t) throw Error('Threshold not found in share ' + idx)
-          if (!i) throw Error('Integrity not found in share ' + idx)
-          const tInt = parseInt(t)
-          if (idx !== 0 && threshold !== tInt) throw Error('Threshold mismatch in share ' + idx)
-          if (idx !== 0 && integrity !== i) throw Error('Integrity mismatch in share ' + idx)
-          threshold = tInt
-          integrity = i
-          return PointInFiniteField.fromString([x,y].join('.'))
-        })
-        return new KeyShares(points, threshold, integrity)
-    }
+  constructor (points: PointInFiniteField[], threshold: number, integrity: string) {
+    this.points = points
+    this.threshold = threshold
+    this.integrity = integrity
+  }
 
-    toBackupFormat() {
-        return this.points.map(share => share.toString() + '.' + this.threshold + '.' + this.integrity)
-    }
+  static fromBackupFormat (shares: string[]): KeyShares {
+    let threshold = 0
+    let integrity = ''
+    const points = shares.map((share, idx) => {
+      const shareParts = share.split('.')
+      if (shareParts.length !== 4) throw Error('Invalid share format in share ' + idx + '. Expected format: "x.y.t.i" - received ' + share)
+      const [x, y, t, i] = shareParts
+      if (!t) throw Error('Threshold not found in share ' + idx)
+      if (!i) throw Error('Integrity not found in share ' + idx)
+      const tInt = parseInt(t)
+      if (idx !== 0 && threshold !== tInt) throw Error('Threshold mismatch in share ' + idx)
+      if (idx !== 0 && integrity !== i) throw Error('Integrity mismatch in share ' + idx)
+      threshold = tInt
+      integrity = i
+      return PointInFiniteField.fromString([x, y].join('.'))
+    })
+    return new KeyShares(points, threshold, integrity)
+  }
+
+  toBackupFormat () {
+    return this.points.map(share => share.toString() + '.' + this.threshold + '.' + this.integrity)
+  }
 }
 
 /**
