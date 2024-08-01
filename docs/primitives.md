@@ -6471,6 +6471,8 @@ export default class PrivateKey extends BigNumber {
     deriveSharedSecret(key: PublicKey): Point 
     deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
     toKeyShares(threshold: number, totalShares: number): KeyShares 
+    toBackupShares(threshold: number, totalShares: number): string[] 
+    static fromBackupShares(shares: string[]): PrivateKey 
     static fromKeyShares(keyShares: KeyShares): PrivateKey 
 }
 ```
@@ -6566,6 +6568,16 @@ const privateKey = PrivateKey.fromRandom();
 const publicKey = privateKey.toPublicKey();
 const sharedSecret = privateKey.deriveSharedSecret(publicKey);
 ```
+
+#### Method fromBackupShares
+
+```ts
+static fromBackupShares(shares: string[]): PrivateKey 
+```
+
+Returns
+
+PrivateKey
 
 #### Method fromKeyShares
 
@@ -6724,6 +6736,19 @@ const address = privkey.toAddress('mainnet')
 const testnetAddress = privkey.toAddress([0x6f])
 const testnetAddress = privkey.toAddress('testnet')
 ```
+
+#### Method toBackupShares
+
+```ts
+toBackupShares(threshold: number, totalShares: number): string[] 
+```
+
+Argument Details
+
++ **threshold**
+  + The number of shares which will be required to reconstruct the private key.
++ **totalShares**
+  + The nu,ber of shares to generate for distribution.
 
 #### Method toKeyShares
 

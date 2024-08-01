@@ -339,6 +339,33 @@ export default class PrivateKey extends BigNumber {
   }
 
   /**
+   * @method toBackupShares
+   *
+   * Creates a backup of the private key by splitting it into shares.
+   *
+   *
+   * @param threshold The number of shares which will be required to reconstruct the private key.
+   * @param totalShares The nu,ber of shares to generate for distribution.
+   * @returns
+   */
+  toBackupShares (threshold: number, totalShares: number): string[] {
+    return this.toKeyShares(threshold, totalShares).toBackupFormat()
+  }
+
+  /**
+   *
+   * @method fromBackupShares
+   *
+   * Creates a private key from backup shares.
+   *
+   * @param shares
+   * @returns PrivateKey
+   */
+  static fromBackupShares (shares: string[]): PrivateKey {
+    return PrivateKey.fromKeyShares(KeyShares.fromBackupFormat(shares))
+  }
+
+  /**
    * Combines shares to reconstruct the private key.
    *
    * @param shares An array of points (shares) to be used to reconstruct the private key.

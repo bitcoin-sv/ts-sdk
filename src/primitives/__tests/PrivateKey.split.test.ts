@@ -44,4 +44,11 @@ describe('PrivateKey', () => {
     const recovery = KeyShares.fromBackupFormat([backup[0], backup[1], backup[1]])
     expect(() => PrivateKey.fromKeyShares(recovery)).toThrow('Duplicate share detected, each must be unique.')
   })
+
+  it('should be able to create a backup array from a private key, and recover the same key back from the backup', () => {
+    const key = PrivateKey.fromRandom()
+    const backup = key.toBackupShares(3, 5)
+    const recoveredKey = PrivateKey.fromBackupShares(backup.slice(0, 3))
+    expect(recoveredKey.toWif()).toBe(key.toWif())
+  })
 })
