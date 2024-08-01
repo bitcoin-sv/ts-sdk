@@ -1,11 +1,30 @@
 import PrivateKey from './PrivateKey.js'
 import BigNumber from './BigNumber.js'
-import Point from './Point.js'
 import Curve from './Curve.js'
 import Random from './Random.js'
+import { fromBase58, toBase58 } from './utils.js'
 
 // prime for the finite field must be larger than any key value.
 const P = new Curve().p
+
+export class PointInFiniteField {
+    x: BigNumber
+    y: BigNumber
+    
+    constructor (x: BigNumber, y: BigNumber) {
+        this.x = x.umod(P)
+        this.y = y.umod(P)
+    }
+
+    toString(): string {
+        return toBase58(this.x.toArray()) + '.' + toBase58(this.y.toArray())
+    }
+
+    static fromString(str: string): PointInFiniteField {
+        const [x, y] = str.split('.')
+        return new PointInFiniteField(new BigNumber(fromBase58(x)), new BigNumber(fromBase58(y)))
+    }
+}
 
 /**
  * Polynomial class
@@ -23,23 +42,23 @@ const P = new Curve().p
  *
  */
 export default class Polynomial {
-  readonly points: Point[]
+  readonly points: PointInFiniteField[]
   readonly threshold: number
 
-  constructor (points: Point[]) {
+  constructor (points: PointInFiniteField[], threshold?: number) {
     this.points = points
-    this.threshold = points.length
+    this.threshold = threshold || points.length
   }
 
   static fromPrivateKey (key: PrivateKey, threshold: number): Polynomial {
     // The key is the y-intercept of the polynomial where x=0.
-    const points = [new Point(new BigNumber(0), new BigNumber(key.toArray()))]
+    const points = [new PointInFiniteField(new BigNumber(0), new BigNumber(key.toArray()))]
 
     // The other values are random
     for (let i = 1; i < threshold; i++) {
       const randomX = new BigNumber(Random(32)).umod(P)
       const randomY = new BigNumber(Random(32)).umod(P)
-      points.push(new Point(randomX, randomY))
+      points.push(new PointInFiniteField(randomX, randomY))
     }
 
     return new Polynomial(points)

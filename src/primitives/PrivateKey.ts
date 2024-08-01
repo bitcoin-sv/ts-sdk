@@ -6,8 +6,58 @@ import Curve from './Curve.js'
 import { sign, verify } from './ECDSA.js'
 import { sha256, sha256hmac } from './Hash.js'
 import Random from './Random.js'
-import { fromBase58Check, toArray, toBase58Check } from './utils.js'
-import Polynomial from './Polynomial.js'
+import { fromBase58Check, toArray, toBase58, toBase58Check } from './utils.js'
+import Polynomial, { PointInFiniteField } from './Polynomial.js'
+
+/**
+ * @class KeyShares
+ * 
+ * This class is used to store the shares of a private key.
+ * 
+ * @param shares - An array of shares
+ * @param threshold - The number of shares required to recombine the private key
+ * 
+ * @returns KeyShares
+ * 
+ * @example
+ * const key = PrivateKey.fromShares(shares)
+ * 
+ */
+
+export class KeyShares {
+    points: PointInFiniteField[]
+    threshold: number
+    integrity: string
+    
+    constructor(points: PointInFiniteField[], threshold: number, integrity: string) {
+        this.points = points
+        this.threshold = threshold
+        this.integrity = integrity
+    }
+
+    static fromBackupFormat(shares: string[]): KeyShares {
+      let threshold = 0
+      let integrity = ''
+        const points = shares.map((share, idx) => {
+          const shareParts = share.split('.')
+          if (shareParts.length !== 4) throw Error('Invalid share format in share ' + idx + '. Expected format: "x.y.t.i" - received ' + share)
+          const [x, y, t, i] = shareParts
+          if (!t) throw Error('Threshold not found in share ' + idx)
+          if (!i) throw Error('Integrity not found in share ' + idx)
+          const tInt = parseInt(t)
+          if (idx !== 0 && threshold !== tInt) throw Error('Threshold mismatch in share ' + idx)
+          if (idx !== 0 && integrity !== i) throw Error('Integrity mismatch in share ' + idx)
+          threshold = tInt
+          integrity = i
+          return PointInFiniteField.fromString([x,y].join('.'))
+        })
+        return new KeyShares(points, threshold, integrity)
+    }
+
+    toBackupFormat() {
+        return this.points.map(share => share.toString() + '.' + this.threshold + '.' + this.integrity)
+    }
+}
 
 /**
  * Represents a Private Key, which is a secret that can be used to generate signatures in a cryptographic system.
@@ -268,22 +318,24 @@ export default class PrivateKey extends BigNumber {
    *
    * @example
    * const key = PrivateKey.fromRandom()
-   * const shares = key.split(2, 5)
+   * const shares = key.toKeyShares(2, 5)
    */
-  split (threshold: number, totalShares: number): BigNumber[] {
+  toKeyShares (threshold: number, totalShares: number): KeyShares {
     if (threshold < 2 || threshold > totalShares || threshold > 99) throw new Error('threshold should be between 2 and 99')
     if (totalShares < 3 || totalShares > 100) throw new Error('totalShares should be between 3 and 100')
 
     const poly = Polynomial.fromPrivateKey(this, threshold)
 
-    const shares = []
+    const points = []
     for (let i = 0; i < totalShares; i++) {
       const x = new BigNumber(PrivateKey.fromRandom().toArray())
       const y = poly.valueAt(x)
-      shares.push(new Point(x, y))
+      points.push(new PointInFiniteField(x, y))
     }
 
-    return shares
+    const integrity = (this.toPublicKey().toHash('hex') as string).slice(0, 8)
+
+    return new KeyShares(points, threshold, integrity)
   }
 
   /**
@@ -295,23 +347,30 @@ export default class PrivateKey extends BigNumber {
    * @returns The reconstructed private key.
    *
    * @example
-   * const key = PrivateKey.fromRandom()
-   * const shares = key.split(2, 5)
-   * const reconstructedKey = PrivateKey.fromShares([shares[1], shares[3]])
+   * const share1 = '2NWeap6SDBTL5jVnvk9yUxyfLqNrDs2Bw85KNDfLJwRT.4yLtSm327NApsbuP7QXVW3CWDuBRgmS6rRiFkAkTukic'
+   * const share2 = '7NbgGA8iAsxg2s6mBLkLFtGKQrnc4aCbooHJJV31cWs4.GUgXtudthawE3Eevc1waT3Atr1Ft7j1XxdUguVo3B7x3'
+   * const reconstructedKey = PrivateKey.fromKeyShares({ shares: [share1, share2], threshold: 2, integrity: '23409547' })
    *
    **/
-  static fromShares (shares: Point[]): PrivateKey {
-    if (shares.length < 2) throw new Error('At least 2 shares are required to reconstruct the private key')
+  static fromKeyShares (keyShares: KeyShares): PrivateKey {
+    const { points, threshold, integrity } = keyShares
+    if (threshold < 2 || threshold > 99) throw new Error('threshold should be between 2 and 99')
+    if (points.length < threshold) throw new Error(`At least ${threshold} shares are required to reconstruct the private key`)
     // check to see if two points have the same x value
-    for (let i = 0; i < shares.length; i++) {
-      for (let j = i + 1; j < shares.length; j++) {
-        if (shares[i].x.eq(shares[j].x)) {
+    for (let i = 0; i < threshold; i++) {
+      for (let j = i + 1; j < threshold; j++) {
+        if (points[i].x.eq(points[j].x)) {
           throw new Error('Duplicate share detected, each must be unique.')
         }
       }
     }
-    const poly = new Polynomial(shares)
+    const poly = new Polynomial(points, threshold)
+    const privateKey = new PrivateKey(poly.valueAt(new BigNumber(0)).toArray())
+    const integrityHash = privateKey.toPublicKey().toHash('hex').slice(0, 8)
+    if (integrityHash !== integrity) {
+      throw new Error('Integrity hash mismatch')
+    }
 
-    return new PrivateKey(poly.valueAt(new BigNumber(0)).toArray())
+    return privateKey
   }
 }
