@@ -16,8 +16,10 @@ All notable changes to this project will be documented in this file. The format 
 ## [Unreleased]
 
 ### Added
+- Added some convenience functions for toDER and fromDER on the point and pubkey classes where missing.
 
 ### Changed
+- In the PublicKey class pubkey.toDER() to defaults to return a number[] rather than string. If a string is desired .toString() or .toDER('hex') have equivalent functionality.
 
 ### Deprecated
 

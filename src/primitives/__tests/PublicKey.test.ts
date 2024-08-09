@@ -47,9 +47,22 @@ describe('PublicKey', () => {
     })
 
     test('toDER should return DER encoded string of public key', () => {
-      const derString = publicKey.toDER()
+      const derString = publicKey.toString()
       expect(typeof derString).toBe('string')
       expect(derString.length).toBe(66)
+    })
+
+    test('toDER should return DER encoded number[] of public key', () => {
+      const der = publicKey.toDER()
+      expect(typeof der).toBe('object')
+      expect(der.length).toBe(33)
+    })
+
+    test('fromDER and fromString should result in the same public key', () => {
+      const key = PrivateKey.fromRandom()
+      const original = key.toPublicKey()
+      const backAndForth = PublicKey.fromString(PublicKey.fromDER(original.toDER()).toString())
+      expect(backAndForth.toString()).toEqual(original.toString())
     })
   })
   describe('BRC42 vectors', () => {
