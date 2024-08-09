@@ -52,6 +52,21 @@ export default class PublicKey extends Point {
   }
 
   /**
+   * Static factory method to create a PublicKey instance from a number array.
+   *
+   * @param bytes - A number array representing a public key.
+   *
+   * @returns Returns the PublicKey created from the number array.
+   *
+   * @example
+   * const myPubKey = PublicKey.fromString("03....")
+   */
+  static fromDER (bytes: number[]): PublicKey {
+    const p = Point.fromDER(bytes)
+    return new PublicKey(p.x, p.y)
+  }
+
+  /**
    * @constructor
    * @param x - A point or the x-coordinate of the point. May be a number, a BigNumber, a string (which will be interpreted as hex), a number array, or null. If null, an "Infinity" point is constructed.
    * @param y - If x is not a point, the y-coordinate of the point, similar to x.
@@ -121,8 +136,8 @@ export default class PublicKey extends Point {
    * @example
    * const derPublicKey = myPubKey.toDER()
    */
-  toDER (): string {
-    return this.encode(true, 'hex') as string
+  toDER (enc?: 'hex' | undefined): string {
+    return this.encode(true, enc) as string
   }
 
   /**

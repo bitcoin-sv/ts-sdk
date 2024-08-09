@@ -22,26 +22,23 @@ export default class Point extends BasePoint {
   inf: boolean
 
   /**
-   * Creates a point object from a given string. This string can represent coordinates in hex format, or points
+   * Creates a point object from a given Array. These numbers can represent coordinates in hex format, or points
    * in multiple established formats.
    * The function verifies the integrity of the provided data and throws errors if inconsistencies are found.
    *
-   * @method fromString
+   * @method fromDER
    * @static
-   * @param str - The point representation string.
+   * @param bytes - The point representation number array.
    * @returns Returns a new point representing the given string.
-   * @throws `Error` If the point string value has a wrong length.
+   * @throws `Error` If the point number[] value has a wrong length.
    * @throws `Error` If the point format is unknown.
    *
    * @example
-   * const pointStr = 'abcdef';
-   * const point = Point.fromString(pointStr);
+   * const derPoint = [ 2, 18, 123, 108, 125, 83, 1, 251, 164, 214, 16, 119, 200, 216, 210, 193, 251, 193, 129, 67, 97, 146, 210, 216, 77, 254, 18, 6, 150, 190, 99, 198, 128 ];
+   * const point = Point.fromDER(derPoint);
    */
-  static fromString (str: string): Point {
-    const bytes = toArray(str, 'hex')
-
+  static fromDER (bytes: number[]): Point {
     const len = 32
-
     // uncompressed, hybrid-odd, hybrid-even
     if ((bytes[0] === 0x04 || bytes[0] === 0x06 || bytes[0] === 0x07) &&
       bytes.length - 1 === 2 * len) {
@@ -66,6 +63,28 @@ export default class Point extends BasePoint {
       return Point.fromX(bytes.slice(1, 1 + len), bytes[0] === 0x03)
     }
     throw new Error('Unknown point format')
+  }
+
+  /**
+   * Creates a point object from a given string. This string can represent coordinates in hex format, or points
+   * in multiple established formats.
+   * The function verifies the integrity of the provided data and throws errors if inconsistencies are found.
+   *
+   * @method fromString
+   * @static
+   *
+   * @param str The point representation string.
+   * @returns Returns a new point representing the given string.
+   * @throws `Error` If the point string value has a wrong length.
+   * @throws `Error` If the point format is unknown.
+   *
+   * @example
+   * const pointStr = 'abcdef';
+   * const point = Point.fromString(pointStr);
+   */
+  static fromString (str: string): Point {
+    const bytes = toArray(str, 'hex')
+    return Point.fromDER(bytes)
   }
 
   /**
