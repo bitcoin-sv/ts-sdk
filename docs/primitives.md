@@ -5349,6 +5349,7 @@ export default class Point extends BasePoint {
     x: BigNumber | null;
     y: BigNumber | null;
     inf: boolean;
+    static fromDER(bytes: number[]): Point 
     static fromString(str: string): Point 
     static fromX(x: BigNumber | number | number[] | string, odd: boolean): Point 
     static fromJSON(obj: string | any[], isRed: boolean): Point 
@@ -5560,6 +5561,38 @@ Example
 const p1 = new Point(5, 20);
 const p2 = new Point(5, 20);
 const areEqual = p1.eq(p2); // returns true
+```
+
+#### Method fromDER
+
+Creates a point object from a given Array. These numbers can represent coordinates in hex format, or points
+in multiple established formats.
+The function verifies the integrity of the provided data and throws errors if inconsistencies are found.
+
+```ts
+static fromDER(bytes: number[]): Point 
+```
+
+Returns
+
+Returns a new point representing the given string.
+
+Argument Details
+
++ **bytes**
+  + The point representation number array.
+
+Throws
+
+`Error` If the point number[] value has a wrong length.
+
+`Error` If the point format is unknown.
+
+Example
+
+```ts
+const derPoint = [ 2, 18, 123, 108, 125, 83, 1, 251, 164, 214, 16, 119, 200, 216, 210, 193, 251, 193, 129, 67, 97, 146, 210, 216, 77, 254, 18, 6, 150, 190, 99, 198, 128 ];
+const point = Point.fromDER(derPoint);
 ```
 
 #### Method fromJSON
@@ -6716,10 +6749,11 @@ The class comes with static methods to generate PublicKey instances from private
 export default class PublicKey extends Point {
     static fromPrivateKey(key: PrivateKey): PublicKey 
     static fromString(str: string): PublicKey 
+    static fromDER(bytes: number[]): PublicKey 
     constructor(x: Point | BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null = null, isRed: boolean = true) 
     deriveSharedSecret(priv: PrivateKey): Point 
     verify(msg: number[] | string, sig: Signature, enc?: "hex" | "utf8"): boolean 
-    toDER(): string 
+    toDER(enc?: "hex" | undefined): string 
     toHash(enc?: "hex"): number[] | string 
     toAddress(prefix: number[] | string = [0]): string 
     deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey 
@@ -6799,6 +6833,29 @@ Example
 ```ts
 const myPrivKey = new PrivateKey(...)
 const sharedSecret = myPubKey.deriveSharedSecret(myPrivKey)
+```
+
+#### Method fromDER
+
+Static factory method to create a PublicKey instance from a number array.
+
+```ts
+static fromDER(bytes: number[]): PublicKey 
+```
+
+Returns
+
+Returns the PublicKey created from the number array.
+
+Argument Details
+
++ **bytes**
+  + A number array representing a public key.
+
+Example
+
+```ts
+const myPubKey = PublicKey.fromString("03....")
 ```
 
 #### Method fromMsgHashAndCompactSignature
@@ -6913,7 +6970,7 @@ const testnetAddress = pubkey.toAddress('testnet')
 Encode the public key to DER (Distinguished Encoding Rules) format.
 
 ```ts
-toDER(): string 
+toDER(enc?: "hex" | undefined): string 
 ```
 
 Returns
