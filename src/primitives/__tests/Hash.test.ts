@@ -5,7 +5,7 @@ import PBKDF2Vectors from './PBKDF2.vectors'
 import { toArray, toHex } from '../../../dist/cjs/src/primitives/utils'
 
 describe('Hash', function () {
-  function test(Hash, cases): void {
+  function test (Hash, cases): void {
     for (let i = 0; i < cases.length; i++) {
       const msg = cases[i][0]
       const res = cases[i][1]
@@ -92,7 +92,7 @@ describe('Hash', function () {
 
   describe('PBKDF2 vectors', () => {
     for (let i = 0; i < PBKDF2Vectors.length; i++) {
-      let v = PBKDF2Vectors[i]
+      const v = PBKDF2Vectors[i]
       let key, salt
       if (v.keyUint8Array) {
         key = v.keyUint8Array

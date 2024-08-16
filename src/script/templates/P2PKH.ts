@@ -21,7 +21,7 @@ export default class P2PKH implements ScriptTemplate {
    * @param {number[] | string} pubkeyhash or address - An array or address representing the public key hash.
    * @returns {LockingScript} - A P2PKH locking script.
    */
-  lock(pubkeyhash: string | number[]): LockingScript {
+  lock (pubkeyhash: string | number[]): LockingScript {
     let data: number[]
     if (typeof pubkeyhash === 'string') {
       const hash = fromBase58Check(pubkeyhash)
@@ -54,16 +54,16 @@ export default class P2PKH implements ScriptTemplate {
    * @param {Script} lockingScript - Optional. The lockinScript. Otherwise the input.sourceTransaction is required.
    * @returns {Object} - An object containing the `sign` and `estimateLength` functions.
    */
-  unlock(
+  unlock (
     privateKey: PrivateKey,
     signOutputs: 'all' | 'none' | 'single' = 'all',
     anyoneCanPay: boolean = false,
     sourceSatoshis?: number,
     lockingScript?: Script
   ): {
-    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
-    estimateLength: () => Promise<106>
-  } {
+      sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
+      estimateLength: () => Promise<106>
+    } {
     return {
       sign: async (tx: Transaction, inputIndex: number) => {
         let signatureScope = TransactionSignature.SIGHASH_FORKID
@@ -84,7 +84,7 @@ export default class P2PKH implements ScriptTemplate {
 
         const otherInputs = tx.inputs.filter((_, index) => index !== inputIndex)
 
-        const sourceTXID = input.sourceTXID ? input.sourceTXID : input.sourceTransaction?.id('hex') as string
+        const sourceTXID = input.sourceTXID ? input.sourceTXID : input.sourceTransaction?.id('hex')
         if (!sourceTXID) {
           throw new Error(
             'The input sourceTXID or sourceTransaction is required for transaction signing.'
