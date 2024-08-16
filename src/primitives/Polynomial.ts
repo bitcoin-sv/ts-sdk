@@ -4,14 +4,12 @@ import Curve from './Curve.js'
 import Random from './Random.js'
 import { fromBase58, toBase58 } from './utils.js'
 
-// prime for the finite field must be larger than any key value.
-const P = new Curve().p
-
 export class PointInFiniteField {
   x: BigNumber
   y: BigNumber
 
   constructor (x: BigNumber, y: BigNumber) {
+    const P = new Curve().p // arithmetic is mod P
     this.x = x.umod(P)
     this.y = y.umod(P)
   }
@@ -51,9 +49,10 @@ export default class Polynomial {
   }
 
   static fromPrivateKey (key: PrivateKey, threshold: number): Polynomial {
+    const P = new Curve().p // arithmetic is mod P
     // The key is the y-intercept of the polynomial where x=0.
     const points = [new PointInFiniteField(new BigNumber(0), new BigNumber(key.toArray()))]
-
+    
     // The other values are random
     for (let i = 1; i < threshold; i++) {
       const randomX = new BigNumber(Random(32)).umod(P)
@@ -66,6 +65,7 @@ export default class Polynomial {
 
   // Evaluate the polynomial at x by using Lagrange interpolation
   valueAt (x: BigNumber): BigNumber {
+    const P = new Curve().p // arithmetic is mod P
     let y = new BigNumber(0)
     for (let i = 0; i < this.threshold; i++) {
       let term = this.points[i].y
