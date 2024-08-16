@@ -6748,7 +6748,7 @@ Argument Details
 + **threshold**
   + The number of shares which will be required to reconstruct the private key.
 + **totalShares**
-  + The nu,ber of shares to generate for distribution.
+  + The number of shares to generate for distribution.
 
 #### Method toKeyShares
 

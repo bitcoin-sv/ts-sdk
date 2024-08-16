@@ -321,8 +321,10 @@ export default class PrivateKey extends BigNumber {
    * const shares = key.toKeyShares(2, 5)
    */
   toKeyShares (threshold: number, totalShares: number): KeyShares {
-    if (threshold < 2 || threshold > totalShares || threshold > 99) throw new Error('threshold should be between 2 and 99')
-    if (totalShares < 3 || totalShares > 100) throw new Error('totalShares should be between 3 and 100')
+    if (typeof threshold !== 'number' || typeof totalShares !== 'number') throw new Error('threshold and totalShares must be numbers')
+    if (threshold < 2) throw new Error('threshold must be at least 2')
+    if (totalShares < 2) throw new Error('totalShares must be at least 2')
+    if (threshold > totalShares) throw new Error('threshold should be less than or equal to totalShares')
 
     const poly = Polynomial.fromPrivateKey(this, threshold)
 
@@ -345,7 +347,7 @@ export default class PrivateKey extends BigNumber {
    *
    *
    * @param threshold The number of shares which will be required to reconstruct the private key.
-   * @param totalShares The nu,ber of shares to generate for distribution.
+   * @param totalShares The number of shares to generate for distribution.
    * @returns
    */
   toBackupShares (threshold: number, totalShares: number): string[] {

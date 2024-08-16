@@ -52,7 +52,7 @@ export default class Polynomial {
     const P = new Curve().p // arithmetic is mod P
     // The key is the y-intercept of the polynomial where x=0.
     const points = [new PointInFiniteField(new BigNumber(0), new BigNumber(key.toArray()))]
-    
+
     // The other values are random
     for (let i = 1; i < threshold; i++) {
       const randomX = new BigNumber(Random(32)).umod(P)

@@ -34,9 +34,25 @@ describe('PrivateKey', () => {
     }
   })
 
-  it('should throw an error for invalid threshold values', () => {
+  it('should throw an error for invalid threshold or totalShares', () => {
     const k = PrivateKey.fromRandom()
-    expect(() => k.toKeyShares(101, 23)).toThrow('threshold should be between 2 and 99')
+    expect(() => k.toKeyShares('12', 14)).toThrow('threshold and totalShares must be numbers')
+    expect(() => k.toKeyShares(4, '5')).toThrow('threshold and totalShares must be numbers')
+  })
+
+  it('should throw an error for invalid threshold', () => {
+    const k = PrivateKey.fromRandom()
+    expect(() => k.toKeyShares(1, 2)).toThrow('threshold must be at least 2')
+  })
+
+  it('should throw an error for invalid totalShares', () => {
+    const k = PrivateKey.fromRandom()
+    expect(() => k.toKeyShares(2, -4)).toThrow('totalShares must be at least 2')
+  })
+
+  it('should throw an error for totalShares being less than threshold', () => {
+    const k = PrivateKey.fromRandom()
+    expect(() => k.toKeyShares(3, 2)).toThrow('threshold should be less than or equal to totalShares')
   })
 
   it('should throw an error if the same share is included twice during recovery', () => {
