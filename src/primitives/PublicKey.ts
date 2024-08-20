@@ -131,13 +131,15 @@ export default class PublicKey extends Point {
   /**
    * Encode the public key to DER (Distinguished Encoding Rules) format.
    *
-   * @returns Returns the DER-encoded string of this public key.
+   * @returns Returns the DER-encoded public key in number array or string.
+   *
+   * @param enc - The encoding of the DER string. undefined = number array, 'hex' = hex string.
    *
    * @example
    * const derPublicKey = myPubKey.toDER()
    */
-  toDER (enc?: 'hex' | undefined): string {
-    return this.encode(true, enc) as string
+  toDER (enc?: 'hex' | undefined): number[] | string {
+    return this.encode(true, enc)
   }
 
   /**

@@ -6911,7 +6911,7 @@ export default class PublicKey extends Point {
     constructor(x: Point | BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null = null, isRed: boolean = true) 
     deriveSharedSecret(priv: PrivateKey): Point 
     verify(msg: number[] | string, sig: Signature, enc?: "hex" | "utf8"): boolean 
-    toDER(enc?: "hex" | undefined): string 
+    toDER(enc?: "hex" | undefined): number[] | string 
     toHash(enc?: "hex"): number[] | string 
     toAddress(prefix: number[] | string = [0]): string 
     deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey 
@@ -7128,12 +7128,17 @@ const testnetAddress = pubkey.toAddress('testnet')
 Encode the public key to DER (Distinguished Encoding Rules) format.
 
 ```ts
-toDER(enc?: "hex" | undefined): string 
+toDER(enc?: "hex" | undefined): number[] | string 
 ```
 
 Returns
 
-Returns the DER-encoded string of this public key.
+Returns the DER-encoded public key in number array or string.
+
+Argument Details
+
++ **enc**
+  + The encoding of the DER string. undefined = number array, 'hex' = hex string.
 
 Example
 
