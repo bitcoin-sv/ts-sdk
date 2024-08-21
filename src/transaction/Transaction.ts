@@ -215,7 +215,7 @@ export default class Transaction {
     return { inputs, outputs }
   }
 
-  private static fromReader (br: Reader): Transaction {
+  static fromReader (br: Reader): Transaction {
     const version = br.readUInt32LE()
     const inputsLength = br.readVarIntNum()
     const inputs: TransactionInput[] = []
