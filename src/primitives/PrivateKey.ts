@@ -6,7 +6,58 @@ import Curve from './Curve.js'
 import { sign, verify } from './ECDSA.js'
 import { sha256, sha256hmac } from './Hash.js'
 import Random from './Random.js'
-import { fromBase58Check, toArray, toBase58Check } from './utils.js'
+import { fromBase58Check, toArray, toBase58, toBase58Check } from './utils.js'
+import Polynomial, { PointInFiniteField } from './Polynomial.js'
+
+/**
+ * @class KeyShares
+ *
+ * This class is used to store the shares of a private key.
+ *
+ * @param shares - An array of shares
+ * @param threshold - The number of shares required to recombine the private key
+ *
+ * @returns KeyShares
+ *
+ * @example
+ * const key = PrivateKey.fromShares(shares)
+ *
+ */
+
+export class KeyShares {
+  points: PointInFiniteField[]
+  threshold: number
+  integrity: string
+
+  constructor (points: PointInFiniteField[], threshold: number, integrity: string) {
+    this.points = points
+    this.threshold = threshold
+    this.integrity = integrity
+  }
+
+  static fromBackupFormat (shares: string[]): KeyShares {
+    let threshold = 0
+    let integrity = ''
+    const points = shares.map((share, idx) => {
+      const shareParts = share.split('.')
+      if (shareParts.length !== 4) throw Error('Invalid share format in share ' + idx + '. Expected format: "x.y.t.i" - received ' + share)
+      const [x, y, t, i] = shareParts
+      if (!t) throw Error('Threshold not found in share ' + idx)
+      if (!i) throw Error('Integrity not found in share ' + idx)
+      const tInt = parseInt(t)
+      if (idx !== 0 && threshold !== tInt) throw Error('Threshold mismatch in share ' + idx)
+      if (idx !== 0 && integrity !== i) throw Error('Integrity mismatch in share ' + idx)
+      threshold = tInt
+      integrity = i
+      return PointInFiniteField.fromString([x, y].join('.'))
+    })
+    return new KeyShares(points, threshold, integrity)
+  }
+
+  toBackupFormat () {
+    return this.points.map(share => share.toString() + '.' + this.threshold + '.' + this.integrity)
+  }
+}
 
 /**
  * Represents a Private Key, which is a secret that can be used to generate signatures in a cryptographic system.
@@ -255,5 +306,100 @@ export default class PrivateKey extends BigNumber {
     const hmac = sha256hmac(sharedSecret.encode(true), invoiceNumberBin)
     const curve = new Curve()
     return new PrivateKey(this.add(new BigNumber(hmac)).mod(curve.n).toArray())
+  }
+
+  /**
+   * Splits the private key into shares using Shamir's Secret Sharing Scheme.
+   *
+   * @param threshold The minimum number of shares required to reconstruct the private key.
+   * @param totalShares The total number of shares to generate.
+   * @param prime The prime number to be used in Shamir's Secret Sharing Scheme.
+   * @returns An array of shares.
+   *
+   * @example
+   * const key = PrivateKey.fromRandom()
+   * const shares = key.toKeyShares(2, 5)
+   */
+  toKeyShares (threshold: number, totalShares: number): KeyShares {
+    if (typeof threshold !== 'number' || typeof totalShares !== 'number') throw new Error('threshold and totalShares must be numbers')
+    if (threshold < 2) throw new Error('threshold must be at least 2')
+    if (totalShares < 2) throw new Error('totalShares must be at least 2')
+    if (threshold > totalShares) throw new Error('threshold should be less than or equal to totalShares')
+
+    const poly = Polynomial.fromPrivateKey(this, threshold)
+
+    const points = []
+    for (let i = 0; i < totalShares; i++) {
+      const x = new BigNumber(PrivateKey.fromRandom().toArray())
+      const y = poly.valueAt(x)
+      points.push(new PointInFiniteField(x, y))
+    }
+
+    const integrity = (this.toPublicKey().toHash('hex') as string).slice(0, 8)
+
+    return new KeyShares(points, threshold, integrity)
+  }
+
+  /**
+   * @method toBackupShares
+   *
+   * Creates a backup of the private key by splitting it into shares.
+   *
+   *
+   * @param threshold The number of shares which will be required to reconstruct the private key.
+   * @param totalShares The number of shares to generate for distribution.
+   * @returns
+   */
+  toBackupShares (threshold: number, totalShares: number): string[] {
+    return this.toKeyShares(threshold, totalShares).toBackupFormat()
+  }
+
+  /**
+   *
+   * @method fromBackupShares
+   *
+   * Creates a private key from backup shares.
+   *
+   * @param shares
+   * @returns PrivateKey
+   */
+  static fromBackupShares (shares: string[]): PrivateKey {
+    return PrivateKey.fromKeyShares(KeyShares.fromBackupFormat(shares))
+  }
+
+  /**
+   * Combines shares to reconstruct the private key.
+   *
+   * @param shares An array of points (shares) to be used to reconstruct the private key.
+   * @param threshold The minimum number of shares required to reconstruct the private key.
+   *
+   * @returns The reconstructed private key.
+   *
+   * @example
+   * const share1 = '2NWeap6SDBTL5jVnvk9yUxyfLqNrDs2Bw85KNDfLJwRT.4yLtSm327NApsbuP7QXVW3CWDuBRgmS6rRiFkAkTukic'
+   * const share2 = '7NbgGA8iAsxg2s6mBLkLFtGKQrnc4aCbooHJJV31cWs4.GUgXtudthawE3Eevc1waT3Atr1Ft7j1XxdUguVo3B7x3'
+   * const reconstructedKey = PrivateKey.fromKeyShares({ shares: [share1, share2], threshold: 2, integrity: '23409547' })
+   *
+   **/
+  static fromKeyShares (keyShares: KeyShares): PrivateKey {
+    const { points, threshold, integrity } = keyShares
+    if (threshold < 2 || threshold > 99) throw new Error('threshold should be between 2 and 99')
+    if (points.length < threshold) throw new Error(`At least ${threshold} shares are required to reconstruct the private key`)
+    // check to see if two points have the same x value
+    for (let i = 0; i < threshold; i++) {
+      for (let j = i + 1; j < threshold; j++) {
+        if (points[i].x.eq(points[j].x)) {
+          throw new Error('Duplicate share detected, each must be unique.')
+        }
+      }
+    }
+    const poly = new Polynomial(points, threshold)
+    const privateKey = new PrivateKey(poly.valueAt(new BigNumber(0)).toArray())
+    const integrityHash = privateKey.toPublicKey().toHash('hex').slice(0, 8)
+    if (integrityHash !== integrity) {
+      throw new Error('Integrity hash mismatch')
+    }
+
+    return privateKey
   }
 }
