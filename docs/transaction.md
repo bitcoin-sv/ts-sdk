@@ -876,6 +876,7 @@ export default class Transaction {
             length: number;
         }>;
     } 
+    static fromReader(br: Reader): Transaction 
     static fromBinary(bin: number[]): Transaction 
     static fromHex(hex: string): Transaction 
     static fromHexEF(hex: string): Transaction 

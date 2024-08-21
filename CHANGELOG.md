@@ -32,6 +32,10 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.1.17] - 2024-08-21
+### Added
+Transaction static fromReader method is now public.
+
 ## [1.1.14] - 2024-07-30
 ### Added
 Ability to split a private key into shares using Shamir's Secret Sharing Scheme. Use like this:
