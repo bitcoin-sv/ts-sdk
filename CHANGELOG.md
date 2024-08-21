@@ -33,6 +33,10 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.1.14] - 2024-08-20
+### Added
+Transaction static fromReader method is now public.
+
 ## [1.1.13] - 2024-07-19
 ### Fixed
 Transaction SPV verification now correctly returns true for "scripts only" verification when a merkle proof is found.
