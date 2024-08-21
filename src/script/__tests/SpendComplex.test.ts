@@ -1,6 +1,6 @@
-import Script from "../../../dist/cjs/src/script/Script"
-import Spend from "../../../dist/cjs/src/script/Spend"
-import Transaction from "../../../dist/cjs/src/transaction/Transaction"
+import Script from '../../../dist/cjs/src/script/Script'
+import Spend from '../../../dist/cjs/src/script/Spend'
+import Transaction from '../../../dist/cjs/src/transaction/Transaction'
 
 describe('SpendComplex', () => {
   it('complex unlock script validation', () => {
@@ -17,9 +17,9 @@ describe('SpendComplex', () => {
   })
 })
 
-function verifyTruthy<T>(v: T | undefined): T { if (v == null) throw new Error('must have value'); return v }
+function verifyTruthy<T> (v: T | undefined): T { if (v == null) throw new Error('must have value'); return v }
 
-export function validateUnlockScript(spendingRawTx: string, vin: number, lockingScript: string, amount: number): boolean {
+export function validateUnlockScript (spendingRawTx: string, vin: number, lockingScript: string, amount: number): boolean {
   const spendingTx = Transaction.fromHex(spendingRawTx)
   const ls = Script.fromHex(lockingScript)
 

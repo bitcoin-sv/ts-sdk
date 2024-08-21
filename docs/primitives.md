@@ -6,20 +6,17 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ## Classes
 
-| | |
-| --- | --- |
-| [BasePoint](#class-basepoint) | [Reader](#class-reader) |
-| [BigNumber](#class-bignumber) | [ReductionContext](#class-reductioncontext) |
-| [Curve](#class-curve) | [SHA1](#class-sha1) |
-| [DRBG](#class-drbg) | [SHA1HMAC](#class-sha1hmac) |
-| [JacobianPoint](#class-jacobianpoint) | [SHA256](#class-sha256) |
-| [K256](#class-k256) | [SHA256HMAC](#class-sha256hmac) |
-| [Mersenne](#class-mersenne) | [SHA512](#class-sha512) |
-| [MontgomoryMethod](#class-montgomorymethod) | [SHA512HMAC](#class-sha512hmac) |
-| [Point](#class-point) | [Signature](#class-signature) |
-| [PrivateKey](#class-privatekey) | [SymmetricKey](#class-symmetrickey) |
-| [PublicKey](#class-publickey) | [TransactionSignature](#class-transactionsignature) |
-| [RIPEMD160](#class-ripemd160) | [Writer](#class-writer) |
+| | | |
+| --- | --- | --- |
+| [BasePoint](#class-basepoint) | [Point](#class-point) | [SHA1HMAC](#class-sha1hmac) |
+| [BigNumber](#class-bignumber) | [PointInFiniteField](#class-pointinfinitefield) | [SHA256](#class-sha256) |
+| [Curve](#class-curve) | [Polynomial](#class-polynomial) | [SHA256HMAC](#class-sha256hmac) |
+| [DRBG](#class-drbg) | [PrivateKey](#class-privatekey) | [SHA512](#class-sha512) |
+| [JacobianPoint](#class-jacobianpoint) | [PublicKey](#class-publickey) | [SHA512HMAC](#class-sha512hmac) |
+| [K256](#class-k256) | [RIPEMD160](#class-ripemd160) | [Signature](#class-signature) |
+| [KeyShares](#class-keyshares) | [Reader](#class-reader) | [SymmetricKey](#class-symmetrickey) |
+| [Mersenne](#class-mersenne) | [ReductionContext](#class-reductioncontext) | [TransactionSignature](#class-transactionsignature) |
+| [MontgomoryMethod](#class-montgomorymethod) | [SHA1](#class-sha1) | [Writer](#class-writer) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -6402,6 +6399,85 @@ const isVerified = signature.verify(msg, publicKey);
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+### Class: PointInFiniteField
+
+```ts
+export class PointInFiniteField {
+    x: BigNumber;
+    y: BigNumber;
+    constructor(x: BigNumber, y: BigNumber) 
+    toString(): string 
+    static fromString(str: string): PointInFiniteField 
+}
+```
+
+<details>
+
+<summary>Class PointInFiniteField Details</summary>
+
+#### Method toString
+
+function toString() { [native code] }
+
+```ts
+toString(): string 
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: Polynomial
+
+Polynomial class
+
+This class is used to create a polynomial with a given threshold and a private key.
+The polynomial is used to create shares of the private key.
+
+Example
+
+```ts
+const key = new PrivateKey()
+const threshold = 2
+const polynomial = new Polynomial(key, threshold)
+```
+
+```ts
+export default class Polynomial {
+    readonly points: PointInFiniteField[];
+    readonly threshold: number;
+    constructor(points: PointInFiniteField[], threshold?: number) 
+    static fromPrivateKey(key: PrivateKey, threshold: number): Polynomial 
+    valueAt(x: BigNumber): BigNumber 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: KeyShares
+
+Example
+
+```ts
+const key = PrivateKey.fromShares(shares)
+```
+
+```ts
+export class KeyShares {
+    points: PointInFiniteField[];
+    threshold: number;
+    integrity: string;
+    constructor(points: PointInFiniteField[], threshold: number, integrity: string) 
+    static fromBackupFormat(shares: string[]): KeyShares 
+    toBackupFormat() 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 ### Class: PrivateKey
 
 Represents a Private Key, which is a secret that can be used to generate signatures in a cryptographic system.
@@ -6427,6 +6503,10 @@ export default class PrivateKey extends BigNumber {
     toAddress(prefix: number[] | string = [0]): string 
     deriveSharedSecret(key: PublicKey): Point 
     deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
+    toKeyShares(threshold: number, totalShares: number): KeyShares 
+    toBackupShares(threshold: number, totalShares: number): string[] 
+    static fromBackupShares(shares: string[]): PrivateKey 
+    static fromKeyShares(keyShares: KeyShares): PrivateKey 
 }
 ```
 
@@ -6520,6 +6600,43 @@ Example
 const privateKey = PrivateKey.fromRandom();
 const publicKey = privateKey.toPublicKey();
 const sharedSecret = privateKey.deriveSharedSecret(publicKey);
+```
+
+#### Method fromBackupShares
+
+```ts
+static fromBackupShares(shares: string[]): PrivateKey 
+```
+
+Returns
+
+PrivateKey
+
+#### Method fromKeyShares
+
+Combines shares to reconstruct the private key.
+
+```ts
+static fromKeyShares(keyShares: KeyShares): PrivateKey 
+```
+
+Returns
+
+The reconstructed private key.
+
+Argument Details
+
++ **shares**
+  + An array of points (shares) to be used to reconstruct the private key.
++ **threshold**
+  + The minimum number of shares required to reconstruct the private key.
+
+Example
+
+```ts
+const share1 = '2NWeap6SDBTL5jVnvk9yUxyfLqNrDs2Bw85KNDfLJwRT.4yLtSm327NApsbuP7QXVW3CWDuBRgmS6rRiFkAkTukic'
+const share2 = '7NbgGA8iAsxg2s6mBLkLFtGKQrnc4aCbooHJJV31cWs4.GUgXtudthawE3Eevc1waT3Atr1Ft7j1XxdUguVo3B7x3'
+const reconstructedKey = PrivateKey.fromKeyShares({ shares: [share1, share2], threshold: 2, integrity: '23409547' })
 ```
 
 #### Method fromRandom
@@ -6653,6 +6770,47 @@ const testnetAddress = privkey.toAddress([0x6f])
 const testnetAddress = privkey.toAddress('testnet')
 ```
 
+#### Method toBackupShares
+
+```ts
+toBackupShares(threshold: number, totalShares: number): string[] 
+```
+
+Argument Details
+
++ **threshold**
+  + The number of shares which will be required to reconstruct the private key.
++ **totalShares**
+  + The number of shares to generate for distribution.
+
+#### Method toKeyShares
+
+Splits the private key into shares using Shamir's Secret Sharing Scheme.
+
+```ts
+toKeyShares(threshold: number, totalShares: number): KeyShares 
+```
+
+Returns
+
+An array of shares.
+
+Argument Details
+
++ **threshold**
+  + The minimum number of shares required to reconstruct the private key.
++ **totalShares**
+  + The total number of shares to generate.
++ **prime**
+  + The prime number to be used in Shamir's Secret Sharing Scheme.
+
+Example
+
+```ts
+const key = PrivateKey.fromRandom()
+const shares = key.toKeyShares(2, 5)
+```
+
 #### Method toPublicKey
 
 Converts the private key to its corresponding public key.
@@ -6753,7 +6911,7 @@ export default class PublicKey extends Point {
     constructor(x: Point | BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null = null, isRed: boolean = true) 
     deriveSharedSecret(priv: PrivateKey): Point 
     verify(msg: number[] | string, sig: Signature, enc?: "hex" | "utf8"): boolean 
-    toDER(enc?: "hex" | undefined): string 
+    toDER(enc?: "hex" | undefined): number[] | string 
     toHash(enc?: "hex"): number[] | string 
     toAddress(prefix: number[] | string = [0]): string 
     deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey 
@@ -6970,12 +7128,17 @@ const testnetAddress = pubkey.toAddress('testnet')
 Encode the public key to DER (Distinguished Encoding Rules) format.
 
 ```ts
-toDER(enc?: "hex" | undefined): string 
+toDER(enc?: "hex" | undefined): number[] | string 
 ```
 
 Returns
 
-Returns the DER-encoded string of this public key.
+Returns the DER-encoded public key in number array or string.
+
+Argument Details
+
++ **enc**
+  + The encoding of the DER string. undefined = number array, 'hex' = hex string.
 
 Example
 

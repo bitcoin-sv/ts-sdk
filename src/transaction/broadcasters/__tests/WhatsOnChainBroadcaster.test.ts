@@ -1,7 +1,7 @@
 import Transaction from '../../../../dist/cjs/src/transaction/Transaction.js'
-import {NodejsHttpClient} from "../../../../dist/cjs/src/transaction/http/NodejsHttpClient.js";
-import WhatsOnChainBroadcaster from "../../../../dist/cjs/src/transaction/broadcasters/WhatsOnChainBroadcaster.js";
-import {FetchHttpClient} from "../../../../dist/cjs/src/transaction/http/FetchHttpClient.js";
+import { NodejsHttpClient } from '../../../../dist/cjs/src/transaction/http/NodejsHttpClient.js'
+import WhatsOnChainBroadcaster from '../../../../dist/cjs/src/transaction/broadcasters/WhatsOnChainBroadcaster.js'
+import { FetchHttpClient } from '../../../../dist/cjs/src/transaction/http/FetchHttpClient.js'
 
 // Mock Transaction
 jest.mock('../../Transaction', () => {
@@ -59,7 +59,6 @@ describe('WhatsOnChainBroadcaster', () => {
   })
 
   it('should broadcast successfully using provided fetch', async () => {
-
     const mockFetch = mockedFetch(successResponse)
 
     const broadcaster = new WhatsOnChainBroadcaster(network, new FetchHttpClient(mockFetch))
@@ -74,7 +73,6 @@ describe('WhatsOnChainBroadcaster', () => {
   })
 
   it('should broadcast successfully using provided https', async () => {
-
     const mockHttps = mockedHttps(successResponse)
     const broadcaster = new WhatsOnChainBroadcaster(network, new NodejsHttpClient(mockHttps))
 
@@ -120,23 +118,23 @@ describe('WhatsOnChainBroadcaster', () => {
     })
   })
 
-  function mockedFetch(response) {
+  function mockedFetch (response) {
     return jest.fn().mockResolvedValue({
       ok: response.status === 200,
       status: response.status,
       statusText: response.status === 200 ? 'OK' : 'Bad request',
       headers: {
-        get(key: string) {
+        get (key: string) {
           if (key === 'Content-Type') {
             return 'text/plain'
           }
         }
       },
       text: async () => response.data
-    });
+    })
   }
 
-  function mockedHttps(response) {
+  function mockedHttps (response) {
     const https = {
       request: (url, options, callback) => {
         // eslint-disable-next-line
@@ -162,4 +160,3 @@ describe('WhatsOnChainBroadcaster', () => {
     return https
   }
 })
-
