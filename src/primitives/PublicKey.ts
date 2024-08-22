@@ -139,7 +139,8 @@ export default class PublicKey extends Point {
    * const derPublicKey = myPubKey.toDER()
    */
   toDER (enc?: 'hex' | undefined): number[] | string {
-    return this.encode(true, enc)
+    if (enc === 'hex') return this.encode(true, enc) as string
+    return this.encode(true) as number[]
   }
 
   /**
