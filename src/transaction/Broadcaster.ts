@@ -12,6 +12,7 @@ export interface BroadcastResponse {
   status: 'success'
   txid: string
   message: string
+  competingTxs?: string[]
 }
 
 /**
