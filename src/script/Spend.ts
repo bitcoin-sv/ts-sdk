@@ -4,7 +4,7 @@ import Script from './Script.js'
 import BigNumber from '../primitives/BigNumber.js'
 import OP from './OP.js'
 import ScriptChunk from './ScriptChunk.js'
-import { toHex } from '../primitives/utils.js'
+import { toHex, minimallyEncode } from '../primitives/utils.js'
 import * as Hash from '../primitives/Hash.js'
 import TransactionSignature from '../primitives/TransactionSignature.js'
 import PublicKey from '../primitives/PublicKey.js'
@@ -89,7 +89,7 @@ export default class Spend {
    *   inputSequence: 0xffffffff // inputSequence
    * });
    */
-  constructor (params: {
+  constructor(params: {
     sourceTXID: string
     sourceOutputIndex: number
     sourceSatoshis: number
@@ -116,7 +116,7 @@ export default class Spend {
     this.reset()
   }
 
-  reset (): void {
+  reset(): void {
     this.context = 'UnlockingScript'
     this.programCounter = 0
     this.lastCodeSeparator = null
@@ -125,7 +125,7 @@ export default class Spend {
     this.ifStack = []
   }
 
-  step (): void {
+  step(): void {
     // If the context is UnlockingScript and we have reached the end,
     // set the context to LockingScript and zero the program counter
     if (
@@ -204,49 +204,6 @@ export default class Spend {
         }
       }
       return true
-    }
-
-    const minimallyEncode = (buf: number[]): number[] => {
-      if (buf.length === 0) {
-        return buf
-      }
-
-      // If the last byte is not 0x00 or 0x80, we are minimally encoded.
-      const last = buf[buf.length - 1]
-      if ((last & 0x7f) !== 0) {
-        return buf
-      }
-
-      // If the script is one byte long, then we have a zero, which encodes as an
-      // empty array.
-      if (buf.length === 1) {
-        return []
-      }
-
-      // If the next byte has it sign bit set, then we are minimaly encoded.
-      if ((buf[buf.length - 2] & 0x80) !== 0) {
-        return buf
-      }
-
-      // We are not minimally encoded, we need to figure out how much to trim.
-      for (let i = buf.length - 1; i > 0; i--) {
-        // We found a non zero byte, time to encode.
-        if (buf[i - 1] !== 0) {
-          if ((buf[i - 1] & 0x80) !== 0) {
-            // We found a byte with it sign bit set so we need one more
-            // byte.
-            buf[i++] = last
-          } else {
-            // the sign bit is clear, we can use it.
-            buf[i - 1] |= last
-          }
-
-          return buf.slice(0, i)
-        }
-      }
-
-      // If we found the whole thing is zeros, then we have a zero.
-      return []
     }
 
     const padDataToSize = (buf: number[], len: number): number[] => {
@@ -1331,7 +1288,7 @@ export default class Spend {
    *   console.log("Invalid spend!");
    * }
    */
-  validate (): boolean {
+  validate(): boolean {
     if (requirePushOnlyUnlockingScripts && !this.unlockingScript.isPushOnly()) {
       this.scriptEvaluationError('Unlocking scripts can only contain push operations, and no other opcodes.')
     }
@@ -1355,11 +1312,11 @@ export default class Spend {
     return true
   }
 
-  private stacktop (i: number): number[] {
+  private stacktop(i: number): number[] {
     return this.stack[this.stack.length + i]
   }
 
-  private castToBool (val: number[]): boolean {
+  private castToBool(val: number[]): boolean {
     for (let i = 0; i < val.length; i++) {
       if (val[i] !== 0) {
         // can be negative zero
@@ -1372,7 +1329,7 @@ export default class Spend {
     return false
   }
 
-  private scriptEvaluationError (str: string): void {
+  private scriptEvaluationError(str: string): void {
     throw new Error(`Script evaluation error: ${str}\n\nSource TXID: ${this.sourceTXID}\nSource output index: ${this.sourceOutputIndex}\nContext: ${this.context}\nProgram counter: ${this.programCounter}\nStack size: ${this.stack.length}\nAlt stack size: ${this.altStack.length}`)
   }
 }
