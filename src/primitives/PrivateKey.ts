@@ -362,12 +362,12 @@ export default class PrivateKey extends BigNumber {
    *
    * @param shares
    * @returns PrivateKey
-   * 
+   *
    * @example
-   * 
+   *
    * const share1 = '3znuzt7DZp8HzZTfTh5MF9YQKNX3oSxTbSYmSRGrH2ev.2Nm17qoocmoAhBTCs8TEBxNXCskV9N41rB2PckcgYeqV.2.35449bb9'
    * const share2 = 'Cm5fuUc39X5xgdedao8Pr1kvCSm8Gk7Cfenc7xUKcfLX.2juyK9BxCWn2DiY5JUAgj9NsQ77cc9bWksFyW45haXZm.2.35449bb9'
-   * 
+   *
    * const recoveredKey = PrivateKey.fromBackupShares([share1, share2])
    */
   static fromBackupShares (shares: string[]): PrivateKey {

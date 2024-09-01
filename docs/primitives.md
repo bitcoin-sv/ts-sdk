@@ -6612,6 +6612,15 @@ Returns
 
 PrivateKey
 
+Example
+
+```ts
+const share1 = '3znuzt7DZp8HzZTfTh5MF9YQKNX3oSxTbSYmSRGrH2ev.2Nm17qoocmoAhBTCs8TEBxNXCskV9N41rB2PckcgYeqV.2.35449bb9'
+const share2 = 'Cm5fuUc39X5xgdedao8Pr1kvCSm8Gk7Cfenc7xUKcfLX.2juyK9BxCWn2DiY5JUAgj9NsQ77cc9bWksFyW45haXZm.2.35449bb9'
+
+const recoveredKey = PrivateKey.fromBackupShares([share1, share2])
+```
+
 #### Method fromKeyShares
 
 Combines shares to reconstruct the private key.
@@ -6630,14 +6639,6 @@ Argument Details
   + An array of points (shares) to be used to reconstruct the private key.
 + **threshold**
   + The minimum number of shares required to reconstruct the private key.
-
-Example
-
-```ts
-const share1 = '2NWeap6SDBTL5jVnvk9yUxyfLqNrDs2Bw85KNDfLJwRT.4yLtSm327NApsbuP7QXVW3CWDuBRgmS6rRiFkAkTukic'
-const share2 = '7NbgGA8iAsxg2s6mBLkLFtGKQrnc4aCbooHJJV31cWs4.GUgXtudthawE3Eevc1waT3Atr1Ft7j1XxdUguVo3B7x3'
-const reconstructedKey = PrivateKey.fromKeyShares({ shares: [share1, share2], threshold: 2, integrity: '23409547' })
-```
 
 #### Method fromRandom
 
