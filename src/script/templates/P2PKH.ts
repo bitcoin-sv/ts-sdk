@@ -21,7 +21,7 @@ export default class P2PKH implements ScriptTemplate {
    * @param {number[] | string} pubkeyhash or address - An array or address representing the public key hash.
    * @returns {LockingScript} - A P2PKH locking script.
    */
-  lock (pubkeyhash: string | number[]): LockingScript {
+  lock(pubkeyhash: string | number[]): LockingScript {
     let data: number[]
     if (typeof pubkeyhash === 'string') {
       const hash = fromBase58Check(pubkeyhash)
@@ -54,16 +54,16 @@ export default class P2PKH implements ScriptTemplate {
    * @param {Script} lockingScript - Optional. The lockinScript. Otherwise the input.sourceTransaction is required.
    * @returns {Object} - An object containing the `sign` and `estimateLength` functions.
    */
-  unlock (
+  unlock(
     privateKey: PrivateKey,
     signOutputs: 'all' | 'none' | 'single' = 'all',
     anyoneCanPay: boolean = false,
     sourceSatoshis?: number,
     lockingScript?: Script
   ): {
-      sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
-      estimateLength: () => Promise<106>
-    } {
+    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
+    estimateLength: () => Promise<108>
+  } {
     return {
       sign: async (tx: Transaction, inputIndex: number) => {
         let signatureScope = TransactionSignature.SIGHASH_FORKID
@@ -130,9 +130,9 @@ export default class P2PKH implements ScriptTemplate {
         ])
       },
       estimateLength: async () => {
-        // public key (1+33) + signature (1+71)
+        // public key (1+33) + signature (1+73)
         // Note: We add 1 to each element's length because of the associated OP_PUSH
-        return 106
+        return 108
       }
     }
   }
