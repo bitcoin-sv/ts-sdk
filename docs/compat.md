@@ -852,9 +852,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ### Variable: sign
 
 ```ts
-sign = (message: number[], privateKey: PrivateKey): Signature => {
+sign = (message: number[], privateKey: PrivateKey, mode: "raw" | "base64" = "raw"): Signature | string => {
     const hashBuf = magicHash(message);
-    return ECDSA.sign(new BigNumber(hashBuf), privateKey, true);
+    const sig = ECDSA.sign(new BigNumber(hashBuf), privateKey, true);
+    if (mode === "raw") {
+        return sig;
+    }
+    const h = new BigNumber(hashBuf);
+    const r = sig.CalculateRecoveryFactor(privateKey.toPublicKey(), h);
+    return sig.toCompact(r, true, "base64") as string;
 }
 ```
 
