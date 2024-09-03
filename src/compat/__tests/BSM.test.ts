@@ -20,6 +20,11 @@ describe('BSM', () => {
       const sig = sign(messageBuf, privateKey).toDER()
       expect(sig.length).toEqual(70)
     })
+    it('Creates the correct base64 signature', () => {
+      const privateKey = PrivateKey.fromWif("L211enC224G1kV8pyyq7bjVd9SxZebnRYEzzM3i7ZHCc1c5E7dQu")
+      const sig = sign(toArray('hello world', 'utf8'), privateKey, 'base64')
+      expect(sig).toEqual('H4T8Asr0WkC6wYfBESR6pCAfECtdsPM4fwiSQ2qndFi8dVtv/mrOFaySx9xQE7j24ugoJ4iGnsRwAC8QwaoHOXk=')
+    })
   })
   describe('verify', () => {
     const messageBuf = toArray('this is my message', 'utf8')
