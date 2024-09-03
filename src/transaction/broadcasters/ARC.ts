@@ -98,12 +98,16 @@ export default class ARC implements Broadcaster {
     try {
       const response = await this.httpClient.request<ArcResponse>(`${this.URL}/v1/tx`, requestOptions)
       if (response.ok) {
-        const { txid, extraInfo, txStatus } = response.data
-        return {
+        const { txid, extraInfo, txStatus, competingTxs } = response.data
+        let broadcastRes : BroadcastResponse = {
           status: 'success',
           txid,
           message: `${txStatus} ${extraInfo}`
         }
+        if (competingTxs) {
+          broadcastRes.competingTxs = competingTxs
+        }
+        return broadcastRes
       } else {
         const st = typeof response.status
         const r: BroadcastFailure = {
@@ -171,4 +175,5 @@ interface ArcResponse {
   txid: string
   extraInfo: string
   txStatus: string
+  competingTxs?: string[]
 }
