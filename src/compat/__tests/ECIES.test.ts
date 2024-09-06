@@ -86,5 +86,12 @@ describe('#ECIES', () => {
       expect(ECIES.electrumDecrypt(ecdhMessageEncryptedBob, alicePrivateKey, bobPrivateKey.toPublicKey()))
         .toEqual(toArray('this is my ECDH test message', 'utf8'))
     })
+
+    it('should encrypt and decrypt using ephemeral fromPrivateKey', () => {
+      const message = toArray('this is my ephemeral key test message', 'utf8')
+      const encryptedMessage = ECIES.electrumEncrypt(message, bobPrivateKey.toPublicKey())
+      expect(ECIES.electrumDecrypt(encryptedMessage, bobPrivateKey))
+        .toEqual(message)
+    })
   })
 })
