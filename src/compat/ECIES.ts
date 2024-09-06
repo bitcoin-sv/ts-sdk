@@ -442,7 +442,7 @@ export default class ECIES {
      */
   public static electrumEncrypt (messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, noKey = false): number[] {
     let Rbuf
-    if (fromPrivateKey === null) {
+    if (!fromPrivateKey) {
       fromPrivateKey = PrivateKey.fromRandom()
     }
     if (!noKey) {
