@@ -442,7 +442,7 @@ export default class ECIES {
      */
   public static electrumEncrypt (messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, noKey = false): number[] {
     let Rbuf
-    if (fromPrivateKey === null) {
+    if (!fromPrivateKey) {
       fromPrivateKey = PrivateKey.fromRandom()
     }
     if (!noKey) {
@@ -469,7 +469,7 @@ export default class ECIES {
      * @param {PublicKey} [fromPublicKey=null] - The public key of the sender. If not provided, it is extracted from the message.
      * @returns {number[]} The decrypted message as a number array.
      */
-  public static electrumDecrypt (encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey: PublicKey = null): number[] {
+  public static electrumDecrypt (encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey?: PublicKey): number[] {
     const tagLength = 32
 
     const magic = encBuf.slice(0, 4)
@@ -477,7 +477,7 @@ export default class ECIES {
       throw new Error('Invalid Magic')
     }
     let offset = 4
-    if (fromPublicKey === null) {
+    if (!fromPublicKey) {
       // BIE1 use compressed public key, length is always 33.
       const pub = encBuf.slice(4, 37)
       fromPublicKey = PublicKey.fromString(toHex(pub))

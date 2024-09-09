@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file. The format 
 ### Added
 
 ### Changed
+- electrumEncrypt correctly allows fromPrivateKey to be omitted
 
 ### Deprecated
 
