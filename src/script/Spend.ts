@@ -4,7 +4,7 @@ import Script from './Script.js'
 import BigNumber from '../primitives/BigNumber.js'
 import OP from './OP.js'
 import ScriptChunk from './ScriptChunk.js'
-import { toHex } from '../primitives/utils.js'
+import { toHex, minimallyEncode } from '../primitives/utils.js'
 import * as Hash from '../primitives/Hash.js'
 import TransactionSignature from '../primitives/TransactionSignature.js'
 import PublicKey from '../primitives/PublicKey.js'
@@ -204,49 +204,6 @@ export default class Spend {
         }
       }
       return true
-    }
-
-    const minimallyEncode = (buf: number[]): number[] => {
-      if (buf.length === 0) {
-        return buf
-      }
-
-      // If the last byte is not 0x00 or 0x80, we are minimally encoded.
-      const last = buf[buf.length - 1]
-      if ((last & 0x7f) !== 0) {
-        return buf
-      }
-
-      // If the script is one byte long, then we have a zero, which encodes as an
-      // empty array.
-      if (buf.length === 1) {
-        return []
-      }
-
-      // If the next byte has it sign bit set, then we are minimaly encoded.
-      if ((buf[buf.length - 2] & 0x80) !== 0) {
-        return buf
-      }
-
-      // We are not minimally encoded, we need to figure out how much to trim.
-      for (let i = buf.length - 1; i > 0; i--) {
-        // We found a non zero byte, time to encode.
-        if (buf[i - 1] !== 0) {
-          if ((buf[i - 1] & 0x80) !== 0) {
-            // We found a byte with it sign bit set so we need one more
-            // byte.
-            buf[i++] = last
-          } else {
-            // the sign bit is clear, we can use it.
-            buf[i - 1] |= last
-          }
-
-          return buf.slice(0, i)
-        }
-      }
-
-      // If we found the whole thing is zeros, then we have a zero.
-      return []
     }
 
     const padDataToSize = (buf: number[], len: number): number[] => {

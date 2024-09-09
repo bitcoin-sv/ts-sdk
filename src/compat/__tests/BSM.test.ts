@@ -17,7 +17,7 @@ describe('BSM', () => {
     const messageBuf = toArray('this is my message', 'utf8')
     const privateKey = new PrivateKey(42)
     it('should return a signature', () => {
-      const sig = sign(messageBuf, privateKey).toDER()
+      const sig = sign(messageBuf, privateKey, 'raw').toDER()
       expect(sig.length).toEqual(70)
     })
     it('Creates the correct base64 signature', () => {
@@ -31,7 +31,7 @@ describe('BSM', () => {
     const privateKey = new PrivateKey(42)
 
     it('should verify a signed message', () => {
-      const sig = sign(messageBuf, privateKey)
+      const sig = sign(messageBuf, privateKey, 'raw')
       expect(verify(messageBuf, sig, privateKey.toPublicKey())).toEqual(true)
     })
     it('Should verify a signed message in base64', () => {

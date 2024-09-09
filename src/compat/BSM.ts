@@ -30,10 +30,10 @@ export const magicHash = (messageBuf: number[]): number[] => {
  * @deprecated Replaced by BRC-77 which employs BRC-42 key derivation and BRC-43 invoice numbers for enhanced security and privacy.
  * @param message The message to be signed as a number array.
  * @param privateKey The private key used for signing the message.
- * @param mode The mode of operation. When "raw", a Signature object is returned. When "base64", the BSM format signature is returned. Default: "raw".
+ * @param mode The mode of operation. When "base64", the BSM format signature is returned. When "raw", a Signature object is returned. Default: "base64".
  * @returns The signature object when in raw mode, or the BSM base64 string when in base64 mode.
  */
-export const sign = (message: number[], privateKey: PrivateKey, mode: 'raw' | 'base64' = 'raw'): Signature | string => {
+export const sign = (message: number[], privateKey: PrivateKey, mode: 'raw' | 'base64' = 'base64'): Signature | string => {
   const hashBuf = magicHash(message)
   const sig = ECDSA.sign(new BigNumber(hashBuf), privateKey, true)
   if (mode === 'raw') {

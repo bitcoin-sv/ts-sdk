@@ -7501,15 +7501,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [checkBit](#variable-checkbit) | [multiply](#variable-multiply) | [toArray](#variable-toarray) |
-| [encode](#variable-encode) | [rightShift](#variable-rightshift) | [toBase58](#variable-tobase58) |
-| [exclusiveOR](#variable-exclusiveor) | [ripemd160](#variable-ripemd160) | [toBase58Check](#variable-tobase58check) |
-| [fromBase58](#variable-frombase58) | [sha1](#variable-sha1) | [toHex](#variable-tohex) |
-| [fromBase58Check](#variable-frombase58check) | [sha256](#variable-sha256) | [toUTF8](#variable-toutf8) |
-| [getBytes](#variable-getbytes) | [sha256hmac](#variable-sha256hmac) | [verify](#variable-verify) |
-| [hash160](#variable-hash160) | [sha512](#variable-sha512) | [zero2](#variable-zero2) |
-| [hash256](#variable-hash256) | [sha512hmac](#variable-sha512hmac) |  |
-| [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [sign](#variable-sign) |  |
+| [checkBit](#variable-checkbit) | [minimallyEncode](#variable-minimallyencode) | [sign](#variable-sign) |
+| [encode](#variable-encode) | [multiply](#variable-multiply) | [toArray](#variable-toarray) |
+| [exclusiveOR](#variable-exclusiveor) | [rightShift](#variable-rightshift) | [toBase58](#variable-tobase58) |
+| [fromBase58](#variable-frombase58) | [ripemd160](#variable-ripemd160) | [toBase58Check](#variable-tobase58check) |
+| [fromBase58Check](#variable-frombase58check) | [sha1](#variable-sha1) | [toHex](#variable-tohex) |
+| [getBytes](#variable-getbytes) | [sha256](#variable-sha256) | [toUTF8](#variable-toutf8) |
+| [hash160](#variable-hash160) | [sha256hmac](#variable-sha256hmac) | [verify](#variable-verify) |
+| [hash256](#variable-hash256) | [sha512](#variable-sha512) | [zero2](#variable-zero2) |
+| [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [sha512hmac](#variable-sha512hmac) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -7857,6 +7857,41 @@ fromBase58Check = (str: string, enc?: "hex", prefixLength: number = 1) => {
         data = toHex(data);
     }
     return { prefix, data };
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: minimallyEncode
+
+```ts
+minimallyEncode = (buf: number[]): number[] => {
+    if (buf.length === 0) {
+        return buf;
+    }
+    const last = buf[buf.length - 1];
+    if ((last & 127) !== 0) {
+        return buf;
+    }
+    if (buf.length === 1) {
+        return [];
+    }
+    if ((buf[buf.length - 2] & 128) !== 0) {
+        return buf;
+    }
+    for (let i = buf.length - 1; i > 0; i--) {
+        if (buf[i - 1] !== 0) {
+            if ((buf[i - 1] & 128) !== 0) {
+                buf[i++] = last;
+            }
+            else {
+                buf[i - 1] |= last;
+            }
+            return buf.slice(0, i);
+        }
+    }
+    return [];
 }
 ```
 

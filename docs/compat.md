@@ -651,7 +651,7 @@ export default class ECIES {
         kM: number[];
     } 
     public static electrumEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, noKey = false): number[] 
-    public static electrumDecrypt(encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey: PublicKey = null): number[] 
+    public static electrumDecrypt(encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey?: PublicKey): number[] 
     public static bitcoreEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, ivBuf?: number[]): number[] 
     public static bitcoreDecrypt(encBuf: number[], toPrivateKey: PrivateKey): number[] 
 }
@@ -708,7 +708,7 @@ Argument Details
 Decrypts a message encrypted using the Electrum ECIES method.
 
 ```ts
-public static electrumDecrypt(encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey: PublicKey = null): number[] 
+public static electrumDecrypt(encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey?: PublicKey): number[] 
 ```
 
 Returns
@@ -852,7 +852,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ### Variable: sign
 
 ```ts
-sign = (message: number[], privateKey: PrivateKey, mode: "raw" | "base64" = "raw"): Signature | string => {
+sign = (message: number[], privateKey: PrivateKey, mode: "raw" | "base64" = "base64"): Signature | string => {
     const hashBuf = magicHash(message);
     const sig = ECDSA.sign(new BigNumber(hashBuf), privateKey, true);
     if (mode === "raw") {
