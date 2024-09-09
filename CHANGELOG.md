@@ -31,6 +31,10 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.1.22] - 2024-09-02
+### Added
+- Base64 mode support for BSM
+
 ## [1.1.21] - 2024-09-02
 ### Added
 - Broadcaster types have been updated to better align with Arc

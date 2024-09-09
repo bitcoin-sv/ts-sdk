@@ -614,7 +614,7 @@ export default class P2PKH implements ScriptTemplate {
     lock(pubkeyhash: string | number[]): LockingScript 
     unlock(privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false, sourceSatoshis?: number, lockingScript?: Script): {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-        estimateLength: () => Promise<106>;
+        estimateLength: () => Promise<108>;
     } 
 }
 ```
@@ -652,7 +652,7 @@ The returned object contains:
 ```ts
 unlock(privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false, sourceSatoshis?: number, lockingScript?: Script): {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-    estimateLength: () => Promise<106>;
+    estimateLength: () => Promise<108>;
 } 
 ```
 
@@ -691,7 +691,7 @@ export default class RPuzzle implements ScriptTemplate {
     lock(value: number[]): LockingScript 
     unlock(k: BigNumber, privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false): {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-        estimateLength: () => Promise<106>;
+        estimateLength: () => Promise<108>;
     } 
 }
 ```
@@ -740,7 +740,7 @@ The returned object contains:
 ```ts
 unlock(k: BigNumber, privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay: boolean = false): {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-    estimateLength: () => Promise<106>;
+    estimateLength: () => Promise<108>;
 } 
 ```
 
