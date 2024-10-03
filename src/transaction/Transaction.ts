@@ -12,6 +12,7 @@ import Spend from '../script/Spend.js'
 import ChainTracker from './ChainTracker.js'
 import { defaultBroadcaster } from './broadcasters/DefaultBroadcaster.js'
 import { defaultChainTracker } from './chaintrackers/DefaultChainTracker.js'
+import { HashCache } from '../primitives/TransactionSignature.js'
 
 /**
  * Represents a complete Bitcoin transaction. This class encapsulates all the details
@@ -640,6 +641,11 @@ export default class Transaction {
   ): Promise<boolean> {
     const verifiedTxids = new Set<string>()
     const txQueue: Transaction[] = [this]
+    const hashCache: HashCache = {
+      hashPrevouts: Array(32).fill(0),
+      hashSequence: Array(32).fill(0),
+      hashOutputs: Array(32).fill(0),
+    }
 
     while (txQueue.length > 0) {
       const tx = txQueue.shift()
@@ -712,7 +718,8 @@ export default class Transaction {
           inputSequence: input.sequence,
           inputIndex: i,
           outputs: tx.outputs,
-          lockTime: tx.lockTime
+          lockTime: tx.lockTime,
+          hashCache
         })
         const spendValid = spend.validate()
 

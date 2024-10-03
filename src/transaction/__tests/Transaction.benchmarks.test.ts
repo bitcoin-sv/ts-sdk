@@ -114,8 +114,8 @@ describe('Transaction Verification Benchmark', () => {
     })
 
     it('verifies a large transaction with many inputs and outputs', async () => {
-        const inputCount = 50
-        const outputCount = 50
+        const inputCount = 500
+        const outputCount = 500
         const sourceTxs = []
 
         // Create source transactions

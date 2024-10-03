@@ -6,7 +6,7 @@ import OP from './OP.js'
 import ScriptChunk from './ScriptChunk.js'
 import { toHex, minimallyEncode } from '../primitives/utils.js'
 import * as Hash from '../primitives/Hash.js'
-import TransactionSignature from '../primitives/TransactionSignature.js'
+import TransactionSignature, { HashCache } from '../primitives/TransactionSignature.js'
 import PublicKey from '../primitives/PublicKey.js'
 import { verify } from '../primitives/ECDSA.js'
 import TransactionInput from '../transaction/TransactionInput.js'
@@ -39,6 +39,7 @@ const requireCleanStack = true
  * @property {UnlockingScript} unlockingScript - The unlocking script that unlocks the UTXO for spending.
  * @property {number} inputSequence - The sequence number of this input.
  */
+
 export default class Spend {
   sourceTXID: string
   sourceOutputIndex: number
@@ -101,6 +102,7 @@ export default class Spend {
     inputSequence: number
     inputIndex: number
     lockTime: number
+    hashCache?: HashCache
   }) {
     this.sourceTXID = params.sourceTXID
     this.sourceOutputIndex = params.sourceOutputIndex

@@ -6,6 +6,12 @@ import Script from '../script/Script.js'
 import TransactionInput from '../transaction/TransactionInput.js'
 import TransactionOutput from '../transaction/TransactionOutput.js'
 
+export type HashCache = {
+  hashPrevouts: number[]
+  hashSequence: number[]
+  hashOutputs: number[]
+}
+
 export default class TransactionSignature extends Signature {
   public static readonly SIGHASH_ALL = 0x00000001
   public static readonly SIGHASH_NONE = 0x00000002
@@ -27,7 +33,15 @@ export default class TransactionSignature extends Signature {
     inputSequence: number
     lockTime: number
     scope: number
+    hashCache?: HashCache
   }): number[] {
+    if ((params.scope & this.SIGHASH_FORKID) > 0 && params.hashCache === undefined) {
+      params.hashCache = {
+        hashPrevouts: Array(32).fill(0),
+        hashSequence: Array(32).fill(0),
+        hashOutputs: Array(32).fill(0),
+      }
+    }
     const currentInput = {
       sourceTXID: params.sourceTXID,
       sourceOutputIndex: params.sourceOutputIndex,
@@ -37,6 +51,7 @@ export default class TransactionSignature extends Signature {
     inputs.splice(params.inputIndex, 0, currentInput)
 
     const getPrevoutHash = (): number[] => {
+      if (params.hashCache.hashPrevouts) return params.hashCache.hashPrevouts
       const writer = new Writer()
       for (const input of inputs) {
         if (typeof input.sourceTXID === 'undefined') {
@@ -49,10 +64,12 @@ export default class TransactionSignature extends Signature {
 
       const buf = writer.toArray()
       const ret = Hash.hash256(buf)
+      params.hashCache.hashPrevouts = ret
       return ret
     }
 
     const getSequenceHash = (): number[] => {
+      if (params.hashCache.hashSequence) return params.hashCache.hashSequence
       const writer = new Writer()
 
       for (const input of inputs) {
@@ -61,10 +78,12 @@ export default class TransactionSignature extends Signature {
 
       const buf = writer.toArray()
       const ret = Hash.hash256(buf)
+      params.hashCache.hashSequence = ret
       return ret
     }
 
     function getOutputsHash (outputIndex?: number): number[] {
+      if (params.hashCache.hashOutputs) return params.hashCache.hashOutputs
       const writer = new Writer()
 
       if (typeof outputIndex === 'undefined') {
@@ -85,6 +104,7 @@ export default class TransactionSignature extends Signature {
 
       const buf = writer.toArray()
       const ret = Hash.hash256(buf)
+      params.hashCache.hashOutputs = ret
       return ret
     }
 
