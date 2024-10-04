@@ -1016,7 +1016,7 @@ export default class Spend {
 
           try {
             sig = TransactionSignature.fromChecksigFormat(bufSig)
-            pubkey = PublicKey.fromString(toHex(bufPubkey))
+            pubkey = PublicKey.fromDER(bufPubkey)
             fSuccess = verifySignature(sig, pubkey, subscript)
           } catch (e) {
             // invalid sig or pubkey

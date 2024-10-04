@@ -23,10 +23,9 @@ import DRBG from './DRBG.js'
  * let msg = new BigNumber('1234567890abcdef', 16);
  * let truncatedMsg = truncateToN(msg);
  */
-function truncateToN (msg: BigNumber, truncOnly?: boolean): BigNumber {
-  const curve = new Curve()
+function truncateToN(msg: BigNumber, truncOnly?: boolean, curve = new Curve()): BigNumber {
   const delta = msg.byteLength() * 8 - curve.n.bitLength()
-  if (delta > 0) { msg = msg.ushrn(delta) }
+  if (delta > 0) { msg.iushrn(delta) }
   if (!truncOnly && msg.cmp(curve.n) >= 0) {
     return msg.sub(curve.n)
   } else {
@@ -51,7 +50,7 @@ function truncateToN (msg: BigNumber, truncOnly?: boolean): BigNumber {
  */
 export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: BigNumber | Function): Signature => {
   const curve = new Curve()
-  msg = truncateToN(msg)
+  msg = truncateToN(msg, undefined, curve)
 
   // Zero-extend key to provide enough entropy
   const bytes = curve.n.byteLength()
@@ -73,7 +72,7 @@ export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false,
       : BigNumber.isBN(customK)
         ? customK
         : new BigNumber(drbg.generate(bytes), 16)
-    k = truncateToN(k, true)
+    k = truncateToN(k, true, curve)
     if (k.cmpn(1) <= 0 || k.cmp(ns1) >= 0) {
       if (BigNumber.isBN(customK)) {
         throw new Error('Invalid fixed custom K value (must be more than 1 and less than N-1)')
@@ -140,7 +139,7 @@ export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false,
  */
 export const verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
   const curve = new Curve()
-  msg = truncateToN(msg)
+  msg = truncateToN(msg, undefined, curve)
   // Perform primitive values validation
   const r = sig.r
   const s = sig.s

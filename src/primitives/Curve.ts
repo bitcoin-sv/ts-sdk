@@ -33,7 +33,7 @@ export default class Curve {
   _bitLength: number
 
   // Represent num in a w-NAF form
-  static assert (
+  static assert(
     expression: unknown,
     message: string = 'Elliptic curve assertion failed'
   ): void {
@@ -42,7 +42,7 @@ export default class Curve {
     }
   }
 
-  getNAF (num: BigNumber, w: number, bits: number): number[] {
+  getNAF(num: BigNumber, w: number, bits: number): number[] {
     const naf = new Array(Math.max(num.bitLength(), bits) + 1)
     naf.fill(0)
 
@@ -67,7 +67,7 @@ export default class Curve {
   }
 
   // Represent k1, k2 in a Joint Sparse Form
-  getJSF (k1: BigNumber, k2: BigNumber): number[][] {
+  getJSF(k1: BigNumber, k2: BigNumber): number[][] {
     const jsf: any[][] = [
       [],
       []
@@ -115,9 +115,9 @@ export default class Curve {
     return jsf
   }
 
-  static cachedProperty (obj, name: string, computer): void {
+  static cachedProperty(obj, name: string, computer): void {
     const key = '_' + name
-    obj.prototype[name] = function cachedProperty () {
+    obj.prototype[name] = function cachedProperty() {
       const r = this[key] !== undefined
         ? this[key]
         : this[key] = computer.call(this)
@@ -125,17 +125,24 @@ export default class Curve {
     }
   }
 
-  static parseBytes (bytes: string | number[]): number[] {
+  static parseBytes(bytes: string | number[]): number[] {
     return typeof bytes === 'string'
       ? toArray(bytes, 'hex')
       : bytes
   }
 
-  static intFromLE (bytes: number[]): BigNumber {
+  static intFromLE(bytes: number[]): BigNumber {
     return new BigNumber(bytes, 'hex', 'le')
   }
 
-  constructor () {
+  constructor() {
+    if (typeof globalCurve !== 'undefined') {
+      return globalCurve
+    } else {
+      /* eslint-disable @typescript-eslint/no-this-alias */
+      globalCurve = this
+    }
+
     const precomputed = {
       doubles: {
         step: 4,
@@ -916,13 +923,6 @@ export default class Curve {
         ]
       }
     }
-
-    if (typeof globalCurve !== 'undefined') {
-      return globalCurve
-    } else {
-      /* eslint-disable @typescript-eslint/no-this-alias */
-      globalCurve = this
-    }
     const conf = {
       prime: 'k256',
       p: 'ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe fffffc2f',
@@ -988,7 +988,7 @@ export default class Curve {
     this._endoWnafT2 = new Array(4)
   }
 
-  _getEndomorphism (conf): {
+  _getEndomorphism(conf): {
     beta: BigNumber
     lambda: BigNumber
     basis: Array<{ a: BigNumber, b: BigNumber }>
@@ -1040,7 +1040,7 @@ export default class Curve {
     }
   };
 
-  _getEndoRoots (num: BigNumber): [BigNumber, BigNumber] {
+  _getEndoRoots(num: BigNumber): [BigNumber, BigNumber] {
     // Find roots of for x^2 + x + 1 in F
     // Root = (-1 +- Sqrt(-3)) / 2
     //
@@ -1055,7 +1055,7 @@ export default class Curve {
     return [l1, l2]
   };
 
-  _getEndoBasis (lambda: BigNumber): [{ a: BigNumber, b: BigNumber }, { a: BigNumber, b: BigNumber }] {
+  _getEndoBasis(lambda: BigNumber): [{ a: BigNumber, b: BigNumber }, { a: BigNumber, b: BigNumber }] {
     // aprxSqrt >= sqrt(this.n)
     const aprxSqrt = this.n.ushrn(Math.floor(this.n.bitLength() / 2))
 
@@ -1131,7 +1131,7 @@ export default class Curve {
     ]
   }
 
-  _endoSplit (k: BigNumber): { k1: BigNumber, k2: BigNumber } {
+  _endoSplit(k: BigNumber): { k1: BigNumber, k2: BigNumber } {
     const basis = this.endo.basis
     const v1 = basis[0]
     const v2 = basis[1]
@@ -1150,7 +1150,7 @@ export default class Curve {
     return { k1, k2 }
   }
 
-  validate (point: Point): boolean {
+  validate(point: Point): boolean {
     if (point.inf) { return true }
 
     const x = point.x

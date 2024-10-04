@@ -17,6 +17,10 @@ import ReductionContext from './ReductionContext.js'
  * @property inf - Flag to record if the point is at infinity in the Elliptic Curve.
  */
 export default class Point extends BasePoint {
+  private static red: any = new ReductionContext('k256')
+  private static a: BigNumber = new BigNumber(0).toRed(Point.red)
+  private static b: BigNumber = new BigNumber(7).toRed(Point.red)
+  private static zero: BigNumber = new BigNumber(0).toRed(Point.red)
   x: BigNumber | null
   y: BigNumber | null
   inf: boolean
@@ -37,7 +41,7 @@ export default class Point extends BasePoint {
    * const derPoint = [ 2, 18, 123, 108, 125, 83, 1, 251, 164, 214, 16, 119, 200, 216, 210, 193, 251, 193, 129, 67, 97, 146, 210, 216, 77, 254, 18, 6, 150, 190, 99, 198, 128 ];
    * const point = Point.fromDER(derPoint);
    */
-  static fromDER (bytes: number[]): Point {
+  static fromDER(bytes: number[]): Point {
     const len = 32
     // uncompressed, hybrid-odd, hybrid-even
     if ((bytes[0] === 0x04 || bytes[0] === 0x06 || bytes[0] === 0x07) &&
@@ -59,7 +63,7 @@ export default class Point extends BasePoint {
 
       return res
     } else if ((bytes[0] === 0x02 || bytes[0] === 0x03) &&
-              bytes.length - 1 === len) {
+      bytes.length - 1 === len) {
       return Point.fromX(bytes.slice(1, 1 + len), bytes[0] === 0x03)
     }
     throw new Error('Unknown point format')
@@ -82,9 +86,16 @@ export default class Point extends BasePoint {
    * const pointStr = 'abcdef';
    * const point = Point.fromString(pointStr);
    */
-  static fromString (str: string): Point {
+  static fromString(str: string): Point {
     const bytes = toArray(str, 'hex')
     return Point.fromDER(bytes)
+  }
+
+  static redSqrtOptimized(y2: BigNumber): BigNumber {
+    const red = Point.red;
+    const p = red.m; // The modulus
+    const exponent = p.addn(1).iushrn(2); // (p + 1) / 4
+    return y2.redPow(exponent);
   }
 
   /**
@@ -102,28 +113,31 @@ export default class Point extends BasePoint {
    * const xCoordinate = new BigNumber('10');
    * const point = Point.fromX(xCoordinate, true);
    */
+  static fromX(x: BigNumber | number | number[] | string, odd: boolean): Point {
+    const red = Point.red
+    const a = Point.a
+    const b = Point.b
+    const zero = Point.zero
 
-  static fromX (x: BigNumber | number | number[] | string, odd: boolean): Point {
-    const red = new ReductionContext('k256')
-    const a = new BigNumber(0).toRed(red)
-    const b = new BigNumber(7).toRed(red)
-    const zero = new BigNumber(0).toRed(red)
-    if (!BigNumber.isBN(x)) {
-      x = new BigNumber(x as number, 16)
-    }
-    x = x as BigNumber
-    if (x.red == null) {
-      x = x.toRed(red)
+    // Convert x to BigNumber and reduce it
+    if (typeof x === 'string' || Array.isArray(x)) {
+      x = new BigNumber(x as string | number[], 16);
+    } else if (typeof x === 'number') {
+      x = new BigNumber(x);
     }
 
-    const y2 = x.redSqr().redMul(x).redIAdd(x.redMul(a)).redIAdd(b)
-    let y = y2.redSqrt()
+    x = (x as BigNumber).toRed(red);
+
+    // Compute y^2 = x^3 + ax + b
+    const y2 = x.redSqr().redIMul(x).redIAdd(b)
+    let y = Point.redSqrtOptimized(y2)
+
+    // Verify that y^2 = x^3 + ax + b
     if (y.redSqr().redSub(y2).cmp(zero) !== 0) {
-      throw new Error('invalid point')
+      throw new Error('Invalid point')
     }
 
-    // XXX Is there any way to tell if the number is odd without converting it
-    // to non-red form?
+    // Adjust y based on the parity
     const isOdd = y.fromRed().isOdd()
     if ((odd && !isOdd) || (!odd && isOdd)) {
       y = y.redNeg()
@@ -147,7 +161,7 @@ export default class Point extends BasePoint {
    * const serializedPoint = '{"x":52,"y":15}';
    * const point = Point.fromJSON(serializedPoint, true);
    */
-  static fromJSON (
+  static fromJSON(
     obj: string | any[], isRed: boolean
   ): Point {
     if (typeof obj === 'string') {
@@ -167,15 +181,15 @@ export default class Point extends BasePoint {
       beta: null,
       doubles: typeof pre.doubles === 'object' && pre.doubles !== null
         ? {
-            step: pre.doubles.step,
-            points: [res].concat(pre.doubles.points.map(obj2point))
-          }
+          step: pre.doubles.step,
+          points: [res].concat(pre.doubles.points.map(obj2point))
+        }
         : undefined,
       naf: typeof pre.naf === 'object' && pre.naf !== null
         ? {
-            wnd: pre.naf.wnd,
-            points: [res].concat(pre.naf.points.map(obj2point))
-          }
+          wnd: pre.naf.wnd,
+          points: [res].concat(pre.naf.points.map(obj2point))
+        }
         : undefined
     }
     return res
@@ -191,7 +205,7 @@ export default class Point extends BasePoint {
    * new Point('abc123', 'def456');
    * new Point(null, null); // Generates Infinity point.
    */
-  constructor (
+  constructor(
     x: BigNumber | number | number[] | string | null,
     y: BigNumber | number | number[] | string | null,
     isRed: boolean = true
@@ -233,7 +247,7 @@ export default class Point extends BasePoint {
    * const aPoint = new Point(x, y);
    * const isValid = aPoint.validate();
    */
-  validate (): boolean {
+  validate(): boolean {
     return this.curve.validate(this)
   }
 
@@ -252,7 +266,7 @@ export default class Point extends BasePoint {
    * const encodedPointArray = aPoint.encode();
    * const encodedPointHex = aPoint.encode(true, 'hex');
    */
-  encode (compact: boolean = true, enc?: 'hex'): number[] | string {
+  encode(compact: boolean = true, enc?: 'hex'): number[] | string {
     const len = this.curve.p.byteLength()
     const x = this.getX().toArray('be', len)
     let res: number[]
@@ -279,7 +293,7 @@ export default class Point extends BasePoint {
    * const aPoint = new Point(x, y);
    * const stringPoint = aPoint.toString();
    */
-  toString (): string {
+  toString(): string {
     return this.encode(true, 'hex') as string
   }
 
@@ -293,24 +307,24 @@ export default class Point extends BasePoint {
    * const aPoint = new Point(x, y);
    * const jsonPoint = aPoint.toJSON();
    */
-  toJSON (): [BigNumber | null, BigNumber | null, { doubles: { step: any, points: any[] } | undefined, naf: { wnd: any, points: any[] } | undefined }?] {
+  toJSON(): [BigNumber | null, BigNumber | null, { doubles: { step: any, points: any[] } | undefined, naf: { wnd: any, points: any[] } | undefined }?] {
     if (this.precomputed == null) { return [this.x, this.y] }
 
     return [this.x, this.y, typeof this.precomputed === 'object' && this.precomputed !== null
       ? {
-          doubles: (this.precomputed.doubles != null)
-            ? {
-                step: this.precomputed.doubles.step,
-                points: this.precomputed.doubles.points.slice(1)
-              }
-            : undefined,
-          naf: (this.precomputed.naf != null)
-            ? {
-                wnd: this.precomputed.naf.wnd,
-                points: this.precomputed.naf.points.slice(1)
-              }
-            : undefined
-        }
+        doubles: (this.precomputed.doubles != null)
+          ? {
+            step: this.precomputed.doubles.step,
+            points: this.precomputed.doubles.points.slice(1)
+          }
+          : undefined,
+        naf: (this.precomputed.naf != null)
+          ? {
+            wnd: this.precomputed.naf.wnd,
+            points: this.precomputed.naf.points.slice(1)
+          }
+          : undefined
+      }
       : undefined]
   }
 
@@ -324,7 +338,7 @@ export default class Point extends BasePoint {
    * const aPoint = new Point(x, y);
    * console.log(aPoint.inspect());
    */
-  inspect (): string {
+  inspect(): string {
     if (this.isInfinity()) {
       return '<EC Point Infinity>'
     }
@@ -341,7 +355,7 @@ export default class Point extends BasePoint {
    * const p = new Point(null, null);
    * console.log(p.isInfinity()); // outputs: true
    */
-  isInfinity (): boolean {
+  isInfinity(): boolean {
     return this.inf
   }
 
@@ -357,7 +371,7 @@ export default class Point extends BasePoint {
    * const p2 = new Point(2, 3);
    * const result = p1.add(p2);
    */
-  add (p: Point): Point {
+  add(p: Point): Point {
     // O + P = P
     if (this.inf) { return p }
 
@@ -389,7 +403,7 @@ export default class Point extends BasePoint {
    * const P = new Point('123', '456');
    * const result = P.dbl();
    * */
-  dbl (): Point {
+  dbl(): Point {
     if (this.inf) { return this }
 
     // 2P = O
@@ -416,7 +430,7 @@ export default class Point extends BasePoint {
    * const P = new Point('123', '456');
    * const x = P.getX();
    */
-  getX (): BigNumber {
+  getX(): BigNumber {
     return this.x.fromRed()
   }
 
@@ -427,7 +441,7 @@ export default class Point extends BasePoint {
    * const P = new Point('123', '456');
    * const x = P.getX();
    */
-  getY (): BigNumber {
+  getY(): BigNumber {
     return this.y.fromRed()
   }
 
@@ -442,7 +456,7 @@ export default class Point extends BasePoint {
    * const p = new Point(1, 2);
    * const result = p.mul(2); // this doubles the Point
    */
-  mul (k: BigNumber | number | number[] | string): Point {
+  mul(k: BigNumber | number | number[] | string): Point {
     if (!BigNumber.isBN(k)) {
       k = new BigNumber(k as number, 16)
     }
@@ -471,7 +485,7 @@ export default class Point extends BasePoint {
    * const p2 = new Point(2, 3);
    * const result = p1.mulAdd(2, p2, 3);
    */
-  mulAdd (k1: BigNumber, p2: Point, k2: BigNumber): Point {
+  mulAdd(k1: BigNumber, p2: Point, k2: BigNumber): Point {
     const points = [this, p2]
     const coeffs = [k1, k2]
     return this._endoWnafMulAdd(points, coeffs) as Point
@@ -492,7 +506,7 @@ export default class Point extends BasePoint {
    * const p2 = new Point(2, 3);
    * const result = p1.jmulAdd(2, p2, 3);
    */
-  jmulAdd (k1: BigNumber, p2: Point, k2: BigNumber): JPoint {
+  jmulAdd(k1: BigNumber, p2: Point, k2: BigNumber): JPoint {
     const points = [this, p2]
     const coeffs = [k1, k2]
     return this._endoWnafMulAdd(points, coeffs, true) as JPoint
@@ -511,7 +525,7 @@ export default class Point extends BasePoint {
    * const p2 = new Point(5, 20);
    * const areEqual = p1.eq(p2); // returns true
    */
-  eq (p: Point): boolean {
+  eq(p: Point): boolean {
     return this === p || (
       (this.inf === p.inf) &&
       (this.inf || (this.x.cmp(p.x) === 0 && this.y.cmp(p.y) === 0)))
@@ -526,7 +540,7 @@ export default class Point extends BasePoint {
    * const P = new Point('123', '456');
    * const result = P.neg();
    */
-  neg (_precompute?: boolean): Point {
+  neg(_precompute?: boolean): Point {
     if (this.inf) { return this }
 
     const res = new Point(this.x, this.y.redNeg())
@@ -562,7 +576,7 @@ export default class Point extends BasePoint {
    * const p = new Point(5, 20);
    * const doubledPoint = p.dblp(10); // returns the point after "doubled" 10 times
    */
-  dblp (k: number): Point {
+  dblp(k: number): Point {
     /* eslint-disable @typescript-eslint/no-this-alias */
     let r: Point = this
     for (let i = 0; i < k; i++) { r = r.dbl() }
@@ -580,7 +594,7 @@ export default class Point extends BasePoint {
    * const point = new Point(xCoordinate, yCoordinate);
    * const jacobianPoint = point.toJ();
    */
-  toJ (): JPoint {
+  toJ(): JPoint {
     if (this.inf) {
       return new JPoint(null, null, null)
     }
@@ -588,7 +602,7 @@ export default class Point extends BasePoint {
     return res
   }
 
-  private _getBeta (): undefined | Point {
+  private _getBeta(): undefined | Point {
     if (typeof this.curve.endo !== 'object') { return }
 
     const pre = this.precomputed
@@ -607,22 +621,22 @@ export default class Point extends BasePoint {
         beta: null,
         naf: (pre.naf != null)
           ? {
-              wnd: pre.naf.wnd,
-              points: pre.naf.points.map(endoMul)
-            }
+            wnd: pre.naf.wnd,
+            points: pre.naf.points.map(endoMul)
+          }
           : undefined,
         doubles: (pre.doubles != null)
           ? {
-              step: pre.doubles.step,
-              points: pre.doubles.points.map(endoMul)
-            }
+            step: pre.doubles.step,
+            points: pre.doubles.points.map(endoMul)
+          }
           : undefined
       }
     }
     return beta
   }
 
-  private _fixedNafMul (k: BigNumber): Point {
+  private _fixedNafMul(k: BigNumber): Point {
     if (typeof this.precomputed !== 'object' || this.precomputed === null) {
       throw new Error('_fixedNafMul requires precomputed values for the point')
     }
@@ -658,7 +672,7 @@ export default class Point extends BasePoint {
     return a.toP()
   }
 
-  private _wnafMulAdd (
+  private _wnafMulAdd(
     defW: number,
     points: Point[],
     coeffs: BigNumber[],
@@ -737,6 +751,7 @@ export default class Point extends BasePoint {
       }
     }
 
+
     let acc = new JPoint(null, null, null)
     const tmp = this.curve._wnafT4
     for (let i = max; i >= 0; i--) {
@@ -784,7 +799,7 @@ export default class Point extends BasePoint {
     }
   }
 
-  private _endoWnafMulAdd (points: Point[], coeffs, jacobianResult?: boolean): BasePoint {
+  private _endoWnafMulAdd(points: Point[], coeffs, jacobianResult?: boolean): BasePoint {
     const npoints = this.curve._endoWnafT1
     const ncoeffs = this.curve._endoWnafT2
     let i
@@ -817,7 +832,7 @@ export default class Point extends BasePoint {
     return res
   }
 
-  private _hasDoubles (k: BigNumber): boolean {
+  private _hasDoubles(k: BigNumber): boolean {
     if (this.precomputed == null) { return false }
 
     const doubles = this.precomputed.doubles
@@ -826,7 +841,7 @@ export default class Point extends BasePoint {
     return doubles.points.length >= Math.ceil((k.bitLength() + 1) / doubles.step)
   };
 
-  private _getDoubles (
+  private _getDoubles(
     step?: number,
     power?: number
   ): { step: number, points: any[] } {
@@ -851,7 +866,7 @@ export default class Point extends BasePoint {
     }
   };
 
-  private _getNAFPoints (wnd: number): { wnd: number, points: any[] } {
+  private _getNAFPoints(wnd: number): { wnd: number, points: any[] } {
     if (
       typeof this.precomputed === 'object' && this.precomputed !== null &&
       typeof this.precomputed.naf === 'object' && this.precomputed.naf !== null
