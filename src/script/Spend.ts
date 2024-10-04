@@ -1017,9 +1017,7 @@ export default class Spend {
           try {
             sig = TransactionSignature.fromChecksigFormat(bufSig)
             pubkey = PublicKey.fromString(toHex(bufPubkey))
-            console.time('sigVerify')
             fSuccess = verifySignature(sig, pubkey, subscript)
-            console.timeEnd('sigVerify')
           } catch (e) {
             // invalid sig or pubkey
             fSuccess = false
