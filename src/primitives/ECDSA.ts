@@ -49,73 +49,293 @@ function truncateToN(msg: BigNumber, truncOnly?: boolean, curve = new Curve()): 
  * const signature = sign(msg, key)
  */
 export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: BigNumber | Function): Signature => {
-  const curve = new Curve()
-  msg = truncateToN(msg)
+  if (typeof BigInt === 'function') {
+    // Curve parameters for secp256k1
+    const zero = BigInt(0);
+    const one = BigInt(1);
+    const two = BigInt(2);
+    const n = BigInt(
+      '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141'
+    ); // Order of the curve
+    const p = BigInt(
+      '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F'
+    ); // Field prime
+    const Gx = BigInt(
+      '0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798'
+    );
+    const Gy = BigInt(
+      '0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8'
+    );
+    const G = { x: Gx, y: Gy };
 
-  // Zero-extend key to provide enough entropy
-  const bytes = curve.n.byteLength()
-  const bkey = key.toArray('be', bytes)
+    // Convert msg and key to BigInt
+    const z = BigInt('0x' + msg.toString(16));
+    const d = BigInt('0x' + key.toString(16));
 
-  // Zero-extend nonce to have the same byte size as N
-  const nonce = msg.toArray('be', bytes)
+    // Validate private key
+    if (d <= zero || d >= n) {
+      throw new Error('Invalid private key');
+    }
 
-  // Instantiate Hmac_DRBG
-  const drbg = new DRBG(bkey, nonce)
+    // Helper function to convert BigInt to byte array
+    function bigIntToBytes(value: bigint, length: number): Uint8Array {
+      const hex = value.toString(16).padStart(length * 2, '0');
+      const bytes = new Uint8Array(length);
+      for (let i = 0; i < length; i++) {
+        bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+      }
+      return bytes;
+    }
 
-  // Number of bytes to generate
-  const ns1 = curve.n.subn(1)
+    // Zero-extend key to provide enough entropy
+    const bytes = 32; // Assuming 256-bit curve
+    const bkey = bigIntToBytes(d, bytes); // 'd' is the private key BigInt
 
-  for (let iter = 0; ; iter++) {
-    // Compute the k-value
-    let k = typeof customK === 'function'
-      ? customK(iter)
-      : BigNumber.isBN(customK)
-        ? customK
-        : new BigNumber(drbg.generate(bytes), 16)
-    k = truncateToN(k, true)
-    if (k.cmpn(1) <= 0 || k.cmp(ns1) >= 0) {
-      if (BigNumber.isBN(customK)) {
-        throw new Error('Invalid fixed custom K value (must be more than 1 and less than N-1)')
+    // Zero-extend nonce to have the same byte size as N
+    const nonce = bigIntToBytes(z, bytes); // 'z' is the message hash BigInt
+
+    // Instantiate Hmac_DRBG
+    const drbg = new DRBG(Array.from(bkey), Array.from(nonce));
+
+    // Number of bytes to generate
+    const ns1 = n - one;
+
+    let iter = 0;
+
+    // Truncate to N function for BigInt
+    function truncateToN(k: bigint, n: bigint, truncOnly: boolean = true): bigint {
+      const kBitLength = k.toString(2).length;
+      const nBitLength = n.toString(2).length;
+      const delta = kBitLength - nBitLength;
+      if (delta > 0) {
+        k = k >> BigInt(delta);
+      }
+      if (!truncOnly && k >= n) {
+        return k - n;
       } else {
-        continue
+        return k;
       }
     }
 
-    const kp = curve.g.mul(k)
-    if (kp.isInfinity()) {
-      if (BigNumber.isBN(customK)) {
-        throw new Error('Invalid fixed custom K value (must not create a point at infinity when multiplied by the generator point)')
+    function generateK(): bigint {
+      if (typeof customK === 'function') {
+        // Call customK function to get k as BigNumber
+        const k_bn = customK(iter);
+        // Convert k_bn (BigNumber) to BigInt
+        const k_str = k_bn.toString(16);
+        return BigInt('0x' + k_str);
+      } else if (BigNumber.isBN(customK)) {
+        // Use customK provided, convert to BigInt
+        const k_str = customK.toString(16);
+        return BigInt('0x' + k_str);
       } else {
-        continue
+        // Use DRBG to generate k
+        const k_hex = drbg.generate(bytes); // Generate hex string
+        return BigInt('0x' + k_hex);
       }
     }
 
-    const kpX = kp.getX()
-    const r = kpX.umod(curve.n)
-    if (r.cmpn(0) === 0) {
-      if (BigNumber.isBN(customK)) {
-        throw new Error('Invalid fixed custom K value (when multiplied by G, the resulting x coordinate mod N must not be zero)')
-      } else {
-        continue
+    // Modular arithmetic functions
+    function mod(a: bigint, m: bigint): bigint {
+      return ((a % m) + m) % m;
+    }
+
+    function modInv(a: bigint, m: bigint): bigint {
+      let lm = one,
+        hm = zero;
+      let low = mod(a, m),
+        high = m;
+      while (low > one) {
+        const r = high / low;
+        const nm = hm - lm * r;
+        const neww = high - low * r;
+        hm = lm;
+        lm = nm;
+        high = low;
+        low = neww;
       }
+      return mod(lm, m);
     }
 
-    let s = k.invm(curve.n).mul(r.mul(key).iadd(msg))
-    s = s.umod(curve.n)
-    if (s.cmpn(0) === 0) {
-      if (BigNumber.isBN(customK)) {
-        throw new Error('Invalid fixed custom K value (when used with the key, it cannot create a zero value for S)')
-      } else {
-        continue
+    function pointAdd(
+      P: { x: bigint; y: bigint } | null,
+      Q: { x: bigint; y: bigint } | null
+    ): { x: bigint; y: bigint } | null {
+      if (P === null) return Q;
+      if (Q === null) return P;
+
+      if (P.x === Q.x && P.y === mod(-Q.y, p)) {
+        return null; // Point at infinity
       }
+
+      let m: bigint;
+      if (P.x === Q.x && P.y === Q.y) {
+        // Point doubling
+        if (P.y === zero) {
+          return null; // Point at infinity
+        }
+        const numerator = mod(BigInt(3) * P.x * P.x, p); // 3 * x^2
+        const denominator = modInv(two * P.y, p);
+        m = mod(numerator * denominator, p);
+      } else {
+        const numerator = mod(Q.y - P.y, p);
+        const denominator = modInv(Q.x - P.x, p);
+        m = mod(numerator * denominator, p);
+      }
+
+      const xR = mod(m * m - P.x - Q.x, p);
+      const yR = mod(m * (P.x - xR) - P.y, p);
+
+      return { x: xR, y: yR };
     }
 
-    // Use complement of `s`, if it is > `n / 2`
-    if (forceLowS && s.cmp(curve.n.ushrn(1)) > 0) {
-      s = curve.n.sub(s)
+    function scalarMul(
+      k: bigint,
+      P: { x: bigint; y: bigint }
+    ): { x: bigint; y: bigint } | null {
+      let N = P;
+      let Q = null; // Point at infinity
+
+      while (k > zero) {
+        if (k % two === one) {
+          Q = pointAdd(Q, N);
+        }
+        N = pointAdd(N, N);
+        k >>= one;
+      }
+      return Q;
     }
 
-    return new Signature(r, s)
+    while (true) {
+      let k = generateK();
+      iter += 1;
+
+      // Truncate k to n bits
+      k = truncateToN(k, n, true);
+
+      if (k <= one || k >= ns1) {
+        if (customK instanceof BigNumber) {
+          throw new Error(
+            'Invalid fixed custom K value (must be more than 1 and less than N-1)'
+          );
+        } else {
+          continue;
+        }
+      }
+
+      const R = scalarMul(k, G);
+      if (R === null) {
+        if (customK instanceof BigNumber) {
+          throw new Error(
+            'Invalid fixed custom K value (must not create a point at infinity when multiplied by the generator point)'
+          );
+        } else {
+          continue;
+        }
+      }
+
+      const r = mod(R.x, n);
+      if (r === zero) {
+        if (customK instanceof BigNumber) {
+          throw new Error(
+            'Invalid fixed custom K value (when multiplied by G, the resulting x coordinate mod N must not be zero)'
+          );
+        } else {
+          continue;
+        }
+      }
+
+      const kInv = modInv(k, n);
+      const rd = mod(r * d, n);
+      let s = mod(kInv * (z + rd), n);
+      if (s === zero) {
+        if (customK instanceof BigNumber) {
+          throw new Error(
+            'Invalid fixed custom K value (when used with the key, it cannot create a zero value for S)'
+          );
+        } else {
+          continue;
+        }
+      }
+
+      // Use complement of `s` if it is > n / 2
+      if (forceLowS && s > n / two) {
+        s = n - s;
+      }
+
+      // Return signature as BigNumbers
+      const r_bn = new BigNumber(r.toString(16), 16);
+      const s_bn = new BigNumber(s.toString(16), 16);
+      return new Signature(r_bn, s_bn);
+    }
+  } else {
+    const curve = new Curve()
+    msg = truncateToN(msg)
+
+    // Zero-extend key to provide enough entropy
+    const bytes = curve.n.byteLength()
+    const bkey = key.toArray('be', bytes)
+
+    // Zero-extend nonce to have the same byte size as N
+    const nonce = msg.toArray('be', bytes)
+
+    // Instantiate Hmac_DRBG
+    const drbg = new DRBG(bkey, nonce)
+
+    // Number of bytes to generate
+    const ns1 = curve.n.subn(1)
+
+    for (let iter = 0; ; iter++) {
+      // Compute the k-value
+      let k = typeof customK === 'function'
+        ? customK(iter)
+        : BigNumber.isBN(customK)
+          ? customK
+          : new BigNumber(drbg.generate(bytes), 16)
+      k = truncateToN(k, true)
+      if (k.cmpn(1) <= 0 || k.cmp(ns1) >= 0) {
+        if (BigNumber.isBN(customK)) {
+          throw new Error('Invalid fixed custom K value (must be more than 1 and less than N-1)')
+        } else {
+          continue
+        }
+      }
+
+      const kp = curve.g.mul(k)
+      if (kp.isInfinity()) {
+        if (BigNumber.isBN(customK)) {
+          throw new Error('Invalid fixed custom K value (must not create a point at infinity when multiplied by the generator point)')
+        } else {
+          continue
+        }
+      }
+
+      const kpX = kp.getX()
+      const r = kpX.umod(curve.n)
+      if (r.cmpn(0) === 0) {
+        if (BigNumber.isBN(customK)) {
+          throw new Error('Invalid fixed custom K value (when multiplied by G, the resulting x coordinate mod N must not be zero)')
+        } else {
+          continue
+        }
+      }
+
+      let s = k.invm(curve.n).mul(r.mul(key).iadd(msg))
+      s = s.umod(curve.n)
+      if (s.cmpn(0) === 0) {
+        if (BigNumber.isBN(customK)) {
+          throw new Error('Invalid fixed custom K value (when used with the key, it cannot create a zero value for S)')
+        } else {
+          continue
+        }
+      }
+
+      // Use complement of `s`, if it is > `n / 2`
+      if (forceLowS && s.cmp(curve.n.ushrn(1)) > 0) {
+        s = curve.n.sub(s)
+      }
+      return new Signature(r, s)
+    }
   }
 }
 
