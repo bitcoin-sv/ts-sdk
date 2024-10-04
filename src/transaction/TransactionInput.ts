@@ -59,5 +59,5 @@ export default interface TransactionInput {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
     estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>
   }
-  sequence: number
+  sequence?: number
 }

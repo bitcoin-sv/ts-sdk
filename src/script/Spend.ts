@@ -207,9 +207,9 @@ export default class Spend {
     }
 
     const padDataToSize = (buf: number[], len: number): number[] => {
-      let b = buf
+      const b = buf
       while (b.length < len) {
-        b = [0x00, ...b]
+        b.unshift(0)
       }
       return b
     }
@@ -785,7 +785,7 @@ export default class Spend {
               shifted = bn1.ushrn(n)
             }
             const bufShifted = padDataToSize(
-              [...shifted.toArray().slice(buf1.length * -1)],
+              shifted.toArray().slice(buf1.length * -1),
               buf1.length
             )
             this.stack.push(bufShifted)
@@ -1016,7 +1016,7 @@ export default class Spend {
 
           try {
             sig = TransactionSignature.fromChecksigFormat(bufSig)
-            pubkey = PublicKey.fromString(toHex(bufPubkey))
+            pubkey = PublicKey.fromDER(bufPubkey)
             fSuccess = verifySignature(sig, pubkey, subscript)
           } catch (e) {
             // invalid sig or pubkey

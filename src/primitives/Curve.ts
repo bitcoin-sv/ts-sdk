@@ -136,6 +136,13 @@ export default class Curve {
   }
 
   constructor () {
+    if (typeof globalCurve !== 'undefined') {
+      return globalCurve
+    } else {
+      /* eslint-disable @typescript-eslint/no-this-alias */
+      globalCurve = this
+    }
+
     const precomputed = {
       doubles: {
         step: 4,
@@ -915,13 +922,6 @@ export default class Curve {
           ]
         ]
       }
-    }
-
-    if (typeof globalCurve !== 'undefined') {
-      return globalCurve
-    } else {
-      /* eslint-disable @typescript-eslint/no-this-alias */
-      globalCurve = this
     }
     const conf = {
       prime: 'k256',

@@ -17,6 +17,10 @@ import ReductionContext from './ReductionContext.js'
  * @property inf - Flag to record if the point is at infinity in the Elliptic Curve.
  */
 export default class Point extends BasePoint {
+  private static readonly red: any = new ReductionContext('k256')
+  private static readonly a: BigNumber = new BigNumber(0).toRed(Point.red)
+  private static readonly b: BigNumber = new BigNumber(7).toRed(Point.red)
+  private static readonly zero: BigNumber = new BigNumber(0).toRed(Point.red)
   x: BigNumber | null
   y: BigNumber | null
   inf: boolean
@@ -85,6 +89,13 @@ export default class Point extends BasePoint {
   static fromString(str: string): Point {
     const bytes = toArray(str, 'hex')
     return Point.fromDER(bytes)
+  }
+
+  static redSqrtOptimized(y2: BigNumber): BigNumber {
+    const red = Point.red
+    const p = red.m // The modulus
+    const exponent = p.addn(1).iushrn(2) // (p + 1) / 4
+    return y2.redPow(exponent)
   }
 
   /**
