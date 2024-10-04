@@ -149,32 +149,8 @@ export const verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
       s: BigInt(`0x${sig.s.toHex()}`)
     }
   )
-  /////
-  const curve = new Curve()
-  msg = truncateToN(msg)
-  // Perform primitive values validation
-  const r = sig.r
-  const s = sig.s
-  if (r.cmpn(1) < 0 || r.cmp(curve.n) >= 0) { return false }
-  if (s.cmpn(1) < 0 || s.cmp(curve.n) >= 0) { return false }
-
-  // Validate signature
-  const sinv = s.invm(curve.n)
-  const u1 = sinv.mul(msg).umod(curve.n)
-  const u2 = sinv.mul(r).umod(curve.n)
-
-  // NOTE: Greg Maxwell's trick, inspired by:
-  // https://git.io/vad3K
-  const p = curve.g.jmulAdd(u1, key, u2)
-  if (p.isInfinity()) { return false }
-
-  // Compare `p.x` of Jacobian point with `r`,
-  // this will do `p.x == r * p.z^2` instead of multiplying `p.x` by the
-  // inverse of `p.z^2`
-  return p.eqXToP(r)
 }
 
-//////////
 // secp256k1 parameters
 const zero = BigInt(0)
 const one = BigInt(1)
