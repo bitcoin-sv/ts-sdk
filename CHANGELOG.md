@@ -31,6 +31,11 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.1.24] - 2024-10-04
+### Fixed
+- Addressed #125
+- Optimized SPV verification
+
 ## [1.1.22] - 2024-09-02
 ### Added
 - Base64 mode support for BSM
