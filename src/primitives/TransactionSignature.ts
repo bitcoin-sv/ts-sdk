@@ -35,13 +35,7 @@ export default class TransactionSignature extends Signature {
     scope: number
     hashCache?: HashCache
   }): number[] {
-    if ((params.scope & this.SIGHASH_FORKID) > 0 && params.hashCache === undefined) {
-      params.hashCache = {
-        hashPrevouts: Array(32).fill(0),
-        hashSequence: Array(32).fill(0),
-        hashOutputs: Array(32).fill(0),
-      }
-    }
+    if (!params.hashCache) params.hashCache = { hashPrevouts: undefined, hashSequence: undefined, hashOutputs: undefined }
     const currentInput = {
       sourceTXID: params.sourceTXID,
       sourceOutputIndex: params.sourceOutputIndex,
