@@ -3,6 +3,7 @@ import Signature from './Signature.js'
 import Curve from './Curve.js'
 import Point from './Point.js'
 import DRBG from './DRBG.js'
+import { secp256k1 } from '@noble/curves/secp256k1'
 
 /**
  * Truncates a BigNumber message to the length of the curve order n, in the context of the Elliptic Curve Digital Signature Algorithm (ECDSA).
@@ -138,6 +139,15 @@ export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false,
  * const isVerified = verify(msg, sig, key)
  */
 export const verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
+  const qr = sig.r.toArray()
+  const qs = sig.s.toArray()
+  const signat = {
+    r: qr.reverse().reduce((acc, num, idx) => acc + BigInt(num * 2**(8*idx)), BigInt(0)),
+    s: qs.reverse().reduce((acc, num, idx) => acc + BigInt(num * 2**(8*idx)), BigInt(0))
+  }
+  const msgnat = new Uint8Array(msg.toArray())
+  const pubkey = key.toString()
+  return secp256k1.verify(signat, msgnat, pubkey)
   const curve = new Curve()
   msg = truncateToN(msg, undefined, curve)
   // Perform primitive values validation

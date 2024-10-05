@@ -170,5 +170,8 @@
     "ts2md": "^0.2.0",
     "tsconfig-to-dual-package": "^1.2.0",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@noble/curves": "^1.6.0"
   }
 }
