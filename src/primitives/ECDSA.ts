@@ -360,137 +360,193 @@ export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false,
 export const verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
     // Use BigInt for verification opportunistically
     if (typeof BigInt === 'function') {
-        // secp256k1 parameters
-        const zero = BigInt(0)
-        const one = BigInt(1)
-        const p = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F'); // Field prime
-        const n = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141'); // Order of the curve
+        // Curve parameters for secp256k1
+        const zero = BigInt(0);
+        const one = BigInt(1);
+        const two = BigInt(2);
+        const three = BigInt(3);
+        const p = BigInt(
+            '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F'
+        ); // Field prime
+        const n = BigInt(
+            '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141'
+        ); // Order of the curve
         const G = {
-            x: BigInt('0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798'),
-            y: BigInt('0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8')
+            x: BigInt(
+                '0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798'
+            ),
+            y: BigInt(
+                '0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8'
+            ),
         };
 
         // Modular arithmetic functions
-        function mod(a: bigint, m: bigint): bigint {
-            return ((a % m) + m) % m;
-        }
-
-        function modInv(a: bigint, m: bigint): bigint {
-            let lm = one, hm = zero;
-            let low = mod(a, m), high = m;
-            while (low > one) {
-                let r = high / low;
-                let nm = hm - lm * r;
-                let neww = high - low * r;
-                hm = lm;
-                lm = nm;
-                high = low;
-                low = neww;
+        const mod = (a: bigint, m: bigint): bigint => ((a % m) + m) % m;
+        const modInv = (a: bigint, m: bigint): bigint => {
+            // Extended Euclidean Algorithm for modular inverse
+            let [old_r, r] = [a, m];
+            let [old_s, s] = [BigInt(1), BigInt(0)];
+            while (r !== zero) {
+                const q = old_r / r;
+                [old_r, r] = [r, old_r - q * r];
+                [old_s, s] = [s, old_s - q * s];
             }
-            return mod(lm, m);
+            if (old_r > one) return zero; // No inverse
+            return mod(old_s, m);
+        };
+        const modMul = (a: bigint, b: bigint, m: bigint): bigint =>
+            mod(a * b, m);
+        const modSub = (a: bigint, b: bigint, m: bigint): bigint =>
+            mod(a - b, m);
+        const modAdd = (a: bigint, b: bigint, m: bigint): bigint =>
+            mod(a + b, m);
+
+        // Define constants
+        const four = BigInt(4);
+        const eight = BigInt(8);
+
+        // Elliptic curve point operations in Jacobian coordinates
+        interface JacobianPoint {
+            X: bigint;
+            Y: bigint;
+            Z: bigint;
         }
 
-        function modAdd(a, b, m) {
-            return mod(a + b, m);
-        }
+        // Point Doubling
+        const pointDouble = (P: JacobianPoint): JacobianPoint => {
+            const { X: X1, Y: Y1, Z: Z1 } = P;
 
-        function modSub(a: bigint, b, m) {
-            return mod(a - b, m);
-        }
-
-        function modMul(a: bigint, b, m) {
-            return mod(a * b, m);
-        }
-
-        // Elliptic curve point operations
-        function pointAdd(P: { x: bigint, y: bigint }, Q: { x: bigint, y: bigint }) {
-            if (P === null) return Q;
-            if (Q === null) return P;
-
-            if (P.x === Q.x && P.y === mod(-Q.y, p)) {
-                return null; // Point at infinity
+            if (Y1 === zero) {
+                return { X: zero, Y: one, Z: zero }; // Point at infinity
             }
 
-            let m;
-            if (P.x === Q.x && P.y === Q.y) {
-                // Point doubling
-                if (P.y === zero) {
-                    return null; // Point at infinity
+            const Y1_sq = modMul(Y1, Y1, p); // Y1^2
+            const S = modMul(four, modMul(X1, Y1_sq, p), p); // S = 4 * X1 * Y1^2
+            const M = modMul(three, modMul(X1, X1, p), p); // M = 3 * X1^2
+            const X3 = modSub(modMul(M, M, p), modMul(two, S, p), p); // X3 = M^2 - 2 * S
+            const Y3 = modSub(
+                modMul(M, modSub(S, X3, p), p),
+                modMul(eight, modMul(Y1_sq, Y1_sq, p), p),
+                p
+            ); // Y3 = M * (S - X3) - 8 * Y1^4
+            const Z3 = modMul(two, modMul(Y1, Z1, p), p); // Z3 = 2 * Y1 * Z1
+
+            return { X: X3, Y: Y3, Z: Z3 };
+        };
+
+        // Point Addition
+        const pointAdd = (P: JacobianPoint, Q: JacobianPoint): JacobianPoint => {
+            if (P.Z === zero) return Q;
+            if (Q.Z === zero) return P;
+
+            const Z1Z1 = modMul(P.Z, P.Z, p);
+            const Z2Z2 = modMul(Q.Z, Q.Z, p);
+            const U1 = modMul(P.X, Z2Z2, p);
+            const U2 = modMul(Q.X, Z1Z1, p);
+            const S1 = modMul(P.Y, modMul(Z2Z2, Q.Z, p), p);
+            const S2 = modMul(Q.Y, modMul(Z1Z1, P.Z, p), p);
+
+            const H = modSub(U2, U1, p);
+            const r = modSub(S2, S1, p);
+
+            if (H === zero) {
+                if (r === zero) {
+                    // P == Q
+                    return pointDouble(P);
+                } else {
+                    // Point at infinity
+                    return { X: zero, Y: one, Z: zero };
                 }
-                let numerator = modMul(BigInt(3) * modMul(P.x, P.x, p), one, p); // 3 * x^2
-                let denominator = modMul(BigInt(2) * P.y, one, p); // 2 * y
-                m = modMul(numerator, modInv(denominator, p), p);
-            } else {
-                let numerator = modSub(Q.y, P.y, p);
-                let denominator = modSub(Q.x, P.x, p);
-                m = modMul(numerator, modInv(denominator, p), p);
             }
 
-            let xR = modSub(modMul(m, m, p), modAdd(P.x, Q.x, p), p);
-            let yR = modSub(modMul(m, modSub(P.x, xR, p), p), P.y, p);
+            const HH = modMul(H, H, p);
+            const HHH = modMul(H, HH, p);
+            const V = modMul(U1, HH, p);
 
-            return { x: xR, y: yR };
-        }
+            const X3 = modSub(modSub(modMul(r, r, p), HHH, p), modMul(two, V, p), p);
+            const Y3 = modSub(
+                modMul(r, modSub(V, X3, p), p),
+                modMul(S1, HHH, p),
+                p
+            );
+            const Z3 = modMul(H, modMul(P.Z, Q.Z, p), p);
 
-        function scalarMul(k, P) {
-            let N = P;
-            let Q = null; // Point at infinity
-            while (k > zero) {
-                if (k & one) {
+            return { X: X3, Y: Y3, Z: Z3 };
+        };
+
+        // Scalar Multiplication
+        const scalarMultiply = (k: bigint, P: { x: bigint; y: bigint }): JacobianPoint => {
+            let N: JacobianPoint = { X: P.x, Y: P.y, Z: one };
+            let Q: JacobianPoint = { X: zero, Y: one, Z: zero }; // Point at infinity
+
+            const kBin = k.toString(2);
+            for (let i = 0; i < kBin.length; i++) {
+                Q = pointDouble(Q);
+                if (kBin[i] === '1') {
                     Q = pointAdd(Q, N);
                 }
-                N = pointAdd(N, N);
-                k >>= one;
             }
             return Q;
-        }
+        };
 
-        // ECDSA signature verification function
-        function verifyECDSA(hash, publicKey, signature) {
+        // Verify Function Using Jacobian Coordinates
+        const verifyECDSA = (
+            hash: bigint,
+            publicKey: { x: bigint; y: bigint },
+            signature: { r: bigint; s: bigint }
+        ): boolean => {
             const { r, s } = signature;
-            const { x: xQ, y: yQ } = publicKey;
             const z = hash;
 
-            // 1. Verify that r and s are in [1, n - 1]
+            // Check r and s are in [1, n - 1]
             if (r <= zero || r >= n || s <= zero || s >= n) {
                 return false;
             }
 
-            // 2. Compute w = s^-1 mod n
-            const w = modInv(s, n);
-
-            // 3. Compute u1 = z * w mod n
+            const w = modInv(s, n); // w = s^-1 mod n
+            if (w === zero) {
+                return false; // No inverse exists
+            }
             const u1 = modMul(z, w, n);
-
-            // 4. Compute u2 = r * w mod n
             const u2 = modMul(r, w, n);
 
-            // 5. Compute (x1, y1) = u1 * G + u2 * Q
-            const Gmul = scalarMul(u1, G);
-            const Q = { x: xQ, y: yQ };
-            const Qmul = scalarMul(u2, Q);
-            const R = pointAdd(Gmul, Qmul);
+            // Compute point R = u1 * G + u2 * Q
+            const RG = scalarMultiply(u1, G);
+            const RQ = scalarMultiply(u2, publicKey);
+            const R = pointAdd(RG, RQ);
 
-            if (R === null || R.x === undefined || R.y === undefined) {
+            if (R.Z === zero) {
+                // Point at infinity
                 return false;
             }
 
-            // 6. The signature is valid if r ≡ x1 mod n
-            const x1 = R.x;
-            const v = mod(x1, n);
-            return v === r;
-        }
-        return verifyECDSA(
-            BigInt(`0x${msg.toHex()}`),
-            {
-                x: BigInt(`0x${key.x.toHex()}`),
-                y: BigInt(`0x${key.y.toHex()}`)
-            },
-            {
-                r: BigInt(`0x${sig.r.toHex()}`),
-                s: BigInt(`0x${sig.s.toHex()}`)
+            // Compute affine x-coordinate x1 = X / Z^2 mod p
+            const ZInv = modInv(R.Z, p);
+            if (ZInv === zero) {
+                return false; // No inverse exists
             }
-        )
+            const ZInv2 = modMul(ZInv, ZInv, p);
+            const x1_affine = modMul(R.X, ZInv2, p);
+
+            // Compute v = x1_affine mod n
+            const v = mod(x1_affine, n);
+
+            // Signature is valid if v == r mod n
+            return v === r;
+        };
+
+        // Convert inputs to BigInt
+        const hash = BigInt('0x' + msg.toString(16));
+        const publicKey = {
+            x: BigInt('0x' + key.x.toString(16)),
+            y: BigInt('0x' + key.y.toString(16)),
+        };
+        const signature = {
+            r: BigInt('0x' + sig.r.toString(16)),
+            s: BigInt('0x' + sig.s.toString(16)),
+        };
+
+        return verifyECDSA(hash, publicKey, signature)
     } else {
         const curve = new Curve()
         msg = truncateToN(msg)
