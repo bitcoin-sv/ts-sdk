@@ -320,9 +320,13 @@ export class Writer {
   }
 
   toArray (): number[] {
-    let ret = []
-    for (const x of this.bufs) {
-      if (x.length < 65536) { ret.push(...x) } else { ret = ret.concat(x) }
+    const totalLength = this.getLength()
+    const ret = new Array(totalLength)
+    let offset = 0
+    for (const buf of this.bufs) {
+      for (let i = 0; i < buf.length; i++) {
+        ret[offset++] = buf[i]
+      }
     }
     return ret
   }
@@ -515,18 +519,18 @@ export class Reader {
   }
 
   public read (len = this.bin.length): number[] {
-    const bin = this.bin.slice(this.pos, this.pos + len)
-    this.pos = this.pos + len
-    return bin
+    const start = this.pos
+    const end = this.pos + len
+    this.pos = end
+    return this.bin.slice(start, end)
   }
 
   public readReverse (len = this.bin.length): number[] {
-    const bin = this.bin.slice(this.pos, this.pos + len)
-    this.pos = this.pos + len
-    const buf2 = new Array(bin.length)
-    for (let i = 0; i < buf2.length; i++) {
-      buf2[i] = bin[bin.length - 1 - i]
+    const buf2 = new Array(len)
+    for (let i = 0; i < len; i++) {
+      buf2[i] = this.bin[this.pos + len - 1 - i]
     }
+    this.pos += len
     return buf2
   }
 

@@ -40,7 +40,7 @@ export default class TransactionSignature extends Signature {
       const writer = new Writer()
       for (const input of inputs) {
         if (typeof input.sourceTXID === 'undefined') {
-          writer.writeReverse(input.sourceTransaction.id())
+          writer.write(input.sourceTransaction.hash() as number[])
         } else {
           writer.writeReverse(toArray(input.sourceTXID, 'hex'))
         }
@@ -122,8 +122,9 @@ export default class TransactionSignature extends Signature {
     writer.writeUInt32LE(params.sourceOutputIndex)
 
     // scriptCode of the input (serialized as scripts inside CTxOuts)
-    writer.writeVarIntNum(params.subscript.toBinary().length)
-    writer.write(params.subscript.toBinary())
+    const subscriptBin = params.subscript.toBinary()
+    writer.writeVarIntNum(subscriptBin.length)
+    writer.write(subscriptBin)
 
     // value of the output spent by this input (8-byte little endian)
     writer.writeUInt64LE(params.sourceSatoshis)

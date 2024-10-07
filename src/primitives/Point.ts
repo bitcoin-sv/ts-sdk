@@ -17,6 +17,10 @@ import ReductionContext from './ReductionContext.js'
  * @property inf - Flag to record if the point is at infinity in the Elliptic Curve.
  */
 export default class Point extends BasePoint {
+  private static readonly red: any = new ReductionContext('k256')
+  private static readonly a: BigNumber = new BigNumber(0).toRed(Point.red)
+  private static readonly b: BigNumber = new BigNumber(7).toRed(Point.red)
+  private static readonly zero: BigNumber = new BigNumber(0).toRed(Point.red)
   x: BigNumber | null
   y: BigNumber | null
   inf: boolean
@@ -59,7 +63,7 @@ export default class Point extends BasePoint {
 
       return res
     } else if ((bytes[0] === 0x02 || bytes[0] === 0x03) &&
-              bytes.length - 1 === len) {
+      bytes.length - 1 === len) {
       return Point.fromX(bytes.slice(1, 1 + len), bytes[0] === 0x03)
     }
     throw new Error('Unknown point format')
@@ -87,6 +91,13 @@ export default class Point extends BasePoint {
     return Point.fromDER(bytes)
   }
 
+  static redSqrtOptimized (y2: BigNumber): BigNumber {
+    const red = Point.red
+    const p = red.m // The modulus
+    const exponent = p.addn(1).iushrn(2) // (p + 1) / 4
+    return y2.redPow(exponent)
+  }
+
   /**
    * Generates a point from an x coordinate and a boolean indicating whether the corresponding
    * y coordinate is odd.
@@ -102,34 +113,108 @@ export default class Point extends BasePoint {
    * const xCoordinate = new BigNumber('10');
    * const point = Point.fromX(xCoordinate, true);
    */
-
   static fromX (x: BigNumber | number | number[] | string, odd: boolean): Point {
-    const red = new ReductionContext('k256')
-    const a = new BigNumber(0).toRed(red)
-    const b = new BigNumber(7).toRed(red)
-    const zero = new BigNumber(0).toRed(red)
-    if (!BigNumber.isBN(x)) {
-      x = new BigNumber(x as number, 16)
-    }
-    x = x as BigNumber
-    if (x.red == null) {
-      x = x.toRed(red)
-    }
+    if (typeof BigInt === 'function') {
+      function mod (a: bigint, n: bigint): bigint {
+        return ((a % n) + n) % n
+      }
+      function modPow (base: bigint, exponent: bigint, modulus: bigint): bigint {
+        let result = BigInt(1)
+        base = mod(base, modulus)
+        while (exponent > BigInt(0)) {
+          if ((exponent & BigInt(1)) === BigInt(1)) {
+            result = mod(result * base, modulus)
+          }
+          exponent >>= BigInt(1)
+          base = mod(base * base, modulus)
+        }
+        return result
+      }
+      function sqrtMod (a: bigint, p: bigint): bigint | null {
+        const exponent = (p + BigInt(1)) >> BigInt(2) // Precomputed exponent
+        const sqrtCandidate = modPow(a, exponent, p)
+        if (mod(sqrtCandidate * sqrtCandidate, p) === mod(a, p)) {
+          return sqrtCandidate
+        } else {
+          // No square root exists
+          return null
+        }
+      }
 
-    const y2 = x.redSqr().redMul(x).redIAdd(x.redMul(a)).redIAdd(b)
-    let y = y2.redSqrt()
-    if (y.redSqr().redSub(y2).cmp(zero) !== 0) {
-      throw new Error('invalid point')
-    }
+      // Curve parameters for secp256k1
+      const p = BigInt(
+        '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F'
+      )
+      const a = BigInt(0)
+      const b = BigInt(7)
 
-    // XXX Is there any way to tell if the number is odd without converting it
-    // to non-red form?
-    const isOdd = y.fromRed().isOdd()
-    if ((odd && !isOdd) || (!odd && isOdd)) {
-      y = y.redNeg()
-    }
+      // Convert x to BigInt
+      let xBigInt: bigint
+      if (x instanceof BigNumber) {
+        xBigInt = BigInt('0x' + x.toString(16))
+      } else if (typeof x === 'string') {
+        xBigInt = BigInt('0x' + x)
+      } else if (Array.isArray(x)) {
+        xBigInt = BigInt(
+          '0x' +
+          Buffer.from(x).toString('hex').padStart(64, '0')
+        )
+      } else if (typeof x === 'number') {
+        xBigInt = BigInt(x)
+      } else {
+        throw new Error('Invalid x-coordinate type')
+      }
 
-    return new Point(x, y)
+      // Ensure x is within field range
+      xBigInt = mod(xBigInt, p)
+
+      // Compute y^2 = x^3 + a x + b mod p
+      const y2 = mod(modPow(xBigInt, BigInt(3), p) + b, p)
+
+      // Compute modular square root y = sqrt(y2) mod p
+      let y = sqrtMod(y2, p)
+
+      if (y === null) {
+        throw new Error('Invalid point')
+      }
+
+      // Adjust y to match the oddness
+      const isYOdd = (y % BigInt(2)) === BigInt(1)
+      if ((odd && !isYOdd) || (!odd && isYOdd)) {
+        y = p - y
+      }
+
+      // Convert x and y to BigNumber
+      const xBN = new BigNumber(xBigInt.toString(16), 16)
+      const yBN = new BigNumber(y.toString(16), 16)
+      return new Point(xBN, yBN)
+    } else {
+      const red = new ReductionContext('k256')
+      const a = new BigNumber(0).toRed(red)
+      const b = new BigNumber(7).toRed(red)
+      const zero = new BigNumber(0).toRed(red)
+      if (!BigNumber.isBN(x)) {
+        x = new BigNumber(x as number, 16)
+      }
+      x = x as BigNumber
+      if (x.red == null) {
+        x = x.toRed(red)
+      }
+
+      const y2 = x.redSqr().redMul(x).redIAdd(x.redMul(a)).redIAdd(b)
+      let y = y2.redSqrt()
+      if (y.redSqr().redSub(y2).cmp(zero) !== 0) {
+        throw new Error('invalid point')
+      }
+
+      // XXX Is there any way to tell if the number is odd without converting it
+      // to non-red form?
+      const isOdd = y.fromRed().isOdd()
+      if ((odd && !isOdd) || (!odd && isOdd)) {
+        y = y.redNeg()
+      }
+      return new Point(x, y)
+    }
   }
 
   /**

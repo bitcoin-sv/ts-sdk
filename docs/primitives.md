@@ -5348,6 +5348,7 @@ export default class Point extends BasePoint {
     inf: boolean;
     static fromDER(bytes: number[]): Point 
     static fromString(str: string): Point 
+    static redSqrtOptimized(y2: BigNumber): BigNumber 
     static fromX(x: BigNumber | number | number[] | string, odd: boolean): Point 
     static fromJSON(obj: string | any[], isRed: boolean): Point 
     constructor(x: BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null, isRed: boolean = true) 
@@ -7903,7 +7904,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: BigNumber | Function): Signature => {
     const curve = new Curve();
-    msg = truncateToN(msg);
+    msg = truncateToN(msg, undefined, curve);
     const bytes = curve.n.byteLength();
     const bkey = key.toArray("be", bytes);
     const nonce = msg.toArray("be", bytes);
@@ -7915,7 +7916,7 @@ sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: Bi
             : BigNumber.isBN(customK)
                 ? customK
                 : new BigNumber(drbg.generate(bytes), 16);
-        k = truncateToN(k, true);
+        k = truncateToN(k, true, curve);
         if (k.cmpn(1) <= 0 || k.cmp(ns1) >= 0) {
             if (BigNumber.isBN(customK)) {
                 throw new Error("Invalid fixed custom K value (must be more than 1 and less than N-1)");
@@ -7969,7 +7970,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
     const curve = new Curve();
-    msg = truncateToN(msg);
+    msg = truncateToN(msg, undefined, curve);
     const r = sig.r;
     const s = sig.s;
     if (r.cmpn(1) < 0 || r.cmp(curve.n) >= 0) {
