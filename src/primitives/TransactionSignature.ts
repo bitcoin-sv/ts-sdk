@@ -15,7 +15,7 @@ export default class TransactionSignature extends Signature {
 
   scope: number
 
-  static format (params: {
+  static format(params: {
     sourceTXID: string
     sourceOutputIndex: number
     sourceSatoshis: number
@@ -40,7 +40,7 @@ export default class TransactionSignature extends Signature {
       const writer = new Writer()
       for (const input of inputs) {
         if (typeof input.sourceTXID === 'undefined') {
-          writer.writeReverse(input.sourceTransaction.id())
+          writer.write(input.sourceTransaction.hash() as number[])
         } else {
           writer.writeReverse(toArray(input.sourceTXID, 'hex'))
         }
@@ -64,7 +64,7 @@ export default class TransactionSignature extends Signature {
       return ret
     }
 
-    function getOutputsHash (outputIndex?: number): number[] {
+    function getOutputsHash(outputIndex?: number): number[] {
       const writer = new Writer()
 
       if (typeof outputIndex === 'undefined') {
@@ -122,8 +122,9 @@ export default class TransactionSignature extends Signature {
     writer.writeUInt32LE(params.sourceOutputIndex)
 
     // scriptCode of the input (serialized as scripts inside CTxOuts)
-    writer.writeVarIntNum(params.subscript.toBinary().length)
-    writer.write(params.subscript.toBinary())
+    const subscriptBin = params.subscript.toBinary()
+    writer.writeVarIntNum(subscriptBin.length)
+    writer.write(subscriptBin)
 
     // value of the output spent by this input (8-byte little endian)
     writer.writeUInt64LE(params.sourceSatoshis)
@@ -146,7 +147,7 @@ export default class TransactionSignature extends Signature {
   }
 
   // The format used in a tx
-  static fromChecksigFormat (buf: number[]): TransactionSignature {
+  static fromChecksigFormat(buf: number[]): TransactionSignature {
     if (buf.length === 0) {
       // allow setting a "blank" signature
       const r = new BigNumber(1)
@@ -160,7 +161,7 @@ export default class TransactionSignature extends Signature {
     return new TransactionSignature(tempSig.r, tempSig.s, scope)
   }
 
-  constructor (r: BigNumber, s: BigNumber, scope: number) {
+  constructor(r: BigNumber, s: BigNumber, scope: number) {
     super(r, s)
     this.scope = scope
   }
@@ -170,7 +171,7 @@ export default class TransactionSignature extends Signature {
      * See also Ecdsa signature algorithm which enforces this.
      * See also Bip 62, "low S values in signatures"
      */
-  public hasLowS (): boolean {
+  public hasLowS(): boolean {
     if (
       this.s.ltn(1) ||
       this.s.gt(new BigNumber(
@@ -182,7 +183,7 @@ export default class TransactionSignature extends Signature {
     return true
   }
 
-  toChecksigFormat (): number[] {
+  toChecksigFormat(): number[] {
     const derbuf = this.toDER() as number[]
     return [...derbuf, this.scope]
   }

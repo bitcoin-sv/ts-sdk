@@ -115,71 +115,32 @@ export default class Point extends BasePoint {
    */
   static fromX(x: BigNumber | number | number[] | string, odd: boolean): Point {
     if (typeof BigInt === 'function') {
-      /**
-       * Computes a mod n, ensuring a non-negative result.
-       * @param a - The dividend.
-       * @param n - The modulus.
-       * @returns The result of a mod n.
-       */
       function mod(a: bigint, n: bigint): bigint {
         return ((a % n) + n) % n;
       }
-
-      /**
-       * Performs modular exponentiation using the binary exponentiation method.
-       * Computes base^exponent mod modulus.
-       * @param base - The base.
-       * @param exponent - The exponent.
-       * @param modulus - The modulus.
-       * @returns The result of base^exponent mod modulus.
-       */
       function modPow(base: bigint, exponent: bigint, modulus: bigint): bigint {
-        if (modulus === BigInt(1)) return BigInt(0);
         let result = BigInt(1);
         base = mod(base, modulus);
         while (exponent > BigInt(0)) {
-          if (exponent % BigInt(2) === BigInt(1)) {
+          if ((exponent & BigInt(1)) === BigInt(1)) {
             result = mod(result * base, modulus);
           }
-          exponent = exponent >> BigInt(1);
+          exponent >>= BigInt(1);
           base = mod(base * base, modulus);
         }
         return result;
       }
-
-      /**
-       * Computes the modular square root of a modulo p.
-       * Since p ≡ 3 mod 4 for secp256k1, sqrt(a) mod p = a^{(p + 1) / 4} mod p
-       * @param a - The value to compute the square root of.
-       * @param p - The modulus.
-       * @returns The square root of a modulo p, or null if none exists.
-       */
       function sqrtMod(a: bigint, p: bigint): bigint | null {
-        // Check if a is a quadratic residue modulo p
-        if (legendreSymbol(a, p) !== BigInt(1)) {
+        const exponent = (p + BigInt(1)) >> BigInt(2); // Precomputed exponent
+        const sqrtCandidate = modPow(a, exponent, p);
+        if (mod(sqrtCandidate * sqrtCandidate, p) === mod(a, p)) {
+          return sqrtCandidate;
+        } else {
           // No square root exists
           return null;
         }
-        const exponent = (p + BigInt(1)) >> BigInt(2);
-        return modPow(a, exponent, p);
       }
 
-      /**
-       * Computes the Legendre symbol (a|p).
-       * @param a - The integer a.
-       * @param p - The prime modulus p.
-       * @returns 1 if a is a quadratic residue mod p, -1 if a is a non-residue, 0 if a ≡ 0 mod p.
-       */
-      function legendreSymbol(a: bigint, p: bigint): bigint {
-        const ls = modPow(a, (p - BigInt(1)) >> BigInt(1), p);
-        if (ls === BigInt(0)) {
-          return BigInt(0);
-        } else if (ls === BigInt(1)) {
-          return BigInt(1);
-        } else {
-          return BigInt(-1);
-        }
-      }
       // Curve parameters for secp256k1
       const p = BigInt(
         '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F'
@@ -208,7 +169,7 @@ export default class Point extends BasePoint {
       xBigInt = mod(xBigInt, p);
 
       // Compute y^2 = x^3 + a x + b mod p
-      const y2 = mod(modPow(xBigInt, BigInt(3), p) + a * xBigInt + b, p);
+      const y2 = mod(modPow(xBigInt, BigInt(3), p) + b, p);
 
       // Compute modular square root y = sqrt(y2) mod p
       let y = sqrtMod(y2, p);
