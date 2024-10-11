@@ -8,15 +8,16 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [BasePoint](#class-basepoint) | [Point](#class-point) | [SHA1HMAC](#class-sha1hmac) |
-| [BigNumber](#class-bignumber) | [PointInFiniteField](#class-pointinfinitefield) | [SHA256](#class-sha256) |
-| [Curve](#class-curve) | [Polynomial](#class-polynomial) | [SHA256HMAC](#class-sha256hmac) |
-| [DRBG](#class-drbg) | [PrivateKey](#class-privatekey) | [SHA512](#class-sha512) |
-| [JacobianPoint](#class-jacobianpoint) | [PublicKey](#class-publickey) | [SHA512HMAC](#class-sha512hmac) |
-| [K256](#class-k256) | [RIPEMD160](#class-ripemd160) | [Signature](#class-signature) |
-| [KeyShares](#class-keyshares) | [Reader](#class-reader) | [SymmetricKey](#class-symmetrickey) |
-| [Mersenne](#class-mersenne) | [ReductionContext](#class-reductioncontext) | [TransactionSignature](#class-transactionsignature) |
-| [MontgomoryMethod](#class-montgomorymethod) | [SHA1](#class-sha1) | [Writer](#class-writer) |
+| [BasePoint](#class-basepoint) | [PointInFiniteField](#class-pointinfinitefield) | [SHA256HMAC](#class-sha256hmac) |
+| [BigNumber](#class-bignumber) | [Polynomial](#class-polynomial) | [SHA512](#class-sha512) |
+| [Curve](#class-curve) | [PrivateKey](#class-privatekey) | [SHA512HMAC](#class-sha512hmac) |
+| [DRBG](#class-drbg) | [PublicKey](#class-publickey) | [Schnorr](#class-schnorr) |
+| [JacobianPoint](#class-jacobianpoint) | [RIPEMD160](#class-ripemd160) | [Signature](#class-signature) |
+| [K256](#class-k256) | [Reader](#class-reader) | [SymmetricKey](#class-symmetrickey) |
+| [KeyShares](#class-keyshares) | [ReductionContext](#class-reductioncontext) | [TransactionSignature](#class-transactionsignature) |
+| [Mersenne](#class-mersenne) | [SHA1](#class-sha1) | [Writer](#class-writer) |
+| [MontgomoryMethod](#class-montgomorymethod) | [SHA1HMAC](#class-sha1hmac) |  |
+| [Point](#class-point) | [SHA256](#class-sha256) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -7344,6 +7345,116 @@ See also Bip 62, "low S values in signatures"
 ```ts
 public hasLowS(): boolean 
 ```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: Schnorr
+
+Class representing the Schnorr Zero-Knowledge Proof (ZKP) protocol.
+
+This class provides methods to generate and verify proofs that demonstrate knowledge of a secret without revealing it.
+Specifically, it allows one party to prove to another that they know the private key corresponding to a public key
+and have correctly computed a shared secret, without disclosing the private key itself.
+
+The protocol involves two main methods:
+- `generateProof`: Generates a proof linking a public key `A` and a shared secret `S`, proving knowledge of the corresponding private key `a`.
+- `verifyProof`: Verifies the provided proof, ensuring its validity without revealing any secret information.
+
+The class utilizes elliptic curve cryptography (ECC) and the SHA-256 hash function to compute challenges within the proof.
+
+Example
+
+```typescript
+const schnorr = new Schnorr();
+const a = PrivateKey.fromRandom(); // Prover's private key
+const A = a.toPublicKey();         // Prover's public key
+const b = PrivateKey.fromRandom(); // Other party's private key
+const B = b.toPublicKey();         // Other party's public key
+const S = B.mul(a);                // Shared secret
+
+// Prover generates the proof
+const proof = schnorr.generateProof(a, A, B, S);
+
+// Verifier verifies the proof
+const isValid = schnorr.verifyProof(A.point, B.point, S.point, proof);
+console.log(`Proof is valid: ${isValid}`);
+```
+```ts
+export default class Schnorr {
+    constructor() 
+    generateProof(aArg: PrivateKey, AArg: PublicKey, BArg: PublicKey, S: Point): {
+        R: Point;
+        SPrime: Point;
+        z: BigNumber;
+    } 
+    verifyProof(A: Point, B: Point, S: Point, proof: {
+        R: Point;
+        SPrime: Point;
+        z: BigNumber;
+    }): boolean 
+}
+```
+
+<details>
+
+<summary>Class Schnorr Details</summary>
+
+#### Method generateProof
+
+Generates a proof that demonstrates the link between public key A and shared secret S
+
+```ts
+generateProof(aArg: PrivateKey, AArg: PublicKey, BArg: PublicKey, S: Point): {
+    R: Point;
+    SPrime: Point;
+    z: BigNumber;
+} 
+```
+
+Returns
+
+Proof (R, S', z)
+
+Argument Details
+
++ **a**
+  + Private key corresponding to public key A
++ **A**
+  + Public key
++ **B**
+  + Other party's public key
++ **S**
+  + Shared secret
+
+#### Method verifyProof
+
+Verifies the proof of the link between public key A and shared secret S
+
+```ts
+verifyProof(A: Point, B: Point, S: Point, proof: {
+    R: Point;
+    SPrime: Point;
+    z: BigNumber;
+}): boolean 
+```
+
+Returns
+
+True if the proof is valid, false otherwise
+
+Argument Details
+
++ **A**
+  + Public key
++ **B**
+  + Other party's public key
++ **S**
+  + Shared secret
++ **proof**
+  + Proof (R, S', z)
 
 </details>
 
