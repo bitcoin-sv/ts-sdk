@@ -525,8 +525,32 @@ export default class Transaction {
 
     // Distribute change among change outputs
     if (changeDistribution === 'random') {
-      // TODO
-      throw new Error('Not yet implemented')
+      // Implement Benford's Law distribution for change outputs
+      const changeOutputs = this.outputs.filter(out => out.change)
+      const remainingChange = change
+
+      // Helper function to generate a number following Benford's Law
+      const benfordNumber = (min: number, max: number): number => {
+        const d = Math.floor(Math.random() * 9) + 1
+        return Math.floor(min + (max - min) * Math.log10(1 + 1 / d) / Math.log10(10))
+      }
+
+      // Generate Benford's Law distributed numbers
+      let benfordNumbers = changeOutputs.map(() => benfordNumber(1, remainingChange))
+
+      // Normalize the numbers to sum up to the total change
+      const sum = benfordNumbers.reduce((a, b) => a + b, 0)
+      benfordNumbers = benfordNumbers.map(n => Math.floor(n * remainingChange / sum))
+
+      // Distribute the change
+      let distributedChange = 0
+      for (let i = 0; i < changeOutputs.length; i++) {
+        const amount = i === changeOutputs.length - 1
+          ? remainingChange - distributedChange
+          : benfordNumbers[i]
+        changeOutputs[i].satoshis = amount
+        distributedChange += amount
+      }
     } else if (changeDistribution === 'equal') {
       const perOutput = Math.floor(change / changeCount)
       for (const out of this.outputs) {
