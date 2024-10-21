@@ -15,7 +15,7 @@ export const BEEF_MAGIC_TXID_ONLY_EXTENSION = 4022206465 // 0100BEEF in LE order
  * BUMP standard: BRC-74: BSV Unified Merkle Path (BUMP) Format
  * https://github.com/bitcoin-sv/BRCs/blob/master/transactions/0074.md
  * 
- * A valid serialized BEEF is the cornerstone of Simple Payment Validation (SPV)
+ * A valid serialized BEEF is the cornerstone of Simplified Payment Validation (SPV)
  * where they are exchanged between two non-trusting parties to establish the
  * validity of a newly constructed bitcoin transaction and its inputs from prior
  * transactions.
@@ -29,11 +29,11 @@ export const BEEF_MAGIC_TXID_ONLY_EXTENSION = 4022206465 // 0100BEEF in LE order
  * To be valid, the list of transactions must be sorted in dependency order:
  * oldest transaction first;
  * and each transaction must either
- * have a merkle path in one of the bumps, or
+ * have a merkle path in one of the BUMPs, or
  * have all of its input transactions included in the list of transactions.
  * 
- * The `Beef` class supports the construction of valid BEEFs by allowing BUMPs,
- * merkle paths, and transactions to be merged sequentially.
+ * The `Beef` class supports the construction of valid BEEFs by allowing BUMPs
+ * (merkle paths) and transactions to be merged sequentially.
  * 
  * The `Beef` class also extends the standard by supporting 'known' transactions.
  * A 'known' transaction is represented solely by its txid.
@@ -51,7 +51,7 @@ export class Beef {
     bumps: MerklePath[] = []
     txs: BeefTx[] = []
 
-    constructor () {
+    constructor() {
     }
 
     /**
@@ -59,7 +59,7 @@ export class Beef {
      * BEEF_MAGIC_V2 includes support for txidOnly transactions in serialized beefs.
      * @returns version based on current contents.
      */
-    get version() : number {
+    get version(): number {
         const hasTxidOnly = !this.txs.every(tx => !tx.isTxidOnly)
         if (hasTxidOnly)
             return BEEF_MAGIC_V2
@@ -71,7 +71,7 @@ export class Beef {
      * @param txid of `beefTx` to find
      * @returns `BeefTx` in `txs` with `txid`.
      */
-    findTxid(txid: string) : BeefTx | undefined {
+    findTxid(txid: string): BeefTx | undefined {
         return this.txs.find(tx => tx.txid === txid)
     }
 
@@ -80,31 +80,31 @@ export class Beef {
      * @param bump 
      * @returns index of merged bump
      */
-    mergeBump(bump: MerklePath) : number {
+    mergeBump(bump: MerklePath): number {
         let bumpIndex: number | undefined = undefined
         // If this proof is identical to another one previously added, we use that first. Otherwise, we try to merge it with proofs from the same block.
         for (let i = 0; i < this.bumps.length; i++) {
-          const b = this.bumps[i]
-          if (b === bump) { // Literally the same
-            return i
-          }
-          if (b.blockHeight === bump.blockHeight) {
-            // Probably the same...
-            const rootA = b.computeRoot()
-            const rootB = bump.computeRoot()
-            if (rootA === rootB) {
-              // Definitely the same... combine them to save space
-              b.combine(bump)
-              bumpIndex = i
-              break
+            const b = this.bumps[i]
+            if (b === bump) { // Literally the same
+                return i
             }
-          }
+            if (b.blockHeight === bump.blockHeight) {
+                // Probably the same...
+                const rootA = b.computeRoot()
+                const rootB = bump.computeRoot()
+                if (rootA === rootB) {
+                    // Definitely the same... combine them to save space
+                    b.combine(bump)
+                    bumpIndex = i
+                    break
+                }
+            }
         }
 
         // if the proof is not yet added, add a new path.
         if (bumpIndex === undefined) {
-          bumpIndex = this.bumps.length
-          this.bumps.push(bump)
+            bumpIndex = this.bumps.length
+            this.bumps.push(bump)
         }
 
         // review if any transactions are proven by this bump
@@ -136,7 +136,7 @@ export class Beef {
      * @param bumpIndex Optional. If a number, must be valid index into bumps array.
      * @returns txid of rawTx
      */
-    mergeRawTx(rawTx: number[], bumpIndex?: number) : BeefTx {
+    mergeRawTx(rawTx: number[], bumpIndex?: number): BeefTx {
         const newTx: BeefTx = new BeefTx(rawTx, bumpIndex)
         this.removeExistingTxid(newTx.txid)
         this.txs.push(newTx)
@@ -154,7 +154,7 @@ export class Beef {
      * @param tx 
      * @returns txid of tx
      */
-    mergeTransaction(tx: Transaction) : BeefTx {
+    mergeTransaction(tx: Transaction): BeefTx {
         const txid = tx.id('hex')
         this.removeExistingTxid(txid)
         let bumpIndex: number | undefined = undefined
@@ -173,13 +173,17 @@ export class Beef {
         return newTx
     }
 
+    /**
+     * Removes an existing transaction from the BEEF, given its TXID
+     * @param txid TXID of the transaction to remove
+     */
     removeExistingTxid(txid: string) {
         const existingTxIndex = this.txs.findIndex(t => t.txid === txid)
         if (existingTxIndex >= 0)
             this.txs.splice(existingTxIndex, 1)
     }
 
-    mergeTxidOnly(txid: string) : BeefTx {
+    mergeTxidOnly(txid: string): BeefTx {
         let tx = this.txs.find(t => t.txid === txid)
         if (!tx) {
             tx = new BeefTx(txid)
@@ -189,7 +193,7 @@ export class Beef {
         return tx
     }
 
-    mergeBeefTx(btx: BeefTx) : BeefTx {
+    mergeBeefTx(btx: BeefTx): BeefTx {
         let beefTx = this.findTxid(btx.txid)
         if (!beefTx && btx.isTxidOnly)
             beefTx = this.mergeTxidOnly(btx.txid)
@@ -201,6 +205,7 @@ export class Beef {
         }
         return beefTx
     }
+
     mergeBeef(beef: number[] | Beef) {
         const b: Beef = Array.isArray(beef) ? Beef.fromBinary(beef) : beef
 
@@ -224,7 +229,7 @@ export class Beef {
      * 
      * @param allowTxidOnly optional. If true, transaction txid only is assumed valid
      */
-    isValid(allowTxidOnly?: boolean) : boolean {
+    isValid(allowTxidOnly?: boolean): boolean {
         return this.verifyValid(allowTxidOnly).valid
     }
 
@@ -242,7 +247,7 @@ export class Beef {
      * @param chainTracker Used to verify computed merkle path roots for all bump txids.
      * @param allowTxidOnly optional. If true, transaction txid is assumed valid
      */
-    async verify(chainTracker: ChainTracker, allowTxidOnly?: boolean) : Promise<boolean> {
+    async verify(chainTracker: ChainTracker, allowTxidOnly?: boolean): Promise<boolean> {
         const r = this.verifyValid(allowTxidOnly)
         if (!r.valid) return false
 
@@ -256,7 +261,7 @@ export class Beef {
     }
 
     private verifyValid(allowTxidOnly?: boolean)
-    : { valid: boolean, roots: Record<number, string> } {
+        : { valid: boolean, roots: Record<number, string> } {
 
         const r: { valid: boolean, roots: Record<number, string> } = { valid: false, roots: {} }
 
@@ -272,7 +277,7 @@ export class Beef {
             }
         }
 
-        const confirmComputedRoot = (b: MerklePath, txid: string) : boolean => {
+        const confirmComputedRoot = (b: MerklePath, txid: string): boolean => {
             const root = b.computeRoot(txid)
             if (!r.roots[b.blockHeight]) {
                 // accept the root as valid for this block and reuse for subsequent txids
@@ -305,7 +310,11 @@ export class Beef {
         return r
     }
 
-    toBinary() : number[] {
+    /**
+     * Returns a binary array representing the serialized BEEF
+     * @returns A binary array representing the BEEF
+     */
+    toBinary(): number[] {
 
         const writer = new Writer()
         writer.writeUInt32LE(this.version)
@@ -323,11 +332,15 @@ export class Beef {
         return writer.toArray()
     }
 
-    toHex() : string {
+    /**
+     * Returns a hex string representing the serialized BEEF
+     * @returns A hex string representing the BEEF
+     */
+    toHex(): string {
         return toHex(this.toBinary())
     }
 
-    static fromReader (br: Reader): Beef {
+    static fromReader(br: Reader): Beef {
         const version = br.readUInt32LE()
         if (version !== BEEF_MAGIC && version !== BEEF_MAGIC_V2)
             throw new Error(`Serialized BEEF must start with ${BEEF_MAGIC} or ${BEEF_MAGIC_V2} but starts with ${version}`)
@@ -345,11 +358,22 @@ export class Beef {
         return beef
     }
 
+    /**
+     * Constructs an instance of the Beef class based on the provided binary array
+     * @param bin The binary array from which to construct BEEF
+     * @returns An instance of the Beef class constructed from the binary data
+     */
     static fromBinary(bin: number[]): Beef {
         const br = new Reader(bin)
         return Beef.fromReader(br)
     }
 
+    /**
+     * Constructs an instance of the Beef class based on the provided string
+     * @param s The string value from which to construct BEEF
+     * @param enc The encoding of the string value from which BEEF should be constructed
+     * @returns An instance of the Beef class constructed from the string
+     */
     static fromString(s: string, enc?: 'hex' | 'utf8' | 'base64'): Beef {
         enc ||= 'hex'
         const bin = toArray(s, enc)
@@ -364,7 +388,7 @@ export class Beef {
      * @param newTx A new `BeefTx` that has been added to this.txs
      * @returns true if a bump was found, false otherwise
      */
-    private tryToValidateBumpIndex(newTx: BeefTx) : boolean {
+    private tryToValidateBumpIndex(newTx: BeefTx): boolean {
         if (newTx.bumpIndex !== undefined)
             return true
         const txid = newTx.txid
@@ -383,7 +407,7 @@ export class Beef {
      * Sort the `txs` by input txid dependency order.
      * @returns array of input txids of unproven transactions that aren't included in txs.
      */
-    sortTxs() : string[] {
+    sortTxs(): string[] {
         const missingInputs: Record<string, boolean> = {}
 
         const txidToTx: Record<string, BeefTx> = {}
@@ -452,7 +476,7 @@ export class Beef {
     /**
      * @returns a shallow copy of this beef
      */
-    clone() : Beef {
+    clone(): Beef {
         const c = new Beef()
         c.bumps = Array.from(this.bumps)
         c.txs = Array.from(this.txs)
@@ -464,7 +488,7 @@ export class Beef {
      * @param knownTxids 
      */
     trimKnownTxids(knownTxids: string[]) {
-        for (let i = 0; i < this.txs.length; ) {
+        for (let i = 0; i < this.txs.length;) {
             const tx = this.txs[i]
             if (tx.isTxidOnly && -1 < knownTxids.indexOf(tx.txid)) {
                 this.txs.splice(i, 1)
@@ -478,7 +502,7 @@ export class Beef {
     /**
      * @returns Summary of `Beef` contents as multi-line string.
      */
-    toLogString() : string {
+    toLogString(): string {
         let log = ''
         log += `BEEF with ${this.bumps.length} BUMPS and ${this.txs.length} Transactions, isValid ${this.isValid()}\n`
         let i = -1
@@ -505,4 +529,5 @@ export class Beef {
         return log
     }
 }
+
 export default Beef
