@@ -1,7 +1,7 @@
-import MerklePath from "../transaction/MerklePath.js";
-import Transaction from "../transaction/Transaction.js";
-import ChainTracker from "../transaction/ChainTracker.js";
-import BeefTx from "../beef/BeefTx.js";
+import MerklePath from "./MerklePath.js";
+import Transaction from "./Transaction.js";
+import ChainTracker from "./ChainTracker.js";
+import BeefTx from "./BeefTx.js";
 import { Reader, Writer, toHex, toArray } from "../primitives/utils.js"
 
 export const BEEF_MAGIC = 4022206465    // 0100BEEF in LE order

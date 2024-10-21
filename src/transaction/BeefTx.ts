@@ -1,6 +1,6 @@
+import { hash256 } from "../primitives/Hash.js"
 import { Reader, Writer, toHex, toArray } from "../primitives/utils.js"
-import Transaction from "../transaction/Transaction.js"
-import { asString, doubleSha256BE } from "./helpers.js"
+import Transaction from "./Transaction.js"
 import { BEEF_MAGIC_TXID_ONLY_EXTENSION } from "./Beef.js"
 
 /**
@@ -38,7 +38,7 @@ export default class BeefTx {
     get txid() {
         if (this._txid) return this._txid
         if (this._tx) return this._txid = this._tx.id('hex')
-        if (this._rawTx) return this._txid = asString(doubleSha256BE(Buffer.from(this._rawTx)))
+        if (this._rawTx) return this._txid = toHex(hash256(this._rawTx))
         throw new Error('Internal')
     }
 

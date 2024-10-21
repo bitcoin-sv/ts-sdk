@@ -12,7 +12,7 @@ import Spend from '../script/Spend.js'
 import ChainTracker from './ChainTracker.js'
 import { defaultBroadcaster } from './broadcasters/DefaultBroadcaster.js'
 import { defaultChainTracker } from './chaintrackers/DefaultChainTracker.js'
-import { BEEF_MAGIC } from '../beef/Beef.js'
+import { BEEF_MAGIC } from './Beef.js'
 
 /**
  * Represents a complete Bitcoin transaction. This class encapsulates all the details

@@ -1,7 +1,7 @@
-import BeefTx from "../../../dist/cjs/src/beef/BeefTx"
-import Beef from "../../../dist/cjs/src/beef/Beef"
-import BeefParty from "../../../dist/cjs/src/beef/BeefParty"
-import { BEEF_MAGIC, BEEF_MAGIC_V2 } from "../../../dist/cjs/src/beef/Beef"
+import BeefTx from "../../../dist/cjs/src/transaction/BeefTx"
+import Beef from "../../../dist/cjs/src/transaction/Beef"
+import BeefParty from "../../../dist/cjs/src/transaction/BeefParty"
+import { BEEF_MAGIC, BEEF_MAGIC_V2 } from "../../../dist/cjs/src/transaction/Beef"
 import Transaction from "../../../dist/cjs/src/transaction/Transaction"
 
 describe('Beef tests', () => {
