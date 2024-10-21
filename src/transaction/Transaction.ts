@@ -12,6 +12,7 @@ import Spend from '../script/Spend.js'
 import ChainTracker from './ChainTracker.js'
 import { defaultBroadcaster } from './broadcasters/DefaultBroadcaster.js'
 import { defaultChainTracker } from './chaintrackers/DefaultChainTracker.js'
+import { BEEF_MAGIC } from './Beef.js'
 
 /**
  * Represents a complete Bitcoin transaction. This class encapsulates all the details
@@ -66,7 +67,7 @@ export default class Transaction {
     const reader = new Reader(beef)
     // Read the version
     const version = reader.readUInt32LE()
-    if (version !== 4022206465) {
+    if (version !== BEEF_MAGIC) {
       throw new Error(`Invalid BEEF version. Expected 4022206465, received ${version}.`)
     }
 

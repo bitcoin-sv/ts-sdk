@@ -449,6 +449,9 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | |
 | --- |
 | [ARC](#class-arc) |
+| [Beef](#class-beef) |
+| [BeefParty](#class-beefparty) |
+| [BeefTx](#class-beeftx) |
 | [FetchHttpClient](#class-fetchhttpclient) |
 | [MerklePath](#class-merklepath) |
 | [NodejsHttpClient](#class-nodejshttpclient) |
@@ -831,6 +834,319 @@ Argument Details
   + The BSV network to use when calling the WhatsOnChain API.
 + **config**
   + Configuration options for the WhatsOnChain ChainTracker.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: BeefTx
+
+A single bitcoin transaction associated with a `Beef` validity proof set.
+
+Simple case is transaction data included directly, either as raw bytes or fully parsed data, or both.
+
+Supports 'known' transactions which are represented by just their txid.
+It is assumed that intended consumer of this beef already has validity proof for such a transaction,
+which they can merge if necessary to create a valid beef.
+
+```ts
+export default class BeefTx {
+    _bumpIndex?: number;
+    _tx?: Transaction;
+    _rawTx?: number[];
+    _txid?: string;
+    inputTxids: string[] = [];
+    degree: number = 0;
+    get bumpIndex(): number | undefined 
+    set bumpIndex(v: number | undefined) 
+    get hasProof(): boolean 
+    get isTxidOnly(): boolean 
+    get txid() 
+    get tx() 
+    get rawTx() 
+    constructor(tx: Transaction | number[] | string, bumpIndex?: number) 
+    toWriter(writer: Writer): void 
+    static fromReader(br: Reader): BeefTx 
+}
+```
+
+<details>
+
+<summary>Class BeefTx Details</summary>
+
+#### Constructor
+
+```ts
+constructor(tx: Transaction | number[] | string, bumpIndex?: number) 
+```
+
+Argument Details
+
++ **tx**
+  + If string, must be a valid txid. If `number[]` must be a valid serialized transaction.
++ **bumpIndex**
+  + If transaction already has a proof in the beef to which it will be added.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: Beef
+
+```ts
+export class Beef {
+    bumps: MerklePath[] = [];
+    txs: BeefTx[] = [];
+    constructor() 
+    get version(): number 
+    findTxid(txid: string): BeefTx | undefined 
+    mergeBump(bump: MerklePath): number 
+    mergeRawTx(rawTx: number[], bumpIndex?: number): BeefTx 
+    mergeTransaction(tx: Transaction): BeefTx 
+    removeExistingTxid(txid: string) 
+    mergeTxidOnly(txid: string): BeefTx 
+    mergeBeefTx(btx: BeefTx): BeefTx 
+    mergeBeef(beef: number[] | Beef) 
+    isValid(allowTxidOnly?: boolean): boolean 
+    async verify(chainTracker: ChainTracker, allowTxidOnly?: boolean): Promise<boolean> 
+    toBinary(): number[] 
+    toHex(): string 
+    static fromReader(br: Reader): Beef 
+    static fromBinary(bin: number[]): Beef 
+    static fromString(s: string, enc?: "hex" | "utf8" | "base64"): Beef 
+    sortTxs(): string[] 
+    clone(): Beef 
+    trimKnownTxids(knownTxids: string[]) 
+    toLogString(): string 
+}
+```
+
+<details>
+
+<summary>Class Beef Details</summary>
+
+#### Method clone
+
+```ts
+clone(): Beef 
+```
+
+Returns
+
+a shallow copy of this beef
+
+#### Method findTxid
+
+```ts
+findTxid(txid: string): BeefTx | undefined 
+```
+
+Returns
+
+`BeefTx` in `txs` with `txid`.
+
+Argument Details
+
++ **txid**
+  + of `beefTx` to find
+
+#### Method fromBinary
+
+Constructs an instance of the Beef class based on the provided binary array
+
+```ts
+static fromBinary(bin: number[]): Beef 
+```
+
+Returns
+
+An instance of the Beef class constructed from the binary data
+
+Argument Details
+
++ **bin**
+  + The binary array from which to construct BEEF
+
+#### Method fromString
+
+Constructs an instance of the Beef class based on the provided string
+
+```ts
+static fromString(s: string, enc?: "hex" | "utf8" | "base64"): Beef 
+```
+
+Returns
+
+An instance of the Beef class constructed from the string
+
+Argument Details
+
++ **s**
+  + The string value from which to construct BEEF
++ **enc**
+  + The encoding of the string value from which BEEF should be constructed
+
+#### Method isValid
+
+Sorts `txs` and checks structural validity of beef.
+
+Does NOT verify merkle roots.
+
+Validity requirements:
+1. No 'known' txids, unless `allowTxidOnly` is true.
+2. All transactions have bumps or their inputs chain back to bumps (or are known).
+3. Order of transactions satisfies dependencies before dependents.
+4. No transactions with duplicate txids.
+
+```ts
+isValid(allowTxidOnly?: boolean): boolean 
+```
+
+Argument Details
+
++ **allowTxidOnly**
+  + optional. If true, transaction txid only is assumed valid
+
+#### Method mergeBump
+
+Merge a MerklePath that is assumed to be fully valid.
+
+```ts
+mergeBump(bump: MerklePath): number 
+```
+
+Returns
+
+index of merged bump
+
+#### Method mergeRawTx
+
+Merge a serialized transaction.
+
+Checks that a transaction with the same txid hasn't already been merged.
+
+Replaces existing transaction with same txid.
+
+```ts
+mergeRawTx(rawTx: number[], bumpIndex?: number): BeefTx 
+```
+
+Returns
+
+txid of rawTx
+
+Argument Details
+
++ **bumpIndex**
+  + Optional. If a number, must be valid index into bumps array.
+
+#### Method mergeTransaction
+
+Merge a `Transaction` and any referenced `merklePath` and `sourceTransaction`, recursifely.
+
+Replaces existing transaction with same txid.
+
+Attempts to match an existing bump to the new transaction.
+
+```ts
+mergeTransaction(tx: Transaction): BeefTx 
+```
+
+Returns
+
+txid of tx
+
+#### Method removeExistingTxid
+
+Removes an existing transaction from the BEEF, given its TXID
+
+```ts
+removeExistingTxid(txid: string) 
+```
+
+Argument Details
+
++ **txid**
+  + TXID of the transaction to remove
+
+#### Method sortTxs
+
+Sort the `txs` by input txid dependency order.
+
+```ts
+sortTxs(): string[] 
+```
+
+Returns
+
+array of input txids of unproven transactions that aren't included in txs.
+
+#### Method toBinary
+
+Returns a binary array representing the serialized BEEF
+
+```ts
+toBinary(): number[] 
+```
+
+Returns
+
+A binary array representing the BEEF
+
+#### Method toHex
+
+Returns a hex string representing the serialized BEEF
+
+```ts
+toHex(): string 
+```
+
+Returns
+
+A hex string representing the BEEF
+
+#### Method toLogString
+
+```ts
+toLogString(): string 
+```
+
+Returns
+
+Summary of `Beef` contents as multi-line string.
+
+#### Method trimKnownTxids
+
+Ensure that all the txids in `knownTxids` are txidOnly
+
+```ts
+trimKnownTxids(knownTxids: string[]) 
+```
+
+#### Method verify
+
+Sorts `txs` and confirms validity of transaction data contained in beef
+by validating structure of this beef and confirming computed merkle roots
+using `chainTracker`.
+
+Validity requirements:
+1. No 'known' txids, unless `allowTxidOnly` is true.
+2. All transactions have bumps or their inputs chain back to bumps (or are known).
+3. Order of transactions satisfies dependencies before dependents.
+4. No transactions with duplicate txids.
+
+```ts
+async verify(chainTracker: ChainTracker, allowTxidOnly?: boolean): Promise<boolean> 
+```
+
+Argument Details
+
++ **chainTracker**
+  + Used to verify computed merkle path roots for all bump txids.
++ **allowTxidOnly**
+  + optional. If true, transaction txid is assumed valid
 
 </details>
 
@@ -1309,6 +1625,119 @@ tx.verify(new WhatsOnChain(), new SatoshisPerKilobyte(1))
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+### Class: BeefParty
+
+Extends `Beef` that is used to exchange transaction validity data with more than one external party.
+
+Use `addKnownTxidsForParty` to keep track of who knows what to reduce re-transmission of potentially large transactions.
+
+Use `getTrimmedBeefForParty` to obtain a `Beef` trimmed of transaction validity data known to a specific party.
+
+Typical usage scenario:
+
+1. Query a wallet storage provider for spendable outputs.
+2. The provider replies with a Beef validating the returned outputs.
+3. Construct a new transaction using some of the queried outputs as inputs, including Beef validating all the inputs.
+4. Receive new valid raw transaction after processing and Beef validating change outputs added to original inputs.
+5. Return to step 1, continuing to build on old and new spendable outputs.
+
+By default, each Beef is required to be complete and valid: All transactions appear as full serialized bitcoin transactions and
+each transaction either has a merkle path proof (it has been mined) or all of its input transactions are included.
+
+The size and redundancy of these Beefs becomes a problem when chained transaction creation out-paces the block mining rate.
+
+```ts
+export class BeefParty extends Beef {
+    knownTo: Record<string, Record<string, boolean>> = {};
+    constructor(parties?: string[]) 
+    isParty(party: string) 
+    addParty(party: string) 
+    getKnownTxidsForParty(party: string): string[] 
+    getTrimmedBeefForParty(party: string): Beef 
+    addKnownTxidsForParty(party: string, knownTxids: string[]) 
+}
+```
+
+<details>
+
+<summary>Class BeefParty Details</summary>
+
+#### Constructor
+
+```ts
+constructor(parties?: string[]) 
+```
+
+Argument Details
+
++ **parties**
+  + Optional array of initial unique party identifiers.
+
+#### Property knownTo
+
+keys are party identifiers.
+values are records of txids with truthy value for which the party already has validity proof.
+
+```ts
+knownTo: Record<string, Record<string, boolean>> = {}
+```
+
+#### Method addKnownTxidsForParty
+
+Make note of additional txids "known" to `party`.
+
+```ts
+addKnownTxidsForParty(party: string, knownTxids: string[]) 
+```
+
+Argument Details
+
++ **party**
+  + unique identifier, added if new.
+
+#### Method addParty
+
+Adds a new unique party identifier to this `BeefParty`.
+
+```ts
+addParty(party: string) 
+```
+
+#### Method getKnownTxidsForParty
+
+```ts
+getKnownTxidsForParty(party: string): string[] 
+```
+
+Returns
+
+Array of txids "known" to `party`.
+
+#### Method getTrimmedBeefForParty
+
+```ts
+getTrimmedBeefForParty(party: string): Beef 
+```
+
+Returns
+
+trimmed beef of unknown transactions and proofs for `party`
+
+#### Method isParty
+
+```ts
+isParty(party: string) 
+```
+
+Returns
+
+`true` if `party` has already beed added to this `BeefParty`.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 ## Functions
 
 | |
@@ -1423,3 +1852,40 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ## Variables
 
+| |
+| --- |
+| [BEEF_MAGIC](#variable-beef_magic) |
+| [BEEF_MAGIC_TXID_ONLY_EXTENSION](#variable-beef_magic_txid_only_extension) |
+| [BEEF_MAGIC_V2](#variable-beef_magic_v2) |
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+
+### Variable: BEEF_MAGIC
+
+```ts
+BEEF_MAGIC = 4022206465
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: BEEF_MAGIC_V2
+
+```ts
+BEEF_MAGIC_V2 = 4022206466
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: BEEF_MAGIC_TXID_ONLY_EXTENSION
+
+```ts
+BEEF_MAGIC_TXID_ONLY_EXTENSION = 4022206465
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
