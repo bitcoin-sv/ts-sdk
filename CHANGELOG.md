@@ -31,6 +31,15 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.1.26] - 2024-10-22
+### Added
+- Atomic BEEF serializer and deserializer for `Transaction` class
+- Ability to select a TXID from a BEEF when construction a `Transaction.fromBEEF()`
+
+## [1.1.25] - 2024-10-21
+### Added
+- `Beef`, `BeefTx`, and `BeefParty` classes
+
 ## [1.1.24] - 2024-10-04
 ### Fixed
 - Addressed #125
