@@ -8,6 +8,8 @@ export const BEEF_MAGIC = 4022206465    // 0100BEEF in LE order
 export const BEEF_MAGIC_V2 = 4022206466 // 0200BEEF in LE order
 export const BEEF_MAGIC_TXID_ONLY_EXTENSION = 4022206465 // 0100BEEF in LE order
 
+export type BeefVersion = undefined | 'V1' | 'V2'
+
 /*
  * BEEF standard: BRC-62: Background Evaluation Extended Format (BEEF) Transactions
  * https://github.com/bitcoin-sv/BRCs/blob/master/transactions/0062.md
@@ -50,21 +52,29 @@ export const BEEF_MAGIC_TXID_ONLY_EXTENSION = 4022206465 // 0100BEEF in LE order
 export class Beef {
     bumps: MerklePath[] = []
     txs: BeefTx[] = []
+    version: BeefVersion = undefined
 
-    constructor() {
+    constructor(version?: BeefVersion) {
+        this.version = version
     }
 
     /**
      * BEEF_MAGIC is the original V1 version.
      * BEEF_MAGIC_V2 includes support for txidOnly transactions in serialized beefs.
-     * @returns version based on current contents.
+     * @returns version magic value based on current contents and constructor version parameter.
      */
-    get version(): number {
-        const hasTxidOnly = !this.txs.every(tx => !tx.isTxidOnly)
+    get magic(): number {
+        if (this.version === 'V1')
+            return BEEF_MAGIC
+
+        if (this.version === 'V2')
+            return BEEF_MAGIC_V2
+
+        const hasTxidOnly = -1 < this.txs.findIndex(tx => tx.isTxidOnly)
         if (hasTxidOnly)
             return BEEF_MAGIC_V2
-        else
-            return BEEF_MAGIC
+
+        return BEEF_MAGIC
     }
 
     /**
@@ -184,6 +194,9 @@ export class Beef {
     }
 
     mergeTxidOnly(txid: string): BeefTx {
+        if (this.version === 'V1')
+            throw new Error(`BEEF V1 format does not support txid only transactions.`)
+
         let tx = this.txs.find(t => t.txid === txid)
         if (!tx) {
             tx = new BeefTx(txid)
@@ -317,7 +330,7 @@ export class Beef {
     toBinary(): number[] {
 
         const writer = new Writer()
-        writer.writeUInt32LE(this.version)
+        writer.writeUInt32LE(this.magic)
 
         writer.writeVarIntNum(this.bumps.length)
         for (const b of this.bumps) {
@@ -326,7 +339,7 @@ export class Beef {
 
         writer.writeVarIntNum(this.txs.length)
         for (const tx of this.txs) {
-            tx.toWriter(writer)
+            tx.toWriter(writer, this.magic)
         }
 
         return writer.toArray()
@@ -344,7 +357,7 @@ export class Beef {
         const version = br.readUInt32LE()
         if (version !== BEEF_MAGIC && version !== BEEF_MAGIC_V2)
             throw new Error(`Serialized BEEF must start with ${BEEF_MAGIC} or ${BEEF_MAGIC_V2} but starts with ${version}`)
-        const beef = new Beef()
+        const beef = new Beef(version === BEEF_MAGIC_V2 ? 'V2' : undefined)
         const bumpsLength = br.readVarIntNum()
         for (let i = 0; i < bumpsLength; i++) {
             const bump = MerklePath.fromReader(br)
@@ -352,7 +365,7 @@ export class Beef {
         }
         const txsLength = br.readVarIntNum()
         for (let i = 0; i < txsLength; i++) {
-            const beefTx = BeefTx.fromReader(br)
+            const beefTx = BeefTx.fromReader(br, version)
             beef.txs.push(beefTx)
         }
         return beef

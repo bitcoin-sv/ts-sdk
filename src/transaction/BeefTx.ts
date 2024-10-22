@@ -1,7 +1,7 @@
 import { hash256 } from "../primitives/Hash.js"
 import { Reader, Writer, toHex, toArray } from "../primitives/utils.js"
 import Transaction from "./Transaction.js"
-import { BEEF_MAGIC_TXID_ONLY_EXTENSION } from "./Beef.js"
+import { BEEF_MAGIC, BEEF_MAGIC_TXID_ONLY_EXTENSION } from "./Beef.js"
 
 /**
  * A single bitcoin transaction associated with a `Beef` validity proof set.
@@ -84,36 +84,77 @@ export default class BeefTx {
         }
     }
 
-    toWriter(writer: Writer) : void {
-        if (this.isTxidOnly) {
-            // Encode just the txid of a known transaction using the txid
-            writer.writeUInt32LE(BEEF_MAGIC_TXID_ONLY_EXTENSION)
-            writer.writeReverse(toArray(this._txid, 'hex'))
-        } else if (this._rawTx)
-            writer.write(this._rawTx)
-        else if (this._tx)
-            writer.write(this._tx.toBinary())
-        else
-            throw new Error('a valid serialized Transaction is expected')
-        if (this.bumpIndex === undefined) {
-            writer.writeUInt8(0)
+    toWriter(writer: Writer, magic: number) : void {
+        if (magic === BEEF_MAGIC) {
+            // V1
+            if (this.isTxidOnly) {
+                // Encode just the txid of a known transaction using the txid
+                writer.writeUInt32LE(BEEF_MAGIC_TXID_ONLY_EXTENSION)
+                writer.writeReverse(toArray(this._txid, 'hex'))
+            } else if (this._rawTx)
+                writer.write(this._rawTx)
+            else if (this._tx)
+                writer.write(this._tx.toBinary())
+            else
+                throw new Error('a valid serialized Transaction is expected')
+            if (this.bumpIndex === undefined) {
+                writer.writeUInt8(0)
+            } else {
+                writer.writeUInt8(1)
+                writer.writeVarIntNum(this.bumpIndex)
+            }
         } else {
-            writer.writeUInt8(1)
-            writer.writeVarIntNum(this.bumpIndex)
+            // V2
+            if (this.isTxidOnly) {
+                // Encode just the txid of a known transaction using the txid
+                writer.writeUInt8(2)
+                writer.writeReverse(toArray(this._txid, 'hex'))
+            } else {
+                if (this.bumpIndex === undefined) {
+                    writer.writeUInt8(0)
+                } else {
+                    writer.writeUInt8(1)
+                    writer.writeVarIntNum(this.bumpIndex)
+                }
+                if (this._rawTx)
+                    writer.write(this._rawTx)
+                else if (this._tx)
+                    writer.write(this._tx.toBinary())
+                else
+                    throw new Error('a valid serialized Transaction is expected')
+            }
         }
     }
 
-    static fromReader (br: Reader): BeefTx {
+    static fromReader (br: Reader, magic: number): BeefTx {
+
         let tx: Transaction | number[] | string | undefined = undefined
-        const version = br.readUInt32LE()
-        if (version === BEEF_MAGIC_TXID_ONLY_EXTENSION) {
-            // This is the extension to support known transactions
-            tx = toHex(br.readReverse(32))
+        let bumpIndex: number | undefined = undefined
+
+        if (magic === BEEF_MAGIC) {
+            // V1
+            const version = br.readUInt32LE()
+            if (version === BEEF_MAGIC_TXID_ONLY_EXTENSION) {
+                // This is the extension to support known transactions
+                tx = toHex(br.readReverse(32))
+            } else {
+                br.pos -= 4 // Unread the version...
+                tx = Transaction.fromReader(br)
+            }
+            bumpIndex = br.readUInt8() ? br.readVarIntNum() : undefined
         } else {
-            br.pos -= 4 // Unread the version...
-            tx = Transaction.fromReader(br)
+            // V2
+            const format = br.readUInt8()
+            if (format === 2) {
+                // txid only
+                tx = toHex(br.readReverse(32))
+            } else {
+                if (format === 1)
+                    bumpIndex =  br.readVarIntNum()
+                tx = Transaction.fromReader(br)
+            }
         }
-        const bumpIndex = br.readUInt8() ? br.readVarIntNum() : undefined
+
         const beefTx = new BeefTx(tx, bumpIndex)
         return beefTx
     }
