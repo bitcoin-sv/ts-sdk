@@ -1179,7 +1179,8 @@ export default class Transaction {
     lockTime: number;
     metadata: Record<string, any>;
     merklePath?: MerklePath;
-    static fromBEEF(beef: number[]): Transaction 
+    static fromBEEF(beef: number[], txid?: string): Transaction 
+    static fromAtomicBEEF(beef: number[]): Transaction 
     static fromEF(ef: number[]): Transaction 
     static parseScriptOffsets(bin: number[]): {
         inputs: Array<{
@@ -1197,7 +1198,7 @@ export default class Transaction {
     static fromBinary(bin: number[]): Transaction 
     static fromHex(hex: string): Transaction 
     static fromHexEF(hex: string): Transaction 
-    static fromHexBEEF(hex: string): Transaction 
+    static fromHexBEEF(hex: string, txid?: string): Transaction 
     constructor(version: number = 1, inputs: TransactionInput[] = [], outputs: TransactionOutput[] = [], lockTime: number = 0, metadata: Record<string, any> = {}, merklePath?: MerklePath) 
     addInput(input: TransactionInput): void 
     addOutput(output: TransactionOutput): void 
@@ -1211,12 +1212,14 @@ export default class Transaction {
     toHexEF(): string 
     toHex(): string 
     toHexBEEF(): string 
+    toHexAtomicBEEF(): string 
     hash(enc?: "hex"): number[] | string 
     id(): number[];
     id(enc: "hex"): string;
     id(enc?: "hex"): number[] | string 
     async verify(chainTracker: ChainTracker | "scripts only" = defaultChainTracker(), feeModel?: FeeModel): Promise<boolean> 
     toBEEF(): number[] 
+    toAtomicBEEF(): number[] 
 }
 ```
 
@@ -1291,12 +1294,35 @@ amongst the change outputs
 
 TODO: Benford's law change distribution.
 
+#### Method fromAtomicBEEF
+
+Creates a new transaction from an Atomic BEEF (BRC-95) structure.
+Extracts the subject transaction and ensures that all transactions within the BEEF data
+are part of the dependency graph of the subject transaction.
+Throws errors if the Atomic BEEF data does not strictly adhere to the BRC-95 specification.
+
+```ts
+static fromAtomicBEEF(beef: number[]): Transaction 
+```
+
+Returns
+
+The subject transaction, linked to its associated inputs populated with merkle paths.
+
+Argument Details
+
++ **beef**
+  + A binary representation of an Atomic BEEF structure.
+
 #### Method fromBEEF
 
 Creates a new transaction, linked to its inputs and their associated merkle paths, from a BEEF (BRC-62) structure.
+Optionally, you can provide a specific TXID to retrieve a particular transaction from the BEEF data.
+If the TXID is provided but not found in the BEEF data, an error will be thrown.
+If no TXID is provided, the last transaction in the BEEF data is returned.
 
 ```ts
-static fromBEEF(beef: number[]): Transaction 
+static fromBEEF(beef: number[], txid?: string): Transaction 
 ```
 
 Returns
@@ -1306,7 +1332,9 @@ An anchored transaction, linked to its associated inputs populated with merkle p
 Argument Details
 
 + **beef**
-  + A binary representation of a transaction in BEEF format.
+  + A binary representation of transactions in BEEF format.
++ **txid**
+  + Optional TXID of the transaction to retrieve from the BEEF data.
 
 #### Method fromBinary
 
@@ -1362,9 +1390,12 @@ Argument Details
 #### Method fromHexBEEF
 
 Creates a Transaction instance from a hexadecimal string encoded BEEF.
+Optionally, you can provide a specific TXID to retrieve a particular transaction from the BEEF data.
+If the TXID is provided but not found in the BEEF data, an error will be thrown.
+If no TXID is provided, the last transaction in the BEEF data is returned.
 
 ```ts
-static fromHexBEEF(hex: string): Transaction 
+static fromHexBEEF(hex: string, txid?: string): Transaction 
 ```
 
 Returns
@@ -1375,6 +1406,8 @@ Argument Details
 
 + **hex**
   + The hexadecimal string representation of the transaction BEEF.
++ **txid**
+  + Optional TXID of the transaction to retrieve from the BEEF data.
 
 #### Method fromHexEF
 
@@ -1512,6 +1545,21 @@ Signs a transaction, hydrating all its unlocking scripts based on the provided s
 async sign(): Promise<void> 
 ```
 
+#### Method toAtomicBEEF
+
+Serializes this transaction and its inputs into the Atomic BEEF (BRC-95) format.
+The Atomic BEEF format starts with a 4-byte prefix `0x01010101`, followed by the TXID of the subject transaction,
+and then the BEEF data containing only the subject transaction and its dependencies.
+This format ensures that the BEEF structure is atomic and contains no unrelated transactions.
+
+```ts
+toAtomicBEEF(): number[] 
+```
+
+Returns
+
+- The serialized Atomic BEEF structure.
+
 #### Method toBEEF
 
 Serializes this transaction, together with its inputs and the respective merkle proofs, into the BEEF (BRC-62) format. This enables efficient verification of its compliance with the rules of SPV.
@@ -1559,6 +1607,18 @@ toHex(): string
 Returns
 
 - The hexadecimal string representation of the transaction.
+
+#### Method toHexAtomicBEEF
+
+Converts the transaction to a hexadecimal string Atomic BEEF.
+
+```ts
+toHexAtomicBEEF(): string 
+```
+
+Returns
+
+- The hexadecimal string representation of the transaction Atomic BEEF.
 
 #### Method toHexBEEF
 
