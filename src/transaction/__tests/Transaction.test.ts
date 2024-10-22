@@ -1,6 +1,6 @@
 import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
 import TransactionSignature from '../../../dist/cjs/src/primitives/TransactionSignature'
-import { toHex, toArray } from '../../../dist/cjs/src/primitives/utils'
+import { toHex, toArray, Writer } from '../../../dist/cjs/src/primitives/utils'
 import Script from '../../../dist/cjs/src/script/Script'
 import UnlockingScript from '../../../dist/cjs/src/script/UnlockingScript'
 import LockingScript from '../../../dist/cjs/src/script/LockingScript'
@@ -10,6 +10,8 @@ import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
 import Curve from '../../../dist/cjs/src/primitives/Curve'
 import P2PKH from '../../../dist/cjs/src/script/templates/P2PKH'
 import fromUtxo from '../../../dist/cjs/src/compat/Utxo'
+import MerklePath from '../../../dist/cjs/src/transaction/MerklePath'
+import { BEEF_MAGIC } from '../../../dist/cjs/src/transaction/Beef'
 
 import sighashVectors from '../../primitives/__tests/sighash.vectors'
 import invalidTransactions from './tx.invalid.vectors'
@@ -422,7 +424,7 @@ describe('Transaction', () => {
         status: 200,
         statusText: 'OK',
         headers: {
-          get (key: string) {
+          get(key: string) {
             if (key === 'Content-Type') {
               return 'application/json'
             }
@@ -501,7 +503,7 @@ describe('Transaction', () => {
         status: 200,
         statusText: 'OK',
         headers: {
-          get (key: string) {
+          get(key: string) {
             if (key === 'Content-Type') {
               return 'application/json'
             }
@@ -614,6 +616,223 @@ describe('Transaction', () => {
         const actualHex = toHex(actualBin)
         expect(actualHex).toEqual(expectedHex)
       })
+    })
+  })
+
+  describe('Atomic BEEF', () => {
+    it('should serialize a transaction to Atomic BEEF format correctly', async () => {
+      const privateKey = new PrivateKey(1)
+      const publicKey = new Curve().g.mul(privateKey)
+      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const p2pkh = new P2PKH()
+
+      // Create a simple transaction
+      const sourceTx = new Transaction(1, [], [{
+        lockingScript: p2pkh.lock(publicKeyHash),
+        satoshis: 10000
+      }], 0)
+
+      const spendTx = new Transaction(1, [{
+        sourceTransaction: sourceTx,
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: p2pkh.unlock(privateKey),
+        sequence: 0xffffffff
+      }], [{
+        satoshis: 9000,
+        lockingScript: p2pkh.lock(publicKeyHash)
+      }], 0)
+
+      // Sign the transaction
+      await spendTx.fee()
+      await spendTx.sign()
+
+      // Assign a MerklePath to the source transaction to simulate mined transaction
+      const sourceTxID = sourceTx.id('hex')
+      const merklePath = new MerklePath(1000, [
+        [
+          { offset: 0, hash: sourceTxID, txid: true },
+          { offset: 1, duplicate: true }
+        ]
+      ])
+      sourceTx.merklePath = merklePath
+
+      // Serialize to Atomic BEEF
+      const atomicBEEF = spendTx.toAtomicBEEF()
+      expect(atomicBEEF).toBeDefined()
+      // Verify that the Atomic BEEF starts with the correct prefix and TXID
+      const expectedPrefix = [0x01, 0x01, 0x01, 0x01]
+      expect(atomicBEEF.slice(0, 4)).toEqual(expectedPrefix)
+      const txid = spendTx.id()
+      expect(atomicBEEF.slice(4, 36)).toEqual(txid)
+
+      // Deserialize from Atomic BEEF
+      const deserializedTx = Transaction.fromAtomicBEEF(atomicBEEF)
+      expect(deserializedTx.toHex()).toEqual(spendTx.toHex())
+    })
+
+    it('should throw an error when deserializing Atomic BEEF if subject transaction is missing', () => {
+      // Create Atomic BEEF data with missing subject transaction
+      const writer = new Writer()
+      // Write Atomic BEEF prefix
+      writer.writeUInt32LE(0x01010101)
+      // Write subject TXID
+      const fakeTXID = toArray('00'.repeat(32), 'hex')
+      writer.write(fakeTXID)
+      // Write empty BEEF data
+      writer.writeUInt32LE(BEEF_MAGIC) // BEEF version
+      writer.writeVarIntNum(0) // No BUMPs
+      writer.writeVarIntNum(0) // No transactions
+
+      const atomicBEEFData = writer.toArray()
+
+      expect(() => {
+        Transaction.fromAtomicBEEF(atomicBEEFData)
+      }).toThrowError('Subject transaction with TXID 0000000000000000000000000000000000000000000000000000000000000000 not found in Atomic BEEF data.')
+    })
+
+    it('should throw an error when deserializing Atomic BEEF if there are unrelated transactions', async () => {
+      // Create two unrelated transactions
+      const privateKey1 = new PrivateKey(1)
+      const publicKey1 = new Curve().g.mul(privateKey1)
+      const publicKeyHash1 = hash160(publicKey1.encode(true)) as number[]
+      const p2pkh = new P2PKH()
+
+      const sourceTx1 = new Transaction(1, [], [{
+        lockingScript: p2pkh.lock(publicKeyHash1),
+        satoshis: 10000
+      }], 0)
+
+      const spendTx1 = new Transaction(1, [{
+        sourceTransaction: sourceTx1,
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: p2pkh.unlock(privateKey1),
+        sequence: 0xffffffff
+      }], [{
+        satoshis: 9000,
+        lockingScript: p2pkh.lock(publicKeyHash1)
+      }], 0)
+
+      // Another unrelated transaction
+      const privateKey2 = new PrivateKey(2)
+      const publicKey2 = new Curve().g.mul(privateKey2)
+      const publicKeyHash2 = hash160(publicKey2.encode(true)) as number[]
+
+      const sourceTx2 = new Transaction(1, [], [{
+        lockingScript: p2pkh.lock(publicKeyHash2),
+        satoshis: 10000
+      }], 0)
+
+      // Assign merkle paths to source transactions to simulate mined transactions
+      const sourceTx1ID = sourceTx1.id('hex')
+      const sourceTx2ID = sourceTx2.id('hex')
+      sourceTx1.merklePath = new MerklePath(1000, [
+        [
+          { offset: 0, hash: sourceTx1ID, txid: true },
+          { offset: 1, duplicate: true }
+        ]
+      ])
+      sourceTx2.merklePath = new MerklePath(1001, [
+        [
+          { offset: 0, hash: sourceTx2ID, txid: true },
+          { offset: 1, duplicate: true }
+        ]
+      ])
+
+      // Sign the transaction
+      await spendTx1.fee()
+      await spendTx1.sign()
+
+      // Construct the Atomic BEEF data manually, including the unrelated transaction
+      const writer = new Writer()
+      // Write Atomic BEEF prefix
+      writer.writeUInt32LE(0x01010101)
+      // Write subject TXID (spendTx1)
+      const spendTx1ID = spendTx1.id()
+      writer.write(spendTx1ID)
+
+      // Build BEEF data
+      const beefWriter = new Writer()
+      beefWriter.writeUInt32LE(BEEF_MAGIC) // BEEF version
+      // BUMPs
+      beefWriter.writeVarIntNum(2)
+      beefWriter.write(sourceTx1.merklePath.toBinary())
+      beefWriter.write(sourceTx2.merklePath.toBinary())
+      // Transactions
+      beefWriter.writeVarIntNum(3)
+      // Transaction 1 (sourceTx1)
+      beefWriter.write(sourceTx1.toBinary())
+      beefWriter.writeUInt8(1) // hasBump
+      beefWriter.writeVarIntNum(0) // BUMP index
+      // Transaction 2 (sourceTx2) - unrelated
+      beefWriter.write(sourceTx2.toBinary())
+      beefWriter.writeUInt8(1) // hasBump
+      beefWriter.writeVarIntNum(1) // BUMP index
+      // Transaction 3 (spendTx1)
+      beefWriter.write(spendTx1.toBinary())
+      beefWriter.writeUInt8(0) // no BUMP
+
+      // Combine Atomic BEEF data
+      writer.write(beefWriter.toArray())
+      const atomicBEEFData = writer.toArray()
+
+      // Attempt to deserialize
+      expect(() => {
+        Transaction.fromAtomicBEEF(atomicBEEFData)
+      }).toThrowError(/Unrelated transaction with TXID .+ found in Atomic BEEF data./)
+    })
+
+    it('should allow selecting a specific TXID from BEEF data', async () => {
+      // Create two transactions, one depending on the other
+      const privateKey = new PrivateKey(1)
+      const publicKey = new Curve().g.mul(privateKey)
+      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const p2pkh = new P2PKH()
+
+      const sourceTx = new Transaction(1, [], [{
+        lockingScript: p2pkh.lock(publicKeyHash),
+        satoshis: 10000
+      }], 0)
+
+      const spendTx = new Transaction(1, [{
+        sourceTransaction: sourceTx,
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: p2pkh.unlock(privateKey),
+        sequence: 0xffffffff
+      }], [{
+        satoshis: 9000,
+        lockingScript: p2pkh.lock(publicKeyHash)
+      }], 0)
+
+      // Sign transactions
+      await spendTx.fee()
+      await spendTx.sign()
+
+      // Assign merkle path to source transaction
+      const sourceTxID = sourceTx.id('hex')
+      sourceTx.merklePath = new MerklePath(1000, [
+        [
+          { offset: 0, hash: sourceTxID, txid: true },
+          { offset: 1, duplicate: true }
+        ]
+      ])
+
+      // Serialize to BEEF
+      const beefData = spendTx.toBEEF()
+      // Get TXIDs
+      const spendTxID = spendTx.id('hex')
+
+      // Deserialize the source transaction from BEEF data
+      const deserializedSourceTx = Transaction.fromBEEF(beefData, sourceTxID)
+      expect(deserializedSourceTx.id('hex')).toEqual(sourceTxID)
+
+      // Deserialize the spend transaction from BEEF data
+      const deserializedSpendTx = Transaction.fromBEEF(beefData, spendTxID)
+      expect(deserializedSpendTx.id('hex')).toEqual(spendTxID)
+
+      // Attempt to deserialize a non-existent transaction
+      expect(() => {
+        Transaction.fromBEEF(beefData, '00'.repeat(32))
+      }).toThrowError('Transaction with TXID 0000000000000000000000000000000000000000000000000000000000000000 not found in BEEF data.')
     })
   })
 })
