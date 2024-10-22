@@ -866,8 +866,8 @@ export default class BeefTx {
     get tx() 
     get rawTx() 
     constructor(tx: Transaction | number[] | string, bumpIndex?: number) 
-    toWriter(writer: Writer): void 
-    static fromReader(br: Reader): BeefTx 
+    toWriter(writer: Writer, magic: number): void 
+    static fromReader(br: Reader, magic: number): BeefTx 
 }
 ```
 
@@ -899,8 +899,9 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export class Beef {
     bumps: MerklePath[] = [];
     txs: BeefTx[] = [];
-    constructor() 
-    get version(): number 
+    version: BeefVersion = undefined;
+    constructor(version?: BeefVersion) 
+    get magic(): number 
     findTxid(txid: string): BeefTx | undefined 
     mergeBump(bump: MerklePath): number 
     mergeRawTx(rawTx: number[], bumpIndex?: number): BeefTx 
@@ -1869,6 +1870,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | |
 | --- |
+| [BeefVersion](#type-beefversion) |
 | [Fetch](#type-fetch) |
 | [HttpClientResponse](#type-httpclientresponse) |
 
@@ -1905,6 +1907,15 @@ Makes a request to the server.
 
 ```ts
 export type Fetch = (url: string, options: FetchOptions) => Promise<Response>
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Type: BeefVersion
+
+```ts
+export type BeefVersion = undefined | "V1" | "V2"
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
