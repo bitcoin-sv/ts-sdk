@@ -31,6 +31,10 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.1.27] - 2024-10-23
+### Added
+- UMD support added for use in non-standard environments.
+
 ## [1.1.26] - 2024-10-22
 ### Added
 - Atomic BEEF serializer and deserializer for `Transaction` class
