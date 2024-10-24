@@ -46,9 +46,9 @@ function AES (key) {
       decKey[j] = tmp
     } else {
       decKey[j] = decTable[0][sbox[tmp >>> 24]] ^
-                decTable[1][sbox[tmp >> 16 & 255]] ^
-                decTable[2][sbox[tmp >> 8 & 255]] ^
-                decTable[3][sbox[tmp & 255]]
+        decTable[1][sbox[tmp >> 16 & 255]] ^
+        decTable[2][sbox[tmp >> 8 & 255]] ^
+        decTable[3][sbox[tmp & 255]]
     }
   }
 }
@@ -162,11 +162,11 @@ AES.prototype = {
     // Last round.
     for (i = 0; i < 4; i++) {
       out[dir ? 3 & -i : i] =
-                sbox[a >>> 24] << 24 ^
-                sbox[b >> 16 & 255] << 16 ^
-                sbox[c >> 8 & 255] << 8 ^
-                sbox[d & 255] ^
-                key[kIndex++]
+        sbox[a >>> 24] << 24 ^
+        sbox[b >> 16 & 255] << 16 ^
+        sbox[c >> 8 & 255] << 8 ^
+        sbox[d & 255] ^
+        key[kIndex++]
       a2 = a; a = b; b = c; c = d; d = a2
     }
 
@@ -200,10 +200,10 @@ class AESWrapper {
     const words = []
     for (let i = 0; i < buf.length / 4; i++) {
       const val =
-                (buf[i * 4] * 0x1000000) + // Shift the first byte by 24 bits
-                ((buf[i * 4 + 1] << 16) | // Shift the second byte by 16 bits
-                    (buf[i * 4 + 2] << 8) | // Shift the third byte by 8 bits
-                    buf[i * 4 + 3]) // The fourth byte
+        (buf[i * 4] * 0x1000000) + // Shift the first byte by 24 bits
+        ((buf[i * 4 + 1] << 16) | // Shift the second byte by 16 bits
+          (buf[i * 4 + 2] << 8) | // Shift the third byte by 8 bits
+          buf[i * 4 + 3]) // The fourth byte
       words.push(val)
     }
     return words
@@ -477,12 +477,32 @@ export default class ECIES {
       throw new Error('Invalid Magic')
     }
     let offset = 4
-    if (!fromPublicKey) {
-      // BIE1 use compressed public key, length is always 33.
-      const pub = encBuf.slice(4, 37)
-      fromPublicKey = PublicKey.fromString(toHex(pub))
-      offset = 37
+
+    // Determine if the sender's public key is included in encBuf
+    let Rbuf: number[] | null = null
+    if (encBuf.length - offset - tagLength >= 33) {
+      const firstByte = encBuf[offset]
+      if (firstByte === 0x02 || firstByte === 0x03) {
+        // Compressed public key
+        Rbuf = encBuf.slice(offset, offset + 33)
+        offset += 33
+      } else if (firstByte === 0x04) {
+        // Uncompressed public key
+        Rbuf = encBuf.slice(offset, offset + 65)
+        offset += 65
+      }
     }
+
+    if (Rbuf) {
+      if (!fromPublicKey) {
+        fromPublicKey = PublicKey.fromString(toHex(Rbuf))
+      }
+    } else {
+      if (!fromPublicKey) {
+        throw new Error('Sender public key is required')
+      }
+    }
+
     const { iv, kE, kM } = ECIES.ivkEkM(toPrivateKey, fromPublicKey)
     const ciphertext = encBuf.slice(offset, encBuf.length - tagLength)
     const hmac = encBuf.slice(encBuf.length - tagLength, encBuf.length)
@@ -492,6 +512,7 @@ export default class ECIES {
     if (toHex(hmac) !== toHex(hmac2)) {
       throw new Error('Invalid checksum')
     }
+
     return AESCBC.decrypt(ciphertext, kE, iv)
   }
 

@@ -1,7 +1,7 @@
 import ECIES from '../../../dist/cjs/src/compat/ECIES'
 import * as Hash from '../../../dist/cjs/src/primitives/Hash'
 import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
-import { toArray, toHex, encode, toBase64 } from '../../../dist/cjs/src/primitives/utils'
+import { toArray, toHex, encode, toBase64, toUTF8 } from '../../../dist/cjs/src/primitives/utils'
 
 describe('#ECIES', () => {
   it('should make a new ECIES object', () => {
@@ -92,6 +92,28 @@ describe('#ECIES', () => {
       const encryptedMessage = ECIES.electrumEncrypt(message, bobPrivateKey.toPublicKey())
       expect(ECIES.electrumDecrypt(encryptedMessage, bobPrivateKey))
         .toEqual(message)
+    })
+
+    it('should encrypt and decrypt message with counterparty public key', () => {
+      const wif = 'L211enC224G1kV8pyyq7bjVd9SxZebnRYEzzM3i7ZHCc1c5E7dQu'
+      const senderPrivateKey = PrivateKey.fromWif(wif)
+      const senderPublicKey = senderPrivateKey.toPublicKey()
+      const msgStr = 'hello world'
+      const messageBuf = toArray(msgStr, 'utf8')
+
+      // Create a random counterparty (recipient) public/private key pair
+      const recipientPrivateKey = PrivateKey.fromRandom()
+      const recipientPublicKey = recipientPrivateKey.toPublicKey()
+
+      // Encrypt the message using electrumEncrypt
+      const encryptedMessage = ECIES.electrumEncrypt(messageBuf, recipientPublicKey, senderPrivateKey)
+
+      // Decrypt the message using electrumDecrypt
+      const decryptedMessageBuf = ECIES.electrumDecrypt(encryptedMessage, recipientPrivateKey, senderPublicKey)
+
+      const decryptedMsgStr = toUTF8(decryptedMessageBuf)
+
+      expect(decryptedMsgStr).toEqual(msgStr)
     })
   })
 })
