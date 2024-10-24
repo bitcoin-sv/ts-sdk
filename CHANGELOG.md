@@ -31,7 +31,11 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-## [1.1.27] - 2024-10-23
+## [1.1.29] - 2024-10-23
+### Fixed
+- ECIES ElectrumDecrypt counterparty decryption bug
+
+## [1.1.28] - 2024-10-23
 ### Added
 - UMD support added for use in non-standard environments.
 
