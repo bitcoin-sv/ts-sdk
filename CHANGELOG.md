@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.1.30 - 2024-07-30](#1130---2024-11-02)
+- [1.1.29 - 2024-10-23](#1129---2024-10-23)
+- [1.1.28 - 2024-10-23](#1128---2024-10-23)
+- [1.1.26 - 2024-10-22](#1126---2024-10-22)
+- [1.1.25 - 2024-10-21](#1125---2024-10-21)
+- [1.1.24 - 2024-10-04](#1124---2024-10-04)
+- [1.1.22 - 2024-09-02](#1122---2024-09-02)
+- [1.1.21 - 2024-09-02](#1121---2024-09-02)
+- [1.1.17 - 2024-08-21](#1117---2024-08-21)
+- [1.1.10 - 2024-06-28](#1110---2024-06-28)
 - [1.1.14 - 2024-07-30](#1114---2024-07-30)
 - [1.1.13 - 2024-07-19](#1113---2024-07-19)
 - [1.1.8 - 2024-06-12](#118---2024-06-19)
@@ -17,6 +27,23 @@ All notable changes to this project will be documented in this file. The format 
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+---
+
+## [1.1.30] - 2024-11-02
+
+### Added
+- Feature - Schorr class which allows ZKP creation and verification. BRC-94 and BRC-100 related.
 
 ### Changed
 - electrumEncrypt correctly allows fromPrivateKey to be omitted
