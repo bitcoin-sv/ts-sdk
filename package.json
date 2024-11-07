@@ -134,6 +134,36 @@
       "require": "./dist/cjs/src/totp/*.js",
       "types": "./dist/types/src/totp/*.d.ts"
     },
+    "./wallet": {
+      "import": "./dist/esm/src/wallet/index.js",
+      "require": "./dist/cjs/src/wallet/index.js",
+      "types": "./dist/types/src/wallet/index.d.ts"
+    },
+    "./wallet/*": {
+      "import": "./dist/esm/src/wallet/*.js",
+      "require": "./dist/cjs/src/wallet/*.js",
+      "types": "./dist/types/src/wallet/*.d.ts"
+    },
+    "./wallet/substrates": {
+      "import": "./dist/esm/src/wallet/substrates/index.js",
+      "require": "./dist/cjs/src/wallet/substrates/index.js",
+      "types": "./dist/types/src/wallet/substrates/index.d.ts"
+    },
+    "./wallet/substrates/*": {
+      "import": "./dist/esm/src/wallet/substrates/*.js",
+      "require": "./dist/cjs/src/wallet/substrates/*.js",
+      "types": "./dist/types/src/wallet/substrates/*.d.ts"
+    },
+    "./auth": {
+      "import": "./dist/esm/src/auth/index.js",
+      "require": "./dist/cjs/src/auth/index.js",
+      "types": "./dist/types/src/auth/index.d.ts"
+    },
+    "./auth/*": {
+      "import": "./dist/esm/src/auth/*.js",
+      "require": "./dist/cjs/src/auth/*.js",
+      "types": "./dist/types/src/auth/*.d.ts"
+    },
     "./umd": {
       "import": "./dist/umd/bundle.js"
     }
@@ -148,7 +178,7 @@
     "build:umd": "webpack --config webpack.config.js",
     "dev": "tsc -b -w",
     "prepublish": "npm run build",
-    "doc": "ts2md --inputFilename=src/script/index.ts --outputFilename=docs/script.md --filenameSubString=script --firstHeadingLevel=1 && ts2md --inputFilename=src/primitives/index.ts --outputFilename=docs/primitives.md --filenameSubString=primitives --firstHeadingLevel=1 && ts2md --inputFilename=src/transaction/index.ts --outputFilename=docs/transaction.md --filenameSubString=transaction --firstHeadingLevel=1 && ts2md --inputFilename=src/messages/index.ts --outputFilename=docs/messages.md --filenameSubString=messages --firstHeadingLevel=1 && ts2md --inputFilename=src/compat/index.ts --outputFilename=docs/compat.md --filenameSubString=compat --firstHeadingLevel=1"
+    "doc": "ts2md --inputFilename=src/script/index.ts --outputFilename=docs/script.md --filenameSubString=script --firstHeadingLevel=1 && ts2md --inputFilename=src/primitives/index.ts --outputFilename=docs/primitives.md --filenameSubString=primitives --firstHeadingLevel=1 && ts2md --inputFilename=src/transaction/index.ts --outputFilename=docs/transaction.md --filenameSubString=transaction --firstHeadingLevel=1 && ts2md --inputFilename=src/messages/index.ts --outputFilename=docs/messages.md --filenameSubString=messages --firstHeadingLevel=1 && ts2md --inputFilename=src/compat/index.ts --outputFilename=docs/compat.md --filenameSubString=compat --firstHeadingLevel=1 && ts2md --inputFilename=src/wallet/index.ts --outputFilename=docs/wallet.md --filenameSubString=wallet --firstHeadingLevel=1 && ts2md --inputFilename=src/totp/index.ts --outputFilename=docs/totp.md --filenameSubString=totp --firstHeadingLevel=1"
   },
   "repository": {
     "type": "git",
