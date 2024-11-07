@@ -1,6 +1,6 @@
 # API
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ## Interfaces
 
@@ -9,7 +9,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 | [Wallet](#interface-wallet) |
 | [WalletWire](#interface-walletwire) |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 
@@ -1107,7 +1107,7 @@ waitForAuthentication: (args: {}, originator?: OriginatorDomainNameString) => Pr
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Interface: WalletWire
@@ -1120,7 +1120,7 @@ export default interface WalletWire {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ## Classes
@@ -1136,7 +1136,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 | [WindowCWISubstrate](#class-windowcwisubstrate) |
 | [XDMSubstrate](#class-xdmsubstrate) |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 
@@ -1313,7 +1313,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Class: CachedKeyDeriver
@@ -1498,7 +1498,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Class: ProtoWallet
@@ -1943,7 +1943,7 @@ export default class ProtoWallet implements Wallet {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Class: WindowCWISubstrate
@@ -2384,7 +2384,7 @@ export default class WindowCWISubstrate implements Wallet {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Class: XDMSubstrate
@@ -2826,7 +2826,7 @@ export default class XDMSubstrate implements Wallet {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Class: WalletWireTransceiver
@@ -3282,7 +3282,7 @@ export default class WalletWireTransceiver implements Wallet {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Class: HTTPWalletWire
@@ -3297,7 +3297,7 @@ export default class HTTPWalletWire implements WalletWire {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Class: WalletSDK
@@ -3741,9 +3741,11 @@ export default class WalletSDK implements Wallet {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+## Functions
+
 ## Types
 
 | | | |
@@ -3759,7 +3761,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 | [DescriptionString5to50Characters](#type-descriptionstring5to50characters) | [OutpointString](#type-outpointstring) | [VersionString7To30Characters](#type-versionstring7to30characters) |
 | [EntityIconURLStringMax500Characters](#type-entityiconurlstringmax500characters) | [OutputTagStringUnder300Characters](#type-outputtagstringunder300characters) |  |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 
@@ -3769,7 +3771,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type BooleanDefaultFalse = boolean
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: BooleanDefaultTrue
@@ -3778,7 +3780,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type BooleanDefaultTrue = boolean
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: Byte
@@ -3787,7 +3789,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type Byte = number
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: PositiveIntegerOrZero
@@ -3796,7 +3798,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type PositiveIntegerOrZero = number
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: PositiveInteger
@@ -3805,7 +3807,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type PositiveInteger = number
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: PositiveIntegerMax10
@@ -3814,7 +3816,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type PositiveIntegerMax10 = number
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: PositiveIntegerDefault10Max10000
@@ -3823,7 +3825,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type PositiveIntegerDefault10Max10000 = number
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: SatoshiValue
@@ -3832,7 +3834,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type SatoshiValue = number
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: ISOTimestampString
@@ -3841,7 +3843,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type ISOTimestampString = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: HexString
@@ -3850,7 +3852,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type HexString = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: TXIDHexString
@@ -3859,7 +3861,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type TXIDHexString = HexString
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: OutpointString
@@ -3868,7 +3870,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type OutpointString = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: PubKeyHex
@@ -3877,7 +3879,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type PubKeyHex = HexString
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: Base64String
@@ -3886,7 +3888,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type Base64String = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: OriginatorDomainNameString
@@ -3895,7 +3897,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type OriginatorDomainNameString = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: DescriptionString5to50Characters
@@ -3904,7 +3906,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type DescriptionString5to50Characters = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: BasketStringUnder300Characters
@@ -3913,7 +3915,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type BasketStringUnder300Characters = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: OutputTagStringUnder300Characters
@@ -3922,7 +3924,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type OutputTagStringUnder300Characters = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: LabelStringUnder300Characters
@@ -3931,7 +3933,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type LabelStringUnder300Characters = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: BEEF
@@ -3940,7 +3942,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type BEEF = Byte[]
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: AtomicBEEF
@@ -3949,7 +3951,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type AtomicBEEF = Byte[]
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: ProtocolString5To400Characters
@@ -3958,7 +3960,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type ProtocolString5To400Characters = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: KeyIDStringUnder800Characters
@@ -3967,7 +3969,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type KeyIDStringUnder800Characters = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: CertificateFieldNameUnder50Characters
@@ -3976,7 +3978,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type CertificateFieldNameUnder50Characters = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: EntityNameStringMax100Characters
@@ -3985,7 +3987,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type EntityNameStringMax100Characters = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: EntityIconURLStringMax500Characters
@@ -3994,7 +3996,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type EntityIconURLStringMax500Characters = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: VersionString7To30Characters
@@ -4003,7 +4005,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type VersionString7To30Characters = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: ErrorCodeString10To40Characters
@@ -4012,7 +4014,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type ErrorCodeString10To40Characters = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ### Type: ErrorDescriptionString20To200Characters
@@ -4021,6 +4023,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#typ
 export type ErrorDescriptionString20To200Characters = string
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Types](#types)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+## Variables
+

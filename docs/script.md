@@ -77,6 +77,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | --- |
 | [LockingScript](#class-lockingscript) |
 | [P2PKH](#class-p2pkh) |
+| [PushDrop](#class-pushdrop) |
 | [RPuzzle](#class-rpuzzle) |
 | [Script](#class-script) |
 | [Spend](#class-spend) |
@@ -758,6 +759,140 @@ Argument Details
   + The signature scope for outputs.
 + **anyoneCanPay**
   + Flag indicating if the signature allows for other inputs to be added later.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: PushDrop
+
+```ts
+export default class PushDrop implements ScriptTemplate {
+    wallet: Wallet;
+    static decode(script: LockingScript): {
+        lockingPublicKey: PublicKey;
+        fields: number[][];
+    } 
+    constructor(wallet: Wallet) 
+    async lock(fields: number[][], protocolID: [
+        0 | 1 | 2,
+        string
+    ], keyID: string, counterparty: string, forSelf = false, includeSignature = true, lockPosition: "before" | "after" = "before"): Promise<LockingScript> 
+    unlock(protocolID: [
+        0 | 1 | 2,
+        string
+    ], keyID: string, counterparty: string, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay = false, sourceSatoshis?: number, lockingScript?: LockingScript): {
+        sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
+        estimateLength: () => Promise<73>;
+    } 
+}
+```
+
+<details>
+
+<summary>Class PushDrop Details</summary>
+
+#### Constructor
+
+Constructs a new instance of the PushDrop class.
+
+```ts
+constructor(wallet: Wallet) 
+```
+
+Argument Details
+
++ **wallet**
+  + The wallet interface used for creating signatures and accessing public keys.
+
+#### Method decode
+
+Decodes a PushDrop script back into its token fields and the locking public key. If a signature was present, it will be the last field returned.
+Warning: Only works with a P2PK lock at the beginning of the script.
+
+```ts
+static decode(script: LockingScript): {
+    lockingPublicKey: PublicKey;
+    fields: number[][];
+} 
+```
+
+Returns
+
+An object containing PushDrop token fields and the locking public key. If a signature was included, it will be the last field.
+
+Argument Details
+
++ **script**
+  + PushDrop script to decode back into token fields
+
+#### Method lock
+
+Creates a PushDrop locking script with arbitrary data fields and a public key lock.
+
+```ts
+async lock(fields: number[][], protocolID: [
+    0 | 1 | 2,
+    string
+], keyID: string, counterparty: string, forSelf = false, includeSignature = true, lockPosition: "before" | "after" = "before"): Promise<LockingScript> 
+```
+
+Returns
+
+The generated PushDrop locking script.
+
+Argument Details
+
++ **fields**
+  + The token fields to include in the locking script.
++ **protocolID**
+  + The protocol ID to use.
++ **keyID**
+  + The key ID to use.
++ **counterparty**
+  + The counterparty involved in the transaction, "self" or "anyone".
++ **forSelf**
+  + Flag indicating if the lock is for the creator (default no).
++ **includeSignature**
+  + Flag indicating if a signature should be included in the script (default yes).
+
+#### Method unlock
+
+Creates an unlocking script for spending a PushDrop token output.
+
+```ts
+unlock(protocolID: [
+    0 | 1 | 2,
+    string
+], keyID: string, counterparty: string, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay = false, sourceSatoshis?: number, lockingScript?: LockingScript): {
+    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
+    estimateLength: () => Promise<73>;
+} 
+```
+
+Returns
+
+An object containing functions to sign the transaction and estimate the script length.
+
+Argument Details
+
++ **protocolID**
+  + The protocol ID to use.
++ **keyID**
+  + The key ID to use.
++ **counterparty**
+  + The counterparty involved in the transaction, "self" or "anyone".
++ **sourceTXID**
+  + The TXID of the source transaction.
++ **sourceSatoshis**
+  + The number of satoshis in the source output.
++ **lockingScript**
+  + The locking script of the source output.
++ **signOutputs**
+  + Specifies which outputs to sign.
++ **anyoneCanPay**
+  + Specifies if the anyone-can-pay flag is set.
 
 </details>
 
