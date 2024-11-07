@@ -119,23 +119,18 @@ Transaction.fromAtomicBEEF
 1. degree property from BeefTx class, was used only by original sortTxs algorithm.
 ---
 
-## [1.1.30] - 2024-11-02
+## [1.2.0] - 2024-11-07
+### Added
+- Implement BRC-100 wallet interface
+- Add PushDrop token template
+- SHIP and SLAP overlay tooling
 
+## [1.1.30] - 2024-11-02
 ### Added
 - Feature - Schorr class which allows ZKP creation and verification. BRC-94 and BRC-100 related.
 
 ### Changed
 - electrumEncrypt correctly allows fromPrivateKey to be omitted
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
-
----
 
 ## [1.1.29] - 2024-10-23
 ### Fixed
