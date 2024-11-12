@@ -49,9 +49,9 @@ export interface SHIPBroadcasterConfig {
   facilitator?: OverlayBroadcastFacilitator
   /** The resolver used to locate suitable hosts with SHIP */
   resolver: LookupResolver
-  /** Determines which topics (all, any, or a specific list) mustt be present within all STEAKs received from every host for the broadcast to be considered a success. By default, all hosts must acknowledge all topics. */
+  /** Determines which topics (all, any, or a specific list) must be present within all STEAKs received from every host for the broadcast to be considered a success. By default, all hosts must acknowledge all topics. */
   requireAcknowledgmentFromAllHostsForTopics?: 'all' | 'any' | string[]
-  /** Determines which topics (all, any, or a specific list) mustt be present within STEAK received from at least one host for the broadcast to be considered a success. */
+  /** Determines which topics (all, any, or a specific list) must be present within STEAK received from at least one host for the broadcast to be considered a success. */
   requireAcknowledgmentFromAnyHostForTopics?: 'all' | 'any' | string[]
   /** Determines a mapping whose keys are specific hosts and whose values are the topics (all, any, or a specific list) that must be present within the STEAK received by the given hosts, in order for the broadcast to be considered a success. */
   requireAcknowledgmentFromSpecificHostsForTopics?: Record<string, 'all' | 'any' | string[]>
