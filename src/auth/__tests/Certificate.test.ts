@@ -25,7 +25,8 @@ describe('Certificate', () => {
             sampleSubjectPubKey,
             sampleCertifierPubKey,
             sampleRevocationOutpoint,
-            sampleFields
+            sampleFields,
+            undefined // No signature
         )
 
         expect(certificate.type).toEqual(sampleType)
@@ -44,7 +45,8 @@ describe('Certificate', () => {
             sampleSubjectPubKey,
             sampleCertifierPubKey,
             sampleRevocationOutpoint,
-            sampleFields
+            sampleFields,
+            undefined // No signature
         )
 
         const serialized = certificate.toBin(false) // Exclude signature
@@ -66,7 +68,8 @@ describe('Certificate', () => {
             sampleSubjectPubKey,
             sampleCertifierPubKey,
             sampleRevocationOutpoint,
-            sampleFields
+            sampleFields,
+            undefined // No signature
         )
 
         // Sign the certificate
@@ -92,7 +95,8 @@ describe('Certificate', () => {
             sampleSubjectPubKey,
             sampleCertifierPubKey,
             sampleRevocationOutpoint,
-            sampleFields
+            sampleFields,
+            undefined // No signature
         )
 
         // Sign the certificate
@@ -111,7 +115,8 @@ describe('Certificate', () => {
             sampleSubjectPubKey,
             sampleCertifierPubKey,
             sampleRevocationOutpoint,
-            sampleFields
+            sampleFields,
+            undefined // No signature
         )
 
         // Sign the certificate
@@ -132,11 +137,27 @@ describe('Certificate', () => {
             sampleSubjectPubKey,
             sampleCertifierPubKey,
             sampleRevocationOutpoint,
-            sampleFields
+            sampleFields,
+            undefined // No signature
         )
 
         // Verify the signature
         await expect(certificate.verify()).rejects.toThrow()
+    })
+
+    it('should fail verification if the signature is incorrect', async () => {
+        const certificate = new Certificate(
+            sampleType,
+            sampleSerialNumber,
+            sampleSubjectPubKey,
+            sampleCertifierPubKey,
+            sampleRevocationOutpoint,
+            sampleFields,
+            '3045022100cde229279465bb91992ccbc30bf6ed4eb8cdd9d517f31b30ff778d500d5400010220134f0e4065984f8668a642a5ad7a80886265f6aaa56d215d6400c216a4802177' // Incorrect signature
+        )
+
+        // Verify the signature
+        await expect(certificate.verify()).rejects.toThrowErrorMatchingInlineSnapshot(`"Signature is not valid"`)
     })
 
     it('should handle certificates with empty fields', async () => {
@@ -146,7 +167,8 @@ describe('Certificate', () => {
             sampleSubjectPubKey,
             sampleCertifierPubKey,
             sampleRevocationOutpoint,
-            sampleFieldsEmpty
+            sampleFieldsEmpty,
+            undefined // No signature
         )
 
         // Sign the certificate
@@ -196,7 +218,8 @@ describe('Certificate', () => {
             sampleSubjectPubKey,
             sampleCertifierPubKey,
             sampleRevocationOutpoint,
-            fields
+            fields,
+            undefined // No signature
         )
 
         // Sign the certificate
@@ -221,7 +244,8 @@ describe('Certificate', () => {
             sampleSubjectPubKey,
             sampleCertifierPubKey,
             sampleRevocationOutpoint,
-            sampleFields
+            sampleFields,
+            undefined // No signature
         )
 
         const serialized = certificate.toBin(false)
@@ -237,7 +261,8 @@ describe('Certificate', () => {
             sampleSubjectPubKey,
             sampleCertifierPubKey,
             sampleRevocationOutpoint,
-            {} // No fields
+            {}, // No fields
+            undefined // No signature
         )
 
         // Sign the certificate
