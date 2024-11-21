@@ -39,7 +39,7 @@ export default class Certificate {
   fields: Record<CertificateFieldNameUnder50Characters, string>
 
   /**
-   * Certificate signature by the certifier's private key, hex string.
+   * Certificate signature by the certifier's private key, DER encoded hex string.
   */
   signature?: HexString
 
@@ -52,7 +52,7 @@ export default class Certificate {
    * @param {PubKeyHex} certifier - Public key of the certifier who issued the certificate, compressed public key hex string.
    * @param {OutpointString} revocationOutpoint - The outpoint used to confirm that the certificate has not been revoked (TXID.OutputIndex), as a string.
    * @param {Record<CertificateFieldNameUnder50Characters, string>} fields - All the fields present in the certificate.
-   * @param {HexString} signature - Certificate signature by the certifier's private key, hex string.
+   * @param {HexString} signature - Certificate signature by the certifier's private key, DER encoded hex string.
    */
   constructor(
     type: Base64String,
