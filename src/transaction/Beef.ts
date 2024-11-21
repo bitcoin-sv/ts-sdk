@@ -83,6 +83,76 @@ export class Beef {
   }
 
   /**
+   * @returns `MerklePath` with level zero hash equal to txid or undefined.
+   */
+  findBump (txid: string): MerklePath | undefined {
+    return this.bumps.find(b => b.path[0].find(leaf => leaf.hash === txid))
+  }
+
+  /**
+   * Finds a Transaction in this `Beef`
+   * and adds any missing input SourceTransactions from this `Beef`.
+   * 
+   * The result is suitable for signing.
+   * 
+   * @param txid The id of the target transaction.
+   * @returns Transaction with all available input `SourceTransaction`s from this Beef.
+   */
+  findTransactionForSigning (txid: string): Transaction | undefined {
+
+    const beefTx = this.findTxid(txid)
+    if (!beefTx) return undefined
+
+    for (const i of beefTx.tx.inputs) {
+      if (!i.sourceTransaction) {
+        const itx = this.findTxid(i.sourceTXID)
+        if (itx) {
+          i.sourceTransaction = itx.tx
+        }
+      }
+    }
+
+    return beefTx.tx
+  }
+  /**
+   * Builds the proof tree rooted at a specific `Transaction`.
+   * 
+   * To succeed, the Beef must contain all the required transaction and merkle path data.
+   * 
+   * @param txid The id of the target transaction.
+   * @returns Transaction with input `SourceTransaction` and `MerklePath` populated from this Beef.
+   */
+  findAtomicTransaction (txid: string): Transaction | undefined {
+
+    const beefTx = this.findTxid(txid)
+    if (!beefTx) return undefined
+
+    const addInputProof = (beef: Beef, tx: Transaction) => {
+      for (const i of tx.inputs) {
+        if (!i.sourceTransaction) {
+          const itx = beef.findTxid(i.sourceTXID)
+          if (itx) {
+            i.sourceTransaction = itx.tx
+          }
+        }
+        if (i.sourceTransaction) {
+          const mp = beef.findBump(i.sourceTransaction.id('hex'))
+          if (mp) {
+            i.sourceTransaction.merklePath = mp
+          }
+          else {
+            addInputProof(beef, i.sourceTransaction)
+          }
+        }
+      }
+    }
+
+    addInputProof(this, beefTx.tx)
+
+    return beefTx.tx
+  }
+
+  /**
      * Merge a MerklePath that is assumed to be fully valid.
      * @param bump
      * @returns index of merged bump
