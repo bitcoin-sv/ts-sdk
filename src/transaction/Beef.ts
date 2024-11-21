@@ -465,71 +465,104 @@ export class Beef {
   }
 
   /**
-     * Sort the `txs` by input txid dependency order.
-     * @returns array of input txids of unproven transactions that aren't included in txs.
+     * Sort the `txs` by input txid dependency order:
+     * - Oldest Tx Anchored by Path
+     * - Newer Txs depending on Older parents
+     * - Newest Tx
+     * 
+     * with proof (MerklePath) last, longest chain of dependencies first
+     * 
+     * @returns `{ missingInputs, notValid, valid, withMissingInputs }`
      */
-  sortTxs (): string[] {
-    const missingInputs: Record<string, boolean> = {}
+  sortTxs ()
+    : {
+      missingInputs: string[],
+      notValid: string[],
+      valid: string[],
+      withMissingInputs: string[],
+      txidOnly: string[]
+    } {
+    // Hashtable of valid txids (with proof or all inputs chain to proof)
+    const validTxids: Record<string, boolean> = {}
 
+    // Hashtable of all transaction txids to transaction
     const txidToTx: Record<string, BeefTx> = {}
+
+    // queue of unsorted transactions ...
+    let queue: BeefTx[] = []
+
+    // sorted transactions: hasProof to with longest dependency chain
+    const result: BeefTx[] = []
+
+    const txidOnly: BeefTx[] = []
 
     for (const tx of this.txs) {
       txidToTx[tx.txid] = tx
-      // All transactions in this beef start at degree zero.
-      tx.degree = 0
+      tx.isValid = tx.hasProof
+      if (tx.isValid) {
+        validTxids[tx.txid] = true
+        result.push(tx)
+      } else if (tx.isTxidOnly)
+        txidOnly.push(tx)
+      else
+        queue.push(tx)
     }
 
-    for (const tx of this.txs) {
-      if (tx.bumpIndex === undefined) {
+    // Hashtable of unknown input txids used to fund transactions without their own proof.
+    const missingInputs: Record<string, boolean> = {}
+    // transactions with one or more missing inputs
+    const txsMissingInputs: BeefTx[] = []
+
+    const possiblyMissingInputs = queue
+    queue = []
+
+    for (const tx of possiblyMissingInputs) {
+      let hasMissingInput = false
+      if (!tx.isValid) {
         // For all the unproven transactions,
         // link their inputs that exist in this beef,
         // make a note of missing inputs.
         for (const inputTxid of tx.inputTxids) {
-          if (!txidToTx[inputTxid]) { missingInputs[inputTxid] = true }
-        }
-      }
-    }
-
-    // queue of transactions that no unsorted transactions depend upon...
-    const queue: BeefTx[] = []
-    // sorted transactions
-    const result: BeefTx[] = []
-
-    // Increment each txid's degree for every input reference to it by another txid
-    for (const tx of this.txs) {
-      for (const inputTxid of tx.inputTxids) {
-        const tx = txidToTx[inputTxid]
-        if (tx) { tx.degree++ }
-      }
-    }
-    // Since circular dependencies aren't possible, start with the txids no one depends on.
-    // These are the transactions that should be sent last...
-    for (const tx of this.txs) {
-      if (tx.degree === 0) {
-        queue.push(tx)
-      }
-    }
-    // As long as we have transactions to send...
-    while (queue.length > 0) {
-      const tx = queue.shift()!
-      // Add it as new first to send
-      result.unshift(tx)
-      // And remove its impact on degree
-      // noting that any tx achieving a
-      // value of zero can be sent...
-      for (const inputTxid of tx.inputTxids) {
-        const inputTx = txidToTx[inputTxid]
-        if (inputTx) {
-          inputTx.degree--
-          if (inputTx.degree === 0) {
-            queue.push(inputTx)
+          if (!txidToTx[inputTxid]) {
+            missingInputs[inputTxid] = true
+            hasMissingInput = true
           }
         }
       }
+      if (hasMissingInput)
+        txsMissingInputs.push(tx)
+      else
+        queue.push(tx)
     }
-    this.txs = result
 
-    return Object.keys(missingInputs)
+    // As long as we have unsorted transactions...
+    while (queue.length > 0) {
+      const oldQueue = queue
+      queue = []
+      for (const tx of oldQueue) {
+        if (tx.inputTxids.every(txid => validTxids[txid])) {
+          validTxids[tx.txid] = true
+          result.push(tx)
+        } else
+          queue.push(tx)
+      }
+      if (oldQueue.length === queue.length)
+        break;
+    }
+
+    // transactions that don't have proofs and don't chain to proofs
+    const txsNotValid = queue
+
+    // New order of txs is sorted, unsortable, txidOnly (no raw transaction)
+    this.txs = result.concat(queue).concat(txidOnly).concat(txsMissingInputs)
+
+    return {
+      missingInputs: Object.keys(missingInputs),
+      notValid: txsNotValid.map(tx => tx.txid),
+      valid: Object.keys(validTxids),
+      withMissingInputs: txsMissingInputs.map(tx => tx.txid),
+      txidOnly: txidOnly.map(tx => tx.txid)
+    }
   }
 
   /**
@@ -556,6 +589,14 @@ export class Beef {
       }
     }
     // TODO: bumps could be trimmed to eliminate unreferenced proofs.
+  }
+
+  /**
+   * @returns array of transaction txids that either have a proof or whose inputs chain back to a proven transaction.
+   */
+  getValidTxids() : string[] {
+    const r = this.sortTxs()
+    return r.valid
   }
 
   /**
