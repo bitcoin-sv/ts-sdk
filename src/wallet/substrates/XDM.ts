@@ -1,5 +1,6 @@
-import { Base64String, BasketStringUnder300Characters, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Characters, DescriptionString5to50Characters, EntityIconURLStringMax500Characters, EntityNameStringMax100Characters, HexString, ISOTimestampString, KeyIDStringUnder800Characters, LabelStringUnder300Characters, OriginatorDomainNameString, OutpointString, OutputTagStringUnder300Characters, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Characters, PubKeyHex, SatoshiValue, TXIDHexString, VersionString7To30Characters, Wallet } from '../Wallet.interface.js'
+import { Base64String, BasketStringUnder300Characters, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Characters, DescriptionString5to50Characters, EntityIconURLStringMax500Characters, EntityNameStringMax100Characters, HexString, ISOTimestampString, KeyIDStringUnder800Characters, LabelStringUnder300Characters, OriginatorDomainNameStringUnder250Characters, OutpointString, OutputTagStringUnder300Characters, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Characters, PubKeyHex, SatoshiValue, TXIDHexString, VersionString7To30Characters, Wallet } from '../Wallet.interface.js'
 import { Utils, Random } from '../../primitives/index.js'
+import { WalletError } from '../WalletError.js'
 
 /**
  * Facilitates wallet operations over cross-document messaging.
@@ -20,8 +21,7 @@ export default class XDMSubstrate implements Wallet {
       window.addEventListener('message', async e => {
         if (e.data.type !== 'CWI' || !e.isTrusted || e.data.id !== id || e.data.isInvocation) return
         if (e.data.status === 'error') {
-          const err = new Error(e.data.description);
-          (err as any).code = e.data.code
+          const err = new WalletError(e.data.description, e.data.code)
           reject(err)
         } else {
           resolve(e.data.result)

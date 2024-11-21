@@ -1,8 +1,9 @@
-import { AtomicBEEF, Base64String, BasketStringUnder300Characters, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Characters, DescriptionString5to50Characters, EntityIconURLStringMax500Characters, EntityNameStringMax100Characters, HexString, ISOTimestampString, KeyIDStringUnder800Characters, LabelStringUnder300Characters, OriginatorDomainNameString, OutpointString, OutputTagStringUnder300Characters, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Characters, PubKeyHex, SatoshiValue, TXIDHexString, VersionString7To30Characters, Wallet } from '../Wallet.interface.js'
+import { AtomicBEEF, Base64String, BasketStringUnder300Characters, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Characters, DescriptionString5to50Characters, EntityIconURLStringMax500Characters, EntityNameStringMax100Characters, HexString, ISOTimestampString, KeyIDStringUnder800Characters, LabelStringUnder300Characters, OriginatorDomainNameStringUnder250Characters, OutpointString, OutputTagStringUnder300Characters, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Characters, PubKeyHex, SatoshiValue, TXIDHexString, VersionString7To30Characters, Wallet } from '../Wallet.interface.js'
 import WalletWire from './WalletWire.js'
 import Certificate from '../../auth/Certificate.js'
 import { Utils } from '../../primitives/index.js'
-import calls from './WalletWireCalls.js'
+import calls, { CallType } from './WalletWireCalls.js'
+import { WalletError } from '../WalletError.js'
 
 /**
  * A way to make remote calls to a wallet over a wallet wire.
@@ -14,7 +15,7 @@ export default class WalletWireTransceiver implements Wallet {
     this.wire = wire
   }
 
-  private async transmit(call: string, originator: string = '', params: number[] = []): Promise<number[]> {
+  private async transmit(call: CallType, originator: OriginatorDomainNameStringUnder250Characters = '', params: number[] = []): Promise<number[]> {
     const frameWriter = new Utils.Writer()
     frameWriter.writeUInt8(calls[call])
     frameWriter.writeUInt8(originator.length)
@@ -40,15 +41,13 @@ export default class WalletWireTransceiver implements Wallet {
       const stackTraceBytes = resultReader.read(stackTraceLength)
       const stackTrace = Utils.toUTF8(stackTraceBytes)
 
-      // Reconstruct the Error object
-      const e = new Error(errorMessage)
-      e.stack = stackTrace
-        ; (e as any).code = errorByte
+      // Construct a custom wallet error
+      const e = new WalletError(errorMessage, errorByte, stackTrace)
       throw e
     }
   }
 
-  async createAction(args: { description: DescriptionString5to50Characters, inputBEEF?: BEEF, inputs?: Array<{ outpoint: OutpointString, unlockingScript?: HexString, unlockingScriptLength?: PositiveInteger, inputDescription: DescriptionString5to50Characters, sequenceNumber?: PositiveIntegerOrZero }>, outputs?: Array<{ lockingScript: HexString, satoshis: SatoshiValue, outputDescription: DescriptionString5to50Characters, basket?: BasketStringUnder300Characters, customInstructions?: string, tags?: OutputTagStringUnder300Characters[] }>, lockTime?: PositiveIntegerOrZero, version?: PositiveIntegerOrZero, labels?: LabelStringUnder300Characters[], options?: { signAndProcess?: BooleanDefaultTrue, acceptDelayedBroadcast?: BooleanDefaultTrue, trustSelf?: 'known', knownTxids?: TXIDHexString[], returnTXIDOnly?: BooleanDefaultFalse, noSend?: BooleanDefaultFalse, noSendChange?: OutpointString[], sendWith?: TXIDHexString[], randomizeOutputs?: BooleanDefaultTrue } }, originator?: OriginatorDomainNameString): Promise<{ txid?: TXIDHexString, tx?: BEEF, noSendChange?: OutpointString[], sendWithResults?: Array<{ txid: TXIDHexString, status: 'unproven' | 'sending' | 'failed' }>, signableTransaction?: { tx: BEEF, reference: Base64String } }> {
+  async createAction(args: { description: DescriptionString5to50Characters, inputBEEF?: BEEF, inputs?: Array<{ outpoint: OutpointString, unlockingScript?: HexString, unlockingScriptLength?: PositiveInteger, inputDescription: DescriptionString5to50Characters, sequenceNumber?: PositiveIntegerOrZero }>, outputs?: Array<{ lockingScript: HexString, satoshis: SatoshiValue, outputDescription: DescriptionString5to50Characters, basket?: BasketStringUnder300Characters, customInstructions?: string, tags?: OutputTagStringUnder300Characters[] }>, lockTime?: PositiveIntegerOrZero, version?: PositiveIntegerOrZero, labels?: LabelStringUnder300Characters[], options?: { signAndProcess?: BooleanDefaultTrue, acceptDelayedBroadcast?: BooleanDefaultTrue, trustSelf?: 'known', knownTxids?: TXIDHexString[], returnTXIDOnly?: BooleanDefaultFalse, noSend?: BooleanDefaultFalse, noSendChange?: OutpointString[], sendWith?: TXIDHexString[], randomizeOutputs?: BooleanDefaultTrue } }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ txid?: TXIDHexString, tx?: BEEF, noSendChange?: OutpointString[], sendWithResults?: Array<{ txid: TXIDHexString, status: 'unproven' | 'sending' | 'failed' }>, signableTransaction?: { tx: BEEF, reference: Base64String } }> {
     const paramWriter = new Utils.Writer()
 
     // Serialize description
@@ -329,7 +328,7 @@ export default class WalletWireTransceiver implements Wallet {
     return response
   }
 
-  async signAction(args: { spends: Record<PositiveIntegerOrZero, { unlockingScript: HexString, sequenceNumber?: PositiveIntegerOrZero }>, reference: Base64String, options?: { acceptDelayedBroadcast?: BooleanDefaultTrue, returnTXIDOnly?: BooleanDefaultFalse, noSend?: BooleanDefaultFalse, noSendChange?: OutpointString[], sendWith: TXIDHexString[] } }, originator?: OriginatorDomainNameString): Promise<{ txid?: TXIDHexString, tx?: BEEF, noSendChange?: OutpointString[], sendWithResults?: Array<{ txid: TXIDHexString, status: 'unproven' | 'sending' | 'failed' }> }> {
+  async signAction(args: { spends: Record<PositiveIntegerOrZero, { unlockingScript: HexString, sequenceNumber?: PositiveIntegerOrZero }>, reference: Base64String, options?: { acceptDelayedBroadcast?: BooleanDefaultTrue, returnTXIDOnly?: BooleanDefaultFalse, noSend?: BooleanDefaultFalse, noSendChange?: OutpointString[], sendWith: TXIDHexString[] } }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ txid?: TXIDHexString, tx?: BEEF, noSendChange?: OutpointString[], sendWithResults?: Array<{ txid: TXIDHexString, status: 'unproven' | 'sending' | 'failed' }> }> {
     const paramWriter = new Utils.Writer()
 
     // Serialize spends
@@ -441,12 +440,12 @@ export default class WalletWireTransceiver implements Wallet {
     return response
   }
 
-  async abortAction(args: { reference: Base64String }, originator?: OriginatorDomainNameString): Promise<{ aborted: true }> {
+  async abortAction(args: { reference: Base64String }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ aborted: true }> {
     await this.transmit('abortAction', originator, Utils.toArray(args.reference, 'base64'))
     return { aborted: true }
   }
 
-  async listActions(args: { seekPermission?: BooleanDefaultTrue, labels: LabelStringUnder300Characters[], labelQueryMode?: 'any' | 'all', includeLabels?: BooleanDefaultFalse, includeInputs?: BooleanDefaultFalse, includeInputSourceLockingScripts?: BooleanDefaultFalse, includeInputUnlockingScripts?: BooleanDefaultFalse, includeOutputs?: BooleanDefaultFalse, includeOutputLockingScripts?: BooleanDefaultFalse, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }, originator?: OriginatorDomainNameString): Promise<{ totalActions: PositiveIntegerOrZero, actions: Array<{ txid: TXIDHexString, satoshis: SatoshiValue, status: 'completed' | 'unprocessed' | 'sending' | 'unproven' | 'unsigned' | 'nosend' | 'nonfinal', isOutgoing: boolean, description: DescriptionString5to50Characters, labels?: LabelStringUnder300Characters[], version: PositiveIntegerOrZero, lockTime: PositiveIntegerOrZero, inputs?: Array<{ sourceOutpoint: OutpointString, sourceSatoshis: SatoshiValue, sourceLockingScript?: HexString, unlockingScript?: HexString, inputDescription: DescriptionString5to50Characters, sequenceNumber: PositiveIntegerOrZero }>, outputs?: Array<{ outputIndex: PositiveIntegerOrZero, satoshis: SatoshiValue, lockingScript?: HexString, spendable: boolean, outputDescription: DescriptionString5to50Characters, basket: BasketStringUnder300Characters, tags: OutputTagStringUnder300Characters[], customInstructions?: string }> }> }> {
+  async listActions(args: { seekPermission?: BooleanDefaultTrue, labels: LabelStringUnder300Characters[], labelQueryMode?: 'any' | 'all', includeLabels?: BooleanDefaultFalse, includeInputs?: BooleanDefaultFalse, includeInputSourceLockingScripts?: BooleanDefaultFalse, includeInputUnlockingScripts?: BooleanDefaultFalse, includeOutputs?: BooleanDefaultFalse, includeOutputLockingScripts?: BooleanDefaultFalse, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ totalActions: PositiveIntegerOrZero, actions: Array<{ txid: TXIDHexString, satoshis: SatoshiValue, status: 'completed' | 'unprocessed' | 'sending' | 'unproven' | 'unsigned' | 'nosend' | 'nonfinal', isOutgoing: boolean, description: DescriptionString5to50Characters, labels?: LabelStringUnder300Characters[], version: PositiveIntegerOrZero, lockTime: PositiveIntegerOrZero, inputs?: Array<{ sourceOutpoint: OutpointString, sourceSatoshis: SatoshiValue, sourceLockingScript?: HexString, unlockingScript?: HexString, inputDescription: DescriptionString5to50Characters, sequenceNumber: PositiveIntegerOrZero }>, outputs?: Array<{ outputIndex: PositiveIntegerOrZero, satoshis: SatoshiValue, lockingScript?: HexString, spendable: boolean, outputDescription: DescriptionString5to50Characters, basket: BasketStringUnder300Characters, tags: OutputTagStringUnder300Characters[], customInstructions?: string }> }> }> {
     const paramWriter = new Utils.Writer()
 
     // Serialize labels
@@ -713,7 +712,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async internalizeAction(args: { seekPermission?: BooleanDefaultTrue, tx: AtomicBEEF, outputs: Array<{ outputIndex: PositiveIntegerOrZero, protocol: 'wallet payment' | 'basket insertion', paymentRemittance?: { derivationPrefix: Base64String, derivationSuffix: Base64String, senderIdentityKey: PubKeyHex }, insertionRemittance?: { basket: BasketStringUnder300Characters, customInstructions?: string, tags?: OutputTagStringUnder300Characters[] } }>, description: DescriptionString5to50Characters, labels?: LabelStringUnder300Characters[] }, originator?: OriginatorDomainNameString): Promise<{ accepted: true }> {
+  async internalizeAction(args: { seekPermission?: BooleanDefaultTrue, tx: AtomicBEEF, outputs: Array<{ outputIndex: PositiveIntegerOrZero, protocol: 'wallet payment' | 'basket insertion', paymentRemittance?: { derivationPrefix: Base64String, derivationSuffix: Base64String, senderIdentityKey: PubKeyHex }, insertionRemittance?: { basket: BasketStringUnder300Characters, customInstructions?: string, tags?: OutputTagStringUnder300Characters[] } }>, description: DescriptionString5to50Characters, labels?: LabelStringUnder300Characters[] }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ accepted: true }> {
     const paramWriter = new Utils.Writer()
     paramWriter.writeVarIntNum(args.tx.length)
     paramWriter.write(args.tx)
@@ -774,7 +773,7 @@ export default class WalletWireTransceiver implements Wallet {
     return { accepted: true }
   }
 
-  async listOutputs(args: { seekPermission?: BooleanDefaultTrue, basket: BasketStringUnder300Characters, tags?: OutputTagStringUnder300Characters[], tagQueryMode?: 'all' | 'any', include?: 'locking scripts' | 'entire transactions', includeCustomInstructions?: BooleanDefaultFalse, includeTags?: BooleanDefaultFalse, includeLabels?: BooleanDefaultFalse, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }, originator?: OriginatorDomainNameString): Promise<{ totalOutputs: PositiveIntegerOrZero, BEEF?: BEEF, outputs: Array<{ outpoint: OutpointString, satoshis: SatoshiValue, lockingScript?: HexString, spendable: true, customInstructions?: string, tags?: OutputTagStringUnder300Characters[], labels?: LabelStringUnder300Characters[] }> }> {
+  async listOutputs(args: { seekPermission?: BooleanDefaultTrue, basket: BasketStringUnder300Characters, tags?: OutputTagStringUnder300Characters[], tagQueryMode?: 'all' | 'any', include?: 'locking scripts' | 'entire transactions', includeCustomInstructions?: BooleanDefaultFalse, includeTags?: BooleanDefaultFalse, includeLabels?: BooleanDefaultFalse, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ totalOutputs: PositiveIntegerOrZero, BEEF?: BEEF, outputs: Array<{ outpoint: OutpointString, satoshis: SatoshiValue, lockingScript?: HexString, spendable: true, customInstructions?: string, tags?: OutputTagStringUnder300Characters[], labels?: LabelStringUnder300Characters[] }> }> {
     const paramWriter = new Utils.Writer()
     const basketAsArray = Utils.toArray(args.basket, 'utf8')
     paramWriter.writeVarIntNum(basketAsArray.length)
@@ -884,7 +883,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async relinquishOutput(args: { basket: BasketStringUnder300Characters, output: OutpointString }, originator?: OriginatorDomainNameString): Promise<{ relinquished: true }> {
+  async relinquishOutput(args: { basket: BasketStringUnder300Characters, output: OutpointString }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ relinquished: true }> {
     const paramWriter = new Utils.Writer()
     const basketAsArray = Utils.toArray(args.basket, 'utf8')
     paramWriter.writeVarIntNum(basketAsArray.length)
@@ -908,7 +907,7 @@ export default class WalletWireTransceiver implements Wallet {
     return `${txid}.${index}`
   }
 
-  async getPublicKey(args: { seekPermission?: BooleanDefaultTrue, identityKey?: true, protocolID?: [0 | 1 | 2, ProtocolString5To400Characters], keyID?: KeyIDStringUnder800Characters, privileged?: BooleanDefaultFalse, privilegedReason?: DescriptionString5to50Characters, counterparty?: PubKeyHex | 'self' | 'anyone', forSelf?: BooleanDefaultFalse }, originator?: OriginatorDomainNameString): Promise<{ publicKey: PubKeyHex }> {
+  async getPublicKey(args: { seekPermission?: BooleanDefaultTrue, identityKey?: true, protocolID?: [0 | 1 | 2, ProtocolString5To400Characters], keyID?: KeyIDStringUnder800Characters, privileged?: BooleanDefaultFalse, privilegedReason?: DescriptionString5to50Characters, counterparty?: PubKeyHex | 'self' | 'anyone', forSelf?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ publicKey: PubKeyHex }> {
     const paramWriter = new Utils.Writer()
     paramWriter.writeUInt8(args.identityKey ? 1 : 0)
     if (!args.identityKey) {
@@ -931,7 +930,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async revealCounterpartyKeyLinkage(args: { counterparty: PubKeyHex, verifier: PubKeyHex, privilegedReason?: DescriptionString5to50Characters, privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameString): Promise<{ prover: PubKeyHex, verifier: PubKeyHex, counterparty: PubKeyHex, revelationTime: ISOTimestampString, encryptedLinkage: Byte[], encryptedLinkageProof: number[] }> {
+  async revealCounterpartyKeyLinkage(args: { counterparty: PubKeyHex, verifier: PubKeyHex, privilegedReason?: DescriptionString5to50Characters, privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ prover: PubKeyHex, verifier: PubKeyHex, counterparty: PubKeyHex, revelationTime: ISOTimestampString, encryptedLinkage: Byte[], encryptedLinkageProof: number[] }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(this.encodePrivilegedParams(args.privileged, args.privilegedReason))
     paramWriter.write(Utils.toArray(args.counterparty, 'hex'))
@@ -957,7 +956,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async revealSpecificKeyLinkage(args: { counterparty: PubKeyHex, verifier: PubKeyHex, protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, privilegedReason?: DescriptionString5to50Characters, privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameString): Promise<{ prover: PubKeyHex, verifier: PubKeyHex, counterparty: PubKeyHex, protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, encryptedLinkage: Byte[], encryptedLinkageProof: Byte[], proofType: Byte }> {
+  async revealSpecificKeyLinkage(args: { counterparty: PubKeyHex, verifier: PubKeyHex, protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, privilegedReason?: DescriptionString5to50Characters, privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ prover: PubKeyHex, verifier: PubKeyHex, counterparty: PubKeyHex, protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, encryptedLinkage: Byte[], encryptedLinkageProof: Byte[], proofType: Byte }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(this.encodeKeyRelatedParams(args.protocolID, args.keyID, args.counterparty, args.privileged, args.privilegedReason))
     paramWriter.write(Utils.toArray(args.verifier, 'hex'))
@@ -988,7 +987,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async encrypt(args: { seekPermission?: BooleanDefaultTrue, plaintext: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, privilegedReason?: DescriptionString5to50Characters, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameString): Promise<{ ciphertext: Byte[] }> {
+  async encrypt(args: { seekPermission?: BooleanDefaultTrue, plaintext: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, privilegedReason?: DescriptionString5to50Characters, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ ciphertext: Byte[] }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(this.encodeKeyRelatedParams(args.protocolID, args.keyID, args.counterparty, args.privileged, args.privilegedReason))
     paramWriter.writeVarIntNum(args.plaintext.length)
@@ -1000,7 +999,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async decrypt(args: { seekPermission?: BooleanDefaultTrue, ciphertext: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, privilegedReason?: DescriptionString5to50Characters, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameString): Promise<{ plaintext: Byte[] }> {
+  async decrypt(args: { seekPermission?: BooleanDefaultTrue, ciphertext: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, privilegedReason?: DescriptionString5to50Characters, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ plaintext: Byte[] }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(this.encodeKeyRelatedParams(args.protocolID, args.keyID, args.counterparty, args.privileged, args.privilegedReason))
     paramWriter.writeVarIntNum(args.ciphertext.length)
@@ -1012,7 +1011,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async createHmac(args: { seekPermission?: BooleanDefaultTrue, data: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, privilegedReason?: DescriptionString5to50Characters, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameString): Promise<{ hmac: Byte[] }> {
+  async createHmac(args: { seekPermission?: BooleanDefaultTrue, data: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, privilegedReason?: DescriptionString5to50Characters, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ hmac: Byte[] }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(this.encodeKeyRelatedParams(args.protocolID, args.keyID, args.counterparty, args.privileged, args.privilegedReason))
     paramWriter.writeVarIntNum(args.data.length)
@@ -1024,7 +1023,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async verifyHmac(args: { seekPermission?: BooleanDefaultTrue, data: Byte[], hmac: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, privilegedReason?: DescriptionString5to50Characters, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameString): Promise<{ valid: true }> {
+  async verifyHmac(args: { seekPermission?: BooleanDefaultTrue, data: Byte[], hmac: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, privilegedReason?: DescriptionString5to50Characters, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ valid: true }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(this.encodeKeyRelatedParams(args.protocolID, args.keyID, args.counterparty, args.privileged, args.privilegedReason))
     paramWriter.write(args.hmac)
@@ -1036,7 +1035,7 @@ export default class WalletWireTransceiver implements Wallet {
     return { valid: true }
   }
 
-  async createSignature(args: { seekPermission?: BooleanDefaultTrue, data?: Byte[], hashToDirectlySign?: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, privilegedReason?: DescriptionString5to50Characters, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameString): Promise<{ signature: Byte[] }> {
+  async createSignature(args: { seekPermission?: BooleanDefaultTrue, data?: Byte[], hashToDirectlySign?: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, privilegedReason?: DescriptionString5to50Characters, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ signature: Byte[] }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(this.encodeKeyRelatedParams(args.protocolID, args.keyID, args.counterparty, args.privileged, args.privilegedReason))
     if (typeof args.data === 'object') {
@@ -1054,7 +1053,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async verifySignature(args: { seekPermission?: BooleanDefaultTrue, data?: Byte[], hashToDirectlyVerify?: Byte[], signature: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, privilegedReason?: DescriptionString5to50Characters, counterparty?: PubKeyHex | 'self' | 'anyone', forSelf?: BooleanDefaultFalse, privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameString): Promise<{ valid: true }> {
+  async verifySignature(args: { seekPermission?: BooleanDefaultTrue, data?: Byte[], hashToDirectlyVerify?: Byte[], signature: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Characters], keyID: KeyIDStringUnder800Characters, privilegedReason?: DescriptionString5to50Characters, counterparty?: PubKeyHex | 'self' | 'anyone', forSelf?: BooleanDefaultFalse, privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ valid: true }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(this.encodeKeyRelatedParams(args.protocolID, args.keyID, args.counterparty, args.privileged, args.privilegedReason))
     if (typeof args.forSelf === 'boolean') {
@@ -1115,7 +1114,7 @@ export default class WalletWireTransceiver implements Wallet {
       privileged?: BooleanDefaultFalse
       privilegedReason?: DescriptionString5to50Characters
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ): Promise<{ type: Base64String, subject: PubKeyHex, serialNumber: Base64String, certifier: PubKeyHex, revocationOutpoint: OutpointString, signature: HexString, fields: Record<CertificateFieldNameUnder50Characters, string> }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(Utils.toArray(args.type, 'base64'))
@@ -1190,7 +1189,7 @@ export default class WalletWireTransceiver implements Wallet {
     return paramWriter.toArray()
   }
 
-  async listCertificates(args: { certifiers: PubKeyHex[], types: Base64String[], limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero, privileged?: BooleanDefaultFalse, privilegedReason?: DescriptionString5to50Characters }, originator?: OriginatorDomainNameString): Promise<{ totalCertificates: PositiveIntegerOrZero, certificates: Array<{ type: Base64String, subject: PubKeyHex, serialNumber: Base64String, certifier: PubKeyHex, revocationOutpoint: OutpointString, signature: HexString, fields: Record<CertificateFieldNameUnder50Characters, string> }> }> {
+  async listCertificates(args: { certifiers: PubKeyHex[], types: Base64String[], limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero, privileged?: BooleanDefaultFalse, privilegedReason?: DescriptionString5to50Characters }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ totalCertificates: PositiveIntegerOrZero, certificates: Array<{ type: Base64String, subject: PubKeyHex, serialNumber: Base64String, certifier: PubKeyHex, revocationOutpoint: OutpointString, signature: HexString, fields: Record<CertificateFieldNameUnder50Characters, string> }> }> {
     const paramWriter = new Utils.Writer()
     paramWriter.writeVarIntNum(args.certifiers.length)
     for (let i = 0; i < args.certifiers.length; i++) {
@@ -1239,7 +1238,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async proveCertificate(args: { certificate: { type: Base64String, subject: PubKeyHex, serialNumber: Base64String, certifier: PubKeyHex, revocationOutpoint: OutpointString, signature: HexString, fields: Record<CertificateFieldNameUnder50Characters, string> }, fieldsToReveal: CertificateFieldNameUnder50Characters[], verifier: PubKeyHex, privileged?: BooleanDefaultFalse, privilegedReason?: DescriptionString5to50Characters }, originator?: OriginatorDomainNameString): Promise<{ keyringForVerifier: Record<CertificateFieldNameUnder50Characters, Base64String> }> {
+  async proveCertificate(args: { certificate: { type: Base64String, subject: PubKeyHex, serialNumber: Base64String, certifier: PubKeyHex, revocationOutpoint: OutpointString, signature: HexString, fields: Record<CertificateFieldNameUnder50Characters, string> }, fieldsToReveal: CertificateFieldNameUnder50Characters[], verifier: PubKeyHex, privileged?: BooleanDefaultFalse, privilegedReason?: DescriptionString5to50Characters }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ keyringForVerifier: Record<CertificateFieldNameUnder50Characters, Base64String> }> {
     const paramWriter = new Utils.Writer()
     const typeAsArray = Utils.toArray(args.certificate.type, 'base64')
     paramWriter.write(typeAsArray)
@@ -1287,7 +1286,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async relinquishCertificate(args: { type: Base64String, serialNumber: Base64String, certifier: PubKeyHex }, originator?: OriginatorDomainNameString): Promise<{ relinquished: true }> {
+  async relinquishCertificate(args: { type: Base64String, serialNumber: Base64String, certifier: PubKeyHex }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ relinquished: true }> {
     const paramWriter = new Utils.Writer()
     const typeAsArray = Utils.toArray(args.type, 'base64')
     paramWriter.write(typeAsArray)
@@ -1379,7 +1378,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async discoverByIdentityKey(args: { seekPermission?: BooleanDefaultTrue, identityKey: PubKeyHex, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }, originator?: OriginatorDomainNameString): Promise<{ totalCertificates: PositiveIntegerOrZero, certificates: Array<{ type: Base64String, subject: PubKeyHex, serialNumber: Base64String, certifier: PubKeyHex, revocationOutpoint: OutpointString, signature: HexString, fields: Record<CertificateFieldNameUnder50Characters, Base64String>, certifierInfo: { name: EntityNameStringMax100Characters, iconUrl: EntityIconURLStringMax500Characters, description: DescriptionString5to50Characters, trust: PositiveIntegerMax10 }, publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>, decryptedFields: Record<CertificateFieldNameUnder50Characters, string> }> }> {
+  async discoverByIdentityKey(args: { seekPermission?: BooleanDefaultTrue, identityKey: PubKeyHex, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ totalCertificates: PositiveIntegerOrZero, certificates: Array<{ type: Base64String, subject: PubKeyHex, serialNumber: Base64String, certifier: PubKeyHex, revocationOutpoint: OutpointString, signature: HexString, fields: Record<CertificateFieldNameUnder50Characters, Base64String>, certifierInfo: { name: EntityNameStringMax100Characters, iconUrl: EntityIconURLStringMax500Characters, description: DescriptionString5to50Characters, trust: PositiveIntegerMax10 }, publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>, decryptedFields: Record<CertificateFieldNameUnder50Characters, string> }> }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(Utils.toArray(args.identityKey, 'hex'))
     if (typeof args.limit === 'number') {
@@ -1398,7 +1397,7 @@ export default class WalletWireTransceiver implements Wallet {
     return this.parseDiscoveryResult(result)
   }
 
-  async discoverByAttributes(args: { seekPermission?: BooleanDefaultTrue, attributes: Record<CertificateFieldNameUnder50Characters, string>, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }, originator?: OriginatorDomainNameString): Promise<{ totalCertificates: PositiveIntegerOrZero, certificates: Array<{ type: Base64String, subject: PubKeyHex, serialNumber: Base64String, certifier: PubKeyHex, revocationOutpoint: OutpointString, signature: HexString, fields: Record<CertificateFieldNameUnder50Characters, Base64String>, certifierInfo: { name: EntityNameStringMax100Characters, iconUrl: EntityIconURLStringMax500Characters, description: DescriptionString5to50Characters, trust: PositiveIntegerMax10 }, publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>, decryptedFields: Record<CertificateFieldNameUnder50Characters, string> }> }> {
+  async discoverByAttributes(args: { seekPermission?: BooleanDefaultTrue, attributes: Record<CertificateFieldNameUnder50Characters, string>, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ totalCertificates: PositiveIntegerOrZero, certificates: Array<{ type: Base64String, subject: PubKeyHex, serialNumber: Base64String, certifier: PubKeyHex, revocationOutpoint: OutpointString, signature: HexString, fields: Record<CertificateFieldNameUnder50Characters, Base64String>, certifierInfo: { name: EntityNameStringMax100Characters, iconUrl: EntityIconURLStringMax500Characters, description: DescriptionString5to50Characters, trust: PositiveIntegerMax10 }, publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>, decryptedFields: Record<CertificateFieldNameUnder50Characters, string> }> }> {
     const paramWriter = new Utils.Writer()
     const attributeKeys = Object.keys(args.attributes)
     paramWriter.writeVarIntNum(attributeKeys.length)
@@ -1424,17 +1423,17 @@ export default class WalletWireTransceiver implements Wallet {
     return this.parseDiscoveryResult(result)
   }
 
-  async isAuthenticated(args: {}, originator?: OriginatorDomainNameString): Promise<{ authenticated: boolean }> {
+  async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ authenticated: boolean }> {
     const result = await this.transmit('isAuthenticated', originator)
     return { authenticated: !!result[0] }
   }
 
-  async waitForAuthentication(args: {}, originator?: OriginatorDomainNameString): Promise<{ authenticated: true }> {
+  async waitForAuthentication(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ authenticated: true }> {
     await this.transmit('waitForAuthentication', originator)
     return { authenticated: true }
   }
 
-  async getHeight(args: {}, originator?: OriginatorDomainNameString): Promise<{ height: PositiveInteger }> {
+  async getHeight(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ height: PositiveInteger }> {
     const result = await this.transmit('getHeight', originator)
     const resultReader = new Utils.Reader(result)
     return {
@@ -1442,7 +1441,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async getHeaderForHeight(args: { height: PositiveInteger }, originator?: OriginatorDomainNameString): Promise<{ header: HexString }> {
+  async getHeaderForHeight(args: { height: PositiveInteger }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ header: HexString }> {
     const paramWriter = new Utils.Writer()
     paramWriter.writeVarIntNum(args.height)
     const header = await this.transmit('getHeaderForHeight', originator, paramWriter.toArray())
@@ -1451,14 +1450,14 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async getNetwork(args: {}, originator?: OriginatorDomainNameString): Promise<{ network: 'mainnet' | 'testnet' }> {
+  async getNetwork(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ network: 'mainnet' | 'testnet' }> {
     const net = await this.transmit('getNetwork', originator)
     return {
       network: net[0] === 0 ? 'mainnet' : 'testnet'
     }
   }
 
-  async getVersion(args: {}, originator?: OriginatorDomainNameString): Promise<{ version: VersionString7To30Characters }> {
+  async getVersion(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{ version: VersionString7To30Characters }> {
     const version = await this.transmit('getVersion', originator)
     return {
       version: Utils.toUTF8(version)

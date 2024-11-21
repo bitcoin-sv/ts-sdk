@@ -50,7 +50,6 @@ export default class WalletWireProcessor implements WalletWire {
       // Read parameters
       const paramsReader = messageReader // Remaining bytes
 
-      let result
       switch (callName) {
         case 'createAction':
           // Deserialize parameters from paramsReader

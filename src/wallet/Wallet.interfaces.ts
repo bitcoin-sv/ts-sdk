@@ -14,7 +14,7 @@ import {
   ISOTimestampString,
   KeyIDStringUnder800Characters,
   LabelStringUnder300Characters,
-  OriginatorDomainNameString,
+  OriginatorDomainNameStringUnder250Characters,
   OutpointString,
   OutputTagStringUnder300Characters,
   PositiveInteger,
@@ -44,7 +44,7 @@ export type {
   ISOTimestampString,
   KeyIDStringUnder800Characters,
   LabelStringUnder300Characters,
-  OriginatorDomainNameString,
+  OriginatorDomainNameStringUnder250Characters,
   OutpointString,
   OutputTagStringUnder300Characters,
   PositiveInteger,
@@ -699,72 +699,72 @@ export interface Wallet {
    * Creates a new Bitcoin transaction based on the provided inputs, outputs, labels, locks, and other options.
    *
    * @param {CreateActionArgs} args - The arguments required to create the transaction.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<CreateActionResult>} The promise returns different structures based on the outcome: error response, response with TXID, response with transaction, or info about signable transaction (partial BEEF and reference number).
    */
   createAction: (
     args: CreateActionArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<CreateActionResult>
 
   /**
    * Signs a transaction previously created using `createAction`.
    *
    * @param {SignActionArgs} args - Arguments to sign the transaction.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<SignActionResult>} The promise returns an error response or a response with either the completed transaction or TXID.
    */
   signAction: (
     args: SignActionArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<SignActionResult>
 
   /**
    * Aborts a transaction that is in progress and has not yet been finalized or sent to the network.
    *
    * @param {AbortActionArgs} args - Arguments to identify the transaction that needs to be aborted.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<AbortActionResult>} The promise resolves to an object indicating the abortion result (either success or error).
    */
   abortAction: (
     args: AbortActionArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<AbortActionResult>
 
   /**
    * Lists all transactions matching the specified labels.
    *
    * @param {Object} args - Arguments to specify how to filter or retrieve transactions.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<ListActionsResult>} The promise resolves to an object containing actions, their metadata, inputs, and outputs if applicable, or an error object.
    */
   listActions: (
     args: ListActionsArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<ListActionsResult>
 
   /**
    * Submits a transaction to be internalized and optionally labeled, outputs paid to the wallet balance, inserted into baskets, and/or tagged.
    *
    * @param {InternalizeActionArgs} args - Arguments required to internalize the transaction.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<InternalizeActionResult>} The promise resolves to an object indicating the success of the operation or an error object.
    */
   internalizeAction: (
     args: InternalizeActionArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<InternalizeActionResult>
 
   /**
    * Lists the spendable outputs kept within a specific basket, optionally tagged with specific labels.
    *
    * @param {ListOutputsArgs} args - Arguments detailing the query for listing spendable outputs.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise returns an output listing or an error object.
    */
   listOutputs: (
     args: ListOutputsArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<ListOutputsResult>
 
   /**
@@ -773,7 +773,7 @@ export interface Wallet {
    * @param {Object} args - Arguments identifying the output in the basket.
    * @param {BasketStringUnder300Characters} args.basket - The associated basket name where the output should be removed.
    * @param {OutpointString} args.outpoint - The output that should be removed from the basket.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise returns an indication of successful removal or an error object.
    */
   relinquishOutput: (
@@ -781,223 +781,223 @@ export interface Wallet {
       basket: BasketStringUnder300Characters
       output: OutpointString
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ relinquished: true }>
 
   /**
    * Retrieves a derived or identity public key based on the requested protocol, key ID, counterparty, and other factors.
    *
    * @param {GetPublicKeyArgs} args - Arguments to specify which public key to retrieve.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to an object containing the public key, or an error response.
    */
   getPublicKey: (
     args: GetPublicKeyArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ publicKey: PubKeyHex }>
 
   /**
    * Reveals the key linkage between ourselves and a counterparty, to a particular verifier, across all interactions with the counterparty.
    *
    * @param {RevealCounterpartyKeyLinkageArgs} args - Contains information about counterparty, verifier, and whether the operation is privileged.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to the key linkage, or an error response.
    */
   revealCounterpartyKeyLinkage: (
     args: RevealCounterpartyKeyLinkageArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<RevealCounterpartyKeyLinkageResult>
 
   /**
    * Reveals the key linkage between ourselves and a counterparty, to a particular verifier, with respect to a specific interaction.
    *
    * @param {RevealSpecificKeyLinkageArgs} args - The object defining the counterparty, verifier, protocol, and keyID for which linkage should be revealed.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise returns the requested linkage information, or an error object.
    */
   revealSpecificKeyLinkage: (
     args: RevealSpecificKeyLinkageArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<RevealSpecificKeyLinkageResult>
 
   /**
    * Encrypts the provided plaintext data using derived keys, based on the protocol ID, key ID, counterparty, and other factors.
    *
    * @param {WalletEncryptArgs} args - Information needed for encryption, including the plaintext, protocol ID, and key ID.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to the encrypted ciphertext bytes or an error if encryption fails.
    */
   encrypt: (
     args: WalletEncryptArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ ciphertext: Byte[] }>
 
   /**
    * Decrypts the provided ciphertext using derived keys, based on the protocol ID, key ID, counterparty, and other factors.
    *
    * @param {WalletDecryptArgs} args - Contains the ciphertext, protocol ID, and key ID required to decrypt the data.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to the decryption result, containing the plaintext data or an error.
    */
   decrypt: (
     args: WalletDecryptArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ plaintext: Byte[] }>
 
   /**
    * Creates an HMAC (Hash-based Message Authentication Code) based on the provided data, protocol, key ID, counterparty, and other factors.
    *
    * @param {Object} args - Arguments containing the data, protocol ID, and key ID to generate the HMAC from.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to an object containing the generated HMAC bytes, or an error if the creation fails.
    */
   createHmac: (
     args: CreateHmacArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ hmac: Byte[] }>
 
   /**
    * Verifies an HMAC (Hash-based Message Authentication Code) based on the provided data, protocol, key ID, counterparty, and other factors.
    *
    * @param {VerifyHmacArgs} args - Arguments containing the HMAC data, protocol ID, and key ID needed for verification.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to an object confirming whether the HMAC was valid or an error.
    */
   verifyHmac: (
     args: VerifyHmacArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ valid: true }>
 
   /**
    * Creates a digital signature for the provided data or hash using a specific protocol, key, and optionally considering privilege and counterparty.
    *
    * @param {CreateSignatureArgs} args - Arguments to specify data, protocol, key ID, and privilege for creating the signature.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise will resolve to an object containing the DER-encoded ECDSA signature, or an error on failure.
    */
   createSignature: (
     args: CreateSignatureArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ signature: Byte[] }>
 
   /**
    * Verifies a digital signature for the provided data or hash using a specific protocol, key, and optionally considering privilege and counterparty.
    *
    * @param {VerifySignatureArgs} args - Arguments specifying the data, signature, protocol, and key ID.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to a boolean object indicating whether the signature was valid or an error message.
    */
   verifySignature: (
     args: VerifySignatureArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ valid: true }>
 
   /**
    * Acquires an identity certificate, whether by acquiring one from the certifier or by directly receiving it.
    *
    * @param {AcquireCertificateArgs} args - Contains the type of certificate, certifier information, and fields of the certificate to be provided, among other details.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<AcquireCertificateResult>} The promise resolves to an object containing the acquired certificate, or an error object.
    */
   acquireCertificate: (
     args: AcquireCertificateArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<AcquireCertificateResult>
 
   /**
    * Lists identity certificates belonging to the user, filtered by certifier(s) and type(s).
    *
    * @param {ListCertificatesArgs} args - Arguments used to filter or limit the list of certificates returned by the request.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<ListCertificatesResult>} The promise resolves to an object containing certificates or an error response.
    */
   listCertificates: (
     args: ListCertificatesArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<ListCertificatesResult>
 
   /**
    * Proves select fields of an identity certificate, as specified, when requested by a verifier.
    *
    * @param {ProveCertificateArgs} args - Arguments including the certificate, fields to reveal, and verifier's public key.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<ProveCertificateResult>} Resolves to a keyring for the verifier or an error object.
    */
   proveCertificate: (
     args: ProveCertificateArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<ProveCertificateResult>
 
   /**
    * Relinquishes an identity certificate, removing it from the wallet regardless of whether the revocation outpoint has become spent.
    *
    * @param {RelinquishCertificateArgs} args - Contains the type of certificate, certifier, and serial number for relinquishment.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to an indication of successful relinquishment or an error object.
    */
   relinquishCertificate: (
     args: RelinquishCertificateArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ relinquished: true }>
 
   /**
    * Discovers identity certificates, issued to a given identity key by a trusted entity.
    *
    * @param {DiscoverByIdentityKeyArgs} args - Arguments for requesting the discovery based on the identity key.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to the list of certificates discovered or an error object.
    */
   discoverByIdentityKey: (
     args: DiscoverByIdentityKeyArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<DiscoverCertificatesResult>
 
   /**
    * Discovers identity certificates belonging to other users, where the documents contain specific attributes, issued by a trusted entity.
    *
    * @param {DiscoverByAttributesArgs} args - Attributes and optional parameters used to discover certificates.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<DiscoverByAttributesResult>} The promise resolves to a list of matching certificates or an error object.
    */
   discoverByAttributes: (
     args: DiscoverByAttributesArgs,
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<DiscoverCertificatesResult>
 
   /**
    * Checks the authentication status of the user.
    *
    * @param {Object} args - Empty object, as no parameters are needed.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to an object indicating whether the user is authenticated or an error response.
    */
   isAuthenticated: (
     args: {},
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ authenticated: boolean }>
 
   /**
    * Continuously waits until the user is authenticated, returning the result once confirmed.
    *
    * @param {Object} args - Not used, pass an empty object.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The final result indicating that the user is authenticated or an error object.
    */
   waitForAuthentication: (
     args: {},
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ authenticated: true }>
 
   /**
    * Retrieves the current height of the blockchain.
    *
    * @param {Object} args - Empty object as no other parameters are necessary.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to an object indicating the current height or an error on failure.
    */
   getHeight: (
     args: {},
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ height: PositiveInteger }>
 
   /**
@@ -1005,35 +1005,35 @@ export interface Wallet {
    *
    * @param {Object} args - Contains the height parameter needed to retrieve the block header.
    * @param {PositiveInteger} args.height - Specifies the height at which the block header needs to be retrieved.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to an 80-byte block header or an error if it cannot be retrieved.
    */
   getHeaderForHeight: (
     args: { height: PositiveInteger },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ header: HexString }>
 
   /**
    * Retrieves the Bitcoin network the client is using (mainnet or testnet).
    *
    * @param {Object} args - No arguments required, pass an empty object.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to an object indicating whether the client is using the mainnet or testnet.
    */
   getNetwork: (
     args: {},
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ network: WalletNetwork }>
 
   /**
    * Retrieves the current version string of the wallet.
    *
    * @param {Object} args - Empty argument object.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to an object containing the version string of the wallet, or an error.
    */
   getVersion: (
     args: {},
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ version: VersionString7To30Characters }>
 }

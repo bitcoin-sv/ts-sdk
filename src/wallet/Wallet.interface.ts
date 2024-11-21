@@ -98,10 +98,10 @@ export type PubKeyHex = HexString
 export type Base64String = string
 
 /**
- * @typedef {string} OriginatorDomainNameString
+ * @typedef {string} OriginatorDomainNameStringUnder250Characters
  * Represents the fully qualified domain name (FQDN) of the application that originates the request.
  */
-export type OriginatorDomainNameString = string
+export type OriginatorDomainNameStringUnder250Characters = string
 
 /**
  * @typedef {string & { minLength: 5, maxLength: 50 }} DescriptionString5to50Characters

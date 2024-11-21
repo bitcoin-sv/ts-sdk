@@ -1,4 +1,4 @@
-import { Base64String, BasketStringUnder300Characters, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Characters, DescriptionString5to50Characters, EntityIconURLStringMax500Characters, EntityNameStringMax100Characters, HexString, ISOTimestampString, KeyIDStringUnder800Characters, LabelStringUnder300Characters, OriginatorDomainNameString, OutpointString, OutputTagStringUnder300Characters, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Characters, PubKeyHex, SatoshiValue, TXIDHexString, VersionString7To30Characters, Wallet } from './Wallet.interface.js'
+import { Base64String, BasketStringUnder300Characters, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Characters, DescriptionString5to50Characters, EntityIconURLStringMax500Characters, EntityNameStringMax100Characters, HexString, ISOTimestampString, KeyIDStringUnder800Characters, LabelStringUnder300Characters, OriginatorDomainNameStringUnder250Characters, OutpointString, OutputTagStringUnder300Characters, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Characters, PubKeyHex, SatoshiValue, TXIDHexString, VersionString7To30Characters, Wallet } from './Wallet.interfaces.js'
 import WindowCWISubstrate from './substrates/window.CWI.js'
 import XDMSubstrate from './substrates/XDM.js'
 import WalletWireTransceiver from './substrates/WalletWireTransceiver.js'
@@ -7,10 +7,10 @@ import HTTPWalletWire from './substrates/HTTPWalletWire.js'
 /**
  * The SDK is how applications communicate with wallets over a communications substrate.
  */
-export default class WalletSDK implements Wallet {
+export default class WalletClient implements Wallet {
   public substrate: 'auto' | Wallet
-  originator?: OriginatorDomainNameString
-  constructor(substrate: 'auto' | 'Cicada' | 'XDM' | 'window.CWI' | Wallet = 'auto', originator?: OriginatorDomainNameString) {
+  originator?: OriginatorDomainNameStringUnder250Characters
+  constructor(substrate: 'auto' | 'Cicada' | 'XDM' | 'window.CWI' | Wallet = 'auto', originator?: OriginatorDomainNameStringUnder250Characters) {
     if (substrate === 'Cicada') substrate = new WalletWireTransceiver(new HTTPWalletWire(originator))
     if (substrate === 'window.CWI') substrate = new WindowCWISubstrate()
     if (substrate === 'XDM') substrate = new XDMSubstrate()

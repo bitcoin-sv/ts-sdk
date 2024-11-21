@@ -1,3 +1,4 @@
+// NOTE: Enum values must not exceed the UInt8 range (0–255)
 enum calls {
   createAction = 1,
   signAction = 2,
@@ -30,3 +31,4 @@ enum calls {
 }
 
 export default calls
+export type CallType = keyof typeof calls
