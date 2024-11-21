@@ -1,4 +1,3 @@
-import { HttpClient, HttpClientRequestOptions, defaultHttpClient } from '../transaction/http/index.js'
 import { Transaction } from '../transaction/index.js'
 import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate.js'
 
@@ -56,23 +55,25 @@ export interface OverlayLookupFacilitator {
 }
 
 export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
-  httpClient: HttpClient
+  fetchClient: typeof fetch
 
-  constructor(httpClient?: HttpClient) {
-    this.httpClient = httpClient ?? defaultHttpClient()
+  constructor(httpClient = fetch) {
+    this.fetchClient = httpClient
   }
 
   async lookup(url: string, question: LookupQuestion): Promise<LookupAnswer> {
     if (!url.startsWith('https:')) {
       throw new Error('HTTPS facilitator can only use URLs that start with "https:"')
     }
-    const requestOptions: HttpClientRequestOptions = {
+    const response = await fetch(`${url}/lookup`, {
       method: 'POST',
-      data: JSON.stringify({ service: question.service, query: question.query })
-    }
-    const response = await this.httpClient.request<LookupAnswer>(`${url}/lookup`, requestOptions)
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ service: question.service, query: question.query })
+    })
     if (response.ok) {
-      return response.data
+      return await response.json()
     } else {
       throw new Error('Failed to facilitate lookup')
     }

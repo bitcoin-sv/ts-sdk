@@ -1,5 +1,4 @@
 import { Transaction, BroadcastResponse, BroadcastFailure, Broadcaster } from '../transaction/index.js'
-import { HttpClient, HttpClientRequestOptions, defaultHttpClient } from '../transaction/http/index.js'
 import LookupResolver from './LookupResolver.js'
 import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate.js'
 
@@ -63,27 +62,26 @@ export interface OverlayBroadcastFacilitator {
 }
 
 export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilitator {
-  httpClient: HttpClient
+  httpClient: typeof fetch
 
-  constructor(httpClient?: HttpClient) {
-    this.httpClient = httpClient ?? defaultHttpClient()
+  constructor(httpClient = fetch) {
+    this.httpClient = httpClient
   }
 
   async send(url: string, taggedBEEF: TaggedBEEF): Promise<STEAK> {
     if (!url.startsWith('https:')) {
       throw new Error('HTTPS facilitator can only use URLs that start with "https:"')
     }
-    const requestOptions: HttpClientRequestOptions = {
+    const response = await fetch(`${url}/submit`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/octet-stream',
         'X-Topics': JSON.stringify(taggedBEEF.topics)
       },
-      data: new Uint8Array(taggedBEEF.beef)
-    }
-    const response = await this.httpClient.request<STEAK>(`${url}/submit`, requestOptions)
+      body: new Uint8Array(taggedBEEF.beef)
+    })
     if (response.ok) {
-      return response.data
+      return await response.json()
     } else {
       throw new Error('Failed to facilitate broadcast')
     }
