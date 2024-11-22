@@ -37,11 +37,6 @@ export interface AdmittanceInstructions {
  */
 export type STEAK = Record<string, AdmittanceInstructions>
 
-/** Default SHIP trackers */
-export const DEFAULT_SHIP_TRACKERS: string[] = [
-  // TODO: Specify default trackers.
-]
-
 /** Configuration options for the SHIP broadcaster. */
 export interface SHIPBroadcasterConfig {
   /** The facilitator used to make requests to Overlay Services hosts. */

@@ -34,7 +34,19 @@ export type LookupAnswer = {
 
 /** Default SLAP trackers */
 export const DEFAULT_SLAP_TRACKERS: string[] = [
-  // TODO: Specify default trackers.
+  // Babbage primary overlay service
+  'https://overlay.babbage.systems',
+  // Babbage example overlay
+  'https://overlay-example.babbage.systems',
+  // The Babbage office building
+  'https://office.babbage.systems'
+
+  // NOTE: Other entities may submit pull requests to the library if they maintain SLAP overlay services.
+  // Additional trackers run by different entities contribute to greater network resiliency.
+  // It also generally doesn't hurt to have more trackers in this list.
+
+  // DISCLAIMER:
+  // Trackers known to host invalid or illegal records will be removed at the discretion of the BSV Association.
 ]
 
 /** Configuration options for the Lookup resolver. */
