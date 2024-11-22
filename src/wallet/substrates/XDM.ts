@@ -1,6 +1,7 @@
 import { Base64String, BasketStringUnder300Characters, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Characters, DescriptionString5to50Characters, EntityIconURLStringMax500Characters, EntityNameStringMax100Characters, HexString, ISOTimestampString, KeyIDStringUnder800Characters, LabelStringUnder300Characters, OriginatorDomainNameStringUnder250Characters, OutpointString, OutputTagStringUnder300Characters, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Characters, PubKeyHex, SatoshiValue, TXIDHexString, VersionString7To30Characters, Wallet } from '../Wallet.interfaces.js'
 import { Utils, Random } from '../../primitives/index.js'
 import { WalletError } from '../WalletError.js'
+import { CallType } from 'mod.js'
 
 /**
  * Facilitates wallet operations over cross-document messaging.
@@ -15,7 +16,7 @@ export default class XDMSubstrate implements Wallet {
     }
   }
 
-  async invoke(call, args): Promise<any> {
+  async invoke(call: CallType, args: any): Promise<any> {
     return await new Promise((resolve, reject) => {
       const id = Utils.toBase64(Random(12))
       const listener = async e => {
