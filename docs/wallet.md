@@ -35,7 +35,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export interface CreateActionInput {
     outpoint: OutpointString;
-    inputDescription: DescriptionString5to50Characters;
+    inputDescription: DescriptionString5to50Bytes;
     unlockingScript?: HexString;
     unlockingScriptLength?: PositiveInteger;
     sequenceNumber?: PositiveIntegerOrZero;
@@ -51,10 +51,10 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export interface CreateActionOutput {
     lockingScript: HexString;
     satoshis: SatoshiValue;
-    outputDescription: DescriptionString5to50Characters;
-    basket?: BasketStringUnder300Characters;
+    outputDescription: DescriptionString5to50Bytes;
+    basket?: BasketStringUnder300Bytes;
     customInstructions?: string;
-    tags?: OutputTagStringUnder300Characters[];
+    tags?: OutputTagStringUnder300Bytes[];
 }
 ```
 
@@ -123,13 +123,13 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export interface CreateActionArgs {
-    description: DescriptionString5to50Characters;
+    description: DescriptionString5to50Bytes;
     inputBEEF?: BEEF;
     inputs?: Array<CreateActionInput>;
     outputs?: Array<CreateActionOutput>;
     lockTime?: PositiveIntegerOrZero;
     version?: PositiveIntegerOrZero;
-    labels?: LabelStringUnder300Characters[];
+    labels?: LabelStringUnder300Bytes[];
     options?: CreateActionOptions;
 }
 ```
@@ -215,7 +215,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export interface ListActionsArgs {
-    labels: LabelStringUnder300Characters[];
+    labels: LabelStringUnder300Bytes[];
     labelQueryMode?: "any" | "all";
     includeLabels?: BooleanDefaultFalse;
     includeInputs?: BooleanDefaultFalse;
@@ -240,7 +240,7 @@ export interface WalletActionInput {
     sourceSatoshis: SatoshiValue;
     sourceLockingScript?: HexString;
     unlockingScript?: HexString;
-    inputDescription: DescriptionString5to50Characters;
+    inputDescription: DescriptionString5to50Bytes;
     sequenceNumber: PositiveIntegerOrZero;
 }
 ```
@@ -256,10 +256,10 @@ export interface WalletActionOutput {
     lockingScript?: HexString;
     spendable: boolean;
     customInstructions?: string;
-    tags: OutputTagStringUnder300Characters[];
+    tags: OutputTagStringUnder300Bytes[];
     outputIndex: PositiveIntegerOrZero;
-    outputDescription: DescriptionString5to50Characters;
-    basket: BasketStringUnder300Characters;
+    outputDescription: DescriptionString5to50Bytes;
+    basket: BasketStringUnder300Bytes;
 }
 ```
 
@@ -274,9 +274,9 @@ export interface WalletOutput {
     lockingScript?: HexString;
     spendable: true;
     customInstructions?: string;
-    tags?: OutputTagStringUnder300Characters[];
+    tags?: OutputTagStringUnder300Bytes[];
     outpoint: OutpointString;
-    labels?: LabelStringUnder300Characters[];
+    labels?: LabelStringUnder300Bytes[];
 }
 ```
 
@@ -291,8 +291,8 @@ export interface WalletAction {
     satoshis: SatoshiValue;
     status: ActionStatus;
     isOutgoing: boolean;
-    description: DescriptionString5to50Characters;
-    labels?: LabelStringUnder300Characters[];
+    description: DescriptionString5to50Bytes;
+    labels?: LabelStringUnder300Bytes[];
     version: PositiveIntegerOrZero;
     lockTime: PositiveIntegerOrZero;
     inputs?: Array<WalletActionInput>;
@@ -332,9 +332,9 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export interface BasketInsertion {
-    basket: BasketStringUnder300Characters;
+    basket: BasketStringUnder300Bytes;
     customInstructions?: string;
-    tags?: OutputTagStringUnder300Characters[];
+    tags?: OutputTagStringUnder300Bytes[];
 }
 ```
 
@@ -361,8 +361,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export interface InternalizeActionArgs {
     tx: AtomicBEEF;
     outputs: Array<InternalizeOutput>;
-    description: DescriptionString5to50Characters;
-    labels?: LabelStringUnder300Characters[];
+    description: DescriptionString5to50Bytes;
+    labels?: LabelStringUnder300Bytes[];
     seekPermission?: BooleanDefaultTrue;
 }
 ```
@@ -385,8 +385,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export interface ListOutputsArgs {
-    basket: BasketStringUnder300Characters;
-    tags?: OutputTagStringUnder300Characters[];
+    basket: BasketStringUnder300Bytes;
+    tags?: OutputTagStringUnder300Bytes[];
     tagQueryMode?: "all" | "any";
     include?: "locking scripts" | "entire transactions";
     includeCustomInstructions?: BooleanDefaultFalse;
@@ -419,10 +419,10 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export interface KeyLinkageArgs {
     protocolID: WalletProtocol;
-    keyID: KeyIDStringUnder800Characters;
+    keyID: KeyIDStringUnder800Bytes;
     counterparty?: WalletCounterparty;
     privileged?: BooleanDefaultFalse;
-    privilegedReason?: DescriptionString5to50Characters;
+    privilegedReason?: DescriptionString5to50Bytes;
 }
 ```
 
@@ -463,7 +463,7 @@ export interface RevealCounterpartyKeyLinkageArgs {
     counterparty: PubKeyHex;
     verifier: PubKeyHex;
     privileged?: BooleanDefaultFalse;
-    privilegedReason?: DescriptionString5to50Characters;
+    privilegedReason?: DescriptionString5to50Bytes;
 }
 ```
 
@@ -512,7 +512,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export interface RevealSpecificKeyLinkageResult extends KeyLinkageResult {
     protocolID: WalletProtocol;
-    keyID: KeyIDStringUnder800Characters;
+    keyID: KeyIDStringUnder800Bytes;
     proofType: Byte;
 }
 ```
@@ -598,15 +598,15 @@ export interface AcquireCertificateArgs {
     type: Base64String;
     certifier: PubKeyHex;
     acquisitionProtocol: AcquisitionProtocol;
-    fields: Record<CertificateFieldNameUnder50Characters, string>;
+    fields: Record<CertificateFieldNameUnder50Bytes, string>;
     serialNumber?: Base64String;
     revocationOutpoint?: OutpointString;
     signature?: HexString;
     certifierUrl?: string;
     keyringRevealer?: KeyringRevealer;
-    keyringForSubject?: Record<CertificateFieldNameUnder50Characters, Base64String>;
+    keyringForSubject?: Record<CertificateFieldNameUnder50Bytes, Base64String>;
     privileged?: BooleanDefaultFalse;
-    privilegedReason?: DescriptionString5to50Characters;
+    privilegedReason?: DescriptionString5to50Bytes;
 }
 ```
 
@@ -623,7 +623,7 @@ export interface WalletCertificate {
     certifier: PubKeyHex;
     revocationOutpoint: OutpointString;
     signature: HexString;
-    fields: Record<CertificateFieldNameUnder50Characters, string>;
+    fields: Record<CertificateFieldNameUnder50Bytes, string>;
 }
 ```
 
@@ -634,9 +634,9 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export interface IdentityCertifier {
-    name: EntityNameStringMax100Characters;
-    iconUrl: EntityIconURLStringMax500Characters;
-    description: DescriptionString5to50Characters;
+    name: EntityNameStringMax100Bytes;
+    iconUrl: EntityIconURLStringMax500Bytes;
+    description: DescriptionString5to50Bytes;
     trust: PositiveIntegerMax10;
 }
 ```
@@ -649,8 +649,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export interface IdentityCertificate extends WalletCertificate {
     certifierInfo: IdentityCertifier;
-    publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>;
-    decryptedFields: Record<CertificateFieldNameUnder50Characters, string>;
+    publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
+    decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
 }
 ```
 
@@ -676,7 +676,7 @@ export interface ListCertificatesArgs {
     limit?: PositiveIntegerDefault10Max10000;
     offset?: PositiveIntegerOrZero;
     privileged?: BooleanDefaultFalse;
-    privilegedReason?: DescriptionString5to50Characters;
+    privilegedReason?: DescriptionString5to50Bytes;
 }
 ```
 
@@ -700,10 +700,10 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export interface ProveCertificateArgs {
     certificate: WalletCertificate;
-    fieldsToReveal: CertificateFieldNameUnder50Characters[];
+    fieldsToReveal: CertificateFieldNameUnder50Bytes[];
     verifier: PubKeyHex;
     privileged?: BooleanDefaultFalse;
-    privilegedReason?: DescriptionString5to50Characters;
+    privilegedReason?: DescriptionString5to50Bytes;
 }
 ```
 
@@ -714,7 +714,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export interface ProveCertificateResult {
-    keyringForVerifier: Record<CertificateFieldNameUnder50Characters, Base64String>;
+    keyringForVerifier: Record<CertificateFieldNameUnder50Bytes, Base64String>;
 }
 ```
 
@@ -764,7 +764,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export interface DiscoverByAttributesArgs {
-    attributes: Record<CertificateFieldNameUnder50Characters, string>;
+    attributes: Record<CertificateFieldNameUnder50Bytes, string>;
     limit?: PositiveIntegerDefault10Max10000;
     offset?: PositiveIntegerOrZero;
     seekPermission?: BooleanDefaultTrue;
@@ -806,68 +806,68 @@ deserialize and rethrow `WalletError` conforming objects.
 
 ```ts
 export interface Wallet {
-    createAction: (args: CreateActionArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<CreateActionResult>;
-    signAction: (args: SignActionArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<SignActionResult>;
-    abortAction: (args: AbortActionArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<AbortActionResult>;
-    listActions: (args: ListActionsArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<ListActionsResult>;
-    internalizeAction: (args: InternalizeActionArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<InternalizeActionResult>;
-    listOutputs: (args: ListOutputsArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<ListOutputsResult>;
+    createAction: (args: CreateActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<CreateActionResult>;
+    signAction: (args: SignActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<SignActionResult>;
+    abortAction: (args: AbortActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<AbortActionResult>;
+    listActions: (args: ListActionsArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<ListActionsResult>;
+    internalizeAction: (args: InternalizeActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<InternalizeActionResult>;
+    listOutputs: (args: ListOutputsArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<ListOutputsResult>;
     relinquishOutput: (args: {
-        basket: BasketStringUnder300Characters;
+        basket: BasketStringUnder300Bytes;
         output: OutpointString;
-    }, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
         relinquished: true;
     }>;
-    getPublicKey: (args: GetPublicKeyArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+    getPublicKey: (args: GetPublicKeyArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
         publicKey: PubKeyHex;
     }>;
-    revealCounterpartyKeyLinkage: (args: RevealCounterpartyKeyLinkageArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<RevealCounterpartyKeyLinkageResult>;
-    revealSpecificKeyLinkage: (args: RevealSpecificKeyLinkageArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<RevealSpecificKeyLinkageResult>;
-    encrypt: (args: WalletEncryptArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+    revealCounterpartyKeyLinkage: (args: RevealCounterpartyKeyLinkageArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<RevealCounterpartyKeyLinkageResult>;
+    revealSpecificKeyLinkage: (args: RevealSpecificKeyLinkageArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<RevealSpecificKeyLinkageResult>;
+    encrypt: (args: WalletEncryptArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
         ciphertext: Byte[];
     }>;
-    decrypt: (args: WalletDecryptArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+    decrypt: (args: WalletDecryptArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
         plaintext: Byte[];
     }>;
-    createHmac: (args: CreateHmacArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+    createHmac: (args: CreateHmacArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
         hmac: Byte[];
     }>;
-    verifyHmac: (args: VerifyHmacArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+    verifyHmac: (args: VerifyHmacArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
         valid: true;
     }>;
-    createSignature: (args: CreateSignatureArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+    createSignature: (args: CreateSignatureArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
         signature: Byte[];
     }>;
-    verifySignature: (args: VerifySignatureArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+    verifySignature: (args: VerifySignatureArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
         valid: true;
     }>;
-    acquireCertificate: (args: AcquireCertificateArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<AcquireCertificateResult>;
-    listCertificates: (args: ListCertificatesArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<ListCertificatesResult>;
-    proveCertificate: (args: ProveCertificateArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<ProveCertificateResult>;
-    relinquishCertificate: (args: RelinquishCertificateArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+    acquireCertificate: (args: AcquireCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<AcquireCertificateResult>;
+    listCertificates: (args: ListCertificatesArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<ListCertificatesResult>;
+    proveCertificate: (args: ProveCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<ProveCertificateResult>;
+    relinquishCertificate: (args: RelinquishCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
         relinquished: true;
     }>;
-    discoverByIdentityKey: (args: DiscoverByIdentityKeyArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<DiscoverCertificatesResult>;
-    discoverByAttributes: (args: DiscoverByAttributesArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<DiscoverCertificatesResult>;
-    isAuthenticated: (args: {}, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+    discoverByIdentityKey: (args: DiscoverByIdentityKeyArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<DiscoverCertificatesResult>;
+    discoverByAttributes: (args: DiscoverByAttributesArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<DiscoverCertificatesResult>;
+    isAuthenticated: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
         authenticated: boolean;
     }>;
-    waitForAuthentication: (args: {}, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+    waitForAuthentication: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
         authenticated: true;
     }>;
-    getHeight: (args: {}, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+    getHeight: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
         height: PositiveInteger;
     }>;
     getHeaderForHeight: (args: {
         height: PositiveInteger;
-    }, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
         header: HexString;
     }>;
-    getNetwork: (args: {}, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+    getNetwork: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
         network: WalletNetwork;
     }>;
-    getVersion: (args: {}, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
-        version: VersionString7To30Characters;
+    getVersion: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
+        version: VersionString7To30Bytes;
     }>;
 }
 ```
@@ -881,7 +881,7 @@ export interface Wallet {
 Aborts a transaction that is in progress and has not yet been finalized or sent to the network.
 
 ```ts
-abortAction: (args: AbortActionArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<AbortActionResult>
+abortAction: (args: AbortActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<AbortActionResult>
 ```
 
 #### Property acquireCertificate
@@ -889,7 +889,7 @@ abortAction: (args: AbortActionArgs, originator?: OriginatorDomainNameStringUnde
 Acquires an identity certificate, whether by acquiring one from the certifier or by directly receiving it.
 
 ```ts
-acquireCertificate: (args: AcquireCertificateArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<AcquireCertificateResult>
+acquireCertificate: (args: AcquireCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<AcquireCertificateResult>
 ```
 
 #### Property createAction
@@ -897,7 +897,7 @@ acquireCertificate: (args: AcquireCertificateArgs, originator?: OriginatorDomain
 Creates a new Bitcoin transaction based on the provided inputs, outputs, labels, locks, and other options.
 
 ```ts
-createAction: (args: CreateActionArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<CreateActionResult>
+createAction: (args: CreateActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<CreateActionResult>
 ```
 
 #### Property createHmac
@@ -905,7 +905,7 @@ createAction: (args: CreateActionArgs, originator?: OriginatorDomainNameStringUn
 Creates an HMAC (Hash-based Message Authentication Code) based on the provided data, protocol, key ID, counterparty, and other factors.
 
 ```ts
-createHmac: (args: CreateHmacArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+createHmac: (args: CreateHmacArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
     hmac: Byte[];
 }>
 ```
@@ -915,7 +915,7 @@ createHmac: (args: CreateHmacArgs, originator?: OriginatorDomainNameStringUnder2
 Creates a digital signature for the provided data or hash using a specific protocol, key, and optionally considering privilege and counterparty.
 
 ```ts
-createSignature: (args: CreateSignatureArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+createSignature: (args: CreateSignatureArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
     signature: Byte[];
 }>
 ```
@@ -925,7 +925,7 @@ createSignature: (args: CreateSignatureArgs, originator?: OriginatorDomainNameSt
 Decrypts the provided ciphertext using derived keys, based on the protocol ID, key ID, counterparty, and other factors.
 
 ```ts
-decrypt: (args: WalletDecryptArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+decrypt: (args: WalletDecryptArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
     plaintext: Byte[];
 }>
 ```
@@ -935,7 +935,7 @@ decrypt: (args: WalletDecryptArgs, originator?: OriginatorDomainNameStringUnder2
 Discovers identity certificates belonging to other users, where the documents contain specific attributes, issued by a trusted entity.
 
 ```ts
-discoverByAttributes: (args: DiscoverByAttributesArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<DiscoverCertificatesResult>
+discoverByAttributes: (args: DiscoverByAttributesArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<DiscoverCertificatesResult>
 ```
 
 #### Property discoverByIdentityKey
@@ -943,7 +943,7 @@ discoverByAttributes: (args: DiscoverByAttributesArgs, originator?: OriginatorDo
 Discovers identity certificates, issued to a given identity key by a trusted entity.
 
 ```ts
-discoverByIdentityKey: (args: DiscoverByIdentityKeyArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<DiscoverCertificatesResult>
+discoverByIdentityKey: (args: DiscoverByIdentityKeyArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<DiscoverCertificatesResult>
 ```
 
 #### Property encrypt
@@ -951,7 +951,7 @@ discoverByIdentityKey: (args: DiscoverByIdentityKeyArgs, originator?: Originator
 Encrypts the provided plaintext data using derived keys, based on the protocol ID, key ID, counterparty, and other factors.
 
 ```ts
-encrypt: (args: WalletEncryptArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+encrypt: (args: WalletEncryptArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
     ciphertext: Byte[];
 }>
 ```
@@ -963,7 +963,7 @@ Retrieves the block header of a block at a specified height.
 ```ts
 getHeaderForHeight: (args: {
     height: PositiveInteger;
-}, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
     header: HexString;
 }>
 ```
@@ -973,7 +973,7 @@ getHeaderForHeight: (args: {
 Retrieves the current height of the blockchain.
 
 ```ts
-getHeight: (args: {}, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+getHeight: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
     height: PositiveInteger;
 }>
 ```
@@ -983,7 +983,7 @@ getHeight: (args: {}, originator?: OriginatorDomainNameStringUnder250Characters)
 Retrieves the Bitcoin network the client is using (mainnet or testnet).
 
 ```ts
-getNetwork: (args: {}, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+getNetwork: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
     network: WalletNetwork;
 }>
 ```
@@ -993,7 +993,7 @@ getNetwork: (args: {}, originator?: OriginatorDomainNameStringUnder250Characters
 Retrieves a derived or identity public key based on the requested protocol, key ID, counterparty, and other factors.
 
 ```ts
-getPublicKey: (args: GetPublicKeyArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+getPublicKey: (args: GetPublicKeyArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
     publicKey: PubKeyHex;
 }>
 ```
@@ -1003,8 +1003,8 @@ getPublicKey: (args: GetPublicKeyArgs, originator?: OriginatorDomainNameStringUn
 Retrieves the current version string of the wallet.
 
 ```ts
-getVersion: (args: {}, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
-    version: VersionString7To30Characters;
+getVersion: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
+    version: VersionString7To30Bytes;
 }>
 ```
 
@@ -1013,7 +1013,7 @@ getVersion: (args: {}, originator?: OriginatorDomainNameStringUnder250Characters
 Submits a transaction to be internalized and optionally labeled, outputs paid to the wallet balance, inserted into baskets, and/or tagged.
 
 ```ts
-internalizeAction: (args: InternalizeActionArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<InternalizeActionResult>
+internalizeAction: (args: InternalizeActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<InternalizeActionResult>
 ```
 
 #### Property isAuthenticated
@@ -1021,7 +1021,7 @@ internalizeAction: (args: InternalizeActionArgs, originator?: OriginatorDomainNa
 Checks the authentication status of the user.
 
 ```ts
-isAuthenticated: (args: {}, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+isAuthenticated: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
     authenticated: boolean;
 }>
 ```
@@ -1031,7 +1031,7 @@ isAuthenticated: (args: {}, originator?: OriginatorDomainNameStringUnder250Chara
 Lists all transactions matching the specified labels.
 
 ```ts
-listActions: (args: ListActionsArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<ListActionsResult>
+listActions: (args: ListActionsArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<ListActionsResult>
 ```
 
 #### Property listCertificates
@@ -1039,7 +1039,7 @@ listActions: (args: ListActionsArgs, originator?: OriginatorDomainNameStringUnde
 Lists identity certificates belonging to the user, filtered by certifier(s) and type(s).
 
 ```ts
-listCertificates: (args: ListCertificatesArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<ListCertificatesResult>
+listCertificates: (args: ListCertificatesArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<ListCertificatesResult>
 ```
 
 #### Property listOutputs
@@ -1047,7 +1047,7 @@ listCertificates: (args: ListCertificatesArgs, originator?: OriginatorDomainName
 Lists the spendable outputs kept within a specific basket, optionally tagged with specific labels.
 
 ```ts
-listOutputs: (args: ListOutputsArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<ListOutputsResult>
+listOutputs: (args: ListOutputsArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<ListOutputsResult>
 ```
 
 #### Property proveCertificate
@@ -1055,7 +1055,7 @@ listOutputs: (args: ListOutputsArgs, originator?: OriginatorDomainNameStringUnde
 Proves select fields of an identity certificate, as specified, when requested by a verifier.
 
 ```ts
-proveCertificate: (args: ProveCertificateArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<ProveCertificateResult>
+proveCertificate: (args: ProveCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<ProveCertificateResult>
 ```
 
 #### Property relinquishCertificate
@@ -1063,7 +1063,7 @@ proveCertificate: (args: ProveCertificateArgs, originator?: OriginatorDomainName
 Relinquishes an identity certificate, removing it from the wallet regardless of whether the revocation outpoint has become spent.
 
 ```ts
-relinquishCertificate: (args: RelinquishCertificateArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+relinquishCertificate: (args: RelinquishCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
     relinquished: true;
 }>
 ```
@@ -1074,9 +1074,9 @@ Relinquish an output out of a basket, removing it from tracking without spending
 
 ```ts
 relinquishOutput: (args: {
-    basket: BasketStringUnder300Characters;
+    basket: BasketStringUnder300Bytes;
     output: OutpointString;
-}, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
     relinquished: true;
 }>
 ```
@@ -1086,7 +1086,7 @@ relinquishOutput: (args: {
 Reveals the key linkage between ourselves and a counterparty, to a particular verifier, across all interactions with the counterparty.
 
 ```ts
-revealCounterpartyKeyLinkage: (args: RevealCounterpartyKeyLinkageArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<RevealCounterpartyKeyLinkageResult>
+revealCounterpartyKeyLinkage: (args: RevealCounterpartyKeyLinkageArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<RevealCounterpartyKeyLinkageResult>
 ```
 
 #### Property revealSpecificKeyLinkage
@@ -1094,7 +1094,7 @@ revealCounterpartyKeyLinkage: (args: RevealCounterpartyKeyLinkageArgs, originato
 Reveals the key linkage between ourselves and a counterparty, to a particular verifier, with respect to a specific interaction.
 
 ```ts
-revealSpecificKeyLinkage: (args: RevealSpecificKeyLinkageArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<RevealSpecificKeyLinkageResult>
+revealSpecificKeyLinkage: (args: RevealSpecificKeyLinkageArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<RevealSpecificKeyLinkageResult>
 ```
 
 #### Property signAction
@@ -1102,7 +1102,7 @@ revealSpecificKeyLinkage: (args: RevealSpecificKeyLinkageArgs, originator?: Orig
 Signs a transaction previously created using `createAction`.
 
 ```ts
-signAction: (args: SignActionArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<SignActionResult>
+signAction: (args: SignActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<SignActionResult>
 ```
 
 #### Property verifyHmac
@@ -1110,7 +1110,7 @@ signAction: (args: SignActionArgs, originator?: OriginatorDomainNameStringUnder2
 Verifies an HMAC (Hash-based Message Authentication Code) based on the provided data, protocol, key ID, counterparty, and other factors.
 
 ```ts
-verifyHmac: (args: VerifyHmacArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+verifyHmac: (args: VerifyHmacArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
     valid: true;
 }>
 ```
@@ -1120,7 +1120,7 @@ verifyHmac: (args: VerifyHmacArgs, originator?: OriginatorDomainNameStringUnder2
 Verifies a digital signature for the provided data or hash using a specific protocol, key, and optionally considering privilege and counterparty.
 
 ```ts
-verifySignature: (args: VerifySignatureArgs, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+verifySignature: (args: VerifySignatureArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
     valid: true;
 }>
 ```
@@ -1130,7 +1130,7 @@ verifySignature: (args: VerifySignatureArgs, originator?: OriginatorDomainNameSt
 Continuously waits until the user is authenticated, returning the result once confirmed.
 
 ```ts
-waitForAuthentication: (args: {}, originator?: OriginatorDomainNameStringUnder250Characters) => Promise<{
+waitForAuthentication: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<{
     authenticated: true;
 }>
 ```
@@ -1555,26 +1555,26 @@ export default class ProtoWallet implements Wallet {
     privilegedError: string = "ProtoWallet is a single-keyring wallet, operating without context about whether its configured keyring is privileged.";
     constructor(rootKey: PrivateKey | "anyone", KeyDeriverClass = KeyDeriver) 
     async createAction(args: {
-        description: DescriptionString5to50Characters;
+        description: DescriptionString5to50Bytes;
         inputs?: Array<{
             tx?: BEEF;
             outpoint: OutpointString;
             unlockingScript?: HexString;
             unlockingScriptLength?: PositiveInteger;
-            inputDescription: DescriptionString5to50Characters;
+            inputDescription: DescriptionString5to50Bytes;
             sequenceNumber?: PositiveIntegerOrZero;
         }>;
         outputs?: Array<{
             lockingScript: HexString;
             satoshis: SatoshiValue;
-            outputDescription: DescriptionString5to50Characters;
-            basket?: BasketStringUnder300Characters;
+            outputDescription: DescriptionString5to50Bytes;
+            basket?: BasketStringUnder300Bytes;
             customInstructions?: string;
-            tags?: OutputTagStringUnder300Characters[];
+            tags?: OutputTagStringUnder300Bytes[];
         }>;
         lockTime?: PositiveIntegerOrZero;
         version?: PositiveIntegerOrZero;
-        labels?: LabelStringUnder300Characters[];
+        labels?: LabelStringUnder300Bytes[];
         options?: {
             signAndProcess?: BooleanDefaultTrue;
             acceptDelayedBroadcast?: BooleanDefaultTrue;
@@ -1586,7 +1586,7 @@ export default class ProtoWallet implements Wallet {
             sendWith?: TXIDHexString[];
             randomizeOutputs?: BooleanDefaultTrue;
         };
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         txid?: TXIDHexString;
         tx?: BEEF;
         noSendChange?: OutpointString[];
@@ -1612,7 +1612,7 @@ export default class ProtoWallet implements Wallet {
             noSendChange?: OutpointString[];
             sendWith?: TXIDHexString[];
         };
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         txid?: TXIDHexString;
         tx?: BEEF;
         noSendChange?: OutpointString[];
@@ -1623,11 +1623,11 @@ export default class ProtoWallet implements Wallet {
     }> 
     async abortAction(args: {
         reference: Base64String;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         aborted: true;
     }> 
     async listActions(args: {
-        labels: LabelStringUnder300Characters[];
+        labels: LabelStringUnder300Bytes[];
         labelQueryMode?: "any" | "all";
         includeLabels?: BooleanDefaultFalse;
         includeInputs?: BooleanDefaultFalse;
@@ -1637,15 +1637,15 @@ export default class ProtoWallet implements Wallet {
         includeOutputLockingScripts?: BooleanDefaultFalse;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         totalActions: PositiveIntegerOrZero;
         actions: Array<{
             txid: TXIDHexString;
             satoshis: SatoshiValue;
             status: "completed" | "unprocessed" | "sending" | "unproven" | "unsigned" | "nosend" | "nonfinal";
             isOutgoing: boolean;
-            description: DescriptionString5to50Characters;
-            labels?: LabelStringUnder300Characters[];
+            description: DescriptionString5to50Bytes;
+            labels?: LabelStringUnder300Bytes[];
             version: PositiveIntegerOrZero;
             lockTime: PositiveIntegerOrZero;
             inputs?: Array<{
@@ -1653,7 +1653,7 @@ export default class ProtoWallet implements Wallet {
                 sourceSatoshis: SatoshiValue;
                 sourceLockingScript?: HexString;
                 unlockingScript?: HexString;
-                inputDescription: DescriptionString5to50Characters;
+                inputDescription: DescriptionString5to50Bytes;
                 sequenceNumber: PositiveIntegerOrZero;
             }>;
             outputs?: Array<{
@@ -1661,9 +1661,9 @@ export default class ProtoWallet implements Wallet {
                 satoshis: SatoshiValue;
                 lockingScript?: HexString;
                 spendable: boolean;
-                outputDescription: DescriptionString5to50Characters;
-                basket: BasketStringUnder300Characters;
-                tags: OutputTagStringUnder300Characters[];
+                outputDescription: DescriptionString5to50Bytes;
+                basket: BasketStringUnder300Bytes;
+                tags: OutputTagStringUnder300Bytes[];
                 customInstructions?: string;
             }>;
         }>;
@@ -1679,19 +1679,19 @@ export default class ProtoWallet implements Wallet {
                 senderIdentityKey: PubKeyHex;
             };
             insertionRemittance?: {
-                basket: BasketStringUnder300Characters;
+                basket: BasketStringUnder300Bytes;
                 customInstructions?: string;
-                tags?: OutputTagStringUnder300Characters[];
+                tags?: OutputTagStringUnder300Bytes[];
             };
         }>;
-        description: DescriptionString5to50Characters;
-        labels?: LabelStringUnder300Characters[];
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+        description: DescriptionString5to50Bytes;
+        labels?: LabelStringUnder300Bytes[];
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         accepted: true;
     }> 
     async listOutputs(args: {
-        basket: BasketStringUnder300Characters;
-        tags?: OutputTagStringUnder300Characters[];
+        basket: BasketStringUnder300Bytes;
+        tags?: OutputTagStringUnder300Bytes[];
         tagQueryMode?: "all" | "any";
         include?: "locking scripts" | "entire transactions";
         includeCustomInstructions?: BooleanDefaultFalse;
@@ -1699,7 +1699,7 @@ export default class ProtoWallet implements Wallet {
         includeLabels?: BooleanDefaultFalse;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         totalOutputs: PositiveIntegerOrZero;
         outputs: Array<{
             outpoint: OutpointString;
@@ -1708,36 +1708,36 @@ export default class ProtoWallet implements Wallet {
             tx?: BEEF;
             spendable: true;
             customInstructions?: string;
-            tags?: OutputTagStringUnder300Characters[];
-            labels?: LabelStringUnder300Characters[];
+            tags?: OutputTagStringUnder300Bytes[];
+            labels?: LabelStringUnder300Bytes[];
         }>;
     }> 
     async relinquishOutput(args: {
-        basket: BasketStringUnder300Characters;
+        basket: BasketStringUnder300Bytes;
         output: OutpointString;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         relinquished: true;
     }> 
     async getPublicKey(args: {
         identityKey?: true;
         protocolID?: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID?: KeyIDStringUnder800Characters;
+        keyID?: KeyIDStringUnder800Bytes;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         forSelf?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         publicKey: PubKeyHex;
     }> 
     async revealCounterpartyKeyLinkage(args: {
         counterparty: PubKeyHex;
         verifier: PubKeyHex;
-        privilegedReason?: DescriptionString5to50Characters;
+        privilegedReason?: DescriptionString5to50Bytes;
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         prover: PubKeyHex;
         verifier: PubKeyHex;
         counterparty: PubKeyHex;
@@ -1750,20 +1750,20 @@ export default class ProtoWallet implements Wallet {
         verifier: PubKeyHex;
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         prover: PubKeyHex;
         verifier: PubKeyHex;
         counterparty: PubKeyHex;
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
+        keyID: KeyIDStringUnder800Bytes;
         encryptedLinkage: Byte[];
         encryptedLinkageProof: Byte[];
         proofType: Byte;
@@ -1772,39 +1772,39 @@ export default class ProtoWallet implements Wallet {
         plaintext: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         ciphertext: Byte[];
     }> 
     async decrypt(args: {
         ciphertext: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         plaintext: Byte[];
     }> 
     async createHmac(args: {
         data: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         hmac: Byte[];
     }> 
     async verifyHmac(args: {
@@ -1812,13 +1812,13 @@ export default class ProtoWallet implements Wallet {
         hmac: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         valid: true;
     }> 
     async createSignature(args: {
@@ -1826,13 +1826,13 @@ export default class ProtoWallet implements Wallet {
         hashToDirectlySign?: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         signature: Byte[];
     }> 
     async verifySignature(args: {
@@ -1841,37 +1841,37 @@ export default class ProtoWallet implements Wallet {
         signature: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         forSelf?: BooleanDefaultFalse;
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         valid: true;
     }> 
     async acquireCertificate(args: {
         type: Base64String;
         certifier: PubKeyHex;
         acquisitionProtocol: "direct" | "issuance";
-        fields: Record<CertificateFieldNameUnder50Characters, string>;
+        fields: Record<CertificateFieldNameUnder50Bytes, string>;
         serialNumber?: Base64String;
         revocationOutpoint?: OutpointString;
         signature?: HexString;
         certifierUrl?: string;
         keyringRevealer?: PubKeyHex | "certifier";
-        keyringForSubject?: Record<CertificateFieldNameUnder50Characters, Base64String>;
+        keyringForSubject?: Record<CertificateFieldNameUnder50Bytes, Base64String>;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+        privilegedReason?: DescriptionString5to50Bytes;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         type: Base64String;
         subject: PubKeyHex;
         serialNumber: Base64String;
         certifier: PubKeyHex;
         revocationOutpoint: OutpointString;
         signature: HexString;
-        fields: Record<CertificateFieldNameUnder50Characters, string>;
+        fields: Record<CertificateFieldNameUnder50Bytes, string>;
     }> 
     async listCertificates(args: {
         certifiers: PubKeyHex[];
@@ -1879,8 +1879,8 @@ export default class ProtoWallet implements Wallet {
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+        privilegedReason?: DescriptionString5to50Bytes;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         totalCertificates: PositiveIntegerOrZero;
         certificates: Array<{
             type: Base64String;
@@ -1889,7 +1889,7 @@ export default class ProtoWallet implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, string>;
+            fields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
     async proveCertificate(args: {
@@ -1900,27 +1900,27 @@ export default class ProtoWallet implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, string>;
+            fields: Record<CertificateFieldNameUnder50Bytes, string>;
         };
-        fieldsToReveal: CertificateFieldNameUnder50Characters[];
+        fieldsToReveal: CertificateFieldNameUnder50Bytes[];
         verifier: PubKeyHex;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
-        keyringForVerifier: Record<CertificateFieldNameUnder50Characters, Base64String>;
+        privilegedReason?: DescriptionString5to50Bytes;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        keyringForVerifier: Record<CertificateFieldNameUnder50Bytes, Base64String>;
     }> 
     async relinquishCertificate(args: {
         type: Base64String;
         serialNumber: Base64String;
         certifier: PubKeyHex;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         relinquished: true;
     }> 
     async discoverByIdentityKey(args: {
         identityKey: PubKeyHex;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         totalCertificates: PositiveIntegerOrZero;
         certificates: Array<{
             type: Base64String;
@@ -1929,22 +1929,22 @@ export default class ProtoWallet implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, Base64String>;
+            fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
             certifierInfo: {
-                name: EntityNameStringMax100Characters;
-                iconUrl: EntityIconURLStringMax500Characters;
-                description: DescriptionString5to50Characters;
+                name: EntityNameStringMax100Bytes;
+                iconUrl: EntityIconURLStringMax500Bytes;
+                description: DescriptionString5to50Bytes;
                 trust: PositiveIntegerMax10;
             };
-            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>;
-            decryptedFields: Record<CertificateFieldNameUnder50Characters, string>;
+            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
+            decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
     async discoverByAttributes(args: {
-        attributes: Record<CertificateFieldNameUnder50Characters, string>;
+        attributes: Record<CertificateFieldNameUnder50Bytes, string>;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         totalCertificates: PositiveIntegerOrZero;
         certificates: Array<{
             type: Base64String;
@@ -1953,36 +1953,36 @@ export default class ProtoWallet implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, Base64String>;
+            fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
             certifierInfo: {
-                name: EntityNameStringMax100Characters;
-                iconUrl: EntityIconURLStringMax500Characters;
-                description: DescriptionString5to50Characters;
+                name: EntityNameStringMax100Bytes;
+                iconUrl: EntityIconURLStringMax500Bytes;
+                description: DescriptionString5to50Bytes;
                 trust: PositiveIntegerMax10;
             };
-            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>;
-            decryptedFields: Record<CertificateFieldNameUnder50Characters, string>;
+            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
+            decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
-    async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         authenticated: boolean;
     }> 
-    async waitForAuthentication(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    async waitForAuthentication(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         authenticated: true;
     }> 
-    async getHeight(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    async getHeight(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         height: PositiveInteger;
     }> 
     async getHeaderForHeight(args: {
         height: PositiveInteger;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         header: HexString;
     }> 
-    async getNetwork(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    async getNetwork(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         network: "mainnet" | "testnet";
     }> 
-    async getVersion(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
-        version: VersionString7To30Characters;
+    async getVersion(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        version: VersionString7To30Bytes;
     }> 
 }
 ```
@@ -1998,26 +1998,26 @@ Facilitates wallet operations over the window.CWI interface.
 export default class WindowCWISubstrate implements Wallet {
     constructor() 
     async createAction(args: {
-        description: DescriptionString5to50Characters;
+        description: DescriptionString5to50Bytes;
         inputs?: Array<{
             tx?: BEEF;
             outpoint: OutpointString;
             unlockingScript?: HexString;
             unlockingScriptLength?: PositiveInteger;
-            inputDescription: DescriptionString5to50Characters;
+            inputDescription: DescriptionString5to50Bytes;
             sequenceNumber?: PositiveIntegerOrZero;
         }>;
         outputs?: Array<{
             lockingScript: HexString;
             satoshis: SatoshiValue;
-            outputDescription: DescriptionString5to50Characters;
-            basket?: BasketStringUnder300Characters;
+            outputDescription: DescriptionString5to50Bytes;
+            basket?: BasketStringUnder300Bytes;
             customInstructions?: string;
-            tags?: OutputTagStringUnder300Characters[];
+            tags?: OutputTagStringUnder300Bytes[];
         }>;
         lockTime?: PositiveIntegerOrZero;
         version?: PositiveIntegerOrZero;
-        labels?: LabelStringUnder300Characters[];
+        labels?: LabelStringUnder300Bytes[];
         options?: {
             signAndProcess?: BooleanDefaultTrue;
             acceptDelayedBroadcast?: BooleanDefaultTrue;
@@ -2028,7 +2028,7 @@ export default class WindowCWISubstrate implements Wallet {
             noSendChange?: OutpointString[];
             sendWith?: TXIDHexString[];
         };
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         txid?: TXIDHexString;
         tx?: BEEF;
         noSendChange?: OutpointString[];
@@ -2054,7 +2054,7 @@ export default class WindowCWISubstrate implements Wallet {
             noSendChange?: OutpointString[];
             sendWith: TXIDHexString[];
         };
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         txid?: TXIDHexString;
         tx?: BEEF;
         noSendChange?: OutpointString[];
@@ -2065,11 +2065,11 @@ export default class WindowCWISubstrate implements Wallet {
     }> 
     async abortAction(args: {
         reference: Base64String;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         aborted: true;
     }> 
     async listActions(args: {
-        labels: LabelStringUnder300Characters[];
+        labels: LabelStringUnder300Bytes[];
         labelQueryMode?: "any" | "all";
         includeLabels?: BooleanDefaultFalse;
         includeInputs?: BooleanDefaultFalse;
@@ -2079,15 +2079,15 @@ export default class WindowCWISubstrate implements Wallet {
         includeOutputLockingScripts?: BooleanDefaultFalse;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         totalActions: PositiveIntegerOrZero;
         actions: Array<{
             txid: TXIDHexString;
             satoshis: SatoshiValue;
             status: "completed" | "unprocessed" | "sending" | "unproven" | "unsigned" | "nosend" | "nonfinal";
             isOutgoing: boolean;
-            description: DescriptionString5to50Characters;
-            labels?: LabelStringUnder300Characters[];
+            description: DescriptionString5to50Bytes;
+            labels?: LabelStringUnder300Bytes[];
             version: PositiveIntegerOrZero;
             lockTime: PositiveIntegerOrZero;
             inputs?: Array<{
@@ -2095,7 +2095,7 @@ export default class WindowCWISubstrate implements Wallet {
                 sourceSatoshis: SatoshiValue;
                 sourceLockingScript?: HexString;
                 unlockingScript?: HexString;
-                inputDescription: DescriptionString5to50Characters;
+                inputDescription: DescriptionString5to50Bytes;
                 sequenceNumber: PositiveIntegerOrZero;
             }>;
             outputs?: Array<{
@@ -2103,9 +2103,9 @@ export default class WindowCWISubstrate implements Wallet {
                 satoshis: SatoshiValue;
                 lockingScript?: HexString;
                 spendable: boolean;
-                outputDescription: DescriptionString5to50Characters;
-                basket: BasketStringUnder300Characters;
-                tags: OutputTagStringUnder300Characters[];
+                outputDescription: DescriptionString5to50Bytes;
+                basket: BasketStringUnder300Bytes;
+                tags: OutputTagStringUnder300Bytes[];
                 customInstructions?: string;
             }>;
         }>;
@@ -2121,19 +2121,19 @@ export default class WindowCWISubstrate implements Wallet {
                 senderIdentityKey: PubKeyHex;
             };
             insertionRemittance?: {
-                basket: BasketStringUnder300Characters;
+                basket: BasketStringUnder300Bytes;
                 customInstructions?: string;
-                tags?: OutputTagStringUnder300Characters[];
+                tags?: OutputTagStringUnder300Bytes[];
             };
         }>;
-        description: DescriptionString5to50Characters;
-        labels?: LabelStringUnder300Characters[];
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+        description: DescriptionString5to50Bytes;
+        labels?: LabelStringUnder300Bytes[];
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         accepted: true;
     }> 
     async listOutputs(args: {
-        basket: BasketStringUnder300Characters;
-        tags?: OutputTagStringUnder300Characters[];
+        basket: BasketStringUnder300Bytes;
+        tags?: OutputTagStringUnder300Bytes[];
         tagQueryMode?: "all" | "any";
         include?: "locking scripts" | "entire transactions";
         includeCustomInstructions?: BooleanDefaultFalse;
@@ -2141,7 +2141,7 @@ export default class WindowCWISubstrate implements Wallet {
         includeLabels?: BooleanDefaultFalse;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         totalOutputs: PositiveIntegerOrZero;
         outputs: Array<{
             outpoint: OutpointString;
@@ -2150,36 +2150,36 @@ export default class WindowCWISubstrate implements Wallet {
             tx?: BEEF;
             spendable: true;
             customInstructions?: string;
-            tags?: OutputTagStringUnder300Characters[];
-            labels?: LabelStringUnder300Characters[];
+            tags?: OutputTagStringUnder300Bytes[];
+            labels?: LabelStringUnder300Bytes[];
         }>;
     }> 
     async relinquishOutput(args: {
-        basket: BasketStringUnder300Characters;
+        basket: BasketStringUnder300Bytes;
         output: OutpointString;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         relinquished: true;
     }> 
     async getPublicKey(args: {
         identityKey?: true;
         protocolID?: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID?: KeyIDStringUnder800Characters;
+        keyID?: KeyIDStringUnder800Bytes;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         forSelf?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         publicKey: PubKeyHex;
     }> 
     async revealCounterpartyKeyLinkage(args: {
         counterparty: PubKeyHex;
         verifier: PubKeyHex;
-        privilegedReason?: DescriptionString5to50Characters;
+        privilegedReason?: DescriptionString5to50Bytes;
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         prover: PubKeyHex;
         verifier: PubKeyHex;
         counterparty: PubKeyHex;
@@ -2192,20 +2192,20 @@ export default class WindowCWISubstrate implements Wallet {
         verifier: PubKeyHex;
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         prover: PubKeyHex;
         verifier: PubKeyHex;
         counterparty: PubKeyHex;
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
+        keyID: KeyIDStringUnder800Bytes;
         encryptedLinkage: Byte[];
         encryptedLinkageProof: Byte[];
         proofType: Byte;
@@ -2214,39 +2214,39 @@ export default class WindowCWISubstrate implements Wallet {
         plaintext: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         ciphertext: Byte[];
     }> 
     async decrypt(args: {
         ciphertext: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         plaintext: Byte[];
     }> 
     async createHmac(args: {
         data: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         hmac: Byte[];
     }> 
     async verifyHmac(args: {
@@ -2254,13 +2254,13 @@ export default class WindowCWISubstrate implements Wallet {
         hmac: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         valid: true;
     }> 
     async createSignature(args: {
@@ -2268,13 +2268,13 @@ export default class WindowCWISubstrate implements Wallet {
         hashToDirectlySign?: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         signature: Byte[];
     }> 
     async verifySignature(args: {
@@ -2283,14 +2283,14 @@ export default class WindowCWISubstrate implements Wallet {
         signature: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         forSelf?: BooleanDefaultFalse;
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         valid: true;
     }> 
     async acquireCertificate(args: {
@@ -2299,20 +2299,20 @@ export default class WindowCWISubstrate implements Wallet {
         serialNumber: Base64String;
         revocationOutpoint: OutpointString;
         signature: HexString;
-        fields: Record<CertificateFieldNameUnder50Characters, string>;
+        fields: Record<CertificateFieldNameUnder50Bytes, string>;
         certifier: PubKeyHex;
         keyringRevealer: PubKeyHex | "certifier";
-        keyringForSubject: Record<CertificateFieldNameUnder50Characters, Base64String>;
+        keyringForSubject: Record<CertificateFieldNameUnder50Bytes, Base64String>;
         acquisitionProtocol: "direct" | "issuance";
         certifierUrl?: string;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         type: Base64String;
         subject: PubKeyHex;
         serialNumber: Base64String;
         certifier: PubKeyHex;
         revocationOutpoint: OutpointString;
         signature: HexString;
-        fields: Record<CertificateFieldNameUnder50Characters, string>;
+        fields: Record<CertificateFieldNameUnder50Bytes, string>;
     }> 
     async listCertificates(args: {
         certifiers: PubKeyHex[];
@@ -2320,8 +2320,8 @@ export default class WindowCWISubstrate implements Wallet {
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+        privilegedReason?: DescriptionString5to50Bytes;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         totalCertificates: PositiveIntegerOrZero;
         certificates: Array<{
             type: Base64String;
@@ -2330,7 +2330,7 @@ export default class WindowCWISubstrate implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, string>;
+            fields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
     async proveCertificate(args: {
@@ -2341,27 +2341,27 @@ export default class WindowCWISubstrate implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, string>;
+            fields: Record<CertificateFieldNameUnder50Bytes, string>;
         };
-        fieldsToReveal: CertificateFieldNameUnder50Characters[];
+        fieldsToReveal: CertificateFieldNameUnder50Bytes[];
         verifier: PubKeyHex;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
-        keyringForVerifier: Record<CertificateFieldNameUnder50Characters, Base64String>;
+        privilegedReason?: DescriptionString5to50Bytes;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        keyringForVerifier: Record<CertificateFieldNameUnder50Bytes, Base64String>;
     }> 
     async relinquishCertificate(args: {
         type: Base64String;
         serialNumber: Base64String;
         certifier: PubKeyHex;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         relinquished: true;
     }> 
     async discoverByIdentityKey(args: {
         identityKey: PubKeyHex;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         totalCertificates: PositiveIntegerOrZero;
         certificates: Array<{
             type: Base64String;
@@ -2370,22 +2370,22 @@ export default class WindowCWISubstrate implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, Base64String>;
+            fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
             certifierInfo: {
-                name: EntityNameStringMax100Characters;
-                iconUrl: EntityIconURLStringMax500Characters;
-                description: DescriptionString5to50Characters;
+                name: EntityNameStringMax100Bytes;
+                iconUrl: EntityIconURLStringMax500Bytes;
+                description: DescriptionString5to50Bytes;
                 trust: PositiveIntegerMax10;
             };
-            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>;
-            decryptedFields: Record<CertificateFieldNameUnder50Characters, string>;
+            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
+            decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
     async discoverByAttributes(args: {
-        attributes: Record<CertificateFieldNameUnder50Characters, string>;
+        attributes: Record<CertificateFieldNameUnder50Bytes, string>;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         totalCertificates: PositiveIntegerOrZero;
         certificates: Array<{
             type: Base64String;
@@ -2394,36 +2394,36 @@ export default class WindowCWISubstrate implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, Base64String>;
+            fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
             certifierInfo: {
-                name: EntityNameStringMax100Characters;
-                iconUrl: EntityIconURLStringMax500Characters;
-                description: DescriptionString5to50Characters;
+                name: EntityNameStringMax100Bytes;
+                iconUrl: EntityIconURLStringMax500Bytes;
+                description: DescriptionString5to50Bytes;
                 trust: PositiveIntegerMax10;
             };
-            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>;
-            decryptedFields: Record<CertificateFieldNameUnder50Characters, string>;
+            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
+            decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
-    async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         authenticated: boolean;
     }> 
-    async waitForAuthentication(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    async waitForAuthentication(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         authenticated: true;
     }> 
-    async getHeight(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    async getHeight(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         height: PositiveInteger;
     }> 
     async getHeaderForHeight(args: {
         height: PositiveInteger;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         header: HexString;
     }> 
-    async getNetwork(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    async getNetwork(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         network: "mainnet" | "testnet";
     }> 
-    async getVersion(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
-        version: VersionString7To30Characters;
+    async getVersion(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        version: VersionString7To30Bytes;
     }> 
 }
 ```
@@ -2440,26 +2440,26 @@ export default class XDMSubstrate implements Wallet {
     constructor() 
     async invoke(call, args): Promise<any> 
     async createAction(args: {
-        description: DescriptionString5to50Characters;
+        description: DescriptionString5to50Bytes;
         inputs?: Array<{
             tx?: BEEF;
             outpoint: OutpointString;
             unlockingScript?: HexString;
             unlockingScriptLength?: PositiveInteger;
-            inputDescription: DescriptionString5to50Characters;
+            inputDescription: DescriptionString5to50Bytes;
             sequenceNumber?: PositiveIntegerOrZero;
         }>;
         outputs?: Array<{
             lockingScript: HexString;
             satoshis: SatoshiValue;
-            outputDescription: DescriptionString5to50Characters;
-            basket?: BasketStringUnder300Characters;
+            outputDescription: DescriptionString5to50Bytes;
+            basket?: BasketStringUnder300Bytes;
             customInstructions?: string;
-            tags?: OutputTagStringUnder300Characters[];
+            tags?: OutputTagStringUnder300Bytes[];
         }>;
         lockTime?: PositiveIntegerOrZero;
         version?: PositiveIntegerOrZero;
-        labels?: LabelStringUnder300Characters[];
+        labels?: LabelStringUnder300Bytes[];
         options?: {
             signAndProcess?: BooleanDefaultTrue;
             acceptDelayedBroadcast?: BooleanDefaultTrue;
@@ -2511,7 +2511,7 @@ export default class XDMSubstrate implements Wallet {
         aborted: true;
     }> 
     async listActions(args: {
-        labels: LabelStringUnder300Characters[];
+        labels: LabelStringUnder300Bytes[];
         labelQueryMode?: "any" | "all";
         includeLabels?: BooleanDefaultFalse;
         includeInputs?: BooleanDefaultFalse;
@@ -2528,8 +2528,8 @@ export default class XDMSubstrate implements Wallet {
             satoshis: SatoshiValue;
             status: "completed" | "unprocessed" | "sending" | "unproven" | "unsigned" | "nosend" | "nonfinal";
             isOutgoing: boolean;
-            description: DescriptionString5to50Characters;
-            labels?: LabelStringUnder300Characters[];
+            description: DescriptionString5to50Bytes;
+            labels?: LabelStringUnder300Bytes[];
             version: PositiveIntegerOrZero;
             lockTime: PositiveIntegerOrZero;
             inputs?: Array<{
@@ -2537,7 +2537,7 @@ export default class XDMSubstrate implements Wallet {
                 sourceSatoshis: SatoshiValue;
                 sourceLockingScript?: HexString;
                 unlockingScript?: HexString;
-                inputDescription: DescriptionString5to50Characters;
+                inputDescription: DescriptionString5to50Bytes;
                 sequenceNumber: PositiveIntegerOrZero;
             }>;
             outputs?: Array<{
@@ -2545,9 +2545,9 @@ export default class XDMSubstrate implements Wallet {
                 satoshis: SatoshiValue;
                 lockingScript?: HexString;
                 spendable: boolean;
-                outputDescription: DescriptionString5to50Characters;
-                basket: BasketStringUnder300Characters;
-                tags: OutputTagStringUnder300Characters[];
+                outputDescription: DescriptionString5to50Bytes;
+                basket: BasketStringUnder300Bytes;
+                tags: OutputTagStringUnder300Bytes[];
                 customInstructions?: string;
             }>;
         }>;
@@ -2563,19 +2563,19 @@ export default class XDMSubstrate implements Wallet {
                 senderIdentityKey: PubKeyHex;
             };
             insertionRemittance?: {
-                basket: BasketStringUnder300Characters;
+                basket: BasketStringUnder300Bytes;
                 customInstructions?: string;
-                tags?: OutputTagStringUnder300Characters[];
+                tags?: OutputTagStringUnder300Bytes[];
             };
         }>;
-        description: DescriptionString5to50Characters;
-        labels?: LabelStringUnder300Characters[];
+        description: DescriptionString5to50Bytes;
+        labels?: LabelStringUnder300Bytes[];
     }): Promise<{
         accepted: true;
     }> 
     async listOutputs(args: {
-        basket: BasketStringUnder300Characters;
-        tags?: OutputTagStringUnder300Characters[];
+        basket: BasketStringUnder300Bytes;
+        tags?: OutputTagStringUnder300Bytes[];
         tagQueryMode?: "all" | "any";
         include?: "locking scripts" | "entire transactions";
         includeCustomInstructions?: BooleanDefaultFalse;
@@ -2592,12 +2592,12 @@ export default class XDMSubstrate implements Wallet {
             tx?: BEEF;
             spendable: true;
             customInstructions?: string;
-            tags?: OutputTagStringUnder300Characters[];
-            labels?: LabelStringUnder300Characters[];
+            tags?: OutputTagStringUnder300Bytes[];
+            labels?: LabelStringUnder300Bytes[];
         }>;
     }> 
     async relinquishOutput(args: {
-        basket: BasketStringUnder300Characters;
+        basket: BasketStringUnder300Bytes;
         output: OutpointString;
     }): Promise<{
         relinquished: true;
@@ -2606,11 +2606,11 @@ export default class XDMSubstrate implements Wallet {
         identityKey?: true;
         protocolID?: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID?: KeyIDStringUnder800Characters;
+        keyID?: KeyIDStringUnder800Bytes;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         forSelf?: BooleanDefaultFalse;
     }): Promise<{
@@ -2619,7 +2619,7 @@ export default class XDMSubstrate implements Wallet {
     async revealCounterpartyKeyLinkage(args: {
         counterparty: PubKeyHex;
         verifier: PubKeyHex;
-        privilegedReason?: DescriptionString5to50Characters;
+        privilegedReason?: DescriptionString5to50Bytes;
         privileged?: BooleanDefaultFalse;
     }): Promise<{
         prover: PubKeyHex;
@@ -2634,10 +2634,10 @@ export default class XDMSubstrate implements Wallet {
         verifier: PubKeyHex;
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         privileged?: BooleanDefaultFalse;
     }): Promise<{
         prover: PubKeyHex;
@@ -2645,9 +2645,9 @@ export default class XDMSubstrate implements Wallet {
         counterparty: PubKeyHex;
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
+        keyID: KeyIDStringUnder800Bytes;
         encryptedLinkage: Byte[];
         encryptedLinkageProof: Byte[];
         proofType: Byte;
@@ -2656,10 +2656,10 @@ export default class XDMSubstrate implements Wallet {
         plaintext: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
     }): Promise<{
@@ -2669,10 +2669,10 @@ export default class XDMSubstrate implements Wallet {
         ciphertext: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
     }): Promise<{
@@ -2682,10 +2682,10 @@ export default class XDMSubstrate implements Wallet {
         data: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
     }): Promise<{
@@ -2696,10 +2696,10 @@ export default class XDMSubstrate implements Wallet {
         hmac: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
     }): Promise<{
@@ -2710,10 +2710,10 @@ export default class XDMSubstrate implements Wallet {
         hashToDirectlySign?: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
     }): Promise<{
@@ -2725,10 +2725,10 @@ export default class XDMSubstrate implements Wallet {
         signature: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         forSelf?: BooleanDefaultFalse;
         privileged?: BooleanDefaultFalse;
@@ -2741,10 +2741,10 @@ export default class XDMSubstrate implements Wallet {
         serialNumber: Base64String;
         revocationOutpoint: OutpointString;
         signature: HexString;
-        fields: Record<CertificateFieldNameUnder50Characters, string>;
+        fields: Record<CertificateFieldNameUnder50Bytes, string>;
         certifier: PubKeyHex;
         keyringRevealer: PubKeyHex | "certifier";
-        keyringForSubject: Record<CertificateFieldNameUnder50Characters, Base64String>;
+        keyringForSubject: Record<CertificateFieldNameUnder50Bytes, Base64String>;
         acquisitionProtocol: "direct" | "issuance";
         certifierUrl?: string;
     }): Promise<{
@@ -2754,7 +2754,7 @@ export default class XDMSubstrate implements Wallet {
         certifier: PubKeyHex;
         revocationOutpoint: OutpointString;
         signature: HexString;
-        fields: Record<CertificateFieldNameUnder50Characters, string>;
+        fields: Record<CertificateFieldNameUnder50Bytes, string>;
     }> 
     async listCertificates(args: {
         certifiers: PubKeyHex[];
@@ -2762,7 +2762,7 @@ export default class XDMSubstrate implements Wallet {
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
+        privilegedReason?: DescriptionString5to50Bytes;
     }): Promise<{
         totalCertificates: PositiveIntegerOrZero;
         certificates: Array<{
@@ -2772,7 +2772,7 @@ export default class XDMSubstrate implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, string>;
+            fields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
     async proveCertificate(args: {
@@ -2783,14 +2783,14 @@ export default class XDMSubstrate implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, string>;
+            fields: Record<CertificateFieldNameUnder50Bytes, string>;
         };
-        fieldsToReveal: CertificateFieldNameUnder50Characters[];
+        fieldsToReveal: CertificateFieldNameUnder50Bytes[];
         verifier: PubKeyHex;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
+        privilegedReason?: DescriptionString5to50Bytes;
     }): Promise<{
-        keyringForVerifier: Record<CertificateFieldNameUnder50Characters, Base64String>;
+        keyringForVerifier: Record<CertificateFieldNameUnder50Bytes, Base64String>;
     }> 
     async relinquishCertificate(args: {
         type: Base64String;
@@ -2812,19 +2812,19 @@ export default class XDMSubstrate implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, Base64String>;
+            fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
             certifierInfo: {
-                name: EntityNameStringMax100Characters;
-                iconUrl: EntityIconURLStringMax500Characters;
-                description: DescriptionString5to50Characters;
+                name: EntityNameStringMax100Bytes;
+                iconUrl: EntityIconURLStringMax500Bytes;
+                description: DescriptionString5to50Bytes;
                 trust: PositiveIntegerMax10;
             };
-            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>;
-            decryptedFields: Record<CertificateFieldNameUnder50Characters, string>;
+            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
+            decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
     async discoverByAttributes(args: {
-        attributes: Record<CertificateFieldNameUnder50Characters, string>;
+        attributes: Record<CertificateFieldNameUnder50Bytes, string>;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
     }): Promise<{
@@ -2836,15 +2836,15 @@ export default class XDMSubstrate implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, Base64String>;
+            fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
             certifierInfo: {
-                name: EntityNameStringMax100Characters;
-                iconUrl: EntityIconURLStringMax500Characters;
-                description: DescriptionString5to50Characters;
+                name: EntityNameStringMax100Bytes;
+                iconUrl: EntityIconURLStringMax500Bytes;
+                description: DescriptionString5to50Bytes;
                 trust: PositiveIntegerMax10;
             };
-            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>;
-            decryptedFields: Record<CertificateFieldNameUnder50Characters, string>;
+            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
+            decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
     async isAuthenticated(args: {}): Promise<{
@@ -2865,7 +2865,7 @@ export default class XDMSubstrate implements Wallet {
         network: "mainnet" | "testnet";
     }> 
     async getVersion(args: {}): Promise<{
-        version: VersionString7To30Characters;
+        version: VersionString7To30Bytes;
     }> 
 }
 ```
@@ -2882,26 +2882,26 @@ export default class WalletWireTransceiver implements Wallet {
     wire: WalletWire;
     constructor(wire: WalletWire) 
     async createAction(args: {
-        description: DescriptionString5to50Characters;
+        description: DescriptionString5to50Bytes;
         inputBEEF?: BEEF;
         inputs?: Array<{
             outpoint: OutpointString;
             unlockingScript?: HexString;
             unlockingScriptLength?: PositiveInteger;
-            inputDescription: DescriptionString5to50Characters;
+            inputDescription: DescriptionString5to50Bytes;
             sequenceNumber?: PositiveIntegerOrZero;
         }>;
         outputs?: Array<{
             lockingScript: HexString;
             satoshis: SatoshiValue;
-            outputDescription: DescriptionString5to50Characters;
-            basket?: BasketStringUnder300Characters;
+            outputDescription: DescriptionString5to50Bytes;
+            basket?: BasketStringUnder300Bytes;
             customInstructions?: string;
-            tags?: OutputTagStringUnder300Characters[];
+            tags?: OutputTagStringUnder300Bytes[];
         }>;
         lockTime?: PositiveIntegerOrZero;
         version?: PositiveIntegerOrZero;
-        labels?: LabelStringUnder300Characters[];
+        labels?: LabelStringUnder300Bytes[];
         options?: {
             signAndProcess?: BooleanDefaultTrue;
             acceptDelayedBroadcast?: BooleanDefaultTrue;
@@ -2913,7 +2913,7 @@ export default class WalletWireTransceiver implements Wallet {
             sendWith?: TXIDHexString[];
             randomizeOutputs?: BooleanDefaultTrue;
         };
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         txid?: TXIDHexString;
         tx?: BEEF;
         noSendChange?: OutpointString[];
@@ -2939,7 +2939,7 @@ export default class WalletWireTransceiver implements Wallet {
             noSendChange?: OutpointString[];
             sendWith: TXIDHexString[];
         };
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         txid?: TXIDHexString;
         tx?: BEEF;
         noSendChange?: OutpointString[];
@@ -2950,12 +2950,12 @@ export default class WalletWireTransceiver implements Wallet {
     }> 
     async abortAction(args: {
         reference: Base64String;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         aborted: true;
     }> 
     async listActions(args: {
         seekPermission?: BooleanDefaultTrue;
-        labels: LabelStringUnder300Characters[];
+        labels: LabelStringUnder300Bytes[];
         labelQueryMode?: "any" | "all";
         includeLabels?: BooleanDefaultFalse;
         includeInputs?: BooleanDefaultFalse;
@@ -2965,15 +2965,15 @@ export default class WalletWireTransceiver implements Wallet {
         includeOutputLockingScripts?: BooleanDefaultFalse;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         totalActions: PositiveIntegerOrZero;
         actions: Array<{
             txid: TXIDHexString;
             satoshis: SatoshiValue;
             status: "completed" | "unprocessed" | "sending" | "unproven" | "unsigned" | "nosend" | "nonfinal";
             isOutgoing: boolean;
-            description: DescriptionString5to50Characters;
-            labels?: LabelStringUnder300Characters[];
+            description: DescriptionString5to50Bytes;
+            labels?: LabelStringUnder300Bytes[];
             version: PositiveIntegerOrZero;
             lockTime: PositiveIntegerOrZero;
             inputs?: Array<{
@@ -2981,7 +2981,7 @@ export default class WalletWireTransceiver implements Wallet {
                 sourceSatoshis: SatoshiValue;
                 sourceLockingScript?: HexString;
                 unlockingScript?: HexString;
-                inputDescription: DescriptionString5to50Characters;
+                inputDescription: DescriptionString5to50Bytes;
                 sequenceNumber: PositiveIntegerOrZero;
             }>;
             outputs?: Array<{
@@ -2989,9 +2989,9 @@ export default class WalletWireTransceiver implements Wallet {
                 satoshis: SatoshiValue;
                 lockingScript?: HexString;
                 spendable: boolean;
-                outputDescription: DescriptionString5to50Characters;
-                basket: BasketStringUnder300Characters;
-                tags: OutputTagStringUnder300Characters[];
+                outputDescription: DescriptionString5to50Bytes;
+                basket: BasketStringUnder300Bytes;
+                tags: OutputTagStringUnder300Bytes[];
                 customInstructions?: string;
             }>;
         }>;
@@ -3008,20 +3008,20 @@ export default class WalletWireTransceiver implements Wallet {
                 senderIdentityKey: PubKeyHex;
             };
             insertionRemittance?: {
-                basket: BasketStringUnder300Characters;
+                basket: BasketStringUnder300Bytes;
                 customInstructions?: string;
-                tags?: OutputTagStringUnder300Characters[];
+                tags?: OutputTagStringUnder300Bytes[];
             };
         }>;
-        description: DescriptionString5to50Characters;
-        labels?: LabelStringUnder300Characters[];
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+        description: DescriptionString5to50Bytes;
+        labels?: LabelStringUnder300Bytes[];
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         accepted: true;
     }> 
     async listOutputs(args: {
         seekPermission?: BooleanDefaultTrue;
-        basket: BasketStringUnder300Characters;
-        tags?: OutputTagStringUnder300Characters[];
+        basket: BasketStringUnder300Bytes;
+        tags?: OutputTagStringUnder300Bytes[];
         tagQueryMode?: "all" | "any";
         include?: "locking scripts" | "entire transactions";
         includeCustomInstructions?: BooleanDefaultFalse;
@@ -3029,7 +3029,7 @@ export default class WalletWireTransceiver implements Wallet {
         includeLabels?: BooleanDefaultFalse;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         totalOutputs: PositiveIntegerOrZero;
         BEEF?: BEEF;
         outputs: Array<{
@@ -3038,14 +3038,14 @@ export default class WalletWireTransceiver implements Wallet {
             lockingScript?: HexString;
             spendable: true;
             customInstructions?: string;
-            tags?: OutputTagStringUnder300Characters[];
-            labels?: LabelStringUnder300Characters[];
+            tags?: OutputTagStringUnder300Bytes[];
+            labels?: LabelStringUnder300Bytes[];
         }>;
     }> 
     async relinquishOutput(args: {
-        basket: BasketStringUnder300Characters;
+        basket: BasketStringUnder300Bytes;
         output: OutpointString;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         relinquished: true;
     }> 
     async getPublicKey(args: {
@@ -3053,22 +3053,22 @@ export default class WalletWireTransceiver implements Wallet {
         identityKey?: true;
         protocolID?: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID?: KeyIDStringUnder800Characters;
+        keyID?: KeyIDStringUnder800Bytes;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         forSelf?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         publicKey: PubKeyHex;
     }> 
     async revealCounterpartyKeyLinkage(args: {
         counterparty: PubKeyHex;
         verifier: PubKeyHex;
-        privilegedReason?: DescriptionString5to50Characters;
+        privilegedReason?: DescriptionString5to50Bytes;
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         prover: PubKeyHex;
         verifier: PubKeyHex;
         counterparty: PubKeyHex;
@@ -3081,20 +3081,20 @@ export default class WalletWireTransceiver implements Wallet {
         verifier: PubKeyHex;
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         prover: PubKeyHex;
         verifier: PubKeyHex;
         counterparty: PubKeyHex;
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
+        keyID: KeyIDStringUnder800Bytes;
         encryptedLinkage: Byte[];
         encryptedLinkageProof: Byte[];
         proofType: Byte;
@@ -3104,13 +3104,13 @@ export default class WalletWireTransceiver implements Wallet {
         plaintext: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         ciphertext: Byte[];
     }> 
     async decrypt(args: {
@@ -3118,13 +3118,13 @@ export default class WalletWireTransceiver implements Wallet {
         ciphertext: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         plaintext: Byte[];
     }> 
     async createHmac(args: {
@@ -3132,13 +3132,13 @@ export default class WalletWireTransceiver implements Wallet {
         data: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         hmac: Byte[];
     }> 
     async verifyHmac(args: {
@@ -3147,13 +3147,13 @@ export default class WalletWireTransceiver implements Wallet {
         hmac: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         valid: true;
     }> 
     async createSignature(args: {
@@ -3162,13 +3162,13 @@ export default class WalletWireTransceiver implements Wallet {
         hashToDirectlySign?: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         signature: Byte[];
     }> 
     async verifySignature(args: {
@@ -3178,37 +3178,37 @@ export default class WalletWireTransceiver implements Wallet {
         signature: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         forSelf?: BooleanDefaultFalse;
         privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         valid: true;
     }> 
     async acquireCertificate(args: {
         type: Base64String;
         certifier: PubKeyHex;
         acquisitionProtocol: "direct" | "issuance";
-        fields: Record<CertificateFieldNameUnder50Characters, string>;
+        fields: Record<CertificateFieldNameUnder50Bytes, string>;
         serialNumber?: Base64String;
         revocationOutpoint?: OutpointString;
         signature?: HexString;
         certifierUrl?: string;
         keyringRevealer?: PubKeyHex | "certifier";
-        keyringForSubject?: Record<CertificateFieldNameUnder50Characters, Base64String>;
+        keyringForSubject?: Record<CertificateFieldNameUnder50Bytes, Base64String>;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+        privilegedReason?: DescriptionString5to50Bytes;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         type: Base64String;
         subject: PubKeyHex;
         serialNumber: Base64String;
         certifier: PubKeyHex;
         revocationOutpoint: OutpointString;
         signature: HexString;
-        fields: Record<CertificateFieldNameUnder50Characters, string>;
+        fields: Record<CertificateFieldNameUnder50Bytes, string>;
     }> 
     async listCertificates(args: {
         certifiers: PubKeyHex[];
@@ -3216,8 +3216,8 @@ export default class WalletWireTransceiver implements Wallet {
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+        privilegedReason?: DescriptionString5to50Bytes;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         totalCertificates: PositiveIntegerOrZero;
         certificates: Array<{
             type: Base64String;
@@ -3226,7 +3226,7 @@ export default class WalletWireTransceiver implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, string>;
+            fields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
     async proveCertificate(args: {
@@ -3237,20 +3237,20 @@ export default class WalletWireTransceiver implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, string>;
+            fields: Record<CertificateFieldNameUnder50Bytes, string>;
         };
-        fieldsToReveal: CertificateFieldNameUnder50Characters[];
+        fieldsToReveal: CertificateFieldNameUnder50Bytes[];
         verifier: PubKeyHex;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
-        keyringForVerifier: Record<CertificateFieldNameUnder50Characters, Base64String>;
+        privilegedReason?: DescriptionString5to50Bytes;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        keyringForVerifier: Record<CertificateFieldNameUnder50Bytes, Base64String>;
     }> 
     async relinquishCertificate(args: {
         type: Base64String;
         serialNumber: Base64String;
         certifier: PubKeyHex;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         relinquished: true;
     }> 
     async discoverByIdentityKey(args: {
@@ -3258,7 +3258,7 @@ export default class WalletWireTransceiver implements Wallet {
         identityKey: PubKeyHex;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         totalCertificates: PositiveIntegerOrZero;
         certificates: Array<{
             type: Base64String;
@@ -3267,23 +3267,23 @@ export default class WalletWireTransceiver implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, Base64String>;
+            fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
             certifierInfo: {
-                name: EntityNameStringMax100Characters;
-                iconUrl: EntityIconURLStringMax500Characters;
-                description: DescriptionString5to50Characters;
+                name: EntityNameStringMax100Bytes;
+                iconUrl: EntityIconURLStringMax500Bytes;
+                description: DescriptionString5to50Bytes;
                 trust: PositiveIntegerMax10;
             };
-            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>;
-            decryptedFields: Record<CertificateFieldNameUnder50Characters, string>;
+            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
+            decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
     async discoverByAttributes(args: {
         seekPermission?: BooleanDefaultTrue;
-        attributes: Record<CertificateFieldNameUnder50Characters, string>;
+        attributes: Record<CertificateFieldNameUnder50Bytes, string>;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         totalCertificates: PositiveIntegerOrZero;
         certificates: Array<{
             type: Base64String;
@@ -3292,36 +3292,36 @@ export default class WalletWireTransceiver implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, Base64String>;
+            fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
             certifierInfo: {
-                name: EntityNameStringMax100Characters;
-                iconUrl: EntityIconURLStringMax500Characters;
-                description: DescriptionString5to50Characters;
+                name: EntityNameStringMax100Bytes;
+                iconUrl: EntityIconURLStringMax500Bytes;
+                description: DescriptionString5to50Bytes;
                 trust: PositiveIntegerMax10;
             };
-            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>;
-            decryptedFields: Record<CertificateFieldNameUnder50Characters, string>;
+            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
+            decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
-    async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         authenticated: boolean;
     }> 
-    async waitForAuthentication(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    async waitForAuthentication(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         authenticated: true;
     }> 
-    async getHeight(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    async getHeight(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         height: PositiveInteger;
     }> 
     async getHeaderForHeight(args: {
         height: PositiveInteger;
-    }, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         header: HexString;
     }> 
-    async getNetwork(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
+    async getNetwork(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         network: "mainnet" | "testnet";
     }> 
-    async getVersion(args: {}, originator?: OriginatorDomainNameStringUnder250Characters): Promise<{
-        version: VersionString7To30Characters;
+    async getVersion(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        version: VersionString7To30Bytes;
     }> 
 }
 ```
@@ -3351,30 +3351,30 @@ The SDK is how applications communicate with wallets over a communications subst
 ```ts
 export default class WalletClient implements Wallet {
     public substrate: "auto" | Wallet;
-    originator?: OriginatorDomainNameStringUnder250Characters;
-    constructor(substrate: "auto" | "Cicada" | "XDM" | "window.CWI" | Wallet = "auto", originator?: OriginatorDomainNameStringUnder250Characters) 
+    originator?: OriginatorDomainNameStringUnder250Bytes;
+    constructor(substrate: "auto" | "Cicada" | "XDM" | "window.CWI" | Wallet = "auto", originator?: OriginatorDomainNameStringUnder250Bytes) 
     async connectToSubstrate() 
     async createAction(args: {
-        description: DescriptionString5to50Characters;
+        description: DescriptionString5to50Bytes;
         inputs?: Array<{
             tx?: BEEF;
             outpoint: OutpointString;
             unlockingScript?: HexString;
             unlockingScriptLength?: PositiveInteger;
-            inputDescription: DescriptionString5to50Characters;
+            inputDescription: DescriptionString5to50Bytes;
             sequenceNumber?: PositiveIntegerOrZero;
         }>;
         outputs?: Array<{
             lockingScript: HexString;
             satoshis: SatoshiValue;
-            outputDescription: DescriptionString5to50Characters;
-            basket?: BasketStringUnder300Characters;
+            outputDescription: DescriptionString5to50Bytes;
+            basket?: BasketStringUnder300Bytes;
             customInstructions?: string;
-            tags?: OutputTagStringUnder300Characters[];
+            tags?: OutputTagStringUnder300Bytes[];
         }>;
         lockTime?: PositiveIntegerOrZero;
         version?: PositiveIntegerOrZero;
-        labels?: LabelStringUnder300Characters[];
+        labels?: LabelStringUnder300Bytes[];
         options?: {
             signAndProcess?: BooleanDefaultTrue;
             acceptDelayedBroadcast?: BooleanDefaultTrue;
@@ -3426,7 +3426,7 @@ export default class WalletClient implements Wallet {
         aborted: true;
     }> 
     async listActions(args: {
-        labels: LabelStringUnder300Characters[];
+        labels: LabelStringUnder300Bytes[];
         labelQueryMode?: "any" | "all";
         includeLabels?: BooleanDefaultFalse;
         includeInputs?: BooleanDefaultFalse;
@@ -3443,8 +3443,8 @@ export default class WalletClient implements Wallet {
             satoshis: SatoshiValue;
             status: "completed" | "unprocessed" | "sending" | "unproven" | "unsigned" | "nosend" | "nonfinal";
             isOutgoing: boolean;
-            description: DescriptionString5to50Characters;
-            labels?: LabelStringUnder300Characters[];
+            description: DescriptionString5to50Bytes;
+            labels?: LabelStringUnder300Bytes[];
             version: PositiveIntegerOrZero;
             lockTime: PositiveIntegerOrZero;
             inputs?: Array<{
@@ -3452,7 +3452,7 @@ export default class WalletClient implements Wallet {
                 sourceSatoshis: SatoshiValue;
                 sourceLockingScript?: HexString;
                 unlockingScript?: HexString;
-                inputDescription: DescriptionString5to50Characters;
+                inputDescription: DescriptionString5to50Bytes;
                 sequenceNumber: PositiveIntegerOrZero;
             }>;
             outputs?: Array<{
@@ -3460,9 +3460,9 @@ export default class WalletClient implements Wallet {
                 satoshis: SatoshiValue;
                 lockingScript?: HexString;
                 spendable: boolean;
-                outputDescription: DescriptionString5to50Characters;
-                basket: BasketStringUnder300Characters;
-                tags: OutputTagStringUnder300Characters[];
+                outputDescription: DescriptionString5to50Bytes;
+                basket: BasketStringUnder300Bytes;
+                tags: OutputTagStringUnder300Bytes[];
                 customInstructions?: string;
             }>;
         }>;
@@ -3478,19 +3478,19 @@ export default class WalletClient implements Wallet {
                 senderIdentityKey: PubKeyHex;
             };
             insertionRemittance?: {
-                basket: BasketStringUnder300Characters;
+                basket: BasketStringUnder300Bytes;
                 customInstructions?: string;
-                tags?: OutputTagStringUnder300Characters[];
+                tags?: OutputTagStringUnder300Bytes[];
             };
         }>;
-        description: DescriptionString5to50Characters;
-        labels?: LabelStringUnder300Characters[];
+        description: DescriptionString5to50Bytes;
+        labels?: LabelStringUnder300Bytes[];
     }): Promise<{
         accepted: true;
     }> 
     async listOutputs(args: {
-        basket: BasketStringUnder300Characters;
-        tags?: OutputTagStringUnder300Characters[];
+        basket: BasketStringUnder300Bytes;
+        tags?: OutputTagStringUnder300Bytes[];
         tagQueryMode?: "all" | "any";
         include?: "locking scripts" | "entire transactions";
         includeCustomInstructions?: BooleanDefaultFalse;
@@ -3507,12 +3507,12 @@ export default class WalletClient implements Wallet {
             tx?: BEEF;
             spendable: true;
             customInstructions?: string;
-            tags?: OutputTagStringUnder300Characters[];
-            labels?: LabelStringUnder300Characters[];
+            tags?: OutputTagStringUnder300Bytes[];
+            labels?: LabelStringUnder300Bytes[];
         }>;
     }> 
     async relinquishOutput(args: {
-        basket: BasketStringUnder300Characters;
+        basket: BasketStringUnder300Bytes;
         output: OutpointString;
     }): Promise<{
         relinquished: true;
@@ -3521,11 +3521,11 @@ export default class WalletClient implements Wallet {
         identityKey?: true;
         protocolID?: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID?: KeyIDStringUnder800Characters;
+        keyID?: KeyIDStringUnder800Bytes;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         forSelf?: BooleanDefaultFalse;
     }): Promise<{
@@ -3534,7 +3534,7 @@ export default class WalletClient implements Wallet {
     async revealCounterpartyKeyLinkage(args: {
         counterparty: PubKeyHex;
         verifier: PubKeyHex;
-        privilegedReason?: DescriptionString5to50Characters;
+        privilegedReason?: DescriptionString5to50Bytes;
         privileged?: BooleanDefaultFalse;
     }): Promise<{
         prover: PubKeyHex;
@@ -3549,10 +3549,10 @@ export default class WalletClient implements Wallet {
         verifier: PubKeyHex;
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         privileged?: BooleanDefaultFalse;
     }): Promise<{
         prover: PubKeyHex;
@@ -3560,9 +3560,9 @@ export default class WalletClient implements Wallet {
         counterparty: PubKeyHex;
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
+        keyID: KeyIDStringUnder800Bytes;
         encryptedLinkage: Byte[];
         encryptedLinkageProof: Byte[];
         proofType: Byte;
@@ -3571,10 +3571,10 @@ export default class WalletClient implements Wallet {
         plaintext: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
     }): Promise<{
@@ -3584,10 +3584,10 @@ export default class WalletClient implements Wallet {
         ciphertext: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
     }): Promise<{
@@ -3597,10 +3597,10 @@ export default class WalletClient implements Wallet {
         data: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
     }): Promise<{
@@ -3611,10 +3611,10 @@ export default class WalletClient implements Wallet {
         hmac: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
     }): Promise<{
@@ -3625,10 +3625,10 @@ export default class WalletClient implements Wallet {
         hashToDirectlySign?: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         privileged?: BooleanDefaultFalse;
     }): Promise<{
@@ -3640,10 +3640,10 @@ export default class WalletClient implements Wallet {
         signature: Byte[];
         protocolID: [
             0 | 1 | 2,
-            ProtocolString5To400Characters
+            ProtocolString5To400Bytes
         ];
-        keyID: KeyIDStringUnder800Characters;
-        privilegedReason?: DescriptionString5to50Characters;
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
         counterparty?: PubKeyHex | "self" | "anyone";
         forSelf?: BooleanDefaultFalse;
         privileged?: BooleanDefaultFalse;
@@ -3656,10 +3656,10 @@ export default class WalletClient implements Wallet {
         serialNumber: Base64String;
         revocationOutpoint: OutpointString;
         signature: HexString;
-        fields: Record<CertificateFieldNameUnder50Characters, string>;
+        fields: Record<CertificateFieldNameUnder50Bytes, string>;
         certifier: PubKeyHex;
         keyringRevealer: PubKeyHex | "certifier";
-        keyringForSubject: Record<CertificateFieldNameUnder50Characters, Base64String>;
+        keyringForSubject: Record<CertificateFieldNameUnder50Bytes, Base64String>;
         acquisitionProtocol: "direct" | "issuance";
         certifierUrl?: string;
     }): Promise<{
@@ -3669,7 +3669,7 @@ export default class WalletClient implements Wallet {
         certifier: PubKeyHex;
         revocationOutpoint: OutpointString;
         signature: HexString;
-        fields: Record<CertificateFieldNameUnder50Characters, string>;
+        fields: Record<CertificateFieldNameUnder50Bytes, string>;
     }> 
     async listCertificates(args: {
         certifiers: PubKeyHex[];
@@ -3677,7 +3677,7 @@ export default class WalletClient implements Wallet {
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
+        privilegedReason?: DescriptionString5to50Bytes;
     }): Promise<{
         totalCertificates: PositiveIntegerOrZero;
         certificates: Array<{
@@ -3687,7 +3687,7 @@ export default class WalletClient implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, string>;
+            fields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
     async proveCertificate(args: {
@@ -3698,14 +3698,14 @@ export default class WalletClient implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, string>;
+            fields: Record<CertificateFieldNameUnder50Bytes, string>;
         };
-        fieldsToReveal: CertificateFieldNameUnder50Characters[];
+        fieldsToReveal: CertificateFieldNameUnder50Bytes[];
         verifier: PubKeyHex;
         privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Characters;
+        privilegedReason?: DescriptionString5to50Bytes;
     }): Promise<{
-        keyringForVerifier: Record<CertificateFieldNameUnder50Characters, Base64String>;
+        keyringForVerifier: Record<CertificateFieldNameUnder50Bytes, Base64String>;
     }> 
     async relinquishCertificate(args: {
         type: Base64String;
@@ -3727,19 +3727,19 @@ export default class WalletClient implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, Base64String>;
+            fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
             certifierInfo: {
-                name: EntityNameStringMax100Characters;
-                iconUrl: EntityIconURLStringMax500Characters;
-                description: DescriptionString5to50Characters;
+                name: EntityNameStringMax100Bytes;
+                iconUrl: EntityIconURLStringMax500Bytes;
+                description: DescriptionString5to50Bytes;
                 trust: PositiveIntegerMax10;
             };
-            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>;
-            decryptedFields: Record<CertificateFieldNameUnder50Characters, string>;
+            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
+            decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
     async discoverByAttributes(args: {
-        attributes: Record<CertificateFieldNameUnder50Characters, string>;
+        attributes: Record<CertificateFieldNameUnder50Bytes, string>;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
     }): Promise<{
@@ -3751,15 +3751,15 @@ export default class WalletClient implements Wallet {
             certifier: PubKeyHex;
             revocationOutpoint: OutpointString;
             signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Characters, Base64String>;
+            fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
             certifierInfo: {
-                name: EntityNameStringMax100Characters;
-                iconUrl: EntityIconURLStringMax500Characters;
-                description: DescriptionString5to50Characters;
+                name: EntityNameStringMax100Bytes;
+                iconUrl: EntityIconURLStringMax500Bytes;
+                description: DescriptionString5to50Bytes;
                 trust: PositiveIntegerMax10;
             };
-            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>;
-            decryptedFields: Record<CertificateFieldNameUnder50Characters, string>;
+            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
+            decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
     async isAuthenticated(args: {} = {}): Promise<{
@@ -3780,7 +3780,7 @@ export default class WalletClient implements Wallet {
         network: "mainnet" | "testnet";
     }> 
     async getVersion(args: {} = {}): Promise<{
-        version: VersionString7To30Characters;
+        version: VersionString7To30Bytes;
     }> 
 }
 ```
@@ -3809,19 +3809,19 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [AcquisitionProtocol](#type-acquisitionprotocol) | [EntityNameStringMax100Characters](#type-entitynamestringmax100characters) | [PositiveIntegerMax10](#type-positiveintegermax10) |
-| [ActionStatus](#type-actionstatus) | [ErrorCodeString10To40Characters](#type-errorcodestring10to40characters) | [PositiveIntegerOrZero](#type-positiveintegerorzero) |
-| [AtomicBEEF](#type-atomicbeef) | [ErrorDescriptionString20To200Characters](#type-errordescriptionstring20to200characters) | [ProtocolString5To400Characters](#type-protocolstring5to400characters) |
+| [AcquisitionProtocol](#type-acquisitionprotocol) | [EntityNameStringMax100Bytes](#type-entitynamestringmax100characters) | [PositiveIntegerMax10](#type-positiveintegermax10) |
+| [ActionStatus](#type-actionstatus) | [ErrorCodeString10To40Bytes](#type-errorcodestring10to40characters) | [PositiveIntegerOrZero](#type-positiveintegerorzero) |
+| [AtomicBEEF](#type-atomicbeef) | [ErrorDescriptionString20To200Bytes](#type-errordescriptionstring20to200characters) | [ProtocolString5To400Bytes](#type-protocolstring5to400characters) |
 | [BEEF](#type-beef) | [HexString](#type-hexstring) | [PubKeyHex](#type-pubkeyhex) |
 | [Base64String](#type-base64string) | [ISOTimestampString](#type-isotimestampstring) | [SatoshiValue](#type-satoshivalue) |
-| [BasketStringUnder300Characters](#type-basketstringunder300characters) | [KeyIDStringUnder800Characters](#type-keyidstringunder800characters) | [TXIDHexString](#type-txidhexstring) |
+| [BasketStringUnder300Bytes](#type-basketstringunder300characters) | [KeyIDStringUnder800Bytes](#type-keyidstringunder800characters) | [TXIDHexString](#type-txidhexstring) |
 | [BooleanDefaultFalse](#type-booleandefaultfalse) | [KeyringRevealer](#type-keyringrevealer) | [TrustSelf](#type-trustself) |
-| [BooleanDefaultTrue](#type-booleandefaulttrue) | [LabelStringUnder300Characters](#type-labelstringunder300characters) | [VersionString7To30Characters](#type-versionstring7to30characters) |
-| [Byte](#type-byte) | [OriginatorDomainNameStringUnder250Characters](#type-originatordomainnamestringunder250characters) | [WalletCounterparty](#type-walletcounterparty) |
+| [BooleanDefaultTrue](#type-booleandefaulttrue) | [LabelStringUnder300Bytes](#type-labelstringunder300characters) | [VersionString7To30Bytes](#type-versionstring7to30characters) |
+| [Byte](#type-byte) | [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250characters) | [WalletCounterparty](#type-walletcounterparty) |
 | [CallType](#type-calltype) | [OutpointString](#type-outpointstring) | [WalletErrorCode](#type-walleterrorcode) |
-| [CertificateFieldNameUnder50Characters](#type-certificatefieldnameunder50characters) | [OutputTagStringUnder300Characters](#type-outputtagstringunder300characters) | [WalletNetwork](#type-walletnetwork) |
-| [DescriptionString5to50Characters](#type-descriptionstring5to50characters) | [PositiveInteger](#type-positiveinteger) | [WalletProtocol](#type-walletprotocol) |
-| [EntityIconURLStringMax500Characters](#type-entityiconurlstringmax500characters) | [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000) |  |
+| [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50characters) | [OutputTagStringUnder300Bytes](#type-outputtagstringunder300characters) | [WalletNetwork](#type-walletnetwork) |
+| [DescriptionString5to50Bytes](#type-descriptionstring5to50characters) | [PositiveInteger](#type-positiveinteger) | [WalletProtocol](#type-walletprotocol) |
+| [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500characters) | [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -3953,46 +3953,46 @@ export type Base64String = string
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Type: OriginatorDomainNameStringUnder250Characters
+### Type: OriginatorDomainNameStringUnder250Bytes
 
 ```ts
-export type OriginatorDomainNameStringUnder250Characters = string
+export type OriginatorDomainNameStringUnder250Bytes = string
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Type: DescriptionString5to50Characters
+### Type: DescriptionString5to50Bytes
 
 ```ts
-export type DescriptionString5to50Characters = string
+export type DescriptionString5to50Bytes = string
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Type: BasketStringUnder300Characters
+### Type: BasketStringUnder300Bytes
 
 ```ts
-export type BasketStringUnder300Characters = string
+export type BasketStringUnder300Bytes = string
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Type: OutputTagStringUnder300Characters
+### Type: OutputTagStringUnder300Bytes
 
 ```ts
-export type OutputTagStringUnder300Characters = string
+export type OutputTagStringUnder300Bytes = string
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Type: LabelStringUnder300Characters
+### Type: LabelStringUnder300Bytes
 
 ```ts
-export type LabelStringUnder300Characters = string
+export type LabelStringUnder300Bytes = string
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
@@ -4016,73 +4016,73 @@ export type AtomicBEEF = Byte[]
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Type: ProtocolString5To400Characters
+### Type: ProtocolString5To400Bytes
 
 ```ts
-export type ProtocolString5To400Characters = string
+export type ProtocolString5To400Bytes = string
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Type: KeyIDStringUnder800Characters
+### Type: KeyIDStringUnder800Bytes
 
 ```ts
-export type KeyIDStringUnder800Characters = string
+export type KeyIDStringUnder800Bytes = string
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Type: CertificateFieldNameUnder50Characters
+### Type: CertificateFieldNameUnder50Bytes
 
 ```ts
-export type CertificateFieldNameUnder50Characters = string
+export type CertificateFieldNameUnder50Bytes = string
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Type: EntityNameStringMax100Characters
+### Type: EntityNameStringMax100Bytes
 
 ```ts
-export type EntityNameStringMax100Characters = string
+export type EntityNameStringMax100Bytes = string
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Type: EntityIconURLStringMax500Characters
+### Type: EntityIconURLStringMax500Bytes
 
 ```ts
-export type EntityIconURLStringMax500Characters = string
+export type EntityIconURLStringMax500Bytes = string
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Type: VersionString7To30Characters
+### Type: VersionString7To30Bytes
 
 ```ts
-export type VersionString7To30Characters = string
+export type VersionString7To30Bytes = string
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Type: ErrorCodeString10To40Characters
+### Type: ErrorCodeString10To40Bytes
 
 ```ts
-export type ErrorCodeString10To40Characters = string
+export type ErrorCodeString10To40Bytes = string
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Type: ErrorDescriptionString20To200Characters
+### Type: ErrorDescriptionString20To200Bytes
 
 ```ts
-export type ErrorDescriptionString20To200Characters = string
+export type ErrorDescriptionString20To200Bytes = string
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
@@ -4102,7 +4102,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export type WalletProtocol = [
     0 | 1 | 2,
-    ProtocolString5To400Characters
+    ProtocolString5To400Bytes
 ]
 ```
 

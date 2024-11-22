@@ -1,5 +1,5 @@
 import { Utils } from '../primitives/index.js'
-import { Wallet, Base64String, PubKeyHex, HexString, OutpointString, CertificateFieldNameUnder50Characters } from '../wallet/Wallet.interfaces.js'
+import { Wallet, Base64String, PubKeyHex, HexString, OutpointString, CertificateFieldNameUnder50Bytes } from '../wallet/Wallet.interfaces.js'
 import ProtoWallet from '../wallet/ProtoWallet.js'
 
 /**
@@ -36,7 +36,7 @@ export default class Certificate {
   /**
    * All the fields present in the certificate, with field names as keys and field values as strings.
    */
-  fields: Record<CertificateFieldNameUnder50Characters, string>
+  fields: Record<CertificateFieldNameUnder50Bytes, string>
 
   /**
    * Certificate signature by the certifier's private key, DER encoded hex string.
@@ -51,7 +51,7 @@ export default class Certificate {
    * @param {PubKeyHex} subject - The public key belonging to the certificate's subject, compressed public key hex string.
    * @param {PubKeyHex} certifier - Public key of the certifier who issued the certificate, compressed public key hex string.
    * @param {OutpointString} revocationOutpoint - The outpoint used to confirm that the certificate has not been revoked (TXID.OutputIndex), as a string.
-   * @param {Record<CertificateFieldNameUnder50Characters, string>} fields - All the fields present in the certificate.
+   * @param {Record<CertificateFieldNameUnder50Bytes, string>} fields - All the fields present in the certificate.
    * @param {HexString} signature - Certificate signature by the certifier's private key, DER encoded hex string.
    */
   constructor(
@@ -60,7 +60,7 @@ export default class Certificate {
     subject: PubKeyHex,
     certifier: PubKeyHex,
     revocationOutpoint: OutpointString,
-    fields: Record<CertificateFieldNameUnder50Characters, string>,
+    fields: Record<CertificateFieldNameUnder50Bytes, string>,
     signature?: HexString,
   ) {
     this.type = type
@@ -161,12 +161,12 @@ export default class Certificate {
 
     // Read fields
     const numFields = reader.readVarIntNum()
-    const fields: Record<CertificateFieldNameUnder50Characters, string> = {}
+    const fields: Record<CertificateFieldNameUnder50Bytes, string> = {}
     for (let i = 0; i < numFields; i++) {
       // Field name
       const fieldNameLength = reader.readVarIntNum()
       const fieldNameBytes = reader.read(fieldNameLength)
-      const fieldName = Utils.toUTF8(fieldNameBytes) as CertificateFieldNameUnder50Characters
+      const fieldName = Utils.toUTF8(fieldNameBytes) as CertificateFieldNameUnder50Bytes
 
       // Field value
       const fieldValueLength = reader.readVarIntNum()

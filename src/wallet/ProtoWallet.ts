@@ -1,30 +1,30 @@
 import {
   Base64String,
-  BasketStringUnder300Characters,
+  BasketStringUnder300Bytes,
   BEEF,
   BooleanDefaultFalse,
   BooleanDefaultTrue,
   Byte,
-  CertificateFieldNameUnder50Characters,
-  DescriptionString5to50Characters,
-  EntityIconURLStringMax500Characters,
-  EntityNameStringMax100Characters,
+  CertificateFieldNameUnder50Bytes,
+  DescriptionString5to50Bytes,
+  EntityIconURLStringMax500Bytes,
+  EntityNameStringMax100Bytes,
   HexString,
   ISOTimestampString,
-  KeyIDStringUnder800Characters,
-  LabelStringUnder300Characters,
-  OriginatorDomainNameStringUnder250Characters,
+  KeyIDStringUnder800Bytes,
+  LabelStringUnder300Bytes,
+  OriginatorDomainNameStringUnder250Bytes,
   OutpointString,
-  OutputTagStringUnder300Characters,
+  OutputTagStringUnder300Bytes,
   PositiveInteger,
   PositiveIntegerDefault10Max10000,
   PositiveIntegerMax10,
   PositiveIntegerOrZero,
-  ProtocolString5To400Characters,
+  ProtocolString5To400Bytes,
   PubKeyHex,
   SatoshiValue,
   TXIDHexString,
-  VersionString7To30Characters,
+  VersionString7To30Bytes,
   Wallet
 } from './Wallet.interfaces.js'
 import KeyDeriver from './KeyDeriver.js'
@@ -45,26 +45,26 @@ export default class ProtoWallet implements Wallet {
 
   async createAction(
     args: {
-      description: DescriptionString5to50Characters
+      description: DescriptionString5to50Bytes
       inputs?: Array<{
         tx?: BEEF
         outpoint: OutpointString
         unlockingScript?: HexString
         unlockingScriptLength?: PositiveInteger
-        inputDescription: DescriptionString5to50Characters
+        inputDescription: DescriptionString5to50Bytes
         sequenceNumber?: PositiveIntegerOrZero
       }>
       outputs?: Array<{
         lockingScript: HexString
         satoshis: SatoshiValue
-        outputDescription: DescriptionString5to50Characters
-        basket?: BasketStringUnder300Characters
+        outputDescription: DescriptionString5to50Bytes
+        basket?: BasketStringUnder300Bytes
         customInstructions?: string
-        tags?: OutputTagStringUnder300Characters[]
+        tags?: OutputTagStringUnder300Bytes[]
       }>
       lockTime?: PositiveIntegerOrZero
       version?: PositiveIntegerOrZero
-      labels?: LabelStringUnder300Characters[]
+      labels?: LabelStringUnder300Bytes[]
       options?: {
         signAndProcess?: BooleanDefaultTrue
         acceptDelayedBroadcast?: BooleanDefaultTrue
@@ -77,7 +77,7 @@ export default class ProtoWallet implements Wallet {
         randomizeOutputs?: BooleanDefaultTrue
       }
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{
     txid?: TXIDHexString
     tx?: BEEF
@@ -112,7 +112,7 @@ export default class ProtoWallet implements Wallet {
         sendWith?: TXIDHexString[]
       }
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{
     txid?: TXIDHexString
     tx?: BEEF
@@ -129,14 +129,14 @@ export default class ProtoWallet implements Wallet {
     args: {
       reference: Base64String
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ aborted: true }> {
     throw new WalletError('ProtoWallet does not support aborting transactions.', walletErrors.unsupportedAction)
   }
 
   async listActions(
     args: {
-      labels: LabelStringUnder300Characters[]
+      labels: LabelStringUnder300Bytes[]
       labelQueryMode?: 'any' | 'all'
       includeLabels?: BooleanDefaultFalse
       includeInputs?: BooleanDefaultFalse
@@ -147,7 +147,7 @@ export default class ProtoWallet implements Wallet {
       limit?: PositiveIntegerDefault10Max10000
       offset?: PositiveIntegerOrZero
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{
     totalActions: PositiveIntegerOrZero
     actions: Array<{
@@ -162,8 +162,8 @@ export default class ProtoWallet implements Wallet {
       | 'nosend'
       | 'nonfinal'
       isOutgoing: boolean
-      description: DescriptionString5to50Characters
-      labels?: LabelStringUnder300Characters[]
+      description: DescriptionString5to50Bytes
+      labels?: LabelStringUnder300Bytes[]
       version: PositiveIntegerOrZero
       lockTime: PositiveIntegerOrZero
       inputs?: Array<{
@@ -171,7 +171,7 @@ export default class ProtoWallet implements Wallet {
         sourceSatoshis: SatoshiValue
         sourceLockingScript?: HexString
         unlockingScript?: HexString
-        inputDescription: DescriptionString5to50Characters
+        inputDescription: DescriptionString5to50Bytes
         sequenceNumber: PositiveIntegerOrZero
       }>
       outputs?: Array<{
@@ -179,9 +179,9 @@ export default class ProtoWallet implements Wallet {
         satoshis: SatoshiValue
         lockingScript?: HexString
         spendable: boolean
-        outputDescription: DescriptionString5to50Characters
-        basket: BasketStringUnder300Characters
-        tags: OutputTagStringUnder300Characters[]
+        outputDescription: DescriptionString5to50Bytes
+        basket: BasketStringUnder300Bytes
+        tags: OutputTagStringUnder300Bytes[]
         customInstructions?: string
       }>
     }>
@@ -201,23 +201,23 @@ export default class ProtoWallet implements Wallet {
           senderIdentityKey: PubKeyHex
         }
         insertionRemittance?: {
-          basket: BasketStringUnder300Characters
+          basket: BasketStringUnder300Bytes
           customInstructions?: string
-          tags?: OutputTagStringUnder300Characters[]
+          tags?: OutputTagStringUnder300Bytes[]
         }
       }>
-      description: DescriptionString5to50Characters
-      labels?: LabelStringUnder300Characters[]
+      description: DescriptionString5to50Bytes
+      labels?: LabelStringUnder300Bytes[]
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ accepted: true }> {
     throw new WalletError('ProtoWallet does not support internalizing transactions.', walletErrors.unsupportedAction)
   }
 
   async listOutputs(
     args: {
-      basket: BasketStringUnder300Characters
-      tags?: OutputTagStringUnder300Characters[]
+      basket: BasketStringUnder300Bytes
+      tags?: OutputTagStringUnder300Bytes[]
       tagQueryMode?: 'all' | 'any'
       include?: 'locking scripts' | 'entire transactions'
       includeCustomInstructions?: BooleanDefaultFalse
@@ -226,7 +226,7 @@ export default class ProtoWallet implements Wallet {
       limit?: PositiveIntegerDefault10Max10000
       offset?: PositiveIntegerOrZero
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{
     totalOutputs: PositiveIntegerOrZero
     outputs: Array<{
@@ -236,8 +236,8 @@ export default class ProtoWallet implements Wallet {
       tx?: BEEF
       spendable: true
       customInstructions?: string
-      tags?: OutputTagStringUnder300Characters[]
-      labels?: LabelStringUnder300Characters[]
+      tags?: OutputTagStringUnder300Bytes[]
+      labels?: LabelStringUnder300Bytes[]
     }>
   }> {
     throw new WalletError('ProtoWallet does not support retrieving outputs.', walletErrors.unsupportedAction)
@@ -245,10 +245,10 @@ export default class ProtoWallet implements Wallet {
 
   async relinquishOutput(
     args: {
-      basket: BasketStringUnder300Characters
+      basket: BasketStringUnder300Bytes
       output: OutpointString
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ relinquished: true }> {
     throw new WalletError('ProtoWallet does not support deleting outputs.', walletErrors.unsupportedAction)
   }
@@ -256,14 +256,14 @@ export default class ProtoWallet implements Wallet {
   async getPublicKey(
     args: {
       identityKey?: true
-      protocolID?: [0 | 1 | 2, ProtocolString5To400Characters]
-      keyID?: KeyIDStringUnder800Characters
+      protocolID?: [0 | 1 | 2, ProtocolString5To400Bytes]
+      keyID?: KeyIDStringUnder800Bytes
       privileged?: BooleanDefaultFalse
-      privilegedReason?: DescriptionString5to50Characters
+      privilegedReason?: DescriptionString5to50Bytes
       counterparty?: PubKeyHex | 'self' | 'anyone'
       forSelf?: BooleanDefaultFalse
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ publicKey: PubKeyHex }> {
     if (args.privileged) {
       throw new WalletError(this.privilegedError)
@@ -288,10 +288,10 @@ export default class ProtoWallet implements Wallet {
     args: {
       counterparty: PubKeyHex
       verifier: PubKeyHex
-      privilegedReason?: DescriptionString5to50Characters
+      privilegedReason?: DescriptionString5to50Bytes
       privileged?: BooleanDefaultFalse
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{
     prover: PubKeyHex
     verifier: PubKeyHex
@@ -338,18 +338,18 @@ export default class ProtoWallet implements Wallet {
     args: {
       counterparty: PubKeyHex
       verifier: PubKeyHex
-      protocolID: [0 | 1 | 2, ProtocolString5To400Characters]
-      keyID: KeyIDStringUnder800Characters
-      privilegedReason?: DescriptionString5to50Characters
+      protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+      keyID: KeyIDStringUnder800Bytes
+      privilegedReason?: DescriptionString5to50Bytes
       privileged?: BooleanDefaultFalse
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{
     prover: PubKeyHex
     verifier: PubKeyHex
     counterparty: PubKeyHex
-    protocolID: [0 | 1 | 2, ProtocolString5To400Characters]
-    keyID: KeyIDStringUnder800Characters
+    protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+    keyID: KeyIDStringUnder800Bytes
     encryptedLinkage: Byte[]
     encryptedLinkageProof: Byte[]
     proofType: Byte
@@ -390,13 +390,13 @@ export default class ProtoWallet implements Wallet {
   async encrypt(
     args: {
       plaintext: Byte[]
-      protocolID: [0 | 1 | 2, ProtocolString5To400Characters]
-      keyID: KeyIDStringUnder800Characters
-      privilegedReason?: DescriptionString5to50Characters
+      protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+      keyID: KeyIDStringUnder800Bytes
+      privilegedReason?: DescriptionString5to50Bytes
       counterparty?: PubKeyHex | 'self' | 'anyone'
       privileged?: BooleanDefaultFalse
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ ciphertext: Byte[] }> {
     if (args.privileged) {
       throw new WalletError(this.privilegedError)
@@ -412,13 +412,13 @@ export default class ProtoWallet implements Wallet {
   async decrypt(
     args: {
       ciphertext: Byte[]
-      protocolID: [0 | 1 | 2, ProtocolString5To400Characters]
-      keyID: KeyIDStringUnder800Characters
-      privilegedReason?: DescriptionString5to50Characters
+      protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+      keyID: KeyIDStringUnder800Bytes
+      privilegedReason?: DescriptionString5to50Bytes
       counterparty?: PubKeyHex | 'self' | 'anyone'
       privileged?: BooleanDefaultFalse
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ plaintext: Byte[] }> {
     if (args.privileged) {
       throw new WalletError(this.privilegedError)
@@ -434,13 +434,13 @@ export default class ProtoWallet implements Wallet {
   async createHmac(
     args: {
       data: Byte[]
-      protocolID: [0 | 1 | 2, ProtocolString5To400Characters]
-      keyID: KeyIDStringUnder800Characters
-      privilegedReason?: DescriptionString5to50Characters
+      protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+      keyID: KeyIDStringUnder800Bytes
+      privilegedReason?: DescriptionString5to50Bytes
       counterparty?: PubKeyHex | 'self' | 'anyone'
       privileged?: BooleanDefaultFalse
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ hmac: Byte[] }> {
     if (args.privileged) {
       throw new WalletError(this.privilegedError)
@@ -457,13 +457,13 @@ export default class ProtoWallet implements Wallet {
     args: {
       data: Byte[]
       hmac: Byte[]
-      protocolID: [0 | 1 | 2, ProtocolString5To400Characters]
-      keyID: KeyIDStringUnder800Characters
-      privilegedReason?: DescriptionString5to50Characters
+      protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+      keyID: KeyIDStringUnder800Bytes
+      privilegedReason?: DescriptionString5to50Bytes
       counterparty?: PubKeyHex | 'self' | 'anyone'
       privileged?: BooleanDefaultFalse
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ valid: true }> {
     if (args.privileged) {
       throw new WalletError(this.privilegedError)
@@ -484,13 +484,13 @@ export default class ProtoWallet implements Wallet {
     args: {
       data?: Byte[]
       hashToDirectlySign?: Byte[]
-      protocolID: [0 | 1 | 2, ProtocolString5To400Characters]
-      keyID: KeyIDStringUnder800Characters
-      privilegedReason?: DescriptionString5to50Characters
+      protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+      keyID: KeyIDStringUnder800Bytes
+      privilegedReason?: DescriptionString5to50Bytes
       counterparty?: PubKeyHex | 'self' | 'anyone'
       privileged?: BooleanDefaultFalse
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ signature: Byte[] }> {
     if (args.privileged) {
       throw new WalletError(this.privilegedError)
@@ -512,14 +512,14 @@ export default class ProtoWallet implements Wallet {
       data?: Byte[]
       hashToDirectlyVerify?: Byte[]
       signature: Byte[]
-      protocolID: [0 | 1 | 2, ProtocolString5To400Characters]
-      keyID: KeyIDStringUnder800Characters
-      privilegedReason?: DescriptionString5to50Characters
+      protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+      keyID: KeyIDStringUnder800Bytes
+      privilegedReason?: DescriptionString5to50Bytes
       counterparty?: PubKeyHex | 'self' | 'anyone'
       forSelf?: BooleanDefaultFalse
       privileged?: BooleanDefaultFalse
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ valid: true }> {
     if (args.privileged) {
       throw new WalletError(this.privilegedError)
@@ -546,17 +546,17 @@ export default class ProtoWallet implements Wallet {
       type: Base64String
       certifier: PubKeyHex
       acquisitionProtocol: 'direct' | 'issuance'
-      fields: Record<CertificateFieldNameUnder50Characters, string>
+      fields: Record<CertificateFieldNameUnder50Bytes, string>
       serialNumber?: Base64String
       revocationOutpoint?: OutpointString
       signature?: HexString
       certifierUrl?: string
       keyringRevealer?: PubKeyHex | 'certifier'
-      keyringForSubject?: Record<CertificateFieldNameUnder50Characters, Base64String>
+      keyringForSubject?: Record<CertificateFieldNameUnder50Bytes, Base64String>
       privileged?: BooleanDefaultFalse
-      privilegedReason?: DescriptionString5to50Characters
+      privilegedReason?: DescriptionString5to50Bytes
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{
     type: Base64String
     subject: PubKeyHex
@@ -564,7 +564,7 @@ export default class ProtoWallet implements Wallet {
     certifier: PubKeyHex
     revocationOutpoint: OutpointString
     signature: HexString
-    fields: Record<CertificateFieldNameUnder50Characters, string>
+    fields: Record<CertificateFieldNameUnder50Bytes, string>
   }> {
     throw new WalletError('ProtoWallet does not support acquiring certificates.', walletErrors.unsupportedAction)
   }
@@ -576,9 +576,9 @@ export default class ProtoWallet implements Wallet {
       limit?: PositiveIntegerDefault10Max10000
       offset?: PositiveIntegerOrZero
       privileged?: BooleanDefaultFalse
-      privilegedReason?: DescriptionString5to50Characters
+      privilegedReason?: DescriptionString5to50Bytes
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{
     totalCertificates: PositiveIntegerOrZero
     certificates: Array<{
@@ -588,7 +588,7 @@ export default class ProtoWallet implements Wallet {
       certifier: PubKeyHex
       revocationOutpoint: OutpointString
       signature: HexString
-      fields: Record<CertificateFieldNameUnder50Characters, string>
+      fields: Record<CertificateFieldNameUnder50Bytes, string>
     }>
   }> {
     throw new WalletError('ProtoWallet does not support retrieving certificates.', walletErrors.unsupportedAction)
@@ -603,16 +603,16 @@ export default class ProtoWallet implements Wallet {
         certifier: PubKeyHex
         revocationOutpoint: OutpointString
         signature: HexString
-        fields: Record<CertificateFieldNameUnder50Characters, string>
+        fields: Record<CertificateFieldNameUnder50Bytes, string>
       }
-      fieldsToReveal: CertificateFieldNameUnder50Characters[]
+      fieldsToReveal: CertificateFieldNameUnder50Bytes[]
       verifier: PubKeyHex
       privileged?: BooleanDefaultFalse
-      privilegedReason?: DescriptionString5to50Characters
+      privilegedReason?: DescriptionString5to50Bytes
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{
-    keyringForVerifier: Record<CertificateFieldNameUnder50Characters, Base64String>
+    keyringForVerifier: Record<CertificateFieldNameUnder50Bytes, Base64String>
   }> {
     throw new WalletError('ProtoWallet does not support proving certificates.', walletErrors.unsupportedAction)
   }
@@ -623,7 +623,7 @@ export default class ProtoWallet implements Wallet {
       serialNumber: Base64String
       certifier: PubKeyHex
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ relinquished: true }> {
     throw new WalletError('ProtoWallet does not support deleting certificates.', walletErrors.unsupportedAction)
   }
@@ -634,7 +634,7 @@ export default class ProtoWallet implements Wallet {
       limit?: PositiveIntegerDefault10Max10000
       offset?: PositiveIntegerOrZero
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{
     totalCertificates: PositiveIntegerOrZero
     certificates: Array<{
@@ -644,15 +644,15 @@ export default class ProtoWallet implements Wallet {
       certifier: PubKeyHex
       revocationOutpoint: OutpointString
       signature: HexString
-      fields: Record<CertificateFieldNameUnder50Characters, Base64String>
+      fields: Record<CertificateFieldNameUnder50Bytes, Base64String>
       certifierInfo: {
-        name: EntityNameStringMax100Characters
-        iconUrl: EntityIconURLStringMax500Characters
-        description: DescriptionString5to50Characters
+        name: EntityNameStringMax100Bytes
+        iconUrl: EntityIconURLStringMax500Bytes
+        description: DescriptionString5to50Bytes
         trust: PositiveIntegerMax10
       }
-      publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>
-      decryptedFields: Record<CertificateFieldNameUnder50Characters, string>
+      publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>
+      decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>
     }>
   }> {
     throw new WalletError('ProtoWallet does not support resolving identities.', walletErrors.unsupportedAction)
@@ -660,11 +660,11 @@ export default class ProtoWallet implements Wallet {
 
   async discoverByAttributes(
     args: {
-      attributes: Record<CertificateFieldNameUnder50Characters, string>
+      attributes: Record<CertificateFieldNameUnder50Bytes, string>
       limit?: PositiveIntegerDefault10Max10000
       offset?: PositiveIntegerOrZero
     },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{
     totalCertificates: PositiveIntegerOrZero
     certificates: Array<{
@@ -674,15 +674,15 @@ export default class ProtoWallet implements Wallet {
       certifier: PubKeyHex
       revocationOutpoint: OutpointString
       signature: HexString
-      fields: Record<CertificateFieldNameUnder50Characters, Base64String>
+      fields: Record<CertificateFieldNameUnder50Bytes, Base64String>
       certifierInfo: {
-        name: EntityNameStringMax100Characters
-        iconUrl: EntityIconURLStringMax500Characters
-        description: DescriptionString5to50Characters
+        name: EntityNameStringMax100Bytes
+        iconUrl: EntityIconURLStringMax500Bytes
+        description: DescriptionString5to50Bytes
         trust: PositiveIntegerMax10
       }
-      publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Characters, Base64String>
-      decryptedFields: Record<CertificateFieldNameUnder50Characters, string>
+      publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>
+      decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>
     }>
   }> {
     throw new WalletError('ProtoWallet does not support resolving identities.', walletErrors.unsupportedAction)
@@ -690,43 +690,43 @@ export default class ProtoWallet implements Wallet {
 
   async isAuthenticated(
     args: {},
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ authenticated: boolean }> {
     return { authenticated: true }
   }
 
   async waitForAuthentication(
     args: {},
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ authenticated: true }> {
     return { authenticated: true }
   }
 
   async getHeight(
     args: {},
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ height: PositiveInteger }> {
     throw new WalletError('ProtoWallet does not support blockchain tracking.', walletErrors.unsupportedAction)
   }
 
   async getHeaderForHeight(
     args: { height: PositiveInteger },
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ header: HexString }> {
     throw new WalletError('ProtoWallet does not support blockchain tracking.', walletErrors.unsupportedAction)
   }
 
   async getNetwork(
     args: {},
-    originator?: OriginatorDomainNameStringUnder250Characters
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ network: 'mainnet' | 'testnet' }> {
     return { network: 'mainnet' }
   }
 
   async getVersion(
     args: {},
-    originator?: OriginatorDomainNameStringUnder250Characters
-  ): Promise<{ version: VersionString7To30Characters }> {
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<{ version: VersionString7To30Bytes }> {
     return { version: 'proto-1.0.0' }
   }
 }
