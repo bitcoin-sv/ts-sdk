@@ -10,7 +10,7 @@ import Transaction from "../../../dist/cjs/src/transaction/Transaction"
 //import Beef from '../Beef'
 //import BeefParty from "../BeefParty"
 //import { BEEF_MAGIC, BEEF_MAGIC_V2 } from "../Beef"
-//import Transaction from "..//Transaction"
+//import Transaction from "../Transaction"
 
 describe('Beef tests', () => {
     jest.setTimeout(99999999)
