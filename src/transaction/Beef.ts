@@ -396,11 +396,10 @@ export class Beef {
   }
 
   /**
-     * Returns a binary array representing the serialized BEEF
-     * @returns A binary array representing the BEEF
-     */
-  toBinary (): number[] {
-    const writer = new Writer()
+   * Serializes this data to `writer`
+   * @param writer 
+   */
+  toWriter (writer: Writer) {
     writer.writeUInt32LE(this.magic)
 
     writer.writeVarIntNum(this.bumps.length)
@@ -412,7 +411,38 @@ export class Beef {
     for (const tx of this.txs) {
       tx.toWriter(writer, this.magic)
     }
+  }
 
+  /**
+     * Returns a binary array representing the serialized BEEF
+     * @returns A binary array representing the BEEF
+     */
+  toBinary (): number[] {
+    const writer = new Writer()
+    this.toWriter(writer)
+    return writer.toArray()
+  }
+
+  /**
+   * Serialize this Beef as AtomicBEEF.
+   * 
+   * `txid` must exist and be the last transaction
+   * in sorted (dependency) order.
+   * 
+   * @param txid 
+   * @returns serialized contents of this Beef with AtomicBEEF prefix.
+   */
+  toBinaryAtomic(txid: string) {
+    this.sortTxs()
+    const tx = this.findTxid(txid)
+    if (!tx)
+      throw new Error(`${txid} does not exist in this Beef`)
+    if (this.txs[this.txs.length - 1] !== tx)
+      throw new Error(`${txid} is not the last transaction in this Beef`)
+    const writer = new Writer()
+    writer.writeUInt32LE(ATOMIC_BEEF)
+    writer.write(toArray(txid, 'hex'))
+    this.toWriter(writer)
     return writer.toArray()
   }
 
@@ -429,7 +459,7 @@ export class Beef {
     let atomicTxid: string | undefined = undefined
     if (version === ATOMIC_BEEF) {
       // Skip the txid and re-read the BEEF version
-      atomicTxid = toHex(br.readReverse(32))
+      atomicTxid = toHex(br.read(32))
       version = br.readUInt32LE()
     }
     if (version !== BEEF_MAGIC && version !== BEEF_MAGIC_V2) { throw new Error(`Serialized BEEF must start with ${BEEF_MAGIC} or ${BEEF_MAGIC_V2} but starts with ${version}`) }

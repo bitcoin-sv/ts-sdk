@@ -101,7 +101,7 @@ describe('Beef tests', () => {
         }
     })
 
-    test('4_all merkleRoots equal', async () => {
+    test('1_all merkleRoots equal', async () => {
         {
           const beef = Beef.fromString(beefs[0])
           expect(beef.isValid(undefined)).toBe(true)
@@ -115,7 +115,7 @@ describe('Beef tests', () => {
         }
     })
 
-    test('4_allowTxidOnly', async () => {
+    test('2_allowTxidOnly', async () => {
         {
           const beef = Beef.fromString(beefs[0])
           expect(beef.isValid(undefined)).toBe(true)
@@ -125,7 +125,7 @@ describe('Beef tests', () => {
         }
     })
 
-    test('4_removeExistingTxid', async () => {
+    test('3_removeExistingTxid', async () => {
         {
           const beef = Beef.fromString(beefs[0])
           expect(beef.isValid(undefined)).toBe(true)
@@ -165,7 +165,7 @@ describe('Beef tests', () => {
         }
     })
 
-    test('4_mergeBeef', async () => {
+    test('5_mergeBeef', async () => {
         {
           const beef = Beef.fromString(beefs[0])
           const beefB = Beef.fromString(beefs[0])
@@ -201,7 +201,7 @@ describe('Beef tests', () => {
         }
     })
 
-    test('4_BeefParty', async () => {
+    test('6_BeefParty', async () => {
 
       const bp = new BeefParty(['b', 'c'])
       expect(bp.isParty('a')).toBe(false)
@@ -254,7 +254,7 @@ describe('Beef tests', () => {
       }
     })
 
-    test('5_AtomicBeef', async () => {
+    test('7_AtomicBeef', async () => {
       {
         const beef = Beef.fromString(beefs[0])
         expect(beef.toHex()).toBe(beefs[0])
@@ -289,6 +289,20 @@ describe('Beef tests', () => {
         // Verify that atomic BEEF can be deserialized.
         const beef2 = Beef.fromBinary(atomic)
         expect(beef2.toHex()).toBe(beefHex)
+      }
+    })
+
+    test('8_toBinaryAtomic', async () => {
+      {
+        const beef = Beef.fromString(beefs[0])
+        const tx = Transaction.fromHex(txs[0])
+        beef.mergeTransaction(tx)
+        const sr = beef.sortTxs()
+        const log = beef.toLogString()
+        const atomic = beef.toBinaryAtomic(tx.id('hex'))
+        const t2 = Transaction.fromAtomicBEEF(atomic)
+        const beef2 = t2.toAtomicBEEF()
+        expect(atomic).toEqual(beef2)
       }
     })
 })
