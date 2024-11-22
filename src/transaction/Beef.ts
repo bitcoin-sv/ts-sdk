@@ -68,6 +68,7 @@ export class Beef {
   bumps: MerklePath[] = []
   txs: BeefTx[] = []
   version: BeefVersion = undefined
+  atomicTxid: string | undefined = undefined
 
   constructor (version?: BeefVersion) {
     this.version = version
@@ -425,9 +426,10 @@ export class Beef {
 
   static fromReader (br: Reader): Beef {
     let version = br.readUInt32LE()
+    let atomicTxid: string | undefined = undefined
     if (version === ATOMIC_BEEF) {
       // Skip the txid and re-read the BEEF version
-      const atomicTxid = toHex(br.readReverse(32))
+      atomicTxid = toHex(br.readReverse(32))
       version = br.readUInt32LE()
     }
     if (version !== BEEF_MAGIC && version !== BEEF_MAGIC_V2) { throw new Error(`Serialized BEEF must start with ${BEEF_MAGIC} or ${BEEF_MAGIC_V2} but starts with ${version}`) }
@@ -442,6 +444,7 @@ export class Beef {
       const beefTx = BeefTx.fromReader(br, version)
       beef.txs.push(beefTx)
     }
+    beef.atomicTxid = atomicTxid
     return beef
   }
 
