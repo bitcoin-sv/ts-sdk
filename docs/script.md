@@ -34,7 +34,7 @@ export default interface ScriptTemplate {
     lock: (...params: any) => LockingScript | Promise<LockingScript>;
     unlock: (...params: any) => {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-        estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
+        estimateLength: (tx?: Transaction, inputIndex?: number) => Promise<number>;
     };
 }
 ```
@@ -62,7 +62,7 @@ This method returns an object containing two functions:
 ```ts
 unlock: (...params: any) => {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-    estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
+    estimateLength: (tx?: Transaction, inputIndex?: number) => Promise<number>;
 }
 ```
 

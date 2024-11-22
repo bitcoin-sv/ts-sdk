@@ -857,7 +857,7 @@ export default class BeefTx {
     _rawTx?: number[];
     _txid?: string;
     inputTxids: string[] = [];
-    degree: number = 0;
+    isValid?: boolean = undefined;
     get bumpIndex(): number | undefined 
     set bumpIndex(v: number | undefined) 
     get hasProof(): boolean 
@@ -888,6 +888,16 @@ Argument Details
 + **bumpIndex**
   + If transaction already has a proof in the beef to which it will be added.
 
+#### Property isValid
+
+true if `hasProof` or all inputs chain to `hasProof`.
+
+Typically set by sorting transactions by proven dependency chains.
+
+```ts
+isValid?: boolean = undefined
+```
+
 </details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
@@ -903,6 +913,9 @@ export class Beef {
     constructor(version?: BeefVersion) 
     get magic(): number 
     findTxid(txid: string): BeefTx | undefined 
+    findBump(txid: string): MerklePath | undefined 
+    findTransactionForSigning(txid: string): Transaction | undefined 
+    findAtomicTransaction(txid: string): Transaction | undefined 
     mergeBump(bump: MerklePath): number 
     mergeRawTx(rawTx: number[], bumpIndex?: number): BeefTx 
     mergeTransaction(tx: Transaction): BeefTx 
@@ -917,9 +930,16 @@ export class Beef {
     static fromReader(br: Reader): Beef 
     static fromBinary(bin: number[]): Beef 
     static fromString(s: string, enc?: "hex" | "utf8" | "base64"): Beef 
-    sortTxs(): string[] 
+    sortTxs(): {
+        missingInputs: string[];
+        notValid: string[];
+        valid: string[];
+        withMissingInputs: string[];
+        txidOnly: string[];
+    } 
     clone(): Beef 
     trimKnownTxids(knownTxids: string[]) 
+    getValidTxids(): string[] 
     toLogString(): string 
 }
 ```
@@ -937,6 +957,55 @@ clone(): Beef
 Returns
 
 a shallow copy of this beef
+
+#### Method findAtomicTransaction
+
+Builds the proof tree rooted at a specific `Transaction`.
+
+To succeed, the Beef must contain all the required transaction and merkle path data.
+
+```ts
+findAtomicTransaction(txid: string): Transaction | undefined 
+```
+
+Returns
+
+Transaction with input `SourceTransaction` and `MerklePath` populated from this Beef.
+
+Argument Details
+
++ **txid**
+  + The id of the target transaction.
+
+#### Method findBump
+
+```ts
+findBump(txid: string): MerklePath | undefined 
+```
+
+Returns
+
+`MerklePath` with level zero hash equal to txid or undefined.
+
+#### Method findTransactionForSigning
+
+Finds a Transaction in this `Beef`
+and adds any missing input SourceTransactions from this `Beef`.
+
+The result is suitable for signing.
+
+```ts
+findTransactionForSigning(txid: string): Transaction | undefined 
+```
+
+Returns
+
+Transaction with all available input `SourceTransaction`s from this Beef.
+
+Argument Details
+
++ **txid**
+  + The id of the target transaction.
 
 #### Method findTxid
 
@@ -988,6 +1057,16 @@ Argument Details
   + The string value from which to construct BEEF
 + **enc**
   + The encoding of the string value from which BEEF should be constructed
+
+#### Method getValidTxids
+
+```ts
+getValidTxids(): string[] 
+```
+
+Returns
+
+array of transaction txids that either have a proof or whose inputs chain back to a proven transaction.
 
 #### Method isValid
 
@@ -1074,15 +1153,26 @@ Argument Details
 
 #### Method sortTxs
 
-Sort the `txs` by input txid dependency order.
+Sort the `txs` by input txid dependency order:
+- Oldest Tx Anchored by Path
+- Newer Txs depending on Older parents
+- Newest Tx
+
+with proof (MerklePath) last, longest chain of dependencies first
 
 ```ts
-sortTxs(): string[] 
+sortTxs(): {
+    missingInputs: string[];
+    notValid: string[];
+    valid: string[];
+    withMissingInputs: string[];
+    txidOnly: string[];
+} 
 ```
 
 Returns
 
-array of input txids of unproven transactions that aren't included in txs.
+`{ missingInputs, notValid, valid, withMissingInputs }`
 
 #### Method toBinary
 
@@ -1219,8 +1309,8 @@ export default class Transaction {
     id(enc: "hex"): string;
     id(enc?: "hex"): number[] | string 
     async verify(chainTracker: ChainTracker | "scripts only" = defaultChainTracker(), feeModel?: FeeModel): Promise<boolean> 
-    toBEEF(): number[] 
-    toAtomicBEEF(): number[] 
+    toBEEF(allowPartial?: boolean): number[] 
+    toAtomicBEEF(allowPartial?: boolean): number[] 
 }
 ```
 
@@ -1554,24 +1644,42 @@ and then the BEEF data containing only the subject transaction and its dependenc
 This format ensures that the BEEF structure is atomic and contains no unrelated transactions.
 
 ```ts
-toAtomicBEEF(): number[] 
+toAtomicBEEF(allowPartial?: boolean): number[] 
 ```
 
 Returns
 
 - The serialized Atomic BEEF structure.
 
+Argument Details
+
++ **allowPartial**
+  + If true, error will not be thrown if there are any missing sourceTransactions.
+
+Throws
+
+Error if there are any missing sourceTransactions unless `allowPartial` is true.
+
 #### Method toBEEF
 
 Serializes this transaction, together with its inputs and the respective merkle proofs, into the BEEF (BRC-62) format. This enables efficient verification of its compliance with the rules of SPV.
 
 ```ts
-toBEEF(): number[] 
+toBEEF(allowPartial?: boolean): number[] 
 ```
 
 Returns
 
 The serialized BEEF structure
+
+Argument Details
+
++ **allowPartial**
+  + If true, error will not be thrown if there are any missing sourceTransactions.
+
+Throws
+
+Error if there are any missing sourceTransactions unless `allowPartial` is true.
 
 #### Method toBinary
 
@@ -1716,6 +1824,7 @@ export class BeefParty extends Beef {
     getKnownTxidsForParty(party: string): string[] 
     getTrimmedBeefForParty(party: string): Beef 
     addKnownTxidsForParty(party: string, knownTxids: string[]) 
+    mergeBeefFromParty(party: string, beef: number[] | Beef) 
 }
 ```
 
@@ -1793,6 +1902,18 @@ isParty(party: string)
 Returns
 
 `true` if `party` has already beed added to this `BeefParty`.
+
+#### Method mergeBeefFromParty
+
+Merge a `beef` received from a specific `party`.
+
+Updates this `BeefParty` to track all the txids
+corresponding to transactions for which `party`
+has raw transaction and validity proof data.
+
+```ts
+mergeBeefFromParty(party: string, beef: number[] | Beef) 
+```
 
 </details>
 
@@ -1925,6 +2046,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | |
 | --- |
+| [ATOMIC_BEEF](#variable-atomic_beef) |
 | [BEEF_MAGIC](#variable-beef_magic) |
 | [BEEF_MAGIC_TXID_ONLY_EXTENSION](#variable-beef_magic_txid_only_extension) |
 | [BEEF_MAGIC_V2](#variable-beef_magic_v2) |
@@ -1955,6 +2077,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 BEEF_MAGIC_TXID_ONLY_EXTENSION = 4022206465
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: ATOMIC_BEEF
+
+```ts
+ATOMIC_BEEF = 16843009
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
