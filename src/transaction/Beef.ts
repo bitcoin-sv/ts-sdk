@@ -7,6 +7,7 @@ import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
 export const BEEF_MAGIC = 4022206465 // 0100BEEF in LE order
 export const BEEF_MAGIC_V2 = 4022206466 // 0200BEEF in LE order
 export const BEEF_MAGIC_TXID_ONLY_EXTENSION = 4022206465 // 0100BEEF in LE order
+export const ATOMIC_BEEF = 0x01010101 // Atomic Beef serialization prefix
 
 export type BeefVersion = undefined | 'V1' | 'V2'
 
@@ -16,6 +17,14 @@ export type BeefVersion = undefined | 'V1' | 'V2'
  *
  * BUMP standard: BRC-74: BSV Unified Merkle Path (BUMP) Format
  * https://github.com/bitcoin-sv/BRCs/blob/master/transactions/0074.md
+ * 
+ * BRC-95: Atomic BEEF Transactions
+ * https://github.com/bitcoin-sv/BRCs/blob/master/transactions/0095.md
+ * 
+ * The Atomic BEEF format is supported by the binary deserialization static method `fromBinary`.
+ * 
+ * BRC-96: BEEF V2, Txid Only Extension
+ * https://github.com/bitcoin-sv/BRCs/blob/master/transactions/0096.md
  *
  * A valid serialized BEEF is the cornerstone of Simplified Payment Validation (SPV)
  * where they are exchanged between two non-trusting parties to establish the
@@ -48,6 +57,12 @@ export type BeefVersion = undefined | 'V1' | 'V2'
  *
  * A valid `Beef` is only required when sent to a party with no shared history,
  * such as a transaction processor.
+ * 
+ * IMPORTANT NOTE:
+ * It is fundamental to the BEEF value proposition that only valid transactions and valid
+ * merkle path (BUMP) data be added to it. Merging invalid data breaks the `verify` and `isValid`
+ * functions. There is no support for removing invalid data. A `Beef` that becomes invalid
+ * must be discarded.
  */
 export class Beef {
   bumps: MerklePath[] = []
@@ -128,20 +143,25 @@ export class Beef {
     if (!beefTx) return undefined
 
     const addInputProof = (beef: Beef, tx: Transaction) => {
-      for (const i of tx.inputs) {
-        if (!i.sourceTransaction) {
-          const itx = beef.findTxid(i.sourceTXID)
-          if (itx) {
-            i.sourceTransaction = itx.tx
+      const mp = beef.findBump(tx.id('hex'))
+      if (mp)
+        tx.merklePath = mp
+      else {
+        for (const i of tx.inputs) {
+          if (!i.sourceTransaction) {
+            const itx = beef.findTxid(i.sourceTXID)
+            if (itx) {
+              i.sourceTransaction = itx.tx
+            }
           }
-        }
-        if (i.sourceTransaction) {
-          const mp = beef.findBump(i.sourceTransaction.id('hex'))
-          if (mp) {
-            i.sourceTransaction.merklePath = mp
-          }
-          else {
-            addInputProof(beef, i.sourceTransaction)
+          if (i.sourceTransaction) {
+            const mp = beef.findBump(i.sourceTransaction.id('hex'))
+            if (mp) {
+              i.sourceTransaction.merklePath = mp
+            }
+            else {
+              addInputProof(beef, i.sourceTransaction)
+            }
           }
         }
       }
@@ -404,7 +424,12 @@ export class Beef {
   }
 
   static fromReader (br: Reader): Beef {
-    const version = br.readUInt32LE()
+    let version = br.readUInt32LE()
+    if (version === ATOMIC_BEEF) {
+      // Skip the txid and re-read the BEEF version
+      const atomicTxid = toHex(br.readReverse(32))
+      version = br.readUInt32LE()
+    }
     if (version !== BEEF_MAGIC && version !== BEEF_MAGIC_V2) { throw new Error(`Serialized BEEF must start with ${BEEF_MAGIC} or ${BEEF_MAGIC_V2} but starts with ${version}`) }
     const beef = new Beef(version === BEEF_MAGIC_V2 ? 'V2' : undefined)
     const bumpsLength = br.readVarIntNum()

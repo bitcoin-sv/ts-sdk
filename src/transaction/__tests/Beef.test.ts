@@ -1,8 +1,16 @@
+// The following imports allow flag a large number type checking errors by the VsCode editor due to missing type information:
 import BeefTx from "../../../dist/cjs/src/transaction/BeefTx"
 import Beef from "../../../dist/cjs/src/transaction/Beef"
 import BeefParty from "../../../dist/cjs/src/transaction/BeefParty"
 import { BEEF_MAGIC, BEEF_MAGIC_V2 } from "../../../dist/cjs/src/transaction/Beef"
 import Transaction from "../../../dist/cjs/src/transaction/Transaction"
+
+// The following imports allow full type checking by the VsCode editor, but tests will fail to run:
+//import BeefTx from '../BeefTx'
+//import Beef from '../Beef'
+//import BeefParty from "../BeefParty"
+//import { BEEF_MAGIC, BEEF_MAGIC_V2 } from "../Beef"
+//import Transaction from "..//Transaction"
 
 describe('Beef tests', () => {
     jest.setTimeout(99999999)
@@ -246,6 +254,43 @@ describe('Beef tests', () => {
       }
     })
 
+    test('5_AtomicBeef', async () => {
+      {
+        const beef = Beef.fromString(beefs[0])
+        expect(beef.toHex()).toBe(beefs[0])
+        const sr = beef.sortTxs()
+        const beefHex = beef.toHex()
+        const tx = beef.txs[beef.txs.length - 1].tx!
+        expect(tx).toBeTruthy()
+        const atomic = tx.toAtomicBEEF(true)
+        // Verify that atomic BEEF can be deserialized.
+        const beef2 = Beef.fromBinary(atomic)
+        // The merkle path isn't linked to tx by default.
+        expect(beef2.toHex()).not.toBe(beefHex)
+        {
+          const atx = beef.findAtomicTransaction(tx.id('hex'))
+          const atomic = atx.toAtomicBEEF(true)
+          // Verify that atomic BEEF can be deserialized.
+          const beef2 = Beef.fromBinary(atomic)
+          // The merkle path now is linked to tx by default.
+          expect(beef2.toHex()).toBe(beefHex)
+        }
+      }
+      {
+        const beef = Beef.fromString(beefs[0])
+        expect(beef.toHex()).toBe(beefs[0])
+        beef.mergeTransaction(Transaction.fromHex(txs[0]))
+        const sr = beef.sortTxs()
+        const beefHex = beef.toHex()
+        const tx = beef.txs[beef.txs.length - 1].tx!
+        expect(tx).toBeTruthy()
+        const atx = beef.findAtomicTransaction(tx.id('hex'))
+        const atomic = atx.toAtomicBEEF()
+        // Verify that atomic BEEF can be deserialized.
+        const beef2 = Beef.fromBinary(atomic)
+        expect(beef2.toHex()).toBe(beefHex)
+      }
+    })
 })
 
 const txs: string[] = [
