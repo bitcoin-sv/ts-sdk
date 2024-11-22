@@ -18,8 +18,9 @@ export default class WalletWireTransceiver implements Wallet {
   private async transmit(call: CallType, originator: OriginatorDomainNameStringUnder250Bytes = '', params: number[] = []): Promise<number[]> {
     const frameWriter = new Utils.Writer()
     frameWriter.writeUInt8(calls[call])
-    frameWriter.writeUInt8(originator.length)
-    frameWriter.write(Utils.toArray(originator, 'utf8'))
+    const originatorArray = Utils.toArray(originator, 'utf8')
+    frameWriter.writeUInt8(originatorArray.length)
+    frameWriter.write(originatorArray)
     if (params.length > 0) {
       frameWriter.write(params)
     }
