@@ -13,7 +13,7 @@ All notable changes to this project will be documented in this file. The format 
     - [Removed](#removed)
     - [Fixed](#fixed)
     - [Security](#security)
-  - [\[1.1.31\] - 2024-11-22](#1131---2024-11-22)
+  - [\[1.1.32\] - 2024-11-22](#1132---2024-11-22)
     - [Added](#added-1)
     - [Fixed](#fixed-1)
     - [Removed](#removed-1)
@@ -81,7 +81,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-## [1.1.31] - 2024-11-22
+## [1.1.32] - 2024-11-22
 
 ### Added
 
