@@ -4,6 +4,8 @@ import XDMSubstrate from './substrates/XDM.js'
 import WalletWireTransceiver from './substrates/WalletWireTransceiver.js'
 import HTTPWalletWire from './substrates/HTTPWalletWire.js'
 
+const MAX_XDM_RESPONSE_WAIT = 200
+
 /**
  * The SDK is how applications communicate with wallets over a communications substrate.
  */
@@ -44,7 +46,7 @@ export default class WalletClient implements Wallet {
     } catch (e) {
       try {
         sub = new XDMSubstrate()
-        await checkSub(200)
+        await checkSub(MAX_XDM_RESPONSE_WAIT)
         this.substrate = sub
       } catch (e) {
         try {
