@@ -1,5 +1,6 @@
 export class WalletError extends Error {
   code: number
+  isError: boolean = true
 
   constructor(message: string, code = 1, stack?: string) {
     super(message)

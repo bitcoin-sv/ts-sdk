@@ -1,4 +1,4 @@
-import { Wallet } from '../Wallet.interface.js'
+import { Wallet } from '../Wallet.interfaces.js'
 import WalletWire from './WalletWire.js'
 import { Utils } from '../../primitives/index.js'
 import calls from './WalletWireCalls.js'

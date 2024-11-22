@@ -26,7 +26,7 @@ import {
   TXIDHexString,
   VersionString7To30Characters,
   Wallet
-} from './Wallet.interface.js'
+} from './Wallet.interfaces.js'
 import KeyDeriver from './KeyDeriver.js'
 import { PrivateKey, Hash, ECDSA, BigNumber, Signature, Schnorr, PublicKey, Point } from '../primitives/index.js'
 import walletErrors, { WalletError } from './WalletError.js'

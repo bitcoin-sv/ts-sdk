@@ -1,6 +1,6 @@
 import { ScriptTemplate, LockingScript, UnlockingScript, OP } from '../index.js'
 import { Utils, Hash, TransactionSignature, Signature, PublicKey } from '../../primitives/index.js'
-import { Wallet } from '../../wallet/Wallet.interface.js'
+import { Wallet } from '../../wallet/Wallet.interfaces.js'
 import { Transaction } from '../../transaction/index.js'
 
 /**

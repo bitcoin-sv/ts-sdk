@@ -1,5 +1,5 @@
 import { Utils } from '../primitives/index.js'
-import { Wallet, Base64String, PubKeyHex, HexString, OutpointString, CertificateFieldNameUnder50Characters } from '../wallet/Wallet.interface.js'
+import { Wallet, Base64String, PubKeyHex, HexString, OutpointString, CertificateFieldNameUnder50Characters } from '../wallet/Wallet.interfaces.js'
 import ProtoWallet from '../wallet/ProtoWallet.js'
 
 /**

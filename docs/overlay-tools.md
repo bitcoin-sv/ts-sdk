@@ -200,7 +200,7 @@ facilitator?: OverlayBroadcastFacilitator
 
 #### Property requireAcknowledgmentFromAllHostsForTopics
 
-Determines which topics (all, any, or a specific list) mustt be present within all STEAKs received from every host for the broadcast to be considered a success. By default, all hosts must acknowledge all topics.
+Determines which topics (all, any, or a specific list) must be present within all STEAKs received from every host for the broadcast to be considered a success. By default, all hosts must acknowledge all topics.
 
 ```ts
 requireAcknowledgmentFromAllHostsForTopics?: "all" | "any" | string[]
@@ -208,7 +208,7 @@ requireAcknowledgmentFromAllHostsForTopics?: "all" | "any" | string[]
 
 #### Property requireAcknowledgmentFromAnyHostForTopics
 
-Determines which topics (all, any, or a specific list) mustt be present within STEAK received from at least one host for the broadcast to be considered a success.
+Determines which topics (all, any, or a specific list) must be present within STEAK received from at least one host for the broadcast to be considered a success.
 
 ```ts
 requireAcknowledgmentFromAnyHostForTopics?: "all" | "any" | string[]
@@ -373,8 +373,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
-    httpClient: HttpClient;
-    constructor(httpClient?: HttpClient) 
+    fetchClient: typeof fetch;
+    constructor(httpClient = fetch) 
     async lookup(url: string, question: LookupQuestion): Promise<LookupAnswer> 
 }
 ```
@@ -414,8 +414,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilitator {
-    httpClient: HttpClient;
-    constructor(httpClient?: HttpClient) 
+    httpClient: typeof fetch;
+    constructor(httpClient = fetch) 
     async send(url: string, taggedBEEF: TaggedBEEF): Promise<STEAK> 
 }
 ```

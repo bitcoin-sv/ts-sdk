@@ -1,5 +1,5 @@
 import PushDrop from '../script/templates/PushDrop.js'
-import { Wallet } from '../wallet/Wallet.interface.js'
+import { Wallet } from '../wallet/Wallet.interfaces.js'
 import { LockingScript, ScriptTemplate, UnlockingScript } from '../script/index.js'
 import { Transaction } from '../transaction/index.js'
 import { Utils } from '../primitives/index.js'

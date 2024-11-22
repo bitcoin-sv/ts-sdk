@@ -1,62 +1,193 @@
-import {
-  AtomicBEEF,
-  Base64String,
-  BasketStringUnder300Characters,
-  BEEF,
-  BooleanDefaultFalse,
-  BooleanDefaultTrue,
-  Byte,
-  CertificateFieldNameUnder50Characters,
-  DescriptionString5to50Characters,
-  EntityIconURLStringMax500Characters,
-  EntityNameStringMax100Characters,
-  HexString,
-  ISOTimestampString,
-  KeyIDStringUnder800Characters,
-  LabelStringUnder300Characters,
-  OriginatorDomainNameStringUnder250Characters,
-  OutpointString,
-  OutputTagStringUnder300Characters,
-  PositiveInteger,
-  PositiveIntegerDefault10Max10000,
-  PositiveIntegerMax10,
-  PositiveIntegerOrZero,
-  ProtocolString5To400Characters,
-  PubKeyHex,
-  SatoshiValue,
-  TXIDHexString,
-  VersionString7To30Characters
-} from "./Wallet.interface.js"
+/**
+ * @typedef {boolean} BooleanDefaultFalse
+ * Represents an optional boolean parameter, which defaults to `false` if not provided.
+ */
+export type BooleanDefaultFalse = boolean
 
-export type {
-  AtomicBEEF,
-  Base64String,
-  BasketStringUnder300Characters,
-  BEEF,
-  BooleanDefaultFalse,
-  BooleanDefaultTrue,
-  Byte,
-  CertificateFieldNameUnder50Characters,
-  DescriptionString5to50Characters,
-  EntityIconURLStringMax500Characters,
-  EntityNameStringMax100Characters,
-  HexString,
-  ISOTimestampString,
-  KeyIDStringUnder800Characters,
-  LabelStringUnder300Characters,
-  OriginatorDomainNameStringUnder250Characters,
-  OutpointString,
-  OutputTagStringUnder300Characters,
-  PositiveInteger,
-  PositiveIntegerDefault10Max10000,
-  PositiveIntegerMax10,
-  PositiveIntegerOrZero,
-  ProtocolString5To400Characters,
-  PubKeyHex,
-  SatoshiValue,
-  TXIDHexString,
-  VersionString7To30Characters
-}
+/**
+ * @typedef {boolean} BooleanDefaultTrue
+ * Represents an optional boolean parameter, which defaults to `true` if not provided.
+ */
+export type BooleanDefaultTrue = boolean
+
+/**
+ * @typedef {number} Byte
+ * Represents an integer from 0 to 255 (inclusive).
+ * @minimum 0
+ * @maximum 255
+ */
+export type Byte = number
+
+/**
+ * @typedef {number} PositiveIntegerOrZero
+ * A positive integer, includes zero and has an upper bound of `2^32 - 1`.
+ * @minimum 0
+ * @maximum 4294967295
+ */
+export type PositiveIntegerOrZero = number
+
+/**
+ * @typedef {number} PositiveInteger
+ * A positive integer that excludes zero, and has an upper bound of `2^32 - 1`.
+ * @minimum 1
+ * @maximum 4294967295
+ */
+export type PositiveInteger = number
+
+/**
+ * @typedef {number} PositiveIntegerMax10
+ * A positive integer that excludes zero, and has an upper bound of 10.
+ * @minimum 1
+ * @maximum 10
+ */
+export type PositiveIntegerMax10 = number
+
+/**
+ * @typedef {number} PositiveIntegerDefault10Max10000
+ * A positive integer that defaults to 10, and has an upper bound of 10000.
+ * @minimum 1
+ * @default 10
+ * @maximum 10000
+ */
+export type PositiveIntegerDefault10Max10000 = number
+
+/**
+ * @typedef {number} SatoshiValue
+ * Represents a value in Satoshis, constrained by the max supply of Bitcoin (2.1 * 10^15 Satoshis).
+ * @minimum 1
+ * @maximum 2100000000000000
+ */
+export type SatoshiValue = number
+
+/**
+ * @typedef {string} ISOTimestampString
+ * Represents an ISO timestamp string.
+ */
+export type ISOTimestampString = string
+
+/**
+ * @typedef {string} HexString
+ * A string containing only hexadecimal characters (0-9, a-f).
+ */
+export type HexString = string
+
+/**
+ * @typedef {HexString} TXIDHexString
+ * Represents a transaction ID, enforced to be exactly 64 characters in length and in hexadecimal format.
+ * @length 64
+ */
+export type TXIDHexString = HexString
+
+/**
+ * @typedef {string} OutpointString
+ * Represents a transaction ID and output index pair. The TXID is given as a hex string followed by a period "." and then the output index is given as a decimal integer.
+ */
+export type OutpointString = string
+
+/**
+ * @typedef {HexString} PubKeyHex
+ * Represents a compressed DER secp256k1 public key, exactly 66 hex characters (33 bytes) in length.
+ * @length 66
+ */
+export type PubKeyHex = HexString
+
+/**
+ * @typedef {string} Base64String
+ * A standard base64 encoded string.
+ */
+export type Base64String = string
+
+/**
+ * @typedef {string} OriginatorDomainNameStringUnder250Characters
+ * Represents the fully qualified domain name (FQDN) of the application that originates the request.
+ */
+export type OriginatorDomainNameStringUnder250Characters = string
+
+/**
+ * @typedef {string & { minLength: 5, maxLength: 50 }} DescriptionString5to50Characters
+ * A string used for descriptions, with a length between 5 and 50 characters.
+ */
+export type DescriptionString5to50Characters = string
+
+/**
+ * @typedef {string & { maxLength: 300 }} BasketStringUnder300Characters
+ * A string for naming baskets, with a maximum length of 300 characters.
+ */
+export type BasketStringUnder300Characters = string
+
+/**
+ * @typedef {string & { maxLength: 300 }} OutputTagStringUnder300Characters
+ * A string for tagging outputs, with a maximum length of 300 characters.
+ */
+export type OutputTagStringUnder300Characters = string
+
+/**
+ * @typedef {string & { maxLength: 300 }} LabelStringUnder300Characters
+ * A string for labeling transactions, with a maximum length of 300 characters.
+ */
+export type LabelStringUnder300Characters = string
+
+/**
+ * @typedef {Byte[]} BEEF
+ * An array of integers, each ranging from 0 to 255, indicating transaction data in BEEF (BRC-62) format.
+ */
+export type BEEF = Byte[]
+
+/**
+ * @typedef {Byte[]} AtomicBEEF
+ * An array of integers, each ranging from 0 to 255, indicating transaction data in Atomic BEEF (BRC-95) format.
+ */
+export type AtomicBEEF = Byte[]
+
+/**
+ * @typedef {string & { minLength: 5, maxLength: 400 }} ProtocolString5To400Characters
+ * A protocol identifier with a length between 5 and 400 characters.
+ */
+export type ProtocolString5To400Characters = string
+
+/**
+ * @typedef {string & { maxLength: 800 }} KeyIDStringUnder800Characters
+ * Represents a key identifier string, with a maximum length of 800 characters.
+ */
+export type KeyIDStringUnder800Characters = string
+
+/**
+ * @typedef {string & { maxLength: 50 }} CertificateFieldNameUnder50Characters
+ * Represents a certificate field name with a maximum length of 50 characters.
+ */
+export type CertificateFieldNameUnder50Characters = string
+
+/**
+ * @typedef {string & { maxLength: 100 }} EntityNameStringMax100Characters
+ * Represents a trusted entity name with a maximum length of 100 characters.
+ */
+export type EntityNameStringMax100Characters = string
+
+/**
+ * @typedef {string & { maxLength: 500 }} EntityIconURLStringMax500Characters
+ * Represents a trusted entity icon URL with a maximum length of 500 characters.
+ */
+export type EntityIconURLStringMax500Characters = string
+
+/**
+ * @typedef {string & { minLength: 7, maxLength: 30 }} VersionString7To30Characters
+ * Represents a version string, with a length between 7 and 30 characters.
+ *
+ * The format is [vendor]-[major].[minor].[patch]
+ */
+export type VersionString7To30Characters = string
+
+/**
+ * @typedef {string & { minLength: 10, maxLength: 40 }} ErrorCodeString10To40Characters
+ * Represents a machine-readable error code string, with a length between 10 and 40 characters.
+ */
+export type ErrorCodeString10To40Characters = string
+
+/**
+ * @typedef {string & { minLength: 20, maxLength: 200 }} ErrorDescriptionString20To200Characters
+ * Represents a human-readable error description string, with a length between 20 and 200 characters.
+ */
+export type ErrorDescriptionString20To200Characters = string
 
 export type WalletNetwork = 'mainnet' | 'testnet'
 
@@ -677,7 +808,7 @@ export interface DiscoverByAttributesArgs {
  * Serialization layers can rely on the `isError` property being unique to error objects.
  * Deserialization should rethrow `WalletError` conforming objects.
  */
-export interface WalletError extends Error {
+export interface WalletErrorObject extends Error {
   isError: true
 }
 
