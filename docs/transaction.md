@@ -926,7 +926,9 @@ export class Beef {
     mergeBeef(beef: number[] | Beef) 
     isValid(allowTxidOnly?: boolean): boolean 
     async verify(chainTracker: ChainTracker, allowTxidOnly?: boolean): Promise<boolean> 
+    toWriter(writer: Writer) 
     toBinary(): number[] 
+    toBinaryAtomic(txid: string) 
     toHex(): string 
     static fromReader(br: Reader): Beef 
     static fromBinary(bin: number[]): Beef 
@@ -1187,6 +1189,21 @@ Returns
 
 A binary array representing the BEEF
 
+#### Method toBinaryAtomic
+
+Serialize this Beef as AtomicBEEF.
+
+`txid` must exist and be the last transaction
+in sorted (dependency) order.
+
+```ts
+toBinaryAtomic(txid: string) 
+```
+
+Returns
+
+serialized contents of this Beef with AtomicBEEF prefix.
+
 #### Method toHex
 
 Returns a hex string representing the serialized BEEF
@@ -1208,6 +1225,14 @@ toLogString(): string
 Returns
 
 Summary of `Beef` contents as multi-line string.
+
+#### Method toWriter
+
+Serializes this data to `writer`
+
+```ts
+toWriter(writer: Writer) 
+```
 
 #### Method trimKnownTxids
 
