@@ -19,16 +19,17 @@ describe('XDMSubstrate', () => {
     eventHandlers = {};
 
     // Mock window object
-    window = {
+    global.window = {
       postMessage: jest.fn(),
       parent: {
         postMessage: jest.fn(),
       } as unknown as Window,
       addEventListener: jest.fn((event, handler) => {
-        console.log('hit')
         eventHandlers[event] = handler;
       }),
     } as unknown as Window & typeof globalThis;
+
+    jest.spyOn(window.parent, 'postMessage')
   });
 
   afterEach(() => {
@@ -39,14 +40,14 @@ describe('XDMSubstrate', () => {
 
   describe('constructor', () => {
     it('should throw if window is not an object', () => {
-      global.window = undefined as unknown as Window & typeof globalThis;
+      delete (global as any).window
       expect(() => {
         new XDMSubstrate();
-      }).toThrow('The window object does not seem to support postMessage calls.');
+      }).toThrow('The XDM substrate requires a global window object.');
     });
 
     it('should throw if window.postMessage is not an object', () => {
-      global.window = {
+      window = {
         postMessage: undefined,
       } as unknown as Window & typeof globalThis;
       expect(() => {
@@ -74,8 +75,7 @@ describe('XDMSubstrate', () => {
       jest.spyOn(Utils, 'toBase64').mockReturnValue(mockId);
 
       const invokePromise = xdmSubstrate.invoke(call, args);
-
-      expect(global.window.parent.postMessage).toHaveBeenCalledWith(
+      expect(window.parent.postMessage).toHaveBeenCalledWith(
         {
           type: 'CWI',
           isInvocation: true,
@@ -181,7 +181,7 @@ describe('XDMSubstrate', () => {
       });
 
       // Wait a bit to ensure no unintended resolution
-      await new Promise((resolve) => setImmediate(resolve));
+      await new Promise((resolve) => setTimeout(resolve, 1));
       expect(isResolved).toBe(false);
     });
 
@@ -217,7 +217,7 @@ describe('XDMSubstrate', () => {
       });
 
       // Wait a bit to ensure no unintended resolution
-      await new Promise((resolve) => setImmediate(resolve));
+      await new Promise((resolve) => setTimeout(resolve, 1));
       expect(isResolved).toBe(false);
     });
 
@@ -253,7 +253,7 @@ describe('XDMSubstrate', () => {
       });
 
       // Wait a bit to ensure no unintended resolution
-      await new Promise((resolve) => setImmediate(resolve));
+      await new Promise((resolve) => setTimeout(resolve, 1));
       expect(isResolved).toBe(false);
     });
 
@@ -289,7 +289,7 @@ describe('XDMSubstrate', () => {
       });
 
       // Wait a bit to ensure no unintended resolution
-      await new Promise((resolve) => setImmediate(resolve));
+      await new Promise((resolve) => setTimeout(resolve, 1));
       expect(isResolved).toBe(false);
     });
   });
@@ -310,7 +310,7 @@ describe('XDMSubstrate', () => {
 
         const invokePromise = xdmSubstrate[methodName](args);
 
-        expect(global.window.parent.postMessage).toHaveBeenCalledWith(
+        expect(window.parent.postMessage).toHaveBeenCalledWith(
           {
             type: 'CWI',
             isInvocation: true,
@@ -349,7 +349,7 @@ describe('XDMSubstrate', () => {
 
         const invokePromise = xdmSubstrate[methodName](args);
 
-        expect(global.window.parent.postMessage).toHaveBeenCalledWith(
+        expect(window.parent.postMessage).toHaveBeenCalledWith(
           {
             type: 'CWI',
             isInvocation: true,
