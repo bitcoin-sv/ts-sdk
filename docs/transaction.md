@@ -910,6 +910,7 @@ export class Beef {
     bumps: MerklePath[] = [];
     txs: BeefTx[] = [];
     version: BeefVersion = undefined;
+    atomicTxid: string | undefined = undefined;
     constructor(version?: BeefVersion) 
     get magic(): number 
     findTxid(txid: string): BeefTx | undefined 

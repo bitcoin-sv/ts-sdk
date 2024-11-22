@@ -31,6 +31,6 @@ export default interface ScriptTemplate {
   {
     sign: (tx: Transaction, inputIndex: number) =>
     Promise<UnlockingScript>
-    estimateLength: (tx?: Transaction, inputIndex?: number) => Promise<number>
+    estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>
   }
 }

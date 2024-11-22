@@ -15,12 +15,11 @@ All notable changes to this project will be documented in this file. The format 
     - [Security](#security)
   - [\[1.1.31\] - 2024-11-22](#1131---2024-11-22)
     - [Added](#added-1)
-    - [Changed](#changed-1)
     - [Fixed](#fixed-1)
     - [Removed](#removed-1)
   - [\[1.1.30\] - 2024-11-02](#1130---2024-11-02)
     - [Added](#added-2)
-    - [Changed](#changed-2)
+    - [Changed](#changed-1)
     - [Deprecated](#deprecated-1)
     - [Removed](#removed-2)
     - [Fixed](#fixed-2)
@@ -39,7 +38,7 @@ All notable changes to this project will be documented in this file. The format 
     - [Added](#added-6)
   - [\[1.1.21\] - 2024-09-02](#1121---2024-09-02)
     - [Added](#added-7)
-    - [Changed](#changed-3)
+    - [Changed](#changed-2)
   - [\[1.1.17\] - 2024-08-21](#1117---2024-08-21)
     - [Added](#added-8)
   - [\[1.1.14\] - 2024-07-30](#1114---2024-07-30)
@@ -56,7 +55,7 @@ All notable changes to this project will be documented in this file. The format 
     - [Fixed](#fixed-7)
   - [\[1.1.4\] - 2024-05-10](#114---2024-05-10)
     - [Added](#added-12)
-    - [Changed](#changed-4)
+    - [Changed](#changed-3)
   - [\[1.1.0\] - 2024-05-06](#110---2024-05-06)
     - [Added](#added-13)
     - [Removed](#removed-3)
@@ -92,10 +91,6 @@ All notable changes to this project will be documented in this file. The format 
 4. isValid to BeefTx, used by new sortTx.
 5. Add serialized AtomicBEEF deserialization to Beef class.
 6. Add atomicTxid property to Beef class.
-
-### Changed
-
-1. Make estimateLength ScriptTemplate arguments optional.
 
 ### Fixed
 
