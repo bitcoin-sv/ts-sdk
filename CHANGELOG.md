@@ -90,7 +90,8 @@ All notable changes to this project will be documented in this file. The format 
 2. findBump, findTransactionForSigning, findAtomicTransaction to Beef class.
 3. mergeBeefFromParty to BeefParty
 4. isValid to BeefTx, used by new sortTx.
-5. Add serialized AtomicBEEF deserialization to Beef class. 
+5. Add serialized AtomicBEEF deserialization to Beef class.
+6. Add atomicTxid property to Beef class.
 
 ### Changed
 
