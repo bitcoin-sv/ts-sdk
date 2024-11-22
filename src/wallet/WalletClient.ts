@@ -1,4 +1,4 @@
-import { Base64String, BasketStringUnder300Bytes, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Bytes, DescriptionString5to50Bytes, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, ISOTimestampString, KeyIDStringUnder800Bytes, LabelStringUnder300Bytes, OriginatorDomainNameStringUnder250Bytes, OutpointString, OutputTagStringUnder300Bytes, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, PubKeyHex, SatoshiValue, TXIDHexString, VersionString7To30Bytes, Wallet } from './Wallet.interfaces.js'
+import { AcquireCertificateArgs, AcquireCertificateResult, Base64String, BasketStringUnder300Bytes, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Bytes, CreateActionArgs, CreateActionResult, DescriptionString5to50Bytes, DiscoverCertificatesResult, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, InternalizeActionArgs, ISOTimestampString, KeyIDStringUnder800Bytes, LabelStringUnder300Bytes, ListActionsArgs, ListActionsResult, ListCertificatesResult, ListOutputsArgs, ListOutputsResult, OriginatorDomainNameStringUnder250Bytes, OutpointString, OutputTagStringUnder300Bytes, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, ProveCertificateArgs, ProveCertificateResult, PubKeyHex, SatoshiValue, SignActionArgs, SignActionResult, TXIDHexString, VersionString7To30Bytes, Wallet } from './Wallet.interfaces.js'
 import WindowCWISubstrate from './substrates/window.CWI.js'
 import XDMSubstrate from './substrates/XDM.js'
 import WalletWireTransceiver from './substrates/WalletWireTransceiver.js'
@@ -60,14 +60,14 @@ export default class WalletClient implements Wallet {
     }
   }
 
-  async createAction(args: { description: DescriptionString5to50Bytes, inputs?: Array<{ tx?: BEEF, outpoint: OutpointString, unlockingScript?: HexString, unlockingScriptLength?: PositiveInteger, inputDescription: DescriptionString5to50Bytes, sequenceNumber?: PositiveIntegerOrZero }>, outputs?: Array<{ lockingScript: HexString, satoshis: SatoshiValue, outputDescription: DescriptionString5to50Bytes, basket?: BasketStringUnder300Bytes, customInstructions?: string, tags?: OutputTagStringUnder300Bytes[] }>, lockTime?: PositiveIntegerOrZero, version?: PositiveIntegerOrZero, labels?: LabelStringUnder300Bytes[], options?: { signAndProcess?: BooleanDefaultTrue, acceptDelayedBroadcast?: BooleanDefaultTrue, trustSelf?: 'known', knownTxids?: TXIDHexString[], returnTXIDOnly?: BooleanDefaultFalse, noSend?: BooleanDefaultFalse, noSendChange?: OutpointString[], sendWith?: TXIDHexString[] } }): Promise<{ txid?: TXIDHexString, tx?: BEEF, noSendChange?: OutpointString[], sendWithResults?: Array<{ txid: TXIDHexString, status: 'unproven' | 'sending' | 'failed' }>, signableTransaction?: { tx: BEEF, reference: Base64String } }> {
+  async createAction(args: CreateActionArgs): Promise<CreateActionResult> {
     if (typeof this.substrate !== 'object') {
       await this.connectToSubstrate()
     }
     return await (this.substrate as Wallet).createAction(args, this.originator)
   }
 
-  async signAction(args: { spends: Record<PositiveIntegerOrZero, { unlockingScript: HexString, sequenceNumber?: PositiveIntegerOrZero }>, reference: Base64String, options?: { acceptDelayedBroadcast?: BooleanDefaultTrue, returnTXIDOnly?: BooleanDefaultFalse, noSend?: BooleanDefaultFalse, noSendChange?: OutpointString[], sendWith: TXIDHexString[] } }): Promise<{ txid?: TXIDHexString, tx?: BEEF, noSendChange?: OutpointString[], sendWithResults?: Array<{ txid: TXIDHexString, status: 'unproven' | 'sending' | 'failed' }> }> {
+  async signAction(args: SignActionArgs): Promise<SignActionResult> {
     if (typeof this.substrate !== 'object') {
       await this.connectToSubstrate()
     }
@@ -81,21 +81,21 @@ export default class WalletClient implements Wallet {
     return await (this.substrate as Wallet).abortAction(args, this.originator)
   }
 
-  async listActions(args: { labels: LabelStringUnder300Bytes[], labelQueryMode?: 'any' | 'all', includeLabels?: BooleanDefaultFalse, includeInputs?: BooleanDefaultFalse, includeInputSourceLockingScripts?: BooleanDefaultFalse, includeInputUnlockingScripts?: BooleanDefaultFalse, includeOutputs?: BooleanDefaultFalse, includeOutputLockingScripts?: BooleanDefaultFalse, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }): Promise<{ totalActions: PositiveIntegerOrZero, actions: Array<{ txid: TXIDHexString, satoshis: SatoshiValue, status: 'completed' | 'unprocessed' | 'sending' | 'unproven' | 'unsigned' | 'nosend' | 'nonfinal', isOutgoing: boolean, description: DescriptionString5to50Bytes, labels?: LabelStringUnder300Bytes[], version: PositiveIntegerOrZero, lockTime: PositiveIntegerOrZero, inputs?: Array<{ sourceOutpoint: OutpointString, sourceSatoshis: SatoshiValue, sourceLockingScript?: HexString, unlockingScript?: HexString, inputDescription: DescriptionString5to50Bytes, sequenceNumber: PositiveIntegerOrZero }>, outputs?: Array<{ outputIndex: PositiveIntegerOrZero, satoshis: SatoshiValue, lockingScript?: HexString, spendable: boolean, outputDescription: DescriptionString5to50Bytes, basket: BasketStringUnder300Bytes, tags: OutputTagStringUnder300Bytes[], customInstructions?: string }> }> }> {
+  async listActions(args: ListActionsArgs): Promise<ListActionsResult> {
     if (typeof this.substrate !== 'object') {
       await this.connectToSubstrate()
     }
     return await (this.substrate as Wallet).listActions(args, this.originator)
   }
 
-  async internalizeAction(args: { tx: BEEF, outputs: Array<{ outputIndex: PositiveIntegerOrZero, protocol: 'wallet payment' | 'basket insertion', paymentRemittance?: { derivationPrefix: Base64String, derivationSuffix: Base64String, senderIdentityKey: PubKeyHex }, insertionRemittance?: { basket: BasketStringUnder300Bytes, customInstructions?: string, tags?: OutputTagStringUnder300Bytes[] } }>, description: DescriptionString5to50Bytes, labels?: LabelStringUnder300Bytes[] }): Promise<{ accepted: true }> {
+  async internalizeAction(args: InternalizeActionArgs): Promise<{ accepted: true }> {
     if (typeof this.substrate !== 'object') {
       await this.connectToSubstrate()
     }
     return await (this.substrate as Wallet).internalizeAction(args, this.originator)
   }
 
-  async listOutputs(args: { basket: BasketStringUnder300Bytes, tags?: OutputTagStringUnder300Bytes[], tagQueryMode?: 'all' | 'any', include?: 'locking scripts' | 'entire transactions', includeCustomInstructions?: BooleanDefaultFalse, includeTags?: BooleanDefaultFalse, includeLabels?: BooleanDefaultFalse, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }): Promise<{ totalOutputs: PositiveIntegerOrZero, outputs: Array<{ outpoint: OutpointString, satoshis: SatoshiValue, lockingScript?: HexString, tx?: BEEF, spendable: true, customInstructions?: string, tags?: OutputTagStringUnder300Bytes[], labels?: LabelStringUnder300Bytes[] }> }> {
+  async listOutputs(args: ListOutputsArgs): Promise<ListOutputsResult> {
     if (typeof this.substrate !== 'object') {
       await this.connectToSubstrate()
     }
@@ -172,21 +172,21 @@ export default class WalletClient implements Wallet {
     return await (this.substrate as Wallet).verifySignature(args, this.originator)
   }
 
-  async acquireCertificate(args: { type: Base64String, subject: PubKeyHex, serialNumber: Base64String, revocationOutpoint: OutpointString, signature: HexString, fields: Record<CertificateFieldNameUnder50Bytes, string>, certifier: PubKeyHex, keyringRevealer: PubKeyHex | 'certifier', keyringForSubject: Record<CertificateFieldNameUnder50Bytes, Base64String>, acquisitionProtocol: 'direct' | 'issuance', certifierUrl?: string }): Promise<{ type: Base64String, subject: PubKeyHex, serialNumber: Base64String, certifier: PubKeyHex, revocationOutpoint: OutpointString, signature: HexString, fields: Record<CertificateFieldNameUnder50Bytes, string> }> {
+  async acquireCertificate(args: AcquireCertificateArgs): Promise<AcquireCertificateResult> {
     if (typeof this.substrate !== 'object') {
       await this.connectToSubstrate()
     }
     return await (this.substrate as Wallet).acquireCertificate(args, this.originator)
   }
 
-  async listCertificates(args: { certifiers: PubKeyHex[], types: Base64String[], limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero, privileged?: BooleanDefaultFalse, privilegedReason?: DescriptionString5to50Bytes }): Promise<{ totalCertificates: PositiveIntegerOrZero, certificates: Array<{ type: Base64String, subject: PubKeyHex, serialNumber: Base64String, certifier: PubKeyHex, revocationOutpoint: OutpointString, signature: HexString, fields: Record<CertificateFieldNameUnder50Bytes, string> }> }> {
+  async listCertificates(args: { certifiers: PubKeyHex[], types: Base64String[], limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero, privileged?: BooleanDefaultFalse, privilegedReason?: DescriptionString5to50Bytes }): Promise<ListCertificatesResult> {
     if (typeof this.substrate !== 'object') {
       await this.connectToSubstrate()
     }
     return await (this.substrate as Wallet).listCertificates(args, this.originator)
   }
 
-  async proveCertificate(args: { certificate: { type: Base64String, subject: PubKeyHex, serialNumber: Base64String, certifier: PubKeyHex, revocationOutpoint: OutpointString, signature: HexString, fields: Record<CertificateFieldNameUnder50Bytes, string> }, fieldsToReveal: CertificateFieldNameUnder50Bytes[], verifier: PubKeyHex, privileged?: BooleanDefaultFalse, privilegedReason?: DescriptionString5to50Bytes }): Promise<{ keyringForVerifier: Record<CertificateFieldNameUnder50Bytes, Base64String> }> {
+  async proveCertificate(args: ProveCertificateArgs): Promise<ProveCertificateResult> {
     if (typeof this.substrate !== 'object') {
       await this.connectToSubstrate()
     }
@@ -200,14 +200,14 @@ export default class WalletClient implements Wallet {
     return await (this.substrate as Wallet).relinquishCertificate(args, this.originator)
   }
 
-  async discoverByIdentityKey(args: { identityKey: PubKeyHex, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }): Promise<{ totalCertificates: PositiveIntegerOrZero, certificates: Array<{ type: Base64String, subject: PubKeyHex, serialNumber: Base64String, certifier: PubKeyHex, revocationOutpoint: OutpointString, signature: HexString, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, certifierInfo: { name: EntityNameStringMax100Bytes, iconUrl: EntityIconURLStringMax500Bytes, description: DescriptionString5to50Bytes, trust: PositiveIntegerMax10 }, publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, decryptedFields: Record<CertificateFieldNameUnder50Bytes, string> }> }> {
+  async discoverByIdentityKey(args: { identityKey: PubKeyHex, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }): Promise<DiscoverCertificatesResult> {
     if (typeof this.substrate !== 'object') {
       await this.connectToSubstrate()
     }
     return await (this.substrate as Wallet).discoverByIdentityKey(args, this.originator)
   }
 
-  async discoverByAttributes(args: { attributes: Record<CertificateFieldNameUnder50Bytes, string>, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }): Promise<{ totalCertificates: PositiveIntegerOrZero, certificates: Array<{ type: Base64String, subject: PubKeyHex, serialNumber: Base64String, certifier: PubKeyHex, revocationOutpoint: OutpointString, signature: HexString, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, certifierInfo: { name: EntityNameStringMax100Bytes, iconUrl: EntityIconURLStringMax500Bytes, description: DescriptionString5to50Bytes, trust: PositiveIntegerMax10 }, publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, decryptedFields: Record<CertificateFieldNameUnder50Bytes, string> }> }> {
+  async discoverByAttributes(args: { attributes: Record<CertificateFieldNameUnder50Bytes, string>, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }): Promise<DiscoverCertificatesResult> {
     if (typeof this.substrate !== 'object') {
       await this.connectToSubstrate()
     }
