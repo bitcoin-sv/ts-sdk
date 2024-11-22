@@ -228,7 +228,7 @@ export interface Wallet {
    * @param {Array<OutPoint>} [args.options.noSendChange] - Optional. Valid when `noSend` is true. May contain `noSendChange` outpoints previously returned by prior `noSend` actions in the same batch of chained actions.
    * @param {Array<TXIDHexString>} [args.options.sendWith] - Optional. Sends a batch of actions previously created as `noSend` actions to the network; either synchronously if `acceptDelayedBroadcast` is true or by a background process.
    * @param {BooleanDefaultTrue} [args.options.randomizeOutputs] — optional. When set to false, the wallet will avoid randomizing the order of outputs within the transaction.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise returns different structures based on the outcome: error response, response with TXID, response with transaction, or info about signable transaction (partial BEEF and reference number).
    */
   createAction: (
@@ -265,7 +265,7 @@ export interface Wallet {
         randomizeOutputs?: BooleanDefaultTrue
       }
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{
     txid?: TXIDHexString
     tx?: AtomicBEEF
@@ -295,7 +295,7 @@ export interface Wallet {
    * @param {BooleanDefaultFalse} [args.options.returnTXIDOnly] - Optional. If true, only a TXID will be returned instead of a transaction.
    * @param {BooleanDefaultFalse} [args.options.noSend] - Optional. If true, the transaction will be constructed but not sent to the network. Supports the creation of chained batches of transactions using the `sendWith` option.
    * @param {Array<TXIDHexString>} [args.options.sendWith] - Optional. Sends a batch of actions previously created as `noSend` actions to the network; either synchronously if `acceptDelayedBroadcast` is true or by a background process.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise returns an error response or a response with either the completed transaction or TXID.
    */
   signAction: (
@@ -315,7 +315,7 @@ export interface Wallet {
         sendWith?: TXIDHexString[]
       }
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{
     txid?: TXIDHexString
     tx?: AtomicBEEF
@@ -330,14 +330,14 @@ export interface Wallet {
    *
    * @param {Object} args - Arguments to identify the transaction that needs to be aborted.
    * @param {Base64String} args.reference - Reference number for the transaction to abort.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to an object indicating the abortion result (either success or error).
    */
   abortAction: (
     args: {
       reference: Base64String
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ aborted: true }>
 
   /**
@@ -355,7 +355,7 @@ export interface Wallet {
    * @param {PositiveIntegerDefault10Max10000} [args.limit] - The maximum number of transactions to retrieve.
    * @param {PositiveIntegerOrZero} [args.offset] - Number of transactions to skip before starting to return the results.
    * @param {BooleanDefaultTrue} [args.seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to an object containing actions, their metadata, inputs, and outputs if applicable, or an error object.
    */
   listActions: (
@@ -372,7 +372,7 @@ export interface Wallet {
       offset?: PositiveIntegerOrZero
       seekPermission?: BooleanDefaultTrue
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{
     totalActions: PositiveIntegerOrZero
     actions: Array<{
@@ -431,7 +431,7 @@ export interface Wallet {
    * @param {DescriptionString5to50Characters} args.description - Human-readable description of the transaction being internalized.
    * @param {LabelStringUnder300Characters[]} [args.labels] - Optional labels associated with this transaction.
    * @param {BooleanDefaultTrue} [args.seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to an object indicating the success of the operation or an error object.
    */
   internalizeAction: (
@@ -455,7 +455,7 @@ export interface Wallet {
       labels?: LabelStringUnder300Characters[]
       seekPermission?: BooleanDefaultTrue
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ accepted: true }>
 
   /**
@@ -472,7 +472,7 @@ export interface Wallet {
    * @param {BooleanDefaultFalse} [args.includeLabels] - Whether the labels associated with the transaction containing the output should be returned.
    * @param {PositiveIntegerDefault10Max10000} [args.limit] - Optional limit on the number of outputs to return.
    * @param {PositiveIntegerOrZero} [args.offset] - Number of outputs to skip before starting to return results.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @param {BooleanDefaultTrue} [args.seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
    * @returns {Promise<Object>} The promise returns an output listing or an error object.
    */
@@ -489,7 +489,7 @@ export interface Wallet {
       offset?: PositiveIntegerOrZero
       seekPermission?: BooleanDefaultTrue
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{
     totalOutputs: PositiveIntegerOrZero
     BEEF?: BEEF
@@ -510,7 +510,7 @@ export interface Wallet {
    * @param {Object} args - Arguments identifying the output in the basket.
    * @param {BasketStringUnder300Characters} args.basket - The associated basket name where the output should be removed.
    * @param {OutpointString} args.outpoint - The output that should be removed from the basket.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise returns an indication of successful removal or an error object.
    */
   relinquishOutput: (
@@ -518,7 +518,7 @@ export interface Wallet {
       basket: BasketStringUnder300Characters
       output: OutpointString
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ relinquished: true }>
 
   /**
@@ -533,7 +533,7 @@ export interface Wallet {
    * @param {PubKeyHex | 'self' | 'anyone'} [args.counterparty] - The public key of the counterparty involved in the key derivation process.
    * @param {BooleanDefaultFalse} [args.forSelf] - Whether to return the public key derived from the current user's own identity (as opposed to the counterparty's identity).
    * @param {BooleanDefaultTrue} [args.seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to an object containing the public key, or an error response.
    */
   getPublicKey: (
@@ -547,7 +547,7 @@ export interface Wallet {
       forSelf?: BooleanDefaultFalse
       seekPermission?: BooleanDefaultTrue
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ publicKey: PubKeyHex }>
 
   /**
@@ -558,7 +558,7 @@ export interface Wallet {
    * @param {PubKeyHex} args.verifier - The public key of the verifier requesting the linkage information.
    * @param {DescriptionString5to50Characters} [args.privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
    * @param {BooleanDefaultFalse} [args.privileged] - Whether this is a privileged request.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to the key linkage, or an error response.
    */
   revealCounterpartyKeyLinkage: (
@@ -568,7 +568,7 @@ export interface Wallet {
       privilegedReason?: DescriptionString5to50Characters
       privileged?: BooleanDefaultFalse
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{
     prover: PubKeyHex
     verifier: PubKeyHex
@@ -588,7 +588,7 @@ export interface Wallet {
    * @param {KeyIDStringUnder800Characters} args.keyID - The key ID associated with the linkage information to reveal.
    * @param {DescriptionString5to50Characters} [args.privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
    * @param {BooleanDefaultFalse} [args.privileged] - Whether this is a privileged request.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise returns the requested linkage information, or an error object.
    */
   revealSpecificKeyLinkage: (
@@ -600,7 +600,7 @@ export interface Wallet {
       privilegedReason?: DescriptionString5to50Characters
       privileged?: BooleanDefaultFalse
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{
     prover: PubKeyHex
     verifier: PubKeyHex
@@ -623,7 +623,7 @@ export interface Wallet {
    * @param {PubKeyHex | 'self' | 'anyone'} [args.counterparty] - Public key of the counterparty (if two-party encryption is desired).
    * @param {BooleanDefaultFalse} [args.privileged] - Whether this is a privileged request.
    * @param {BooleanDefaultTrue} [args.seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to the encrypted ciphertext bytes or an error if encryption fails.
    */
   encrypt: (
@@ -636,7 +636,7 @@ export interface Wallet {
       privileged?: BooleanDefaultFalse
       seekPermission?: BooleanDefaultTrue
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ ciphertext: Byte[] }>
 
   /**
@@ -650,7 +650,7 @@ export interface Wallet {
    * @param {PubKeyHex | 'self' | 'anyone'} [args.counterparty] - Public identity key of the counterparty for the encryption operation.
    * @param {BooleanDefaultFalse} [args.privileged] - Whether this is a privileged request.
    * @param {BooleanDefaultTrue} [args.seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to the decryption result, containing the plaintext data or an error.
    */
   decrypt: (
@@ -663,7 +663,7 @@ export interface Wallet {
       privileged?: BooleanDefaultFalse
       seekPermission?: BooleanDefaultTrue
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ plaintext: Byte[] }>
 
   /**
@@ -677,7 +677,7 @@ export interface Wallet {
    * @param {PubKeyHex | 'self' | 'anyone'} [args.counterparty] - Public identity key of the counterparty if the operation encompasses a two-party interaction.
    * @param {BooleanDefaultFalse} [args.privileged] - Whether this is a privileged request.
    * @param {BooleanDefaultTrue} [args.seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to an object containing the generated HMAC bytes, or an error if the creation fails.
    */
   createHmac: (
@@ -690,7 +690,7 @@ export interface Wallet {
       privileged?: BooleanDefaultFalse
       seekPermission?: BooleanDefaultTrue
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ hmac: Byte[] }>
 
   /**
@@ -705,7 +705,7 @@ export interface Wallet {
    * @param {PubKeyHex | 'self' | 'anyone'} [args.counterparty] - Public identity key of the counterparty if the operation encompasses a two-party interaction.
    * @param {BooleanDefaultFalse} [args.privileged] - Whether this is a privileged request.
    * @param {BooleanDefaultTrue} [args.seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to an object confirming whether the HMAC was valid or an error.
    */
   verifyHmac: (
@@ -719,7 +719,7 @@ export interface Wallet {
       privileged?: BooleanDefaultFalse
       seekPermission?: BooleanDefaultTrue
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ valid: true }>
 
   /**
@@ -734,7 +734,7 @@ export interface Wallet {
    * @param {BooleanDefaultFalse} [args.privileged] - Whether this is a privileged request.
    * @param {Byte[]} [args.hashToDirectlySign] - Sign a pre-hashed value in situations where data can't or shouldn't be revealed, whether due to its size or for privacy.
    * @param {BooleanDefaultTrue} [args.seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise will resolve to an object containing the DER-encoded ECDSA signature, or an error on failure.
    */
   createSignature: (
@@ -748,7 +748,7 @@ export interface Wallet {
       privileged?: BooleanDefaultFalse
       seekPermission?: BooleanDefaultTrue
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ signature: Byte[] }>
 
   /**
@@ -765,7 +765,7 @@ export interface Wallet {
    * @param {BooleanDefaultFalse} [args.privileged] - Whether this is a privileged request.
    * @param {Byte[]} [args.hashToDirectlyVerify] - Optional field to verify the signature against a precomputed hash instead of data.
    * @param {BooleanDefaultTrue} [args.seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to a boolean object indicating whether the signature was valid or an error message.
    */
   verifySignature: (
@@ -781,7 +781,7 @@ export interface Wallet {
       privileged?: BooleanDefaultFalse
       seekPermission?: BooleanDefaultTrue
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ valid: true }>
 
   /**
@@ -800,7 +800,7 @@ export interface Wallet {
    * @param {Record<CertificateFieldNameUnder50Characters, Base64String>} [args.keyringForSubject] - Keyring revealing all certificate fields to the subject (required when the acquisition protocol is direct).
    * @param {BooleanDefaultFalse} [args.privileged] - Whether this is a privileged request.
    * @param {DescriptionString5to50Characters} [args.privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to an object containing the acquired certificate, or an error object.
    */
   acquireCertificate: (
@@ -821,7 +821,7 @@ export interface Wallet {
       privileged?: BooleanDefaultFalse
       privilegedReason?: DescriptionString5to50Characters
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{
     type: Base64String
     subject: PubKeyHex
@@ -842,7 +842,7 @@ export interface Wallet {
    * @param {PositiveIntegerOrZero} [args.offset] - Number of records to skip before starting to return results.
    * @param {BooleanDefaultFalse} [args.privileged] - Whether this is a privileged request.
    * @param {DescriptionString5to50Characters} [args.privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to an object containing certificates or an error response.
    */
   listCertificates: (
@@ -854,7 +854,7 @@ export interface Wallet {
       privileged?: BooleanDefaultFalse
       privilegedReason?: DescriptionString5to50Characters
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{
     totalCertificates: PositiveIntegerOrZero
     certificates: Array<{
@@ -884,7 +884,7 @@ export interface Wallet {
    * @param {PubKeyHex} args.verifier - Public key of the verifier, to whom the key revelations will be made.
    * @param {BooleanDefaultFalse} [args.privileged] - Whether this is a privileged request.
    * @param {DescriptionString5to50Characters} [args.privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to a keyring for the verifier or an error object.
    */
   proveCertificate: (
@@ -903,7 +903,7 @@ export interface Wallet {
       privileged?: BooleanDefaultFalse
       privilegedReason?: DescriptionString5to50Characters
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{
     keyringForVerifier: Record<
       CertificateFieldNameUnder50Characters,
@@ -918,7 +918,7 @@ export interface Wallet {
    * @param {Base64String} args.type - Type identifier for the certificate.
    * @param {PubKeyHex} args.certifier - The public identity key of the certifier.
    * @param {Base64String} args.serialNumber - Serial number of the certificate to relinquish.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to an indication of successful relinquishment or an error object.
    */
   relinquishCertificate: (
@@ -927,7 +927,7 @@ export interface Wallet {
       serialNumber: Base64String
       certifier: PubKeyHex
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ relinquished: true }>
 
   /**
@@ -938,7 +938,7 @@ export interface Wallet {
    * @param {PositiveIntegerDefault10Max10000} [args.limit] - Maximum number of certificates to return in the response.
    * @param {PositiveIntegerOrZero} [args.offset] - Skip this number of records before starting to provide results.
    * @param {BooleanDefaultTrue} [args.seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to the list of certificates discovered or an error object.
    */
   discoverByIdentityKey: (
@@ -948,7 +948,7 @@ export interface Wallet {
       offset?: PositiveIntegerOrZero
       seekPermission?: BooleanDefaultTrue
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{
     totalCertificates: PositiveIntegerOrZero
     certificates: Array<{
@@ -981,7 +981,7 @@ export interface Wallet {
    * @param {PositiveIntegerDefault10Max10000} [args.limit] - Optional limit on the number of results returned.
    * @param {PositiveIntegerOrZero} [args.offset] - Starts retrieval of results after the specified number of records.
    * @param {BooleanDefaultTrue} [args.seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to a list of matching certificates or an error object.
    */
   discoverByAttributes: (
@@ -991,7 +991,7 @@ export interface Wallet {
       offset?: PositiveIntegerOrZero
       seekPermission?: BooleanDefaultTrue
     },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{
     totalCertificates: PositiveIntegerOrZero
     certificates: Array<{
@@ -1020,36 +1020,36 @@ export interface Wallet {
    * Checks the authentication status of the user.
    *
    * @param {Object} args - Empty object, as no parameters are needed.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to an object indicating whether the user is authenticated or an error response.
    */
   isAuthenticated: (
     args: {},
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ authenticated: boolean }>
 
   /**
    * Continuously waits until the user is authenticated, returning the result once confirmed.
    *
    * @param {Object} args - Not used, pass an empty object.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The final result indicating that the user is authenticated or an error object.
    */
   waitForAuthentication: (
     args: {},
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ authenticated: true }>
 
   /**
    * Retrieves the current height of the blockchain.
    *
    * @param {Object} args - Empty object as no other parameters are necessary.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to an object indicating the current height or an error on failure.
    */
   getHeight: (
     args: {},
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ height: PositiveInteger }>
 
   /**
@@ -1057,35 +1057,35 @@ export interface Wallet {
    *
    * @param {Object} args - Contains the height parameter needed to retrieve the block header.
    * @param {PositiveInteger} args.height - Specifies the height at which the block header needs to be retrieved.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to an 80-byte block header or an error if it cannot be retrieved.
    */
   getHeaderForHeight: (
     args: { height: PositiveInteger },
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ header: HexString }>
 
   /**
    * Retrieves the Bitcoin network the client is using (mainnet or testnet).
    *
    * @param {Object} args - No arguments required, pass an empty object.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} The promise resolves to an object indicating whether the client is using the mainnet or testnet.
    */
   getNetwork: (
     args: {},
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ network: 'mainnet' | 'testnet' }>
 
   /**
    * Retrieves the current version string of the wallet.
    *
    * @param {Object} args - Empty argument object.
-   * @param {OriginatorDomainNameString} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
+   * @param {OriginatorDomainNameStringUnder250Characters} [originator] - Fully-qualified domain name (FQDN) of the application that originated the request.
    * @returns {Promise<Object>} Resolves to an object containing the version string of the wallet, or an error.
    */
   getVersion: (
     args: {},
-    originator?: OriginatorDomainNameString
+    originator?: OriginatorDomainNameStringUnder250Characters
   ) => Promise<{ version: VersionString7To30Characters }>
 }
