@@ -18,7 +18,12 @@ export default class BeefTx {
   _rawTx?: number[]
   _txid?: string
   inputTxids: string[] = []
-  degree: number = 0
+  /**
+   * true if `hasProof` or all inputs chain to `hasProof`.
+   * 
+   * Typically set by sorting transactions by proven dependency chains.
+   */
+  isValid?: boolean = undefined
 
   get bumpIndex (): number | undefined { return this._bumpIndex }
 

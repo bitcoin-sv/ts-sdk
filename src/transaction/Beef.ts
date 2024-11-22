@@ -7,6 +7,7 @@ import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
 export const BEEF_MAGIC = 4022206465 // 0100BEEF in LE order
 export const BEEF_MAGIC_V2 = 4022206466 // 0200BEEF in LE order
 export const BEEF_MAGIC_TXID_ONLY_EXTENSION = 4022206465 // 0100BEEF in LE order
+export const ATOMIC_BEEF = 0x01010101 // Atomic Beef serialization prefix
 
 export type BeefVersion = undefined | 'V1' | 'V2'
 
@@ -16,6 +17,14 @@ export type BeefVersion = undefined | 'V1' | 'V2'
  *
  * BUMP standard: BRC-74: BSV Unified Merkle Path (BUMP) Format
  * https://github.com/bitcoin-sv/BRCs/blob/master/transactions/0074.md
+ * 
+ * BRC-95: Atomic BEEF Transactions
+ * https://github.com/bitcoin-sv/BRCs/blob/master/transactions/0095.md
+ * 
+ * The Atomic BEEF format is supported by the binary deserialization static method `fromBinary`.
+ * 
+ * BRC-96: BEEF V2, Txid Only Extension
+ * https://github.com/bitcoin-sv/BRCs/blob/master/transactions/0096.md
  *
  * A valid serialized BEEF is the cornerstone of Simplified Payment Validation (SPV)
  * where they are exchanged between two non-trusting parties to establish the
@@ -48,11 +57,18 @@ export type BeefVersion = undefined | 'V1' | 'V2'
  *
  * A valid `Beef` is only required when sent to a party with no shared history,
  * such as a transaction processor.
+ * 
+ * IMPORTANT NOTE:
+ * It is fundamental to the BEEF value proposition that only valid transactions and valid
+ * merkle path (BUMP) data be added to it. Merging invalid data breaks the `verify` and `isValid`
+ * functions. There is no support for removing invalid data. A `Beef` that becomes invalid
+ * must be discarded.
  */
 export class Beef {
   bumps: MerklePath[] = []
   txs: BeefTx[] = []
   version: BeefVersion = undefined
+  atomicTxid: string | undefined = undefined
 
   constructor (version?: BeefVersion) {
     this.version = version
@@ -80,6 +96,81 @@ export class Beef {
      */
   findTxid (txid: string): BeefTx | undefined {
     return this.txs.find(tx => tx.txid === txid)
+  }
+
+  /**
+   * @returns `MerklePath` with level zero hash equal to txid or undefined.
+   */
+  findBump (txid: string): MerklePath | undefined {
+    return this.bumps.find(b => b.path[0].find(leaf => leaf.hash === txid))
+  }
+
+  /**
+   * Finds a Transaction in this `Beef`
+   * and adds any missing input SourceTransactions from this `Beef`.
+   * 
+   * The result is suitable for signing.
+   * 
+   * @param txid The id of the target transaction.
+   * @returns Transaction with all available input `SourceTransaction`s from this Beef.
+   */
+  findTransactionForSigning (txid: string): Transaction | undefined {
+
+    const beefTx = this.findTxid(txid)
+    if (!beefTx) return undefined
+
+    for (const i of beefTx.tx.inputs) {
+      if (!i.sourceTransaction) {
+        const itx = this.findTxid(i.sourceTXID)
+        if (itx) {
+          i.sourceTransaction = itx.tx
+        }
+      }
+    }
+
+    return beefTx.tx
+  }
+  /**
+   * Builds the proof tree rooted at a specific `Transaction`.
+   * 
+   * To succeed, the Beef must contain all the required transaction and merkle path data.
+   * 
+   * @param txid The id of the target transaction.
+   * @returns Transaction with input `SourceTransaction` and `MerklePath` populated from this Beef.
+   */
+  findAtomicTransaction (txid: string): Transaction | undefined {
+
+    const beefTx = this.findTxid(txid)
+    if (!beefTx) return undefined
+
+    const addInputProof = (beef: Beef, tx: Transaction) => {
+      const mp = beef.findBump(tx.id('hex'))
+      if (mp)
+        tx.merklePath = mp
+      else {
+        for (const i of tx.inputs) {
+          if (!i.sourceTransaction) {
+            const itx = beef.findTxid(i.sourceTXID)
+            if (itx) {
+              i.sourceTransaction = itx.tx
+            }
+          }
+          if (i.sourceTransaction) {
+            const mp = beef.findBump(i.sourceTransaction.id('hex'))
+            if (mp) {
+              i.sourceTransaction.merklePath = mp
+            }
+            else {
+              addInputProof(beef, i.sourceTransaction)
+            }
+          }
+        }
+      }
+    }
+
+    addInputProof(this, beefTx.tx)
+
+    return beefTx.tx
   }
 
   /**
@@ -334,7 +425,13 @@ export class Beef {
   }
 
   static fromReader (br: Reader): Beef {
-    const version = br.readUInt32LE()
+    let version = br.readUInt32LE()
+    let atomicTxid: string | undefined = undefined
+    if (version === ATOMIC_BEEF) {
+      // Skip the txid and re-read the BEEF version
+      atomicTxid = toHex(br.readReverse(32))
+      version = br.readUInt32LE()
+    }
     if (version !== BEEF_MAGIC && version !== BEEF_MAGIC_V2) { throw new Error(`Serialized BEEF must start with ${BEEF_MAGIC} or ${BEEF_MAGIC_V2} but starts with ${version}`) }
     const beef = new Beef(version === BEEF_MAGIC_V2 ? 'V2' : undefined)
     const bumpsLength = br.readVarIntNum()
@@ -347,6 +444,7 @@ export class Beef {
       const beefTx = BeefTx.fromReader(br, version)
       beef.txs.push(beefTx)
     }
+    beef.atomicTxid = atomicTxid
     return beef
   }
 
@@ -395,71 +493,104 @@ export class Beef {
   }
 
   /**
-     * Sort the `txs` by input txid dependency order.
-     * @returns array of input txids of unproven transactions that aren't included in txs.
+     * Sort the `txs` by input txid dependency order:
+     * - Oldest Tx Anchored by Path
+     * - Newer Txs depending on Older parents
+     * - Newest Tx
+     * 
+     * with proof (MerklePath) last, longest chain of dependencies first
+     * 
+     * @returns `{ missingInputs, notValid, valid, withMissingInputs }`
      */
-  sortTxs (): string[] {
-    const missingInputs: Record<string, boolean> = {}
+  sortTxs ()
+    : {
+      missingInputs: string[],
+      notValid: string[],
+      valid: string[],
+      withMissingInputs: string[],
+      txidOnly: string[]
+    } {
+    // Hashtable of valid txids (with proof or all inputs chain to proof)
+    const validTxids: Record<string, boolean> = {}
 
+    // Hashtable of all transaction txids to transaction
     const txidToTx: Record<string, BeefTx> = {}
+
+    // queue of unsorted transactions ...
+    let queue: BeefTx[] = []
+
+    // sorted transactions: hasProof to with longest dependency chain
+    const result: BeefTx[] = []
+
+    const txidOnly: BeefTx[] = []
 
     for (const tx of this.txs) {
       txidToTx[tx.txid] = tx
-      // All transactions in this beef start at degree zero.
-      tx.degree = 0
+      tx.isValid = tx.hasProof
+      if (tx.isValid) {
+        validTxids[tx.txid] = true
+        result.push(tx)
+      } else if (tx.isTxidOnly)
+        txidOnly.push(tx)
+      else
+        queue.push(tx)
     }
 
-    for (const tx of this.txs) {
-      if (tx.bumpIndex === undefined) {
+    // Hashtable of unknown input txids used to fund transactions without their own proof.
+    const missingInputs: Record<string, boolean> = {}
+    // transactions with one or more missing inputs
+    const txsMissingInputs: BeefTx[] = []
+
+    const possiblyMissingInputs = queue
+    queue = []
+
+    for (const tx of possiblyMissingInputs) {
+      let hasMissingInput = false
+      if (!tx.isValid) {
         // For all the unproven transactions,
         // link their inputs that exist in this beef,
         // make a note of missing inputs.
         for (const inputTxid of tx.inputTxids) {
-          if (!txidToTx[inputTxid]) { missingInputs[inputTxid] = true }
-        }
-      }
-    }
-
-    // queue of transactions that no unsorted transactions depend upon...
-    const queue: BeefTx[] = []
-    // sorted transactions
-    const result: BeefTx[] = []
-
-    // Increment each txid's degree for every input reference to it by another txid
-    for (const tx of this.txs) {
-      for (const inputTxid of tx.inputTxids) {
-        const tx = txidToTx[inputTxid]
-        if (tx) { tx.degree++ }
-      }
-    }
-    // Since circular dependencies aren't possible, start with the txids no one depends on.
-    // These are the transactions that should be sent last...
-    for (const tx of this.txs) {
-      if (tx.degree === 0) {
-        queue.push(tx)
-      }
-    }
-    // As long as we have transactions to send...
-    while (queue.length > 0) {
-      const tx = queue.shift()!
-      // Add it as new first to send
-      result.unshift(tx)
-      // And remove its impact on degree
-      // noting that any tx achieving a
-      // value of zero can be sent...
-      for (const inputTxid of tx.inputTxids) {
-        const inputTx = txidToTx[inputTxid]
-        if (inputTx) {
-          inputTx.degree--
-          if (inputTx.degree === 0) {
-            queue.push(inputTx)
+          if (!txidToTx[inputTxid]) {
+            missingInputs[inputTxid] = true
+            hasMissingInput = true
           }
         }
       }
+      if (hasMissingInput)
+        txsMissingInputs.push(tx)
+      else
+        queue.push(tx)
     }
-    this.txs = result
 
-    return Object.keys(missingInputs)
+    // As long as we have unsorted transactions...
+    while (queue.length > 0) {
+      const oldQueue = queue
+      queue = []
+      for (const tx of oldQueue) {
+        if (tx.inputTxids.every(txid => validTxids[txid])) {
+          validTxids[tx.txid] = true
+          result.push(tx)
+        } else
+          queue.push(tx)
+      }
+      if (oldQueue.length === queue.length)
+        break;
+    }
+
+    // transactions that don't have proofs and don't chain to proofs
+    const txsNotValid = queue
+
+    // New order of txs is sorted, unsortable, txidOnly (no raw transaction)
+    this.txs = result.concat(queue).concat(txidOnly).concat(txsMissingInputs)
+
+    return {
+      missingInputs: Object.keys(missingInputs),
+      notValid: txsNotValid.map(tx => tx.txid),
+      valid: Object.keys(validTxids),
+      withMissingInputs: txsMissingInputs.map(tx => tx.txid),
+      txidOnly: txidOnly.map(tx => tx.txid)
+    }
   }
 
   /**
@@ -486,6 +617,14 @@ export class Beef {
       }
     }
     // TODO: bumps could be trimmed to eliminate unreferenced proofs.
+  }
+
+  /**
+   * @returns array of transaction txids that either have a proof or whose inputs chain back to a proven transaction.
+   */
+  getValidTxids() : string[] {
+    const r = this.sortTxs()
+    return r.valid
   }
 
   /**

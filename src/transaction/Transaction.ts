@@ -859,10 +859,13 @@ export default class Transaction {
 
   /**
    * Serializes this transaction, together with its inputs and the respective merkle proofs, into the BEEF (BRC-62) format. This enables efficient verification of its compliance with the rules of SPV.
+   * 
+   * @param allowPartial If true, error will not be thrown if there are any missing sourceTransactions.
    *
    * @returns The serialized BEEF structure
+   * @throws Error if there are any missing sourceTransactions unless `allowPartial` is true.
    */
-  toBEEF (): number[] {
+  toBEEF (allowPartial?: boolean): number[] {
     const writer = new Writer()
     writer.writeUInt32LE(4022206465)
     const BUMPs: MerklePath[] = []
@@ -907,10 +910,10 @@ export default class Transaction {
       if (!hasProof) {
         for (let i = 0; i < tx.inputs.length; i++) {
           const input = tx.inputs[i]
-          if (typeof input.sourceTransaction !== 'object') {
+          if (typeof input.sourceTransaction === 'object')
+            addPathsAndInputs(input.sourceTransaction)
+          else if (!allowPartial)
             throw new Error('A required source transaction is missing!')
-          }
-          addPathsAndInputs(input.sourceTransaction)
         }
       }
     }
@@ -940,16 +943,19 @@ export default class Transaction {
    * and then the BEEF data containing only the subject transaction and its dependencies.
    * This format ensures that the BEEF structure is atomic and contains no unrelated transactions.
    *
+   * @param allowPartial If true, error will not be thrown if there are any missing sourceTransactions.
+   *
    * @returns {number[]} - The serialized Atomic BEEF structure.
+   * @throws Error if there are any missing sourceTransactions unless `allowPartial` is true.
    */
-  toAtomicBEEF (): number[] {
+  toAtomicBEEF (allowPartial?: boolean): number[] {
     const writer = new Writer()
     // Write the Atomic BEEF prefix
     writer.writeUInt32LE(0x01010101)
     // Write the subject TXID (big-endian)
     writer.write(this.id())
     // Append the BEEF data
-    const beefData = this.toBEEF()
+    const beefData = this.toBEEF(allowPartial)
     writer.write(beefData)
     return writer.toArray()
   }

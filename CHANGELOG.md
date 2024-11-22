@@ -4,25 +4,66 @@ All notable changes to this project will be documented in this file. The format 
 
 ## Table of Contents
 
-- [Unreleased](#unreleased)
-- [1.1.30 - 2024-07-30](#1130---2024-11-02)
-- [1.1.29 - 2024-10-23](#1129---2024-10-23)
-- [1.1.28 - 2024-10-23](#1128---2024-10-23)
-- [1.1.26 - 2024-10-22](#1126---2024-10-22)
-- [1.1.25 - 2024-10-21](#1125---2024-10-21)
-- [1.1.24 - 2024-10-04](#1124---2024-10-04)
-- [1.1.22 - 2024-09-02](#1122---2024-09-02)
-- [1.1.21 - 2024-09-02](#1121---2024-09-02)
-- [1.1.17 - 2024-08-21](#1117---2024-08-21)
-- [1.1.10 - 2024-06-28](#1110---2024-06-28)
-- [1.1.14 - 2024-07-30](#1114---2024-07-30)
-- [1.1.13 - 2024-07-19](#1113---2024-07-19)
-- [1.1.8 - 2024-06-12](#118---2024-06-19)
-- [1.1.6 - 2024-06-12](#116---2024-06-12)
-- [1.1.5 - 2024-06-11](#115---2024-06-11)
-- [1.1.4 - 2024-05-10](#114---2024-05-10)
-- [1.1.0 - 2024-05-06](#110---2024-05-06)
-- [1.0.0 - 2024-02-10](#100---2024-02-10)
+- [CHANGELOG for `@bsv/sdk`](#changelog-for-bsvsdk)
+  - [Table of Contents](#table-of-contents)
+  - [\[Unreleased\]](#unreleased)
+    - [Added](#added)
+    - [Changed](#changed)
+    - [Deprecated](#deprecated)
+    - [Removed](#removed)
+    - [Fixed](#fixed)
+    - [Security](#security)
+  - [\[1.1.32\] - 2024-11-22](#1132---2024-11-22)
+    - [Added](#added-1)
+    - [Fixed](#fixed-1)
+    - [Removed](#removed-1)
+  - [\[1.1.30\] - 2024-11-02](#1130---2024-11-02)
+    - [Added](#added-2)
+    - [Changed](#changed-1)
+    - [Deprecated](#deprecated-1)
+    - [Removed](#removed-2)
+    - [Fixed](#fixed-2)
+    - [Security](#security-1)
+  - [\[1.1.29\] - 2024-10-23](#1129---2024-10-23)
+    - [Fixed](#fixed-3)
+  - [\[1.1.28\] - 2024-10-23](#1128---2024-10-23)
+    - [Added](#added-3)
+  - [\[1.1.26\] - 2024-10-22](#1126---2024-10-22)
+    - [Added](#added-4)
+  - [\[1.1.25\] - 2024-10-21](#1125---2024-10-21)
+    - [Added](#added-5)
+  - [\[1.1.24\] - 2024-10-04](#1124---2024-10-04)
+    - [Fixed](#fixed-4)
+  - [\[1.1.22\] - 2024-09-02](#1122---2024-09-02)
+    - [Added](#added-6)
+  - [\[1.1.21\] - 2024-09-02](#1121---2024-09-02)
+    - [Added](#added-7)
+    - [Changed](#changed-2)
+  - [\[1.1.17\] - 2024-08-21](#1117---2024-08-21)
+    - [Added](#added-8)
+  - [\[1.1.14\] - 2024-07-30](#1114---2024-07-30)
+    - [Added](#added-9)
+  - [\[1.1.13\] - 2024-07-19](#1113---2024-07-19)
+    - [Fixed](#fixed-5)
+  - [\[1.1.10\] - 2024-06-28](#1110---2024-06-28)
+    - [Fixed](#fixed-6)
+  - [\[1.1.8\] - 2024-06-19](#118---2024-06-19)
+    - [Added](#added-10)
+  - [\[1.1.6\] - 2024-06-12](#116---2024-06-12)
+    - [Added](#added-11)
+  - [\[1.1.5\] - 2024-06-11](#115---2024-06-11)
+    - [Fixed](#fixed-7)
+  - [\[1.1.4\] - 2024-05-10](#114---2024-05-10)
+    - [Added](#added-12)
+    - [Changed](#changed-3)
+  - [\[1.1.0\] - 2024-05-06](#110---2024-05-06)
+    - [Added](#added-13)
+    - [Removed](#removed-3)
+    - [Fixed](#fixed-8)
+    - [New Contributors](#new-contributors)
+  - [\[1.0.0\] - 2024-02-10](#100---2024-02-10)
+    - [Added](#added-14)
+    - [Template for New Releases:](#template-for-new-releases)
 
 ## [Unreleased]
 
@@ -38,6 +79,26 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Security
 
+---
+
+## [1.1.32] - 2024-11-22
+
+### Added
+
+1. allowPartial optional argument to Transaction toBEEF and toAtomicBEEF to avoid errors on missing sourceTransactions.
+2. findBump, findTransactionForSigning, findAtomicTransaction to Beef class.
+3. mergeBeefFromParty to BeefParty
+4. isValid to BeefTx, used by new sortTx.
+5. Add serialized AtomicBEEF deserialization to Beef class.
+6. Add atomicTxid property to Beef class.
+
+### Fixed
+
+1. sortTxs of Beef class fixed to handle incompletely valid data, order now matches spec for isValid true BEEF.
+
+### Removed
+
+1. degree property from BeefTx class, was used only by original sortTxs algorithm.
 ---
 
 ## [1.1.30] - 2024-11-02
