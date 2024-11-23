@@ -138,7 +138,18 @@ export default class Transaction {
 
     // Ensure that all transactions are part of the dependency graph of the subject transaction
     const validTxids = new Set<string>()
+    // All BUMP level 0 hashes are valid.
+    for (const bump of BUMPs) {
+      for (const n of bump.path[0])
+        if (n.hash)
+          validTxids.add(n.hash)
+    }
+    // To keep track of which transactions were used.
+    const unusedTxTxids = new Set<string>()
+    for (const txid of Object.keys(transactions)) unusedTxTxids.add(txid)
+
     const traverseDependencies = (txid: string) => {
+      unusedTxTxids.delete(txid)
       if (validTxids.has(txid)) {
         return
       }
@@ -156,10 +167,8 @@ export default class Transaction {
     traverseDependencies(subjectTXID)
 
     // Check for any unrelated transactions
-    for (const txid in transactions) {
-      if (!validTxids.has(txid)) {
-        throw new Error(`Unrelated transaction with TXID ${txid} found in Atomic BEEF data.`)
-      }
+    for (const txid of unusedTxTxids) {
+      throw new Error(`Unrelated transaction with TXID ${txid} found in Atomic BEEF data.`)
     }
 
     // Build the transaction by linking inputs and merkle paths
