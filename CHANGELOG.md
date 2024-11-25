@@ -86,6 +86,13 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.2.1] - 2024-11-25
+
+### [1.2.0] Added
+- [NPM package provenance](https://github.blog/security/supply-chain-security/introducing-npm-package-provenance/) support
+
+---
+
 ## [1.2.0] - 2024-11-25
 
 ### [1.2.0] Added
