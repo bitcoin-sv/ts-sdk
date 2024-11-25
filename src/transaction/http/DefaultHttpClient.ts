@@ -16,7 +16,7 @@ export function defaultHttpClient (): HttpClient {
 
   if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
     // Use fetch in a browser environment
-    return new FetchHttpClient(window.fetch)
+    return new FetchHttpClient(window.fetch.bind(window))
   } else if (typeof require !== 'undefined') {
     // Use Node.js https module
     // eslint-disable-next-line
