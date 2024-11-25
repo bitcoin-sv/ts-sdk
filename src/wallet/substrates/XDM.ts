@@ -7,13 +7,16 @@ import { CallType } from 'mod.js'
  * Facilitates wallet operations over cross-document messaging.
  */
 export default class XDMSubstrate implements Wallet {
-  constructor() {
+  private readonly domain: string
+  
+  constructor(domain: string = '*') {
     if (typeof window !== 'object') {
       throw new Error('The XDM substrate requires a global window object.')
     }
     if (typeof window.postMessage !== 'function') {
       throw new Error('The window object does not seem to support postMessage calls.')
     }
+    this.domain = domain
   }
 
   async invoke(call: CallType, args: any): Promise<any> {
@@ -21,7 +24,7 @@ export default class XDMSubstrate implements Wallet {
       const id = Utils.toBase64(Random(12))
       const listener = async e => {
         if (e.data.type !== 'CWI' || !e.isTrusted || e.data.id !== id || e.data.isInvocation) return
-        window.removeEventListener('message', listener)
+        if (typeof window.removeEventListener === 'function') window.removeEventListener('message', listener)
         if (e.data.status === 'error') {
           const err = new WalletError(e.data.description, e.data.code)
           reject(err)
@@ -36,7 +39,7 @@ export default class XDMSubstrate implements Wallet {
         id,
         call,
         args
-      }, '*')
+      }, this.domain)
     })
   }
 
