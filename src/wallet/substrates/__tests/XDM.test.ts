@@ -47,9 +47,7 @@ describe('XDMSubstrate', () => {
     });
 
     it('should throw if window.postMessage is not an object', () => {
-      window = {
-        postMessage: undefined,
-      } as unknown as Window & typeof globalThis;
+      delete (global as any).window.postMessage
       expect(() => {
         new XDMSubstrate();
       }).toThrow('The window object does not seem to support postMessage calls.');
