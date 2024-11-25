@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file. The format 
     - [Removed](#removed)
     - [Fixed](#fixed)
     - [Security](#security)
+  - [\[1.2.0\] - 2024-11-25](#120---2024-11-25)
+    - [Added](#120-added)
   - [\[1.1.33\] - 2024-11-22](#1133---2024-11-22)
     - [Added](#added-1)
     - [Fixed](#fixed-1)
@@ -84,6 +86,15 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.2.0] - 2024-11-25
+
+### [1.2.0] Added
+- Implement BRC-100 wallet interface
+- Add PushDrop token template
+- SHIP and SLAP overlay tooling including broadcaster and lookup
+
+---
+
 ## [1.1.33] - 2024-11-22
 
 ### Added
@@ -117,13 +128,8 @@ Transaction.fromAtomicBEEF
 ### Removed
 
 1. degree property from BeefTx class, was used only by original sortTxs algorithm.
----
 
-## [1.2.0] - 2024-11-07
-### Added
-- Implement BRC-100 wallet interface
-- Add PushDrop token template
-- SHIP and SLAP overlay tooling
+---
 
 ## [1.1.30] - 2024-11-02
 ### Added
