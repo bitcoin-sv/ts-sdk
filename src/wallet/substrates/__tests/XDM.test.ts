@@ -4,7 +4,7 @@
 
 import XDMSubstrate from '../../../../dist/cjs/src/wallet/substrates/XDM.js'
 import { WalletError } from '../../../../dist/cjs/src/wallet/WalletError.js'
-import { Utils, Random } from '../../../../dist/cjs/src/primitives/index.js'
+import { Utils } from '../../../../dist/cjs/src/primitives/index.js'
 
 describe('XDMSubstrate', () => {
   let xdmSubstrate;
@@ -42,14 +42,14 @@ describe('XDMSubstrate', () => {
     it('should throw if window is not an object', () => {
       delete (global as any).window
       expect(() => {
-        new XDMSubstrate();
+        const _ = new XDMSubstrate();
       }).toThrow('The XDM substrate requires a global window object.');
     });
 
     it('should throw if window.postMessage is not an object', () => {
       delete (global as any).window.postMessage
       expect(() => {
-        new XDMSubstrate();
+        const _ = new XDMSubstrate();
       }).toThrow('The window object does not seem to support postMessage calls.');
     });
 
@@ -72,7 +72,7 @@ describe('XDMSubstrate', () => {
 
       jest.spyOn(Utils, 'toBase64').mockReturnValue(mockId);
 
-      const invokePromise = xdmSubstrate.invoke(call, args);
+      xdmSubstrate.invoke(call, args);
       expect(window.parent.postMessage).toHaveBeenCalledWith(
         {
           type: 'CWI',
@@ -142,9 +142,11 @@ describe('XDMSubstrate', () => {
 
       await expect(invokePromise).rejects.toThrow(WalletError);
       await expect(invokePromise).rejects.toThrow(errorDescription);
-      await invokePromise.catch((err) => {
+      try {
+        await invokePromise;
+      } catch (err) {
         expect(err.code).toBe(errorCode);
-      });
+      }
     });
 
     it('should ignore messages with incorrect type', async () => {
