@@ -6,7 +6,7 @@ import Point from '../primitives/Point.js'
 import * as Hash from '../primitives/Hash.js'
 import { toArray, toHex, encode } from '../primitives/utils.js'
 
-function AES (key) {
+function AES(key) {
   if (!this._tables[0][0][0]) this._precompute()
 
   let tmp, encKey, decKey
@@ -175,7 +175,7 @@ AES.prototype = {
 }
 
 class AESWrapper {
-  public static encrypt (messageBuf: number[], keyBuf: number[]): number[] {
+  public static encrypt(messageBuf: number[], keyBuf: number[]): number[] {
     const key = AESWrapper.buf2Words((keyBuf))
     const message = AESWrapper.buf2Words((messageBuf))
     const a = new AES(key)
@@ -184,7 +184,7 @@ class AESWrapper {
     return encBuf
   }
 
-  public static decrypt (encBuf: number[], keyBuf: number[]): number[] {
+  public static decrypt(encBuf: number[], keyBuf: number[]): number[] {
     const enc = AESWrapper.buf2Words((encBuf))
     const key = AESWrapper.buf2Words((keyBuf))
     const a = new AES(key)
@@ -193,7 +193,7 @@ class AESWrapper {
     return messageBuf
   }
 
-  public static buf2Words (buf: number[]): number[] {
+  public static buf2Words(buf: number[]): number[] {
     if (buf.length % 4) {
       throw new Error('buf length must be a multiple of 4')
     }
@@ -209,7 +209,7 @@ class AESWrapper {
     return words
   }
 
-  public static words2Buf (words: number[]): number[] {
+  public static words2Buf(words: number[]): number[] {
     const buf = new Array(words.length * 4)
 
     for (let i = 0; i < words.length; i++) {
@@ -225,7 +225,7 @@ class AESWrapper {
 }
 
 class CBC {
-  public static buf2BlocksBuf (buf: number[], blockSize: number): number[][] {
+  public static buf2BlocksBuf(buf: number[], blockSize: number): number[][] {
     const bytesize = blockSize / 8
     const blockBufs = []
 
@@ -242,7 +242,7 @@ class CBC {
     return blockBufs
   }
 
-  public static blockBufs2Buf (blockBufs: number[][]): number[] {
+  public static blockBufs2Buf(blockBufs: number[][]): number[] {
     let last = blockBufs[blockBufs.length - 1]
     last = CBC.pkcs7Unpad(last)
     blockBufs[blockBufs.length - 1] = last
@@ -252,7 +252,7 @@ class CBC {
     return buf
   }
 
-  public static encrypt (
+  public static encrypt(
     messageBuf: number[],
     ivBuf: number[],
     blockCipher: any /* TODO: type */,
@@ -265,7 +265,7 @@ class CBC {
     return encBuf
   }
 
-  public static decrypt (
+  public static decrypt(
     encBuf: number[],
     ivBuf: number[],
     blockCipher: any /* TODO: type */,
@@ -281,7 +281,7 @@ class CBC {
     return buf
   }
 
-  public static encryptBlock (
+  public static encryptBlock(
     blockBuf: number[],
     ivBuf: number[],
     blockCipher: any /* TODO: type */,
@@ -292,7 +292,7 @@ class CBC {
     return encBuf
   }
 
-  public static decryptBlock (
+  public static decryptBlock(
     encBuf: number[],
     ivBuf: number[],
     blockCipher: any /* TODO: type */,
@@ -303,7 +303,7 @@ class CBC {
     return blockBuf
   }
 
-  public static encryptBlocks (
+  public static encryptBlocks(
     blockBufs: number[][],
     ivBuf: number[],
     blockCipher: any /* TODO: type */,
@@ -323,7 +323,7 @@ class CBC {
     return encBufs
   }
 
-  public static decryptBlocks (
+  public static decryptBlocks(
     encBufs: number[][],
     ivBuf: number[],
     blockCipher: any /* TODO: type */,
@@ -343,7 +343,7 @@ class CBC {
     return blockBufs
   }
 
-  public static pkcs7Pad (buf: number[], blockSize: number): number[] {
+  public static pkcs7Pad(buf: number[], blockSize: number): number[] {
     const bytesize = blockSize / 8
     const padbytesize = bytesize - buf.length
     const pad = new Array(padbytesize)
@@ -352,7 +352,7 @@ class CBC {
     return paddedbuf
   }
 
-  public static pkcs7Unpad (paddedbuf: number[]): number[] {
+  public static pkcs7Unpad(paddedbuf: number[]): number[] {
     const padlength = paddedbuf[paddedbuf.length - 1]
     const padbuf = paddedbuf.slice(paddedbuf.length - padlength, paddedbuf.length)
     const padbuf2 = new Array(padlength)
@@ -363,7 +363,7 @@ class CBC {
     return paddedbuf.slice(0, paddedbuf.length - padlength)
   }
 
-  public static xorBufs (buf1: number[], buf2: number[]): number[] {
+  public static xorBufs(buf1: number[], buf2: number[]): number[] {
     if (buf1.length !== buf2.length) {
       throw new Error('bufs must have the same length')
     }
@@ -379,8 +379,8 @@ class CBC {
 }
 
 class AESCBC {
-  public static encrypt (messageBuf: number[], cipherKeyBuf: number[], ivBuf: number[], concatIvBuf = true): number[] {
-    ivBuf = ivBuf || new Array(128 / 8).fill(0) || Random(128 / 8)
+  public static async encrypt(messageBuf: number[], cipherKeyBuf: number[], ivBuf: number[], concatIvBuf = true): Promise<number[]> {
+    ivBuf = ivBuf || new Array(128 / 8).fill(0) || await Random(128 / 8)
     const ctBuf = CBC.encrypt(messageBuf, ivBuf, AESWrapper, cipherKeyBuf)
     if (concatIvBuf) {
       return [...ivBuf, ...ctBuf]
@@ -389,7 +389,7 @@ class AESCBC {
     }
   }
 
-  public static decrypt (encBuf: number[], cipherKeyBuf: number[], ivBuf?: number[]): number[] {
+  public static async decrypt(encBuf: number[], cipherKeyBuf: number[], ivBuf?: number[]): Promise<number[]> {
     if (!ivBuf) {
       ivBuf = encBuf.slice(0, 128 / 8)
       const ctBuf = encBuf.slice(128 / 8)
@@ -417,7 +417,7 @@ export default class ECIES {
      * @param {PublicKey} pubKey - The receiver's public key.
      * @returns {Object} An object containing the iv, kE, and kM as number arrays.
      */
-  public static ivkEkM (privKey: PrivateKey, pubKey: PublicKey): { iv: number[], kE: number[], kM: number[] } {
+  public static ivkEkM(privKey: PrivateKey, pubKey: PublicKey): { iv: number[], kE: number[], kM: number[] } {
     const r = privKey
     const KB = pubKey
     const P = KB.mul(r)
@@ -440,16 +440,16 @@ export default class ECIES {
      * @param {boolean} [noKey=false] - If true, does not include the sender's public key in the encrypted message.
      * @returns {number[]} The encrypted message as a number array.
      */
-  public static electrumEncrypt (messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, noKey = false): number[] {
+  public static async electrumEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, noKey = false): Promise<number[]> {
     let Rbuf
     if (!fromPrivateKey) {
-      fromPrivateKey = PrivateKey.fromRandom()
+      fromPrivateKey = await PrivateKey.fromRandom()
     }
     if (!noKey) {
       Rbuf = fromPrivateKey.toPublicKey().encode(true)
     }
     const { iv, kE, kM } = ECIES.ivkEkM(fromPrivateKey, toPublicKey)
-    const ciphertext = AESCBC.encrypt(messageBuf, kE, iv, false)
+    const ciphertext = await AESCBC.encrypt(messageBuf, kE, iv, false)
     const BIE1 = toArray('BIE1', 'utf8')
     let encBuf: number[]
     if (Rbuf) {
@@ -469,7 +469,7 @@ export default class ECIES {
      * @param {PublicKey} [fromPublicKey=null] - The public key of the sender. If not provided, it is extracted from the message.
      * @returns {number[]} The decrypted message as a number array.
      */
-  public static electrumDecrypt (encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey?: PublicKey): number[] {
+  public static async electrumDecrypt(encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey?: PublicKey): Promise<number[]> {
     const tagLength = 32
 
     const magic = encBuf.slice(0, 4)
@@ -525,9 +525,9 @@ export default class ECIES {
      * @param {number[]} [ivBuf] - The initialization vector for encryption. If not provided, a random IV is used.
      * @returns {number[]} The encrypted message as a number array.
      */
-  public static bitcoreEncrypt (messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, ivBuf?: number[]): number[] {
+  public static async bitcoreEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, ivBuf?: number[]): Promise<number[]> {
     if (!fromPrivateKey) {
-      fromPrivateKey = PrivateKey.fromRandom()
+      fromPrivateKey = await PrivateKey.fromRandom()
     }
     const r = fromPrivateKey
     const RPublicKey = fromPrivateKey.toPublicKey()
@@ -539,7 +539,7 @@ export default class ECIES {
     const kEkM = Hash.sha512(Sbuf)
     const kE = kEkM.slice(0, 32)
     const kM = kEkM.slice(32, 64)
-    const c = AESCBC.encrypt(messageBuf, kE, ivBuf)
+    const c = await AESCBC.encrypt(messageBuf, kE, ivBuf)
     const d = Hash.sha256hmac(kM, [...c])
     const encBuf = [...RBuf, ...c, ...d]
     return encBuf
@@ -552,7 +552,7 @@ export default class ECIES {
      * @param {PrivateKey} toPrivateKey - The private key of the recipient.
      * @returns {number[]} The decrypted message as a number array.
      */
-  public static bitcoreDecrypt (encBuf: number[], toPrivateKey: PrivateKey): number[] {
+  public static async bitcoreDecrypt(encBuf: number[], toPrivateKey: PrivateKey): Promise<number[]> {
     const kB = toPrivateKey
     const fromPublicKey = PublicKey.fromString(toHex(encBuf.slice(0, 33)))
     const R = fromPublicKey
@@ -571,7 +571,7 @@ export default class ECIES {
     if (toHex(d) !== toHex(d2)) {
       throw new Error('Invalid checksum')
     }
-    const messageBuf = AESCBC.decrypt(c, kE)
+    const messageBuf = await AESCBC.decrypt(c, kE)
     return [...messageBuf]
   }
 }

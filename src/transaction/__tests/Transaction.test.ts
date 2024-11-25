@@ -396,7 +396,7 @@ describe('Transaction', () => {
           value: 10000
         }
       ]
-      const priv = PrivateKey.fromRandom()
+      const priv = await PrivateKey.fromRandom()
       const tx = new Transaction()
       utxos.forEach(utxo => {
         const u = {

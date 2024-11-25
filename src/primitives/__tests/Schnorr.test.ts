@@ -14,8 +14,8 @@ describe('Schnorr Zero-Knowledge Proof', () => {
 
     it('should verify a valid proof', () => {
         // Generate private keys
-        const a = PrivateKey.fromRandom()
-        const b = PrivateKey.fromRandom()
+        const a = await PrivateKey.fromRandom()
+        const b = await PrivateKey.fromRandom()
 
         // Compute public keys
         const A = a.toPublicKey()
@@ -34,8 +34,8 @@ describe('Schnorr Zero-Knowledge Proof', () => {
 
     it('should fail verification if proof is tampered (R modified)', () => {
         // Generate private keys
-        const a = PrivateKey.fromRandom()
-        const b = PrivateKey.fromRandom()
+        const a = await PrivateKey.fromRandom()
+        const b = await PrivateKey.fromRandom()
 
         // Compute public keys
         const A = a.toPublicKey()
@@ -58,8 +58,8 @@ describe('Schnorr Zero-Knowledge Proof', () => {
 
     it('should fail verification if proof is tampered (z modified)', () => {
         // Generate private keys
-        const a = PrivateKey.fromRandom()
-        const b = PrivateKey.fromRandom()
+        const a = await PrivateKey.fromRandom()
+        const b = await PrivateKey.fromRandom()
 
         // Compute public keys
         const A = a.toPublicKey()
@@ -82,8 +82,8 @@ describe('Schnorr Zero-Knowledge Proof', () => {
 
     it('should fail verification if proof is tampered (S\' modified)', () => {
         // Generate private keys
-        const a = PrivateKey.fromRandom()
-        const b = PrivateKey.fromRandom()
+        const a = await PrivateKey.fromRandom()
+        const b = await PrivateKey.fromRandom()
 
         // Compute public keys
         const A = a.toPublicKey()
@@ -106,8 +106,8 @@ describe('Schnorr Zero-Knowledge Proof', () => {
 
     it('should fail verification if inputs are tampered (A modified)', () => {
         // Generate private keys
-        const a = PrivateKey.fromRandom()
-        const b = PrivateKey.fromRandom()
+        const a = await PrivateKey.fromRandom()
+        const b = await PrivateKey.fromRandom()
 
         // Compute public keys
         const A = a.toPublicKey()
@@ -129,8 +129,8 @@ describe('Schnorr Zero-Knowledge Proof', () => {
 
     it('should fail verification if inputs are tampered (B modified)', () => {
         // Generate private keys
-        const a = PrivateKey.fromRandom()
-        const b = PrivateKey.fromRandom()
+        const a = await PrivateKey.fromRandom()
+        const b = await PrivateKey.fromRandom()
 
         // Compute public keys
         const A = a.toPublicKey()
@@ -152,8 +152,8 @@ describe('Schnorr Zero-Knowledge Proof', () => {
 
     it('should fail verification if inputs are tampered (S modified)', () => {
         // Generate private keys
-        const a = PrivateKey.fromRandom()
-        const b = PrivateKey.fromRandom()
+        const a = await PrivateKey.fromRandom()
+        const b = await PrivateKey.fromRandom()
 
         // Compute public keys
         const A = a.toPublicKey()
@@ -175,9 +175,9 @@ describe('Schnorr Zero-Knowledge Proof', () => {
 
     it('should fail verification if using wrong private key', () => {
         // Generate private keys
-        const a = PrivateKey.fromRandom()
-        const wrongA = PrivateKey.fromRandom()
-        const b = PrivateKey.fromRandom()
+        const a = await PrivateKey.fromRandom()
+        const wrongA = await PrivateKey.fromRandom()
+        const b = await PrivateKey.fromRandom()
 
         // Compute public keys
         const A = a.toPublicKey()
@@ -196,9 +196,9 @@ describe('Schnorr Zero-Knowledge Proof', () => {
 
     it('should fail verification if using wrong public key', () => {
         // Generate private keys
-        const a = PrivateKey.fromRandom()
-        const b = PrivateKey.fromRandom()
-        const wrongB = PrivateKey.fromRandom()
+        const a = await PrivateKey.fromRandom()
+        const b = await PrivateKey.fromRandom()
+        const wrongB = await PrivateKey.fromRandom()
 
         // Compute public keys
         const A = a.toPublicKey()
@@ -218,8 +218,8 @@ describe('Schnorr Zero-Knowledge Proof', () => {
 
     it('should fail verification if shared secret S is incorrect', () => {
         // Generate private keys
-        const a = PrivateKey.fromRandom()
-        const b = PrivateKey.fromRandom()
+        const a = await PrivateKey.fromRandom()
+        const b = await PrivateKey.fromRandom()
 
         // Compute public keys
         const A = a.toPublicKey()
@@ -257,8 +257,8 @@ describe('Schnorr Zero-Knowledge Proof', () => {
     })
 
     it('should throw an error if inputs are invalid', () => {
-        const a = PrivateKey.fromRandom()
-        const b = PrivateKey.fromRandom()
+        const a = await PrivateKey.fromRandom()
+        const b = await PrivateKey.fromRandom()
         const A = a.toPublicKey()
         const B = b.toPublicKey()
         const S = B.mul(a)

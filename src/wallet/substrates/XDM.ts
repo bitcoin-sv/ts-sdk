@@ -20,8 +20,8 @@ export default class XDMSubstrate implements Wallet {
   }
 
   async invoke(call: CallType, args: any): Promise<any> {
-    return await new Promise((resolve, reject) => {
-      const id = Utils.toBase64(Random(12))
+    return await new Promise(async (resolve, reject) => {
+      const id = Utils.toBase64(await Random(12))
       const listener = async e => {
         if (e.data.type !== 'CWI' || !e.isTrusted || e.data.id !== id || e.data.isInvocation) return
         if (typeof window.removeEventListener === 'function') window.removeEventListener('message', listener)

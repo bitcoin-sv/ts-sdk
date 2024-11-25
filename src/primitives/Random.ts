@@ -1,6 +1,8 @@
 class Rand {
   _rand: Function
-  constructor () {
+  constructor() { }
+
+  async init() {
     const noRand = () => {
       throw new Error('No secure random number generator is available in this environment.')
     }
@@ -24,12 +26,20 @@ class Rand {
           this._rand = n => [...crypto.randomBytes(n)]
         }
       } catch (e) {
-        this._rand = noRand
+        try {
+          /* eslint-disable-next-line */
+          const crypto = await import('crypto')
+          if (typeof crypto.randomBytes === 'function') {
+            this._rand = n => [...crypto.randomBytes(n)]
+          }
+        } catch (e) {
+          this._rand = noRand
+        }
       }
     }
   }
 
-  generate (len: number): number[] {
+  generate(len: number): number[] {
     return this._rand(len)
   }
 }
@@ -47,9 +57,11 @@ let ayn: Rand | null = null
  * import Random from '@bsv/sdk/primitives/Random'
  * const bytes = Random(32) // Produces 32 random bytes
  */
-export default (len: number): number[] => {
+export default async (len: number): Promise<number[]> => {
   if (ayn == null) {
-    ayn = new Rand()
+    let tmp = new Rand()
+    await tmp.init()
+    ayn = tmp
   }
-  return ayn.generate(len)
+  return await ayn.generate(len)
 }

@@ -29,13 +29,13 @@ export class KeyShares {
   threshold: number
   integrity: string
 
-  constructor (points: PointInFiniteField[], threshold: number, integrity: string) {
+  constructor(points: PointInFiniteField[], threshold: number, integrity: string) {
     this.points = points
     this.threshold = threshold
     this.integrity = integrity
   }
 
-  static fromBackupFormat (shares: string[]): KeyShares {
+  static fromBackupFormat(shares: string[]): KeyShares {
     let threshold = 0
     let integrity = ''
     const points = shares.map((share, idx) => {
@@ -54,7 +54,7 @@ export class KeyShares {
     return new KeyShares(points, threshold, integrity)
   }
 
-  toBackupFormat () {
+  toBackupFormat() {
     return this.points.map(share => share.toString() + '.' + this.threshold + '.' + this.integrity)
   }
 }
@@ -77,9 +77,9 @@ export default class PrivateKey extends BigNumber {
    * @returns The newly generated Private Key.
    *
    * @example
-   * const privateKey = PrivateKey.fromRandom();
+   * const privateKey = await PrivateKey.fromRandom();
    */
-  static fromRandom (): PrivateKey {
+  static fromRandom(): PrivateKey {
     return new PrivateKey(Random(32))
   }
 
@@ -93,7 +93,7 @@ export default class PrivateKey extends BigNumber {
    * @returns The generated Private Key.
    * @throws Will throw an error if the string is not valid.
    **/
-  static fromString (str: string, base: number | 'hex'): PrivateKey {
+  static fromString(str: string, base: number | 'hex'): PrivateKey {
     return new PrivateKey(BigNumber.fromString(str, base).toArray())
   }
 
@@ -107,7 +107,7 @@ export default class PrivateKey extends BigNumber {
    * @returns The generated Private Key.
    * @throws Will throw an error if the string is not a valid WIF.
    **/
-  static fromWif (wif: string, prefixLength: number = 1): PrivateKey {
+  static fromWif(wif: string, prefixLength: number = 1): PrivateKey {
     const decoded = fromBase58Check(wif, null, prefixLength)
     if (decoded.data.length !== 33) {
       throw new Error('Invalid WIF length')
@@ -134,7 +134,7 @@ export default class PrivateKey extends BigNumber {
    * import BigNumber from './BigNumber';
    * const privKey = new PrivateKey(new BigNumber('123456', 10, 'be'));
    */
-  constructor (
+  constructor(
     number: BigNumber | number | string | number[] = 0,
     base: number | 'be' | 'le' | 'hex' = 10,
     endian: 'be' | 'le' = 'be',
@@ -163,7 +163,7 @@ export default class PrivateKey extends BigNumber {
    * A utility function to check that the value of this PrivateKey lies in the field limited by curve.n
    * @returns { inField, modN } where modN is this PrivateKey's current BigNumber value mod curve.n, and inField is true only if modN equals current BigNumber value.
    */
-  checkInField (): { inField: boolean, modN: BigNumber } {
+  checkInField(): { inField: boolean, modN: BigNumber } {
     const curve = new Curve()
     const modN = this.mod(curve.n)
     const inField = this.cmp(modN) === 0
@@ -173,7 +173,7 @@ export default class PrivateKey extends BigNumber {
   /**
    * @returns true if the PrivateKey's current BigNumber value lies in the field limited by curve.n
    */
-  isValid (): boolean {
+  isValid(): boolean {
     return this.checkInField().inField
   }
 
@@ -188,10 +188,10 @@ export default class PrivateKey extends BigNumber {
    * @returns A digital signature generated from the hash of the message and the private key.
    *
    * @example
-   * const privateKey = PrivateKey.fromRandom();
+   * const privateKey = await PrivateKey.fromRandom();
    * const signature = privateKey.sign('Hello, World!');
    */
-  sign (msg: number[] | string, enc?: 'hex' | 'utf8', forceLowS: boolean = true, customK?: Function | BigNumber): Signature {
+  sign(msg: number[] | string, enc?: 'hex' | 'utf8', forceLowS: boolean = true, customK?: Function | BigNumber): Signature {
     const msgHash = new BigNumber(sha256(msg, enc), 16)
     return sign(msgHash, this, forceLowS, customK)
   }
@@ -206,11 +206,11 @@ export default class PrivateKey extends BigNumber {
    * @returns Whether or not the signature is valid.
    *
    * @example
-   * const privateKey = PrivateKey.fromRandom();
+   * const privateKey = await PrivateKey.fromRandom();
    * const signature = privateKey.sign('Hello, World!');
    * const isSignatureValid = privateKey.verify('Hello, World!', signature);
    */
-  verify (msg: number[] | string, sig: Signature, enc?: 'hex'): boolean {
+  verify(msg: number[] | string, sig: Signature, enc?: 'hex'): boolean {
     const msgHash = new BigNumber(sha256(msg, enc), 16)
     return verify(msgHash, sig, this.toPublicKey())
   }
@@ -224,10 +224,10 @@ export default class PrivateKey extends BigNumber {
    * @returns The generated PublicKey.
    *
    * @example
-   * const privateKey = PrivateKey.fromRandom();
+   * const privateKey = await PrivateKey.fromRandom();
    * const publicKey = privateKey.toPublicKey();
    */
-  toPublicKey (): PublicKey {
+  toPublicKey(): PublicKey {
     const c = new Curve()
     const p = c.g.mul(this)
     return new PublicKey(p.x, p.y)
@@ -247,11 +247,11 @@ export default class PrivateKey extends BigNumber {
    * @throws Error('Value is out of field') if current BigNumber value is out of field limited by curve.n
    *
    * @example
-   * const privateKey = PrivateKey.fromRandom();
+   * const privateKey = await PrivateKey.fromRandom();
    * const wif = privateKey.toWif();
    * const testnetWif = privateKey.toWif([0xef]);
    */
-  toWif (prefix: number[] = [0x80]): string {
+  toWif(prefix: number[] = [0x80]): string {
     if (!this.isValid()) { throw new Error('Value is out of field') }
     return toBase58Check([...this.toArray('be', 32), 1], prefix)
   }
@@ -270,7 +270,7 @@ export default class PrivateKey extends BigNumber {
    * const testnetAddress = privkey.toAddress([0x6f])
    * const testnetAddress = privkey.toAddress('testnet')
    */
-  toAddress (prefix: number[] | string = [0x00]): string {
+  toAddress(prefix: number[] | string = [0x00]): string {
     return this.toPublicKey().toAddress(prefix)
   }
 
@@ -283,11 +283,11 @@ export default class PrivateKey extends BigNumber {
    * @throws Will throw an error if the public key is not valid.
    *
    * @example
-   * const privateKey = PrivateKey.fromRandom();
+   * const privateKey = await PrivateKey.fromRandom();
    * const publicKey = privateKey.toPublicKey();
    * const sharedSecret = privateKey.deriveSharedSecret(publicKey);
    */
-  deriveSharedSecret (key: PublicKey): Point {
+  deriveSharedSecret(key: PublicKey): Point {
     if (!key.validate()) {
       throw new Error('Public key not valid for ECDH secret derivation')
     }
@@ -300,7 +300,7 @@ export default class PrivateKey extends BigNumber {
    * @param invoiceNumber The invoice number used to derive the child key
    * @returns The derived child key.
    */
-  deriveChild (publicKey: PublicKey, invoiceNumber: string): PrivateKey {
+  deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey {
     const sharedSecret = this.deriveSharedSecret(publicKey)
     const invoiceNumberBin = toArray(invoiceNumber, 'utf8')
     const hmac = sha256hmac(sharedSecret.encode(true), invoiceNumberBin)
@@ -317,10 +317,10 @@ export default class PrivateKey extends BigNumber {
    * @returns An array of shares.
    *
    * @example
-   * const key = PrivateKey.fromRandom()
+   * const key = await PrivateKey.fromRandom()
    * const shares = key.toKeyShares(2, 5)
    */
-  toKeyShares (threshold: number, totalShares: number): KeyShares {
+  toKeyShares(threshold: number, totalShares: number): KeyShares {
     if (typeof threshold !== 'number' || typeof totalShares !== 'number') throw new Error('threshold and totalShares must be numbers')
     if (threshold < 2) throw new Error('threshold must be at least 2')
     if (totalShares < 2) throw new Error('totalShares must be at least 2')
@@ -350,7 +350,7 @@ export default class PrivateKey extends BigNumber {
    * @param totalShares The number of shares to generate for distribution.
    * @returns
    */
-  toBackupShares (threshold: number, totalShares: number): string[] {
+  toBackupShares(threshold: number, totalShares: number): string[] {
     return this.toKeyShares(threshold, totalShares).toBackupFormat()
   }
 
@@ -370,7 +370,7 @@ export default class PrivateKey extends BigNumber {
    *
    * const recoveredKey = PrivateKey.fromBackupShares([share1, share2])
    */
-  static fromBackupShares (shares: string[]): PrivateKey {
+  static fromBackupShares(shares: string[]): PrivateKey {
     return PrivateKey.fromKeyShares(KeyShares.fromBackupFormat(shares))
   }
 
@@ -383,7 +383,7 @@ export default class PrivateKey extends BigNumber {
    * @returns The reconstructed private key.
    *
    **/
-  static fromKeyShares (keyShares: KeyShares): PrivateKey {
+  static fromKeyShares(keyShares: KeyShares): PrivateKey {
     const { points, threshold, integrity } = keyShares
     if (threshold < 2) throw new Error('threshold must be at least 2')
     if (points.length < threshold) throw new Error(`At least ${threshold} shares are required to reconstruct the private key`)

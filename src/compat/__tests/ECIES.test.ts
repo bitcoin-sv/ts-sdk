@@ -94,7 +94,7 @@ describe('#ECIES', () => {
         .toEqual(message)
     })
 
-    it('should encrypt and decrypt message with counterparty public key', () => {
+    it('should encrypt and decrypt message with counterparty public key', async () => {
       const wif = 'L211enC224G1kV8pyyq7bjVd9SxZebnRYEzzM3i7ZHCc1c5E7dQu'
       const senderPrivateKey = PrivateKey.fromWif(wif)
       const senderPublicKey = senderPrivateKey.toPublicKey()
@@ -102,7 +102,7 @@ describe('#ECIES', () => {
       const messageBuf = toArray(msgStr, 'utf8')
 
       // Create a random counterparty (recipient) public/private key pair
-      const recipientPrivateKey = PrivateKey.fromRandom()
+      const recipientPrivateKey = await PrivateKey.fromRandom()
       const recipientPublicKey = recipientPrivateKey.toPublicKey()
 
       // Encrypt the message using electrumEncrypt

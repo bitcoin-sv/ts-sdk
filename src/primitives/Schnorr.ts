@@ -20,9 +20,9 @@ import { PrivateKey, PublicKey } from './index.js'
  * @example
  * ```typescript
  * const schnorr = new Schnorr();
- * const a = PrivateKey.fromRandom(); // Prover's private key
+ * const a = await PrivateKey.fromRandom(); // Prover's private key
  * const A = a.toPublicKey();         // Prover's public key
- * const b = PrivateKey.fromRandom(); // Other party's private key
+ * const b = await PrivateKey.fromRandom(); // Other party's private key
  * const B = b.toPublicKey();         // Other party's public key
  * const S = B.mul(a);                // Shared secret
  *
@@ -37,7 +37,7 @@ import { PrivateKey, PublicKey } from './index.js'
 export default class Schnorr {
   private readonly curve: Curve
 
-  constructor () {
+  constructor() {
     this.curve = new Curve()
   }
 
@@ -49,8 +49,8 @@ export default class Schnorr {
      * @param S Shared secret
      * @returns Proof (R, S', z)
      */
-  generateProof (aArg: PrivateKey, AArg: PublicKey, BArg: PublicKey, S: Point): { R: Point, SPrime: Point, z: BigNumber } {
-    const r = PrivateKey.fromRandom()
+  generateProof(aArg: PrivateKey, AArg: PublicKey, BArg: PublicKey, S: Point): { R: Point, SPrime: Point, z: BigNumber } {
+    const r = await PrivateKey.fromRandom()
     const R = r.toPublicKey()
     const SPrime = BArg.mul(r)
     const e = this.computeChallenge(AArg, BArg, S, SPrime, R)
@@ -66,7 +66,7 @@ export default class Schnorr {
      * @param proof Proof (R, S', z)
      * @returns True if the proof is valid, false otherwise
      */
-  verifyProof (A: Point, B: Point, S: Point, proof: { R: Point, SPrime: Point, z: BigNumber }): boolean {
+  verifyProof(A: Point, B: Point, S: Point, proof: { R: Point, SPrime: Point, z: BigNumber }): boolean {
     const { R, SPrime, z } = proof
     const e = this.computeChallenge(A, B, S, SPrime, R)
 
@@ -87,7 +87,7 @@ export default class Schnorr {
     return true
   }
 
-  private computeChallenge (A: Point, B: Point, S: Point, SPrime: Point, R: Point): BigNumber {
+  private computeChallenge(A: Point, B: Point, S: Point, SPrime: Point, R: Point): BigNumber {
     const message = [...A.encode(true), ...B.encode(true), ...S.encode(true), ...SPrime.encode(true), ...R.encode(true)] as number[]
     const hash = sha256(message)
     return new BigNumber(hash).umod(this.curve.n)

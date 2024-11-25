@@ -14,11 +14,11 @@ const VERSION = '42421033'
  *
  * @returns The encrypted message
  */
-export const encrypt = (
+export const encrypt = async (
   message: number[],
   sender: PrivateKey,
   recipient: PublicKey
-): number[] => {
+): Promise<number[]> => {
   const keyID = Random(32)
   const keyIDBase64 = toBase64(keyID)
   const invoiceNumber = `2-message encryption-${keyIDBase64}`

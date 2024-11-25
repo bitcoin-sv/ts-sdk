@@ -134,8 +134,8 @@ describe('WalletWire Integration Tests', () => {
       expect(Utils.toUTF8(plaintext)).toEqual('BRC-2 Encryption Compliance Validated!')
     })
     it('Encrypts messages decryptable by the counterparty', async () => {
-      const userKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
       const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
       const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
       const { ciphertext } = await user.encrypt({
@@ -154,8 +154,8 @@ describe('WalletWire Integration Tests', () => {
       expect(ciphertext).not.toEqual(plaintext)
     })
     it('Fails to decryupt messages for the wrong protocol, key, and counterparty', async () => {
-      const userKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
       const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
       const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
       const { ciphertext } = await user.encrypt({
@@ -184,8 +184,8 @@ describe('WalletWire Integration Tests', () => {
       })).rejects.toThrow()
     })
     it('Correctly derives keys for a counterparty', async () => {
-      const userKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
       const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
       const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
       const { publicKey: identityKey } = await user.getPublicKey({
@@ -206,8 +206,8 @@ describe('WalletWire Integration Tests', () => {
       expect(derivedForCounterparty).toEqual(derivedByCounterparty)
     })
     it('Signs messages verifiable by the counterparty', async () => {
-      const userKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
       const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
       const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
       const { signature } = await user.createSignature({
@@ -227,8 +227,8 @@ describe('WalletWire Integration Tests', () => {
       expect(signature.length).not.toEqual(0)
     })
     it('Directly signs hash of message verifiable by the counterparty', async () => {
-      const userKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
       const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
       const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
       const { signature } = await user.createSignature({
@@ -256,8 +256,8 @@ describe('WalletWire Integration Tests', () => {
       expect(signature.length).not.toEqual(0)
     })
     it('Fails to verify signature for the wrong data, protocol, key, and counterparty', async () => {
-      const userKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
       const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
       const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
       const { signature } = await user.createSignature({
@@ -296,8 +296,8 @@ describe('WalletWire Integration Tests', () => {
       })).rejects.toThrow()
     })
     it('Computes HMAC over messages verifiable by the counterparty', async () => {
-      const userKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
       const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
       const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
       const { hmac } = await user.createHmac({
@@ -317,8 +317,8 @@ describe('WalletWire Integration Tests', () => {
       expect(hmac.length).toEqual(32)
     })
     it('Fails to verify HMAC for the wrong data, protocol, key, and counterparty', async () => {
-      const userKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
       const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
       const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
       const { hmac } = await user.createHmac({
@@ -364,7 +364,7 @@ describe('WalletWire Integration Tests', () => {
       expect(await wallet.waitForAuthentication({})).toEqual({ authenticated: true })
     })
     it('Uses anyone for creating signatures and self for other operations if no counterparty is provided', async () => {
-      const userKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
       const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
       const { hmac } = await user.createHmac({
         data: sampleData,
@@ -455,9 +455,9 @@ describe('WalletWire Integration Tests', () => {
     })
     it('Validates the revealCounterpartyKeyLinkage function', async () => {
       // Initialize keys
-      const proverKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
-      const verifierKey = PrivateKey.fromRandom()
+      const proverKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
+      const verifierKey = await PrivateKey.fromRandom()
 
       // Initialize wallets
       const proverWallet = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(proverKey)))
@@ -486,9 +486,9 @@ describe('WalletWire Integration Tests', () => {
 
     it('Validates the revealSpecificKeyLinkage function', async () => {
       // Initialize keys
-      const proverKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
-      const verifierKey = PrivateKey.fromRandom()
+      const proverKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
+      const verifierKey = await PrivateKey.fromRandom()
 
       // Initialize wallets
       const proverWallet = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(proverKey)))
@@ -1093,8 +1093,8 @@ describe('WalletWire Integration Tests', () => {
     })
 
     it('should get a derived public key with valid inputs', async () => {
-      const userKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
       const wallet = createTestWalletWire(new ProtoWallet(userKey))
       const args = {
         protocolID: [2, 'tests'] as [0 | 1 | 2, string],
@@ -1146,8 +1146,8 @@ describe('WalletWire Integration Tests', () => {
 
   describe('encrypt and decrypt', () => {
     it('should encrypt and decrypt data correctly', async () => {
-      const userKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
       const userWallet = createTestWalletWire(new ProtoWallet(userKey))
       const counterpartyWallet = createTestWalletWire(new ProtoWallet(counterpartyKey))
 
@@ -1174,8 +1174,8 @@ describe('WalletWire Integration Tests', () => {
     })
 
     it('should throw an error for invalid decryption inputs', async () => {
-      const userKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
       const counterpartyWallet = createTestWalletWire(new ProtoWallet(counterpartyKey))
 
       const decryptArgs = {
@@ -1190,8 +1190,8 @@ describe('WalletWire Integration Tests', () => {
 
   describe('createHmac and verifyHmac', () => {
     it('should create and verify HMAC correctly', async () => {
-      const userKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
       const userWallet = createTestWalletWire(new ProtoWallet(userKey))
       const counterpartyWallet = createTestWalletWire(new ProtoWallet(counterpartyKey))
 
@@ -1218,7 +1218,7 @@ describe('WalletWire Integration Tests', () => {
     })
 
     it('should throw an error for invalid HMAC verification', async () => {
-      const userKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
       const counterpartyWallet = createTestWalletWire(new ProtoWallet(PrivateKey.fromRandom()))
 
       const verifyHmacArgs = {
@@ -1234,8 +1234,8 @@ describe('WalletWire Integration Tests', () => {
 
   describe('createSignature and verifySignature', () => {
     it('should create and verify signature correctly', async () => {
-      const userKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
       const userWallet = createTestWalletWire(new ProtoWallet(userKey))
       const counterpartyWallet = createTestWalletWire(new ProtoWallet(counterpartyKey))
 
@@ -1262,7 +1262,7 @@ describe('WalletWire Integration Tests', () => {
     })
 
     it('should throw an error for invalid signature verification', async () => {
-      const userKey = PrivateKey.fromRandom()
+      const userKey = await PrivateKey.fromRandom()
       const counterpartyWallet = createTestWalletWire(new ProtoWallet(PrivateKey.fromRandom()))
 
       const verifySignatureArgs = {
@@ -1278,9 +1278,9 @@ describe('WalletWire Integration Tests', () => {
 
   describe('revealCounterpartyKeyLinkage', () => {
     it('should reveal counterparty key linkage correctly', async () => {
-      const proverKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
-      const verifierKey = PrivateKey.fromRandom()
+      const proverKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
+      const verifierKey = await PrivateKey.fromRandom()
 
       const proverWallet = createTestWalletWire(new ProtoWallet(proverKey))
       const verifierWallet = createTestWalletWire(new ProtoWallet(verifierKey))
@@ -1306,9 +1306,9 @@ describe('WalletWire Integration Tests', () => {
     })
 
     it('should throw an error when trying to reveal linkage without privilege', async () => {
-      const proverKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
-      const verifierKey = PrivateKey.fromRandom()
+      const proverKey = await PrivateKey.fromRandom()
+      const counterpartyKey = await PrivateKey.fromRandom()
+      const verifierKey = await PrivateKey.fromRandom()
 
       const proverWallet = createTestWalletWire(new ProtoWallet(proverKey))
 

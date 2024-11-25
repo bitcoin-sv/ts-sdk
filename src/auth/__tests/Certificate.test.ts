@@ -6,9 +6,9 @@ describe('Certificate', () => {
     // Sample data for testing
     const sampleType = Utils.toBase64(new Array(32).fill(1))
     const sampleSerialNumber = Utils.toBase64(new Array(32).fill(2))
-    const sampleSubjectPrivateKey = PrivateKey.fromRandom()
+    const sampleSubjectPrivateKey = new PrivateKey(111)
     const sampleSubjectPubKey = sampleSubjectPrivateKey.toPublicKey().toString()
-    const sampleCertifierPrivateKey = PrivateKey.fromRandom()
+    const sampleCertifierPrivateKey = new PrivateKey(222)
     const sampleCertifierPubKey = sampleCertifierPrivateKey.toPublicKey().toString()
     const sampleRevocationOutpoint = 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.1'
     const sampleFields = {

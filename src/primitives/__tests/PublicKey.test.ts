@@ -9,7 +9,7 @@ describe('PublicKey', () => {
   let publicKey
 
   beforeEach(() => {
-    privateKey = PrivateKey.fromRandom()
+    privateKey = await PrivateKey.fromRandom()
     publicKey = PublicKey.fromPrivateKey(privateKey)
   })
 
@@ -59,7 +59,7 @@ describe('PublicKey', () => {
     })
 
     test('fromDER and fromString should result in the same public key', () => {
-      const key = PrivateKey.fromRandom()
+      const key = await PrivateKey.fromRandom()
       const original = key.toPublicKey()
       const backAndForth = PublicKey.fromString(PublicKey.fromDER(original.toDER()).toString())
       expect(backAndForth.toString()).toEqual(original.toString())

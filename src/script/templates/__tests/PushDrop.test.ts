@@ -48,7 +48,7 @@ describe('PushDrop', () => {
   }
 
   beforeEach(() => {
-    privateKey = PrivateKey.fromRandom()
+    privateKey = await PrivateKey.fromRandom()
     wallet = new ProtoWallet(privateKey)
     pushDrop = new PushDrop(wallet)
   })
