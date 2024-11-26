@@ -1538,6 +1538,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export class WalletError extends Error {
     code: number;
+    isError: boolean = true;
     constructor(message: string, code = 1, stack?: string) 
 }
 ```
@@ -2431,14 +2432,265 @@ export default class WindowCWISubstrate implements Wallet {
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+### Class: WalletWireTransceiver
+
+A way to make remote calls to a wallet over a wallet wire.
+
+```ts
+export default class WalletWireTransceiver implements Wallet {
+    wire: WalletWire;
+    constructor(wire: WalletWire) 
+    async createAction(args: CreateActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<CreateActionResult> 
+    async signAction(args: SignActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<SignActionResult> 
+    async abortAction(args: {
+        reference: Base64String;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        aborted: true;
+    }> 
+    async listActions(args: ListActionsArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ListActionsResult> 
+    async internalizeAction(args: InternalizeActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        accepted: true;
+    }> 
+    async listOutputs(args: ListOutputsArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ListOutputsResult> 
+    async relinquishOutput(args: {
+        basket: BasketStringUnder300Bytes;
+        output: OutpointString;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        relinquished: true;
+    }> 
+    async getPublicKey(args: {
+        seekPermission?: BooleanDefaultTrue;
+        identityKey?: true;
+        protocolID?: [
+            0 | 1 | 2,
+            ProtocolString5To400Bytes
+        ];
+        keyID?: KeyIDStringUnder800Bytes;
+        privileged?: BooleanDefaultFalse;
+        privilegedReason?: DescriptionString5to50Bytes;
+        counterparty?: PubKeyHex | "self" | "anyone";
+        forSelf?: BooleanDefaultFalse;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        publicKey: PubKeyHex;
+    }> 
+    async revealCounterpartyKeyLinkage(args: {
+        counterparty: PubKeyHex;
+        verifier: PubKeyHex;
+        privilegedReason?: DescriptionString5to50Bytes;
+        privileged?: BooleanDefaultFalse;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        prover: PubKeyHex;
+        verifier: PubKeyHex;
+        counterparty: PubKeyHex;
+        revelationTime: ISOTimestampString;
+        encryptedLinkage: Byte[];
+        encryptedLinkageProof: number[];
+    }> 
+    async revealSpecificKeyLinkage(args: {
+        counterparty: PubKeyHex;
+        verifier: PubKeyHex;
+        protocolID: [
+            0 | 1 | 2,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
+        privileged?: BooleanDefaultFalse;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        prover: PubKeyHex;
+        verifier: PubKeyHex;
+        counterparty: PubKeyHex;
+        protocolID: [
+            0 | 1 | 2,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        encryptedLinkage: Byte[];
+        encryptedLinkageProof: Byte[];
+        proofType: Byte;
+    }> 
+    async encrypt(args: {
+        seekPermission?: BooleanDefaultTrue;
+        plaintext: Byte[];
+        protocolID: [
+            0 | 1 | 2,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
+        counterparty?: PubKeyHex | "self" | "anyone";
+        privileged?: BooleanDefaultFalse;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        ciphertext: Byte[];
+    }> 
+    async decrypt(args: {
+        seekPermission?: BooleanDefaultTrue;
+        ciphertext: Byte[];
+        protocolID: [
+            0 | 1 | 2,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
+        counterparty?: PubKeyHex | "self" | "anyone";
+        privileged?: BooleanDefaultFalse;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        plaintext: Byte[];
+    }> 
+    async createHmac(args: {
+        seekPermission?: BooleanDefaultTrue;
+        data: Byte[];
+        protocolID: [
+            0 | 1 | 2,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
+        counterparty?: PubKeyHex | "self" | "anyone";
+        privileged?: BooleanDefaultFalse;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        hmac: Byte[];
+    }> 
+    async verifyHmac(args: {
+        seekPermission?: BooleanDefaultTrue;
+        data: Byte[];
+        hmac: Byte[];
+        protocolID: [
+            0 | 1 | 2,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
+        counterparty?: PubKeyHex | "self" | "anyone";
+        privileged?: BooleanDefaultFalse;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        valid: true;
+    }> 
+    async createSignature(args: {
+        seekPermission?: BooleanDefaultTrue;
+        data?: Byte[];
+        hashToDirectlySign?: Byte[];
+        protocolID: [
+            0 | 1 | 2,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
+        counterparty?: PubKeyHex | "self" | "anyone";
+        privileged?: BooleanDefaultFalse;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        signature: Byte[];
+    }> 
+    async verifySignature(args: {
+        seekPermission?: BooleanDefaultTrue;
+        data?: Byte[];
+        hashToDirectlyVerify?: Byte[];
+        signature: Byte[];
+        protocolID: [
+            0 | 1 | 2,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
+        counterparty?: PubKeyHex | "self" | "anyone";
+        forSelf?: BooleanDefaultFalse;
+        privileged?: BooleanDefaultFalse;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        valid: true;
+    }> 
+    async acquireCertificate(args: AcquireCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AcquireCertificateResult> 
+    async listCertificates(args: {
+        certifiers: PubKeyHex[];
+        types: Base64String[];
+        limit?: PositiveIntegerDefault10Max10000;
+        offset?: PositiveIntegerOrZero;
+        privileged?: BooleanDefaultFalse;
+        privilegedReason?: DescriptionString5to50Bytes;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ListCertificatesResult> 
+    async proveCertificate(args: ProveCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ProveCertificateResult> 
+    async relinquishCertificate(args: {
+        type: Base64String;
+        serialNumber: Base64String;
+        certifier: PubKeyHex;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        relinquished: true;
+    }> 
+    async discoverByIdentityKey(args: {
+        seekPermission?: BooleanDefaultTrue;
+        identityKey: PubKeyHex;
+        limit?: PositiveIntegerDefault10Max10000;
+        offset?: PositiveIntegerOrZero;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<DiscoverCertificatesResult> 
+    async discoverByAttributes(args: {
+        seekPermission?: BooleanDefaultTrue;
+        attributes: Record<CertificateFieldNameUnder50Bytes, string>;
+        limit?: PositiveIntegerDefault10Max10000;
+        offset?: PositiveIntegerOrZero;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<DiscoverCertificatesResult> 
+    async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        authenticated: boolean;
+    }> 
+    async waitForAuthentication(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        authenticated: true;
+    }> 
+    async getHeight(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        height: PositiveInteger;
+    }> 
+    async getHeaderForHeight(args: {
+        height: PositiveInteger;
+    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        header: HexString;
+    }> 
+    async getNetwork(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        network: "mainnet" | "testnet";
+    }> 
+    async getVersion(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        version: VersionString7To30Bytes;
+    }> 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: WalletWireProcessor
+
+Processes incoming wallet calls received over a wallet wire, with a given wallet.
+
+```ts
+export default class WalletWireProcessor implements WalletWire {
+    wallet: Wallet;
+    constructor(wallet: Wallet) 
+    async transmitToWallet(message: number[]): Promise<number[]> 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: HTTPWalletWire
+
+```ts
+export default class HTTPWalletWire implements WalletWire {
+    baseUrl: string;
+    httpClient: typeof fetch;
+    originator: string | undefined;
+    constructor(originator: string | undefined, baseUrl: string = "http://localhost:3301", httpClient = fetch) 
+    async transmitToWallet(message: number[]): Promise<number[]> 
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 ### Class: XDMSubstrate
 
 Facilitates wallet operations over cross-document messaging.
 
 ```ts
 export default class XDMSubstrate implements Wallet {
-    constructor() 
-    async invoke(call, args): Promise<any> 
+    constructor(domain: string = "*") 
+    async invoke(call: CallType, args: any): Promise<any> 
     async createAction(args: {
         description: DescriptionString5to50Bytes;
         inputs?: Array<{
@@ -2873,477 +3125,6 @@ export default class XDMSubstrate implements Wallet {
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Class: WalletWireTransceiver
-
-A way to make remote calls to a wallet over a wallet wire.
-
-```ts
-export default class WalletWireTransceiver implements Wallet {
-    wire: WalletWire;
-    constructor(wire: WalletWire) 
-    async createAction(args: {
-        description: DescriptionString5to50Bytes;
-        inputBEEF?: BEEF;
-        inputs?: Array<{
-            outpoint: OutpointString;
-            unlockingScript?: HexString;
-            unlockingScriptLength?: PositiveInteger;
-            inputDescription: DescriptionString5to50Bytes;
-            sequenceNumber?: PositiveIntegerOrZero;
-        }>;
-        outputs?: Array<{
-            lockingScript: HexString;
-            satoshis: SatoshiValue;
-            outputDescription: DescriptionString5to50Bytes;
-            basket?: BasketStringUnder300Bytes;
-            customInstructions?: string;
-            tags?: OutputTagStringUnder300Bytes[];
-        }>;
-        lockTime?: PositiveIntegerOrZero;
-        version?: PositiveIntegerOrZero;
-        labels?: LabelStringUnder300Bytes[];
-        options?: {
-            signAndProcess?: BooleanDefaultTrue;
-            acceptDelayedBroadcast?: BooleanDefaultTrue;
-            trustSelf?: "known";
-            knownTxids?: TXIDHexString[];
-            returnTXIDOnly?: BooleanDefaultFalse;
-            noSend?: BooleanDefaultFalse;
-            noSendChange?: OutpointString[];
-            sendWith?: TXIDHexString[];
-            randomizeOutputs?: BooleanDefaultTrue;
-        };
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        txid?: TXIDHexString;
-        tx?: BEEF;
-        noSendChange?: OutpointString[];
-        sendWithResults?: Array<{
-            txid: TXIDHexString;
-            status: "unproven" | "sending" | "failed";
-        }>;
-        signableTransaction?: {
-            tx: BEEF;
-            reference: Base64String;
-        };
-    }> 
-    async signAction(args: {
-        spends: Record<PositiveIntegerOrZero, {
-            unlockingScript: HexString;
-            sequenceNumber?: PositiveIntegerOrZero;
-        }>;
-        reference: Base64String;
-        options?: {
-            acceptDelayedBroadcast?: BooleanDefaultTrue;
-            returnTXIDOnly?: BooleanDefaultFalse;
-            noSend?: BooleanDefaultFalse;
-            noSendChange?: OutpointString[];
-            sendWith: TXIDHexString[];
-        };
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        txid?: TXIDHexString;
-        tx?: BEEF;
-        noSendChange?: OutpointString[];
-        sendWithResults?: Array<{
-            txid: TXIDHexString;
-            status: "unproven" | "sending" | "failed";
-        }>;
-    }> 
-    async abortAction(args: {
-        reference: Base64String;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        aborted: true;
-    }> 
-    async listActions(args: {
-        seekPermission?: BooleanDefaultTrue;
-        labels: LabelStringUnder300Bytes[];
-        labelQueryMode?: "any" | "all";
-        includeLabels?: BooleanDefaultFalse;
-        includeInputs?: BooleanDefaultFalse;
-        includeInputSourceLockingScripts?: BooleanDefaultFalse;
-        includeInputUnlockingScripts?: BooleanDefaultFalse;
-        includeOutputs?: BooleanDefaultFalse;
-        includeOutputLockingScripts?: BooleanDefaultFalse;
-        limit?: PositiveIntegerDefault10Max10000;
-        offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        totalActions: PositiveIntegerOrZero;
-        actions: Array<{
-            txid: TXIDHexString;
-            satoshis: SatoshiValue;
-            status: "completed" | "unprocessed" | "sending" | "unproven" | "unsigned" | "nosend" | "nonfinal";
-            isOutgoing: boolean;
-            description: DescriptionString5to50Bytes;
-            labels?: LabelStringUnder300Bytes[];
-            version: PositiveIntegerOrZero;
-            lockTime: PositiveIntegerOrZero;
-            inputs?: Array<{
-                sourceOutpoint: OutpointString;
-                sourceSatoshis: SatoshiValue;
-                sourceLockingScript?: HexString;
-                unlockingScript?: HexString;
-                inputDescription: DescriptionString5to50Bytes;
-                sequenceNumber: PositiveIntegerOrZero;
-            }>;
-            outputs?: Array<{
-                outputIndex: PositiveIntegerOrZero;
-                satoshis: SatoshiValue;
-                lockingScript?: HexString;
-                spendable: boolean;
-                outputDescription: DescriptionString5to50Bytes;
-                basket: BasketStringUnder300Bytes;
-                tags: OutputTagStringUnder300Bytes[];
-                customInstructions?: string;
-            }>;
-        }>;
-    }> 
-    async internalizeAction(args: {
-        seekPermission?: BooleanDefaultTrue;
-        tx: AtomicBEEF;
-        outputs: Array<{
-            outputIndex: PositiveIntegerOrZero;
-            protocol: "wallet payment" | "basket insertion";
-            paymentRemittance?: {
-                derivationPrefix: Base64String;
-                derivationSuffix: Base64String;
-                senderIdentityKey: PubKeyHex;
-            };
-            insertionRemittance?: {
-                basket: BasketStringUnder300Bytes;
-                customInstructions?: string;
-                tags?: OutputTagStringUnder300Bytes[];
-            };
-        }>;
-        description: DescriptionString5to50Bytes;
-        labels?: LabelStringUnder300Bytes[];
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        accepted: true;
-    }> 
-    async listOutputs(args: {
-        seekPermission?: BooleanDefaultTrue;
-        basket: BasketStringUnder300Bytes;
-        tags?: OutputTagStringUnder300Bytes[];
-        tagQueryMode?: "all" | "any";
-        include?: "locking scripts" | "entire transactions";
-        includeCustomInstructions?: BooleanDefaultFalse;
-        includeTags?: BooleanDefaultFalse;
-        includeLabels?: BooleanDefaultFalse;
-        limit?: PositiveIntegerDefault10Max10000;
-        offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        totalOutputs: PositiveIntegerOrZero;
-        BEEF?: BEEF;
-        outputs: Array<{
-            outpoint: OutpointString;
-            satoshis: SatoshiValue;
-            lockingScript?: HexString;
-            spendable: true;
-            customInstructions?: string;
-            tags?: OutputTagStringUnder300Bytes[];
-            labels?: LabelStringUnder300Bytes[];
-        }>;
-    }> 
-    async relinquishOutput(args: {
-        basket: BasketStringUnder300Bytes;
-        output: OutpointString;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        relinquished: true;
-    }> 
-    async getPublicKey(args: {
-        seekPermission?: BooleanDefaultTrue;
-        identityKey?: true;
-        protocolID?: [
-            0 | 1 | 2,
-            ProtocolString5To400Bytes
-        ];
-        keyID?: KeyIDStringUnder800Bytes;
-        privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Bytes;
-        counterparty?: PubKeyHex | "self" | "anyone";
-        forSelf?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        publicKey: PubKeyHex;
-    }> 
-    async revealCounterpartyKeyLinkage(args: {
-        counterparty: PubKeyHex;
-        verifier: PubKeyHex;
-        privilegedReason?: DescriptionString5to50Bytes;
-        privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        prover: PubKeyHex;
-        verifier: PubKeyHex;
-        counterparty: PubKeyHex;
-        revelationTime: ISOTimestampString;
-        encryptedLinkage: Byte[];
-        encryptedLinkageProof: number[];
-    }> 
-    async revealSpecificKeyLinkage(args: {
-        counterparty: PubKeyHex;
-        verifier: PubKeyHex;
-        protocolID: [
-            0 | 1 | 2,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        privilegedReason?: DescriptionString5to50Bytes;
-        privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        prover: PubKeyHex;
-        verifier: PubKeyHex;
-        counterparty: PubKeyHex;
-        protocolID: [
-            0 | 1 | 2,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        encryptedLinkage: Byte[];
-        encryptedLinkageProof: Byte[];
-        proofType: Byte;
-    }> 
-    async encrypt(args: {
-        seekPermission?: BooleanDefaultTrue;
-        plaintext: Byte[];
-        protocolID: [
-            0 | 1 | 2,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        privilegedReason?: DescriptionString5to50Bytes;
-        counterparty?: PubKeyHex | "self" | "anyone";
-        privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        ciphertext: Byte[];
-    }> 
-    async decrypt(args: {
-        seekPermission?: BooleanDefaultTrue;
-        ciphertext: Byte[];
-        protocolID: [
-            0 | 1 | 2,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        privilegedReason?: DescriptionString5to50Bytes;
-        counterparty?: PubKeyHex | "self" | "anyone";
-        privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        plaintext: Byte[];
-    }> 
-    async createHmac(args: {
-        seekPermission?: BooleanDefaultTrue;
-        data: Byte[];
-        protocolID: [
-            0 | 1 | 2,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        privilegedReason?: DescriptionString5to50Bytes;
-        counterparty?: PubKeyHex | "self" | "anyone";
-        privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        hmac: Byte[];
-    }> 
-    async verifyHmac(args: {
-        seekPermission?: BooleanDefaultTrue;
-        data: Byte[];
-        hmac: Byte[];
-        protocolID: [
-            0 | 1 | 2,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        privilegedReason?: DescriptionString5to50Bytes;
-        counterparty?: PubKeyHex | "self" | "anyone";
-        privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        valid: true;
-    }> 
-    async createSignature(args: {
-        seekPermission?: BooleanDefaultTrue;
-        data?: Byte[];
-        hashToDirectlySign?: Byte[];
-        protocolID: [
-            0 | 1 | 2,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        privilegedReason?: DescriptionString5to50Bytes;
-        counterparty?: PubKeyHex | "self" | "anyone";
-        privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        signature: Byte[];
-    }> 
-    async verifySignature(args: {
-        seekPermission?: BooleanDefaultTrue;
-        data?: Byte[];
-        hashToDirectlyVerify?: Byte[];
-        signature: Byte[];
-        protocolID: [
-            0 | 1 | 2,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        privilegedReason?: DescriptionString5to50Bytes;
-        counterparty?: PubKeyHex | "self" | "anyone";
-        forSelf?: BooleanDefaultFalse;
-        privileged?: BooleanDefaultFalse;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        valid: true;
-    }> 
-    async acquireCertificate(args: {
-        type: Base64String;
-        certifier: PubKeyHex;
-        acquisitionProtocol: "direct" | "issuance";
-        fields: Record<CertificateFieldNameUnder50Bytes, string>;
-        serialNumber?: Base64String;
-        revocationOutpoint?: OutpointString;
-        signature?: HexString;
-        certifierUrl?: string;
-        keyringRevealer?: PubKeyHex | "certifier";
-        keyringForSubject?: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-        privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Bytes;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        type: Base64String;
-        subject: PubKeyHex;
-        serialNumber: Base64String;
-        certifier: PubKeyHex;
-        revocationOutpoint: OutpointString;
-        signature: HexString;
-        fields: Record<CertificateFieldNameUnder50Bytes, string>;
-    }> 
-    async listCertificates(args: {
-        certifiers: PubKeyHex[];
-        types: Base64String[];
-        limit?: PositiveIntegerDefault10Max10000;
-        offset?: PositiveIntegerOrZero;
-        privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Bytes;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        totalCertificates: PositiveIntegerOrZero;
-        certificates: Array<{
-            type: Base64String;
-            subject: PubKeyHex;
-            serialNumber: Base64String;
-            certifier: PubKeyHex;
-            revocationOutpoint: OutpointString;
-            signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Bytes, string>;
-        }>;
-    }> 
-    async proveCertificate(args: {
-        certificate: {
-            type: Base64String;
-            subject: PubKeyHex;
-            serialNumber: Base64String;
-            certifier: PubKeyHex;
-            revocationOutpoint: OutpointString;
-            signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Bytes, string>;
-        };
-        fieldsToReveal: CertificateFieldNameUnder50Bytes[];
-        verifier: PubKeyHex;
-        privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Bytes;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        keyringForVerifier: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-    }> 
-    async relinquishCertificate(args: {
-        type: Base64String;
-        serialNumber: Base64String;
-        certifier: PubKeyHex;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        relinquished: true;
-    }> 
-    async discoverByIdentityKey(args: {
-        seekPermission?: BooleanDefaultTrue;
-        identityKey: PubKeyHex;
-        limit?: PositiveIntegerDefault10Max10000;
-        offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        totalCertificates: PositiveIntegerOrZero;
-        certificates: Array<{
-            type: Base64String;
-            subject: PubKeyHex;
-            serialNumber: Base64String;
-            certifier: PubKeyHex;
-            revocationOutpoint: OutpointString;
-            signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-            certifierInfo: {
-                name: EntityNameStringMax100Bytes;
-                iconUrl: EntityIconURLStringMax500Bytes;
-                description: DescriptionString5to50Bytes;
-                trust: PositiveIntegerMax10;
-            };
-            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-            decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
-        }>;
-    }> 
-    async discoverByAttributes(args: {
-        seekPermission?: BooleanDefaultTrue;
-        attributes: Record<CertificateFieldNameUnder50Bytes, string>;
-        limit?: PositiveIntegerDefault10Max10000;
-        offset?: PositiveIntegerOrZero;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        totalCertificates: PositiveIntegerOrZero;
-        certificates: Array<{
-            type: Base64String;
-            subject: PubKeyHex;
-            serialNumber: Base64String;
-            certifier: PubKeyHex;
-            revocationOutpoint: OutpointString;
-            signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-            certifierInfo: {
-                name: EntityNameStringMax100Bytes;
-                iconUrl: EntityIconURLStringMax500Bytes;
-                description: DescriptionString5to50Bytes;
-                trust: PositiveIntegerMax10;
-            };
-            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-            decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
-        }>;
-    }> 
-    async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        authenticated: boolean;
-    }> 
-    async waitForAuthentication(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        authenticated: true;
-    }> 
-    async getHeight(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        height: PositiveInteger;
-    }> 
-    async getHeaderForHeight(args: {
-        height: PositiveInteger;
-    }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        header: HexString;
-    }> 
-    async getNetwork(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        network: "mainnet" | "testnet";
-    }> 
-    async getVersion(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        version: VersionString7To30Bytes;
-    }> 
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: HTTPWalletWire
-
-```ts
-export default class HTTPWalletWire implements WalletWire {
-    baseUrl: string;
-    httpClient: typeof fetch;
-    originator: string | undefined;
-    constructor(originator: string | undefined, baseUrl: string = "http://localhost:3301", httpClient = fetch) 
-    async transmitToWallet(message: number[]): Promise<number[]> 
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
 ### Class: WalletClient
 
 The SDK is how applications communicate with wallets over a communications substrate.
@@ -3354,163 +3135,18 @@ export default class WalletClient implements Wallet {
     originator?: OriginatorDomainNameStringUnder250Bytes;
     constructor(substrate: "auto" | "Cicada" | "XDM" | "window.CWI" | Wallet = "auto", originator?: OriginatorDomainNameStringUnder250Bytes) 
     async connectToSubstrate() 
-    async createAction(args: {
-        description: DescriptionString5to50Bytes;
-        inputs?: Array<{
-            tx?: BEEF;
-            outpoint: OutpointString;
-            unlockingScript?: HexString;
-            unlockingScriptLength?: PositiveInteger;
-            inputDescription: DescriptionString5to50Bytes;
-            sequenceNumber?: PositiveIntegerOrZero;
-        }>;
-        outputs?: Array<{
-            lockingScript: HexString;
-            satoshis: SatoshiValue;
-            outputDescription: DescriptionString5to50Bytes;
-            basket?: BasketStringUnder300Bytes;
-            customInstructions?: string;
-            tags?: OutputTagStringUnder300Bytes[];
-        }>;
-        lockTime?: PositiveIntegerOrZero;
-        version?: PositiveIntegerOrZero;
-        labels?: LabelStringUnder300Bytes[];
-        options?: {
-            signAndProcess?: BooleanDefaultTrue;
-            acceptDelayedBroadcast?: BooleanDefaultTrue;
-            trustSelf?: "known";
-            knownTxids?: TXIDHexString[];
-            returnTXIDOnly?: BooleanDefaultFalse;
-            noSend?: BooleanDefaultFalse;
-            noSendChange?: OutpointString[];
-            sendWith?: TXIDHexString[];
-        };
-    }): Promise<{
-        txid?: TXIDHexString;
-        tx?: BEEF;
-        noSendChange?: OutpointString[];
-        sendWithResults?: Array<{
-            txid: TXIDHexString;
-            status: "unproven" | "sending" | "failed";
-        }>;
-        signableTransaction?: {
-            tx: BEEF;
-            reference: Base64String;
-        };
-    }> 
-    async signAction(args: {
-        spends: Record<PositiveIntegerOrZero, {
-            unlockingScript: HexString;
-            sequenceNumber?: PositiveIntegerOrZero;
-        }>;
-        reference: Base64String;
-        options?: {
-            acceptDelayedBroadcast?: BooleanDefaultTrue;
-            returnTXIDOnly?: BooleanDefaultFalse;
-            noSend?: BooleanDefaultFalse;
-            noSendChange?: OutpointString[];
-            sendWith: TXIDHexString[];
-        };
-    }): Promise<{
-        txid?: TXIDHexString;
-        tx?: BEEF;
-        noSendChange?: OutpointString[];
-        sendWithResults?: Array<{
-            txid: TXIDHexString;
-            status: "unproven" | "sending" | "failed";
-        }>;
-    }> 
+    async createAction(args: CreateActionArgs): Promise<CreateActionResult> 
+    async signAction(args: SignActionArgs): Promise<SignActionResult> 
     async abortAction(args: {
         reference: Base64String;
     }): Promise<{
         aborted: true;
     }> 
-    async listActions(args: {
-        labels: LabelStringUnder300Bytes[];
-        labelQueryMode?: "any" | "all";
-        includeLabels?: BooleanDefaultFalse;
-        includeInputs?: BooleanDefaultFalse;
-        includeInputSourceLockingScripts?: BooleanDefaultFalse;
-        includeInputUnlockingScripts?: BooleanDefaultFalse;
-        includeOutputs?: BooleanDefaultFalse;
-        includeOutputLockingScripts?: BooleanDefaultFalse;
-        limit?: PositiveIntegerDefault10Max10000;
-        offset?: PositiveIntegerOrZero;
-    }): Promise<{
-        totalActions: PositiveIntegerOrZero;
-        actions: Array<{
-            txid: TXIDHexString;
-            satoshis: SatoshiValue;
-            status: "completed" | "unprocessed" | "sending" | "unproven" | "unsigned" | "nosend" | "nonfinal";
-            isOutgoing: boolean;
-            description: DescriptionString5to50Bytes;
-            labels?: LabelStringUnder300Bytes[];
-            version: PositiveIntegerOrZero;
-            lockTime: PositiveIntegerOrZero;
-            inputs?: Array<{
-                sourceOutpoint: OutpointString;
-                sourceSatoshis: SatoshiValue;
-                sourceLockingScript?: HexString;
-                unlockingScript?: HexString;
-                inputDescription: DescriptionString5to50Bytes;
-                sequenceNumber: PositiveIntegerOrZero;
-            }>;
-            outputs?: Array<{
-                outputIndex: PositiveIntegerOrZero;
-                satoshis: SatoshiValue;
-                lockingScript?: HexString;
-                spendable: boolean;
-                outputDescription: DescriptionString5to50Bytes;
-                basket: BasketStringUnder300Bytes;
-                tags: OutputTagStringUnder300Bytes[];
-                customInstructions?: string;
-            }>;
-        }>;
-    }> 
-    async internalizeAction(args: {
-        tx: BEEF;
-        outputs: Array<{
-            outputIndex: PositiveIntegerOrZero;
-            protocol: "wallet payment" | "basket insertion";
-            paymentRemittance?: {
-                derivationPrefix: Base64String;
-                derivationSuffix: Base64String;
-                senderIdentityKey: PubKeyHex;
-            };
-            insertionRemittance?: {
-                basket: BasketStringUnder300Bytes;
-                customInstructions?: string;
-                tags?: OutputTagStringUnder300Bytes[];
-            };
-        }>;
-        description: DescriptionString5to50Bytes;
-        labels?: LabelStringUnder300Bytes[];
-    }): Promise<{
+    async listActions(args: ListActionsArgs): Promise<ListActionsResult> 
+    async internalizeAction(args: InternalizeActionArgs): Promise<{
         accepted: true;
     }> 
-    async listOutputs(args: {
-        basket: BasketStringUnder300Bytes;
-        tags?: OutputTagStringUnder300Bytes[];
-        tagQueryMode?: "all" | "any";
-        include?: "locking scripts" | "entire transactions";
-        includeCustomInstructions?: BooleanDefaultFalse;
-        includeTags?: BooleanDefaultFalse;
-        includeLabels?: BooleanDefaultFalse;
-        limit?: PositiveIntegerDefault10Max10000;
-        offset?: PositiveIntegerOrZero;
-    }): Promise<{
-        totalOutputs: PositiveIntegerOrZero;
-        outputs: Array<{
-            outpoint: OutpointString;
-            satoshis: SatoshiValue;
-            lockingScript?: HexString;
-            tx?: BEEF;
-            spendable: true;
-            customInstructions?: string;
-            tags?: OutputTagStringUnder300Bytes[];
-            labels?: LabelStringUnder300Bytes[];
-        }>;
-    }> 
+    async listOutputs(args: ListOutputsArgs): Promise<ListOutputsResult> 
     async relinquishOutput(args: {
         basket: BasketStringUnder300Bytes;
         output: OutpointString;
@@ -3650,27 +3286,7 @@ export default class WalletClient implements Wallet {
     }): Promise<{
         valid: true;
     }> 
-    async acquireCertificate(args: {
-        type: Base64String;
-        subject: PubKeyHex;
-        serialNumber: Base64String;
-        revocationOutpoint: OutpointString;
-        signature: HexString;
-        fields: Record<CertificateFieldNameUnder50Bytes, string>;
-        certifier: PubKeyHex;
-        keyringRevealer: PubKeyHex | "certifier";
-        keyringForSubject: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-        acquisitionProtocol: "direct" | "issuance";
-        certifierUrl?: string;
-    }): Promise<{
-        type: Base64String;
-        subject: PubKeyHex;
-        serialNumber: Base64String;
-        certifier: PubKeyHex;
-        revocationOutpoint: OutpointString;
-        signature: HexString;
-        fields: Record<CertificateFieldNameUnder50Bytes, string>;
-    }> 
+    async acquireCertificate(args: AcquireCertificateArgs): Promise<AcquireCertificateResult> 
     async listCertificates(args: {
         certifiers: PubKeyHex[];
         types: Base64String[];
@@ -3678,35 +3294,8 @@ export default class WalletClient implements Wallet {
         offset?: PositiveIntegerOrZero;
         privileged?: BooleanDefaultFalse;
         privilegedReason?: DescriptionString5to50Bytes;
-    }): Promise<{
-        totalCertificates: PositiveIntegerOrZero;
-        certificates: Array<{
-            type: Base64String;
-            subject: PubKeyHex;
-            serialNumber: Base64String;
-            certifier: PubKeyHex;
-            revocationOutpoint: OutpointString;
-            signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Bytes, string>;
-        }>;
-    }> 
-    async proveCertificate(args: {
-        certificate: {
-            type: Base64String;
-            subject: PubKeyHex;
-            serialNumber: Base64String;
-            certifier: PubKeyHex;
-            revocationOutpoint: OutpointString;
-            signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Bytes, string>;
-        };
-        fieldsToReveal: CertificateFieldNameUnder50Bytes[];
-        verifier: PubKeyHex;
-        privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Bytes;
-    }): Promise<{
-        keyringForVerifier: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-    }> 
+    }): Promise<ListCertificatesResult> 
+    async proveCertificate(args: ProveCertificateArgs): Promise<ProveCertificateResult> 
     async relinquishCertificate(args: {
         type: Base64String;
         serialNumber: Base64String;
@@ -3718,50 +3307,12 @@ export default class WalletClient implements Wallet {
         identityKey: PubKeyHex;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
-    }): Promise<{
-        totalCertificates: PositiveIntegerOrZero;
-        certificates: Array<{
-            type: Base64String;
-            subject: PubKeyHex;
-            serialNumber: Base64String;
-            certifier: PubKeyHex;
-            revocationOutpoint: OutpointString;
-            signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-            certifierInfo: {
-                name: EntityNameStringMax100Bytes;
-                iconUrl: EntityIconURLStringMax500Bytes;
-                description: DescriptionString5to50Bytes;
-                trust: PositiveIntegerMax10;
-            };
-            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-            decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
-        }>;
-    }> 
+    }): Promise<DiscoverCertificatesResult> 
     async discoverByAttributes(args: {
         attributes: Record<CertificateFieldNameUnder50Bytes, string>;
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
-    }): Promise<{
-        totalCertificates: PositiveIntegerOrZero;
-        certificates: Array<{
-            type: Base64String;
-            subject: PubKeyHex;
-            serialNumber: Base64String;
-            certifier: PubKeyHex;
-            revocationOutpoint: OutpointString;
-            signature: HexString;
-            fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-            certifierInfo: {
-                name: EntityNameStringMax100Bytes;
-                iconUrl: EntityIconURLStringMax500Bytes;
-                description: DescriptionString5to50Bytes;
-                trust: PositiveIntegerMax10;
-            };
-            publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-            decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
-        }>;
-    }> 
+    }): Promise<DiscoverCertificatesResult> 
     async isAuthenticated(args: {} = {}): Promise<{
         authenticated: boolean;
     }> 
@@ -3788,40 +3339,25 @@ export default class WalletClient implements Wallet {
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Class: WalletWireProcessor
-
-Processes incoming wallet calls received over a wallet wire, with a given wallet.
-
-```ts
-export default class WalletWireProcessor implements WalletWire {
-    wallet: Wallet;
-    constructor(wallet: Wallet) 
-    async transmitToWallet(message: number[]): Promise<number[]> 
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
 ## Functions
 
 ## Types
 
 | | | |
 | --- | --- | --- |
-| [AcquisitionProtocol](#type-acquisitionprotocol) | [EntityNameStringMax100Bytes](#type-entitynamestringmax100characters) | [PositiveIntegerMax10](#type-positiveintegermax10) |
-| [ActionStatus](#type-actionstatus) | [ErrorCodeString10To40Bytes](#type-errorcodestring10to40characters) | [PositiveIntegerOrZero](#type-positiveintegerorzero) |
-| [AtomicBEEF](#type-atomicbeef) | [ErrorDescriptionString20To200Bytes](#type-errordescriptionstring20to200characters) | [ProtocolString5To400Bytes](#type-protocolstring5to400characters) |
+| [AcquisitionProtocol](#type-acquisitionprotocol) | [EntityNameStringMax100Bytes](#type-entitynamestringmax100bytes) | [PositiveIntegerMax10](#type-positiveintegermax10) |
+| [ActionStatus](#type-actionstatus) | [ErrorCodeString10To40Bytes](#type-errorcodestring10to40bytes) | [PositiveIntegerOrZero](#type-positiveintegerorzero) |
+| [AtomicBEEF](#type-atomicbeef) | [ErrorDescriptionString20To200Bytes](#type-errordescriptionstring20to200bytes) | [ProtocolString5To400Bytes](#type-protocolstring5to400bytes) |
 | [BEEF](#type-beef) | [HexString](#type-hexstring) | [PubKeyHex](#type-pubkeyhex) |
 | [Base64String](#type-base64string) | [ISOTimestampString](#type-isotimestampstring) | [SatoshiValue](#type-satoshivalue) |
-| [BasketStringUnder300Bytes](#type-basketstringunder300characters) | [KeyIDStringUnder800Bytes](#type-keyidstringunder800characters) | [TXIDHexString](#type-txidhexstring) |
+| [BasketStringUnder300Bytes](#type-basketstringunder300bytes) | [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes) | [TXIDHexString](#type-txidhexstring) |
 | [BooleanDefaultFalse](#type-booleandefaultfalse) | [KeyringRevealer](#type-keyringrevealer) | [TrustSelf](#type-trustself) |
-| [BooleanDefaultTrue](#type-booleandefaulttrue) | [LabelStringUnder300Bytes](#type-labelstringunder300characters) | [VersionString7To30Bytes](#type-versionstring7to30characters) |
-| [Byte](#type-byte) | [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250characters) | [WalletCounterparty](#type-walletcounterparty) |
+| [BooleanDefaultTrue](#type-booleandefaulttrue) | [LabelStringUnder300Bytes](#type-labelstringunder300bytes) | [VersionString7To30Bytes](#type-versionstring7to30bytes) |
+| [Byte](#type-byte) | [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes) | [WalletCounterparty](#type-walletcounterparty) |
 | [CallType](#type-calltype) | [OutpointString](#type-outpointstring) | [WalletErrorCode](#type-walleterrorcode) |
-| [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50characters) | [OutputTagStringUnder300Bytes](#type-outputtagstringunder300characters) | [WalletNetwork](#type-walletnetwork) |
-| [DescriptionString5to50Bytes](#type-descriptionstring5to50characters) | [PositiveInteger](#type-positiveinteger) | [WalletProtocol](#type-walletprotocol) |
-| [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500characters) | [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000) |  |
+| [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes) | [OutputTagStringUnder300Bytes](#type-outputtagstringunder300bytes) | [WalletNetwork](#type-walletnetwork) |
+| [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes) | [PositiveInteger](#type-positiveinteger) | [WalletProtocol](#type-walletprotocol) |
+| [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500bytes) | [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 

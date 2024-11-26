@@ -522,28 +522,14 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ## Variables
 
-| |
-| --- |
-| [DEFAULT_SHIP_TRACKERS](#variable-default_ship_trackers) |
-| [DEFAULT_SLAP_TRACKERS](#variable-default_slap_trackers) |
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-
 ### Variable: DEFAULT_SLAP_TRACKERS
 
 ```ts
-DEFAULT_SLAP_TRACKERS: string[] = []
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: DEFAULT_SHIP_TRACKERS
-
-```ts
-DEFAULT_SHIP_TRACKERS: string[] = []
+DEFAULT_SLAP_TRACKERS: string[] = [
+    "https://overlay.babbage.systems",
+    "https://overlay-example.babbage.systems",
+    "https://office.babbage.systems"
+]
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)

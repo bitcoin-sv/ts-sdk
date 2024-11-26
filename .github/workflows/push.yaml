@@ -53,6 +53,6 @@ jobs:
     - name: Build
       run: npm run build
     - name: Publish to NPM (expected to fail if version was not bumped manually)
-      run: npm publish
+      run: npm publish --provenance --access public
       env:
         NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}

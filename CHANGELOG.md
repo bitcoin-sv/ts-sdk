@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file. The format 
     - [Removed](#removed)
     - [Fixed](#fixed)
     - [Security](#security)
+  - [\[1.2.1\] - 2024-11-25](#121---2024-11-25)
+    - [Added](#121-added)
   - [\[1.2.0\] - 2024-11-25](#120---2024-11-25)
     - [Added](#120-added)
   - [\[1.1.33\] - 2024-11-22](#1133---2024-11-22)
@@ -83,6 +85,13 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.2.1] - 2024-11-25
+
+### [1.2.0] Added
+- [NPM package provenance](https://github.blog/security/supply-chain-security/introducing-npm-package-provenance/) support
 
 ---
 
