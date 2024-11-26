@@ -88,6 +88,13 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.2.2] - 2024-11-26
+
+### [1.2.2] Added
+- Updated the default ShipBroadcast config, tests, and docs.
+
+---
+
 ## [1.2.1] - 2024-11-25
 
 ### [1.2.0] Added

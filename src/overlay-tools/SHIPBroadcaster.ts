@@ -116,8 +116,8 @@ export default class SHIPCast implements Broadcaster {
     } = config ?? {} as SHIPBroadcasterConfig
     this.facilitator = facilitator ?? new HTTPSOverlayBroadcastFacilitator()
     this.resolver = resolver ?? new LookupResolver()
-    this.requireAcknowledgmentFromAllHostsForTopics = requireAcknowledgmentFromAllHostsForTopics ?? 'all'
-    this.requireAcknowledgmentFromAnyHostForTopics = requireAcknowledgmentFromAnyHostForTopics ?? []
+    this.requireAcknowledgmentFromAllHostsForTopics = requireAcknowledgmentFromAllHostsForTopics ?? []
+    this.requireAcknowledgmentFromAnyHostForTopics = requireAcknowledgmentFromAnyHostForTopics ?? 'all'
     this.requireAcknowledgmentFromSpecificHostsForTopics = requireAcknowledgmentFromSpecificHostsForTopics ?? {}
   }
 
@@ -178,6 +178,7 @@ export default class SHIPCast implements Broadcaster {
       for (const [topic, instructions] of Object.entries(steak)) {
         const outputsToAdmit = instructions.outputsToAdmit
         const coinsToRetain = instructions.coinsToRetain
+        // TODO: Account for coins removed property on STEAK
         if ((outputsToAdmit && outputsToAdmit.length > 0) || (coinsToRetain && coinsToRetain.length > 0)) {
           acknowledgedTopics.add(topic)
         }

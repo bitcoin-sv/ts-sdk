@@ -16,6 +16,148 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ---
 
+### Class: ECIES
+
+```ts
+export default class ECIES {
+    public static ivkEkM(privKey: PrivateKey, pubKey: PublicKey): {
+        iv: number[];
+        kE: number[];
+        kM: number[];
+    } 
+    public static electrumEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, noKey = false): number[] 
+    public static electrumDecrypt(encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey?: PublicKey): number[] 
+    public static bitcoreEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, ivBuf?: number[]): number[] 
+    public static bitcoreDecrypt(encBuf: number[], toPrivateKey: PrivateKey): number[] 
+}
+```
+
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
+
+<details>
+
+<summary>Class ECIES Details</summary>
+
+#### Method bitcoreDecrypt
+
+Decrypts a message encrypted using the Bitcore variant of ECIES.
+
+```ts
+public static bitcoreDecrypt(encBuf: number[], toPrivateKey: PrivateKey): number[] 
+```
+See also: [PrivateKey](#class-privatekey)
+
+Returns
+
+The decrypted message as a number array.
+
+Argument Details
+
++ **encBuf**
+  + The encrypted message buffer.
++ **toPrivateKey**
+  + The private key of the recipient.
+
+#### Method bitcoreEncrypt
+
+Encrypts a given message using the Bitcore variant of ECIES.
+
+```ts
+public static bitcoreEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, ivBuf?: number[]): number[] 
+```
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
+
+Returns
+
+The encrypted message as a number array.
+
+Argument Details
+
++ **messageBuf**
+  + The message to be encrypted, in number array format.
++ **toPublicKey**
+  + The public key of the recipient.
++ **fromPrivateKey**
+  + The private key of the sender. If not provided, a random private key is used.
++ **ivBuf**
+  + The initialization vector for encryption. If not provided, a random IV is used.
+
+#### Method electrumDecrypt
+
+Decrypts a message encrypted using the Electrum ECIES method.
+
+```ts
+public static electrumDecrypt(encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey?: PublicKey): number[] 
+```
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
+
+Returns
+
+The decrypted message as a number array.
+
+Argument Details
+
++ **encBuf**
+  + The encrypted message buffer.
++ **toPrivateKey**
+  + The private key of the recipient.
++ **fromPublicKey**
+  + The public key of the sender. If not provided, it is extracted from the message.
+
+#### Method electrumEncrypt
+
+Encrypts a given message using the Electrum ECIES method.
+
+```ts
+public static electrumEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, noKey = false): number[] 
+```
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
+
+Returns
+
+The encrypted message as a number array.
+
+Argument Details
+
++ **messageBuf**
+  + The message to be encrypted, in number array format.
++ **toPublicKey**
+  + The public key of the recipient.
++ **fromPrivateKey**
+  + The private key of the sender. If not provided, a random private key is used.
++ **noKey**
+  + If true, does not include the sender's public key in the encrypted message.
+
+#### Method ivkEkM
+
+Generates the initialization vector (iv), encryption key (kE), and MAC key (kM)
+using the sender's private key and receiver's public key.
+
+```ts
+public static ivkEkM(privKey: PrivateKey, pubKey: PublicKey): {
+    iv: number[];
+    kE: number[];
+    kM: number[];
+} 
+```
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
+
+Returns
+
+An object containing the iv, kE, and kM as number arrays.
+
+Argument Details
+
++ **privKey**
+  + The sender's private key.
++ **pubKey**
+  + The receiver's public key.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 ### Class: HD
 
 ```ts
@@ -49,6 +191,8 @@ export default class HD {
 }
 ```
 
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
+
 <details>
 
 <summary>Class HD Details</summary>
@@ -61,6 +205,7 @@ Initializes an HD wallet with optional parameters for version bytes, depth, pare
 ```ts
 constructor(versionBytesNum?: number, depth?: number, parentFingerPrint?: number[], childIndex?: number, chainCode?: number[], privKey?: PrivateKey, pubKey?: PublicKey) 
 ```
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
 
 Argument Details
 
@@ -87,6 +232,7 @@ The path specifies the hierarchy of the child key to be derived.
 ```ts
 public derive(path: string): HD 
 ```
+See also: [HD](#class-hd)
 
 Returns
 
@@ -105,6 +251,7 @@ This method generates either a private or public child key depending on the curr
 ```ts
 public deriveChild(i: number): HD 
 ```
+See also: [HD](#class-hd)
 
 Returns
 
@@ -123,6 +270,7 @@ Parses a binary buffer to set up the wallet's properties.
 ```ts
 public static fromBinary(buf: number[]): HD 
 ```
+See also: [HD](#class-hd)
 
 Returns
 
@@ -172,6 +320,7 @@ This method creates a root HD wallet with randomly generated private and public 
 ```ts
 public static fromRandom(): HD 
 ```
+See also: [HD](#class-hd)
 
 Returns
 
@@ -185,6 +334,7 @@ This method generates keys and other properties from a given seed, conforming to
 ```ts
 public static fromSeed(bytes: number[]): HD 
 ```
+See also: [HD](#class-hd)
 
 Returns
 
@@ -221,6 +371,7 @@ This method decodes a provided string to set up the HD wallet's properties.
 ```ts
 public static fromString(str: string): HD 
 ```
+See also: [HD](#class-hd)
 
 Returns
 
@@ -283,6 +434,7 @@ This method strips away the private key information, leaving only the public par
 ```ts
 public toPublic(): HD 
 ```
+See also: [HD](#class-hd)
 
 Returns
 
@@ -337,6 +489,8 @@ export default class Mnemonic {
 }
 ```
 
+See also: [wordList](#variable-wordlist)
+
 <details>
 
 <summary>Class Mnemonic Details</summary>
@@ -348,6 +502,7 @@ Constructs a Mnemonic object.
 ```ts
 constructor(mnemonic?: string, seed?: number[], wordlist = wordList) 
 ```
+See also: [wordList](#variable-wordlist)
 
 Argument Details
 
@@ -445,6 +600,7 @@ Static method to create a Mnemonic instance from a given entropy.
 ```ts
 public static fromEntropy(buf: number[]): Mnemonic 
 ```
+See also: [Mnemonic](#class-mnemonic)
 
 Returns
 
@@ -483,6 +639,7 @@ Static method to generate a Mnemonic instance with a random mnemonic.
 ```ts
 public static fromRandom(bits?: number): Mnemonic 
 ```
+See also: [Mnemonic](#class-mnemonic)
 
 Returns
 
@@ -517,6 +674,7 @@ Static method to create a Mnemonic instance from a mnemonic string.
 ```ts
 public static fromString(str: string): Mnemonic 
 ```
+See also: [Mnemonic](#class-mnemonic)
 
 Returns
 
@@ -641,141 +799,6 @@ The mnemonic phrase as a string.
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Class: ECIES
-
-```ts
-export default class ECIES {
-    public static ivkEkM(privKey: PrivateKey, pubKey: PublicKey): {
-        iv: number[];
-        kE: number[];
-        kM: number[];
-    } 
-    public static electrumEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, noKey = false): number[] 
-    public static electrumDecrypt(encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey?: PublicKey): number[] 
-    public static bitcoreEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, ivBuf?: number[]): number[] 
-    public static bitcoreDecrypt(encBuf: number[], toPrivateKey: PrivateKey): number[] 
-}
-```
-
-<details>
-
-<summary>Class ECIES Details</summary>
-
-#### Method bitcoreDecrypt
-
-Decrypts a message encrypted using the Bitcore variant of ECIES.
-
-```ts
-public static bitcoreDecrypt(encBuf: number[], toPrivateKey: PrivateKey): number[] 
-```
-
-Returns
-
-The decrypted message as a number array.
-
-Argument Details
-
-+ **encBuf**
-  + The encrypted message buffer.
-+ **toPrivateKey**
-  + The private key of the recipient.
-
-#### Method bitcoreEncrypt
-
-Encrypts a given message using the Bitcore variant of ECIES.
-
-```ts
-public static bitcoreEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, ivBuf?: number[]): number[] 
-```
-
-Returns
-
-The encrypted message as a number array.
-
-Argument Details
-
-+ **messageBuf**
-  + The message to be encrypted, in number array format.
-+ **toPublicKey**
-  + The public key of the recipient.
-+ **fromPrivateKey**
-  + The private key of the sender. If not provided, a random private key is used.
-+ **ivBuf**
-  + The initialization vector for encryption. If not provided, a random IV is used.
-
-#### Method electrumDecrypt
-
-Decrypts a message encrypted using the Electrum ECIES method.
-
-```ts
-public static electrumDecrypt(encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey?: PublicKey): number[] 
-```
-
-Returns
-
-The decrypted message as a number array.
-
-Argument Details
-
-+ **encBuf**
-  + The encrypted message buffer.
-+ **toPrivateKey**
-  + The private key of the recipient.
-+ **fromPublicKey**
-  + The public key of the sender. If not provided, it is extracted from the message.
-
-#### Method electrumEncrypt
-
-Encrypts a given message using the Electrum ECIES method.
-
-```ts
-public static electrumEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, noKey = false): number[] 
-```
-
-Returns
-
-The encrypted message as a number array.
-
-Argument Details
-
-+ **messageBuf**
-  + The message to be encrypted, in number array format.
-+ **toPublicKey**
-  + The public key of the recipient.
-+ **fromPrivateKey**
-  + The private key of the sender. If not provided, a random private key is used.
-+ **noKey**
-  + If true, does not include the sender's public key in the encrypted message.
-
-#### Method ivkEkM
-
-Generates the initialization vector (iv), encryption key (kE), and MAC key (kM)
-using the sender's private key and receiver's public key.
-
-```ts
-public static ivkEkM(privKey: PrivateKey, pubKey: PublicKey): {
-    iv: number[];
-    kE: number[];
-    kM: number[];
-} 
-```
-
-Returns
-
-An object containing the iv, kE, and kM as number arrays.
-
-Argument Details
-
-+ **privKey**
-  + The sender's private key.
-+ **pubKey**
-  + The receiver's public key.
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
 ## Functions
 
 ### Function: fromUtxo
@@ -799,6 +822,8 @@ export default function fromUtxo(utxo: jsonUtxo, unlockingScriptTemplate: {
     estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
 }): TransactionInput 
 ```
+
+See also: [Transaction](#class-transaction), [TransactionInput](#interface-transactioninput), [UnlockingScript](#class-unlockingscript), [sign](#variable-sign)
 
 <details>
 
@@ -846,6 +871,8 @@ magicHash = (messageBuf: number[]): number[] => {
 }
 ```
 
+See also: [Writer](#class-writer), [hash256](#variable-hash256), [toArray](#variable-toarray)
+
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
@@ -864,6 +891,8 @@ sign = (message: number[], privateKey: PrivateKey, mode: "raw" | "base64" = "bas
 }
 ```
 
+See also: [BigNumber](#class-bignumber), [PrivateKey](#class-privatekey), [Signature](#class-signature), [magicHash](#variable-magichash)
+
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
@@ -875,6 +904,8 @@ verify = (message: number[], sig: Signature, pubKey: PublicKey): boolean => {
     return ECDSA.verify(new BigNumber(hashBuf), sig, pubKey);
 }
 ```
+
+See also: [BigNumber](#class-bignumber), [PublicKey](#class-publickey), [Signature](#class-signature), [magicHash](#variable-magichash)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
