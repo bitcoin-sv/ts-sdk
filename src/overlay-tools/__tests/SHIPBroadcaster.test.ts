@@ -401,7 +401,7 @@ describe('SHIPCast', () => {
     expect(mockFacilitator.send).toHaveBeenCalledTimes(2)
   })
 
-  it('should fail when a host does not acknowledge all topics (default behavior)', async () => {
+  it('should fail if at least one host does not acknowledge every topic (default behavior)', async () => {
     const shipHostKey1 = new PrivateKey(42)
     const shipWallet1 = new ProtoWallet(shipHostKey1)
     const shipLib1 = new OverlayAdminTokenTemplate(shipWallet1)
@@ -434,7 +434,7 @@ describe('SHIPCast', () => {
       const steak = {}
       for (const topic of topics) {
         steak[topic] = {
-          outputsToAdmit: [0],
+          outputsToAdmit: [],
           coinsToRetain: []
         }
       }
@@ -462,8 +462,8 @@ describe('SHIPCast', () => {
 
     expect(response).toEqual({
       status: 'error',
-      code: 'ERR_REQUIRE_ACK_FROM_ALL_HOSTS_FAILED',
-      description: 'Not all hosts acknowledged the required topics.'
+      code: 'ERR_REQUIRE_ACK_FROM_ANY_HOST_FAILED',
+      description: 'No host acknowledged the required topics.'
     })
   })
 
