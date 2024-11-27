@@ -63,7 +63,14 @@ export interface LookupResolverConfig {
 
 /** Facilitates lookups to URLs that return answers. */
 export interface OverlayLookupFacilitator {
-  lookup: (url: string, question: LookupQuestion) => Promise<LookupAnswer>
+  /**
+   * Returns a lookup answer for a lookup question
+   * @param url - Overlay Service URL to send the lookup question to.
+   * @param question - Lookup question to find an answer to
+   * @param timeout - Specifics how long to wait for a lookup answer in milliseconds.
+   * @returns 
+   */
+  lookup: (url: string, question: LookupQuestion, timeout?: number) => Promise<LookupAnswer>
 }
 
 export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
