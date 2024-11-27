@@ -69,8 +69,8 @@ describe('SHIPCast', () => {
       service: 'ls_ship',
       query: {
         topics: ['tm_foo']
-      }
-    })
+      },
+    }, 1000)
 
     expect(mockFacilitator.send).toHaveBeenCalledWith('https://shiphost.com', {
       beef: testTx.toBEEF(),
@@ -231,8 +231,8 @@ describe('SHIPCast', () => {
       service: 'ls_ship',
       query: {
         topics: ['tm_foo']
-      }
-    })
+      },
+    }, 1000)
 
     expect(mockFacilitator.send).not.toHaveBeenCalled()
   })
@@ -396,7 +396,7 @@ describe('SHIPCast', () => {
       query: {
         topics: ['tm_foo', 'tm_bar']
       }
-    })
+    }, 1000)
 
     expect(mockFacilitator.send).toHaveBeenCalledTimes(2)
   })

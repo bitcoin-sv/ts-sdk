@@ -49,6 +49,8 @@ export const DEFAULT_SLAP_TRACKERS: string[] = [
   // Trackers known to host invalid or illegal records will be removed at the discretion of the BSV Association.
 ]
 
+const MAX_TRACKER_WAIT_TIME = 1000
+
 /** Configuration options for the Lookup resolver. */
 export interface LookupResolverConfig {
   /** The facilitator used to make requests to Overlay Services hosts. */
@@ -66,7 +68,7 @@ export interface OverlayLookupFacilitator {
   /**
    * Returns a lookup answer for a lookup question
    * @param url - Overlay Service URL to send the lookup question to.
-   * @param question - Lookup question to find an answer to
+   * @param question - Lookup question to find an answer to.
    * @param timeout - Specifics how long to wait for a lookup answer in milliseconds.
    * @returns 
    */
@@ -80,17 +82,24 @@ export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
     this.fetchClient = httpClient
   }
 
-  async lookup(url: string, question: LookupQuestion): Promise<LookupAnswer> {
+  async lookup(url: string, question: LookupQuestion, timeout: number = 5000): Promise<LookupAnswer> {
     if (!url.startsWith('https:')) {
       throw new Error('HTTPS facilitator can only use URLs that start with "https:"')
     }
-    const response = await fetch(`${url}/lookup`, {
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Request timed out')), timeout)
+    )
+
+    const fetchPromise = fetch(`${url}/lookup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ service: question.service, query: question.query })
     })
+
+    const response: Response = await Promise.race([fetchPromise, timeoutPromise]) as unknown as Response
+
     if (response.ok) {
       return await response.json()
     } else {
@@ -119,7 +128,7 @@ export default class LookupResolver {
   /**
    * Given a LookupQuestion, returns a LookupAnswer. Aggregates across multiple services and supports resiliency.
    */
-  async query(question: LookupQuestion): Promise<LookupAnswer> {
+  async query(question: LookupQuestion, timeout?: number): Promise<LookupAnswer> {
     let competentHosts: string[] = []
     if (question.service === 'ls_slap') {
       competentHosts = this.slapTrackers
@@ -140,7 +149,7 @@ export default class LookupResolver {
 
     // Use Promise.allSettled to handle individual host failures
     const hostResponses = await Promise.allSettled(
-      competentHosts.map(async host => await this.facilitator.lookup(host, question))
+      competentHosts.map(async host => await this.facilitator.lookup(host, question, timeout))
     )
 
     const successfulResponses = hostResponses
@@ -197,7 +206,7 @@ export default class LookupResolver {
 
     // Use Promise.allSettled to handle individual SLAP tracker failures
     const trackerResponses = await Promise.allSettled(
-      this.slapTrackers.map(async tracker => await this.facilitator.lookup(tracker, query))
+      this.slapTrackers.map(async tracker => await this.facilitator.lookup(tracker, query, MAX_TRACKER_WAIT_TIME))
     )
 
     const hosts = new Set<string>()

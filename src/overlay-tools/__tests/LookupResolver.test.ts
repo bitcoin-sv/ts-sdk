@@ -63,7 +63,8 @@ describe('LookupResolver', () => {
           query: {
             service: 'ls_foo'
           }
-        }
+        },
+        1000
       ],
       [
         'https://slaphost.com',
@@ -71,8 +72,9 @@ describe('LookupResolver', () => {
           service: 'ls_foo',
           query: {
             test: 1
-          }
-        }
+          },
+        },
+        undefined
       ]
     ])
   })
@@ -139,7 +141,8 @@ describe('LookupResolver', () => {
           query: {
             service: 'ls_foo'
           }
-        }
+        },
+        1000
       ],
       [
         'https://slaphost.com',
@@ -148,7 +151,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ],
       [ // additional host should also have been queried
         'https://additional.host',
@@ -157,7 +161,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ]
     ])
   })
@@ -197,7 +202,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ]
     ])
   })
@@ -252,7 +258,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ],
       [ // additional host should also have been queried
         'https://additional.host',
@@ -261,7 +268,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ]
     ])
   })
@@ -341,7 +349,8 @@ describe('LookupResolver', () => {
           query: {
             service: 'ls_foo'
           }
-        }
+        },
+        1000
       ],
       [
         'https://mock.slap2',
@@ -350,7 +359,8 @@ describe('LookupResolver', () => {
           query: {
             service: 'ls_foo'
           }
-        }
+        },
+        1000
       ],
       [
         'https://slaphost1.com',
@@ -359,7 +369,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ],
       [
         'https://slaphost2.com',
@@ -368,7 +379,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ]
     ])
   })
@@ -434,7 +446,8 @@ describe('LookupResolver', () => {
           query: {
             service: 'ls_foo'
           }
-        }
+        },
+        1000
       ],
       [
         'https://slaphost1.com',
@@ -443,7 +456,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ],
       [
         'https://slaphost2.com',
@@ -452,7 +466,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ]
     ])
   })
@@ -521,7 +536,8 @@ describe('LookupResolver', () => {
           query: {
             service: 'ls_foo'
           }
-        }
+        },
+        1000
       ],
       [
         'https://slaphost1.com',
@@ -530,7 +546,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ],
       [
         'https://slaphost2.com',
@@ -539,7 +556,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ]
     ])
   })
@@ -607,7 +625,8 @@ describe('LookupResolver', () => {
           query: {
             service: 'ls_foo'
           }
-        }
+        },
+        1000
       ],
       [
         'https://slaphost1.com',
@@ -616,7 +635,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ],
       [
         'https://slaphost2.com',
@@ -625,7 +645,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ]
     ])
   })
@@ -655,7 +676,8 @@ describe('LookupResolver', () => {
           query: {
             service: 'ls_foo'
           }
-        }
+        },
+        1000
       ]
     ])
   })
@@ -725,7 +747,8 @@ describe('LookupResolver', () => {
           query: {
             service: 'ls_foo'
           }
-        }
+        },
+        1000
       ],
       [
         'https://slaphost1.com',
@@ -734,7 +757,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ],
       [
         'https://slaphost2.com',
@@ -743,7 +767,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ]
     ])
   })
@@ -777,7 +802,8 @@ describe('LookupResolver', () => {
           query: {
             test: 1
           }
-        }
+        },
+        undefined
       ]
     ])
   })
@@ -808,7 +834,8 @@ describe('LookupResolver', () => {
           query: {
             service: 'ls_foo'
           }
-        }
+        },
+        1000
       ]
     ])
   })
@@ -882,7 +909,8 @@ describe('LookupResolver', () => {
             query: {
               service: 'ls_foo'
             }
-          }
+          },
+          1000
         ],
         [
           'https://mock.slap2',
@@ -891,7 +919,8 @@ describe('LookupResolver', () => {
             query: {
               service: 'ls_foo'
             }
-          }
+          },
+          1000
         ],
         [
           'https://slaphost.com',
@@ -900,7 +929,8 @@ describe('LookupResolver', () => {
             query: {
               test: 1
             }
-          }
+          },
+          undefined
         ]
       ])
     })
@@ -977,7 +1007,8 @@ describe('LookupResolver', () => {
             query: {
               service: 'ls_foo'
             }
-          }
+          },
+          1000
         ],
         [
           'https://slaphost1.com',
@@ -986,7 +1017,8 @@ describe('LookupResolver', () => {
             query: {
               test: 1
             }
-          }
+          },
+          undefined
         ],
         [
           'https://slaphost2.com',
@@ -995,7 +1027,8 @@ describe('LookupResolver', () => {
             query: {
               test: 1
             }
-          }
+          },
+          undefined
         ]
       ])
     })
@@ -1063,7 +1096,8 @@ describe('LookupResolver', () => {
             query: {
               service: 'ls_foo'
             }
-          }
+          },
+          1000
         ],
         [
           'https://slaphost1.com',
@@ -1072,7 +1106,8 @@ describe('LookupResolver', () => {
             query: {
               test: 1
             }
-          }
+          },
+          undefined
         ],
         [
           'https://slaphost2.com',
@@ -1081,7 +1116,8 @@ describe('LookupResolver', () => {
             query: {
               test: 1
             }
-          }
+          },
+          undefined
         ]
       ])
     })
@@ -1148,7 +1184,8 @@ describe('LookupResolver', () => {
             query: {
               service: 'ls_foo'
             }
-          }
+          },
+          1000
         ],
         [
           'https://slaphost1.com',
@@ -1157,7 +1194,8 @@ describe('LookupResolver', () => {
             query: {
               test: 1
             }
-          }
+          },
+          undefined
         ],
         [
           'https://slaphost2.com',
@@ -1166,7 +1204,8 @@ describe('LookupResolver', () => {
             query: {
               test: 1
             }
-          }
+          },
+          undefined
         ]
       ])
     })
@@ -1217,7 +1256,8 @@ describe('LookupResolver', () => {
             query: {
               service: 'ls_foo'
             }
-          }
+          },
+          1000
         ],
         [
           'https://slaphost.com',
@@ -1226,7 +1266,8 @@ describe('LookupResolver', () => {
             query: {
               test: 1
             }
-          }
+          },
+          undefined
         ]
       ])
     })
