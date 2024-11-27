@@ -169,11 +169,26 @@ Facilitates lookups to URLs that return answers.
 
 ```ts
 export interface OverlayLookupFacilitator {
-    lookup: (url: string, question: LookupQuestion) => Promise<LookupAnswer>;
+    lookup: (url: string, question: LookupQuestion, timeout?: number) => Promise<LookupAnswer>;
 }
 ```
 
 See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookupquestion)
+
+<details>
+
+<summary>Interface OverlayLookupFacilitator Details</summary>
+
+#### Property lookup
+
+Returns a lookup answer for a lookup question
+
+```ts
+lookup: (url: string, question: LookupQuestion, timeout?: number) => Promise<LookupAnswer>
+```
+See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookupquestion)
+
+</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -294,7 +309,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
     fetchClient: typeof fetch;
     constructor(httpClient = fetch) 
-    async lookup(url: string, question: LookupQuestion): Promise<LookupAnswer> 
+    async lookup(url: string, question: LookupQuestion, timeout: number = 5000): Promise<LookupAnswer> 
 }
 ```
 
@@ -310,7 +325,7 @@ Represents an SHIP transaction broadcaster.
 ```ts
 export default class LookupResolver {
     constructor(config?: LookupResolverConfig) 
-    async query(question: LookupQuestion): Promise<LookupAnswer> 
+    async query(question: LookupQuestion, timeout?: number): Promise<LookupAnswer> 
 }
 ```
 
@@ -325,7 +340,7 @@ See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookup
 Given a LookupQuestion, returns a LookupAnswer. Aggregates across multiple services and supports resiliency.
 
 ```ts
-async query(question: LookupQuestion): Promise<LookupAnswer> 
+async query(question: LookupQuestion, timeout?: number): Promise<LookupAnswer> 
 ```
 See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookupquestion)
 
