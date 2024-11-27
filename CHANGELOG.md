@@ -88,6 +88,12 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.2.3] - 2024-11-26
+
+### [1.2.3] Added
+- Added support for Overlay broadcast and lookup timeouts.
+---
+
 ## [1.2.2] - 2024-11-26
 
 ### [1.2.2] Added

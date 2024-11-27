@@ -56,6 +56,8 @@ export interface OverlayBroadcastFacilitator {
   send: (url: string, taggedBEEF: TaggedBEEF) => Promise<STEAK>
 }
 
+const MAX_SHIP_QUERY_TIMEOUT = 1000
+
 export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilitator {
   httpClient: typeof fetch
 
@@ -379,8 +381,8 @@ export default class SHIPCast implements Broadcaster {
       service: 'ls_ship',
       query: {
         topics: this.topics
-      }
-    })
+      },
+    }, MAX_SHIP_QUERY_TIMEOUT)
     if (answer.type !== 'output-list') {
       throw new Error('SHIP answer is not an output list.')
     }
