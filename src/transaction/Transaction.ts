@@ -524,40 +524,47 @@ export default class Transaction {
     }
 
     // Distribute change among change outputs
+    let distributedChange = 0
     if (changeDistribution === 'random') {
       // Implement Benford's Law distribution for change outputs
       const changeOutputs = this.outputs.filter(out => out.change)
-      const remainingChange = change
+      let changeToUse = change
 
-      // Helper function to generate a number following Benford's Law
+      // Helper function to generate a number approximating Benford's Law
       const benfordNumber = (min: number, max: number): number => {
         const d = Math.floor(Math.random() * 9) + 1
         return Math.floor(min + (max - min) * Math.log10(1 + 1 / d) / Math.log10(10))
       }
 
-      // Generate Benford's Law distributed numbers
-      let benfordNumbers = changeOutputs.map(() => benfordNumber(1, remainingChange))
-
-      // Normalize the numbers to sum up to the total change
-      const sum = benfordNumbers.reduce((a, b) => a + b, 0)
-      benfordNumbers = benfordNumbers.map(n => Math.floor(n * remainingChange / sum))
-
-      // Distribute the change
-      let distributedChange = 0
-      for (let i = 0; i < changeOutputs.length; i++) {
-        const amount = i === changeOutputs.length - 1
-          ? remainingChange - distributedChange
-          : benfordNumbers[i]
-        changeOutputs[i].satoshis = amount
-        distributedChange += amount
+      const benfordNumbers = Array(changeOutputs.length).fill(1)
+      changeToUse -= changeOutputs.length
+      distributedChange += changeOutputs.length
+      for (let i = 0; i < changeOutputs.length - 1; i++) {
+        const portion = benfordNumber(0, changeToUse)
+        benfordNumbers[i] += portion
+        distributedChange += portion
+        changeToUse -= portion
       }
+
+      for (let i = 0; i < this.outputs.length; i++) {
+        if (this.outputs[i].change) {
+          const t = benfordNumbers.shift()
+          this.outputs[i].satoshis = t
+        }
+      }
+      
     } else if (changeDistribution === 'equal') {
       const perOutput = Math.floor(change / changeCount)
       for (const out of this.outputs) {
         if (out.change) {
+          distributedChange += perOutput
           out.satoshis = perOutput
         }
       }
+    }
+    // if there's any remaining change, add it to the last output
+      if (distributedChange < change) {
+      this.outputs[this.outputs.length - 1].satoshis += (change - distributedChange)
     }
   }
 
@@ -898,7 +905,7 @@ export default class Transaction {
    * @returns The serialized BEEF structure
    * @throws Error if there are any missing sourceTransactions unless `allowPartial` is true.
    */
-  toBEEF (allowPartial?: boolean): number[] {
+  toBEEF (allowPartial?: boolean): number[] {this.outputs.length
     const writer = new Writer()
     writer.writeUInt32LE(4022206465)
     const BUMPs: MerklePath[] = []
