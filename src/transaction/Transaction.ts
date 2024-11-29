@@ -140,9 +140,9 @@ export default class Transaction {
     const validTxids = new Set<string>()
     // All BUMP level 0 hashes are valid.
     for (const bump of BUMPs) {
-      for (const n of bump.path[0])
-        if (n.hash)
-          validTxids.add(n.hash)
+      for (const n of bump.path[0]) {
+        if (n.hash) { validTxids.add(n.hash) }
+      }
     }
     // To keep track of which transactions were used.
     const unusedTxTxids = new Set<string>()
@@ -552,7 +552,6 @@ export default class Transaction {
           this.outputs[i].satoshis = t
         }
       }
-      
     } else if (changeDistribution === 'equal') {
       const perOutput = Math.floor(change / changeCount)
       for (const out of this.outputs) {
@@ -563,7 +562,7 @@ export default class Transaction {
       }
     }
     // if there's any remaining change, add it to the last output
-      if (distributedChange < change) {
+    if (distributedChange < change) {
       this.outputs[this.outputs.length - 1].satoshis += (change - distributedChange)
     }
   }
@@ -899,13 +898,14 @@ export default class Transaction {
 
   /**
    * Serializes this transaction, together with its inputs and the respective merkle proofs, into the BEEF (BRC-62) format. This enables efficient verification of its compliance with the rules of SPV.
-   * 
+   *
    * @param allowPartial If true, error will not be thrown if there are any missing sourceTransactions.
    *
    * @returns The serialized BEEF structure
    * @throws Error if there are any missing sourceTransactions unless `allowPartial` is true.
    */
-  toBEEF (allowPartial?: boolean): number[] {this.outputs.length
+  toBEEF (allowPartial?: boolean): number[] {
+    this.outputs.length
     const writer = new Writer()
     writer.writeUInt32LE(4022206465)
     const BUMPs: MerklePath[] = []
@@ -950,10 +950,7 @@ export default class Transaction {
       if (!hasProof) {
         for (let i = 0; i < tx.inputs.length; i++) {
           const input = tx.inputs[i]
-          if (typeof input.sourceTransaction === 'object')
-            addPathsAndInputs(input.sourceTransaction)
-          else if (!allowPartial)
-            throw new Error('A required source transaction is missing!')
+          if (typeof input.sourceTransaction === 'object') { addPathsAndInputs(input.sourceTransaction) } else if (!allowPartial) { throw new Error('A required source transaction is missing!') }
         }
       }
     }

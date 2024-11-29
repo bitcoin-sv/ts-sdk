@@ -15,7 +15,7 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
      * @param script Locking script comprising a SHIP or SLAP token to decode
      * @returns Decoded SHIP or SLAP advertisement
      */
-  static decode(script: LockingScript): { protocol: 'SHIP' | 'SLAP', identityKey: string, domain: string, topicOrService: string } {
+  static decode (script: LockingScript): { protocol: 'SHIP' | 'SLAP', identityKey: string, domain: string, topicOrService: string } {
     const result = PushDrop.decode(script)
     if (result.fields.length < 4) {
       throw new Error('Invalid SHIP/SLAP advertisement!')
@@ -39,7 +39,7 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
      * Constructs a new Overlay Admin template instance
      * @param wallet Wallet to use for locking and unlocking
      */
-  constructor(wallet: Wallet) {
+  constructor (wallet: Wallet) {
     this.pushDrop = new PushDrop(wallet)
   }
 
@@ -50,7 +50,7 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
      * @param topicOrService Topic or service to advertise
      * @returns Locking script comprising the advertisement token
      */
-  async lock(protocol: 'SHIP' | 'SLAP', domain: string, topicOrService: string): Promise<LockingScript> {
+  async lock (protocol: 'SHIP' | 'SLAP', domain: string, topicOrService: string): Promise<LockingScript> {
     const { publicKey: identityKey } = await this.pushDrop.wallet.getPublicKey({ identityKey: true })
     return await this.pushDrop.lock(
       [
@@ -70,7 +70,7 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
      * @param protocol SHIP or SLAP, depending on the token to unlock
      * @returns Script unlocker capable of unlocking the advertisement token
      */
-  unlock(protocol: 'SHIP' | 'SLAP'): {
+  unlock (protocol: 'SHIP' | 'SLAP'): {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
     estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>
   } {

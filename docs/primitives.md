@@ -23,775 +23,31 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ---
 
-### Class: Mersenne
+### Class: BasePoint
 
-A representation of a pseudo-Mersenne prime.
-A pseudo-Mersenne prime has the general form 2^n - k, where n and k are integers.
+Base class for Point (affine coordinates) and JacobianPoint classes,
+defining their curve and type.
 
 ```ts
-export default class Mersenne {
-    name: string;
-    p: BigNumber;
-    k: BigNumber;
-    n: number;
-    constructor(name: string, p: string) 
-    ireduce(num: BigNumber): BigNumber 
-    split(input: BigNumber, out: BigNumber): void 
-    imulK(num: BigNumber): BigNumber 
+export default abstract class BasePoint {
+    curve: Curve;
+    type: "affine" | "jacobian";
+    precomputed: {
+        doubles: {
+            step: number;
+            points: any[];
+        } | undefined;
+        naf: {
+            wnd: any;
+            points: any[];
+        } | undefined;
+        beta: BasePoint | null | undefined;
+    } | null;
+    constructor(type: "affine" | "jacobian") 
 }
 ```
 
-<details>
-
-<summary>Class Mersenne Details</summary>
-
-#### Constructor
-
-```ts
-constructor(name: string, p: string) 
-```
-
-Argument Details
-
-+ **name**
-  + An identifier for the Mersenne instance.
-+ **p**
-  + A string representation of the pseudo-Mersenne prime, expressed in hexadecimal.
-
-Example
-
-```ts
-const mersenne = new Mersenne('M31', '7FFFFFFF');
-```
-
-#### Property k
-
-The constant subtracted from 2^n to derive a pseudo-Mersenne prime.
-
-```ts
-k: BigNumber
-```
-
-#### Property n
-
-The exponent which determines the magnitude of the prime.
-
-```ts
-n: number
-```
-
-#### Property name
-
-The identifier for the Mersenne instance.
-
-```ts
-name: string
-```
-
-#### Property p
-
-BigNumber equivalent to 2^n - k.
-
-```ts
-p: BigNumber
-```
-
-#### Method imulK
-
-Performs an in-place multiplication of the parameter by constant k.
-
-```ts
-imulK(num: BigNumber): BigNumber 
-```
-
-Returns
-
-The result of the multiplication, in BigNumber format.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to multiply with k.
-
-Example
-
-```ts
-const multiplied = mersenne.imulK(new BigNumber('2345', 16));
-```
-
-#### Method ireduce
-
-Reduces an input BigNumber in place, under the assumption that
-it is less than the square of the pseudo-Mersenne prime.
-
-```ts
-ireduce(num: BigNumber): BigNumber 
-```
-
-Returns
-
-The reduced BigNumber.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to be reduced.
-
-Example
-
-```ts
-const reduced = mersenne.ireduce(new BigNumber('2345', 16));
-```
-
-#### Method split
-
-Shifts bits of the input BigNumber to the right, in place,
-to meet the magnitude of the pseudo-Mersenne prime.
-
-```ts
-split(input: BigNumber, out: BigNumber): void 
-```
-
-Argument Details
-
-+ **input**
-  + The BigNumber to be shifted.
-+ **out**
-  + The BigNumber to hold the shifted result.
-
-Example
-
-```ts
-mersenne.split(new BigNumber('2345', 16), new BigNumber());
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: K256
-
-A class representing K-256, a prime number with optimizations, specifically used in the secp256k1 curve.
-It extends the functionalities of the Mersenne class.
-K-256 prime is represented as 'ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe fffffc2f'
-
-Example
-
-```ts
-const k256 = new K256();
-```
-
-```ts
-export default class K256 extends Mersenne {
-    constructor() 
-    split(input: BigNumber, output: BigNumber): void 
-    imulK(num: BigNumber): BigNumber 
-}
-```
-
-<details>
-
-<summary>Class K256 Details</summary>
-
-#### Constructor
-
-Constructor for the K256 class.
-Creates an instance of K256 using the super constructor from Mersenne.
-
-```ts
-constructor() 
-```
-
-Example
-
-```ts
-const k256 = new K256();
-```
-
-#### Method imulK
-
-Multiplies a BigNumber ('num') with the constant 'K' in-place and returns the result.
-'K' is equal to 0x1000003d1 or in decimal representation: [ 64, 977 ].
-
-```ts
-imulK(num: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the mutated BigNumber after multiplication.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to multiply with K.
-
-Example
-
-```ts
-const number = new BigNumber(12345);
-const result = k256.imulK(number);
-```
-
-#### Method split
-
-Splits a BigNumber into a new BigNumber based on specific computation
-rules. This method modifies the input and output big numbers.
-
-```ts
-split(input: BigNumber, output: BigNumber): void 
-```
-
-Argument Details
-
-+ **input**
-  + The BigNumber to be split.
-+ **output**
-  + The BigNumber that results from the split.
-
-Example
-
-```ts
-const input = new BigNumber(3456);
-const output = new BigNumber(0);
-k256.split(input, output);
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: ReductionContext
-
-A base reduction engine that provides several arithmetic operations over
-big numbers under a modulus context. It's particularly suitable for
-calculations required in cryptography algorithms and encoding schemas.
-
-```ts
-export default class ReductionContext {
-    prime: Mersenne | null;
-    m: BigNumber;
-    constructor(m: BigNumber | "k256") 
-    verify1(a: BigNumber): void 
-    verify2(a: BigNumber, b: BigNumber): void 
-    imod(a: BigNumber): BigNumber 
-    neg(a: BigNumber): BigNumber 
-    add(a: BigNumber, b: BigNumber): BigNumber 
-    iadd(a: BigNumber, b: BigNumber): BigNumber 
-    sub(a: BigNumber, b: BigNumber): BigNumber 
-    isub(a: BigNumber, b: BigNumber): BigNumber 
-    shl(a: BigNumber, num: number): BigNumber 
-    imul(a: BigNumber, b: BigNumber): BigNumber 
-    mul(a: BigNumber, b: BigNumber): BigNumber 
-    isqr(a: BigNumber): BigNumber 
-    sqr(a: BigNumber): BigNumber 
-    sqrt(a: BigNumber): BigNumber 
-    invm(a: BigNumber): BigNumber 
-    pow(a: BigNumber, num: BigNumber): BigNumber 
-    convertTo(num: BigNumber): BigNumber 
-    convertFrom(num: BigNumber): BigNumber 
-}
-```
-
-<details>
-
-<summary>Class ReductionContext Details</summary>
-
-#### Constructor
-
-Constructs a new ReductionContext.
-
-```ts
-constructor(m: BigNumber | "k256") 
-```
-
-Argument Details
-
-+ **m**
-  + A BigNumber representing the modulus, or 'k256' to create a context for Koblitz curve.
-
-Example
-
-```ts
-new ReductionContext(new BigNumber(11));
-new ReductionContext('k256');
-```
-
-#### Property m
-
-The modulus used for reduction operations.
-
-```ts
-m: BigNumber
-```
-
-#### Property prime
-
-The prime number utilised in the reduction context, typically an instance of Mersenne class.
-
-```ts
-prime: Mersenne | null
-```
-
-#### Method add
-
-Performs the addition operation on two BigNumbers in the reduction context.
-
-```ts
-add(a: BigNumber, b: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the result of 'a + b' in the reduction context.
-
-Argument Details
-
-+ **a**
-  + First BigNumber to add.
-+ **b**
-  + Second BigNumber to add.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(5));
-context.add(new BigNumber(2), new BigNumber(4)); // Returns 1
-```
-
-#### Method convertFrom
-
-Converts a BigNumber from reduction context to its regular form.
-
-```ts
-convertFrom(num: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the converted BigNumber in its regular form.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to convert from the reduction context.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(7));
-const a = context.convertTo(new BigNumber(8)); // 'a' is now 1 in the reduction context
-context.convertFrom(a); // Returns 1
-```
-
-#### Method convertTo
-
-Converts a BigNumber to its equivalent in the reduction context.
-
-```ts
-convertTo(num: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the converted BigNumber compatible with the reduction context.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to convert to the reduction context.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(7));
-context.convertTo(new BigNumber(8)); // Returns 1 (8 % 7)
-```
-
-#### Method iadd
-
-Performs an in-place addition operation on two BigNumbers in the reduction context
-in order to avoid creating a new BigNumber, it modifies the first one with the result.
-
-```ts
-iadd(a: BigNumber, b: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the modified 'a' after addition with 'b' in the reduction context.
-
-Argument Details
-
-+ **a**
-  + First BigNumber to add.
-+ **b**
-  + Second BigNumber to add.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(5));
-const a = new BigNumber(2);
-context.iadd(a, new BigNumber(4)); // Modifies 'a' to be 1
-```
-
-#### Method imod
-
-Performs an in-place reduction of the given BigNumber by the modulus of the reduction context, 'm'.
-
-```ts
-imod(a: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the reduced result.
-
-Argument Details
-
-+ **a**
-  + BigNumber to be reduced.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(7));
-context.imod(new BigNumber(19)); // Returns 5
-```
-
-#### Method imul
-
-Performs in-place multiplication of two BigNumbers in the reduction context,
-modifying the first BigNumber with the result.
-
-```ts
-imul(a: BigNumber, b: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the modified 'a' after multiplication with 'b' in the reduction context.
-
-Argument Details
-
-+ **a**
-  + First BigNumber to multiply.
-+ **b**
-  + Second BigNumber to multiply.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(7));
-const a = new BigNumber(3);
-context.imul(a, new BigNumber(2)); // Modifies 'a' to be 6
-```
-
-#### Method invm
-
-Calculates the multiplicative inverse of a BigNumber in the reduction context.
-
-```ts
-invm(a: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the multiplicative inverse of 'a' in the reduction context.
-
-Argument Details
-
-+ **a**
-  + The BigNumber to find the multiplicative inverse of.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(11));
-context.invm(new BigNumber(3)); // Returns 4 (3*4 mod 11 = 1)
-```
-
-#### Method isqr
-
-Calculates the square of a BigNumber in the reduction context,
-modifying the original BigNumber with the result.
-
-```ts
-isqr(a: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the squared 'a' in the reduction context.
-
-Argument Details
-
-+ **a**
-  + BigNumber to be squared.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(7));
-const a = new BigNumber(3);
-context.isqr(a); // Modifies 'a' to be 2 (9 % 7 = 2)
-```
-
-#### Method isub
-
-Performs in-place subtraction of one BigNumber from another in the reduction context,
-it modifies the first BigNumber with the result.
-
-```ts
-isub(a: BigNumber, b: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the modified 'a' after subtraction of 'b' in the reduction context.
-
-Argument Details
-
-+ **a**
-  + BigNumber to be subtracted from.
-+ **b**
-  + BigNumber to subtract.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(5));
-const a = new BigNumber(4);
-context.isub(a, new BigNumber(2)); // Modifies 'a' to be 2
-```
-
-#### Method mul
-
-Multiplies two BigNumbers in the reduction context.
-
-```ts
-mul(a: BigNumber, b: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the result of 'a * b' in the reduction context.
-
-Argument Details
-
-+ **a**
-  + First BigNumber to multiply.
-+ **b**
-  + Second BigNumber to multiply.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(7));
-context.mul(new BigNumber(3), new BigNumber(2)); // Returns 6
-```
-
-#### Method neg
-
-Negates a BigNumber in the context of the modulus.
-
-```ts
-neg(a: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the negation of 'a' in the reduction context.
-
-Argument Details
-
-+ **a**
-  + BigNumber to negate.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(7));
-context.neg(new BigNumber(3)); // Returns 4
-```
-
-#### Method pow
-
-Raises a BigNumber to a power in the reduction context.
-
-```ts
-pow(a: BigNumber, num: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the result of 'a' raised to the power of 'num' in the reduction context.
-
-Argument Details
-
-+ **a**
-  + The BigNumber to be raised to a power.
-+ **num**
-  + The power to raise the BigNumber to.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(7));
-context.pow(new BigNumber(3), new BigNumber(2)); // Returns 2 (3^2 % 7)
-```
-
-#### Method shl
-
-Performs bitwise shift left operation on a BigNumber in the reduction context.
-
-```ts
-shl(a: BigNumber, num: number): BigNumber 
-```
-
-Returns
-
-Returns the result of shifting 'a' left by 'num' positions in the reduction context.
-
-Argument Details
-
-+ **a**
-  + BigNumber to perform shift on.
-+ **num**
-  + The number of positions to shift.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(32));
-context.shl(new BigNumber(4), 2); // Returns 16
-```
-
-#### Method sqr
-
-Calculates the square of a BigNumber in the reduction context.
-
-```ts
-sqr(a: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the result of 'a^2' in the reduction context.
-
-Argument Details
-
-+ **a**
-  + BigNumber to be squared.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(7));
-context.sqr(new BigNumber(3)); // Returns 2 (9 % 7 = 2)
-```
-
-#### Method sqrt
-
-Calculates the square root of a BigNumber in the reduction context.
-
-```ts
-sqrt(a: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the square root of 'a' in the reduction context.
-
-Argument Details
-
-+ **a**
-  + The BigNumber to calculate the square root of.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(9));
-context.sqrt(new BigNumber(4)); // Returns 2
-```
-
-#### Method sub
-
-Subtracts one BigNumber from another BigNumber in the reduction context.
-
-```ts
-sub(a: BigNumber, b: BigNumber): BigNumber 
-```
-
-Returns
-
-Returns the result of 'a - b' in the reduction context.
-
-Argument Details
-
-+ **a**
-  + BigNumber to be subtracted from.
-+ **b**
-  + BigNumber to subtract.
-
-Example
-
-```ts
-const context = new ReductionContext(new BigNumber(7));
-context.sub(new BigNumber(3), new BigNumber(2)); // Returns 1
-```
-
-#### Method verify1
-
-Verifies that a BigNumber is positive and red. Throws an error if these
-conditions are not met.
-
-```ts
-verify1(a: BigNumber): void 
-```
-
-Argument Details
-
-+ **a**
-  + The BigNumber to be verified.
-
-Example
-
-```ts
-this.verify1(new BigNumber(10).toRed());
-this.verify1(new BigNumber(-10).toRed()); //throws an Error
-this.verify1(new BigNumber(10)); //throws an Error
-```
-
-#### Method verify2
-
-Verifies that two BigNumbers are both positive and red. Also checks
-that they have the same reduction context. Throws an error if these
-conditions are not met.
-
-```ts
-verify2(a: BigNumber, b: BigNumber): void 
-```
-
-Argument Details
-
-+ **a**
-  + The first BigNumber to be verified.
-+ **b**
-  + The second BigNumber to be verified.
-
-Example
-
-```ts
-this.verify2(new BigNumber(10).toRed(this), new BigNumber(20).toRed(this));
-this.verify2(new BigNumber(-10).toRed(this), new BigNumber(20).toRed(this)); //throws an Error
-this.verify2(new BigNumber(10).toRed(this), new BigNumber(20)); //throws an Error
-```
-
-</details>
+See also: [Curve](#class-curve)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -947,6 +203,8 @@ export default class BigNumber {
 }
 ```
 
+See also: [ReductionContext](#class-reductioncontext), [toArray](#variable-toarray), [toHex](#variable-tohex)
+
 <details>
 
 <summary>Class BigNumber Details</summary>
@@ -1012,6 +270,7 @@ Reduction context of the big number.
 ```ts
 red: ReductionContext | null
 ```
+See also: [ReductionContext](#class-reductioncontext)
 
 #### Property wordSize
 
@@ -1050,6 +309,7 @@ The multiplicative inverse is a number which when multiplied with the current Bi
 ```ts
 _invmp(p: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1076,6 +336,7 @@ This method modifies the existing BigNumber instance.
 ```ts
 _ishlnsubmul(num: BigNumber, mul, shift: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1106,6 +367,7 @@ This operation does not affect the actual object but instead returns a new insta
 ```ts
 abs(): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1126,6 +388,7 @@ Add `num` to `this` BigNumber.
 ```ts
 add(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1151,6 +414,7 @@ Returns a new BigNumber that is the result of adding a plain number to the origi
 ```ts
 addn(num: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1176,6 +440,7 @@ set in the result only if the corresponding bit is set in both operands.
 ```ts
 and(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1227,6 +492,7 @@ Increments the value at the bit position specified by the input parameter.
 ```ts
 bincn(bit: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1283,6 +549,7 @@ Creates a copy of the current BigNumber instance.
 ```ts
 clone(): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1302,6 +569,7 @@ Compare this big number with another big number.
 ```ts
 cmp(num: BigNumber): 1 | 0 | -1 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1356,6 +624,7 @@ The copy method copies the state of this BigNumber into an exsiting `dest` BigNu
 ```ts
 copy(dest: BigNumber): void 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Argument Details
 
@@ -1378,6 +647,7 @@ Divides a BigNumber instance by another BigNumber and returns result. This does 
 ```ts
 div(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1403,6 +673,7 @@ Returns the rounded quotient after division of one `BigNumber` by another `BigNu
 ```ts
 divRound(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1429,6 +700,7 @@ If the mode parameter is not provided, both division and modulus results are ret
 ```ts
 divmod(num: BigNumber, mode?: "div" | "mod", positive?: boolean): any 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1459,6 +731,7 @@ Returns the quotient `BigNumber` after division of one `BigNumber` by a primitiv
 ```ts
 divn(num: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1489,6 +762,7 @@ egcd(p: BigNumber): {
     gcd: BigNumber;
 } 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1514,6 +788,7 @@ Compares the current BigNumber with the given number and returns whether they're
 ```ts
 eq(num: BigNumber): boolean 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1562,6 +837,7 @@ Increases the BigNumber length up to a certain size and initializes new elements
 ```ts
 expand(size): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1586,6 +862,7 @@ Forces the current BigNumber into a reduction context, irrespective of the BigNu
 ```ts
 forceRed(ctx: ReductionContext): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber), [ReductionContext](#class-reductioncontext)
 
 Returns
 
@@ -1611,6 +888,7 @@ Creates a BigNumber from a number representing the "bits" value in a block heade
 ```ts
 static fromBits(bits: number, strict: boolean = false): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1641,6 +919,7 @@ Creates a BigNumber from a hexadecimal string.
 ```ts
 static fromHex(hex: string, endian?: "little" | "big"): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1665,6 +944,7 @@ Creates a BigNumber from a JSON-serialized string.
 ```ts
 static fromJSON(str: string): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1689,6 +969,7 @@ Creates a BigNumber from a number.
 ```ts
 static fromNumber(n: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1714,6 +995,7 @@ Throws an error in case the number is not in a reduction context.
 ```ts
 fromRed(): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1735,6 +1017,7 @@ Creates a BigNumber from the format used in Bitcoin scripts.
 ```ts
 static fromScriptNum(num: number[], requireMinimal?: boolean, maxNumSize?: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1767,6 +1050,7 @@ Creates a BigNumber from a signed magnitude number.
 ```ts
 static fromSm(num: number[], endian: "big" | "little" = "big"): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1793,6 +1077,7 @@ Creates a BigNumber from a string, considering an optional base.
 ```ts
 static fromString(str: string, base?: number | "hex"): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1819,6 +1104,7 @@ Converts this big number from two's complement with a specified bit width.
 ```ts
 fromTwos(width: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1844,6 +1130,7 @@ Computes and returns the greatest common divisor (GCD) of this BigNumber and the
 ```ts
 gcd(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1869,6 +1156,7 @@ Checks if this BigNumber instance is greater than another BigNumber.
 ```ts
 gt(num: BigNumber): boolean 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1894,6 +1182,7 @@ Checks if this BigNumber instance is greater than or equal to another BigNumber.
 ```ts
 gte(num: BigNumber): boolean 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1967,6 +1256,7 @@ Performs an in-place operation to make the BigNumber an absolute value.
 ```ts
 iabs(): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1986,6 +1276,7 @@ Add `num` to `this` BigNumber in-place.
 ```ts
 iadd(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2011,6 +1302,7 @@ Performs an in-place addition of a plain number to the BigNumber.
 ```ts
 iaddn(num: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2042,6 +1334,7 @@ checks for negative values before operation.
 ```ts
 iand(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2067,6 +1360,7 @@ Performs an in-place division of a `BigNumber` by a primitive number.
 ```ts
 idivn(num: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2093,6 +1387,7 @@ Performs an in-place operation to keep only the lower bits of the number.
 ```ts
 imaskn(bits): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2123,6 +1418,7 @@ Performs an in-place multiplication of the BigNumber instance by a given BigNumb
 ```ts
 imul(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2150,6 +1446,7 @@ If negavtive number is provided, the resulting BigNumber will be inversely negat
 ```ts
 imuln(num: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2174,6 +1471,7 @@ Negates the big number in-place.
 ```ts
 ineg(): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2194,6 +1492,7 @@ In-place method that performs a bitwise NOT operation on a BigNumber up to a spe
 ```ts
 inotn(width: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2238,6 +1537,7 @@ Computes and returns the modular multiplicative inverse of this BigNumber in the
 ```ts
 invm(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2264,6 +1564,7 @@ that neither of the numbers can be negative. Stores the result in this BigNumber
 ```ts
 ior(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2397,6 +1698,7 @@ Performs an in-place left shift operation on the BigNumber instance only if it i
 ```ts
 ishln(bits: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2421,6 +1723,7 @@ Performs an in-place right shift operation on the BigNumber instance only if it 
 ```ts
 ishrn(bits, hint?, extended?): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2449,6 +1752,7 @@ Performs in-place multiplication of the BigNumber instance by itself.
 ```ts
 isqr(): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2468,6 +1772,7 @@ Subtract `num` from `this` BigNumber in-place.
 ```ts
 isub(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2493,6 +1798,7 @@ Performs an in-place subtraction of a plain number from the BigNumber.
 ```ts
 isubn(num: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2524,6 +1830,7 @@ in both operands.
 ```ts
 iuand(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2550,6 +1857,7 @@ the result in this BigNumber.
 ```ts
 iuor(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2576,6 +1884,7 @@ Performs in-place bitwise left shift operation on the BigNumber instance.
 ```ts
 iushln(bits: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2600,6 +1909,7 @@ Performs an in-place unsigned bitwise right shift operation on the BigNumber ins
 ```ts
 iushrn(bits: number, hint?: number, extended?: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2630,6 +1940,7 @@ corresponding bits in the operands are different.
 ```ts
 iuxor(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2658,6 +1969,7 @@ checks for negative values before operation.
 ```ts
 ixor(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2683,6 +1995,7 @@ Checks if this BigNumber instance is less than another BigNumber.
 ```ts
 lt(num: BigNumber): boolean 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2708,6 +2021,7 @@ Checks if this BigNumber instance is less than or equal to another BigNumber.
 ```ts
 lte(num: BigNumber): boolean 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2781,6 +2095,7 @@ Returns a new BigNumber that keeps only the lower bits of the original number.
 ```ts
 maskn(bits): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2805,6 +2120,7 @@ Returns the bigger value between two BigNumbers
 ```ts
 static max(left: BigNumber, right: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2832,6 +2148,7 @@ Returns the smaller value between two BigNumbers
 ```ts
 static min(left: BigNumber, right: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2859,6 +2176,7 @@ Returns the remainder after division of one `BigNumber` by another `BigNumber`.
 ```ts
 mod(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2910,6 +2228,7 @@ Directly transfers the attributes of the source BigNumber to the destination Big
 ```ts
 static move(dest: BigNumber, src: BigNumber): void 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Argument Details
 
@@ -2935,6 +2254,7 @@ It creates a new BigNumber to store the result.
 ```ts
 mul(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2961,6 +2281,7 @@ It chooses the multiplication method based on the lengths of the numbers to opti
 ```ts
 mulTo(num: BigNumber, out: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2990,6 +2311,7 @@ It performs the multiplication operation in-place to a cloned BigNumber.
 ```ts
 muln(num: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3014,6 +2336,7 @@ Negates the big number and returns a new instance.
 ```ts
 neg(): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3034,6 +2357,7 @@ Normalizes the sign of the BigNumber. Changes -0 to 0.
 ```ts
 normSign(): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3053,6 +2377,7 @@ Performs a bitwise NOT operation on a BigNumber up to a specified bit width. Ret
 ```ts
 notn(width: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3081,6 +2406,7 @@ the corresponding bit in the first operand or the second operand is
 ```ts
 or(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3106,6 +2432,7 @@ Raises the BigNumber instance to the power of the specified BigNumber.
 ```ts
 pow(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3132,6 +2459,7 @@ Throws an error in case the number is not in a reduction context.
 ```ts
 redAdd(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3159,6 +2487,7 @@ Throws an error in case the number is not in a reduction context.
 ```ts
 redIAdd(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3186,6 +2515,7 @@ Expects that this BigNumber is within the reduction context i.e., it has been re
 ```ts
 redIMul(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3214,6 +2544,7 @@ if it has a `red` field that points to a reduction context object.
 ```ts
 redISqr(): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3239,6 +2570,7 @@ Throws an error in case the number is not in a reduction context.
 ```ts
 redISub(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3266,6 +2598,7 @@ The method works only on numbers that have a reduction context set.
 ```ts
 redInvm(): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3291,6 +2624,7 @@ Throws an error in case the number is not in a reduction context.
 ```ts
 redMul(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3318,6 +2652,7 @@ The method works only on numbers that have a reduction context set.
 ```ts
 redNeg(): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3343,6 +2678,7 @@ Note that 'num' must not have a reduction context set.
 ```ts
 redPow(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3374,6 +2710,7 @@ Throws an error in case the number is not in a reduction context.
 ```ts
 redShl(num: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3403,6 +2740,7 @@ if it has a `red` field that points to a reduction context object.
 ```ts
 redSqr(): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3431,6 +2769,7 @@ field that points to a reduction context object.
 ```ts
 redSqrt(): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3456,6 +2795,7 @@ Throws an error in case the number is not in a reduction context.
 ```ts
 redSub(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3483,6 +2823,7 @@ and `val` is the value to be set at that position (`0` or `1`).
 ```ts
 setn(bit: number, val: 0 | 1 | true | false): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3510,6 +2851,7 @@ Performs a bitwise left shift operation on a clone of the BigNumber instance.
 ```ts
 shln(bits): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3535,6 +2877,7 @@ Performs a bitwise right shift operation on a clone of the BigNumber instance.
 ```ts
 shrn(bits): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3560,6 +2903,7 @@ Squares the BigNumber instance.
 ```ts
 sqr(): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3579,6 +2923,7 @@ Removes leading zeros.
 ```ts
 strip(): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3599,6 +2944,7 @@ Subtract `num` from `this` BigNumber.
 ```ts
 sub(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3624,6 +2970,7 @@ Returns a new BigNumber that is the result of subtracting a plain number from th
 ```ts
 subn(num: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3699,6 +3046,7 @@ a binary number, where each array index is a bit.
 ```ts
 static toBitArray(num: BigNumber): Array<0 | 1> 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3833,6 +3181,7 @@ Throws an error in case the number is either negative or already in a reduction 
 ```ts
 toRed(ctx: ReductionContext): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber), [ReductionContext](#class-reductioncontext)
 
 Returns
 
@@ -3933,6 +3282,7 @@ Converts this big number to two's complement with a specified bit width.
 ```ts
 toTwos(width: number): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3959,6 +3309,7 @@ Performs a bitwise AND operation without considering signed bit
 ```ts
 uand(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3984,6 +3335,7 @@ Performs an unsigned comparison between this BigNumber instance and another.
 ```ts
 ucmp(num: BigNumber): 1 | 0 | -1 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -4009,6 +3361,7 @@ Returns the remainder after unsigned division of one `BigNumber` by another `Big
 ```ts
 umod(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -4037,6 +3390,7 @@ similar to the `or` method.
 ```ts
 uor(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -4062,6 +3416,7 @@ Performs an unsigned bitwise shift left operation on a clone of the BigNumber in
 ```ts
 ushln(bits): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -4087,6 +3442,7 @@ Performs an unsigned bitwise shift right operation on a clone of the BigNumber i
 ```ts
 ushrn(bits): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -4112,6 +3468,7 @@ Performs an unsigned XOR operation on this BigNumber with the supplied BigNumber
 ```ts
 uxor(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -4138,6 +3495,7 @@ set in the result only if the corresponding bits in the operands are different.
 ```ts
 xor(num: BigNumber): BigNumber 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -4175,1775 +3533,6 @@ Example
 const BigNumber = require("./BigNumber");
 const bn = new BigNumber('8'); // binary: 1000
 const zeroBits = bn.zeroBits(); // 3
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: MontgomoryMethod
-
-Represents a Montgomery reduction context, which is a mathematical method
-for performing modular multiplication without division.
-
-Montgomery reduction is an algorithm used mainly in cryptography which can
-help to speed up calculations in contexts where there are many repeated
-computations.
-
-This class extends the `ReductionContext` class.
-
-```ts
-export default class MontgomoryMethod extends ReductionContext {
-    shift: number;
-    r: BigNumber;
-    r2: BigNumber;
-    rinv: BigNumber;
-    minv: BigNumber;
-    constructor(m: BigNumber | "k256") 
-    convertTo(num: BigNumber): BigNumber 
-    convertFrom(num: BigNumber): BigNumber 
-    imul(a: BigNumber, b: BigNumber): BigNumber 
-    mul(a: BigNumber, b: BigNumber): BigNumber 
-    invm(a: BigNumber): BigNumber 
-}
-```
-
-<details>
-
-<summary>Class MontgomoryMethod Details</summary>
-
-#### Constructor
-
-```ts
-constructor(m: BigNumber | "k256") 
-```
-
-Argument Details
-
-+ **m**
-  + The modulus to be used for the Montgomery method reductions.
-
-#### Property minv
-
-The modular multiplicative inverse of `m` mod `r`.
-
-```ts
-minv: BigNumber
-```
-
-#### Property r
-
-The 2^shift, shifted left by the bit length of modulus `m`.
-
-```ts
-r: BigNumber
-```
-
-#### Property r2
-
-The square of `r` modulo `m`.
-
-```ts
-r2: BigNumber
-```
-
-#### Property rinv
-
-The modular multiplicative inverse of `r` mod `m`.
-
-```ts
-rinv: BigNumber
-```
-
-#### Property shift
-
-The number of bits in the modulus.
-
-```ts
-shift: number
-```
-
-#### Method convertFrom
-
-Converts a number from the Montgomery domain back to the original domain.
-
-```ts
-convertFrom(num: BigNumber): BigNumber 
-```
-
-Returns
-
-The result of the conversion from the Montgomery domain.
-
-Argument Details
-
-+ **num**
-  + The number to be converted from the Montgomery domain.
-
-Example
-
-```ts
-const montMethod = new MontgomoryMethod(m);
-const convertedNum = montMethod.convertFrom(num);
-```
-
-#### Method convertTo
-
-Converts a number into the Montgomery domain.
-
-```ts
-convertTo(num: BigNumber): BigNumber 
-```
-
-Returns
-
-The result of the conversion into the Montgomery domain.
-
-Argument Details
-
-+ **num**
-  + The number to be converted into the Montgomery domain.
-
-Example
-
-```ts
-const montMethod = new MontgomoryMethod(m);
-const convertedNum = montMethod.convertTo(num);
-```
-
-#### Method imul
-
-Performs an in-place multiplication of two numbers in the Montgomery domain.
-
-```ts
-imul(a: BigNumber, b: BigNumber): BigNumber 
-```
-
-Returns
-
-The result of the in-place multiplication.
-
-Argument Details
-
-+ **a**
-  + The first number to multiply.
-+ **b**
-  + The second number to multiply.
-
-Example
-
-```ts
-const montMethod = new MontgomoryMethod(m);
-const product = montMethod.imul(a, b);
-```
-
-#### Method invm
-
-Calculates the modular multiplicative inverse of a number in the Montgomery domain.
-
-```ts
-invm(a: BigNumber): BigNumber 
-```
-
-Returns
-
-The modular multiplicative inverse of 'a'.
-
-Argument Details
-
-+ **a**
-  + The number to compute the modular multiplicative inverse of.
-
-Example
-
-```ts
-const montMethod = new MontgomoryMethod(m);
-const inverse = montMethod.invm(a);
-```
-
-#### Method mul
-
-Performs the multiplication of two numbers in the Montgomery domain.
-
-```ts
-mul(a: BigNumber, b: BigNumber): BigNumber 
-```
-
-Returns
-
-The result of the multiplication.
-
-Argument Details
-
-+ **a**
-  + The first number to multiply.
-+ **b**
-  + The second number to multiply.
-
-Example
-
-```ts
-const montMethod = new MontgomoryMethod(m);
-const product = montMethod.mul(a, b);
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: BasePoint
-
-Base class for Point (affine coordinates) and JacobianPoint classes,
-defining their curve and type.
-
-```ts
-export default abstract class BasePoint {
-    curve: Curve;
-    type: "affine" | "jacobian";
-    precomputed: {
-        doubles: {
-            step: number;
-            points: any[];
-        } | undefined;
-        naf: {
-            wnd: any;
-            points: any[];
-        } | undefined;
-        beta: BasePoint | null | undefined;
-    } | null;
-    constructor(type: "affine" | "jacobian") 
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: JacobianPoint
-
-The `JacobianPoint` class extends the `BasePoint` class for handling Jacobian coordinates on an Elliptic Curve.
-This class defines the properties and the methods needed to work with points in Jacobian coordinates.
-
-The Jacobian coordinates represent a point (x, y, z) on an Elliptic Curve such that the usual (x, y) coordinates are given by (x/z^2, y/z^3).
-
-Example
-
-```ts
-const pointJ = new JacobianPoint('3', '4', '1');
-```
-
-```ts
-export default class JacobianPoint extends BasePoint {
-    x: BigNumber;
-    y: BigNumber;
-    z: BigNumber;
-    zOne: boolean;
-    constructor(x: string | BigNumber | null, y: string | BigNumber | null, z: string | BigNumber | null) 
-    toP(): Point 
-    neg(): JacobianPoint 
-    add(p: JacobianPoint): JacobianPoint 
-    mixedAdd(p: Point): JacobianPoint 
-    dblp(pow: number): JacobianPoint 
-    dbl(): JacobianPoint 
-    eq(p: Point | JacobianPoint): boolean 
-    eqXToP(x: BigNumber): boolean 
-    inspect(): string 
-    isInfinity(): boolean 
-}
-```
-
-<details>
-
-<summary>Class JacobianPoint Details</summary>
-
-#### Constructor
-
-Constructs a new `JacobianPoint` instance.
-
-```ts
-constructor(x: string | BigNumber | null, y: string | BigNumber | null, z: string | BigNumber | null) 
-```
-
-Argument Details
-
-+ **x**
-  + If `null`, the x-coordinate will default to the curve's defined 'one' constant.
-If `x` is not a BigNumber, `x` will be converted to a `BigNumber` assuming it is a hex string.
-+ **y**
-  + If `null`, the y-coordinate will default to the curve's defined 'one' constant.
-If `y` is not a BigNumber, `y` will be converted to a `BigNumber` assuming it is a hex string.
-+ **z**
-  + If `null`, the z-coordinate will default to 0.
-If `z` is not a BigNumber, `z` will be converted to a `BigNumber` assuming it is a hex string.
-
-Example
-
-```ts
-const pointJ1 = new JacobianPoint(null, null, null); // creates point at infinity
-const pointJ2 = new JacobianPoint('3', '4', '1'); // creates point (3, 4, 1)
-```
-
-#### Property x
-
-The `x` coordinate of the point in the Jacobian form.
-
-```ts
-x: BigNumber
-```
-
-#### Property y
-
-The `y` coordinate of the point in the Jacobian form.
-
-```ts
-y: BigNumber
-```
-
-#### Property z
-
-The `z` coordinate of the point in the Jacobian form.
-
-```ts
-z: BigNumber
-```
-
-#### Property zOne
-
-Flag that indicates if the `z` coordinate is one.
-
-```ts
-zOne: boolean
-```
-
-#### Method add
-
-Addition operation in the Jacobian coordinates. It takes a Jacobian point as an argument
-and returns a new Jacobian point as a result of the addition. In the special cases,
-when either one of the points is the point at infinity, it will return the other point.
-
-```ts
-add(p: JacobianPoint): JacobianPoint 
-```
-
-Returns
-
-Returns a new Jacobian point as the result of the addition.
-
-Argument Details
-
-+ **p**
-  + The Jacobian point to be added.
-
-Example
-
-```ts
-const p1 = new JacobianPoint(x1, y1, z1)
-const p2 = new JacobianPoint(x2, y2, z2)
-const result = p1.add(p2)
-```
-
-#### Method dbl
-
-Point doubling operation in the Jacobian coordinates. A special case is when the point is the point at infinity, in this case, this function will return the point itself.
-
-```ts
-dbl(): JacobianPoint 
-```
-
-Returns
-
-Returns a new Jacobian point as the result of the doubling.
-
-Example
-
-```ts
-const jp = new JacobianPoint(x, y, z)
-const result = jp.dbl()
-```
-
-#### Method dblp
-
-Multiple doubling operation. It doubles the Jacobian point as many times as the pow parameter specifies. If pow is 0 or the point is the point at infinity, it will return the point itself.
-
-```ts
-dblp(pow: number): JacobianPoint 
-```
-
-Returns
-
-Returns a new Jacobian point as the result of multiple doublings.
-
-Argument Details
-
-+ **pow**
-  + The number of times the point should be doubled.
-
-Example
-
-```ts
-const jp = new JacobianPoint(x, y, z)
-const result = jp.dblp(3)
-```
-
-#### Method eq
-
-Equality check operation. It checks whether the affine or Jacobian point is equal to this Jacobian point.
-
-```ts
-eq(p: Point | JacobianPoint): boolean 
-```
-
-Returns
-
-Returns true if the points are equal, otherwise returns false.
-
-Argument Details
-
-+ **p**
-  + The affine or Jacobian point to compare with.
-
-Example
-
-```ts
-const jp1 = new JacobianPoint(x1, y1, z1)
-const jp2 = new JacobianPoint(x2, y2, z2)
-const areEqual = jp1.eq(jp2)
-```
-
-#### Method eqXToP
-
-Equality check operation in relation to an x coordinate of a point in projective coordinates.
-It checks whether the x coordinate of the Jacobian point is equal to the provided x coordinate
-of a point in projective coordinates.
-
-```ts
-eqXToP(x: BigNumber): boolean 
-```
-
-Returns
-
-Returns true if the x coordinates are equal, otherwise returns false.
-
-Argument Details
-
-+ **x**
-  + The x coordinate of a point in projective coordinates.
-
-Example
-
-```ts
-const jp = new JacobianPoint(x1, y1, z1)
-const isXEqual = jp.eqXToP(x2)
-```
-
-#### Method inspect
-
-Returns the string representation of the JacobianPoint instance.
-
-```ts
-inspect(): string 
-```
-
-Returns
-
-Returns the string description of the JacobianPoint. If the JacobianPoint represents a point at infinity, the return value of this function is '<EC JPoint Infinity>'. For a normal point, it returns the string description format as '<EC JPoint x: x-coordinate y: y-coordinate z: z-coordinate>'.
-
-Example
-
-```ts
-const point = new JacobianPoint('5', '6', '1');
-console.log(point.inspect()); // Output: '<EC JPoint x: 5 y: 6 z: 1>'
-```
-
-#### Method isInfinity
-
-Checks whether the JacobianPoint instance represents a point at infinity.
-
-```ts
-isInfinity(): boolean 
-```
-
-Returns
-
-Returns true if the JacobianPoint's z-coordinate equals to zero (which represents the point at infinity in Jacobian coordinates). Returns false otherwise.
-
-Example
-
-```ts
-const point = new JacobianPoint('5', '6', '0');
-console.log(point.isInfinity()); // Output: true
-```
-
-#### Method mixedAdd
-
-Mixed addition operation. This function combines the standard point addition with
-the transformation from the affine to Jacobian coordinates. It first converts
-the affine point to Jacobian, and then preforms the addition.
-
-```ts
-mixedAdd(p: Point): JacobianPoint 
-```
-
-Returns
-
-Returns the result of the mixed addition as a new Jacobian point.
-
-Argument Details
-
-+ **p**
-  + The affine point to be added.
-
-Example
-
-```ts
-const jp = new JacobianPoint(x1, y1, z1)
-const ap = new Point(x2, y2)
-const result = jp.mixedAdd(ap)
-```
-
-#### Method neg
-
-Negation operation. It returns the additive inverse of the Jacobian point.
-
-```ts
-neg(): JacobianPoint 
-```
-
-Returns
-
-Returns a new Jacobian point as the result of the negation.
-
-Example
-
-```ts
-const jp = new JacobianPoint(x, y, z)
-const result = jp.neg()
-```
-
-#### Method toP
-
-Converts the `JacobianPoint` object instance to standard affine `Point` format and returns `Point` type.
-
-```ts
-toP(): Point 
-```
-
-Returns
-
-The `Point`(affine) object representing the same point as the original `JacobianPoint`.
-
-If the initial `JacobianPoint` represents point at infinity, an instance of `Point` at infinity is returned.
-
-Example
-
-```ts
-const pointJ = new JacobianPoint('3', '4', '1');
-const pointP = pointJ.toP();  // The point in affine coordinates.
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: RIPEMD160
-
-An implementation of RIPEMD160 cryptographic hash function. Extends the BaseHash class.
-It provides a way to compute a 'digest' for any kind of input data; transforming the data
-into a unique output of fixed size. The output is deterministic; it will always be
-the same for the same input.
-
-Example
-
-```ts
-const ripemd160 = new RIPEMD160();
-```
-
-```ts
-export class RIPEMD160 extends BaseHash {
-    h: number[];
-    constructor() 
-    _update(msg: number[], start: number): void 
-    _digest(): number[] 
-    _digestHex(): string 
-}
-```
-
-<details>
-
-<summary>Class RIPEMD160 Details</summary>
-
-#### Property h
-
-Array that is updated iteratively as part of hashing computation.
-
-```ts
-h: number[]
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: SHA256
-
-An implementation of SHA256 cryptographic hash function. Extends the BaseHash class.
-It provides a way to compute a 'digest' for any kind of input data; transforming the data
-into a unique output of fixed size. The output is deterministic; it will always be
-the same for the same input.
-
-Example
-
-```ts
-const sha256 = new SHA256();
-```
-
-```ts
-export class SHA256 extends BaseHash {
-    h: number[];
-    W: number[];
-    k: number[];
-    constructor() 
-    _update(msg: number[], start?: number): void 
-    ;
-    _digest(): number[] 
-    _digestHex(): string 
-}
-```
-
-<details>
-
-<summary>Class SHA256 Details</summary>
-
-#### Property W
-
-Provides a way to recycle usage of the array memory.
-
-```ts
-W: number[]
-```
-
-#### Property h
-
-The initial hash constants
-
-```ts
-h: number[]
-```
-
-#### Property k
-
-The round constants used for each round of SHA-256
-
-```ts
-k: number[]
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: SHA1
-
-An implementation of SHA1 cryptographic hash function. Extends the BaseHash class.
-It provides a way to compute a 'digest' for any kind of input data; transforming the data
-into a unique output of fixed size. The output is deterministic; it will always be
-the same for the same input.
-
-Example
-
-```ts
-const sha1 = new SHA1();
-```
-
-```ts
-export class SHA1 extends BaseHash {
-    h: number[];
-    W: number[];
-    k: number[];
-    constructor() 
-    _update(msg: number[], start?: number): void 
-    _digest(): number[] 
-    _digestHex(): string 
-}
-```
-
-<details>
-
-<summary>Class SHA1 Details</summary>
-
-#### Property W
-
-Provides a way to recycle usage of the array memory.
-
-```ts
-W: number[]
-```
-
-#### Property h
-
-The initial hash constants.
-
-```ts
-h: number[]
-```
-
-#### Property k
-
-The round constants used for each round of SHA-1.
-
-```ts
-k: number[]
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: SHA512
-
-An implementation of SHA512 cryptographic hash function. Extends the BaseHash class.
-It provides a way to compute a 'digest' for any kind of input data; transforming the data
-into a unique output of fixed size. The output is deterministic; it will always be
-the same for the same input.
-
-Example
-
-```ts
-const sha512 = new SHA512();
-```
-
-```ts
-export class SHA512 extends BaseHash {
-    h: number[];
-    W: number[];
-    k: number[];
-    constructor() 
-    _prepareBlock(msg, start) 
-    _update(msg, start) 
-    _digest() 
-    _digestHex() 
-}
-```
-
-<details>
-
-<summary>Class SHA512 Details</summary>
-
-#### Property W
-
-Provides a way to recycle usage of the array memory.
-
-```ts
-W: number[]
-```
-
-#### Property h
-
-The initial hash constants.
-
-```ts
-h: number[]
-```
-
-#### Property k
-
-The round constants used for each round of SHA-512.
-
-```ts
-k: number[]
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: SHA256HMAC
-
-The `SHA256HMAC` class is used to create Hash-based Message Authentication Code (HMAC) using the SHA-256 cryptographic hash function.
-
-HMAC is a specific type of MAC involving a cryptographic hash function and a secret cryptographic key. It may be used to simultaneously verify both the data integrity and the authenticity of a message.
-
-This class also uses the SHA-256 cryptographic hash algorithm that produces a 256-bit (32-byte) hash value.
-
-```ts
-export class SHA256HMAC {
-    inner: SHA256;
-    outer: SHA256;
-    blockSize = 64;
-    outSize = 32;
-    constructor(key: number[] | string) 
-    update(msg: number[] | string, enc?: "hex"): SHA256HMAC 
-    digest(): number[] 
-    digestHex(): string 
-}
-```
-
-<details>
-
-<summary>Class SHA256HMAC Details</summary>
-
-#### Constructor
-
-The constructor for the `SHA256HMAC` class.
-
-It initializes the `SHA256HMAC` object and sets up the inner and outer padded keys.
-If the key size is larger than the blockSize, it is digested using SHA-256.
-If the key size is less than the blockSize, it is padded with zeroes.
-
-```ts
-constructor(key: number[] | string) 
-```
-
-Argument Details
-
-+ **key**
-  + The key to use to create the HMAC. Can be a number array or a string in hexadecimal format.
-
-Example
-
-```ts
-const myHMAC = new SHA256HMAC('deadbeef');
-```
-
-#### Property blockSize
-
-The block size for the SHA-256 hash function, in bytes. It's set to 64 bytes.
-
-```ts
-blockSize = 64
-```
-
-#### Property inner
-
-Represents the inner hash of SHA-256.
-
-```ts
-inner: SHA256
-```
-
-#### Property outSize
-
-The output size of the SHA-256 hash function, in bytes. It's set to 32 bytes.
-
-```ts
-outSize = 32
-```
-
-#### Property outer
-
-Represents the outer hash of SHA-256.
-
-```ts
-outer: SHA256
-```
-
-#### Method digest
-
-Finalizes the HMAC computation and returns the resultant hash.
-
-```ts
-digest(): number[] 
-```
-
-Returns
-
-Returns the digest of the hashed data. Can be a number array or a string.
-
-Example
-
-```ts
-let hashedMessage = myHMAC.digest();
-```
-
-#### Method digestHex
-
-Finalizes the HMAC computation and returns the resultant hash as a hex string.
-
-```ts
-digestHex(): string 
-```
-
-Returns
-
-Returns the digest of the hashed data as a hex string
-
-Example
-
-```ts
-let hashedMessage = myHMAC.digestHex();
-```
-
-#### Method update
-
-Updates the `SHA256HMAC` object with part of the message to be hashed.
-
-```ts
-update(msg: number[] | string, enc?: "hex"): SHA256HMAC 
-```
-
-Returns
-
-Returns the instance of `SHA256HMAC` for chaining calls.
-
-Argument Details
-
-+ **msg**
-  + Part of the message to hash. Can be a number array or a string.
-+ **enc**
-  + If 'hex', then the input is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
-
-Example
-
-```ts
-myHMAC.update('deadbeef', 'hex');
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: SHA1HMAC
-
-```ts
-export class SHA1HMAC {
-    inner: SHA1;
-    outer: SHA1;
-    blockSize = 64;
-    constructor(key: number[] | string) 
-    update(msg: number[] | string, enc?: "hex"): SHA1HMAC 
-    digest(): number[] 
-    digestHex(): string 
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: SHA512HMAC
-
-The `SHA512HMAC` class is used to create Hash-based Message Authentication Code (HMAC) using the SHA-512 cryptographic hash function.
-
-HMAC is a specific type of MAC involving a cryptographic hash function and a secret cryptographic key. It may be used to simultaneously verify both the data integrity and the authenticity of a message.
-
-This class also uses the SHA-512 cryptographic hash algorithm that produces a 512-bit (64-byte) hash value.
-
-```ts
-export class SHA512HMAC {
-    inner: SHA512;
-    outer: SHA512;
-    blockSize = 128;
-    outSize = 32;
-    constructor(key: number[] | string) 
-    update(msg: number[] | string, enc?: "hex" | "utf8"): SHA512HMAC 
-    digest(): number[] 
-    digestHex(): string 
-}
-```
-
-<details>
-
-<summary>Class SHA512HMAC Details</summary>
-
-#### Constructor
-
-The constructor for the `SHA512HMAC` class.
-
-It initializes the `SHA512HMAC` object and sets up the inner and outer padded keys.
-If the key size is larger than the blockSize, it is digested using SHA-512.
-If the key size is less than the blockSize, it is padded with zeroes.
-
-```ts
-constructor(key: number[] | string) 
-```
-
-Argument Details
-
-+ **key**
-  + The key to use to create the HMAC. Can be a number array or a string in hexadecimal format.
-
-Example
-
-```ts
-const myHMAC = new SHA512HMAC('deadbeef');
-```
-
-#### Property blockSize
-
-The block size for the SHA-512 hash function, in bytes. It's set to 128 bytes.
-
-```ts
-blockSize = 128
-```
-
-#### Property inner
-
-Represents the inner hash of SHA-512.
-
-```ts
-inner: SHA512
-```
-
-#### Property outSize
-
-The output size of the SHA-512 hash function, in bytes. It's set to 64 bytes.
-
-```ts
-outSize = 32
-```
-
-#### Property outer
-
-Represents the outer hash of SHA-512.
-
-```ts
-outer: SHA512
-```
-
-#### Method digest
-
-Finalizes the HMAC computation and returns the resultant hash.
-
-```ts
-digest(): number[] 
-```
-
-Returns
-
-Returns the digest of the hashed data as a number array.
-
-Example
-
-```ts
-let hashedMessage = myHMAC.digest();
-```
-
-#### Method digestHex
-
-Finalizes the HMAC computation and returns the resultant hash as a hex string.
-
-```ts
-digestHex(): string 
-```
-
-Returns
-
-Returns the digest of the hashed data as a hex string
-
-Example
-
-```ts
-let hashedMessage = myHMAC.digestHex();
-```
-
-#### Method update
-
-Updates the `SHA512HMAC` object with part of the message to be hashed.
-
-```ts
-update(msg: number[] | string, enc?: "hex" | "utf8"): SHA512HMAC 
-```
-
-Returns
-
-Returns the instance of `SHA512HMAC` for chaining calls.
-
-Argument Details
-
-+ **msg**
-  + Part of the message to hash. Can be a number array or a string.
-+ **enc**
-  + If 'hex', then the input is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
-
-Example
-
-```ts
-myHMAC.update('deadbeef', 'hex');
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: Writer
-
-```ts
-export class Writer {
-    public bufs: number[][];
-    constructor(bufs?: number[][]) 
-    getLength(): number 
-    toArray(): number[] 
-    write(buf: number[]): Writer 
-    writeReverse(buf: number[]): Writer 
-    writeUInt8(n: number): Writer 
-    writeInt8(n: number): Writer 
-    writeUInt16BE(n: number): Writer 
-    writeInt16BE(n: number): Writer 
-    writeUInt16LE(n: number): Writer 
-    writeInt16LE(n: number): Writer 
-    writeUInt32BE(n: number): Writer 
-    writeInt32BE(n: number): Writer 
-    writeUInt32LE(n: number): Writer 
-    writeInt32LE(n: number): Writer 
-    writeUInt64BEBn(bn: BigNumber): Writer 
-    writeUInt64LEBn(bn: BigNumber): Writer 
-    writeUInt64LE(n: number): Writer 
-    writeVarIntNum(n: number): Writer 
-    writeVarIntBn(bn: BigNumber): Writer 
-    static varIntNum(n: number): number[] 
-    static varIntBn(bn: BigNumber): number[] 
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: Reader
-
-```ts
-export class Reader {
-    public bin: number[];
-    public pos: number;
-    constructor(bin: number[] = [], pos: number = 0) 
-    public eof(): boolean 
-    public read(len = this.bin.length): number[] 
-    public readReverse(len = this.bin.length): number[] 
-    public readUInt8(): number 
-    public readInt8(): number 
-    public readUInt16BE(): number 
-    public readInt16BE(): number 
-    public readUInt16LE(): number 
-    public readInt16LE(): number 
-    public readUInt32BE(): number 
-    public readInt32BE(): number 
-    public readUInt32LE(): number 
-    public readInt32LE(): number 
-    public readUInt64BEBn(): BigNumber 
-    public readUInt64LEBn(): BigNumber 
-    public readVarIntNum(): number 
-    public readVarInt(): number[] 
-    public readVarIntBn(): BigNumber 
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: Point
-
-`Point` class is a representation of an elliptic curve point with affine coordinates.
-It extends the functionality of BasePoint and carries x, y coordinates of point on the curve.
-It also introduces new methods for handling Point operations in elliptic curve.
-
-```ts
-export default class Point extends BasePoint {
-    x: BigNumber | null;
-    y: BigNumber | null;
-    inf: boolean;
-    static fromDER(bytes: number[]): Point 
-    static fromString(str: string): Point 
-    static redSqrtOptimized(y2: BigNumber): BigNumber 
-    static fromX(x: BigNumber | number | number[] | string, odd: boolean): Point 
-    static fromJSON(obj: string | any[], isRed: boolean): Point 
-    constructor(x: BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null, isRed: boolean = true) 
-    validate(): boolean 
-    encode(compact: boolean = true, enc?: "hex"): number[] | string 
-    toString(): string 
-    toJSON(): [
-        BigNumber | null,
-        BigNumber | null,
-        {
-            doubles: {
-                step: any;
-                points: any[];
-            } | undefined;
-            naf: {
-                wnd: any;
-                points: any[];
-            } | undefined;
-        }?
-    ] 
-    inspect(): string 
-    isInfinity(): boolean 
-    add(p: Point): Point 
-    dbl(): Point 
-    getX(): BigNumber 
-    getY(): BigNumber 
-    mul(k: BigNumber | number | number[] | string): Point 
-    mulAdd(k1: BigNumber, p2: Point, k2: BigNumber): Point 
-    jmulAdd(k1: BigNumber, p2: Point, k2: BigNumber): JPoint 
-    eq(p: Point): boolean 
-    neg(_precompute?: boolean): Point 
-    dblp(k: number): Point 
-    toJ(): JPoint 
-    ;
-    ;
-}
-```
-
-<details>
-
-<summary>Class Point Details</summary>
-
-#### Constructor
-
-```ts
-constructor(x: BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null, isRed: boolean = true) 
-```
-
-Argument Details
-
-+ **x**
-  + The x-coordinate of the point. May be a number, a BigNumber, a string (which will be interpreted as hex), a number array, or null. If null, an "Infinity" point is constructed.
-+ **y**
-  + The y-coordinate of the point, similar to x.
-+ **isRed**
-  + A boolean indicating if the point is a member of the field of integers modulo the k256 prime. Default is true.
-
-Example
-
-```ts
-new Point('abc123', 'def456');
-new Point(null, null); // Generates Infinity point.
-```
-
-#### Property inf
-
-Flag to record if the point is at infinity in the Elliptic Curve.
-
-```ts
-inf: boolean
-```
-
-#### Property x
-
-The x-coordinate of the point.
-
-```ts
-x: BigNumber | null
-```
-
-#### Property y
-
-The y-coordinate of the point.
-
-```ts
-y: BigNumber | null
-```
-
-#### Method add
-
-Adds another Point to this Point, returning a new Point.
-
-```ts
-add(p: Point): Point 
-```
-
-Returns
-
-A new Point that results from the addition.
-
-Argument Details
-
-+ **p**
-  + The Point to add to this one.
-
-Example
-
-```ts
-const p1 = new Point(1, 2);
-const p2 = new Point(2, 3);
-const result = p1.add(p2);
-```
-
-#### Method dbl
-
-Doubles the current point.
-
-```ts
-dbl(): Point 
-```
-
-Example
-
-```ts
-const P = new Point('123', '456');
-const result = P.dbl();
-```
-
-#### Method dblp
-
-Performs the "doubling" operation on the Point a given number of times.
-This is used in elliptic curve operations to perform multiplication by 2, multiple times.
-If the point is at infinity, it simply returns the point because doubling
-a point at infinity is still infinity.
-
-```ts
-dblp(k: number): Point 
-```
-
-Returns
-
-The Point after 'k' "doubling" operations have been performed.
-
-Argument Details
-
-+ **k**
-  + The number of times the "doubling" operation is to be performed on the Point.
-
-Example
-
-```ts
-const p = new Point(5, 20);
-const doubledPoint = p.dblp(10); // returns the point after "doubled" 10 times
-```
-
-#### Method encode
-
-Encodes the coordinates of a point into an array or a hexadecimal string.
-The details of encoding are determined by the optional compact and enc parameters.
-
-```ts
-encode(compact: boolean = true, enc?: "hex"): number[] | string 
-```
-
-Returns
-
-If enc is undefined, a byte array representation of the point will be returned. if enc is 'hex', a hexadecimal string representation of the point will be returned.
-
-Argument Details
-
-+ **compact**
-  + If true, an additional prefix byte 0x02 or 0x03 based on the 'y' coordinate being even or odd respectively is used. If false, byte 0x04 is used.
-+ **enc**
-  + Expects the string 'hex' if hexadecimal string encoding is required instead of an array of numbers.
-
-Throws
-
-Will throw an error if the specified encoding method is not recognized. Expects 'hex'.
-
-Example
-
-```ts
-const aPoint = new Point(x, y);
-const encodedPointArray = aPoint.encode();
-const encodedPointHex = aPoint.encode(true, 'hex');
-```
-
-#### Method eq
-
-Checks if the Point instance is equal to another given Point.
-
-```ts
-eq(p: Point): boolean 
-```
-
-Returns
-
-Whether the two Point instances are equal. Both the 'x' and 'y' coordinates have to match, and both points have to either be valid or at infinity for equality. If both conditions are true, it returns true, else it returns false.
-
-Argument Details
-
-+ **p**
-  + The Point to be checked if equal to the current instance.
-
-Example
-
-```ts
-const p1 = new Point(5, 20);
-const p2 = new Point(5, 20);
-const areEqual = p1.eq(p2); // returns true
-```
-
-#### Method fromDER
-
-Creates a point object from a given Array. These numbers can represent coordinates in hex format, or points
-in multiple established formats.
-The function verifies the integrity of the provided data and throws errors if inconsistencies are found.
-
-```ts
-static fromDER(bytes: number[]): Point 
-```
-
-Returns
-
-Returns a new point representing the given string.
-
-Argument Details
-
-+ **bytes**
-  + The point representation number array.
-
-Throws
-
-`Error` If the point number[] value has a wrong length.
-
-`Error` If the point format is unknown.
-
-Example
-
-```ts
-const derPoint = [ 2, 18, 123, 108, 125, 83, 1, 251, 164, 214, 16, 119, 200, 216, 210, 193, 251, 193, 129, 67, 97, 146, 210, 216, 77, 254, 18, 6, 150, 190, 99, 198, 128 ];
-const point = Point.fromDER(derPoint);
-```
-
-#### Method fromJSON
-
-Generates a point from a serialized JSON object. The function accounts for different options in the JSON object,
-including precomputed values for optimization of EC operations, and calls another helper function to turn nested
-JSON points into proper Point objects.
-
-```ts
-static fromJSON(obj: string | any[], isRed: boolean): Point 
-```
-
-Returns
-
-Returns a new point based on the deserialized JSON object.
-
-Argument Details
-
-+ **obj**
-  + An object or array that holds the data for the point.
-+ **isRed**
-  + A boolean to direct how the Point is constructed from the JSON object.
-
-Example
-
-```ts
-const serializedPoint = '{"x":52,"y":15}';
-const point = Point.fromJSON(serializedPoint, true);
-```
-
-#### Method fromString
-
-Creates a point object from a given string. This string can represent coordinates in hex format, or points
-in multiple established formats.
-The function verifies the integrity of the provided data and throws errors if inconsistencies are found.
-
-```ts
-static fromString(str: string): Point 
-```
-
-Returns
-
-Returns a new point representing the given string.
-
-Argument Details
-
-+ **str**
-  + The point representation string.
-
-Throws
-
-`Error` If the point string value has a wrong length.
-
-`Error` If the point format is unknown.
-
-Example
-
-```ts
-const pointStr = 'abcdef';
-const point = Point.fromString(pointStr);
-```
-
-#### Method fromX
-
-Generates a point from an x coordinate and a boolean indicating whether the corresponding
-y coordinate is odd.
-
-```ts
-static fromX(x: BigNumber | number | number[] | string, odd: boolean): Point 
-```
-
-Returns
-
-Returns the new point.
-
-Argument Details
-
-+ **x**
-  + The x coordinate of the point.
-+ **odd**
-  + Boolean indicating whether the corresponding y coordinate is odd or not.
-
-Throws
-
-`Error` If the point is invalid.
-
-Example
-
-```ts
-const xCoordinate = new BigNumber('10');
-const point = Point.fromX(xCoordinate, true);
-```
-
-#### Method getX
-
-Returns X coordinate of point
-
-```ts
-getX(): BigNumber 
-```
-
-Example
-
-```ts
-const P = new Point('123', '456');
-const x = P.getX();
-```
-
-#### Method getY
-
-Returns X coordinate of point
-
-```ts
-getY(): BigNumber 
-```
-
-Example
-
-```ts
-const P = new Point('123', '456');
-const x = P.getX();
-```
-
-#### Method inspect
-
-Provides the point coordinates in a human-readable string format for debugging purposes.
-
-```ts
-inspect(): string 
-```
-
-Returns
-
-String of the format '<EC Point x: x-coordinate y: y-coordinate>', or '<EC Point Infinity>' if the point is at infinity.
-
-Example
-
-```ts
-const aPoint = new Point(x, y);
-console.log(aPoint.inspect());
-```
-
-#### Method isInfinity
-
-Checks if the point is at infinity.
-
-```ts
-isInfinity(): boolean 
-```
-
-Returns
-
-Returns whether or not the point is at infinity.
-
-Example
-
-```ts
-const p = new Point(null, null);
-console.log(p.isInfinity()); // outputs: true
-```
-
-#### Method jmulAdd
-
-Performs the Jacobian multiplication and addition operation in a single
-step. Instead of returning a regular Point, the result is a JacobianPoint.
-
-```ts
-jmulAdd(k1: BigNumber, p2: Point, k2: BigNumber): JPoint 
-```
-
-Returns
-
-A JacobianPoint that results from the combined multiplication and addition operation.
-
-Argument Details
-
-+ **k1**
-  + The scalar value to multiply this Point by.
-+ **p2**
-  + The other Point to be involved in the operation
-+ **k2**
-  + The scalar value to multiply the Point p2 by.
-
-Example
-
-```ts
-const p1 = new Point(1, 2);
-const p2 = new Point(2, 3);
-const result = p1.jmulAdd(2, p2, 3);
-```
-
-#### Method mul
-
-Multiplies this Point by a scalar value, returning a new Point.
-
-```ts
-mul(k: BigNumber | number | number[] | string): Point 
-```
-
-Returns
-
-A new Point that results from the multiplication.
-
-Argument Details
-
-+ **k**
-  + The scalar value to multiply this Point by.
-
-Example
-
-```ts
-const p = new Point(1, 2);
-const result = p.mul(2); // this doubles the Point
-```
-
-#### Method mulAdd
-
-Performs a multiplication and addition operation in a single step.
-Multiplies this Point by k1, adds the resulting Point to the result of p2 multiplied by k2.
-
-```ts
-mulAdd(k1: BigNumber, p2: Point, k2: BigNumber): Point 
-```
-
-Returns
-
-A Point that results from the combined multiplication and addition operations.
-
-Argument Details
-
-+ **k1**
-  + The scalar value to multiply this Point by.
-+ **p2**
-  + The other Point to be involved in the operation.
-+ **k2**
-  + The scalar value to multiply the Point p2 by.
-
-Example
-
-```ts
-const p1 = new Point(1, 2);
-const p2 = new Point(2, 3);
-const result = p1.mulAdd(2, p2, 3);
-```
-
-#### Method neg
-
-Negate a point. The negation of a point P is the mirror of P about x-axis.
-
-```ts
-neg(_precompute?: boolean): Point 
-```
-
-Example
-
-```ts
-const P = new Point('123', '456');
-const result = P.neg();
-```
-
-#### Method toJ
-
-Converts the point to a Jacobian point. If the point is at infinity, the corresponding Jacobian point
-will also be at infinity.
-
-```ts
-toJ(): JPoint 
-```
-
-Returns
-
-Returns a new Jacobian point based on the current point.
-
-Example
-
-```ts
-const point = new Point(xCoordinate, yCoordinate);
-const jacobianPoint = point.toJ();
-```
-
-#### Method toJSON
-
-Exports the x and y coordinates of the point, and the precomputed doubles and non-adjacent form (NAF) for optimization. The output is an array.
-
-```ts
-toJSON(): [
-    BigNumber | null,
-    BigNumber | null,
-    {
-        doubles: {
-            step: any;
-            points: any[];
-        } | undefined;
-        naf: {
-            wnd: any;
-            points: any[];
-        } | undefined;
-    }?
-] 
-```
-
-Returns
-
-An Array where first two elements are the coordinates of the point and optional third element is an object with doubles and NAF points.
-
-Example
-
-```ts
-const aPoint = new Point(x, y);
-const jsonPoint = aPoint.toJSON();
-```
-
-#### Method toString
-
-function toString() { [native code] }
-
-Converts the point coordinates to a hexadecimal string. A wrapper method
-for encode. Byte 0x02 or 0x03 is used as prefix based on the 'y' coordinate being even or odd respectively.
-
-```ts
-toString(): string 
-```
-
-Returns
-
-A hexadecimal string representation of the point coordinates.
-
-Example
-
-```ts
-const aPoint = new Point(x, y);
-const stringPoint = aPoint.toString();
-```
-
-#### Method validate
-
-Validates if a point belongs to the curve. Follows the short Weierstrass
-equation for elliptic curves: y^2 = x^3 + ax + b.
-
-```ts
-validate(): boolean 
-```
-
-Returns
-
-true if the point is on the curve, false otherwise.
-
-Example
-
-```ts
-const aPoint = new Point(x, y);
-const isValid = aPoint.validate();
 ```
 
 </details>
@@ -6016,6 +3605,8 @@ export default class Curve {
 }
 ```
 
+See also: [BigNumber](#class-bignumber), [Point](#class-point), [ReductionContext](#class-reductioncontext)
+
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
@@ -6039,6 +3630,8 @@ export default class DRBG {
     generate(len: number): string 
 }
 ```
+
+See also: [SHA256HMAC](#class-sha256hmac)
 
 <details>
 
@@ -6075,6 +3668,7 @@ Generates HMAC using the K value of the instance. This method is used internally
 ```ts
 hmac(): SHA256HMAC 
 ```
+See also: [SHA256HMAC](#class-sha256hmac)
 
 Returns
 
@@ -6115,6 +3709,3527 @@ drbg.update('e13af...');
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+### Class: JacobianPoint
+
+The `JacobianPoint` class extends the `BasePoint` class for handling Jacobian coordinates on an Elliptic Curve.
+This class defines the properties and the methods needed to work with points in Jacobian coordinates.
+
+The Jacobian coordinates represent a point (x, y, z) on an Elliptic Curve such that the usual (x, y) coordinates are given by (x/z^2, y/z^3).
+
+Example
+
+```ts
+const pointJ = new JacobianPoint('3', '4', '1');
+```
+
+```ts
+export default class JacobianPoint extends BasePoint {
+    x: BigNumber;
+    y: BigNumber;
+    z: BigNumber;
+    zOne: boolean;
+    constructor(x: string | BigNumber | null, y: string | BigNumber | null, z: string | BigNumber | null) 
+    toP(): Point 
+    neg(): JacobianPoint 
+    add(p: JacobianPoint): JacobianPoint 
+    mixedAdd(p: Point): JacobianPoint 
+    dblp(pow: number): JacobianPoint 
+    dbl(): JacobianPoint 
+    eq(p: Point | JacobianPoint): boolean 
+    eqXToP(x: BigNumber): boolean 
+    inspect(): string 
+    isInfinity(): boolean 
+}
+```
+
+See also: [BasePoint](#class-basepoint), [BigNumber](#class-bignumber), [Point](#class-point)
+
+<details>
+
+<summary>Class JacobianPoint Details</summary>
+
+#### Constructor
+
+Constructs a new `JacobianPoint` instance.
+
+```ts
+constructor(x: string | BigNumber | null, y: string | BigNumber | null, z: string | BigNumber | null) 
+```
+See also: [BigNumber](#class-bignumber)
+
+Argument Details
+
++ **x**
+  + If `null`, the x-coordinate will default to the curve's defined 'one' constant.
+If `x` is not a BigNumber, `x` will be converted to a `BigNumber` assuming it is a hex string.
++ **y**
+  + If `null`, the y-coordinate will default to the curve's defined 'one' constant.
+If `y` is not a BigNumber, `y` will be converted to a `BigNumber` assuming it is a hex string.
++ **z**
+  + If `null`, the z-coordinate will default to 0.
+If `z` is not a BigNumber, `z` will be converted to a `BigNumber` assuming it is a hex string.
+
+Example
+
+```ts
+const pointJ1 = new JacobianPoint(null, null, null); // creates point at infinity
+const pointJ2 = new JacobianPoint('3', '4', '1'); // creates point (3, 4, 1)
+```
+
+#### Property x
+
+The `x` coordinate of the point in the Jacobian form.
+
+```ts
+x: BigNumber
+```
+See also: [BigNumber](#class-bignumber)
+
+#### Property y
+
+The `y` coordinate of the point in the Jacobian form.
+
+```ts
+y: BigNumber
+```
+See also: [BigNumber](#class-bignumber)
+
+#### Property z
+
+The `z` coordinate of the point in the Jacobian form.
+
+```ts
+z: BigNumber
+```
+See also: [BigNumber](#class-bignumber)
+
+#### Property zOne
+
+Flag that indicates if the `z` coordinate is one.
+
+```ts
+zOne: boolean
+```
+
+#### Method add
+
+Addition operation in the Jacobian coordinates. It takes a Jacobian point as an argument
+and returns a new Jacobian point as a result of the addition. In the special cases,
+when either one of the points is the point at infinity, it will return the other point.
+
+```ts
+add(p: JacobianPoint): JacobianPoint 
+```
+See also: [JacobianPoint](#class-jacobianpoint)
+
+Returns
+
+Returns a new Jacobian point as the result of the addition.
+
+Argument Details
+
++ **p**
+  + The Jacobian point to be added.
+
+Example
+
+```ts
+const p1 = new JacobianPoint(x1, y1, z1)
+const p2 = new JacobianPoint(x2, y2, z2)
+const result = p1.add(p2)
+```
+
+#### Method dbl
+
+Point doubling operation in the Jacobian coordinates. A special case is when the point is the point at infinity, in this case, this function will return the point itself.
+
+```ts
+dbl(): JacobianPoint 
+```
+See also: [JacobianPoint](#class-jacobianpoint)
+
+Returns
+
+Returns a new Jacobian point as the result of the doubling.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x, y, z)
+const result = jp.dbl()
+```
+
+#### Method dblp
+
+Multiple doubling operation. It doubles the Jacobian point as many times as the pow parameter specifies. If pow is 0 or the point is the point at infinity, it will return the point itself.
+
+```ts
+dblp(pow: number): JacobianPoint 
+```
+See also: [JacobianPoint](#class-jacobianpoint)
+
+Returns
+
+Returns a new Jacobian point as the result of multiple doublings.
+
+Argument Details
+
++ **pow**
+  + The number of times the point should be doubled.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x, y, z)
+const result = jp.dblp(3)
+```
+
+#### Method eq
+
+Equality check operation. It checks whether the affine or Jacobian point is equal to this Jacobian point.
+
+```ts
+eq(p: Point | JacobianPoint): boolean 
+```
+See also: [JacobianPoint](#class-jacobianpoint), [Point](#class-point)
+
+Returns
+
+Returns true if the points are equal, otherwise returns false.
+
+Argument Details
+
++ **p**
+  + The affine or Jacobian point to compare with.
+
+Example
+
+```ts
+const jp1 = new JacobianPoint(x1, y1, z1)
+const jp2 = new JacobianPoint(x2, y2, z2)
+const areEqual = jp1.eq(jp2)
+```
+
+#### Method eqXToP
+
+Equality check operation in relation to an x coordinate of a point in projective coordinates.
+It checks whether the x coordinate of the Jacobian point is equal to the provided x coordinate
+of a point in projective coordinates.
+
+```ts
+eqXToP(x: BigNumber): boolean 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns true if the x coordinates are equal, otherwise returns false.
+
+Argument Details
+
++ **x**
+  + The x coordinate of a point in projective coordinates.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x1, y1, z1)
+const isXEqual = jp.eqXToP(x2)
+```
+
+#### Method inspect
+
+Returns the string representation of the JacobianPoint instance.
+
+```ts
+inspect(): string 
+```
+
+Returns
+
+Returns the string description of the JacobianPoint. If the JacobianPoint represents a point at infinity, the return value of this function is '<EC JPoint Infinity>'. For a normal point, it returns the string description format as '<EC JPoint x: x-coordinate y: y-coordinate z: z-coordinate>'.
+
+Example
+
+```ts
+const point = new JacobianPoint('5', '6', '1');
+console.log(point.inspect()); // Output: '<EC JPoint x: 5 y: 6 z: 1>'
+```
+
+#### Method isInfinity
+
+Checks whether the JacobianPoint instance represents a point at infinity.
+
+```ts
+isInfinity(): boolean 
+```
+
+Returns
+
+Returns true if the JacobianPoint's z-coordinate equals to zero (which represents the point at infinity in Jacobian coordinates). Returns false otherwise.
+
+Example
+
+```ts
+const point = new JacobianPoint('5', '6', '0');
+console.log(point.isInfinity()); // Output: true
+```
+
+#### Method mixedAdd
+
+Mixed addition operation. This function combines the standard point addition with
+the transformation from the affine to Jacobian coordinates. It first converts
+the affine point to Jacobian, and then preforms the addition.
+
+```ts
+mixedAdd(p: Point): JacobianPoint 
+```
+See also: [JacobianPoint](#class-jacobianpoint), [Point](#class-point)
+
+Returns
+
+Returns the result of the mixed addition as a new Jacobian point.
+
+Argument Details
+
++ **p**
+  + The affine point to be added.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x1, y1, z1)
+const ap = new Point(x2, y2)
+const result = jp.mixedAdd(ap)
+```
+
+#### Method neg
+
+Negation operation. It returns the additive inverse of the Jacobian point.
+
+```ts
+neg(): JacobianPoint 
+```
+See also: [JacobianPoint](#class-jacobianpoint)
+
+Returns
+
+Returns a new Jacobian point as the result of the negation.
+
+Example
+
+```ts
+const jp = new JacobianPoint(x, y, z)
+const result = jp.neg()
+```
+
+#### Method toP
+
+Converts the `JacobianPoint` object instance to standard affine `Point` format and returns `Point` type.
+
+```ts
+toP(): Point 
+```
+See also: [Point](#class-point)
+
+Returns
+
+The `Point`(affine) object representing the same point as the original `JacobianPoint`.
+
+If the initial `JacobianPoint` represents point at infinity, an instance of `Point` at infinity is returned.
+
+Example
+
+```ts
+const pointJ = new JacobianPoint('3', '4', '1');
+const pointP = pointJ.toP();  // The point in affine coordinates.
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: K256
+
+A class representing K-256, a prime number with optimizations, specifically used in the secp256k1 curve.
+It extends the functionalities of the Mersenne class.
+K-256 prime is represented as 'ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe fffffc2f'
+
+Example
+
+```ts
+const k256 = new K256();
+```
+
+```ts
+export default class K256 extends Mersenne {
+    constructor() 
+    split(input: BigNumber, output: BigNumber): void 
+    imulK(num: BigNumber): BigNumber 
+}
+```
+
+See also: [BigNumber](#class-bignumber), [Mersenne](#class-mersenne)
+
+<details>
+
+<summary>Class K256 Details</summary>
+
+#### Constructor
+
+Constructor for the K256 class.
+Creates an instance of K256 using the super constructor from Mersenne.
+
+```ts
+constructor() 
+```
+
+Example
+
+```ts
+const k256 = new K256();
+```
+
+#### Method imulK
+
+Multiplies a BigNumber ('num') with the constant 'K' in-place and returns the result.
+'K' is equal to 0x1000003d1 or in decimal representation: [ 64, 977 ].
+
+```ts
+imulK(num: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the mutated BigNumber after multiplication.
+
+Argument Details
+
++ **num**
+  + The BigNumber to multiply with K.
+
+Example
+
+```ts
+const number = new BigNumber(12345);
+const result = k256.imulK(number);
+```
+
+#### Method split
+
+Splits a BigNumber into a new BigNumber based on specific computation
+rules. This method modifies the input and output big numbers.
+
+```ts
+split(input: BigNumber, output: BigNumber): void 
+```
+See also: [BigNumber](#class-bignumber)
+
+Argument Details
+
++ **input**
+  + The BigNumber to be split.
++ **output**
+  + The BigNumber that results from the split.
+
+Example
+
+```ts
+const input = new BigNumber(3456);
+const output = new BigNumber(0);
+k256.split(input, output);
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: KeyShares
+
+Example
+
+```ts
+const key = PrivateKey.fromShares(shares)
+```
+
+```ts
+export class KeyShares {
+    points: PointInFiniteField[];
+    threshold: number;
+    integrity: string;
+    constructor(points: PointInFiniteField[], threshold: number, integrity: string) 
+    static fromBackupFormat(shares: string[]): KeyShares 
+    toBackupFormat() 
+}
+```
+
+See also: [PointInFiniteField](#class-pointinfinitefield)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: Mersenne
+
+A representation of a pseudo-Mersenne prime.
+A pseudo-Mersenne prime has the general form 2^n - k, where n and k are integers.
+
+```ts
+export default class Mersenne {
+    name: string;
+    p: BigNumber;
+    k: BigNumber;
+    n: number;
+    constructor(name: string, p: string) 
+    ireduce(num: BigNumber): BigNumber 
+    split(input: BigNumber, out: BigNumber): void 
+    imulK(num: BigNumber): BigNumber 
+}
+```
+
+See also: [BigNumber](#class-bignumber)
+
+<details>
+
+<summary>Class Mersenne Details</summary>
+
+#### Constructor
+
+```ts
+constructor(name: string, p: string) 
+```
+
+Argument Details
+
++ **name**
+  + An identifier for the Mersenne instance.
++ **p**
+  + A string representation of the pseudo-Mersenne prime, expressed in hexadecimal.
+
+Example
+
+```ts
+const mersenne = new Mersenne('M31', '7FFFFFFF');
+```
+
+#### Property k
+
+The constant subtracted from 2^n to derive a pseudo-Mersenne prime.
+
+```ts
+k: BigNumber
+```
+See also: [BigNumber](#class-bignumber)
+
+#### Property n
+
+The exponent which determines the magnitude of the prime.
+
+```ts
+n: number
+```
+
+#### Property name
+
+The identifier for the Mersenne instance.
+
+```ts
+name: string
+```
+
+#### Property p
+
+BigNumber equivalent to 2^n - k.
+
+```ts
+p: BigNumber
+```
+See also: [BigNumber](#class-bignumber)
+
+#### Method imulK
+
+Performs an in-place multiplication of the parameter by constant k.
+
+```ts
+imulK(num: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+The result of the multiplication, in BigNumber format.
+
+Argument Details
+
++ **num**
+  + The BigNumber to multiply with k.
+
+Example
+
+```ts
+const multiplied = mersenne.imulK(new BigNumber('2345', 16));
+```
+
+#### Method ireduce
+
+Reduces an input BigNumber in place, under the assumption that
+it is less than the square of the pseudo-Mersenne prime.
+
+```ts
+ireduce(num: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+The reduced BigNumber.
+
+Argument Details
+
++ **num**
+  + The BigNumber to be reduced.
+
+Example
+
+```ts
+const reduced = mersenne.ireduce(new BigNumber('2345', 16));
+```
+
+#### Method split
+
+Shifts bits of the input BigNumber to the right, in place,
+to meet the magnitude of the pseudo-Mersenne prime.
+
+```ts
+split(input: BigNumber, out: BigNumber): void 
+```
+See also: [BigNumber](#class-bignumber)
+
+Argument Details
+
++ **input**
+  + The BigNumber to be shifted.
++ **out**
+  + The BigNumber to hold the shifted result.
+
+Example
+
+```ts
+mersenne.split(new BigNumber('2345', 16), new BigNumber());
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: MontgomoryMethod
+
+Represents a Montgomery reduction context, which is a mathematical method
+for performing modular multiplication without division.
+
+Montgomery reduction is an algorithm used mainly in cryptography which can
+help to speed up calculations in contexts where there are many repeated
+computations.
+
+This class extends the `ReductionContext` class.
+
+```ts
+export default class MontgomoryMethod extends ReductionContext {
+    shift: number;
+    r: BigNumber;
+    r2: BigNumber;
+    rinv: BigNumber;
+    minv: BigNumber;
+    constructor(m: BigNumber | "k256") 
+    convertTo(num: BigNumber): BigNumber 
+    convertFrom(num: BigNumber): BigNumber 
+    imul(a: BigNumber, b: BigNumber): BigNumber 
+    mul(a: BigNumber, b: BigNumber): BigNumber 
+    invm(a: BigNumber): BigNumber 
+}
+```
+
+See also: [BigNumber](#class-bignumber), [ReductionContext](#class-reductioncontext)
+
+<details>
+
+<summary>Class MontgomoryMethod Details</summary>
+
+#### Constructor
+
+```ts
+constructor(m: BigNumber | "k256") 
+```
+See also: [BigNumber](#class-bignumber)
+
+Argument Details
+
++ **m**
+  + The modulus to be used for the Montgomery method reductions.
+
+#### Property minv
+
+The modular multiplicative inverse of `m` mod `r`.
+
+```ts
+minv: BigNumber
+```
+See also: [BigNumber](#class-bignumber)
+
+#### Property r
+
+The 2^shift, shifted left by the bit length of modulus `m`.
+
+```ts
+r: BigNumber
+```
+See also: [BigNumber](#class-bignumber)
+
+#### Property r2
+
+The square of `r` modulo `m`.
+
+```ts
+r2: BigNumber
+```
+See also: [BigNumber](#class-bignumber)
+
+#### Property rinv
+
+The modular multiplicative inverse of `r` mod `m`.
+
+```ts
+rinv: BigNumber
+```
+See also: [BigNumber](#class-bignumber)
+
+#### Property shift
+
+The number of bits in the modulus.
+
+```ts
+shift: number
+```
+
+#### Method convertFrom
+
+Converts a number from the Montgomery domain back to the original domain.
+
+```ts
+convertFrom(num: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+The result of the conversion from the Montgomery domain.
+
+Argument Details
+
++ **num**
+  + The number to be converted from the Montgomery domain.
+
+Example
+
+```ts
+const montMethod = new MontgomoryMethod(m);
+const convertedNum = montMethod.convertFrom(num);
+```
+
+#### Method convertTo
+
+Converts a number into the Montgomery domain.
+
+```ts
+convertTo(num: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+The result of the conversion into the Montgomery domain.
+
+Argument Details
+
++ **num**
+  + The number to be converted into the Montgomery domain.
+
+Example
+
+```ts
+const montMethod = new MontgomoryMethod(m);
+const convertedNum = montMethod.convertTo(num);
+```
+
+#### Method imul
+
+Performs an in-place multiplication of two numbers in the Montgomery domain.
+
+```ts
+imul(a: BigNumber, b: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+The result of the in-place multiplication.
+
+Argument Details
+
++ **a**
+  + The first number to multiply.
++ **b**
+  + The second number to multiply.
+
+Example
+
+```ts
+const montMethod = new MontgomoryMethod(m);
+const product = montMethod.imul(a, b);
+```
+
+#### Method invm
+
+Calculates the modular multiplicative inverse of a number in the Montgomery domain.
+
+```ts
+invm(a: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+The modular multiplicative inverse of 'a'.
+
+Argument Details
+
++ **a**
+  + The number to compute the modular multiplicative inverse of.
+
+Example
+
+```ts
+const montMethod = new MontgomoryMethod(m);
+const inverse = montMethod.invm(a);
+```
+
+#### Method mul
+
+Performs the multiplication of two numbers in the Montgomery domain.
+
+```ts
+mul(a: BigNumber, b: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+The result of the multiplication.
+
+Argument Details
+
++ **a**
+  + The first number to multiply.
++ **b**
+  + The second number to multiply.
+
+Example
+
+```ts
+const montMethod = new MontgomoryMethod(m);
+const product = montMethod.mul(a, b);
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: Point
+
+`Point` class is a representation of an elliptic curve point with affine coordinates.
+It extends the functionality of BasePoint and carries x, y coordinates of point on the curve.
+It also introduces new methods for handling Point operations in elliptic curve.
+
+```ts
+export default class Point extends BasePoint {
+    x: BigNumber | null;
+    y: BigNumber | null;
+    inf: boolean;
+    static fromDER(bytes: number[]): Point 
+    static fromString(str: string): Point 
+    static redSqrtOptimized(y2: BigNumber): BigNumber 
+    static fromX(x: BigNumber | number | number[] | string, odd: boolean): Point 
+    static fromJSON(obj: string | any[], isRed: boolean): Point 
+    constructor(x: BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null, isRed: boolean = true) 
+    validate(): boolean 
+    encode(compact: boolean = true, enc?: "hex"): number[] | string 
+    toString(): string 
+    toJSON(): [
+        BigNumber | null,
+        BigNumber | null,
+        {
+            doubles: {
+                step: any;
+                points: any[];
+            } | undefined;
+            naf: {
+                wnd: any;
+                points: any[];
+            } | undefined;
+        }?
+    ] 
+    inspect(): string 
+    isInfinity(): boolean 
+    add(p: Point): Point 
+    dbl(): Point 
+    getX(): BigNumber 
+    getY(): BigNumber 
+    mul(k: BigNumber | number | number[] | string): Point 
+    mulAdd(k1: BigNumber, p2: Point, k2: BigNumber): Point 
+    jmulAdd(k1: BigNumber, p2: Point, k2: BigNumber): JPoint 
+    eq(p: Point): boolean 
+    neg(_precompute?: boolean): Point 
+    dblp(k: number): Point 
+    toJ(): JPoint 
+    ;
+    ;
+}
+```
+
+See also: [BasePoint](#class-basepoint), [BigNumber](#class-bignumber), [encode](#variable-encode)
+
+<details>
+
+<summary>Class Point Details</summary>
+
+#### Constructor
+
+```ts
+constructor(x: BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null, isRed: boolean = true) 
+```
+See also: [BigNumber](#class-bignumber)
+
+Argument Details
+
++ **x**
+  + The x-coordinate of the point. May be a number, a BigNumber, a string (which will be interpreted as hex), a number array, or null. If null, an "Infinity" point is constructed.
++ **y**
+  + The y-coordinate of the point, similar to x.
++ **isRed**
+  + A boolean indicating if the point is a member of the field of integers modulo the k256 prime. Default is true.
+
+Example
+
+```ts
+new Point('abc123', 'def456');
+new Point(null, null); // Generates Infinity point.
+```
+
+#### Property inf
+
+Flag to record if the point is at infinity in the Elliptic Curve.
+
+```ts
+inf: boolean
+```
+
+#### Property x
+
+The x-coordinate of the point.
+
+```ts
+x: BigNumber | null
+```
+See also: [BigNumber](#class-bignumber)
+
+#### Property y
+
+The y-coordinate of the point.
+
+```ts
+y: BigNumber | null
+```
+See also: [BigNumber](#class-bignumber)
+
+#### Method add
+
+Adds another Point to this Point, returning a new Point.
+
+```ts
+add(p: Point): Point 
+```
+See also: [Point](#class-point)
+
+Returns
+
+A new Point that results from the addition.
+
+Argument Details
+
++ **p**
+  + The Point to add to this one.
+
+Example
+
+```ts
+const p1 = new Point(1, 2);
+const p2 = new Point(2, 3);
+const result = p1.add(p2);
+```
+
+#### Method dbl
+
+Doubles the current point.
+
+```ts
+dbl(): Point 
+```
+See also: [Point](#class-point)
+
+Example
+
+```ts
+const P = new Point('123', '456');
+const result = P.dbl();
+```
+
+#### Method dblp
+
+Performs the "doubling" operation on the Point a given number of times.
+This is used in elliptic curve operations to perform multiplication by 2, multiple times.
+If the point is at infinity, it simply returns the point because doubling
+a point at infinity is still infinity.
+
+```ts
+dblp(k: number): Point 
+```
+See also: [Point](#class-point)
+
+Returns
+
+The Point after 'k' "doubling" operations have been performed.
+
+Argument Details
+
++ **k**
+  + The number of times the "doubling" operation is to be performed on the Point.
+
+Example
+
+```ts
+const p = new Point(5, 20);
+const doubledPoint = p.dblp(10); // returns the point after "doubled" 10 times
+```
+
+#### Method encode
+
+Encodes the coordinates of a point into an array or a hexadecimal string.
+The details of encoding are determined by the optional compact and enc parameters.
+
+```ts
+encode(compact: boolean = true, enc?: "hex"): number[] | string 
+```
+
+Returns
+
+If enc is undefined, a byte array representation of the point will be returned. if enc is 'hex', a hexadecimal string representation of the point will be returned.
+
+Argument Details
+
++ **compact**
+  + If true, an additional prefix byte 0x02 or 0x03 based on the 'y' coordinate being even or odd respectively is used. If false, byte 0x04 is used.
++ **enc**
+  + Expects the string 'hex' if hexadecimal string encoding is required instead of an array of numbers.
+
+Throws
+
+Will throw an error if the specified encoding method is not recognized. Expects 'hex'.
+
+Example
+
+```ts
+const aPoint = new Point(x, y);
+const encodedPointArray = aPoint.encode();
+const encodedPointHex = aPoint.encode(true, 'hex');
+```
+
+#### Method eq
+
+Checks if the Point instance is equal to another given Point.
+
+```ts
+eq(p: Point): boolean 
+```
+See also: [Point](#class-point)
+
+Returns
+
+Whether the two Point instances are equal. Both the 'x' and 'y' coordinates have to match, and both points have to either be valid or at infinity for equality. If both conditions are true, it returns true, else it returns false.
+
+Argument Details
+
++ **p**
+  + The Point to be checked if equal to the current instance.
+
+Example
+
+```ts
+const p1 = new Point(5, 20);
+const p2 = new Point(5, 20);
+const areEqual = p1.eq(p2); // returns true
+```
+
+#### Method fromDER
+
+Creates a point object from a given Array. These numbers can represent coordinates in hex format, or points
+in multiple established formats.
+The function verifies the integrity of the provided data and throws errors if inconsistencies are found.
+
+```ts
+static fromDER(bytes: number[]): Point 
+```
+See also: [Point](#class-point)
+
+Returns
+
+Returns a new point representing the given string.
+
+Argument Details
+
++ **bytes**
+  + The point representation number array.
+
+Throws
+
+`Error` If the point number[] value has a wrong length.
+
+`Error` If the point format is unknown.
+
+Example
+
+```ts
+const derPoint = [ 2, 18, 123, 108, 125, 83, 1, 251, 164, 214, 16, 119, 200, 216, 210, 193, 251, 193, 129, 67, 97, 146, 210, 216, 77, 254, 18, 6, 150, 190, 99, 198, 128 ];
+const point = Point.fromDER(derPoint);
+```
+
+#### Method fromJSON
+
+Generates a point from a serialized JSON object. The function accounts for different options in the JSON object,
+including precomputed values for optimization of EC operations, and calls another helper function to turn nested
+JSON points into proper Point objects.
+
+```ts
+static fromJSON(obj: string | any[], isRed: boolean): Point 
+```
+See also: [Point](#class-point)
+
+Returns
+
+Returns a new point based on the deserialized JSON object.
+
+Argument Details
+
++ **obj**
+  + An object or array that holds the data for the point.
++ **isRed**
+  + A boolean to direct how the Point is constructed from the JSON object.
+
+Example
+
+```ts
+const serializedPoint = '{"x":52,"y":15}';
+const point = Point.fromJSON(serializedPoint, true);
+```
+
+#### Method fromString
+
+Creates a point object from a given string. This string can represent coordinates in hex format, or points
+in multiple established formats.
+The function verifies the integrity of the provided data and throws errors if inconsistencies are found.
+
+```ts
+static fromString(str: string): Point 
+```
+See also: [Point](#class-point)
+
+Returns
+
+Returns a new point representing the given string.
+
+Argument Details
+
++ **str**
+  + The point representation string.
+
+Throws
+
+`Error` If the point string value has a wrong length.
+
+`Error` If the point format is unknown.
+
+Example
+
+```ts
+const pointStr = 'abcdef';
+const point = Point.fromString(pointStr);
+```
+
+#### Method fromX
+
+Generates a point from an x coordinate and a boolean indicating whether the corresponding
+y coordinate is odd.
+
+```ts
+static fromX(x: BigNumber | number | number[] | string, odd: boolean): Point 
+```
+See also: [BigNumber](#class-bignumber), [Point](#class-point)
+
+Returns
+
+Returns the new point.
+
+Argument Details
+
++ **x**
+  + The x coordinate of the point.
++ **odd**
+  + Boolean indicating whether the corresponding y coordinate is odd or not.
+
+Throws
+
+`Error` If the point is invalid.
+
+Example
+
+```ts
+const xCoordinate = new BigNumber('10');
+const point = Point.fromX(xCoordinate, true);
+```
+
+#### Method getX
+
+Returns X coordinate of point
+
+```ts
+getX(): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Example
+
+```ts
+const P = new Point('123', '456');
+const x = P.getX();
+```
+
+#### Method getY
+
+Returns X coordinate of point
+
+```ts
+getY(): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Example
+
+```ts
+const P = new Point('123', '456');
+const x = P.getX();
+```
+
+#### Method inspect
+
+Provides the point coordinates in a human-readable string format for debugging purposes.
+
+```ts
+inspect(): string 
+```
+
+Returns
+
+String of the format '<EC Point x: x-coordinate y: y-coordinate>', or '<EC Point Infinity>' if the point is at infinity.
+
+Example
+
+```ts
+const aPoint = new Point(x, y);
+console.log(aPoint.inspect());
+```
+
+#### Method isInfinity
+
+Checks if the point is at infinity.
+
+```ts
+isInfinity(): boolean 
+```
+
+Returns
+
+Returns whether or not the point is at infinity.
+
+Example
+
+```ts
+const p = new Point(null, null);
+console.log(p.isInfinity()); // outputs: true
+```
+
+#### Method jmulAdd
+
+Performs the Jacobian multiplication and addition operation in a single
+step. Instead of returning a regular Point, the result is a JacobianPoint.
+
+```ts
+jmulAdd(k1: BigNumber, p2: Point, k2: BigNumber): JPoint 
+```
+See also: [BigNumber](#class-bignumber), [Point](#class-point)
+
+Returns
+
+A JacobianPoint that results from the combined multiplication and addition operation.
+
+Argument Details
+
++ **k1**
+  + The scalar value to multiply this Point by.
++ **p2**
+  + The other Point to be involved in the operation
++ **k2**
+  + The scalar value to multiply the Point p2 by.
+
+Example
+
+```ts
+const p1 = new Point(1, 2);
+const p2 = new Point(2, 3);
+const result = p1.jmulAdd(2, p2, 3);
+```
+
+#### Method mul
+
+Multiplies this Point by a scalar value, returning a new Point.
+
+```ts
+mul(k: BigNumber | number | number[] | string): Point 
+```
+See also: [BigNumber](#class-bignumber), [Point](#class-point)
+
+Returns
+
+A new Point that results from the multiplication.
+
+Argument Details
+
++ **k**
+  + The scalar value to multiply this Point by.
+
+Example
+
+```ts
+const p = new Point(1, 2);
+const result = p.mul(2); // this doubles the Point
+```
+
+#### Method mulAdd
+
+Performs a multiplication and addition operation in a single step.
+Multiplies this Point by k1, adds the resulting Point to the result of p2 multiplied by k2.
+
+```ts
+mulAdd(k1: BigNumber, p2: Point, k2: BigNumber): Point 
+```
+See also: [BigNumber](#class-bignumber), [Point](#class-point)
+
+Returns
+
+A Point that results from the combined multiplication and addition operations.
+
+Argument Details
+
++ **k1**
+  + The scalar value to multiply this Point by.
++ **p2**
+  + The other Point to be involved in the operation.
++ **k2**
+  + The scalar value to multiply the Point p2 by.
+
+Example
+
+```ts
+const p1 = new Point(1, 2);
+const p2 = new Point(2, 3);
+const result = p1.mulAdd(2, p2, 3);
+```
+
+#### Method neg
+
+Negate a point. The negation of a point P is the mirror of P about x-axis.
+
+```ts
+neg(_precompute?: boolean): Point 
+```
+See also: [Point](#class-point)
+
+Example
+
+```ts
+const P = new Point('123', '456');
+const result = P.neg();
+```
+
+#### Method toJ
+
+Converts the point to a Jacobian point. If the point is at infinity, the corresponding Jacobian point
+will also be at infinity.
+
+```ts
+toJ(): JPoint 
+```
+
+Returns
+
+Returns a new Jacobian point based on the current point.
+
+Example
+
+```ts
+const point = new Point(xCoordinate, yCoordinate);
+const jacobianPoint = point.toJ();
+```
+
+#### Method toJSON
+
+Exports the x and y coordinates of the point, and the precomputed doubles and non-adjacent form (NAF) for optimization. The output is an array.
+
+```ts
+toJSON(): [
+    BigNumber | null,
+    BigNumber | null,
+    {
+        doubles: {
+            step: any;
+            points: any[];
+        } | undefined;
+        naf: {
+            wnd: any;
+            points: any[];
+        } | undefined;
+    }?
+] 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+An Array where first two elements are the coordinates of the point and optional third element is an object with doubles and NAF points.
+
+Example
+
+```ts
+const aPoint = new Point(x, y);
+const jsonPoint = aPoint.toJSON();
+```
+
+#### Method toString
+
+function toString() { [native code] }
+
+Converts the point coordinates to a hexadecimal string. A wrapper method
+for encode. Byte 0x02 or 0x03 is used as prefix based on the 'y' coordinate being even or odd respectively.
+
+```ts
+toString(): string 
+```
+
+Returns
+
+A hexadecimal string representation of the point coordinates.
+
+Example
+
+```ts
+const aPoint = new Point(x, y);
+const stringPoint = aPoint.toString();
+```
+
+#### Method validate
+
+Validates if a point belongs to the curve. Follows the short Weierstrass
+equation for elliptic curves: y^2 = x^3 + ax + b.
+
+```ts
+validate(): boolean 
+```
+
+Returns
+
+true if the point is on the curve, false otherwise.
+
+Example
+
+```ts
+const aPoint = new Point(x, y);
+const isValid = aPoint.validate();
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: PointInFiniteField
+
+```ts
+export class PointInFiniteField {
+    x: BigNumber;
+    y: BigNumber;
+    constructor(x: BigNumber, y: BigNumber) 
+    toString(): string 
+    static fromString(str: string): PointInFiniteField 
+}
+```
+
+See also: [BigNumber](#class-bignumber)
+
+<details>
+
+<summary>Class PointInFiniteField Details</summary>
+
+#### Method toString
+
+function toString() { [native code] }
+
+```ts
+toString(): string 
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: Polynomial
+
+Polynomial class
+
+This class is used to create a polynomial with a given threshold and a private key.
+The polynomial is used to create shares of the private key.
+
+Example
+
+```ts
+const key = new PrivateKey()
+const threshold = 2
+const polynomial = new Polynomial(key, threshold)
+```
+
+```ts
+export default class Polynomial {
+    readonly points: PointInFiniteField[];
+    readonly threshold: number;
+    constructor(points: PointInFiniteField[], threshold?: number) 
+    static fromPrivateKey(key: PrivateKey, threshold: number): Polynomial 
+    valueAt(x: BigNumber): BigNumber 
+}
+```
+
+See also: [BigNumber](#class-bignumber), [PointInFiniteField](#class-pointinfinitefield), [PrivateKey](#class-privatekey)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: PrivateKey
+
+Represents a Private Key, which is a secret that can be used to generate signatures in a cryptographic system.
+
+The `PrivateKey` class extends from the `BigNumber` class. It offers methods to create signatures, verify them,
+create a corresponding public key and derive a shared secret from a public key.
+
+```ts
+export default class PrivateKey extends BigNumber {
+    static fromRandom(): PrivateKey 
+    static fromString(str: string, base: number | "hex"): PrivateKey 
+    static fromWif(wif: string, prefixLength: number = 1): PrivateKey 
+    constructor(number: BigNumber | number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be", modN: "apply" | "nocheck" | "error" = "apply") 
+    checkInField(): {
+        inField: boolean;
+        modN: BigNumber;
+    } 
+    isValid(): boolean 
+    sign(msg: number[] | string, enc?: "hex" | "utf8", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
+    verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
+    toPublicKey(): PublicKey 
+    toWif(prefix: number[] = [128]): string 
+    toAddress(prefix: number[] | string = [0]): string 
+    deriveSharedSecret(key: PublicKey): Point 
+    deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
+    toKeyShares(threshold: number, totalShares: number): KeyShares 
+    toBackupShares(threshold: number, totalShares: number): string[] 
+    static fromBackupShares(shares: string[]): PrivateKey 
+    static fromKeyShares(keyShares: KeyShares): PrivateKey 
+}
+```
+
+See also: [BigNumber](#class-bignumber), [KeyShares](#class-keyshares), [Point](#class-point), [PublicKey](#class-publickey), [Signature](#class-signature), [sign](#variable-sign), [verify](#variable-verify)
+
+<details>
+
+<summary>Class PrivateKey Details</summary>
+
+#### Constructor
+
+```ts
+constructor(number: BigNumber | number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be", modN: "apply" | "nocheck" | "error" = "apply") 
+```
+See also: [BigNumber](#class-bignumber)
+
+Argument Details
+
++ **number**
+  + The number (various types accepted) to construct a BigNumber from. Default is 0.
++ **base**
+  + The base of number provided. By default is 10. Ignored if number is BigNumber.
++ **endian**
+  + The endianness provided. By default is 'big endian'. Ignored if number is BigNumber.
++ **modN**
+  + Optional. Default 'apply. If 'apply', apply modN to input to guarantee a valid PrivateKey. If 'error', if input is out of field throw Error('Input is out of field'). If 'nocheck', assumes input is in field.
+
+Example
+
+```ts
+import PrivateKey from './PrivateKey';
+import BigNumber from './BigNumber';
+const privKey = new PrivateKey(new BigNumber('123456', 10, 'be'));
+```
+
+#### Method checkInField
+
+A utility function to check that the value of this PrivateKey lies in the field limited by curve.n
+
+```ts
+checkInField(): {
+    inField: boolean;
+    modN: BigNumber;
+} 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+, modN } where modN is this PrivateKey's current BigNumber value mod curve.n, and inField is true only if modN equals current BigNumber value.
+
+#### Method deriveChild
+
+Derives a child key with BRC-42.
+
+```ts
+deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
+```
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
+
+Returns
+
+The derived child key.
+
+Argument Details
+
++ **publicKey**
+  + The public key of the other party
++ **invoiceNumber**
+  + The invoice number used to derive the child key
+
+#### Method deriveSharedSecret
+
+Derives a shared secret from the public key.
+
+```ts
+deriveSharedSecret(key: PublicKey): Point 
+```
+See also: [Point](#class-point), [PublicKey](#class-publickey)
+
+Returns
+
+The derived shared secret (a point on the curve).
+
+Argument Details
+
++ **key**
+  + The public key to derive the shared secret from.
+
+Throws
+
+Will throw an error if the public key is not valid.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+const publicKey = privateKey.toPublicKey();
+const sharedSecret = privateKey.deriveSharedSecret(publicKey);
+```
+
+#### Method fromBackupShares
+
+```ts
+static fromBackupShares(shares: string[]): PrivateKey 
+```
+See also: [PrivateKey](#class-privatekey)
+
+Returns
+
+PrivateKey
+
+Example
+
+```ts
+const share1 = '3znuzt7DZp8HzZTfTh5MF9YQKNX3oSxTbSYmSRGrH2ev.2Nm17qoocmoAhBTCs8TEBxNXCskV9N41rB2PckcgYeqV.2.35449bb9'
+const share2 = 'Cm5fuUc39X5xgdedao8Pr1kvCSm8Gk7Cfenc7xUKcfLX.2juyK9BxCWn2DiY5JUAgj9NsQ77cc9bWksFyW45haXZm.2.35449bb9'
+
+const recoveredKey = PrivateKey.fromBackupShares([share1, share2])
+```
+
+#### Method fromKeyShares
+
+Combines shares to reconstruct the private key.
+
+```ts
+static fromKeyShares(keyShares: KeyShares): PrivateKey 
+```
+See also: [KeyShares](#class-keyshares), [PrivateKey](#class-privatekey)
+
+Returns
+
+The reconstructed private key.
+
+Argument Details
+
++ **shares**
+  + An array of points (shares) to be used to reconstruct the private key.
++ **threshold**
+  + The minimum number of shares required to reconstruct the private key.
+
+#### Method fromRandom
+
+Generates a private key randomly.
+
+```ts
+static fromRandom(): PrivateKey 
+```
+See also: [PrivateKey](#class-privatekey)
+
+Returns
+
+The newly generated Private Key.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+```
+
+#### Method fromString
+
+Generates a private key from a string.
+
+```ts
+static fromString(str: string, base: number | "hex"): PrivateKey 
+```
+See also: [PrivateKey](#class-privatekey)
+
+Returns
+
+The generated Private Key.
+
+Argument Details
+
++ **str**
+  + The string to generate the private key from.
++ **base**
+  + The base of the string.
+
+Throws
+
+Will throw an error if the string is not valid.
+
+#### Method fromWif
+
+Generates a private key from a WIF (Wallet Import Format) string.
+
+```ts
+static fromWif(wif: string, prefixLength: number = 1): PrivateKey 
+```
+See also: [PrivateKey](#class-privatekey)
+
+Returns
+
+The generated Private Key.
+
+Argument Details
+
++ **wif**
+  + The WIF string to generate the private key from.
++ **base**
+  + The base of the string.
+
+Throws
+
+Will throw an error if the string is not a valid WIF.
+
+#### Method isValid
+
+```ts
+isValid(): boolean 
+```
+
+Returns
+
+true if the PrivateKey's current BigNumber value lies in the field limited by curve.n
+
+#### Method sign
+
+Signs a message using the private key.
+
+```ts
+sign(msg: number[] | string, enc?: "hex" | "utf8", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
+```
+See also: [BigNumber](#class-bignumber), [Signature](#class-signature)
+
+Returns
+
+A digital signature generated from the hash of the message and the private key.
+
+Argument Details
+
++ **msg**
+  + The message (array of numbers or string) to be signed.
++ **enc**
+  + If 'hex' the string will be treated as hex, utf8 otherwise.
++ **forceLowS**
+  + If true (the default), the signature will be forced to have a low S value.
++ **customK**
+  + — If provided, uses a custom K-value for the signature. Provie a function that returns a BigNumber, or the BigNumber itself.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+const signature = privateKey.sign('Hello, World!');
+```
+
+#### Method toAddress
+
+Base58Check encodes the hash of the public key associated with this private key with a prefix to indicate locking script type.
+Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
+
+```ts
+toAddress(prefix: number[] | string = [0]): string 
+```
+
+Returns
+
+Returns the address encoding associated with the hash of the public key associated with this private key.
+
+Argument Details
+
++ **prefix**
+  + defaults to [0x00] for mainnet, set to [0x6f] for testnet or use the strings 'testnet' or 'mainnet'
+
+Example
+
+```ts
+const address = privkey.toAddress()
+const address = privkey.toAddress('mainnet')
+const testnetAddress = privkey.toAddress([0x6f])
+const testnetAddress = privkey.toAddress('testnet')
+```
+
+#### Method toBackupShares
+
+```ts
+toBackupShares(threshold: number, totalShares: number): string[] 
+```
+
+Argument Details
+
++ **threshold**
+  + The number of shares which will be required to reconstruct the private key.
++ **totalShares**
+  + The number of shares to generate for distribution.
+
+#### Method toKeyShares
+
+Splits the private key into shares using Shamir's Secret Sharing Scheme.
+
+```ts
+toKeyShares(threshold: number, totalShares: number): KeyShares 
+```
+See also: [KeyShares](#class-keyshares)
+
+Returns
+
+An array of shares.
+
+Argument Details
+
++ **threshold**
+  + The minimum number of shares required to reconstruct the private key.
++ **totalShares**
+  + The total number of shares to generate.
++ **prime**
+  + The prime number to be used in Shamir's Secret Sharing Scheme.
+
+Example
+
+```ts
+const key = PrivateKey.fromRandom()
+const shares = key.toKeyShares(2, 5)
+```
+
+#### Method toPublicKey
+
+Converts the private key to its corresponding public key.
+
+The public key is generated by multiplying the base point G of the curve and the private key.
+
+```ts
+toPublicKey(): PublicKey 
+```
+See also: [PublicKey](#class-publickey)
+
+Returns
+
+The generated PublicKey.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+const publicKey = privateKey.toPublicKey();
+```
+
+#### Method toWif
+
+Converts the private key to a Wallet Import Format (WIF) string.
+
+Base58Check encoding is used for encoding the private key.
+The prefix
+
+```ts
+toWif(prefix: number[] = [128]): string 
+```
+
+Returns
+
+The WIF string.
+
+Argument Details
+
++ **prefix**
+  + defaults to [0x80] for mainnet, set it to [0xef] for testnet.
+
+Throws
+
+Error('Value is out of field') if current BigNumber value is out of field limited by curve.n
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+const wif = privateKey.toWif();
+const testnetWif = privateKey.toWif([0xef]);
+```
+
+#### Method verify
+
+Verifies a message's signature using the public key associated with this private key.
+
+```ts
+verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
+```
+See also: [Signature](#class-signature)
+
+Returns
+
+Whether or not the signature is valid.
+
+Argument Details
+
++ **msg**
+  + The original message which has been signed.
++ **sig**
+  + The signature to be verified.
++ **enc**
+  + The data encoding method.
+
+Example
+
+```ts
+const privateKey = PrivateKey.fromRandom();
+const signature = privateKey.sign('Hello, World!');
+const isSignatureValid = privateKey.verify('Hello, World!', signature);
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: PublicKey
+
+The PublicKey class extends the Point class. It is used in public-key cryptography to derive shared secret, verify message signatures, and encode the public key in the DER format.
+The class comes with static methods to generate PublicKey instances from private keys or from strings.
+
+```ts
+export default class PublicKey extends Point {
+    static fromPrivateKey(key: PrivateKey): PublicKey 
+    static fromString(str: string): PublicKey 
+    static fromDER(bytes: number[]): PublicKey 
+    constructor(x: Point | BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null = null, isRed: boolean = true) 
+    deriveSharedSecret(priv: PrivateKey): Point 
+    verify(msg: number[] | string, sig: Signature, enc?: "hex" | "utf8"): boolean 
+    toDER(enc?: "hex" | undefined): number[] | string 
+    toHash(enc?: "hex"): number[] | string 
+    toAddress(prefix: number[] | string = [0]): string 
+    deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey 
+    static fromMsgHashAndCompactSignature(msgHash: BigNumber, signature: number[] | string, enc?: "hex" | "base64"): PublicKey 
+}
+```
+
+See also: [BigNumber](#class-bignumber), [Point](#class-point), [PrivateKey](#class-privatekey), [Signature](#class-signature), [verify](#variable-verify)
+
+<details>
+
+<summary>Class PublicKey Details</summary>
+
+#### Constructor
+
+```ts
+constructor(x: Point | BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null = null, isRed: boolean = true) 
+```
+See also: [BigNumber](#class-bignumber), [Point](#class-point)
+
+Argument Details
+
++ **x**
+  + A point or the x-coordinate of the point. May be a number, a BigNumber, a string (which will be interpreted as hex), a number array, or null. If null, an "Infinity" point is constructed.
++ **y**
+  + If x is not a point, the y-coordinate of the point, similar to x.
++ **isRed**
+  + A boolean indicating if the point is a member of the field of integers modulo the k256 prime. Default is true.
+
+Example
+
+```ts
+new PublicKey(point1);
+new PublicKey('abc123', 'def456');
+```
+
+#### Method deriveChild
+
+Derives a child key with BRC-42.
+
+```ts
+deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey 
+```
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
+
+Returns
+
+The derived child key.
+
+Argument Details
+
++ **privateKey**
+  + The private key of the other party
++ **invoiceNumber**
+  + The invoice number used to derive the child key
+
+#### Method deriveSharedSecret
+
+Derive a shared secret from a public key and a private key for use in symmetric encryption.
+This method multiplies the public key (an instance of Point) with a private key.
+
+```ts
+deriveSharedSecret(priv: PrivateKey): Point 
+```
+See also: [Point](#class-point), [PrivateKey](#class-privatekey)
+
+Returns
+
+Returns the Point representing the shared secret.
+
+Argument Details
+
++ **priv**
+  + The private key to use in deriving the shared secret.
+
+Throws
+
+Will throw an error if the public key is not valid for ECDH secret derivation.
+
+Example
+
+```ts
+const myPrivKey = new PrivateKey(...)
+const sharedSecret = myPubKey.deriveSharedSecret(myPrivKey)
+```
+
+#### Method fromDER
+
+Static factory method to create a PublicKey instance from a number array.
+
+```ts
+static fromDER(bytes: number[]): PublicKey 
+```
+See also: [PublicKey](#class-publickey)
+
+Returns
+
+Returns the PublicKey created from the number array.
+
+Argument Details
+
++ **bytes**
+  + A number array representing a public key.
+
+Example
+
+```ts
+const myPubKey = PublicKey.fromString("03....")
+```
+
+#### Method fromMsgHashAndCompactSignature
+
+Takes an array of numbers or a string and returns a new PublicKey instance.
+This method will throw an error if the Compact encoding is invalid.
+If a string is provided, it is assumed to represent a hexadecimal sequence.
+compactByte value 27-30 means uncompressed public key.
+31-34 means compressed public key.
+The range represents the recovery param which can be 0,1,2,3.
+
+```ts
+static fromMsgHashAndCompactSignature(msgHash: BigNumber, signature: number[] | string, enc?: "hex" | "base64"): PublicKey 
+```
+See also: [BigNumber](#class-bignumber), [PublicKey](#class-publickey)
+
+Returns
+
+A PublicKey instance derived from the message hash and compact signature.
+
+Argument Details
+
++ **msgHash**
+  + The message hash which was signed.
++ **signature**
+  + The signature in compact format.
++ **enc**
+  + The encoding of the signature string.
+
+Example
+
+```ts
+const publicKey = Signature.fromMsgHashAndCompactSignature(msgHash, 'IMOl2mVKfDgsSsHT4uIYBNN4e...', 'base64');
+```
+
+#### Method fromPrivateKey
+
+Static factory method to derive a public key from a private key.
+It multiplies the generator point 'g' on the elliptic curve by the private key.
+
+```ts
+static fromPrivateKey(key: PrivateKey): PublicKey 
+```
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
+
+Returns
+
+Returns the PublicKey derived from the given PrivateKey.
+
+Argument Details
+
++ **key**
+  + The private key from which to derive the public key.
+
+Example
+
+```ts
+const myPrivKey = new PrivateKey(...)
+const myPubKey = PublicKey.fromPrivateKey(myPrivKey)
+```
+
+#### Method fromString
+
+Static factory method to create a PublicKey instance from a string.
+
+```ts
+static fromString(str: string): PublicKey 
+```
+See also: [PublicKey](#class-publickey)
+
+Returns
+
+Returns the PublicKey created from the string.
+
+Argument Details
+
++ **str**
+  + A string representing a public key.
+
+Example
+
+```ts
+const myPubKey = PublicKey.fromString("03....")
+```
+
+#### Method toAddress
+
+Base58Check encodes the hash of the public key with a prefix to indicate locking script type.
+Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
+
+```ts
+toAddress(prefix: number[] | string = [0]): string 
+```
+
+Returns
+
+Returns the address encoding associated with the hash of the public key.
+
+Argument Details
+
++ **prefix**
+  + defaults to [0x00] for mainnet, set to [0x6f] for testnet or use the strings 'mainnet' or 'testnet'
+
+Example
+
+```ts
+const address = pubkey.toAddress()
+const address = pubkey.toAddress('mainnet')
+const testnetAddress = pubkey.toAddress([0x6f])
+const testnetAddress = pubkey.toAddress('testnet')
+```
+
+#### Method toDER
+
+Encode the public key to DER (Distinguished Encoding Rules) format.
+
+```ts
+toDER(enc?: "hex" | undefined): number[] | string 
+```
+
+Returns
+
+Returns the DER-encoded public key in number array or string.
+
+Argument Details
+
++ **enc**
+  + The encoding of the DER string. undefined = number array, 'hex' = hex string.
+
+Example
+
+```ts
+const derPublicKey = myPubKey.toDER()
+```
+
+#### Method toHash
+
+Hash sha256 and ripemd160 of the public key.
+
+```ts
+toHash(enc?: "hex"): number[] | string 
+```
+
+Returns
+
+Returns the hash of the public key.
+
+Example
+
+```ts
+const publicKeyHash = pubkey.toHash()
+```
+
+#### Method verify
+
+Verify a signature of a message using this public key.
+
+```ts
+verify(msg: number[] | string, sig: Signature, enc?: "hex" | "utf8"): boolean 
+```
+See also: [Signature](#class-signature)
+
+Returns
+
+Returns true if the signature is verified successfully, otherwise false.
+
+Argument Details
+
++ **msg**
+  + The message to verify. It can be a string or an array of numbers.
++ **sig**
+  + The Signature of the message that needs verification.
++ **enc**
+  + The encoding of the message. It defaults to 'utf8'.
+
+Example
+
+```ts
+const myMessage = "Hello, world!"
+const mySignature = new Signature(...)
+const isVerified = myPubKey.verify(myMessage, mySignature)
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: RIPEMD160
+
+An implementation of RIPEMD160 cryptographic hash function. Extends the BaseHash class.
+It provides a way to compute a 'digest' for any kind of input data; transforming the data
+into a unique output of fixed size. The output is deterministic; it will always be
+the same for the same input.
+
+Example
+
+```ts
+const ripemd160 = new RIPEMD160();
+```
+
+```ts
+export class RIPEMD160 extends BaseHash {
+    h: number[];
+    constructor() 
+    _update(msg: number[], start: number): void 
+    _digest(): number[] 
+    _digestHex(): string 
+}
+```
+
+<details>
+
+<summary>Class RIPEMD160 Details</summary>
+
+#### Property h
+
+Array that is updated iteratively as part of hashing computation.
+
+```ts
+h: number[]
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: Reader
+
+```ts
+export class Reader {
+    public bin: number[];
+    public pos: number;
+    constructor(bin: number[] = [], pos: number = 0) 
+    public eof(): boolean 
+    public read(len = this.bin.length): number[] 
+    public readReverse(len = this.bin.length): number[] 
+    public readUInt8(): number 
+    public readInt8(): number 
+    public readUInt16BE(): number 
+    public readInt16BE(): number 
+    public readUInt16LE(): number 
+    public readInt16LE(): number 
+    public readUInt32BE(): number 
+    public readInt32BE(): number 
+    public readUInt32LE(): number 
+    public readInt32LE(): number 
+    public readUInt64BEBn(): BigNumber 
+    public readUInt64LEBn(): BigNumber 
+    public readVarIntNum(): number 
+    public readVarInt(): number[] 
+    public readVarIntBn(): BigNumber 
+}
+```
+
+See also: [BigNumber](#class-bignumber)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: ReductionContext
+
+A base reduction engine that provides several arithmetic operations over
+big numbers under a modulus context. It's particularly suitable for
+calculations required in cryptography algorithms and encoding schemas.
+
+```ts
+export default class ReductionContext {
+    prime: Mersenne | null;
+    m: BigNumber;
+    constructor(m: BigNumber | "k256") 
+    verify1(a: BigNumber): void 
+    verify2(a: BigNumber, b: BigNumber): void 
+    imod(a: BigNumber): BigNumber 
+    neg(a: BigNumber): BigNumber 
+    add(a: BigNumber, b: BigNumber): BigNumber 
+    iadd(a: BigNumber, b: BigNumber): BigNumber 
+    sub(a: BigNumber, b: BigNumber): BigNumber 
+    isub(a: BigNumber, b: BigNumber): BigNumber 
+    shl(a: BigNumber, num: number): BigNumber 
+    imul(a: BigNumber, b: BigNumber): BigNumber 
+    mul(a: BigNumber, b: BigNumber): BigNumber 
+    isqr(a: BigNumber): BigNumber 
+    sqr(a: BigNumber): BigNumber 
+    sqrt(a: BigNumber): BigNumber 
+    invm(a: BigNumber): BigNumber 
+    pow(a: BigNumber, num: BigNumber): BigNumber 
+    convertTo(num: BigNumber): BigNumber 
+    convertFrom(num: BigNumber): BigNumber 
+}
+```
+
+See also: [BigNumber](#class-bignumber), [Mersenne](#class-mersenne)
+
+<details>
+
+<summary>Class ReductionContext Details</summary>
+
+#### Constructor
+
+Constructs a new ReductionContext.
+
+```ts
+constructor(m: BigNumber | "k256") 
+```
+See also: [BigNumber](#class-bignumber)
+
+Argument Details
+
++ **m**
+  + A BigNumber representing the modulus, or 'k256' to create a context for Koblitz curve.
+
+Example
+
+```ts
+new ReductionContext(new BigNumber(11));
+new ReductionContext('k256');
+```
+
+#### Property m
+
+The modulus used for reduction operations.
+
+```ts
+m: BigNumber
+```
+See also: [BigNumber](#class-bignumber)
+
+#### Property prime
+
+The prime number utilised in the reduction context, typically an instance of Mersenne class.
+
+```ts
+prime: Mersenne | null
+```
+See also: [Mersenne](#class-mersenne)
+
+#### Method add
+
+Performs the addition operation on two BigNumbers in the reduction context.
+
+```ts
+add(a: BigNumber, b: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the result of 'a + b' in the reduction context.
+
+Argument Details
+
++ **a**
+  + First BigNumber to add.
++ **b**
+  + Second BigNumber to add.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(5));
+context.add(new BigNumber(2), new BigNumber(4)); // Returns 1
+```
+
+#### Method convertFrom
+
+Converts a BigNumber from reduction context to its regular form.
+
+```ts
+convertFrom(num: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the converted BigNumber in its regular form.
+
+Argument Details
+
++ **num**
+  + The BigNumber to convert from the reduction context.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(7));
+const a = context.convertTo(new BigNumber(8)); // 'a' is now 1 in the reduction context
+context.convertFrom(a); // Returns 1
+```
+
+#### Method convertTo
+
+Converts a BigNumber to its equivalent in the reduction context.
+
+```ts
+convertTo(num: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the converted BigNumber compatible with the reduction context.
+
+Argument Details
+
++ **num**
+  + The BigNumber to convert to the reduction context.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(7));
+context.convertTo(new BigNumber(8)); // Returns 1 (8 % 7)
+```
+
+#### Method iadd
+
+Performs an in-place addition operation on two BigNumbers in the reduction context
+in order to avoid creating a new BigNumber, it modifies the first one with the result.
+
+```ts
+iadd(a: BigNumber, b: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the modified 'a' after addition with 'b' in the reduction context.
+
+Argument Details
+
++ **a**
+  + First BigNumber to add.
++ **b**
+  + Second BigNumber to add.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(5));
+const a = new BigNumber(2);
+context.iadd(a, new BigNumber(4)); // Modifies 'a' to be 1
+```
+
+#### Method imod
+
+Performs an in-place reduction of the given BigNumber by the modulus of the reduction context, 'm'.
+
+```ts
+imod(a: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the reduced result.
+
+Argument Details
+
++ **a**
+  + BigNumber to be reduced.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(7));
+context.imod(new BigNumber(19)); // Returns 5
+```
+
+#### Method imul
+
+Performs in-place multiplication of two BigNumbers in the reduction context,
+modifying the first BigNumber with the result.
+
+```ts
+imul(a: BigNumber, b: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the modified 'a' after multiplication with 'b' in the reduction context.
+
+Argument Details
+
++ **a**
+  + First BigNumber to multiply.
++ **b**
+  + Second BigNumber to multiply.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(7));
+const a = new BigNumber(3);
+context.imul(a, new BigNumber(2)); // Modifies 'a' to be 6
+```
+
+#### Method invm
+
+Calculates the multiplicative inverse of a BigNumber in the reduction context.
+
+```ts
+invm(a: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the multiplicative inverse of 'a' in the reduction context.
+
+Argument Details
+
++ **a**
+  + The BigNumber to find the multiplicative inverse of.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(11));
+context.invm(new BigNumber(3)); // Returns 4 (3*4 mod 11 = 1)
+```
+
+#### Method isqr
+
+Calculates the square of a BigNumber in the reduction context,
+modifying the original BigNumber with the result.
+
+```ts
+isqr(a: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the squared 'a' in the reduction context.
+
+Argument Details
+
++ **a**
+  + BigNumber to be squared.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(7));
+const a = new BigNumber(3);
+context.isqr(a); // Modifies 'a' to be 2 (9 % 7 = 2)
+```
+
+#### Method isub
+
+Performs in-place subtraction of one BigNumber from another in the reduction context,
+it modifies the first BigNumber with the result.
+
+```ts
+isub(a: BigNumber, b: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the modified 'a' after subtraction of 'b' in the reduction context.
+
+Argument Details
+
++ **a**
+  + BigNumber to be subtracted from.
++ **b**
+  + BigNumber to subtract.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(5));
+const a = new BigNumber(4);
+context.isub(a, new BigNumber(2)); // Modifies 'a' to be 2
+```
+
+#### Method mul
+
+Multiplies two BigNumbers in the reduction context.
+
+```ts
+mul(a: BigNumber, b: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the result of 'a * b' in the reduction context.
+
+Argument Details
+
++ **a**
+  + First BigNumber to multiply.
++ **b**
+  + Second BigNumber to multiply.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(7));
+context.mul(new BigNumber(3), new BigNumber(2)); // Returns 6
+```
+
+#### Method neg
+
+Negates a BigNumber in the context of the modulus.
+
+```ts
+neg(a: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the negation of 'a' in the reduction context.
+
+Argument Details
+
++ **a**
+  + BigNumber to negate.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(7));
+context.neg(new BigNumber(3)); // Returns 4
+```
+
+#### Method pow
+
+Raises a BigNumber to a power in the reduction context.
+
+```ts
+pow(a: BigNumber, num: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the result of 'a' raised to the power of 'num' in the reduction context.
+
+Argument Details
+
++ **a**
+  + The BigNumber to be raised to a power.
++ **num**
+  + The power to raise the BigNumber to.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(7));
+context.pow(new BigNumber(3), new BigNumber(2)); // Returns 2 (3^2 % 7)
+```
+
+#### Method shl
+
+Performs bitwise shift left operation on a BigNumber in the reduction context.
+
+```ts
+shl(a: BigNumber, num: number): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the result of shifting 'a' left by 'num' positions in the reduction context.
+
+Argument Details
+
++ **a**
+  + BigNumber to perform shift on.
++ **num**
+  + The number of positions to shift.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(32));
+context.shl(new BigNumber(4), 2); // Returns 16
+```
+
+#### Method sqr
+
+Calculates the square of a BigNumber in the reduction context.
+
+```ts
+sqr(a: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the result of 'a^2' in the reduction context.
+
+Argument Details
+
++ **a**
+  + BigNumber to be squared.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(7));
+context.sqr(new BigNumber(3)); // Returns 2 (9 % 7 = 2)
+```
+
+#### Method sqrt
+
+Calculates the square root of a BigNumber in the reduction context.
+
+```ts
+sqrt(a: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the square root of 'a' in the reduction context.
+
+Argument Details
+
++ **a**
+  + The BigNumber to calculate the square root of.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(9));
+context.sqrt(new BigNumber(4)); // Returns 2
+```
+
+#### Method sub
+
+Subtracts one BigNumber from another BigNumber in the reduction context.
+
+```ts
+sub(a: BigNumber, b: BigNumber): BigNumber 
+```
+See also: [BigNumber](#class-bignumber)
+
+Returns
+
+Returns the result of 'a - b' in the reduction context.
+
+Argument Details
+
++ **a**
+  + BigNumber to be subtracted from.
++ **b**
+  + BigNumber to subtract.
+
+Example
+
+```ts
+const context = new ReductionContext(new BigNumber(7));
+context.sub(new BigNumber(3), new BigNumber(2)); // Returns 1
+```
+
+#### Method verify1
+
+Verifies that a BigNumber is positive and red. Throws an error if these
+conditions are not met.
+
+```ts
+verify1(a: BigNumber): void 
+```
+See also: [BigNumber](#class-bignumber)
+
+Argument Details
+
++ **a**
+  + The BigNumber to be verified.
+
+Example
+
+```ts
+this.verify1(new BigNumber(10).toRed());
+this.verify1(new BigNumber(-10).toRed()); //throws an Error
+this.verify1(new BigNumber(10)); //throws an Error
+```
+
+#### Method verify2
+
+Verifies that two BigNumbers are both positive and red. Also checks
+that they have the same reduction context. Throws an error if these
+conditions are not met.
+
+```ts
+verify2(a: BigNumber, b: BigNumber): void 
+```
+See also: [BigNumber](#class-bignumber)
+
+Argument Details
+
++ **a**
+  + The first BigNumber to be verified.
++ **b**
+  + The second BigNumber to be verified.
+
+Example
+
+```ts
+this.verify2(new BigNumber(10).toRed(this), new BigNumber(20).toRed(this));
+this.verify2(new BigNumber(-10).toRed(this), new BigNumber(20).toRed(this)); //throws an Error
+this.verify2(new BigNumber(10).toRed(this), new BigNumber(20)); //throws an Error
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: SHA1
+
+An implementation of SHA1 cryptographic hash function. Extends the BaseHash class.
+It provides a way to compute a 'digest' for any kind of input data; transforming the data
+into a unique output of fixed size. The output is deterministic; it will always be
+the same for the same input.
+
+Example
+
+```ts
+const sha1 = new SHA1();
+```
+
+```ts
+export class SHA1 extends BaseHash {
+    h: number[];
+    W: number[];
+    k: number[];
+    constructor() 
+    _update(msg: number[], start?: number): void 
+    _digest(): number[] 
+    _digestHex(): string 
+}
+```
+
+<details>
+
+<summary>Class SHA1 Details</summary>
+
+#### Property W
+
+Provides a way to recycle usage of the array memory.
+
+```ts
+W: number[]
+```
+
+#### Property h
+
+The initial hash constants.
+
+```ts
+h: number[]
+```
+
+#### Property k
+
+The round constants used for each round of SHA-1.
+
+```ts
+k: number[]
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: SHA1HMAC
+
+```ts
+export class SHA1HMAC {
+    inner: SHA1;
+    outer: SHA1;
+    blockSize = 64;
+    constructor(key: number[] | string) 
+    update(msg: number[] | string, enc?: "hex"): SHA1HMAC 
+    digest(): number[] 
+    digestHex(): string 
+}
+```
+
+See also: [SHA1](#class-sha1)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: SHA256
+
+An implementation of SHA256 cryptographic hash function. Extends the BaseHash class.
+It provides a way to compute a 'digest' for any kind of input data; transforming the data
+into a unique output of fixed size. The output is deterministic; it will always be
+the same for the same input.
+
+Example
+
+```ts
+const sha256 = new SHA256();
+```
+
+```ts
+export class SHA256 extends BaseHash {
+    h: number[];
+    W: number[];
+    k: number[];
+    constructor() 
+    _update(msg: number[], start?: number): void 
+    ;
+    _digest(): number[] 
+    _digestHex(): string 
+}
+```
+
+<details>
+
+<summary>Class SHA256 Details</summary>
+
+#### Property W
+
+Provides a way to recycle usage of the array memory.
+
+```ts
+W: number[]
+```
+
+#### Property h
+
+The initial hash constants
+
+```ts
+h: number[]
+```
+
+#### Property k
+
+The round constants used for each round of SHA-256
+
+```ts
+k: number[]
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: SHA256HMAC
+
+The `SHA256HMAC` class is used to create Hash-based Message Authentication Code (HMAC) using the SHA-256 cryptographic hash function.
+
+HMAC is a specific type of MAC involving a cryptographic hash function and a secret cryptographic key. It may be used to simultaneously verify both the data integrity and the authenticity of a message.
+
+This class also uses the SHA-256 cryptographic hash algorithm that produces a 256-bit (32-byte) hash value.
+
+```ts
+export class SHA256HMAC {
+    inner: SHA256;
+    outer: SHA256;
+    blockSize = 64;
+    outSize = 32;
+    constructor(key: number[] | string) 
+    update(msg: number[] | string, enc?: "hex"): SHA256HMAC 
+    digest(): number[] 
+    digestHex(): string 
+}
+```
+
+See also: [SHA256](#class-sha256)
+
+<details>
+
+<summary>Class SHA256HMAC Details</summary>
+
+#### Constructor
+
+The constructor for the `SHA256HMAC` class.
+
+It initializes the `SHA256HMAC` object and sets up the inner and outer padded keys.
+If the key size is larger than the blockSize, it is digested using SHA-256.
+If the key size is less than the blockSize, it is padded with zeroes.
+
+```ts
+constructor(key: number[] | string) 
+```
+
+Argument Details
+
++ **key**
+  + The key to use to create the HMAC. Can be a number array or a string in hexadecimal format.
+
+Example
+
+```ts
+const myHMAC = new SHA256HMAC('deadbeef');
+```
+
+#### Property blockSize
+
+The block size for the SHA-256 hash function, in bytes. It's set to 64 bytes.
+
+```ts
+blockSize = 64
+```
+
+#### Property inner
+
+Represents the inner hash of SHA-256.
+
+```ts
+inner: SHA256
+```
+See also: [SHA256](#class-sha256)
+
+#### Property outSize
+
+The output size of the SHA-256 hash function, in bytes. It's set to 32 bytes.
+
+```ts
+outSize = 32
+```
+
+#### Property outer
+
+Represents the outer hash of SHA-256.
+
+```ts
+outer: SHA256
+```
+See also: [SHA256](#class-sha256)
+
+#### Method digest
+
+Finalizes the HMAC computation and returns the resultant hash.
+
+```ts
+digest(): number[] 
+```
+
+Returns
+
+Returns the digest of the hashed data. Can be a number array or a string.
+
+Example
+
+```ts
+let hashedMessage = myHMAC.digest();
+```
+
+#### Method digestHex
+
+Finalizes the HMAC computation and returns the resultant hash as a hex string.
+
+```ts
+digestHex(): string 
+```
+
+Returns
+
+Returns the digest of the hashed data as a hex string
+
+Example
+
+```ts
+let hashedMessage = myHMAC.digestHex();
+```
+
+#### Method update
+
+Updates the `SHA256HMAC` object with part of the message to be hashed.
+
+```ts
+update(msg: number[] | string, enc?: "hex"): SHA256HMAC 
+```
+See also: [SHA256HMAC](#class-sha256hmac)
+
+Returns
+
+Returns the instance of `SHA256HMAC` for chaining calls.
+
+Argument Details
+
++ **msg**
+  + Part of the message to hash. Can be a number array or a string.
++ **enc**
+  + If 'hex', then the input is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+
+Example
+
+```ts
+myHMAC.update('deadbeef', 'hex');
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: SHA512
+
+An implementation of SHA512 cryptographic hash function. Extends the BaseHash class.
+It provides a way to compute a 'digest' for any kind of input data; transforming the data
+into a unique output of fixed size. The output is deterministic; it will always be
+the same for the same input.
+
+Example
+
+```ts
+const sha512 = new SHA512();
+```
+
+```ts
+export class SHA512 extends BaseHash {
+    h: number[];
+    W: number[];
+    k: number[];
+    constructor() 
+    _prepareBlock(msg, start) 
+    _update(msg, start) 
+    _digest() 
+    _digestHex() 
+}
+```
+
+<details>
+
+<summary>Class SHA512 Details</summary>
+
+#### Property W
+
+Provides a way to recycle usage of the array memory.
+
+```ts
+W: number[]
+```
+
+#### Property h
+
+The initial hash constants.
+
+```ts
+h: number[]
+```
+
+#### Property k
+
+The round constants used for each round of SHA-512.
+
+```ts
+k: number[]
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: SHA512HMAC
+
+The `SHA512HMAC` class is used to create Hash-based Message Authentication Code (HMAC) using the SHA-512 cryptographic hash function.
+
+HMAC is a specific type of MAC involving a cryptographic hash function and a secret cryptographic key. It may be used to simultaneously verify both the data integrity and the authenticity of a message.
+
+This class also uses the SHA-512 cryptographic hash algorithm that produces a 512-bit (64-byte) hash value.
+
+```ts
+export class SHA512HMAC {
+    inner: SHA512;
+    outer: SHA512;
+    blockSize = 128;
+    outSize = 32;
+    constructor(key: number[] | string) 
+    update(msg: number[] | string, enc?: "hex" | "utf8"): SHA512HMAC 
+    digest(): number[] 
+    digestHex(): string 
+}
+```
+
+See also: [SHA512](#class-sha512)
+
+<details>
+
+<summary>Class SHA512HMAC Details</summary>
+
+#### Constructor
+
+The constructor for the `SHA512HMAC` class.
+
+It initializes the `SHA512HMAC` object and sets up the inner and outer padded keys.
+If the key size is larger than the blockSize, it is digested using SHA-512.
+If the key size is less than the blockSize, it is padded with zeroes.
+
+```ts
+constructor(key: number[] | string) 
+```
+
+Argument Details
+
++ **key**
+  + The key to use to create the HMAC. Can be a number array or a string in hexadecimal format.
+
+Example
+
+```ts
+const myHMAC = new SHA512HMAC('deadbeef');
+```
+
+#### Property blockSize
+
+The block size for the SHA-512 hash function, in bytes. It's set to 128 bytes.
+
+```ts
+blockSize = 128
+```
+
+#### Property inner
+
+Represents the inner hash of SHA-512.
+
+```ts
+inner: SHA512
+```
+See also: [SHA512](#class-sha512)
+
+#### Property outSize
+
+The output size of the SHA-512 hash function, in bytes. It's set to 64 bytes.
+
+```ts
+outSize = 32
+```
+
+#### Property outer
+
+Represents the outer hash of SHA-512.
+
+```ts
+outer: SHA512
+```
+See also: [SHA512](#class-sha512)
+
+#### Method digest
+
+Finalizes the HMAC computation and returns the resultant hash.
+
+```ts
+digest(): number[] 
+```
+
+Returns
+
+Returns the digest of the hashed data as a number array.
+
+Example
+
+```ts
+let hashedMessage = myHMAC.digest();
+```
+
+#### Method digestHex
+
+Finalizes the HMAC computation and returns the resultant hash as a hex string.
+
+```ts
+digestHex(): string 
+```
+
+Returns
+
+Returns the digest of the hashed data as a hex string
+
+Example
+
+```ts
+let hashedMessage = myHMAC.digestHex();
+```
+
+#### Method update
+
+Updates the `SHA512HMAC` object with part of the message to be hashed.
+
+```ts
+update(msg: number[] | string, enc?: "hex" | "utf8"): SHA512HMAC 
+```
+See also: [SHA512HMAC](#class-sha512hmac)
+
+Returns
+
+Returns the instance of `SHA512HMAC` for chaining calls.
+
+Argument Details
+
++ **msg**
+  + Part of the message to hash. Can be a number array or a string.
++ **enc**
+  + If 'hex', then the input is encoded as hexadecimal. If undefined or not 'hex', then no encoding is performed.
+
+Example
+
+```ts
+myHMAC.update('deadbeef', 'hex');
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: Schnorr
+
+Class representing the Schnorr Zero-Knowledge Proof (ZKP) protocol.
+
+This class provides methods to generate and verify proofs that demonstrate knowledge of a secret without revealing it.
+Specifically, it allows one party to prove to another that they know the private key corresponding to a public key
+and have correctly computed a shared secret, without disclosing the private key itself.
+
+The protocol involves two main methods:
+- `generateProof`: Generates a proof linking a public key `A` and a shared secret `S`, proving knowledge of the corresponding private key `a`.
+- `verifyProof`: Verifies the provided proof, ensuring its validity without revealing any secret information.
+
+The class utilizes elliptic curve cryptography (ECC) and the SHA-256 hash function to compute challenges within the proof.
+
+Example
+
+```typescript
+const schnorr = new Schnorr();
+const a = PrivateKey.fromRandom(); // Prover's private key
+const A = a.toPublicKey();         // Prover's public key
+const b = PrivateKey.fromRandom(); // Other party's private key
+const B = b.toPublicKey();         // Other party's public key
+const S = B.mul(a);                // Shared secret
+
+// Prover generates the proof
+const proof = schnorr.generateProof(a, A, B, S);
+
+// Verifier verifies the proof
+const isValid = schnorr.verifyProof(A.point, B.point, S.point, proof);
+console.log(`Proof is valid: ${isValid}`);
+```
+```ts
+export default class Schnorr {
+    constructor() 
+    generateProof(aArg: PrivateKey, AArg: PublicKey, BArg: PublicKey, S: Point): {
+        R: Point;
+        SPrime: Point;
+        z: BigNumber;
+    } 
+    verifyProof(A: Point, B: Point, S: Point, proof: {
+        R: Point;
+        SPrime: Point;
+        z: BigNumber;
+    }): boolean 
+}
+```
+
+See also: [BigNumber](#class-bignumber), [Point](#class-point), [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
+
+<details>
+
+<summary>Class Schnorr Details</summary>
+
+#### Method generateProof
+
+Generates a proof that demonstrates the link between public key A and shared secret S
+
+```ts
+generateProof(aArg: PrivateKey, AArg: PublicKey, BArg: PublicKey, S: Point): {
+    R: Point;
+    SPrime: Point;
+    z: BigNumber;
+} 
+```
+See also: [BigNumber](#class-bignumber), [Point](#class-point), [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
+
+Returns
+
+Proof (R, S', z)
+
+Argument Details
+
++ **a**
+  + Private key corresponding to public key A
++ **A**
+  + Public key
++ **B**
+  + Other party's public key
++ **S**
+  + Shared secret
+
+#### Method verifyProof
+
+Verifies the proof of the link between public key A and shared secret S
+
+```ts
+verifyProof(A: Point, B: Point, S: Point, proof: {
+    R: Point;
+    SPrime: Point;
+    z: BigNumber;
+}): boolean 
+```
+See also: [BigNumber](#class-bignumber), [Point](#class-point)
+
+Returns
+
+True if the proof is valid, false otherwise
+
+Argument Details
+
++ **A**
+  + Public key
++ **B**
+  + Other party's public key
++ **S**
+  + Shared secret
++ **proof**
+  + Proof (R, S', z)
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 ### Class: Signature
 
 Represents a digital signature.
@@ -6140,6 +7255,8 @@ export default class Signature {
 }
 ```
 
+See also: [BigNumber](#class-bignumber), [PublicKey](#class-publickey), [verify](#variable-verify)
+
 <details>
 
 <summary>Class Signature Details</summary>
@@ -6151,6 +7268,7 @@ Creates an instance of the Signature class.
 ```ts
 constructor(r: BigNumber, s: BigNumber) 
 ```
+See also: [BigNumber](#class-bignumber)
 
 Argument Details
 
@@ -6177,6 +7295,7 @@ The recovery factor is a number between 0 and 3.
 ```ts
 CalculateRecoveryFactor(pubkey: PublicKey, msgHash: BigNumber): number 
 ```
+See also: [BigNumber](#class-bignumber), [PublicKey](#class-publickey)
 
 Returns
 
@@ -6204,6 +7323,7 @@ The recovery factor is a number between 0 and 3.
 ```ts
 RecoverPublicKey(recovery: number, e: BigNumber): PublicKey 
 ```
+See also: [BigNumber](#class-bignumber), [PublicKey](#class-publickey)
 
 Returns
 
@@ -6235,6 +7355,7 @@ We could support recovery functions in future if there's demand.
 ```ts
 static fromCompact(data: number[] | string, enc?: "hex" | "base64"): Signature 
 ```
+See also: [Signature](#class-signature)
 
 Returns
 
@@ -6262,6 +7383,7 @@ If a string is provided, it is assumed to represent a hexadecimal sequence.
 ```ts
 static fromDER(data: number[] | string, enc?: "hex" | "base64"): Signature 
 ```
+See also: [Signature](#class-signature)
 
 Returns
 
@@ -6374,6 +7496,7 @@ If the data or key do not match the signature, the function returns false.
 ```ts
 verify(msg: number[] | string, key: PublicKey, enc?: "hex"): boolean 
 ```
+See also: [PublicKey](#class-publickey)
 
 Returns
 
@@ -6401,806 +7524,6 @@ const isVerified = signature.verify(msg, publicKey);
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Class: PointInFiniteField
-
-```ts
-export class PointInFiniteField {
-    x: BigNumber;
-    y: BigNumber;
-    constructor(x: BigNumber, y: BigNumber) 
-    toString(): string 
-    static fromString(str: string): PointInFiniteField 
-}
-```
-
-<details>
-
-<summary>Class PointInFiniteField Details</summary>
-
-#### Method toString
-
-function toString() { [native code] }
-
-```ts
-toString(): string 
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: Polynomial
-
-Polynomial class
-
-This class is used to create a polynomial with a given threshold and a private key.
-The polynomial is used to create shares of the private key.
-
-Example
-
-```ts
-const key = new PrivateKey()
-const threshold = 2
-const polynomial = new Polynomial(key, threshold)
-```
-
-```ts
-export default class Polynomial {
-    readonly points: PointInFiniteField[];
-    readonly threshold: number;
-    constructor(points: PointInFiniteField[], threshold?: number) 
-    static fromPrivateKey(key: PrivateKey, threshold: number): Polynomial 
-    valueAt(x: BigNumber): BigNumber 
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: KeyShares
-
-Example
-
-```ts
-const key = PrivateKey.fromShares(shares)
-```
-
-```ts
-export class KeyShares {
-    points: PointInFiniteField[];
-    threshold: number;
-    integrity: string;
-    constructor(points: PointInFiniteField[], threshold: number, integrity: string) 
-    static fromBackupFormat(shares: string[]): KeyShares 
-    toBackupFormat() 
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: PrivateKey
-
-Represents a Private Key, which is a secret that can be used to generate signatures in a cryptographic system.
-
-The `PrivateKey` class extends from the `BigNumber` class. It offers methods to create signatures, verify them,
-create a corresponding public key and derive a shared secret from a public key.
-
-```ts
-export default class PrivateKey extends BigNumber {
-    static fromRandom(): PrivateKey 
-    static fromString(str: string, base: number | "hex"): PrivateKey 
-    static fromWif(wif: string, prefixLength: number = 1): PrivateKey 
-    constructor(number: BigNumber | number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be", modN: "apply" | "nocheck" | "error" = "apply") 
-    checkInField(): {
-        inField: boolean;
-        modN: BigNumber;
-    } 
-    isValid(): boolean 
-    sign(msg: number[] | string, enc?: "hex" | "utf8", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
-    verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
-    toPublicKey(): PublicKey 
-    toWif(prefix: number[] = [128]): string 
-    toAddress(prefix: number[] | string = [0]): string 
-    deriveSharedSecret(key: PublicKey): Point 
-    deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
-    toKeyShares(threshold: number, totalShares: number): KeyShares 
-    toBackupShares(threshold: number, totalShares: number): string[] 
-    static fromBackupShares(shares: string[]): PrivateKey 
-    static fromKeyShares(keyShares: KeyShares): PrivateKey 
-}
-```
-
-<details>
-
-<summary>Class PrivateKey Details</summary>
-
-#### Constructor
-
-```ts
-constructor(number: BigNumber | number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be", modN: "apply" | "nocheck" | "error" = "apply") 
-```
-
-Argument Details
-
-+ **number**
-  + The number (various types accepted) to construct a BigNumber from. Default is 0.
-+ **base**
-  + The base of number provided. By default is 10. Ignored if number is BigNumber.
-+ **endian**
-  + The endianness provided. By default is 'big endian'. Ignored if number is BigNumber.
-+ **modN**
-  + Optional. Default 'apply. If 'apply', apply modN to input to guarantee a valid PrivateKey. If 'error', if input is out of field throw Error('Input is out of field'). If 'nocheck', assumes input is in field.
-
-Example
-
-```ts
-import PrivateKey from './PrivateKey';
-import BigNumber from './BigNumber';
-const privKey = new PrivateKey(new BigNumber('123456', 10, 'be'));
-```
-
-#### Method checkInField
-
-A utility function to check that the value of this PrivateKey lies in the field limited by curve.n
-
-```ts
-checkInField(): {
-    inField: boolean;
-    modN: BigNumber;
-} 
-```
-
-Returns
-
-, modN } where modN is this PrivateKey's current BigNumber value mod curve.n, and inField is true only if modN equals current BigNumber value.
-
-#### Method deriveChild
-
-Derives a child key with BRC-42.
-
-```ts
-deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
-```
-
-Returns
-
-The derived child key.
-
-Argument Details
-
-+ **publicKey**
-  + The public key of the other party
-+ **invoiceNumber**
-  + The invoice number used to derive the child key
-
-#### Method deriveSharedSecret
-
-Derives a shared secret from the public key.
-
-```ts
-deriveSharedSecret(key: PublicKey): Point 
-```
-
-Returns
-
-The derived shared secret (a point on the curve).
-
-Argument Details
-
-+ **key**
-  + The public key to derive the shared secret from.
-
-Throws
-
-Will throw an error if the public key is not valid.
-
-Example
-
-```ts
-const privateKey = PrivateKey.fromRandom();
-const publicKey = privateKey.toPublicKey();
-const sharedSecret = privateKey.deriveSharedSecret(publicKey);
-```
-
-#### Method fromBackupShares
-
-```ts
-static fromBackupShares(shares: string[]): PrivateKey 
-```
-
-Returns
-
-PrivateKey
-
-Example
-
-```ts
-const share1 = '3znuzt7DZp8HzZTfTh5MF9YQKNX3oSxTbSYmSRGrH2ev.2Nm17qoocmoAhBTCs8TEBxNXCskV9N41rB2PckcgYeqV.2.35449bb9'
-const share2 = 'Cm5fuUc39X5xgdedao8Pr1kvCSm8Gk7Cfenc7xUKcfLX.2juyK9BxCWn2DiY5JUAgj9NsQ77cc9bWksFyW45haXZm.2.35449bb9'
-
-const recoveredKey = PrivateKey.fromBackupShares([share1, share2])
-```
-
-#### Method fromKeyShares
-
-Combines shares to reconstruct the private key.
-
-```ts
-static fromKeyShares(keyShares: KeyShares): PrivateKey 
-```
-
-Returns
-
-The reconstructed private key.
-
-Argument Details
-
-+ **shares**
-  + An array of points (shares) to be used to reconstruct the private key.
-+ **threshold**
-  + The minimum number of shares required to reconstruct the private key.
-
-#### Method fromRandom
-
-Generates a private key randomly.
-
-```ts
-static fromRandom(): PrivateKey 
-```
-
-Returns
-
-The newly generated Private Key.
-
-Example
-
-```ts
-const privateKey = PrivateKey.fromRandom();
-```
-
-#### Method fromString
-
-Generates a private key from a string.
-
-```ts
-static fromString(str: string, base: number | "hex"): PrivateKey 
-```
-
-Returns
-
-The generated Private Key.
-
-Argument Details
-
-+ **str**
-  + The string to generate the private key from.
-+ **base**
-  + The base of the string.
-
-Throws
-
-Will throw an error if the string is not valid.
-
-#### Method fromWif
-
-Generates a private key from a WIF (Wallet Import Format) string.
-
-```ts
-static fromWif(wif: string, prefixLength: number = 1): PrivateKey 
-```
-
-Returns
-
-The generated Private Key.
-
-Argument Details
-
-+ **wif**
-  + The WIF string to generate the private key from.
-+ **base**
-  + The base of the string.
-
-Throws
-
-Will throw an error if the string is not a valid WIF.
-
-#### Method isValid
-
-```ts
-isValid(): boolean 
-```
-
-Returns
-
-true if the PrivateKey's current BigNumber value lies in the field limited by curve.n
-
-#### Method sign
-
-Signs a message using the private key.
-
-```ts
-sign(msg: number[] | string, enc?: "hex" | "utf8", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
-```
-
-Returns
-
-A digital signature generated from the hash of the message and the private key.
-
-Argument Details
-
-+ **msg**
-  + The message (array of numbers or string) to be signed.
-+ **enc**
-  + If 'hex' the string will be treated as hex, utf8 otherwise.
-+ **forceLowS**
-  + If true (the default), the signature will be forced to have a low S value.
-+ **customK**
-  + — If provided, uses a custom K-value for the signature. Provie a function that returns a BigNumber, or the BigNumber itself.
-
-Example
-
-```ts
-const privateKey = PrivateKey.fromRandom();
-const signature = privateKey.sign('Hello, World!');
-```
-
-#### Method toAddress
-
-Base58Check encodes the hash of the public key associated with this private key with a prefix to indicate locking script type.
-Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
-
-```ts
-toAddress(prefix: number[] | string = [0]): string 
-```
-
-Returns
-
-Returns the address encoding associated with the hash of the public key associated with this private key.
-
-Argument Details
-
-+ **prefix**
-  + defaults to [0x00] for mainnet, set to [0x6f] for testnet or use the strings 'testnet' or 'mainnet'
-
-Example
-
-```ts
-const address = privkey.toAddress()
-const address = privkey.toAddress('mainnet')
-const testnetAddress = privkey.toAddress([0x6f])
-const testnetAddress = privkey.toAddress('testnet')
-```
-
-#### Method toBackupShares
-
-```ts
-toBackupShares(threshold: number, totalShares: number): string[] 
-```
-
-Argument Details
-
-+ **threshold**
-  + The number of shares which will be required to reconstruct the private key.
-+ **totalShares**
-  + The number of shares to generate for distribution.
-
-#### Method toKeyShares
-
-Splits the private key into shares using Shamir's Secret Sharing Scheme.
-
-```ts
-toKeyShares(threshold: number, totalShares: number): KeyShares 
-```
-
-Returns
-
-An array of shares.
-
-Argument Details
-
-+ **threshold**
-  + The minimum number of shares required to reconstruct the private key.
-+ **totalShares**
-  + The total number of shares to generate.
-+ **prime**
-  + The prime number to be used in Shamir's Secret Sharing Scheme.
-
-Example
-
-```ts
-const key = PrivateKey.fromRandom()
-const shares = key.toKeyShares(2, 5)
-```
-
-#### Method toPublicKey
-
-Converts the private key to its corresponding public key.
-
-The public key is generated by multiplying the base point G of the curve and the private key.
-
-```ts
-toPublicKey(): PublicKey 
-```
-
-Returns
-
-The generated PublicKey.
-
-Example
-
-```ts
-const privateKey = PrivateKey.fromRandom();
-const publicKey = privateKey.toPublicKey();
-```
-
-#### Method toWif
-
-Converts the private key to a Wallet Import Format (WIF) string.
-
-Base58Check encoding is used for encoding the private key.
-The prefix
-
-```ts
-toWif(prefix: number[] = [128]): string 
-```
-
-Returns
-
-The WIF string.
-
-Argument Details
-
-+ **prefix**
-  + defaults to [0x80] for mainnet, set it to [0xef] for testnet.
-
-Throws
-
-Error('Value is out of field') if current BigNumber value is out of field limited by curve.n
-
-Example
-
-```ts
-const privateKey = PrivateKey.fromRandom();
-const wif = privateKey.toWif();
-const testnetWif = privateKey.toWif([0xef]);
-```
-
-#### Method verify
-
-Verifies a message's signature using the public key associated with this private key.
-
-```ts
-verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
-```
-
-Returns
-
-Whether or not the signature is valid.
-
-Argument Details
-
-+ **msg**
-  + The original message which has been signed.
-+ **sig**
-  + The signature to be verified.
-+ **enc**
-  + The data encoding method.
-
-Example
-
-```ts
-const privateKey = PrivateKey.fromRandom();
-const signature = privateKey.sign('Hello, World!');
-const isSignatureValid = privateKey.verify('Hello, World!', signature);
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: PublicKey
-
-The PublicKey class extends the Point class. It is used in public-key cryptography to derive shared secret, verify message signatures, and encode the public key in the DER format.
-The class comes with static methods to generate PublicKey instances from private keys or from strings.
-
-```ts
-export default class PublicKey extends Point {
-    static fromPrivateKey(key: PrivateKey): PublicKey 
-    static fromString(str: string): PublicKey 
-    static fromDER(bytes: number[]): PublicKey 
-    constructor(x: Point | BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null = null, isRed: boolean = true) 
-    deriveSharedSecret(priv: PrivateKey): Point 
-    verify(msg: number[] | string, sig: Signature, enc?: "hex" | "utf8"): boolean 
-    toDER(enc?: "hex" | undefined): number[] | string 
-    toHash(enc?: "hex"): number[] | string 
-    toAddress(prefix: number[] | string = [0]): string 
-    deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey 
-    static fromMsgHashAndCompactSignature(msgHash: BigNumber, signature: number[] | string, enc?: "hex" | "base64"): PublicKey 
-}
-```
-
-<details>
-
-<summary>Class PublicKey Details</summary>
-
-#### Constructor
-
-```ts
-constructor(x: Point | BigNumber | number | number[] | string | null, y: BigNumber | number | number[] | string | null = null, isRed: boolean = true) 
-```
-
-Argument Details
-
-+ **x**
-  + A point or the x-coordinate of the point. May be a number, a BigNumber, a string (which will be interpreted as hex), a number array, or null. If null, an "Infinity" point is constructed.
-+ **y**
-  + If x is not a point, the y-coordinate of the point, similar to x.
-+ **isRed**
-  + A boolean indicating if the point is a member of the field of integers modulo the k256 prime. Default is true.
-
-Example
-
-```ts
-new PublicKey(point1);
-new PublicKey('abc123', 'def456');
-```
-
-#### Method deriveChild
-
-Derives a child key with BRC-42.
-
-```ts
-deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey 
-```
-
-Returns
-
-The derived child key.
-
-Argument Details
-
-+ **privateKey**
-  + The private key of the other party
-+ **invoiceNumber**
-  + The invoice number used to derive the child key
-
-#### Method deriveSharedSecret
-
-Derive a shared secret from a public key and a private key for use in symmetric encryption.
-This method multiplies the public key (an instance of Point) with a private key.
-
-```ts
-deriveSharedSecret(priv: PrivateKey): Point 
-```
-
-Returns
-
-Returns the Point representing the shared secret.
-
-Argument Details
-
-+ **priv**
-  + The private key to use in deriving the shared secret.
-
-Throws
-
-Will throw an error if the public key is not valid for ECDH secret derivation.
-
-Example
-
-```ts
-const myPrivKey = new PrivateKey(...)
-const sharedSecret = myPubKey.deriveSharedSecret(myPrivKey)
-```
-
-#### Method fromDER
-
-Static factory method to create a PublicKey instance from a number array.
-
-```ts
-static fromDER(bytes: number[]): PublicKey 
-```
-
-Returns
-
-Returns the PublicKey created from the number array.
-
-Argument Details
-
-+ **bytes**
-  + A number array representing a public key.
-
-Example
-
-```ts
-const myPubKey = PublicKey.fromString("03....")
-```
-
-#### Method fromMsgHashAndCompactSignature
-
-Takes an array of numbers or a string and returns a new PublicKey instance.
-This method will throw an error if the Compact encoding is invalid.
-If a string is provided, it is assumed to represent a hexadecimal sequence.
-compactByte value 27-30 means uncompressed public key.
-31-34 means compressed public key.
-The range represents the recovery param which can be 0,1,2,3.
-
-```ts
-static fromMsgHashAndCompactSignature(msgHash: BigNumber, signature: number[] | string, enc?: "hex" | "base64"): PublicKey 
-```
-
-Returns
-
-A PublicKey instance derived from the message hash and compact signature.
-
-Argument Details
-
-+ **msgHash**
-  + The message hash which was signed.
-+ **signature**
-  + The signature in compact format.
-+ **enc**
-  + The encoding of the signature string.
-
-Example
-
-```ts
-const publicKey = Signature.fromMsgHashAndCompactSignature(msgHash, 'IMOl2mVKfDgsSsHT4uIYBNN4e...', 'base64');
-```
-
-#### Method fromPrivateKey
-
-Static factory method to derive a public key from a private key.
-It multiplies the generator point 'g' on the elliptic curve by the private key.
-
-```ts
-static fromPrivateKey(key: PrivateKey): PublicKey 
-```
-
-Returns
-
-Returns the PublicKey derived from the given PrivateKey.
-
-Argument Details
-
-+ **key**
-  + The private key from which to derive the public key.
-
-Example
-
-```ts
-const myPrivKey = new PrivateKey(...)
-const myPubKey = PublicKey.fromPrivateKey(myPrivKey)
-```
-
-#### Method fromString
-
-Static factory method to create a PublicKey instance from a string.
-
-```ts
-static fromString(str: string): PublicKey 
-```
-
-Returns
-
-Returns the PublicKey created from the string.
-
-Argument Details
-
-+ **str**
-  + A string representing a public key.
-
-Example
-
-```ts
-const myPubKey = PublicKey.fromString("03....")
-```
-
-#### Method toAddress
-
-Base58Check encodes the hash of the public key with a prefix to indicate locking script type.
-Defaults to P2PKH for mainnet, otherwise known as a "Bitcoin Address".
-
-```ts
-toAddress(prefix: number[] | string = [0]): string 
-```
-
-Returns
-
-Returns the address encoding associated with the hash of the public key.
-
-Argument Details
-
-+ **prefix**
-  + defaults to [0x00] for mainnet, set to [0x6f] for testnet or use the strings 'mainnet' or 'testnet'
-
-Example
-
-```ts
-const address = pubkey.toAddress()
-const address = pubkey.toAddress('mainnet')
-const testnetAddress = pubkey.toAddress([0x6f])
-const testnetAddress = pubkey.toAddress('testnet')
-```
-
-#### Method toDER
-
-Encode the public key to DER (Distinguished Encoding Rules) format.
-
-```ts
-toDER(enc?: "hex" | undefined): number[] | string 
-```
-
-Returns
-
-Returns the DER-encoded public key in number array or string.
-
-Argument Details
-
-+ **enc**
-  + The encoding of the DER string. undefined = number array, 'hex' = hex string.
-
-Example
-
-```ts
-const derPublicKey = myPubKey.toDER()
-```
-
-#### Method toHash
-
-Hash sha256 and ripemd160 of the public key.
-
-```ts
-toHash(enc?: "hex"): number[] | string 
-```
-
-Returns
-
-Returns the hash of the public key.
-
-Example
-
-```ts
-const publicKeyHash = pubkey.toHash()
-```
-
-#### Method verify
-
-Verify a signature of a message using this public key.
-
-```ts
-verify(msg: number[] | string, sig: Signature, enc?: "hex" | "utf8"): boolean 
-```
-
-Returns
-
-Returns true if the signature is verified successfully, otherwise false.
-
-Argument Details
-
-+ **msg**
-  + The message to verify. It can be a string or an array of numbers.
-+ **sig**
-  + The Signature of the message that needs verification.
-+ **enc**
-  + The encoding of the message. It defaults to 'utf8'.
-
-Example
-
-```ts
-const myMessage = "Hello, world!"
-const mySignature = new Signature(...)
-const isVerified = myPubKey.verify(myMessage, mySignature)
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
 ### Class: SymmetricKey
 
 `SymmetricKey` is a class that extends the `BigNumber` class and implements symmetric encryption and decryption methods.
@@ -7214,6 +7537,8 @@ export default class SymmetricKey extends BigNumber {
     decrypt(msg: number[] | string, enc?: "hex" | "utf8"): string | number[] 
 }
 ```
+
+See also: [BigNumber](#class-bignumber)
 
 <details>
 
@@ -7286,6 +7611,7 @@ Generates a symmetric key randomly.
 ```ts
 static fromRandom(): SymmetricKey 
 ```
+See also: [SymmetricKey](#class-symmetrickey)
 
 Returns
 
@@ -7332,6 +7658,8 @@ export default class TransactionSignature extends Signature {
 }
 ```
 
+See also: [BigNumber](#class-bignumber), [Script](#class-script), [Signature](#class-signature), [TransactionInput](#interface-transactioninput), [TransactionOutput](#interface-transactionoutput)
+
 <details>
 
 <summary>Class TransactionSignature Details</summary>
@@ -7351,112 +7679,37 @@ public hasLowS(): boolean
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Class: Schnorr
+### Class: Writer
 
-Class representing the Schnorr Zero-Knowledge Proof (ZKP) protocol.
-
-This class provides methods to generate and verify proofs that demonstrate knowledge of a secret without revealing it.
-Specifically, it allows one party to prove to another that they know the private key corresponding to a public key
-and have correctly computed a shared secret, without disclosing the private key itself.
-
-The protocol involves two main methods:
-- `generateProof`: Generates a proof linking a public key `A` and a shared secret `S`, proving knowledge of the corresponding private key `a`.
-- `verifyProof`: Verifies the provided proof, ensuring its validity without revealing any secret information.
-
-The class utilizes elliptic curve cryptography (ECC) and the SHA-256 hash function to compute challenges within the proof.
-
-Example
-
-```typescript
-const schnorr = new Schnorr();
-const a = PrivateKey.fromRandom(); // Prover's private key
-const A = a.toPublicKey();         // Prover's public key
-const b = PrivateKey.fromRandom(); // Other party's private key
-const B = b.toPublicKey();         // Other party's public key
-const S = B.mul(a);                // Shared secret
-
-// Prover generates the proof
-const proof = schnorr.generateProof(a, A, B, S);
-
-// Verifier verifies the proof
-const isValid = schnorr.verifyProof(A.point, B.point, S.point, proof);
-console.log(`Proof is valid: ${isValid}`);
-```
 ```ts
-export default class Schnorr {
-    constructor() 
-    generateProof(aArg: PrivateKey, AArg: PublicKey, BArg: PublicKey, S: Point): {
-        R: Point;
-        SPrime: Point;
-        z: BigNumber;
-    } 
-    verifyProof(A: Point, B: Point, S: Point, proof: {
-        R: Point;
-        SPrime: Point;
-        z: BigNumber;
-    }): boolean 
+export class Writer {
+    public bufs: number[][];
+    constructor(bufs?: number[][]) 
+    getLength(): number 
+    toArray(): number[] 
+    write(buf: number[]): Writer 
+    writeReverse(buf: number[]): Writer 
+    writeUInt8(n: number): Writer 
+    writeInt8(n: number): Writer 
+    writeUInt16BE(n: number): Writer 
+    writeInt16BE(n: number): Writer 
+    writeUInt16LE(n: number): Writer 
+    writeInt16LE(n: number): Writer 
+    writeUInt32BE(n: number): Writer 
+    writeInt32BE(n: number): Writer 
+    writeUInt32LE(n: number): Writer 
+    writeInt32LE(n: number): Writer 
+    writeUInt64BEBn(bn: BigNumber): Writer 
+    writeUInt64LEBn(bn: BigNumber): Writer 
+    writeUInt64LE(n: number): Writer 
+    writeVarIntNum(n: number): Writer 
+    writeVarIntBn(bn: BigNumber): Writer 
+    static varIntNum(n: number): number[] 
+    static varIntBn(bn: BigNumber): number[] 
 }
 ```
 
-<details>
-
-<summary>Class Schnorr Details</summary>
-
-#### Method generateProof
-
-Generates a proof that demonstrates the link between public key A and shared secret S
-
-```ts
-generateProof(aArg: PrivateKey, AArg: PublicKey, BArg: PublicKey, S: Point): {
-    R: Point;
-    SPrime: Point;
-    z: BigNumber;
-} 
-```
-
-Returns
-
-Proof (R, S', z)
-
-Argument Details
-
-+ **a**
-  + Private key corresponding to public key A
-+ **A**
-  + Public key
-+ **B**
-  + Other party's public key
-+ **S**
-  + Shared secret
-
-#### Method verifyProof
-
-Verifies the proof of the link between public key A and shared secret S
-
-```ts
-verifyProof(A: Point, B: Point, S: Point, proof: {
-    R: Point;
-    SPrime: Point;
-    z: BigNumber;
-}): boolean 
-```
-
-Returns
-
-True if the proof is valid, false otherwise
-
-Argument Details
-
-+ **A**
-  + Public key
-+ **B**
-  + Other party's public key
-+ **S**
-  + Shared secret
-+ **proof**
-  + Proof (R, S', z)
-
-</details>
+See also: [BigNumber](#class-bignumber), [toArray](#variable-toarray)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -7477,26 +7730,41 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ---
 
-### Function: toArray
+### Function: AES
 
 ```ts
-export function toArray(msg: number[] | string, enc?: "hex" | "utf8"): number[] 
+export function AES(input: number[], key: number[]): number[] 
 ```
 
-<details>
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
-<summary>Function toArray Details</summary>
+---
+### Function: AESGCM
 
-Returns
+```ts
+export function AESGCM(plainText: number[], additionalAuthenticatedData: number[], initializationVector: number[], key: number[]): {
+    result: number[];
+    authenticationTag: number[];
+} 
+```
 
-array of byte values from msg. If msg is an array, a copy is returned.
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
-Argument Details
+---
+### Function: AESGCMDecrypt
 
-+ **enc**
-  + Optional. Encoding to use if msg is string. Default is 'utf8'.
+```ts
+export function AESGCMDecrypt(cipherText: number[], additionalAuthenticatedData: number[], initializationVector: number[], authenticationTag: number[], key: number[]): number[] | null 
+```
 
-</details>
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Function: ghash
+
+```ts
+export function ghash(input: number[], hashSubKey: number[]): number[] 
+```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -7529,6 +7797,30 @@ Argument Details
   + The length of the key
 + **digest**
   + The digest (must be sha512 for this implementation)
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Function: toArray
+
+```ts
+export function toArray(msg: number[] | string, enc?: "hex" | "utf8"): number[] 
+```
+
+<details>
+
+<summary>Function toArray Details</summary>
+
+Returns
+
+array of byte values from msg. If msg is an array, a copy is returned.
+
+Argument Details
+
++ **enc**
+  + Optional. Encoding to use if msg is string. Default is 'utf8'.
 
 </details>
 
@@ -7568,45 +7860,6 @@ Argument Details
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Function: AES
-
-```ts
-export function AES(input: number[], key: number[]): number[] 
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Function: ghash
-
-```ts
-export function ghash(input: number[], hashSubKey: number[]): number[] 
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Function: AESGCM
-
-```ts
-export function AESGCM(plainText: number[], additionalAuthenticatedData: number[], initializationVector: number[], key: number[]): {
-    result: number[];
-    authenticationTag: number[];
-} 
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Function: AESGCMDecrypt
-
-```ts
-export function AESGCMDecrypt(cipherText: number[], additionalAuthenticatedData: number[], initializationVector: number[], authenticationTag: number[], key: number[]): number[] | null 
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
 ## Types
 
 ## Variables
@@ -7627,221 +7880,11 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ---
 
-### Variable: ripemd160
+### Variable: checkBit
 
 ```ts
-ripemd160 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
-    return new RIPEMD160().update(msg, enc).digest();
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: sha1
-
-```ts
-sha1 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
-    return new SHA1().update(msg, enc).digest();
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: sha256
-
-```ts
-sha256 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
-    return new SHA256().update(msg, enc).digest();
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: sha512
-
-```ts
-sha512 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
-    return new SHA512().update(msg, enc).digest();
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: hash256
-
-```ts
-hash256 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
-    const first = new SHA256().update(msg, enc).digest();
-    return new SHA256().update(first).digest();
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: hash160
-
-```ts
-hash160 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
-    const first = new SHA256().update(msg, enc).digest();
-    return new RIPEMD160().update(first).digest();
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: sha256hmac
-
-```ts
-sha256hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): number[] => {
-    return new SHA256HMAC(key).update(msg, enc).digest();
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: sha512hmac
-
-```ts
-sha512hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): number[] => {
-    return new SHA512HMAC(key).update(msg, enc).digest();
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: zero2
-
-```ts
-zero2 = (word: string): string => {
-    if (word.length % 2 === 1) {
-        return "0" + word;
-    }
-    else {
-        return word;
-    }
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: toHex
-
-```ts
-toHex = (msg: number[]): string => {
-    let res = "";
-    for (let i = 0; i < msg.length; i++) {
-        res += zero2(msg[i].toString(16));
-    }
-    return res;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: toArray
-
-```ts
-toArray = (msg: any, enc?: "hex" | "utf8" | "base64"): any[] => {
-    if (Array.isArray(msg)) {
-        return msg.slice();
-    }
-    if (!(msg as boolean)) {
-        return [];
-    }
-    const res: any[] = [];
-    if (typeof msg !== "string") {
-        for (let i = 0; i < msg.length; i++) {
-            res[i] = msg[i] | 0;
-        }
-        return res;
-    }
-    if (enc === "hex") {
-        msg = msg.replace(/[^a-z0-9]+/ig, "");
-        if (msg.length % 2 !== 0) {
-            msg = "0" + (msg as string);
-        }
-        for (let i = 0; i < msg.length; i += 2) {
-            res.push(parseInt((msg[i] as string) + (msg[i + 1] as string), 16));
-        }
-    }
-    else if (enc === "base64") {
-        const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-        const result: number[] = [];
-        let currentBit: number = 0;
-        let currentByte: number = 0;
-        for (const char of msg.replace(/=+$/, "")) {
-            currentBit = (currentBit << 6) | base64Chars.indexOf(char);
-            currentByte += 6;
-            if (currentByte >= 8) {
-                currentByte -= 8;
-                result.push((currentBit >> currentByte) & 255);
-                currentBit &= (1 << currentByte) - 1;
-            }
-        }
-        return result;
-    }
-    else {
-        for (let i = 0; i < msg.length; i++) {
-            const c = msg.charCodeAt(i);
-            const hi = c >> 8;
-            const lo = c & 255;
-            if (hi as unknown as boolean) {
-                res.push(hi, lo);
-            }
-            else {
-                res.push(lo);
-            }
-        }
-    }
-    return res;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: toUTF8
-
-```ts
-toUTF8 = (arr: number[]): string => {
-    let result = "";
-    for (let i = 0; i < arr.length; i++) {
-        const byte = arr[i];
-        if (byte <= 127) {
-            result += String.fromCharCode(byte);
-        }
-        else if (byte >= 192 && byte <= 223) {
-            const byte2 = arr[++i];
-            const codePoint = ((byte & 31) << 6) | (byte2 & 63);
-            result += String.fromCharCode(codePoint);
-        }
-        else if (byte >= 224 && byte <= 239) {
-            const byte2 = arr[++i];
-            const byte3 = arr[++i];
-            const codePoint = ((byte & 15) << 12) | ((byte2 & 63) << 6) | (byte3 & 63);
-            result += String.fromCharCode(codePoint);
-        }
-        else if (byte >= 240 && byte <= 247) {
-            const byte2 = arr[++i];
-            const byte3 = arr[++i];
-            const byte4 = arr[++i];
-            const codePoint = ((byte & 7) << 18) | ((byte2 & 63) << 12) | ((byte3 & 63) << 6) | (byte4 & 63);
-            const surrogate1 = 55296 + ((codePoint - 65536) >> 10);
-            const surrogate2 = 56320 + ((codePoint - 65536) & 1023);
-            result += String.fromCharCode(surrogate1, surrogate2);
-        }
-    }
-    return result;
+checkBit = function (byteArray: number[], byteIndex: number, bitIndex: number): 1 | 0 {
+    return (byteArray[byteIndex] & (1 << bitIndex)) !== 0 ? 1 : 0;
 }
 ```
 
@@ -7860,6 +7903,24 @@ encode = (arr: number[], enc?: "hex" | "utf8"): string | number[] => {
         default:
             return arr;
     }
+}
+```
+
+See also: [toHex](#variable-tohex), [toUTF8](#variable-toutf8)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: exclusiveOR
+
+```ts
+exclusiveOR = function (block0: number[], block1: number[]): number[] {
+    let i;
+    const result = [];
+    for (i = 0; i < block0.length; i++) {
+        result[i] = block0[i] ^ block1[i];
+    }
+    return result;
 }
 ```
 
@@ -7902,54 +7963,6 @@ fromBase58 = (str: string): number[] => {
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Variable: toBase58
-
-```ts
-toBase58 = (bin: number[]): string => {
-    const base58Map = Array(256).fill(-1);
-    for (let i = 0; i < base58chars.length; ++i) {
-        base58Map[base58chars.charCodeAt(i)] = i;
-    }
-    const result = [];
-    for (const byte of bin) {
-        let carry = byte;
-        for (let j = 0; j < result.length; ++j) {
-            const x = (base58Map[result[j]] << 8) + carry;
-            result[j] = base58chars.charCodeAt(x % 58);
-            carry = (x / 58) | 0;
-        }
-        while (carry) {
-            result.push(base58chars.charCodeAt(carry % 58));
-            carry = (carry / 58) | 0;
-        }
-    }
-    for (const byte of bin) {
-        if (byte)
-            break;
-        else
-            result.push("1".charCodeAt(0));
-    }
-    result.reverse();
-    return String.fromCharCode(...result);
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: toBase58Check
-
-```ts
-toBase58Check = (bin: number[], prefix: number[] = [0]) => {
-    let hash = hash256([...prefix, ...bin]);
-    hash = [...prefix, ...bin, ...hash.slice(0, 4)];
-    return toBase58(hash);
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
 ### Variable: fromBase58Check
 
 ```ts
@@ -7969,6 +7982,74 @@ fromBase58Check = (str: string, enc?: "hex", prefixLength: number = 1) => {
         data = toHex(data);
     }
     return { prefix, data };
+}
+```
+
+See also: [fromBase58](#variable-frombase58), [hash256](#variable-hash256), [toHex](#variable-tohex)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: getBytes
+
+```ts
+getBytes = function (numericValue: number): number[] {
+    return [
+        (numericValue & 4278190080) >>> 24,
+        (numericValue & 16711680) >> 16,
+        (numericValue & 65280) >> 8,
+        numericValue & 255
+    ];
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: hash160
+
+```ts
+hash160 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
+    const first = new SHA256().update(msg, enc).digest();
+    return new RIPEMD160().update(first).digest();
+}
+```
+
+See also: [RIPEMD160](#class-ripemd160), [SHA256](#class-sha256)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: hash256
+
+```ts
+hash256 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
+    const first = new SHA256().update(msg, enc).digest();
+    return new SHA256().update(first).digest();
+}
+```
+
+See also: [SHA256](#class-sha256)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: incrementLeastSignificantThirtyTwoBits
+
+```ts
+incrementLeastSignificantThirtyTwoBits = function (block: number[]): number[] {
+    let i;
+    const result = block.slice();
+    for (i = 15; i !== 11; i--) {
+        result[i] = result[i] + 1;
+        if (result[i] === 256) {
+            result[i] = 0;
+        }
+        else {
+            break;
+        }
+    }
+    return result;
 }
 ```
 
@@ -8006,6 +8087,136 @@ minimallyEncode = (buf: number[]): number[] => {
     return [];
 }
 ```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: multiply
+
+```ts
+multiply = function (block0: number[], block1: number[]): number[] {
+    let i;
+    let j;
+    let v = block1.slice();
+    let z = createZeroBlock(16);
+    for (i = 0; i < 16; i++) {
+        for (j = 7; j !== -1; j--) {
+            if (checkBit(block0, i, j) !== 0) {
+                z = exclusiveOR(z, v);
+            }
+            if (checkBit(v, 15, 0) !== 0) {
+                v = exclusiveOR(rightShift(v), R);
+            }
+            else {
+                v = rightShift(v);
+            }
+        }
+    }
+    return z;
+}
+```
+
+See also: [checkBit](#variable-checkbit), [exclusiveOR](#variable-exclusiveor), [rightShift](#variable-rightshift)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: rightShift
+
+```ts
+rightShift = function (block: number[]): number[] {
+    let i: number;
+    let carry = 0;
+    let oldCarry = 0;
+    for (i = 0; i < block.length; i++) {
+        oldCarry = carry;
+        carry = block[i] & 1;
+        block[i] = block[i] >> 1;
+        if (oldCarry !== 0) {
+            block[i] = block[i] | 128;
+        }
+    }
+    return block;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: ripemd160
+
+```ts
+ripemd160 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
+    return new RIPEMD160().update(msg, enc).digest();
+}
+```
+
+See also: [RIPEMD160](#class-ripemd160)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: sha1
+
+```ts
+sha1 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
+    return new SHA1().update(msg, enc).digest();
+}
+```
+
+See also: [SHA1](#class-sha1)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: sha256
+
+```ts
+sha256 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
+    return new SHA256().update(msg, enc).digest();
+}
+```
+
+See also: [SHA256](#class-sha256)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: sha256hmac
+
+```ts
+sha256hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): number[] => {
+    return new SHA256HMAC(key).update(msg, enc).digest();
+}
+```
+
+See also: [SHA256HMAC](#class-sha256hmac)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: sha512
+
+```ts
+sha512 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
+    return new SHA512().update(msg, enc).digest();
+}
+```
+
+See also: [SHA512](#class-sha512)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: sha512hmac
+
+```ts
+sha512hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): number[] => {
+    return new SHA512HMAC(key).update(msg, enc).digest();
+}
+```
+
+See also: [SHA512HMAC](#class-sha512hmac)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -8253,6 +8464,175 @@ sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: Bi
 }
 ```
 
+See also: [BigNumber](#class-bignumber), [Curve](#class-curve), [DRBG](#class-drbg), [Signature](#class-signature), [toArray](#variable-toarray)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: toArray
+
+```ts
+toArray = (msg: any, enc?: "hex" | "utf8" | "base64"): any[] => {
+    if (Array.isArray(msg)) {
+        return msg.slice();
+    }
+    if (!(msg as boolean)) {
+        return [];
+    }
+    const res: any[] = [];
+    if (typeof msg !== "string") {
+        for (let i = 0; i < msg.length; i++) {
+            res[i] = msg[i] | 0;
+        }
+        return res;
+    }
+    if (enc === "hex") {
+        msg = msg.replace(/[^a-z0-9]+/ig, "");
+        if (msg.length % 2 !== 0) {
+            msg = "0" + (msg as string);
+        }
+        for (let i = 0; i < msg.length; i += 2) {
+            res.push(parseInt((msg[i] as string) + (msg[i + 1] as string), 16));
+        }
+    }
+    else if (enc === "base64") {
+        const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        const result: number[] = [];
+        let currentBit: number = 0;
+        let currentByte: number = 0;
+        for (const char of msg.replace(/=+$/, "")) {
+            currentBit = (currentBit << 6) | base64Chars.indexOf(char);
+            currentByte += 6;
+            if (currentByte >= 8) {
+                currentByte -= 8;
+                result.push((currentBit >> currentByte) & 255);
+                currentBit &= (1 << currentByte) - 1;
+            }
+        }
+        return result;
+    }
+    else {
+        for (let i = 0; i < msg.length; i++) {
+            const c = msg.charCodeAt(i);
+            const hi = c >> 8;
+            const lo = c & 255;
+            if (hi as unknown as boolean) {
+                res.push(hi, lo);
+            }
+            else {
+                res.push(lo);
+            }
+        }
+    }
+    return res;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: toBase58
+
+```ts
+toBase58 = (bin: number[]): string => {
+    const base58Map = Array(256).fill(-1);
+    for (let i = 0; i < base58chars.length; ++i) {
+        base58Map[base58chars.charCodeAt(i)] = i;
+    }
+    const result = [];
+    for (const byte of bin) {
+        let carry = byte;
+        for (let j = 0; j < result.length; ++j) {
+            const x = (base58Map[result[j]] << 8) + carry;
+            result[j] = base58chars.charCodeAt(x % 58);
+            carry = (x / 58) | 0;
+        }
+        while (carry) {
+            result.push(base58chars.charCodeAt(carry % 58));
+            carry = (carry / 58) | 0;
+        }
+    }
+    for (const byte of bin) {
+        if (byte)
+            break;
+        else
+            result.push("1".charCodeAt(0));
+    }
+    result.reverse();
+    return String.fromCharCode(...result);
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: toBase58Check
+
+```ts
+toBase58Check = (bin: number[], prefix: number[] = [0]) => {
+    let hash = hash256([...prefix, ...bin]);
+    hash = [...prefix, ...bin, ...hash.slice(0, 4)];
+    return toBase58(hash);
+}
+```
+
+See also: [hash256](#variable-hash256), [toBase58](#variable-tobase58)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: toHex
+
+```ts
+toHex = (msg: number[]): string => {
+    let res = "";
+    for (let i = 0; i < msg.length; i++) {
+        res += zero2(msg[i].toString(16));
+    }
+    return res;
+}
+```
+
+See also: [zero2](#variable-zero2)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Variable: toUTF8
+
+```ts
+toUTF8 = (arr: number[]): string => {
+    let result = "";
+    for (let i = 0; i < arr.length; i++) {
+        const byte = arr[i];
+        if (byte <= 127) {
+            result += String.fromCharCode(byte);
+        }
+        else if (byte >= 192 && byte <= 223) {
+            const byte2 = arr[++i];
+            const codePoint = ((byte & 31) << 6) | (byte2 & 63);
+            result += String.fromCharCode(codePoint);
+        }
+        else if (byte >= 224 && byte <= 239) {
+            const byte2 = arr[++i];
+            const byte3 = arr[++i];
+            const codePoint = ((byte & 15) << 12) | ((byte2 & 63) << 6) | (byte3 & 63);
+            result += String.fromCharCode(codePoint);
+        }
+        else if (byte >= 240 && byte <= 247) {
+            const byte2 = arr[++i];
+            const byte3 = arr[++i];
+            const byte4 = arr[++i];
+            const codePoint = ((byte & 7) << 18) | ((byte2 & 63) << 12) | ((byte3 & 63) << 6) | (byte4 & 63);
+            const surrogate1 = 55296 + ((codePoint - 65536) >> 10);
+            const surrogate2 = 56320 + ((codePoint - 65536) & 1023);
+            result += String.fromCharCode(surrogate1, surrogate2);
+        }
+    }
+    return result;
+}
+```
+
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
@@ -8418,118 +8798,21 @@ verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: checkBit
-
-```ts
-checkBit = function (byteArray: number[], byteIndex: number, bitIndex: number): 1 | 0 {
-    return (byteArray[byteIndex] & (1 << bitIndex)) !== 0 ? 1 : 0;
-}
-```
+See also: [BigNumber](#class-bignumber), [Curve](#class-curve), [JacobianPoint](#class-jacobianpoint), [Point](#class-point), [Signature](#class-signature)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Variable: getBytes
+### Variable: zero2
 
 ```ts
-getBytes = function (numericValue: number): number[] {
-    return [
-        (numericValue & 4278190080) >>> 24,
-        (numericValue & 16711680) >> 16,
-        (numericValue & 65280) >> 8,
-        numericValue & 255
-    ];
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: exclusiveOR
-
-```ts
-exclusiveOR = function (block0: number[], block1: number[]): number[] {
-    let i;
-    const result = [];
-    for (i = 0; i < block0.length; i++) {
-        result[i] = block0[i] ^ block1[i];
+zero2 = (word: string): string => {
+    if (word.length % 2 === 1) {
+        return "0" + word;
     }
-    return result;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: rightShift
-
-```ts
-rightShift = function (block: number[]): number[] {
-    let i: number;
-    let carry = 0;
-    let oldCarry = 0;
-    for (i = 0; i < block.length; i++) {
-        oldCarry = carry;
-        carry = block[i] & 1;
-        block[i] = block[i] >> 1;
-        if (oldCarry !== 0) {
-            block[i] = block[i] | 128;
-        }
+    else {
+        return word;
     }
-    return block;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: multiply
-
-```ts
-multiply = function (block0: number[], block1: number[]): number[] {
-    let i;
-    let j;
-    let v = block1.slice();
-    let z = createZeroBlock(16);
-    for (i = 0; i < 16; i++) {
-        for (j = 7; j !== -1; j--) {
-            if (checkBit(block0, i, j) !== 0) {
-                z = exclusiveOR(z, v);
-            }
-            if (checkBit(v, 15, 0) !== 0) {
-                v = exclusiveOR(rightShift(v), R);
-            }
-            else {
-                v = rightShift(v);
-            }
-        }
-    }
-    return z;
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: incrementLeastSignificantThirtyTwoBits
-
-```ts
-incrementLeastSignificantThirtyTwoBits = function (block: number[]): number[] {
-    let i;
-    const result = block.slice();
-    for (i = 15; i !== 11; i--) {
-        result[i] = result[i] + 1;
-        if (result[i] === 256) {
-            result[i] = 0;
-        }
-        else {
-            break;
-        }
-    }
-    return result;
 }
 ```
 

@@ -19,6 +19,66 @@ Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#v
 
 ---
 
+### Variable: decrypt
+
+```ts
+decrypt = (message: number[], recipient: PrivateKey): number[] => {
+    const reader = new Reader(message);
+    const messageVersion = toHex(reader.read(4));
+    if (messageVersion !== VERSION) {
+        throw new Error(`Message version mismatch: Expected ${VERSION}, received ${messageVersion}`);
+    }
+    const sender = PublicKey.fromString(toHex(reader.read(33)));
+    const expectedRecipientDER = toHex(reader.read(33));
+    const actualRecipientDER = recipient.toPublicKey().encode(true, "hex") as string;
+    if (expectedRecipientDER !== actualRecipientDER) {
+        throw new Error(`The encrypted message expects a recipient public key of ${expectedRecipientDER}, but the provided key is ${actualRecipientDER}`);
+    }
+    const keyID = toBase64(reader.read(32));
+    const encrypted = reader.read(reader.bin.length - reader.pos);
+    const invoiceNumber = `2-message encryption-${keyID}`;
+    const signingPriv = sender.deriveChild(recipient, invoiceNumber);
+    const recipientPub = recipient.deriveChild(sender, invoiceNumber);
+    const sharedSecret = signingPriv.deriveSharedSecret(recipientPub);
+    const symmetricKey = new SymmetricKey(sharedSecret.encode(true).slice(1));
+    return symmetricKey.decrypt(encrypted) as number[];
+}
+```
+
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey), [Reader](#class-reader), [SymmetricKey](#class-symmetrickey), [encode](#variable-encode), [toBase64](#function-tobase64), [toHex](#variable-tohex)
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
+### Variable: encrypt
+
+```ts
+encrypt = (message: number[], sender: PrivateKey, recipient: PublicKey): number[] => {
+    const keyID = Random(32);
+    const keyIDBase64 = toBase64(keyID);
+    const invoiceNumber = `2-message encryption-${keyIDBase64}`;
+    const signingPriv = sender.deriveChild(recipient, invoiceNumber);
+    const recipientPub = recipient.deriveChild(sender, invoiceNumber);
+    const sharedSecret = signingPriv.deriveSharedSecret(recipientPub);
+    const symmetricKey = new SymmetricKey(sharedSecret.encode(true).slice(1));
+    const encrypted = symmetricKey.encrypt(message) as number[];
+    const senderPublicKey = sender.toPublicKey().encode(true);
+    const version = toArray(VERSION, "hex");
+    return [
+        ...version,
+        ...senderPublicKey,
+        ...recipient.encode(true),
+        ...keyID,
+        ...encrypted
+    ];
+}
+```
+
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey), [SymmetricKey](#class-symmetrickey), [encode](#variable-encode), [toArray](#variable-toarray), [toBase64](#function-tobase64)
+
+Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
+
+---
 ### Variable: sign
 
 ```ts
@@ -46,6 +106,8 @@ sign = (message: number[], signer: PrivateKey, verifier?: PublicKey): number[] =
     ];
 }
 ```
+
+See also: [Curve](#class-curve), [PrivateKey](#class-privatekey), [PublicKey](#class-publickey), [encode](#variable-encode), [toArray](#variable-toarray), [toBase64](#function-tobase64)
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 
@@ -85,61 +147,7 @@ verify = (message: number[], sig: number[], recipient?: PrivateKey): boolean => 
 }
 ```
 
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Variable: encrypt
-
-```ts
-encrypt = (message: number[], sender: PrivateKey, recipient: PublicKey): number[] => {
-    const keyID = Random(32);
-    const keyIDBase64 = toBase64(keyID);
-    const invoiceNumber = `2-message encryption-${keyIDBase64}`;
-    const signingPriv = sender.deriveChild(recipient, invoiceNumber);
-    const recipientPub = recipient.deriveChild(sender, invoiceNumber);
-    const sharedSecret = signingPriv.deriveSharedSecret(recipientPub);
-    const symmetricKey = new SymmetricKey(sharedSecret.encode(true).slice(1));
-    const encrypted = symmetricKey.encrypt(message) as number[];
-    const senderPublicKey = sender.toPublicKey().encode(true);
-    const version = toArray(VERSION, "hex");
-    return [
-        ...version,
-        ...senderPublicKey,
-        ...recipient.encode(true),
-        ...keyID,
-        ...encrypted
-    ];
-}
-```
-
-Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
-
----
-### Variable: decrypt
-
-```ts
-decrypt = (message: number[], recipient: PrivateKey): number[] => {
-    const reader = new Reader(message);
-    const messageVersion = toHex(reader.read(4));
-    if (messageVersion !== VERSION) {
-        throw new Error(`Message version mismatch: Expected ${VERSION}, received ${messageVersion}`);
-    }
-    const sender = PublicKey.fromString(toHex(reader.read(33)));
-    const expectedRecipientDER = toHex(reader.read(33));
-    const actualRecipientDER = recipient.toPublicKey().encode(true, "hex") as string;
-    if (expectedRecipientDER !== actualRecipientDER) {
-        throw new Error(`The encrypted message expects a recipient public key of ${expectedRecipientDER}, but the provided key is ${actualRecipientDER}`);
-    }
-    const keyID = toBase64(reader.read(32));
-    const encrypted = reader.read(reader.bin.length - reader.pos);
-    const invoiceNumber = `2-message encryption-${keyID}`;
-    const signingPriv = sender.deriveChild(recipient, invoiceNumber);
-    const recipientPub = recipient.deriveChild(sender, invoiceNumber);
-    const sharedSecret = signingPriv.deriveSharedSecret(recipientPub);
-    const symmetricKey = new SymmetricKey(sharedSecret.encode(true).slice(1));
-    return symmetricKey.decrypt(encrypted) as number[];
-}
-```
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey), [Reader](#class-reader), [Signature](#class-signature), [encode](#variable-encode), [toBase64](#function-tobase64), [toHex](#variable-tohex)
 
 Links: [API](#api), [Classes](#classes), [Functions](#functions), [Variables](#variables)
 

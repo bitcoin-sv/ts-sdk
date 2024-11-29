@@ -69,11 +69,11 @@ export interface OverlayLookupFacilitator {
 export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
   fetchClient: typeof fetch
 
-  constructor(httpClient = fetch) {
+  constructor (httpClient = fetch) {
     this.fetchClient = httpClient
   }
 
-  async lookup(url: string, question: LookupQuestion): Promise<LookupAnswer> {
+  async lookup (url: string, question: LookupQuestion): Promise<LookupAnswer> {
     if (!url.startsWith('https:')) {
       throw new Error('HTTPS facilitator can only use URLs that start with "https:"')
     }
@@ -101,7 +101,7 @@ export default class LookupResolver {
   private readonly hostOverrides: Record<string, string[]>
   private readonly additionalHosts: Record<string, string[]>
 
-  constructor(config?: LookupResolverConfig) {
+  constructor (config?: LookupResolverConfig) {
     const { facilitator, slapTrackers, hostOverrides, additionalHosts } = config ?? {} as LookupResolverConfig
     this.facilitator = facilitator ?? new HTTPSOverlayLookupFacilitator()
     this.slapTrackers = slapTrackers ?? DEFAULT_SLAP_TRACKERS
@@ -112,7 +112,7 @@ export default class LookupResolver {
   /**
    * Given a LookupQuestion, returns a LookupAnswer. Aggregates across multiple services and supports resiliency.
    */
-  async query(question: LookupQuestion): Promise<LookupAnswer> {
+  async query (question: LookupQuestion): Promise<LookupAnswer> {
     let competentHosts: string[] = []
     if (question.service === 'ls_slap') {
       competentHosts = this.slapTrackers
@@ -180,7 +180,7 @@ export default class LookupResolver {
      * @param service Service for which competent hosts are to be returned
      * @returns Array of hosts competent for resolving queries
      */
-  private async findCompetentHosts(service: string): Promise<string[]> {
+  private async findCompetentHosts (service: string): Promise<string[]> {
     const query: LookupQuestion = {
       service: 'ls_slap',
       query: {

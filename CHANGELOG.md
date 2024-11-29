@@ -86,6 +86,12 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.2.4] - 2024-11-29
+
+### [1.2.4] Added
+- A "random" distributioun mode for change allocation which approximates Benford's Law in attempt to distribute the remainder of: (inputSats - knownOutputSats - txFee) across the outputs marked "change: true".
+
+---
 ## [1.2.0] - 2024-11-25
 
 ### [1.2.0] Added

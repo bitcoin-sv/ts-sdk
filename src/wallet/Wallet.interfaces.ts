@@ -203,9 +203,9 @@ export type ActionStatus = | 'completed' | 'unprocessed' | 'sending' | 'unproven
 
 /**
  * Controls behavior of input BEEF validation.
- * 
+ *
  * If `known`, input transactions may omit supporting validity proof data for all TXIDs known to this wallet.
- * 
+ *
  * If undefined, input BEEFs must be complete and valid.
  */
 export type TrustSelf = 'known'
@@ -279,7 +279,7 @@ export interface CreateActionResult {
   txid?: TXIDHexString
   tx?: AtomicBEEF
   noSendChange?: OutpointString[]
-  sendWithResults?: Array<SendWithResult>
+  sendWithResults?: SendWithResult[]
   signableTransaction?: SignableTransaction
 }
 
@@ -296,8 +296,8 @@ export interface CreateActionResult {
 export interface CreateActionArgs {
   description: DescriptionString5to50Bytes
   inputBEEF?: BEEF
-  inputs?: Array<CreateActionInput>
-  outputs?: Array<CreateActionOutput>
+  inputs?: CreateActionInput[]
+  outputs?: CreateActionOutput[]
   lockTime?: PositiveIntegerOrZero
   version?: PositiveIntegerOrZero
   labels?: LabelStringUnder300Bytes[]
@@ -340,12 +340,12 @@ export interface SignActionArgs {
 }
 
 /**
- * 
+ *
  */
 export interface SignActionResult {
   txid?: TXIDHexString
   tx?: AtomicBEEF
-  sendWithResults?: Array<SendWithResult>
+  sendWithResults?: SendWithResult[]
 }
 
 /**
@@ -431,13 +431,13 @@ export interface WalletAction {
   labels?: LabelStringUnder300Bytes[]
   version: PositiveIntegerOrZero
   lockTime: PositiveIntegerOrZero
-  inputs?: Array<WalletActionInput>
-  outputs?: Array<WalletActionOutput>
+  inputs?: WalletActionInput[]
+  outputs?: WalletActionOutput[]
 }
 
 export interface ListActionsResult {
   totalActions: PositiveIntegerOrZero
-  actions: Array<WalletAction>
+  actions: WalletAction[]
 }
 
 /**
@@ -484,7 +484,7 @@ export interface InternalizeOutput {
  */
 export interface InternalizeActionArgs {
   tx: AtomicBEEF
-  outputs: Array<InternalizeOutput>
+  outputs: InternalizeOutput[]
   description: DescriptionString5to50Bytes
   labels?: LabelStringUnder300Bytes[]
   seekPermission?: BooleanDefaultTrue
@@ -523,7 +523,7 @@ export interface ListOutputsArgs {
 export interface ListOutputsResult {
   totalOutputs: PositiveIntegerOrZero
   BEEF?: BEEF
-  outputs: Array<WalletOutput>
+  outputs: WalletOutput[]
 }
 
 /**
@@ -550,9 +550,9 @@ export interface WalletEncryptionArgs extends KeyLinkageArgs {
 
 /**
    * When `identityKey` is true, `WalletEncryptionArgs` are not used.
-   * 
+   *
    * When `identityKey` is undefined, `WalletEncryptionArgs` are required.
-   * 
+   *
    * @param {BooleanDefaultFalse|true} [identityKey] - Use true to retrieve the current user's own identity key, overriding any protocol ID, key ID, or counterparty specified.
    * @param {BooleanDefaultFalse} [forSelf] - Whether to return the public key derived from the current user's own identity (as opposed to the counterparty's identity).
  */
@@ -736,7 +736,7 @@ export interface ListCertificatesArgs {
 
 export interface ListCertificatesResult {
   totalCertificates: PositiveIntegerOrZero
-  certificates: Array<WalletCertificate>
+  certificates: WalletCertificate[]
 }
 
 /**
@@ -786,7 +786,7 @@ export interface DiscoverByIdentityKeyArgs {
  */
 export interface DiscoverCertificatesResult {
   totalCertificates: PositiveIntegerOrZero
-  certificates: Array<IdentityCertificate>
+  certificates: IdentityCertificate[]
 }
 
 /**
@@ -817,9 +817,9 @@ export interface WalletErrorObject extends Error {
  * encryption, decryption, identity certificate management, identity verification, and communication
  * with applications as per the BRC standards. This interface allows applications to interact with
  * the wallet for a range of functionalities aligned with the Babbage architectural principles.
- * 
+ *
  * Error Handling
- * 
+ *
  * Every method of the `Wallet` interface has a return value of the form `Promise<object>`.
  * When an error occurs, an exception object may be thrown which must conform to the `WalletError` interface.
  * Serialization layers can rely on the `isError` property being unique to error objects to

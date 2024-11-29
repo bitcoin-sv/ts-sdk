@@ -59,11 +59,11 @@ export interface OverlayBroadcastFacilitator {
 export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilitator {
   httpClient: typeof fetch
 
-  constructor(httpClient = fetch) {
+  constructor (httpClient = fetch) {
     this.httpClient = httpClient
   }
 
-  async send(url: string, taggedBEEF: TaggedBEEF): Promise<STEAK> {
+  async send (url: string, taggedBEEF: TaggedBEEF): Promise<STEAK> {
     if (!url.startsWith('https:')) {
       throw new Error('HTTPS facilitator can only use URLs that start with "https:"')
     }
@@ -100,7 +100,7 @@ export default class SHIPCast implements Broadcaster {
      * @param {string[]} topics - The list of SHIP topic names where transactions are to be sent.
      * @param {SHIPBroadcasterConfig} config - Configuration options for the SHIP broadcaster.
      */
-  constructor(topics: string[], config?: SHIPBroadcasterConfig) {
+  constructor (topics: string[], config?: SHIPBroadcasterConfig) {
     if (topics.length === 0) {
       throw new Error('At least one topic is required for broadcast.')
     }
@@ -127,7 +127,7 @@ export default class SHIPCast implements Broadcaster {
      * @param {Transaction} tx - The transaction to be sent.
      * @returns {Promise<BroadcastResponse | BroadcastFailure>} A promise that resolves to either a success or failure response.
      */
-  async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> {
+  async broadcast (tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> {
     let beef: number[]
     try {
       beef = tx.toBEEF()
@@ -268,7 +268,7 @@ export default class SHIPCast implements Broadcaster {
     }
   }
 
-  private checkAcknowledgmentFromAllHosts(hostAcknowledgments: Record<string, Set<string>>, requiredTopics: string[], require: 'all' | 'any'): boolean {
+  private checkAcknowledgmentFromAllHosts (hostAcknowledgments: Record<string, Set<string>>, requiredTopics: string[], require: 'all' | 'any'): boolean {
     for (const acknowledgedTopics of Object.values(hostAcknowledgments)) {
       if (require === 'all') {
         for (const topic of requiredTopics) {
@@ -292,7 +292,7 @@ export default class SHIPCast implements Broadcaster {
     return true
   }
 
-  private checkAcknowledgmentFromAnyHost(hostAcknowledgments: Record<string, Set<string>>, requiredTopics: string[], require: 'all' | 'any'): boolean {
+  private checkAcknowledgmentFromAnyHost (hostAcknowledgments: Record<string, Set<string>>, requiredTopics: string[], require: 'all' | 'any'): boolean {
     if (require === 'all') {
       // All required topics must be acknowledged by at least one host
       for (const acknowledgedTopics of Object.values(hostAcknowledgments)) {
@@ -321,7 +321,7 @@ export default class SHIPCast implements Broadcaster {
     }
   }
 
-  private checkAcknowledgmentFromSpecificHosts(hostAcknowledgments: Record<string, Set<string>>, requirements: Record<string, 'all' | 'any' | string[]>): boolean {
+  private checkAcknowledgmentFromSpecificHosts (hostAcknowledgments: Record<string, Set<string>>, requirements: Record<string, 'all' | 'any' | string[]>): boolean {
     for (const [host, requiredTopicsOrAllAny] of Object.entries(requirements)) {
       const acknowledgedTopics = hostAcknowledgments[host]
       if (!acknowledgedTopics) {
@@ -367,7 +367,7 @@ export default class SHIPCast implements Broadcaster {
      *
      * @returns A mapping of URLs for hosts interested in this transaction. Keys are URLs, values are which of our topics the specific host cares about.
      */
-  private async findInterestedHosts(): Promise<Record<string, Set<string>>> {
+  private async findInterestedHosts (): Promise<Record<string, Set<string>>> {
     // TODO: cache the list of interested hosts to avoid spamming SHIP trackers.
     // TODO: Monetize the operation of the SHIP tracker system.
     // TODO: Cache ship/slap lookup with expiry (every 5min)

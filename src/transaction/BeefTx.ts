@@ -20,7 +20,7 @@ export default class BeefTx {
   inputTxids: string[] = []
   /**
    * true if `hasProof` or all inputs chain to `hasProof`.
-   * 
+   *
    * Typically set by sorting transactions by proven dependency chains.
    */
   isValid?: boolean = undefined

@@ -18,6 +18,42 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ---
 
+### Interface: AdmittanceInstructions
+
+Instructs the Overlay Services Engine about which outputs to admit and which previous outputs to retain. Returned by a Topic Manager.
+
+```ts
+export interface AdmittanceInstructions {
+    outputsToAdmit: number[];
+    coinsToRetain: number[];
+}
+```
+
+<details>
+
+<summary>Interface AdmittanceInstructions Details</summary>
+
+#### Property coinsToRetain
+
+The indices of all inputs from the provided transaction which spend previously-admitted outputs that should be retained for historical record-keeping.
+
+```ts
+coinsToRetain: number[]
+```
+
+#### Property outputsToAdmit
+
+The indices of all admissable outputs into the managed topic from the provided transaction.
+
+```ts
+outputsToAdmit: number[]
+```
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 ### Interface: LookupQuestion
 
 The question asked to the Overlay Services Engine when a consumer of state wishes to look up information.
@@ -68,6 +104,8 @@ export interface LookupResolverConfig {
 }
 ```
 
+See also: [OverlayLookupFacilitator](#interface-overlaylookupfacilitator)
+
 <details>
 
 <summary>Interface LookupResolverConfig Details</summary>
@@ -87,6 +125,7 @@ The facilitator used to make requests to Overlay Services hosts.
 ```ts
 facilitator?: OverlayLookupFacilitator
 ```
+See also: [OverlayLookupFacilitator](#interface-overlaylookupfacilitator)
 
 #### Property hostOverrides
 
@@ -109,6 +148,21 @@ slapTrackers?: string[]
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+### Interface: OverlayBroadcastFacilitator
+
+Facilitates transaction broadcasts that return STEAK.
+
+```ts
+export interface OverlayBroadcastFacilitator {
+    send: (url: string, taggedBEEF: TaggedBEEF) => Promise<STEAK>;
+}
+```
+
+See also: [STEAK](#type-steak), [TaggedBEEF](#interface-taggedbeef)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 ### Interface: OverlayLookupFacilitator
 
 Facilitates lookups to URLs that return answers.
@@ -119,55 +173,7 @@ export interface OverlayLookupFacilitator {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Interface: TaggedBEEF
-
-Tagged BEEF
-
-```ts
-export interface TaggedBEEF {
-    beef: number[];
-    topics: string[];
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Interface: AdmittanceInstructions
-
-Instructs the Overlay Services Engine about which outputs to admit and which previous outputs to retain. Returned by a Topic Manager.
-
-```ts
-export interface AdmittanceInstructions {
-    outputsToAdmit: number[];
-    coinsToRetain: number[];
-}
-```
-
-<details>
-
-<summary>Interface AdmittanceInstructions Details</summary>
-
-#### Property coinsToRetain
-
-The indices of all inputs from the provided transaction which spend previously-admitted outputs that should be retained for historical record-keeping.
-
-```ts
-coinsToRetain: number[]
-```
-
-#### Property outputsToAdmit
-
-The indices of all admissable outputs into the managed topic from the provided transaction.
-
-```ts
-outputsToAdmit: number[]
-```
-
-</details>
+See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookupquestion)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -186,6 +192,8 @@ export interface SHIPBroadcasterConfig {
 }
 ```
 
+See also: [LookupResolver](#class-lookupresolver), [OverlayBroadcastFacilitator](#interface-overlaybroadcastfacilitator)
+
 <details>
 
 <summary>Interface SHIPBroadcasterConfig Details</summary>
@@ -197,6 +205,7 @@ The facilitator used to make requests to Overlay Services hosts.
 ```ts
 facilitator?: OverlayBroadcastFacilitator
 ```
+See also: [OverlayBroadcastFacilitator](#interface-overlaybroadcastfacilitator)
 
 #### Property requireAcknowledgmentFromAllHostsForTopics
 
@@ -229,19 +238,21 @@ The resolver used to locate suitable hosts with SHIP
 ```ts
 resolver: LookupResolver
 ```
+See also: [LookupResolver](#class-lookupresolver)
 
 </details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Interface: OverlayBroadcastFacilitator
+### Interface: TaggedBEEF
 
-Facilitates transaction broadcasts that return STEAK.
+Tagged BEEF
 
 ```ts
-export interface OverlayBroadcastFacilitator {
-    send: (url: string, taggedBEEF: TaggedBEEF) => Promise<STEAK>;
+export interface TaggedBEEF {
+    beef: number[];
+    topics: string[];
 }
 ```
 
@@ -262,6 +273,67 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ---
 
+### Class: HTTPSOverlayBroadcastFacilitator
+
+```ts
+export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilitator {
+    httpClient: typeof fetch;
+    constructor(httpClient = fetch) 
+    async send(url: string, taggedBEEF: TaggedBEEF): Promise<STEAK> 
+}
+```
+
+See also: [OverlayBroadcastFacilitator](#interface-overlaybroadcastfacilitator), [STEAK](#type-steak), [TaggedBEEF](#interface-taggedbeef)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: HTTPSOverlayLookupFacilitator
+
+```ts
+export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
+    fetchClient: typeof fetch;
+    constructor(httpClient = fetch) 
+    async lookup(url: string, question: LookupQuestion): Promise<LookupAnswer> 
+}
+```
+
+See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookupquestion), [OverlayLookupFacilitator](#interface-overlaylookupfacilitator)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
+### Class: LookupResolver
+
+Represents an SHIP transaction broadcaster.
+
+```ts
+export default class LookupResolver {
+    constructor(config?: LookupResolverConfig) 
+    async query(question: LookupQuestion): Promise<LookupAnswer> 
+}
+```
+
+See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookupquestion), [LookupResolverConfig](#interface-lookupresolverconfig)
+
+<details>
+
+<summary>Class LookupResolver Details</summary>
+
+#### Method query
+
+Given a LookupQuestion, returns a LookupAnswer. Aggregates across multiple services and supports resiliency.
+
+```ts
+async query(question: LookupQuestion): Promise<LookupAnswer> 
+```
+See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookupquestion)
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 ### Class: OverlayAdminTokenTemplate
 
 Script template enabling the creation, unlocking, and decoding of SHIP and SLAP advertisements.
@@ -284,6 +356,8 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
 }
 ```
 
+See also: [LockingScript](#class-lockingscript), [PushDrop](#class-pushdrop), [ScriptTemplate](#interface-scripttemplate), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [Wallet](#interface-wallet), [sign](#variable-sign)
+
 <details>
 
 <summary>Class OverlayAdminTokenTemplate Details</summary>
@@ -295,6 +369,7 @@ Constructs a new Overlay Admin template instance
 ```ts
 constructor(wallet: Wallet) 
 ```
+See also: [Wallet](#interface-wallet)
 
 Argument Details
 
@@ -313,6 +388,7 @@ static decode(script: LockingScript): {
     topicOrService: string;
 } 
 ```
+See also: [LockingScript](#class-lockingscript)
 
 Returns
 
@@ -330,6 +406,7 @@ Creates a new advertisement locking script
 ```ts
 async lock(protocol: "SHIP" | "SLAP", domain: string, topicOrService: string): Promise<LockingScript> 
 ```
+See also: [LockingScript](#class-lockingscript)
 
 Returns
 
@@ -354,6 +431,7 @@ unlock(protocol: "SHIP" | "SLAP"): {
     estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
 } 
 ```
+See also: [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [sign](#variable-sign)
 
 Returns
 
@@ -369,60 +447,6 @@ Argument Details
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
-### Class: HTTPSOverlayLookupFacilitator
-
-```ts
-export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
-    fetchClient: typeof fetch;
-    constructor(httpClient = fetch) 
-    async lookup(url: string, question: LookupQuestion): Promise<LookupAnswer> 
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: LookupResolver
-
-Represents an SHIP transaction broadcaster.
-
-```ts
-export default class LookupResolver {
-    constructor(config?: LookupResolverConfig) 
-    async query(question: LookupQuestion): Promise<LookupAnswer> 
-}
-```
-
-<details>
-
-<summary>Class LookupResolver Details</summary>
-
-#### Method query
-
-Given a LookupQuestion, returns a LookupAnswer. Aggregates across multiple services and supports resiliency.
-
-```ts
-async query(question: LookupQuestion): Promise<LookupAnswer> 
-```
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Class: HTTPSOverlayBroadcastFacilitator
-
-```ts
-export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilitator {
-    httpClient: typeof fetch;
-    constructor(httpClient = fetch) 
-    async send(url: string, taggedBEEF: TaggedBEEF): Promise<STEAK> 
-}
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
 ### Class: SHIPCast
 
 Represents a SHIP transaction broadcaster.
@@ -433,6 +457,8 @@ export default class SHIPCast implements Broadcaster {
     async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> 
 }
 ```
+
+See also: [BroadcastFailure](#interface-broadcastfailure), [BroadcastResponse](#interface-broadcastresponse), [Broadcaster](#interface-broadcaster), [SHIPBroadcasterConfig](#interface-shipbroadcasterconfig), [Transaction](#class-transaction)
 
 <details>
 
@@ -445,6 +471,7 @@ Constructs an instance of the SHIP broadcaster.
 ```ts
 constructor(topics: string[], config?: SHIPBroadcasterConfig) 
 ```
+See also: [SHIPBroadcasterConfig](#interface-shipbroadcasterconfig)
 
 Argument Details
 
@@ -460,6 +487,7 @@ Broadcasts a transaction to Overlay Services via SHIP.
 ```ts
 async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> 
 ```
+See also: [BroadcastFailure](#interface-broadcastfailure), [BroadcastResponse](#interface-broadcastresponse), [Transaction](#class-transaction)
 
 Returns
 
@@ -517,33 +545,21 @@ Submitted Transaction Execution AcKnowledgment
 export type STEAK = Record<string, AdmittanceInstructions>
 ```
 
+See also: [AdmittanceInstructions](#interface-admittanceinstructions)
+
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
 ## Variables
 
-| |
-| --- |
-| [DEFAULT_SHIP_TRACKERS](#variable-default_ship_trackers) |
-| [DEFAULT_SLAP_TRACKERS](#variable-default_slap_trackers) |
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-
 ### Variable: DEFAULT_SLAP_TRACKERS
 
 ```ts
-DEFAULT_SLAP_TRACKERS: string[] = []
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
-
----
-### Variable: DEFAULT_SHIP_TRACKERS
-
-```ts
-DEFAULT_SHIP_TRACKERS: string[] = []
+DEFAULT_SLAP_TRACKERS: string[] = [
+    "https://overlay.babbage.systems",
+    "https://overlay-example.babbage.systems",
+    "https://office.babbage.systems"
+]
 ```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
