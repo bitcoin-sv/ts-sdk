@@ -87,6 +87,11 @@ All notable changes to this project will be documented in this file. The format 
 ### Security
 
 ---
+## [1.2.4] - 2024-11-26
+
+### Added
+- Testnet capabilities & config override for node to function without error to defaultBroadcaster
+- broadcastMany function to ARCBroadcaster
 
 ## [1.2.3] - 2024-11-26
 
