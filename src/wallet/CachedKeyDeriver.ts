@@ -17,7 +17,7 @@ export default class CachedKeyDeriver {
      * @param {Object} [options] - Optional settings for the cache.
      * @param {number} [options.maxCacheSize=1000] - The maximum number of entries to store in the cache.
      */
-  constructor(rootKey: PrivateKey | 'anyone', options?: { maxCacheSize?: number }) {
+  constructor (rootKey: PrivateKey | 'anyone', options?: { maxCacheSize?: number }) {
     this.keyDeriver = new KeyDeriver(rootKey)
     this.cache = new Map<string, any>()
     this.maxCacheSize = options?.maxCacheSize || 1000
@@ -32,7 +32,7 @@ export default class CachedKeyDeriver {
      * @param {boolean} [forSelf=false] - Whether deriving for self.
      * @returns {PublicKey} - The derived public key.
      */
-  derivePublicKey(
+  derivePublicKey (
     protocolID: [0 | 1 | 2, string],
     keyID: string,
     counterparty: PublicKey | string | 'self' | 'anyone',
@@ -56,7 +56,7 @@ export default class CachedKeyDeriver {
      * @param {PublicKey | string | 'self' | 'anyone'} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
      * @returns {PrivateKey} - The derived private key.
      */
-  derivePrivateKey(
+  derivePrivateKey (
     protocolID: [0 | 1 | 2, string],
     keyID: string,
     counterparty: PublicKey | string | 'self' | 'anyone'
@@ -80,7 +80,7 @@ export default class CachedKeyDeriver {
      * @returns {SymmetricKey} - The derived symmetric key.
      * @throws {Error} - Throws an error if attempting to derive a symmetric key for 'anyone'.
      */
-  deriveSymmetricKey(
+  deriveSymmetricKey (
     protocolID: [0 | 1 | 2, string],
     keyID: string,
     counterparty: PublicKey | string | 'self' | 'anyone'
@@ -102,7 +102,7 @@ export default class CachedKeyDeriver {
      * @returns {number[]} - The shared secret as a number array.
      * @throws {Error} - Throws an error if attempting to reveal a shared secret for 'self'.
      */
-  revealCounterpartySecret(counterparty: PublicKey | string | 'self' | 'anyone'): number[] {
+  revealCounterpartySecret (counterparty: PublicKey | string | 'self' | 'anyone'): number[] {
     const cacheKey = this.generateCacheKey('revealCounterpartySecret', counterparty)
     if (this.cache.has(cacheKey)) {
       return this.cacheGet(cacheKey)
@@ -121,7 +121,7 @@ export default class CachedKeyDeriver {
      * @param {string} keyID - The key identifier.
      * @returns {number[]} - The specific key association as a number array.
      */
-  revealSpecificSecret(
+  revealSpecificSecret (
     counterparty: PublicKey | string | 'self' | 'anyone',
     protocolID: [0 | 1 | 2, string],
     keyID: string
@@ -142,7 +142,7 @@ export default class CachedKeyDeriver {
      * @param {...any} args - The arguments passed to the method.
      * @returns {string} - The generated cache key.
      */
-  private generateCacheKey(methodName: string, ...args: any[]): string {
+  private generateCacheKey (methodName: string, ...args: any[]): string {
     const serializedArgs = args.map((arg) => this.serializeArgument(arg)).join('|')
     return `${methodName}|${serializedArgs}`
   }
@@ -152,7 +152,7 @@ export default class CachedKeyDeriver {
      * @param {any} arg - The argument to serialize.
      * @returns {string} - The serialized argument.
      */
-  private serializeArgument(arg: any): string {
+  private serializeArgument (arg: any): string {
     if (arg instanceof PublicKey || arg instanceof PrivateKey) {
       return arg.toString()
     } else if (Array.isArray(arg)) {
@@ -169,7 +169,7 @@ export default class CachedKeyDeriver {
      * @param {string} cacheKey - The key of the cached item.
      * @returns {any} - The cached value.
      */
-  private cacheGet(cacheKey: string): any {
+  private cacheGet (cacheKey: string): any {
     const value = this.cache.get(cacheKey)
     // Update the entry to reflect recent use
     this.cache.delete(cacheKey)
@@ -182,7 +182,7 @@ export default class CachedKeyDeriver {
      * @param {string} cacheKey - The key of the item to cache.
      * @param {any} value - The value to cache.
      */
-  private cacheSet(cacheKey: string, value: any): void {
+  private cacheSet (cacheKey: string, value: any): void {
     if (this.cache.size >= this.maxCacheSize) {
       // Evict the least recently used item (first item in Map)
       const firstKey = this.cache.keys().next().value

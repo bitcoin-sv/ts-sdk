@@ -17,12 +17,12 @@ export type BeefVersion = undefined | 'V1' | 'V2'
  *
  * BUMP standard: BRC-74: BSV Unified Merkle Path (BUMP) Format
  * https://github.com/bitcoin-sv/BRCs/blob/master/transactions/0074.md
- * 
+ *
  * BRC-95: Atomic BEEF Transactions
  * https://github.com/bitcoin-sv/BRCs/blob/master/transactions/0095.md
- * 
+ *
  * The Atomic BEEF format is supported by the binary deserialization static method `fromBinary`.
- * 
+ *
  * BRC-96: BEEF V2, Txid Only Extension
  * https://github.com/bitcoin-sv/BRCs/blob/master/transactions/0096.md
  *
@@ -57,7 +57,7 @@ export type BeefVersion = undefined | 'V1' | 'V2'
  *
  * A valid `Beef` is only required when sent to a party with no shared history,
  * such as a transaction processor.
- * 
+ *
  * IMPORTANT NOTE:
  * It is fundamental to the BEEF value proposition that only valid transactions and valid
  * merkle path (BUMP) data be added to it. Merging invalid data breaks the `verify` and `isValid`
@@ -108,14 +108,13 @@ export class Beef {
   /**
    * Finds a Transaction in this `Beef`
    * and adds any missing input SourceTransactions from this `Beef`.
-   * 
+   *
    * The result is suitable for signing.
-   * 
+   *
    * @param txid The id of the target transaction.
    * @returns Transaction with all available input `SourceTransaction`s from this Beef.
    */
   findTransactionForSigning (txid: string): Transaction | undefined {
-
     const beefTx = this.findTxid(txid)
     if (!beefTx) return undefined
 
@@ -130,24 +129,22 @@ export class Beef {
 
     return beefTx.tx
   }
+
   /**
    * Builds the proof tree rooted at a specific `Transaction`.
-   * 
+   *
    * To succeed, the Beef must contain all the required transaction and merkle path data.
-   * 
+   *
    * @param txid The id of the target transaction.
    * @returns Transaction with input `SourceTransaction` and `MerklePath` populated from this Beef.
    */
   findAtomicTransaction (txid: string): Transaction | undefined {
-
     const beefTx = this.findTxid(txid)
     if (!beefTx) return undefined
 
     const addInputProof = (beef: Beef, tx: Transaction) => {
       const mp = beef.findBump(tx.id('hex'))
-      if (mp)
-        tx.merklePath = mp
-      else {
+      if (mp) { tx.merklePath = mp } else {
         for (const i of tx.inputs) {
           if (!i.sourceTransaction) {
             const itx = beef.findTxid(i.sourceTXID)
@@ -159,8 +156,7 @@ export class Beef {
             const mp = beef.findBump(i.sourceTransaction.id('hex'))
             if (mp) {
               i.sourceTransaction.merklePath = mp
-            }
-            else {
+            } else {
               addInputProof(beef, i.sourceTransaction)
             }
           }
@@ -397,7 +393,7 @@ export class Beef {
 
   /**
    * Serializes this data to `writer`
-   * @param writer 
+   * @param writer
    */
   toWriter (writer: Writer) {
     writer.writeUInt32LE(this.magic)
@@ -425,20 +421,18 @@ export class Beef {
 
   /**
    * Serialize this Beef as AtomicBEEF.
-   * 
+   *
    * `txid` must exist and be the last transaction
    * in sorted (dependency) order.
-   * 
-   * @param txid 
+   *
+   * @param txid
    * @returns serialized contents of this Beef with AtomicBEEF prefix.
    */
-  toBinaryAtomic(txid: string) {
+  toBinaryAtomic (txid: string) {
     this.sortTxs()
     const tx = this.findTxid(txid)
-    if (!tx)
-      throw new Error(`${txid} does not exist in this Beef`)
-    if (this.txs[this.txs.length - 1] !== tx)
-      throw new Error(`${txid} is not the last transaction in this Beef`)
+    if (!tx) { throw new Error(`${txid} does not exist in this Beef`) }
+    if (this.txs[this.txs.length - 1] !== tx) { throw new Error(`${txid} is not the last transaction in this Beef`) }
     const writer = new Writer()
     writer.writeUInt32LE(ATOMIC_BEEF)
     writer.write(toArray(txid, 'hex'))
@@ -456,7 +450,7 @@ export class Beef {
 
   static fromReader (br: Reader): Beef {
     let version = br.readUInt32LE()
-    let atomicTxid: string | undefined = undefined
+    let atomicTxid: string | undefined
     if (version === ATOMIC_BEEF) {
       // Skip the txid and re-read the BEEF version
       atomicTxid = toHex(br.read(32))
@@ -527,19 +521,18 @@ export class Beef {
      * - Oldest Tx Anchored by Path
      * - Newer Txs depending on Older parents
      * - Newest Tx
-     * 
+     *
      * with proof (MerklePath) last, longest chain of dependencies first
-     * 
+     *
      * @returns `{ missingInputs, notValid, valid, withMissingInputs }`
      */
-  sortTxs ()
-    : {
-      missingInputs: string[],
-      notValid: string[],
-      valid: string[],
-      withMissingInputs: string[],
-      txidOnly: string[]
-    } {
+  sortTxs (): {
+    missingInputs: string[]
+    notValid: string[]
+    valid: string[]
+    withMissingInputs: string[]
+    txidOnly: string[]
+  } {
     // Hashtable of valid txids (with proof or all inputs chain to proof)
     const validTxids: Record<string, boolean> = {}
 
@@ -560,10 +553,7 @@ export class Beef {
       if (tx.isValid) {
         validTxids[tx.txid] = true
         result.push(tx)
-      } else if (tx.isTxidOnly)
-        txidOnly.push(tx)
-      else
-        queue.push(tx)
+      } else if (tx.isTxidOnly) { txidOnly.push(tx) } else { queue.push(tx) }
     }
 
     // Hashtable of unknown input txids used to fund transactions without their own proof.
@@ -587,10 +577,7 @@ export class Beef {
           }
         }
       }
-      if (hasMissingInput)
-        txsMissingInputs.push(tx)
-      else
-        queue.push(tx)
+      if (hasMissingInput) { txsMissingInputs.push(tx) } else { queue.push(tx) }
     }
 
     // As long as we have unsorted transactions...
@@ -601,11 +588,9 @@ export class Beef {
         if (tx.inputTxids.every(txid => validTxids[txid])) {
           validTxids[tx.txid] = true
           result.push(tx)
-        } else
-          queue.push(tx)
+        } else { queue.push(tx) }
       }
-      if (oldQueue.length === queue.length)
-        break;
+      if (oldQueue.length === queue.length) { break }
     }
 
     // transactions that don't have proofs and don't chain to proofs
@@ -652,7 +637,7 @@ export class Beef {
   /**
    * @returns array of transaction txids that either have a proof or whose inputs chain back to a proven transaction.
    */
-  getValidTxids() : string[] {
+  getValidTxids (): string[] {
     const r = this.sortTxs()
     return r.valid
   }

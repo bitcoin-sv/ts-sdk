@@ -94,13 +94,13 @@ export class BeefParty extends Beef {
 
   /**
    * Merge a `beef` received from a specific `party`.
-   * 
+   *
    * Updates this `BeefParty` to track all the txids
    * corresponding to transactions for which `party`
    * has raw transaction and validity proof data.
-   * 
-   * @param party 
-   * @param beef 
+   *
+   * @param party
+   * @param beef
    */
   mergeBeefFromParty (party: string, beef: number[] | Beef) {
     const b: Beef = Array.isArray(beef) ? Beef.fromBinary(beef) : beef
