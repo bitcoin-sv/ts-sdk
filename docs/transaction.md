@@ -498,6 +498,7 @@ export default class ARC implements Broadcaster {
     constructor(URL: string, apiKey?: string);
     constructor(URL: string, config?: string | ArcConfig) 
     async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> 
+    async broadcastMany(txs: Transaction[]): Promise<Array<object>> 
 }
 ```
 
@@ -555,6 +556,25 @@ Argument Details
 
 + **tx**
   + The transaction to be broadcasted.
+
+#### Method broadcastMany
+
+Broadcasts multiple transactions via ARC.
+Handles mixed responses where some transactions succeed and others fail.
+
+```ts
+async broadcastMany(txs: Transaction[]): Promise<Array<object>> 
+```
+See also: [Transaction](#class-transaction)
+
+Returns
+
+A promise that resolves to an array of objects.
+
+Argument Details
+
++ **txs**
+  + Array of transactions to be broadcasted.
 
 </details>
 
@@ -2038,10 +2058,10 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ### Function: defaultBroadcaster
 
 ```ts
-export function defaultBroadcaster(): Broadcaster 
+export function defaultBroadcaster(isTestnet: boolean = false, config: ArcConfig = {}): Broadcaster 
 ```
 
-See also: [Broadcaster](#interface-broadcaster)
+See also: [ArcConfig](#interface-arcconfig), [Broadcaster](#interface-broadcaster)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
