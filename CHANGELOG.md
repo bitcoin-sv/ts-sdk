@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file. The format 
     - [Removed](#removed)
     - [Fixed](#fixed)
     - [Security](#security)
+  - [\[1.2.5\] - 2024-11-30](#125---2024-11-30)
+    - [Added](#125-added)
   - [\[1.2.4\] - 2024-11-29](#124---2024-11-29)
     - [Added](#124-added)
   - [\[1.2.3\] - 2024-11-26](#123---2024-11-26)
@@ -93,9 +95,8 @@ All notable changes to this project will be documented in this file. The format 
 ### Security
 
 ---
-## [1.2.4] - 2024-11-26
-
-### Added
+## [1.2.5] - 2024-11-30
+### [1.2.5] Added
 - Testnet capabilities & config override for node to function without error to defaultBroadcaster
 - broadcastMany function to ARCBroadcaster
 
