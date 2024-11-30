@@ -111,8 +111,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export interface CreateActionArgs {
     description: DescriptionString5to50Bytes;
     inputBEEF?: BEEF;
-    inputs?: Array<CreateActionInput>;
-    outputs?: Array<CreateActionOutput>;
+    inputs?: CreateActionInput[];
+    outputs?: CreateActionOutput[];
     lockTime?: PositiveIntegerOrZero;
     version?: PositiveIntegerOrZero;
     labels?: LabelStringUnder300Bytes[];
@@ -188,7 +188,7 @@ export interface CreateActionResult {
     txid?: TXIDHexString;
     tx?: AtomicBEEF;
     noSendChange?: OutpointString[];
-    sendWithResults?: Array<SendWithResult>;
+    sendWithResults?: SendWithResult[];
     signableTransaction?: SignableTransaction;
 }
 ```
@@ -262,7 +262,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export interface DiscoverCertificatesResult {
     totalCertificates: PositiveIntegerOrZero;
-    certificates: Array<IdentityCertificate>;
+    certificates: IdentityCertificate[];
 }
 ```
 
@@ -325,7 +325,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export interface InternalizeActionArgs {
     tx: AtomicBEEF;
-    outputs: Array<InternalizeOutput>;
+    outputs: InternalizeOutput[];
     description: DescriptionString5to50Bytes;
     labels?: LabelStringUnder300Bytes[];
     seekPermission?: BooleanDefaultTrue;
@@ -426,7 +426,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export interface ListActionsResult {
     totalActions: PositiveIntegerOrZero;
-    actions: Array<WalletAction>;
+    actions: WalletAction[];
 }
 ```
 
@@ -458,7 +458,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export interface ListCertificatesResult {
     totalCertificates: PositiveIntegerOrZero;
-    certificates: Array<WalletCertificate>;
+    certificates: WalletCertificate[];
 }
 ```
 
@@ -495,7 +495,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export interface ListOutputsResult {
     totalOutputs: PositiveIntegerOrZero;
     BEEF?: BEEF;
-    outputs: Array<WalletOutput>;
+    outputs: WalletOutput[];
 }
 ```
 
@@ -657,7 +657,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export interface SignActionResult {
     txid?: TXIDHexString;
     tx?: AtomicBEEF;
-    sendWithResults?: Array<SendWithResult>;
+    sendWithResults?: SendWithResult[];
 }
 ```
 
@@ -1116,8 +1116,8 @@ export interface WalletAction {
     labels?: LabelStringUnder300Bytes[];
     version: PositiveIntegerOrZero;
     lockTime: PositiveIntegerOrZero;
-    inputs?: Array<WalletActionInput>;
-    outputs?: Array<WalletActionOutput>;
+    inputs?: WalletActionInput[];
+    outputs?: WalletActionOutput[];
 }
 ```
 
