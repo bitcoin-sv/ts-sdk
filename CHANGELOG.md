@@ -13,6 +13,12 @@ All notable changes to this project will be documented in this file. The format 
     - [Removed](#removed)
     - [Fixed](#fixed)
     - [Security](#security)
+  - [\[1.2.4\] - 2024-11-29](#124---2024-11-29)
+    - [Added](#124-added)
+  - [\[1.2.3\] - 2024-11-26](#123---2024-11-26)
+    - [Added](#123-added)
+  - [\[1.2.2\] - 2024-11-26](#122---2024-11-26)
+    - [Added](#122-added)
   - [\[1.2.1\] - 2024-11-25](#121---2024-11-25)
     - [Added](#121-added)
   - [\[1.2.0\] - 2024-11-25](#120---2024-11-25)
@@ -88,6 +94,13 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.2.4] - 2024-11-29
+
+### [1.2.4] Added
+- A "random" distributioun mode for change allocation which approximates Benford's Law in attempt to distribute the remainder of: (inputSats - knownOutputSats - txFee) across the outputs marked "change: true".
+
+---
+
 ## [1.2.3] - 2024-11-26
 
 ### [1.2.3] Added
@@ -103,7 +116,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [1.2.1] - 2024-11-25
 
-### [1.2.0] Added
+### [1.2.1] Added
 - [NPM package provenance](https://github.blog/security/supply-chain-security/introducing-npm-package-provenance/) support
 
 ---

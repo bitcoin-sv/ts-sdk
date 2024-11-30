@@ -346,7 +346,7 @@ describe('Transaction', () => {
       // 4000 sats in - 1000 sats out - 1033 sats fee = expected 1967 sats change
       expect(spendTx.outputs[1].satoshis).toEqual(1967)
     })
-    it('Distributes change among multiple change outputs', async () => {
+    it('Distributes change equally among multiple change outputs', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
       const publicKeyHash = hash160(publicKey.encode(true)) as number[]
@@ -369,17 +369,146 @@ describe('Transaction', () => {
       }, {
         lockingScript: p2pkh.lock(publicKeyHash),
         change: true
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
       }], 0)
       expect(spendTx.outputs[1].satoshis).not.toBeDefined()
       expect(spendTx.outputs[2].satoshis).not.toBeDefined()
+      expect(spendTx.outputs[3].satoshis).not.toBeDefined()
+      expect(spendTx.outputs[4].satoshis).not.toBeDefined()
       await spendTx.fee({
         // Our custom fee model will always charge 1033 sats for a tx.
-        computeFee: async () => 1033
+        computeFee: async () => 1032
       })
       // 4000 sats in - 1000 sats out - 1033 sats fee = expected 1967 sats change
       // Divide by 2 (no remainder) = 983 sats per change output
-      expect(spendTx.outputs[1].satoshis).toEqual(983)
-      expect(spendTx.outputs[2].satoshis).toEqual(983)
+      expect(spendTx.outputs[0].satoshis).toEqual(1000)
+      expect(spendTx.outputs[1].satoshis).toEqual(492)
+      expect(spendTx.outputs[2].satoshis).toEqual(492)
+      expect(spendTx.outputs[3].satoshis).toEqual(492)
+      expect(spendTx.outputs[4].satoshis).toEqual(492)
+    })
+    it('Distributes change randomly among multiple change outputs', async () => {
+      const privateKey = new PrivateKey(1)
+      const publicKey = new Curve().g.mul(privateKey)
+      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const p2pkh = new P2PKH()
+      const sourceTx = new Transaction(1, [], [{
+        lockingScript: p2pkh.lock(publicKeyHash),
+        satoshis: 900
+      }], 0)
+      const spendTx = new Transaction(1, [{
+        sourceTransaction: sourceTx,
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: p2pkh.unlock(privateKey),
+        sequence: 0xffffffff
+      }], [{
+        satoshis: 1,
+        lockingScript: p2pkh.lock(publicKeyHash)
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }], 0)
+      expect(spendTx.outputs[1].satoshis).not.toBeDefined()
+      expect(spendTx.outputs[2].satoshis).not.toBeDefined()
+      expect(spendTx.outputs[3].satoshis).not.toBeDefined()
+      expect(spendTx.outputs[4].satoshis).not.toBeDefined()
+      expect(spendTx.outputs[5].satoshis).not.toBeDefined()
+      expect(spendTx.outputs[6].satoshis).not.toBeDefined()
+      await spendTx.fee({
+        computeFee: async () => 3
+      }, 'random')
+      expect(spendTx.outputs[0].satoshis).toEqual(1)
+      expect(spendTx.outputs.reduce((a, b) => a + b.satoshis, 0)).toEqual(897)
+    })
+    it('Distributes change randomly among multiple change outputs, with one set output', async () => {
+      const privateKey = new PrivateKey(1)
+      const publicKey = new Curve().g.mul(privateKey)
+      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const p2pkh = new P2PKH()
+      const sourceTx = new Transaction(1, [], [{
+        lockingScript: p2pkh.lock(publicKeyHash),
+        satoshis: 9
+      }], 0)
+      const spendTx = new Transaction(1, [{
+        sourceTransaction: sourceTx,
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: p2pkh.unlock(privateKey),
+        sequence: 0xffffffff
+      }], [{
+        satoshis: 1,
+        lockingScript: p2pkh.lock(publicKeyHash)
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }, {
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      }], 0)
+      expect(spendTx.outputs[1].satoshis).not.toBeDefined()
+      expect(spendTx.outputs[2].satoshis).not.toBeDefined()
+      expect(spendTx.outputs[3].satoshis).not.toBeDefined()
+      expect(spendTx.outputs[4].satoshis).not.toBeDefined()
+      expect(spendTx.outputs[5].satoshis).not.toBeDefined()
+      expect(spendTx.outputs[6].satoshis).not.toBeDefined()
+      await spendTx.fee({
+        computeFee: async () => 1
+      }, 'random')
+      expect(spendTx.outputs.reduce((a, b) => a + b.satoshis, 0)).toEqual(8)
+    })
+    it('Distributes change randomly among multiple change outputs, thinnly spread', async () => {
+      const privateKey = new PrivateKey(1)
+      const publicKey = new Curve().g.mul(privateKey)
+      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const p2pkh = new P2PKH()
+      const sourceTx = new Transaction(1, [], [{
+        lockingScript: p2pkh.lock(publicKeyHash),
+        satoshis: 46
+      }], 0)
+      const spendTx = new Transaction(1, [{
+        sourceTransaction: sourceTx,
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: p2pkh.unlock(privateKey),
+        sequence: 0xffffffff
+      }], Array(21).fill(null).map(() => ({
+        lockingScript: p2pkh.lock(publicKeyHash),
+        change: true
+      })), 0)
+      await spendTx.fee({
+        computeFee: async () => 1
+      }, 'random')
+      expect(spendTx.outputs.reduce((a, b) => a + b.satoshis, 0)).toEqual(45)
     })
     it('Calculates fee for utxo based transaction', async () => {
       const utxos = [ // WoC format utxos
