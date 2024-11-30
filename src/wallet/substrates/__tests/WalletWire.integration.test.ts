@@ -540,7 +540,7 @@ describe('WalletWire Integration Tests', () => {
         if (protocolName.includes('  ')) {
           throw new Error('Protocol names cannot contain multiple consecutive spaces ("  ")')
         }
-        if (!/^[a-z0-9 ]+$/g.test(protocolName)) {
+        if (!/^[\p{L}\p{M}0-9 ]+$/gu.test(protocolName)) {
           throw new Error('Protocol names can only contain letters, numbers and spaces')
         }
         if (protocolName.endsWith(' protocol')) {
