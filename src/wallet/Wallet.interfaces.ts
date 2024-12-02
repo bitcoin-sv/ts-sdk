@@ -584,6 +584,7 @@ export interface RevealCounterpartyKeyLinkageArgs {
  */
 export interface RevealSpecificKeyLinkageArgs extends KeyLinkageArgs {
   verifier: PubKeyHex
+  counterparty: WalletCounterparty
 }
 
 /**

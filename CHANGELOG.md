@@ -95,6 +95,13 @@ All notable changes to this project will be documented in this file. The format 
 ### Security
 
 ---
+
+## [1.2.6] - 2024-11-30
+### [1.2.6] Fixed
+- revealSpecificKeyLinkage requires a counterparty. 
+- ProtoWallet now correctly implements the wallet interface.
+
+---
 ## [1.2.5] - 2024-11-30
 ### [1.2.5] Added
 - Testnet capabilities & config override for node to function without error to defaultBroadcaster

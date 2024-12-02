@@ -583,10 +583,11 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export interface RevealSpecificKeyLinkageArgs extends KeyLinkageArgs {
     verifier: PubKeyHex;
+    counterparty: WalletCounterparty;
 }
 ```
 
-See also: [KeyLinkageArgs](#interface-keylinkageargs), [PubKeyHex](#type-pubkeyhex)
+See also: [KeyLinkageArgs](#interface-keylinkageargs), [PubKeyHex](#type-pubkeyhex), [WalletCounterparty](#type-walletcounterparty)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
