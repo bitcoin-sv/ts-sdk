@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file. The format 
     - [Removed](#removed)
     - [Fixed](#fixed)
     - [Security](#security)
+  - [\[1.2.8\] - 2024-12-02](#128---2024-12-02)
+    - [Fixed](#127-fixed)
   - [\[1.2.7\] - 2024-12-02](#127---2024-12-02)
     - [Added](#127-added)
     - [Fixed](#127-fixed)
@@ -98,6 +100,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.2.8] - 2024-12-02
+
+### [1.2.8] Fixed
+
+- Stop people inadvertently creating corrupted public keys.
 
 ---
 

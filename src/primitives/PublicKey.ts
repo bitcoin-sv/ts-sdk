@@ -30,7 +30,7 @@ export default class PublicKey extends Point {
    * const myPrivKey = new PrivateKey(...)
    * const myPubKey = PublicKey.fromPrivateKey(myPrivKey)
    */
-  static fromPrivateKey (key: PrivateKey): PublicKey {
+  static fromPrivateKey(key: PrivateKey): PublicKey {
     const c = new Curve()
     const p = c.g.mul(key)
     return new PublicKey(p.x, p.y)
@@ -46,7 +46,7 @@ export default class PublicKey extends Point {
    * @example
    * const myPubKey = PublicKey.fromString("03....")
    */
-  static fromString (str: string): PublicKey {
+  static fromString(str: string): PublicKey {
     const p = Point.fromString(str)
     return new PublicKey(p.x, p.y)
   }
@@ -61,7 +61,7 @@ export default class PublicKey extends Point {
    * @example
    * const myPubKey = PublicKey.fromString("03....")
    */
-  static fromDER (bytes: number[]): PublicKey {
+  static fromDER(bytes: number[]): PublicKey {
     const p = Point.fromDER(bytes)
     return new PublicKey(p.x, p.y)
   }
@@ -76,7 +76,7 @@ export default class PublicKey extends Point {
    * new PublicKey(point1);
    * new PublicKey('abc123', 'def456');
    */
-  constructor (
+  constructor(
     x: Point | BigNumber | number | number[] | string | null,
     y: BigNumber | number | number[] | string | null = null,
     isRed: boolean = true
@@ -84,6 +84,12 @@ export default class PublicKey extends Point {
     if (x instanceof Point) {
       super(x.getX(), x.getY())
     } else {
+      // Common gotcha: constructing PublicKey with a DER value when you should use .fromString()
+      if (y === null && isRed === true && typeof x === 'string') {
+        if (x.length === 66 || x.length === 130) {
+          throw new Error('You are using the "new PublicKey()" constructor with a DER hex string. You need to use "PublicKey.fromString()" instead.')
+        }
+      }
       super(x, y, isRed)
     }
   }
@@ -102,7 +108,7 @@ export default class PublicKey extends Point {
    * const myPrivKey = new PrivateKey(...)
    * const sharedSecret = myPubKey.deriveSharedSecret(myPrivKey)
    */
-  deriveSharedSecret (priv: PrivateKey): Point {
+  deriveSharedSecret(priv: PrivateKey): Point {
     if (!this.validate()) {
       throw new Error('Public key not valid for ECDH secret derivation')
     }
@@ -123,7 +129,7 @@ export default class PublicKey extends Point {
    * const mySignature = new Signature(...)
    * const isVerified = myPubKey.verify(myMessage, mySignature)
    */
-  verify (msg: number[] | string, sig: Signature, enc?: 'hex' | 'utf8'): boolean {
+  verify(msg: number[] | string, sig: Signature, enc?: 'hex' | 'utf8'): boolean {
     const msgHash = new BigNumber(sha256(msg, enc), 16)
     return verify(msgHash, sig, this)
   }
@@ -138,7 +144,7 @@ export default class PublicKey extends Point {
    * @example
    * const derPublicKey = myPubKey.toDER()
    */
-  toDER (enc?: 'hex' | undefined): number[] | string {
+  toDER(enc?: 'hex' | undefined): number[] | string {
     if (enc === 'hex') return this.encode(true, enc) as string
     return this.encode(true) as number[]
   }
@@ -151,7 +157,7 @@ export default class PublicKey extends Point {
    * @example
    * const publicKeyHash = pubkey.toHash()
    */
-  toHash (enc?: 'hex'): number[] | string {
+  toHash(enc?: 'hex'): number[] | string {
     const pkh = hash160(this.encode(true))
     if (enc === 'hex') {
       return toHex(pkh)
@@ -173,7 +179,7 @@ export default class PublicKey extends Point {
    * const testnetAddress = pubkey.toAddress([0x6f])
    * const testnetAddress = pubkey.toAddress('testnet')
    */
-  toAddress (prefix: number[] | string = [0x00]): string {
+  toAddress(prefix: number[] | string = [0x00]): string {
     if (typeof prefix === 'string') {
       if (prefix === 'testnet' || prefix === 'test') {
         prefix = [0x6f]
@@ -192,7 +198,7 @@ export default class PublicKey extends Point {
    * @param invoiceNumber The invoice number used to derive the child key
    * @returns The derived child key.
    */
-  deriveChild (privateKey: PrivateKey, invoiceNumber: string): PublicKey {
+  deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey {
     const sharedSecret = this.deriveSharedSecret(privateKey)
     const invoiceNumberBin = toArray(invoiceNumber, 'utf8')
     const hmac = sha256hmac(sharedSecret.encode(true), invoiceNumberBin)
@@ -219,7 +225,7 @@ export default class PublicKey extends Point {
    * @example
    * const publicKey = Signature.fromMsgHashAndCompactSignature(msgHash, 'IMOl2mVKfDgsSsHT4uIYBNN4e...', 'base64');
    */
-  static fromMsgHashAndCompactSignature (msgHash: BigNumber, signature: number[] | string, enc?: 'hex' | 'base64'): PublicKey {
+  static fromMsgHashAndCompactSignature(msgHash: BigNumber, signature: number[] | string, enc?: 'hex' | 'base64'): PublicKey {
     const data = toArray(signature, enc)
     if (data.length !== 65) {
       throw new Error('Invalid Compact Signature')
