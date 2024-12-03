@@ -13,6 +13,11 @@ All notable changes to this project will be documented in this file. The format 
     - [Removed](#removed)
     - [Fixed](#fixed)
     - [Security](#security)
+  - [\[1.2.7\] - 2024-12-02](#127---2024-12-02)
+    - [Added](#127-added)
+    - [Fixed](#127-fixed)
+  - [\[1.2.6\] - 2024-11-30](#126---2024-11-30)
+    - [Added](#126-fixed)
   - [\[1.2.5\] - 2024-11-30](#125---2024-11-30)
     - [Added](#125-added)
   - [\[1.2.4\] - 2024-11-29](#124---2024-11-29)
@@ -96,16 +101,32 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.2.7] - 2024-12-02
+
+### [1.2.7] Added
+
+- Define the security level of protocolIDs as a type so that we can attach a JSDoc explaining what each value means.
+
+### [1.2.7] Fixed
+
+- Use a default value in the async fee() function when no args are used rather than requiring a value and then setting if undefined.
+
+---
+
 ## [1.2.6] - 2024-11-30
+
 ### [1.2.6] Fixed
 - revealSpecificKeyLinkage requires a counterparty. 
 - ProtoWallet now correctly implements the wallet interface.
 
 ---
 ## [1.2.5] - 2024-11-30
+
 ### [1.2.5] Added
 - Testnet capabilities & config override for node to function without error to defaultBroadcaster
 - broadcastMany function to ARCBroadcaster
+
+---
 
 ## [1.2.4] - 2024-11-29
 

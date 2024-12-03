@@ -1487,7 +1487,7 @@ export default class Transaction {
     addInput(input: TransactionInput): void 
     addOutput(output: TransactionOutput): void 
     updateMetadata(metadata: Record<string, any>): void 
-    async fee(modelOrFee?: FeeModel | number, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
+    async fee(modelOrFee: FeeModel | number = new SatoshisPerKilobyte(10), changeDistribution: "equal" | "random" = "equal"): Promise<void> 
     getFee(): number 
     async sign(): Promise<void> 
     async broadcast(broadcaster: Broadcaster = defaultBroadcaster()): Promise<BroadcastResponse | BroadcastFailure> 
@@ -1507,7 +1507,7 @@ export default class Transaction {
 }
 ```
 
-See also: [BroadcastFailure](#interface-broadcastfailure), [BroadcastResponse](#interface-broadcastresponse), [Broadcaster](#interface-broadcaster), [ChainTracker](#interface-chaintracker), [FeeModel](#interface-feemodel), [MerklePath](#class-merklepath), [Reader](#class-reader), [TransactionInput](#interface-transactioninput), [TransactionOutput](#interface-transactionoutput), [defaultBroadcaster](#function-defaultbroadcaster), [defaultChainTracker](#function-defaultchaintracker), [sign](#variable-sign), [toHex](#variable-tohex), [verify](#variable-verify)
+See also: [BroadcastFailure](#interface-broadcastfailure), [BroadcastResponse](#interface-broadcastresponse), [Broadcaster](#interface-broadcaster), [ChainTracker](#interface-chaintracker), [FeeModel](#interface-feemodel), [MerklePath](#class-merklepath), [Reader](#class-reader), [SatoshisPerKilobyte](#class-satoshisperkilobyte), [TransactionInput](#interface-transactioninput), [TransactionOutput](#interface-transactionoutput), [defaultBroadcaster](#function-defaultbroadcaster), [defaultChainTracker](#function-defaultchaintracker), [sign](#variable-sign), [toHex](#variable-tohex), [verify](#variable-verify)
 
 <details>
 
@@ -1570,9 +1570,9 @@ If no fee model is provided, uses a SatoshisPerKilobyte fee model that pays 10 s
 If fee is a number, the transaction uses that value as fee.
 
 ```ts
-async fee(modelOrFee?: FeeModel | number, changeDistribution: "equal" | "random" = "equal"): Promise<void> 
+async fee(modelOrFee: FeeModel | number = new SatoshisPerKilobyte(10), changeDistribution: "equal" | "random" = "equal"): Promise<void> 
 ```
-See also: [FeeModel](#interface-feemodel)
+See also: [FeeModel](#interface-feemodel), [SatoshisPerKilobyte](#class-satoshisperkilobyte)
 
 Argument Details
 
@@ -1581,8 +1581,6 @@ Argument Details
 + **changeDistribution**
   + Specifies how the change should be distributed
 amongst the change outputs
-
-TODO: Benford's law change distribution.
 
 #### Method fromAtomicBEEF
 

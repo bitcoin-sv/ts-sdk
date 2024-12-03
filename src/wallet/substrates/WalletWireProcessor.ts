@@ -3,6 +3,7 @@ import WalletWire from './WalletWire.js'
 import { Utils } from '../../primitives/index.js'
 import calls from './WalletWireCalls.js'
 import Certificate from '../../auth/Certificate.js'
+import { SecurityLevel } from '../Wallet.interfaces.js'
 
 /**
  * Processes incoming wallet calls received over a wallet wire, with a given wallet.
@@ -1914,8 +1915,8 @@ export default class WalletWireProcessor implements WalletWire {
     }
   }
 
-  private decodeProtocolID(reader: Utils.Reader): [0 | 1 | 2, string] {
-    const securityLevel = reader.readUInt8() as 0 | 1 | 2
+  private decodeProtocolID(reader: Utils.Reader): [SecurityLevel, string] {
+    const securityLevel = reader.readUInt8() as SecurityLevel
     const protocolLength = reader.readVarIntNum()
     const protocolBytes = reader.read(protocolLength)
     const protocolString = Utils.toUTF8(protocolBytes)

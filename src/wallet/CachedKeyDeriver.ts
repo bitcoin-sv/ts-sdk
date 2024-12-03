@@ -1,5 +1,6 @@
 import { PrivateKey, PublicKey, SymmetricKey } from '../primitives/index.js'
 import KeyDeriver from './KeyDeriver.js'
+import { SecurityLevel } from './Wallet.interfaces.js'
 
 /**
  * A cached version of KeyDeriver that caches the results of key derivation methods.
@@ -26,14 +27,14 @@ export default class CachedKeyDeriver {
   /**
      * Derives a public key based on protocol ID, key ID, and counterparty.
      * Caches the result for future calls with the same parameters.
-     * @param {[0 | 1 | 2, string]} protocolID - The protocol ID including a security level and protocol name.
+     * @param {[SecurityLevel, string]} protocolID - The protocol ID including a security level and protocol name.
      * @param {string} keyID - The key identifier.
      * @param {PublicKey | string | 'self' | 'anyone'} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
      * @param {boolean} [forSelf=false] - Whether deriving for self.
      * @returns {PublicKey} - The derived public key.
      */
   derivePublicKey (
-    protocolID: [0 | 1 | 2, string],
+    protocolID: [SecurityLevel, string],
     keyID: string,
     counterparty: PublicKey | string | 'self' | 'anyone',
     forSelf: boolean = false
@@ -51,13 +52,13 @@ export default class CachedKeyDeriver {
   /**
      * Derives a private key based on protocol ID, key ID, and counterparty.
      * Caches the result for future calls with the same parameters.
-     * @param {[0 | 1 | 2, string]} protocolID - The protocol ID including a security level and protocol name.
+     * @param {[SecurityLevel, string]} protocolID - The protocol ID including a security level and protocol name.
      * @param {string} keyID - The key identifier.
      * @param {PublicKey | string | 'self' | 'anyone'} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
      * @returns {PrivateKey} - The derived private key.
      */
   derivePrivateKey (
-    protocolID: [0 | 1 | 2, string],
+    protocolID: [SecurityLevel, string],
     keyID: string,
     counterparty: PublicKey | string | 'self' | 'anyone'
   ): PrivateKey {
@@ -74,14 +75,14 @@ export default class CachedKeyDeriver {
   /**
      * Derives a symmetric key based on protocol ID, key ID, and counterparty.
      * Caches the result for future calls with the same parameters.
-     * @param {[0 | 1 | 2, string]} protocolID - The protocol ID including a security level and protocol name.
+     * @param {[SecurityLevel, string]} protocolID - The protocol ID including a security level and protocol name.
      * @param {string} keyID - The key identifier.
      * @param {PublicKey | string | 'self' | 'anyone'} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
      * @returns {SymmetricKey} - The derived symmetric key.
      * @throws {Error} - Throws an error if attempting to derive a symmetric key for 'anyone'.
      */
   deriveSymmetricKey (
-    protocolID: [0 | 1 | 2, string],
+    protocolID: [SecurityLevel, string],
     keyID: string,
     counterparty: PublicKey | string | 'self' | 'anyone'
   ): SymmetricKey {
@@ -117,13 +118,13 @@ export default class CachedKeyDeriver {
      * Reveals the specific key association for a given protocol ID, key ID, and counterparty.
      * Caches the result for future calls with the same parameters.
      * @param {PublicKey | string | 'self' | 'anyone'} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
-     * @param {[0 | 1 | 2, string]} protocolID - The protocol ID including a security level and protocol name.
+     * @param {[SecurityLevel, string]} protocolID - The protocol ID including a security level and protocol name.
      * @param {string} keyID - The key identifier.
      * @returns {number[]} - The specific key association as a number array.
      */
   revealSpecificSecret (
     counterparty: PublicKey | string | 'self' | 'anyone',
-    protocolID: [0 | 1 | 2, string],
+    protocolID: [SecurityLevel, string],
     keyID: string
   ): number[] {
     const cacheKey = this.generateCacheKey('revealSpecificSecret', counterparty, protocolID, keyID)
