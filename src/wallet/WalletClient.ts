@@ -1,4 +1,4 @@
-import { AcquireCertificateArgs, AcquireCertificateResult, Base64String, BasketStringUnder300Bytes, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Bytes, CreateActionArgs, CreateActionResult, DescriptionString5to50Bytes, DiscoverCertificatesResult, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, InternalizeActionArgs, ISOTimestampString, KeyIDStringUnder800Bytes, LabelStringUnder300Bytes, ListActionsArgs, ListActionsResult, ListCertificatesResult, ListOutputsArgs, ListOutputsResult, OriginatorDomainNameStringUnder250Bytes, OutpointString, OutputTagStringUnder300Bytes, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, ProveCertificateArgs, ProveCertificateResult, PubKeyHex, SatoshiValue, SignActionArgs, SignActionResult, TXIDHexString, VersionString7To30Bytes, Wallet } from './Wallet.interfaces.js'
+import { AcquireCertificateArgs, AcquireCertificateResult, Base64String, BasketStringUnder300Bytes, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Bytes, CreateActionArgs, CreateActionResult, DescriptionString5to50Bytes, DiscoverCertificatesResult, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, InternalizeActionArgs, ISOTimestampString, KeyIDStringUnder800Bytes, LabelStringUnder300Bytes, ListActionsArgs, ListActionsResult, ListCertificatesResult, ListOutputsArgs, ListOutputsResult, OriginatorDomainNameStringUnder250Bytes, OutpointString, OutputTagStringUnder300Bytes, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, ProveCertificateArgs, ProveCertificateResult, PubKeyHex, SatoshiValue, SecurityLevel, SignActionArgs, SignActionResult, TXIDHexString, VersionString7To30Bytes, Wallet } from './Wallet.interfaces.js'
 import WindowCWISubstrate from './substrates/window.CWI.js'
 import XDMSubstrate from './substrates/XDM.js'
 import WalletWireTransceiver from './substrates/WalletWireTransceiver.js'
@@ -95,7 +95,7 @@ export default class WalletClient implements Wallet {
     return await (this.substrate as Wallet).relinquishOutput(args, this.originator)
   }
 
-  async getPublicKey (args: { identityKey?: true, protocolID?: [0 | 1 | 2, ProtocolString5To400Bytes], keyID?: KeyIDStringUnder800Bytes, privileged?: BooleanDefaultFalse, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', forSelf?: BooleanDefaultFalse }): Promise<{ publicKey: PubKeyHex }> {
+  async getPublicKey (args: { identityKey?: true, protocolID?: [SecurityLevel, ProtocolString5To400Bytes], keyID?: KeyIDStringUnder800Bytes, privileged?: BooleanDefaultFalse, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', forSelf?: BooleanDefaultFalse }): Promise<{ publicKey: PubKeyHex }> {
     await this.connectToSubstrate()
     return await (this.substrate as Wallet).getPublicKey(args, this.originator)
   }
@@ -105,36 +105,36 @@ export default class WalletClient implements Wallet {
     return await (this.substrate as Wallet).revealCounterpartyKeyLinkage(args, this.originator)
   }
 
-  async revealSpecificKeyLinkage (args: { counterparty: PubKeyHex, verifier: PubKeyHex, protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, privileged?: BooleanDefaultFalse }): Promise<{ prover: PubKeyHex, verifier: PubKeyHex, counterparty: PubKeyHex, protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, encryptedLinkage: Byte[], encryptedLinkageProof: Byte[], proofType: Byte }> {
+  async revealSpecificKeyLinkage (args: { counterparty: PubKeyHex, verifier: PubKeyHex, protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, privileged?: BooleanDefaultFalse }): Promise<{ prover: PubKeyHex, verifier: PubKeyHex, counterparty: PubKeyHex, protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, encryptedLinkage: Byte[], encryptedLinkageProof: Byte[], proofType: Byte }> {
     await this.connectToSubstrate()
     return await (this.substrate as Wallet).revealSpecificKeyLinkage(args, this.originator)
   }
 
-  async encrypt (args: { plaintext: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }): Promise<{ ciphertext: Byte[] }> {
+  async encrypt (args: { plaintext: Byte[], protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }): Promise<{ ciphertext: Byte[] }> {
     await this.connectToSubstrate()
     return await (this.substrate as Wallet).encrypt(args, this.originator)
   }
 
-  async decrypt (args: { ciphertext: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }): Promise<{ plaintext: Byte[] }> {
+  async decrypt (args: { ciphertext: Byte[], protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }): Promise<{ plaintext: Byte[] }> {
     return await (this.substrate as Wallet).decrypt(args, this.originator)
   }
 
-  async createHmac (args: { data: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }): Promise<{ hmac: Byte[] }> {
+  async createHmac (args: { data: Byte[], protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }): Promise<{ hmac: Byte[] }> {
     await this.connectToSubstrate()
     return await (this.substrate as Wallet).createHmac(args, this.originator)
   }
 
-  async verifyHmac (args: { data: Byte[], hmac: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }): Promise<{ valid: true }> {
+  async verifyHmac (args: { data: Byte[], hmac: Byte[], protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }): Promise<{ valid: true }> {
     await this.connectToSubstrate()
     return await (this.substrate as Wallet).verifyHmac(args, this.originator)
   }
 
-  async createSignature (args: { data?: Byte[], hashToDirectlySign?: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }): Promise<{ signature: Byte[] }> {
+  async createSignature (args: { data?: Byte[], hashToDirectlySign?: Byte[], protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }): Promise<{ signature: Byte[] }> {
     await this.connectToSubstrate()
     return await (this.substrate as Wallet).createSignature(args, this.originator)
   }
 
-  async verifySignature (args: { data?: Byte[], hashToDirectlyVerify?: Byte[], signature: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', forSelf?: BooleanDefaultFalse, privileged?: BooleanDefaultFalse }): Promise<{ valid: true }> {
+  async verifySignature (args: { data?: Byte[], hashToDirectlyVerify?: Byte[], signature: Byte[], protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', forSelf?: BooleanDefaultFalse, privileged?: BooleanDefaultFalse }): Promise<{ valid: true }> {
     await this.connectToSubstrate()
     return await (this.substrate as Wallet).verifySignature(args, this.originator)
   }

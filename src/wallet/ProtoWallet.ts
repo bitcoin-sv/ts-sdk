@@ -23,6 +23,7 @@ import {
   ProtocolString5To400Bytes,
   PubKeyHex,
   SatoshiValue,
+  SecurityLevel,
   TXIDHexString,
   VersionString7To30Bytes,
   Wallet
@@ -256,7 +257,7 @@ export default class ProtoWallet implements Wallet {
   async getPublicKey (
     args: {
       identityKey?: true
-      protocolID?: [0 | 1 | 2, ProtocolString5To400Bytes]
+      protocolID?: [SecurityLevel, ProtocolString5To400Bytes]
       keyID?: KeyIDStringUnder800Bytes
       privileged?: BooleanDefaultFalse
       privilegedReason?: DescriptionString5to50Bytes
@@ -338,7 +339,7 @@ export default class ProtoWallet implements Wallet {
     args: {
       counterparty: PubKeyHex
       verifier: PubKeyHex
-      protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+      protocolID: [SecurityLevel, ProtocolString5To400Bytes]
       keyID: KeyIDStringUnder800Bytes
       privilegedReason?: DescriptionString5to50Bytes
       privileged?: BooleanDefaultFalse
@@ -348,7 +349,7 @@ export default class ProtoWallet implements Wallet {
       prover: PubKeyHex
       verifier: PubKeyHex
       counterparty: PubKeyHex
-      protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+      protocolID: [SecurityLevel, ProtocolString5To400Bytes]
       keyID: KeyIDStringUnder800Bytes
       encryptedLinkage: Byte[]
       encryptedLinkageProof: Byte[]
@@ -390,7 +391,7 @@ export default class ProtoWallet implements Wallet {
   async encrypt (
     args: {
       plaintext: Byte[]
-      protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+      protocolID: [SecurityLevel, ProtocolString5To400Bytes]
       keyID: KeyIDStringUnder800Bytes
       privilegedReason?: DescriptionString5to50Bytes
       counterparty?: PubKeyHex | 'self' | 'anyone'
@@ -412,7 +413,7 @@ export default class ProtoWallet implements Wallet {
   async decrypt (
     args: {
       ciphertext: Byte[]
-      protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+      protocolID: [SecurityLevel, ProtocolString5To400Bytes]
       keyID: KeyIDStringUnder800Bytes
       privilegedReason?: DescriptionString5to50Bytes
       counterparty?: PubKeyHex | 'self' | 'anyone'
@@ -434,7 +435,7 @@ export default class ProtoWallet implements Wallet {
   async createHmac (
     args: {
       data: Byte[]
-      protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+      protocolID: [SecurityLevel, ProtocolString5To400Bytes]
       keyID: KeyIDStringUnder800Bytes
       privilegedReason?: DescriptionString5to50Bytes
       counterparty?: PubKeyHex | 'self' | 'anyone'
@@ -457,7 +458,7 @@ export default class ProtoWallet implements Wallet {
     args: {
       data: Byte[]
       hmac: Byte[]
-      protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+      protocolID: [SecurityLevel, ProtocolString5To400Bytes]
       keyID: KeyIDStringUnder800Bytes
       privilegedReason?: DescriptionString5to50Bytes
       counterparty?: PubKeyHex | 'self' | 'anyone'
@@ -484,7 +485,7 @@ export default class ProtoWallet implements Wallet {
     args: {
       data?: Byte[]
       hashToDirectlySign?: Byte[]
-      protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+      protocolID: [SecurityLevel, ProtocolString5To400Bytes]
       keyID: KeyIDStringUnder800Bytes
       privilegedReason?: DescriptionString5to50Bytes
       counterparty?: PubKeyHex | 'self' | 'anyone'
@@ -512,7 +513,7 @@ export default class ProtoWallet implements Wallet {
       data?: Byte[]
       hashToDirectlyVerify?: Byte[]
       signature: Byte[]
-      protocolID: [0 | 1 | 2, ProtocolString5To400Bytes]
+      protocolID: [SecurityLevel, ProtocolString5To400Bytes]
       keyID: KeyIDStringUnder800Bytes
       privilegedReason?: DescriptionString5to50Bytes
       counterparty?: PubKeyHex | 'self' | 'anyone'

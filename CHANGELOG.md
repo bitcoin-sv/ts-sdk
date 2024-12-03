@@ -112,10 +112,10 @@ All notable changes to this project will be documented in this file. The format 
 - Allow use of Unicode Marks in latin characters like ö and so on, for non-english protocol names.
 - Use a default value in the async fee() function when no args are used rather than requiring a value and then setting if undefined.
 
-
 ---
 
 ## [1.2.6] - 2024-11-30
+
 ### [1.2.6] Fixed
 - revealSpecificKeyLinkage requires a counterparty. 
 - ProtoWallet now correctly implements the wallet interface.

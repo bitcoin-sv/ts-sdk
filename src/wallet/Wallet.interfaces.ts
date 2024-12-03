@@ -192,22 +192,14 @@ export type ErrorDescriptionString20To200Bytes = string
 export type WalletNetwork = 'mainnet' | 'testnet'
 
 /**
- * @typedef enum SecurityLevels
- * 
- * Enumerates the security levels for wallet protocols.
- * Grant: Silently grants the request with no user interation.
- * AppRequest: Requires user approval for every application.
- * CounterpartyAppRequest: Requires user approval for every counterparty and every application.
- * 
+ *
+ * SecurityLevel for protocols.
+ * 0 = Silently grants the request with no user interation.
+ * 1 = Requires user approval for every application.
+ * 2 = Requires user approval for every counterparty and every application.
+ *
  */
-enum SecurityLevels {
-  Grant = 0,
-  AppRequest = 1,
-  CounterpartyAppRequest = 2
-}
-
-export SecurityLevels
-export type SecurityLevel = keyof typeof SecurityLevels
+export type SecurityLevel = 0 | 1 | 2
 
 export type WalletProtocol = [SecurityLevel, ProtocolString5To400Bytes]
 
