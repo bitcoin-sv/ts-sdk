@@ -109,7 +109,6 @@ All notable changes to this project will be documented in this file. The format 
 
 ### [1.2.7] Fixed
 
-- Allow use of Unicode Marks in latin characters like ö and so on, for non-english protocol names.
 - Use a default value in the async fee() function when no args are used rather than requiring a value and then setting if undefined.
 
 ---

@@ -168,7 +168,7 @@ export default class KeyDeriver {
     if (protocolName.includes('  ')) {
       throw new Error('Protocol names cannot contain multiple consecutive spaces ("  ")')
     }
-    if (!/^[\p{L}\p{M}0-9 ]+$/gu.test(protocolName)) {
+    if (!/^[a-z0-9 ]+$/g.test(protocolName)) {
       throw new Error('Protocol names can only contain letters, numbers and spaces')
     }
     if (protocolName.endsWith(' protocol')) {

@@ -339,27 +339,6 @@ describe('ProtoWallet', () => {
       counterparty: counterpartyKey.toPublicKey().toString()
     })).rejects.toThrow()
   })
-  it('Computes HMAC when using unicode marked letters.', async () => {
-    const userKey = PrivateKey.fromRandom()
-    const counterpartyKey = PrivateKey.fromRandom()
-    const user = new ProtoWallet(userKey)
-    const counterparty = new ProtoWallet(counterpartyKey)
-    const { hmac } = await user.createHmac({
-      data: sampleData,
-      protocolID: [2, 'áöťř123 fmaxž töstž789 edfá654 123'],
-      keyID: '4',
-      counterparty: counterpartyKey.toPublicKey().toString()
-    })
-    const { valid } = await counterparty.verifyHmac({
-      hmac,
-      data: sampleData,
-      protocolID: [2, 'áöťř123 fmaxž töstž789 edfá654 123'],
-      keyID: '4',
-      counterparty: userKey.toPublicKey().toString()
-    })
-    expect(valid).toEqual(true)
-    expect(hmac.length).toEqual(32)
-  })
   it('Returns the expected version, network, and authentication status', async () => {
     const wallet = new ProtoWallet('anyone')
     expect(await wallet.getVersion({})).toEqual({ version: 'proto-1.0.0' })
@@ -543,7 +522,7 @@ describe('ProtoWallet', () => {
         if (protocolName.includes('  ')) {
           throw new Error('Protocol names cannot contain multiple consecutive spaces ("  ")')
         }
-        if (!/^[\p{L}\p{M}0-9 ]+$/gu.test(protocolName)) {
+        if (!/^[a-z0-9 ]+$/g.test(protocolName)) {
           throw new Error('Protocol names can only contain letters, numbers and spaces')
         }
         if (protocolName.endsWith(' protocol')) {
