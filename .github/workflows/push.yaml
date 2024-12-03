@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [16.x, 18.x, 20.x]
+        node-version: [18.x, 20.x, 22.x]
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
@@ -28,6 +28,9 @@ jobs:
     name: Publish
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
     - name: Authenticate with registry
@@ -53,6 +56,6 @@ jobs:
     - name: Build
       run: npm run build
     - name: Publish to NPM (expected to fail if version was not bumped manually)
-      run: npm publish
+      run: npm publish --provenance --access public
       env:
         NODE_AUTH_TOKEN: ${{ secrets.BSV_NPM_TOKEN }}

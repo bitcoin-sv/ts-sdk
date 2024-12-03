@@ -13,6 +13,18 @@ All notable changes to this project will be documented in this file. The format 
     - [Removed](#removed)
     - [Fixed](#fixed)
     - [Security](#security)
+  - [\[1.2.5\] - 2024-11-30](#125---2024-11-30)
+    - [Added](#125-added)
+  - [\[1.2.4\] - 2024-11-29](#124---2024-11-29)
+    - [Added](#124-added)
+  - [\[1.2.3\] - 2024-11-26](#123---2024-11-26)
+    - [Added](#123-added)
+  - [\[1.2.2\] - 2024-11-26](#122---2024-11-26)
+    - [Added](#122-added)
+  - [\[1.2.1\] - 2024-11-25](#121---2024-11-25)
+    - [Added](#121-added)
+  - [\[1.2.0\] - 2024-11-25](#120---2024-11-25)
+    - [Added](#120-added)
   - [\[1.1.33\] - 2024-11-22](#1133---2024-11-22)
     - [Added](#added-1)
     - [Fixed](#fixed-1)
@@ -83,6 +95,46 @@ All notable changes to this project will be documented in this file. The format 
 ### Security
 
 ---
+## [1.2.5] - 2024-11-30
+### [1.2.5] Added
+- Testnet capabilities & config override for node to function without error to defaultBroadcaster
+- broadcastMany function to ARCBroadcaster
+
+## [1.2.4] - 2024-11-29
+
+### [1.2.4] Added
+- A "random" distributioun mode for change allocation which approximates Benford's Law in attempt to distribute the remainder of: (inputSats - knownOutputSats - txFee) across the outputs marked "change: true".
+
+---
+
+## [1.2.3] - 2024-11-26
+
+### [1.2.3] Added
+- Added support for Overlay broadcast and lookup timeouts.
+---
+
+## [1.2.2] - 2024-11-26
+
+### [1.2.2] Added
+- Updated the default ShipBroadcast config, tests, and docs.
+
+---
+
+## [1.2.1] - 2024-11-25
+
+### [1.2.1] Added
+- [NPM package provenance](https://github.blog/security/supply-chain-security/introducing-npm-package-provenance/) support
+
+---
+
+## [1.2.0] - 2024-11-25
+
+### [1.2.0] Added
+- Implement BRC-100 wallet interface
+- Add PushDrop token template
+- SHIP and SLAP overlay tooling including broadcaster and lookup
+
+---
 
 ## [1.1.33] - 2024-11-22
 
@@ -117,25 +169,15 @@ Transaction.fromAtomicBEEF
 ### Removed
 
 1. degree property from BeefTx class, was used only by original sortTxs algorithm.
+
 ---
 
 ## [1.1.30] - 2024-11-02
-
 ### Added
 - Feature - Schorr class which allows ZKP creation and verification. BRC-94 and BRC-100 related.
 
 ### Changed
 - electrumEncrypt correctly allows fromPrivateKey to be omitted
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
-
----
 
 ## [1.1.29] - 2024-10-23
 ### Fixed

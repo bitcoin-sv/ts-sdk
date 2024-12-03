@@ -140,9 +140,9 @@ export default class Transaction {
     const validTxids = new Set<string>()
     // All BUMP level 0 hashes are valid.
     for (const bump of BUMPs) {
-      for (const n of bump.path[0])
-        if (n.hash)
-          validTxids.add(n.hash)
+      for (const n of bump.path[0]) {
+        if (n.hash) { validTxids.add(n.hash) }
+      }
     }
     // To keep track of which transactions were used.
     const unusedTxTxids = new Set<string>()
@@ -524,16 +524,46 @@ export default class Transaction {
     }
 
     // Distribute change among change outputs
+    let distributedChange = 0
     if (changeDistribution === 'random') {
-      // TODO
-      throw new Error('Not yet implemented')
+      // Implement Benford's Law distribution for change outputs
+      const changeOutputs = this.outputs.filter(out => out.change)
+      let changeToUse = change
+
+      // Helper function to generate a number approximating Benford's Law
+      const benfordNumber = (min: number, max: number): number => {
+        const d = Math.floor(Math.random() * 9) + 1
+        return Math.floor(min + (max - min) * Math.log10(1 + 1 / d) / Math.log10(10))
+      }
+
+      const benfordNumbers = Array(changeOutputs.length).fill(1)
+      changeToUse -= changeOutputs.length
+      distributedChange += changeOutputs.length
+      for (let i = 0; i < changeOutputs.length - 1; i++) {
+        const portion = benfordNumber(0, changeToUse)
+        benfordNumbers[i] += portion
+        distributedChange += portion
+        changeToUse -= portion
+      }
+
+      for (let i = 0; i < this.outputs.length; i++) {
+        if (this.outputs[i].change) {
+          const t = benfordNumbers.shift()
+          this.outputs[i].satoshis = t
+        }
+      }
     } else if (changeDistribution === 'equal') {
       const perOutput = Math.floor(change / changeCount)
       for (const out of this.outputs) {
         if (out.change) {
+          distributedChange += perOutput
           out.satoshis = perOutput
         }
       }
+    }
+    // if there's any remaining change, add it to the last output
+    if (distributedChange < change) {
+      this.outputs[this.outputs.length - 1].satoshis += (change - distributedChange)
     }
   }
 
@@ -868,13 +898,14 @@ export default class Transaction {
 
   /**
    * Serializes this transaction, together with its inputs and the respective merkle proofs, into the BEEF (BRC-62) format. This enables efficient verification of its compliance with the rules of SPV.
-   * 
+   *
    * @param allowPartial If true, error will not be thrown if there are any missing sourceTransactions.
    *
    * @returns The serialized BEEF structure
    * @throws Error if there are any missing sourceTransactions unless `allowPartial` is true.
    */
   toBEEF (allowPartial?: boolean): number[] {
+    this.outputs.length
     const writer = new Writer()
     writer.writeUInt32LE(4022206465)
     const BUMPs: MerklePath[] = []
@@ -919,10 +950,7 @@ export default class Transaction {
       if (!hasProof) {
         for (let i = 0; i < tx.inputs.length; i++) {
           const input = tx.inputs[i]
-          if (typeof input.sourceTransaction === 'object')
-            addPathsAndInputs(input.sourceTransaction)
-          else if (!allowPartial)
-            throw new Error('A required source transaction is missing!')
+          if (typeof input.sourceTransaction === 'object') { addPathsAndInputs(input.sourceTransaction) } else if (!allowPartial) { throw new Error('A required source transaction is missing!') }
         }
       }
     }

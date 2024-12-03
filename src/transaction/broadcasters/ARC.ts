@@ -21,7 +21,7 @@ export interface ArcConfig {
   headers?: Record<string, string>
 }
 
-function defaultDeploymentId () {
+function defaultDeploymentId() {
   return `ts-sdk-${toHex(Random(16))}`
 }
 
@@ -43,16 +43,16 @@ export default class ARC implements Broadcaster {
    * @param {string} URL - The URL endpoint for the ARC API.
    * @param {ArcConfig} config - Configuration options for the ARC broadcaster.
    */
-  constructor (URL: string, config?: ArcConfig)
+  constructor(URL: string, config?: ArcConfig)
   /**
    * Constructs an instance of the ARC broadcaster.
    *
    * @param {string} URL - The URL endpoint for the ARC API.
    * @param {string} apiKey - The API key used for authorization with the ARC API.
    */
-  constructor (URL: string, apiKey?: string)
+  constructor(URL: string, apiKey?: string)
 
-  constructor (URL: string, config?: string | ArcConfig) {
+  constructor(URL: string, config?: string | ArcConfig) {
     this.URL = URL
     if (typeof config === 'string') {
       this.apiKey = config
@@ -72,12 +72,42 @@ export default class ARC implements Broadcaster {
   }
 
   /**
+   * Constructs a dictionary of the default & supplied request headers.
+   */
+  private requestHeaders() {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'XDeployment-ID': this.deploymentId
+    }
+
+    if (this.apiKey) {
+      headers.Authorization = `Bearer ${this.apiKey}`
+    }
+
+    if (this.callbackUrl) {
+      headers['X-CallbackUrl'] = this.callbackUrl
+    }
+
+    if (this.callbackToken) {
+      headers['X-CallbackToken'] = this.callbackToken
+    }
+
+    if (this.headers) {
+      for (const key in this.headers) {
+        headers[key] = this.headers[key]
+      }
+    }
+
+    return headers
+  }
+
+  /**
    * Broadcasts a transaction via ARC.
    *
    * @param {Transaction} tx - The transaction to be broadcasted.
    * @returns {Promise<BroadcastResponse | BroadcastFailure>} A promise that resolves to either a success or failure response.
    */
-  async broadcast (tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> {
+  async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> {
     let rawTx
     try {
       rawTx = tx.toHexEF()
@@ -99,7 +129,7 @@ export default class ARC implements Broadcaster {
       const response = await this.httpClient.request<ArcResponse>(`${this.URL}/v1/tx`, requestOptions)
       if (response.ok) {
         const { txid, extraInfo, txStatus, competingTxs } = response.data
-        let broadcastRes : BroadcastResponse = {
+        let broadcastRes: BroadcastResponse = {
           status: 'success',
           txid,
           message: `${txStatus} ${extraInfo}`
@@ -143,31 +173,46 @@ export default class ARC implements Broadcaster {
     }
   }
 
-  private requestHeaders () {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'XDeployment-ID': this.deploymentId
-    }
-
-    if (this.apiKey) {
-      headers.Authorization = `Bearer ${this.apiKey}`
-    }
-
-    if (this.callbackUrl) {
-      headers['X-CallbackUrl'] = this.callbackUrl
-    }
-
-    if (this.callbackToken) {
-      headers['X-CallbackToken'] = this.callbackToken
-    }
-
-    if (this.headers) {
-      for (const key in this.headers) {
-        headers[key] = this.headers[key]
+  /**
+   * Broadcasts multiple transactions via ARC.
+   * Handles mixed responses where some transactions succeed and others fail.
+   *
+   * @param {Transaction[]} txs - Array of transactions to be broadcasted.
+   * @returns {Promise<Array<object>>} A promise that resolves to an array of objects.
+   */
+  async broadcastMany(txs: Transaction[]): Promise<Array<object>> {
+    const rawTxs = txs.map(tx => {
+      try {
+        return { rawTx: tx.toHexEF() };
+      } catch (error) {
+        if (error.message === 'All inputs must have source transactions when serializing to EF format') {
+          return { rawTx: tx.toHex() };
+        }
+        throw error;
       }
-    }
+    });
 
-    return headers
+    const requestOptions: HttpClientRequestOptions = {
+      method: 'POST',
+      headers: this.requestHeaders(),
+      data: rawTxs
+    };
+
+    try {
+      const response = await this.httpClient.request<Array<object>>(
+        `${this.URL}/v1/txs`,
+        requestOptions
+      );
+
+      return response.data
+    } catch (error) {
+      const errorResponse: BroadcastFailure = {
+        status: 'error',
+        code: '500',
+        description: error.message || 'Internal Server Error'
+      };
+      return txs.map(() => errorResponse);
+    }
   }
 }
 
