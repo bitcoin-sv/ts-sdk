@@ -368,7 +368,10 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export interface KeyLinkageArgs {
-    protocolID: WalletProtocol;
+    protocolID: [
+        SecurityLevel,
+        ProtocolString5To400Bytes
+    ];
     keyID: KeyIDStringUnder800Bytes;
     counterparty?: WalletCounterparty;
     privileged?: BooleanDefaultFalse;
@@ -376,7 +379,7 @@ export interface KeyLinkageArgs {
 }
 ```
 
-See also: [BooleanDefaultFalse](#type-booleandefaultfalse), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [WalletCounterparty](#type-walletcounterparty), [WalletProtocol](#type-walletprotocol)
+See also: [BooleanDefaultFalse](#type-booleandefaultfalse), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [SecurityLevel](#type-securitylevel), [WalletCounterparty](#type-walletcounterparty)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -1317,26 +1320,26 @@ export default class CachedKeyDeriver {
         maxCacheSize?: number;
     }) 
     derivePublicKey(protocolID: [
-        0 | 1 | 2,
+        SecurityLevel,
         string
     ], keyID: string, counterparty: PublicKey | string | "self" | "anyone", forSelf: boolean = false): PublicKey 
     derivePrivateKey(protocolID: [
-        0 | 1 | 2,
+        SecurityLevel,
         string
     ], keyID: string, counterparty: PublicKey | string | "self" | "anyone"): PrivateKey 
     deriveSymmetricKey(protocolID: [
-        0 | 1 | 2,
+        SecurityLevel,
         string
     ], keyID: string, counterparty: PublicKey | string | "self" | "anyone"): SymmetricKey 
     revealCounterpartySecret(counterparty: PublicKey | string | "self" | "anyone"): number[] 
     revealSpecificSecret(counterparty: PublicKey | string | "self" | "anyone", protocolID: [
-        0 | 1 | 2,
+        SecurityLevel,
         string
     ], keyID: string): number[] 
 }
 ```
 
-See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey), [SymmetricKey](#class-symmetrickey)
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey), [SecurityLevel](#type-securitylevel), [SymmetricKey](#class-symmetrickey)
 
 <details>
 
@@ -1367,11 +1370,11 @@ Caches the result for future calls with the same parameters.
 
 ```ts
 derivePrivateKey(protocolID: [
-    0 | 1 | 2,
+    SecurityLevel,
     string
 ], keyID: string, counterparty: PublicKey | string | "self" | "anyone"): PrivateKey 
 ```
-See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey), [SecurityLevel](#type-securitylevel)
 
 Returns
 
@@ -1393,11 +1396,11 @@ Caches the result for future calls with the same parameters.
 
 ```ts
 derivePublicKey(protocolID: [
-    0 | 1 | 2,
+    SecurityLevel,
     string
 ], keyID: string, counterparty: PublicKey | string | "self" | "anyone", forSelf: boolean = false): PublicKey 
 ```
-See also: [PublicKey](#class-publickey)
+See also: [PublicKey](#class-publickey), [SecurityLevel](#type-securitylevel)
 
 Returns
 
@@ -1421,11 +1424,11 @@ Caches the result for future calls with the same parameters.
 
 ```ts
 deriveSymmetricKey(protocolID: [
-    0 | 1 | 2,
+    SecurityLevel,
     string
 ], keyID: string, counterparty: PublicKey | string | "self" | "anyone"): SymmetricKey 
 ```
-See also: [PublicKey](#class-publickey), [SymmetricKey](#class-symmetrickey)
+See also: [PublicKey](#class-publickey), [SecurityLevel](#type-securitylevel), [SymmetricKey](#class-symmetrickey)
 
 Returns
 
@@ -1474,11 +1477,11 @@ Caches the result for future calls with the same parameters.
 
 ```ts
 revealSpecificSecret(counterparty: PublicKey | string | "self" | "anyone", protocolID: [
-    0 | 1 | 2,
+    SecurityLevel,
     string
 ], keyID: string): number[] 
 ```
-See also: [PublicKey](#class-publickey)
+See also: [PublicKey](#class-publickey), [SecurityLevel](#type-securitylevel)
 
 Returns
 
@@ -1525,26 +1528,26 @@ export default class KeyDeriver {
     rootKey: PrivateKey;
     constructor(rootKey: PrivateKey | "anyone") 
     derivePublicKey(protocolID: [
-        0 | 1 | 2,
+        SecurityLevel,
         string
     ], keyID: string, counterparty: PublicKey | string | "self" | "anyone", forSelf: boolean = false): PublicKey 
     derivePrivateKey(protocolID: [
-        0 | 1 | 2,
+        SecurityLevel,
         string
     ], keyID: string, counterparty: PublicKey | string | "self" | "anyone"): PrivateKey 
     deriveSymmetricKey(protocolID: [
-        0 | 1 | 2,
+        SecurityLevel,
         string
     ], keyID: string, counterparty: PublicKey | string | "self" | "anyone"): SymmetricKey 
     revealCounterpartySecret(counterparty: PublicKey | string | "self" | "anyone"): number[] 
     revealSpecificSecret(counterparty: PublicKey | string | "self" | "anyone", protocolID: [
-        0 | 1 | 2,
+        SecurityLevel,
         string
     ], keyID: string): number[] 
 }
 ```
 
-See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey), [SymmetricKey](#class-symmetrickey)
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey), [SecurityLevel](#type-securitylevel), [SymmetricKey](#class-symmetrickey)
 
 <details>
 
@@ -1570,11 +1573,11 @@ Derives a private key based on protocol ID, key ID, and counterparty.
 
 ```ts
 derivePrivateKey(protocolID: [
-    0 | 1 | 2,
+    SecurityLevel,
     string
 ], keyID: string, counterparty: PublicKey | string | "self" | "anyone"): PrivateKey 
 ```
-See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey), [SecurityLevel](#type-securitylevel)
 
 Returns
 
@@ -1595,11 +1598,11 @@ Derives a public key based on protocol ID, key ID, and counterparty.
 
 ```ts
 derivePublicKey(protocolID: [
-    0 | 1 | 2,
+    SecurityLevel,
     string
 ], keyID: string, counterparty: PublicKey | string | "self" | "anyone", forSelf: boolean = false): PublicKey 
 ```
-See also: [PublicKey](#class-publickey)
+See also: [PublicKey](#class-publickey), [SecurityLevel](#type-securitylevel)
 
 Returns
 
@@ -1623,11 +1626,11 @@ Note: Symmetric keys should not be derivable by everyone due to security risks.
 
 ```ts
 deriveSymmetricKey(protocolID: [
-    0 | 1 | 2,
+    SecurityLevel,
     string
 ], keyID: string, counterparty: PublicKey | string | "self" | "anyone"): SymmetricKey 
 ```
-See also: [PublicKey](#class-publickey), [SymmetricKey](#class-symmetrickey)
+See also: [PublicKey](#class-publickey), [SecurityLevel](#type-securitylevel), [SymmetricKey](#class-symmetrickey)
 
 Returns
 
@@ -1675,11 +1678,11 @@ Reveals the specific key association for a given protocol ID, key ID, and counte
 
 ```ts
 revealSpecificSecret(counterparty: PublicKey | string | "self" | "anyone", protocolID: [
-    0 | 1 | 2,
+    SecurityLevel,
     string
 ], keyID: string): number[] 
 ```
-See also: [PublicKey](#class-publickey)
+See also: [PublicKey](#class-publickey), [SecurityLevel](#type-securitylevel)
 
 Returns
 
@@ -1875,7 +1878,7 @@ export default class ProtoWallet implements Wallet {
     async getPublicKey(args: {
         identityKey?: true;
         protocolID?: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID?: KeyIDStringUnder800Bytes;
@@ -1903,7 +1906,7 @@ export default class ProtoWallet implements Wallet {
         counterparty: PubKeyHex;
         verifier: PubKeyHex;
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -1914,7 +1917,7 @@ export default class ProtoWallet implements Wallet {
         verifier: PubKeyHex;
         counterparty: PubKeyHex;
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -1925,7 +1928,7 @@ export default class ProtoWallet implements Wallet {
     async encrypt(args: {
         plaintext: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -1938,7 +1941,7 @@ export default class ProtoWallet implements Wallet {
     async decrypt(args: {
         ciphertext: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -1951,7 +1954,7 @@ export default class ProtoWallet implements Wallet {
     async createHmac(args: {
         data: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -1965,7 +1968,7 @@ export default class ProtoWallet implements Wallet {
         data: Byte[];
         hmac: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -1979,7 +1982,7 @@ export default class ProtoWallet implements Wallet {
         data?: Byte[];
         hashToDirectlySign?: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -1994,7 +1997,7 @@ export default class ProtoWallet implements Wallet {
         hashToDirectlyVerify?: Byte[];
         signature: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2141,7 +2144,7 @@ export default class ProtoWallet implements Wallet {
 }
 ```
 
-See also: [BEEF](#type-beef), [Base64String](#type-base64string), [BasketStringUnder300Bytes](#type-basketstringunder300bytes), [BooleanDefaultFalse](#type-booleandefaultfalse), [BooleanDefaultTrue](#type-booleandefaulttrue), [Byte](#type-byte), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500bytes), [EntityNameStringMax100Bytes](#type-entitynamestringmax100bytes), [HexString](#type-hexstring), [ISOTimestampString](#type-isotimestampstring), [KeyDeriver](#class-keyderiver), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [LabelStringUnder300Bytes](#type-labelstringunder300bytes), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [OutpointString](#type-outpointstring), [OutputTagStringUnder300Bytes](#type-outputtagstringunder300bytes), [PositiveInteger](#type-positiveinteger), [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000), [PositiveIntegerMax10](#type-positiveintegermax10), [PositiveIntegerOrZero](#type-positiveintegerorzero), [PrivateKey](#class-privatekey), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [PubKeyHex](#type-pubkeyhex), [SatoshiValue](#type-satoshivalue), [TXIDHexString](#type-txidhexstring), [VersionString7To30Bytes](#type-versionstring7to30bytes), [Wallet](#interface-wallet), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
+See also: [BEEF](#type-beef), [Base64String](#type-base64string), [BasketStringUnder300Bytes](#type-basketstringunder300bytes), [BooleanDefaultFalse](#type-booleandefaultfalse), [BooleanDefaultTrue](#type-booleandefaulttrue), [Byte](#type-byte), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500bytes), [EntityNameStringMax100Bytes](#type-entitynamestringmax100bytes), [HexString](#type-hexstring), [ISOTimestampString](#type-isotimestampstring), [KeyDeriver](#class-keyderiver), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [LabelStringUnder300Bytes](#type-labelstringunder300bytes), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [OutpointString](#type-outpointstring), [OutputTagStringUnder300Bytes](#type-outputtagstringunder300bytes), [PositiveInteger](#type-positiveinteger), [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000), [PositiveIntegerMax10](#type-positiveintegermax10), [PositiveIntegerOrZero](#type-positiveintegerorzero), [PrivateKey](#class-privatekey), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [PubKeyHex](#type-pubkeyhex), [SatoshiValue](#type-satoshivalue), [SecurityLevel](#type-securitylevel), [TXIDHexString](#type-txidhexstring), [VersionString7To30Bytes](#type-versionstring7to30bytes), [Wallet](#interface-wallet), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -2177,7 +2180,7 @@ export default class WalletClient implements Wallet {
     async getPublicKey(args: {
         identityKey?: true;
         protocolID?: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID?: KeyIDStringUnder800Bytes;
@@ -2205,7 +2208,7 @@ export default class WalletClient implements Wallet {
         counterparty: PubKeyHex;
         verifier: PubKeyHex;
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2216,7 +2219,7 @@ export default class WalletClient implements Wallet {
         verifier: PubKeyHex;
         counterparty: PubKeyHex;
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2227,7 +2230,7 @@ export default class WalletClient implements Wallet {
     async encrypt(args: {
         plaintext: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2240,7 +2243,7 @@ export default class WalletClient implements Wallet {
     async decrypt(args: {
         ciphertext: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2253,7 +2256,7 @@ export default class WalletClient implements Wallet {
     async createHmac(args: {
         data: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2267,7 +2270,7 @@ export default class WalletClient implements Wallet {
         data: Byte[];
         hmac: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2281,7 +2284,7 @@ export default class WalletClient implements Wallet {
         data?: Byte[];
         hashToDirectlySign?: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2296,7 +2299,7 @@ export default class WalletClient implements Wallet {
         hashToDirectlyVerify?: Byte[];
         signature: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2357,7 +2360,7 @@ export default class WalletClient implements Wallet {
 }
 ```
 
-See also: [AcquireCertificateArgs](#interface-acquirecertificateargs), [AcquireCertificateResult](#interface-acquirecertificateresult), [Base64String](#type-base64string), [BasketStringUnder300Bytes](#type-basketstringunder300bytes), [BooleanDefaultFalse](#type-booleandefaultfalse), [Byte](#type-byte), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [CreateActionArgs](#interface-createactionargs), [CreateActionResult](#interface-createactionresult), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [DiscoverCertificatesResult](#interface-discovercertificatesresult), [HexString](#type-hexstring), [ISOTimestampString](#type-isotimestampstring), [InternalizeActionArgs](#interface-internalizeactionargs), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [ListActionsArgs](#interface-listactionsargs), [ListActionsResult](#interface-listactionsresult), [ListCertificatesResult](#interface-listcertificatesresult), [ListOutputsArgs](#interface-listoutputsargs), [ListOutputsResult](#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [OutpointString](#type-outpointstring), [PositiveInteger](#type-positiveinteger), [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000), [PositiveIntegerOrZero](#type-positiveintegerorzero), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [ProveCertificateArgs](#interface-provecertificateargs), [ProveCertificateResult](#interface-provecertificateresult), [PubKeyHex](#type-pubkeyhex), [SignActionArgs](#interface-signactionargs), [SignActionResult](#interface-signactionresult), [VersionString7To30Bytes](#type-versionstring7to30bytes), [Wallet](#interface-wallet), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
+See also: [AcquireCertificateArgs](#interface-acquirecertificateargs), [AcquireCertificateResult](#interface-acquirecertificateresult), [Base64String](#type-base64string), [BasketStringUnder300Bytes](#type-basketstringunder300bytes), [BooleanDefaultFalse](#type-booleandefaultfalse), [Byte](#type-byte), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [CreateActionArgs](#interface-createactionargs), [CreateActionResult](#interface-createactionresult), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [DiscoverCertificatesResult](#interface-discovercertificatesresult), [HexString](#type-hexstring), [ISOTimestampString](#type-isotimestampstring), [InternalizeActionArgs](#interface-internalizeactionargs), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [ListActionsArgs](#interface-listactionsargs), [ListActionsResult](#interface-listactionsresult), [ListCertificatesResult](#interface-listcertificatesresult), [ListOutputsArgs](#interface-listoutputsargs), [ListOutputsResult](#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [OutpointString](#type-outpointstring), [PositiveInteger](#type-positiveinteger), [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000), [PositiveIntegerOrZero](#type-positiveintegerorzero), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [ProveCertificateArgs](#interface-provecertificateargs), [ProveCertificateResult](#interface-provecertificateresult), [PubKeyHex](#type-pubkeyhex), [SecurityLevel](#type-securitylevel), [SignActionArgs](#interface-signactionargs), [SignActionResult](#interface-signactionresult), [VersionString7To30Bytes](#type-versionstring7to30bytes), [Wallet](#interface-wallet), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -2422,7 +2425,7 @@ export default class WalletWireTransceiver implements Wallet {
         seekPermission?: BooleanDefaultTrue;
         identityKey?: true;
         protocolID?: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID?: KeyIDStringUnder800Bytes;
@@ -2450,7 +2453,7 @@ export default class WalletWireTransceiver implements Wallet {
         counterparty: PubKeyHex;
         verifier: PubKeyHex;
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2461,7 +2464,7 @@ export default class WalletWireTransceiver implements Wallet {
         verifier: PubKeyHex;
         counterparty: PubKeyHex;
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2473,7 +2476,7 @@ export default class WalletWireTransceiver implements Wallet {
         seekPermission?: BooleanDefaultTrue;
         plaintext: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2487,7 +2490,7 @@ export default class WalletWireTransceiver implements Wallet {
         seekPermission?: BooleanDefaultTrue;
         ciphertext: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2501,7 +2504,7 @@ export default class WalletWireTransceiver implements Wallet {
         seekPermission?: BooleanDefaultTrue;
         data: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2516,7 +2519,7 @@ export default class WalletWireTransceiver implements Wallet {
         data: Byte[];
         hmac: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2531,7 +2534,7 @@ export default class WalletWireTransceiver implements Wallet {
         data?: Byte[];
         hashToDirectlySign?: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2547,7 +2550,7 @@ export default class WalletWireTransceiver implements Wallet {
         hashToDirectlyVerify?: Byte[];
         signature: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2610,7 +2613,7 @@ export default class WalletWireTransceiver implements Wallet {
 }
 ```
 
-See also: [AcquireCertificateArgs](#interface-acquirecertificateargs), [AcquireCertificateResult](#interface-acquirecertificateresult), [Base64String](#type-base64string), [BasketStringUnder300Bytes](#type-basketstringunder300bytes), [BooleanDefaultFalse](#type-booleandefaultfalse), [BooleanDefaultTrue](#type-booleandefaulttrue), [Byte](#type-byte), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [CreateActionArgs](#interface-createactionargs), [CreateActionResult](#interface-createactionresult), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [DiscoverCertificatesResult](#interface-discovercertificatesresult), [HexString](#type-hexstring), [ISOTimestampString](#type-isotimestampstring), [InternalizeActionArgs](#interface-internalizeactionargs), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [ListActionsArgs](#interface-listactionsargs), [ListActionsResult](#interface-listactionsresult), [ListCertificatesResult](#interface-listcertificatesresult), [ListOutputsArgs](#interface-listoutputsargs), [ListOutputsResult](#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [OutpointString](#type-outpointstring), [PositiveInteger](#type-positiveinteger), [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000), [PositiveIntegerOrZero](#type-positiveintegerorzero), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [ProveCertificateArgs](#interface-provecertificateargs), [ProveCertificateResult](#interface-provecertificateresult), [PubKeyHex](#type-pubkeyhex), [SignActionArgs](#interface-signactionargs), [SignActionResult](#interface-signactionresult), [VersionString7To30Bytes](#type-versionstring7to30bytes), [Wallet](#interface-wallet), [WalletWire](#interface-walletwire), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
+See also: [AcquireCertificateArgs](#interface-acquirecertificateargs), [AcquireCertificateResult](#interface-acquirecertificateresult), [Base64String](#type-base64string), [BasketStringUnder300Bytes](#type-basketstringunder300bytes), [BooleanDefaultFalse](#type-booleandefaultfalse), [BooleanDefaultTrue](#type-booleandefaulttrue), [Byte](#type-byte), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [CreateActionArgs](#interface-createactionargs), [CreateActionResult](#interface-createactionresult), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [DiscoverCertificatesResult](#interface-discovercertificatesresult), [HexString](#type-hexstring), [ISOTimestampString](#type-isotimestampstring), [InternalizeActionArgs](#interface-internalizeactionargs), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [ListActionsArgs](#interface-listactionsargs), [ListActionsResult](#interface-listactionsresult), [ListCertificatesResult](#interface-listcertificatesresult), [ListOutputsArgs](#interface-listoutputsargs), [ListOutputsResult](#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [OutpointString](#type-outpointstring), [PositiveInteger](#type-positiveinteger), [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000), [PositiveIntegerOrZero](#type-positiveintegerorzero), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [ProveCertificateArgs](#interface-provecertificateargs), [ProveCertificateResult](#interface-provecertificateresult), [PubKeyHex](#type-pubkeyhex), [SecurityLevel](#type-securitylevel), [SignActionArgs](#interface-signactionargs), [SignActionResult](#interface-signactionresult), [VersionString7To30Bytes](#type-versionstring7to30bytes), [Wallet](#interface-wallet), [WalletWire](#interface-walletwire), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -2788,7 +2791,7 @@ export default class WindowCWISubstrate implements Wallet {
     async getPublicKey(args: {
         identityKey?: true;
         protocolID?: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID?: KeyIDStringUnder800Bytes;
@@ -2816,7 +2819,7 @@ export default class WindowCWISubstrate implements Wallet {
         counterparty: PubKeyHex;
         verifier: PubKeyHex;
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2827,7 +2830,7 @@ export default class WindowCWISubstrate implements Wallet {
         verifier: PubKeyHex;
         counterparty: PubKeyHex;
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2838,7 +2841,7 @@ export default class WindowCWISubstrate implements Wallet {
     async encrypt(args: {
         plaintext: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2851,7 +2854,7 @@ export default class WindowCWISubstrate implements Wallet {
     async decrypt(args: {
         ciphertext: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2864,7 +2867,7 @@ export default class WindowCWISubstrate implements Wallet {
     async createHmac(args: {
         data: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2878,7 +2881,7 @@ export default class WindowCWISubstrate implements Wallet {
         data: Byte[];
         hmac: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2892,7 +2895,7 @@ export default class WindowCWISubstrate implements Wallet {
         data?: Byte[];
         hashToDirectlySign?: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -2907,7 +2910,7 @@ export default class WindowCWISubstrate implements Wallet {
         hashToDirectlyVerify?: Byte[];
         signature: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -3053,7 +3056,7 @@ export default class WindowCWISubstrate implements Wallet {
 }
 ```
 
-See also: [BEEF](#type-beef), [Base64String](#type-base64string), [BasketStringUnder300Bytes](#type-basketstringunder300bytes), [BooleanDefaultFalse](#type-booleandefaultfalse), [BooleanDefaultTrue](#type-booleandefaulttrue), [Byte](#type-byte), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500bytes), [EntityNameStringMax100Bytes](#type-entitynamestringmax100bytes), [HexString](#type-hexstring), [ISOTimestampString](#type-isotimestampstring), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [LabelStringUnder300Bytes](#type-labelstringunder300bytes), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [OutpointString](#type-outpointstring), [OutputTagStringUnder300Bytes](#type-outputtagstringunder300bytes), [PositiveInteger](#type-positiveinteger), [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000), [PositiveIntegerMax10](#type-positiveintegermax10), [PositiveIntegerOrZero](#type-positiveintegerorzero), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [PubKeyHex](#type-pubkeyhex), [SatoshiValue](#type-satoshivalue), [TXIDHexString](#type-txidhexstring), [VersionString7To30Bytes](#type-versionstring7to30bytes), [Wallet](#interface-wallet), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
+See also: [BEEF](#type-beef), [Base64String](#type-base64string), [BasketStringUnder300Bytes](#type-basketstringunder300bytes), [BooleanDefaultFalse](#type-booleandefaultfalse), [BooleanDefaultTrue](#type-booleandefaulttrue), [Byte](#type-byte), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500bytes), [EntityNameStringMax100Bytes](#type-entitynamestringmax100bytes), [HexString](#type-hexstring), [ISOTimestampString](#type-isotimestampstring), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [LabelStringUnder300Bytes](#type-labelstringunder300bytes), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [OutpointString](#type-outpointstring), [OutputTagStringUnder300Bytes](#type-outputtagstringunder300bytes), [PositiveInteger](#type-positiveinteger), [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000), [PositiveIntegerMax10](#type-positiveintegermax10), [PositiveIntegerOrZero](#type-positiveintegerorzero), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [PubKeyHex](#type-pubkeyhex), [SatoshiValue](#type-satoshivalue), [SecurityLevel](#type-securitylevel), [TXIDHexString](#type-txidhexstring), [VersionString7To30Bytes](#type-versionstring7to30bytes), [Wallet](#interface-wallet), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -3232,7 +3235,7 @@ export default class XDMSubstrate implements Wallet {
     async getPublicKey(args: {
         identityKey?: true;
         protocolID?: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID?: KeyIDStringUnder800Bytes;
@@ -3260,7 +3263,7 @@ export default class XDMSubstrate implements Wallet {
         counterparty: PubKeyHex;
         verifier: PubKeyHex;
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -3271,7 +3274,7 @@ export default class XDMSubstrate implements Wallet {
         verifier: PubKeyHex;
         counterparty: PubKeyHex;
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -3282,7 +3285,7 @@ export default class XDMSubstrate implements Wallet {
     async encrypt(args: {
         plaintext: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -3295,7 +3298,7 @@ export default class XDMSubstrate implements Wallet {
     async decrypt(args: {
         ciphertext: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -3308,7 +3311,7 @@ export default class XDMSubstrate implements Wallet {
     async createHmac(args: {
         data: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -3322,7 +3325,7 @@ export default class XDMSubstrate implements Wallet {
         data: Byte[];
         hmac: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -3336,7 +3339,7 @@ export default class XDMSubstrate implements Wallet {
         data?: Byte[];
         hashToDirectlySign?: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -3351,7 +3354,7 @@ export default class XDMSubstrate implements Wallet {
         hashToDirectlyVerify?: Byte[];
         signature: Byte[];
         protocolID: [
-            0 | 1 | 2,
+            SecurityLevel,
             ProtocolString5To400Bytes
         ];
         keyID: KeyIDStringUnder800Bytes;
@@ -3497,7 +3500,7 @@ export default class XDMSubstrate implements Wallet {
 }
 ```
 
-See also: [BEEF](#type-beef), [Base64String](#type-base64string), [BasketStringUnder300Bytes](#type-basketstringunder300bytes), [BooleanDefaultFalse](#type-booleandefaultfalse), [BooleanDefaultTrue](#type-booleandefaulttrue), [Byte](#type-byte), [CallType](#type-calltype), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500bytes), [EntityNameStringMax100Bytes](#type-entitynamestringmax100bytes), [HexString](#type-hexstring), [ISOTimestampString](#type-isotimestampstring), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [LabelStringUnder300Bytes](#type-labelstringunder300bytes), [OutpointString](#type-outpointstring), [OutputTagStringUnder300Bytes](#type-outputtagstringunder300bytes), [PositiveInteger](#type-positiveinteger), [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000), [PositiveIntegerMax10](#type-positiveintegermax10), [PositiveIntegerOrZero](#type-positiveintegerorzero), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [PubKeyHex](#type-pubkeyhex), [SatoshiValue](#type-satoshivalue), [TXIDHexString](#type-txidhexstring), [VersionString7To30Bytes](#type-versionstring7to30bytes), [Wallet](#interface-wallet), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
+See also: [BEEF](#type-beef), [Base64String](#type-base64string), [BasketStringUnder300Bytes](#type-basketstringunder300bytes), [BooleanDefaultFalse](#type-booleandefaultfalse), [BooleanDefaultTrue](#type-booleandefaulttrue), [Byte](#type-byte), [CallType](#type-calltype), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500bytes), [EntityNameStringMax100Bytes](#type-entitynamestringmax100bytes), [HexString](#type-hexstring), [ISOTimestampString](#type-isotimestampstring), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [LabelStringUnder300Bytes](#type-labelstringunder300bytes), [OutpointString](#type-outpointstring), [OutputTagStringUnder300Bytes](#type-outputtagstringunder300bytes), [PositiveInteger](#type-positiveinteger), [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000), [PositiveIntegerMax10](#type-positiveintegermax10), [PositiveIntegerOrZero](#type-positiveintegerorzero), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [PubKeyHex](#type-pubkeyhex), [SatoshiValue](#type-satoshivalue), [SecurityLevel](#type-securitylevel), [TXIDHexString](#type-txidhexstring), [VersionString7To30Bytes](#type-versionstring7to30bytes), [Wallet](#interface-wallet), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -3513,14 +3516,14 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [AtomicBEEF](#type-atomicbeef) | [ErrorDescriptionString20To200Bytes](#type-errordescriptionstring20to200bytes) | [ProtocolString5To400Bytes](#type-protocolstring5to400bytes) |
 | [BEEF](#type-beef) | [HexString](#type-hexstring) | [PubKeyHex](#type-pubkeyhex) |
 | [Base64String](#type-base64string) | [ISOTimestampString](#type-isotimestampstring) | [SatoshiValue](#type-satoshivalue) |
-| [BasketStringUnder300Bytes](#type-basketstringunder300bytes) | [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes) | [TXIDHexString](#type-txidhexstring) |
-| [BooleanDefaultFalse](#type-booleandefaultfalse) | [KeyringRevealer](#type-keyringrevealer) | [TrustSelf](#type-trustself) |
-| [BooleanDefaultTrue](#type-booleandefaulttrue) | [LabelStringUnder300Bytes](#type-labelstringunder300bytes) | [VersionString7To30Bytes](#type-versionstring7to30bytes) |
-| [Byte](#type-byte) | [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes) | [WalletCounterparty](#type-walletcounterparty) |
-| [CallType](#type-calltype) | [OutpointString](#type-outpointstring) | [WalletErrorCode](#type-walleterrorcode) |
-| [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes) | [OutputTagStringUnder300Bytes](#type-outputtagstringunder300bytes) | [WalletNetwork](#type-walletnetwork) |
-| [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes) | [PositiveInteger](#type-positiveinteger) | [WalletProtocol](#type-walletprotocol) |
-| [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500bytes) | [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000) |  |
+| [BasketStringUnder300Bytes](#type-basketstringunder300bytes) | [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes) | [SecurityLevel](#type-securitylevel) |
+| [BooleanDefaultFalse](#type-booleandefaultfalse) | [KeyringRevealer](#type-keyringrevealer) | [TXIDHexString](#type-txidhexstring) |
+| [BooleanDefaultTrue](#type-booleandefaulttrue) | [LabelStringUnder300Bytes](#type-labelstringunder300bytes) | [TrustSelf](#type-trustself) |
+| [Byte](#type-byte) | [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes) | [VersionString7To30Bytes](#type-versionstring7to30bytes) |
+| [CallType](#type-calltype) | [OutpointString](#type-outpointstring) | [WalletCounterparty](#type-walletcounterparty) |
+| [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes) | [OutputTagStringUnder300Bytes](#type-outputtagstringunder300bytes) | [WalletErrorCode](#type-walleterrorcode) |
+| [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes) | [PositiveInteger](#type-positiveinteger) | [WalletNetwork](#type-walletnetwork) |
+| [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500bytes) | [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000) | [WalletProtocol](#type-walletprotocol) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
@@ -3813,6 +3816,21 @@ export type SatoshiValue = number
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
 ---
+### Type: SecurityLevel
+
+
+SecurityLevel for protocols.
+0 = Silently grants the request with no user interation.
+1 = Requires user approval for every application.
+2 = Requires user approval for every counterparty and every application.
+
+```ts
+export type SecurityLevel = 0 | 1 | 2
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+
+---
 ### Type: TXIDHexString
 
 ```ts
@@ -3881,12 +3899,12 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export type WalletProtocol = [
-    0 | 1 | 2,
+    SecurityLevel,
     ProtocolString5To400Bytes
 ]
 ```
 
-See also: [ProtocolString5To400Bytes](#type-protocolstring5to400bytes)
+See also: [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [SecurityLevel](#type-securitylevel)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 
