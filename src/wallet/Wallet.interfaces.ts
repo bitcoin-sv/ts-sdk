@@ -192,17 +192,16 @@ export type ErrorDescriptionString20To200Bytes = string
 export type WalletNetwork = 'mainnet' | 'testnet'
 
 /**
- * @enum {number}
- * SecurityLevels for protocols as strings.
+ * @enum {number} SecurityLevels
  *
- * 0 = Silently grants the request with no user interation.
- * 1 = Requires user approval for every application.
- * 2 = Requires user approval for every counterparty and every application.
+ * Silent = 0 Silently grants the request with no user interation.
+ * App = 1 Requires user approval for every application.
+ * Counterparty = 2 Requires user approval per counterparty per application.
  */
 export enum SecurityLevels {
-  SilentApproval = 0,
-  AppGrantRequest = 1,
-  CounterpartyAppGrantRequest = 2
+  Silent = 0,
+  App = 1,
+  Counterparty = 2
 }
 
 /**
@@ -210,7 +209,7 @@ export enum SecurityLevels {
  * SecurityLevel for protocols.
  * 0 = Silently grants the request with no user interation.
  * 1 = Requires user approval for every application.
- * 2 = Requires user approval for every counterparty and every application.
+ * 2 = Requires user approval per counterparty per application.
  *
  */
 export type SecurityLevel = 0 | 1 | 2
@@ -557,7 +556,7 @@ export interface ListOutputsResult {
    * @param {SecurityLevel} protocolID[0] - SecurityLevel:
    * 0 = Silently grants the request with no user interation.
    * 1 = Requires user approval for every application.
-   * 2 = Requires user approval for every counterparty and every application.
+   * 2 = Requires user approval per counterparty per application.
    * @param {ProtocolString5To400Bytes} protocolID[1] - The name of the protocol.
    * @param {KeyIDStringUnder800Bytes} keyID - Key ID under which the encryption will be performed.
    * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.

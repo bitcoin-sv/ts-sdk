@@ -3822,7 +3822,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 SecurityLevel for protocols.
 0 = Silently grants the request with no user interation.
 1 = Requires user approval for every application.
-2 = Requires user approval for every counterparty and every application.
+2 = Requires user approval per counterparty per application.
 
 ```ts
 export type SecurityLevel = 0 | 1 | 2
@@ -3915,9 +3915,9 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export enum SecurityLevels {
-    SilentApproval = 0,
-    AppGrantRequest = 1,
-    CounterpartyAppGrantRequest = 2
+    Silent = 0,
+    App = 1,
+    Counterparty = 2
 }
 ```
 
