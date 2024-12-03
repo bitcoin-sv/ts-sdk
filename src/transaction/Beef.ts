@@ -97,6 +97,27 @@ export class Beef {
   findTxid (txid: string): BeefTx | undefined {
     return this.txs.find(tx => tx.txid === txid)
   }
+  
+  /**
+   * Replaces `BeefTx` for this txid with txidOnly.
+   * 
+   * Replacement is done so that a `clone()` can be
+   * updated by this method without affecting the
+   * original.
+   * 
+   * @param txid 
+   * @returns undefined if txid is unknown.
+   */
+  makeTxidOnly(txid: string): BeefTx | undefined {
+    const i = this.txs.findIndex(tx => tx.txid === txid)
+    if (i === -1) return undefined
+    let btx = this.txs[i]
+    if (btx.isTxidOnly)
+      return btx
+    this.txs.slice(i, i + 1)
+    btx = this.mergeTxidOnly(txid)
+    return btx
+  }
 
   /**
    * @returns `MerklePath` with level zero hash equal to txid or undefined.
