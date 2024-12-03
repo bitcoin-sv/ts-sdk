@@ -27,6 +27,12 @@ describe('PublicKey', () => {
     })
   })
 
+  describe('Constructor', () => {
+    it('Should throw when accidentally passing in DER', () => {
+      expect(() => new PublicKey('036af279b60aa437d48bb0e2ec0b0c6b5cfaa976663f1f08ad456fd7fff149321d')).toThrow()
+    })
+  })
+
   describe('Instance methods', () => {
     test('deriveSharedSecret should derive a shared secret Point', () => {
       const sharedSecret = publicKey.deriveSharedSecret(privateKey)
