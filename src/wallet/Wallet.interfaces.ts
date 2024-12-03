@@ -192,6 +192,20 @@ export type ErrorDescriptionString20To200Bytes = string
 export type WalletNetwork = 'mainnet' | 'testnet'
 
 /**
+ * @enum {number}
+ * SecurityLevels for protocols as strings.
+ *
+ * 0 = Silently grants the request with no user interation.
+ * 1 = Requires user approval for every application.
+ * 2 = Requires user approval for every counterparty and every application.
+ */
+export enum SecurityLevels {
+  SilentApproval = 0,
+  AppGrantRequest = 1,
+  CounterpartyAppGrantRequest = 2
+}
+
+/**
  *
  * SecurityLevel for protocols.
  * 0 = Silently grants the request with no user interation.
