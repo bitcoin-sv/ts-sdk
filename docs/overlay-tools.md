@@ -26,12 +26,22 @@ Instructs the Overlay Services Engine about which outputs to admit and which pre
 export interface AdmittanceInstructions {
     outputsToAdmit: number[];
     coinsToRetain: number[];
+    coinsRemoved?: number[];
 }
 ```
 
 <details>
 
 <summary>Interface AdmittanceInstructions Details</summary>
+
+#### Property coinsRemoved
+
+The indices of all inputs from the provided transaction which reference previously-admitted outputs,
+which are now considered spent and have been removed from the managed topic.
+
+```ts
+coinsRemoved?: number[]
+```
 
 #### Property coinsToRetain
 
@@ -43,7 +53,7 @@ coinsToRetain: number[]
 
 #### Property outputsToAdmit
 
-The indices of all admissable outputs into the managed topic from the provided transaction.
+The indices of all admissible outputs into the managed topic from the provided transaction.
 
 ```ts
 outputsToAdmit: number[]

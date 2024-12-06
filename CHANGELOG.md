@@ -103,6 +103,14 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.2.9] - 2024-12-06
+
+### [1.2.9] Added
+
+- Added support for returning coinsRemoved in an overlay Submitted Transaction Execution AcKnowledgment (STEAK) message.
+
+---
+
 ## [1.2.8] - 2024-12-02
 
 ### [1.2.8] Fixed
