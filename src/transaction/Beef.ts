@@ -97,23 +97,22 @@ export class Beef {
   findTxid (txid: string): BeefTx | undefined {
     return this.txs.find(tx => tx.txid === txid)
   }
-  
+
   /**
    * Replaces `BeefTx` for this txid with txidOnly.
-   * 
+   *
    * Replacement is done so that a `clone()` can be
    * updated by this method without affecting the
    * original.
-   * 
-   * @param txid 
+   *
+   * @param txid
    * @returns undefined if txid is unknown.
    */
-  makeTxidOnly(txid: string): BeefTx | undefined {
+  makeTxidOnly (txid: string): BeefTx | undefined {
     const i = this.txs.findIndex(tx => tx.txid === txid)
     if (i === -1) return undefined
     let btx = this.txs[i]
-    if (btx.isTxidOnly)
-      return btx
+    if (btx.isTxidOnly) { return btx }
     this.txs.slice(i, i + 1)
     btx = this.mergeTxidOnly(txid)
     return btx
@@ -577,8 +576,7 @@ export class Beef {
       } else if (tx.isTxidOnly && tx.inputTxids.length === 0) {
         validTxids[tx.txid] = true
         txidOnly.push(tx)
-      } else
-        queue.push(tx)
+      } else { queue.push(tx) }
     }
 
     // Hashtable of unknown input txids used to fund transactions without their own proof.
@@ -603,10 +601,7 @@ export class Beef {
           hasMissingInput = true
         }
       }
-      if (hasMissingInput)
-        txsMissingInputs.push(tx)
-      else
-        queue.push(tx)
+      if (hasMissingInput) { txsMissingInputs.push(tx) } else { queue.push(tx) }
     }
 
     // As long as we have unsorted transactions...
