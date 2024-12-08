@@ -1,4 +1,5 @@
 import { PrivateKey, PublicKey, SymmetricKey, Hash, Utils } from '../primitives/index.js'
+import { SecurityLevel } from '../wallet/Wallet.interfaces.js'
 
 /**
  * Class responsible for deriving various types of keys using a root private key.
@@ -21,13 +22,13 @@ export default class KeyDeriver {
 
   /**
      * Derives a public key based on protocol ID, key ID, and counterparty.
-     * @param {[0 | 1 | 2, string]} protocolID - The protocol ID including a security level and protocol name.
+     * @param {[SecurityLevel, string]} protocolID - The protocol ID including a security level and protocol name.
      * @param {string} keyID - The key identifier.
      * @param {PublicKey | string | 'self' | 'anyone'} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
      * @param {boolean} [forSelf=false] - Whether deriving for self.
      * @returns {PublicKey} - The derived public key.
      */
-  derivePublicKey (protocolID: [0 | 1 | 2, string], keyID: string, counterparty: PublicKey | string | 'self' | 'anyone', forSelf: boolean = false): PublicKey {
+  derivePublicKey (protocolID: [SecurityLevel, string], keyID: string, counterparty: PublicKey | string | 'self' | 'anyone', forSelf: boolean = false): PublicKey {
     counterparty = this.normalizeCounterparty(counterparty)
     if (forSelf) {
       return this.rootKey.deriveChild(counterparty, this.computeInvoiceNumber(protocolID, keyID)).toPublicKey()
@@ -38,12 +39,12 @@ export default class KeyDeriver {
 
   /**
      * Derives a private key based on protocol ID, key ID, and counterparty.
-     * @param {[0 | 1 | 2, string]} protocolID - The protocol ID including a security level and protocol name.
+     * @param {[SecurityLevel, string]} protocolID - The protocol ID including a security level and protocol name.
      * @param {string} keyID - The key identifier.
      * @param {PublicKey | string | 'self' | 'anyone'} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
      * @returns {PrivateKey} - The derived private key.
      */
-  derivePrivateKey (protocolID: [0 | 1 | 2, string], keyID: string, counterparty: PublicKey | string | 'self' | 'anyone'): PrivateKey {
+  derivePrivateKey (protocolID: [SecurityLevel, string], keyID: string, counterparty: PublicKey | string | 'self' | 'anyone'): PrivateKey {
     counterparty = this.normalizeCounterparty(counterparty)
     return this.rootKey.deriveChild(counterparty, this.computeInvoiceNumber(protocolID, keyID))
   }
@@ -51,13 +52,13 @@ export default class KeyDeriver {
   /**
      * Derives a symmetric key based on protocol ID, key ID, and counterparty.
      * Note: Symmetric keys should not be derivable by everyone due to security risks.
-     * @param {[0 | 1 | 2, string]} protocolID - The protocol ID including a security level and protocol name.
+     * @param {[SecurityLevel, string]} protocolID - The protocol ID including a security level and protocol name.
      * @param {string} keyID - The key identifier.
      * @param {PublicKey | string | 'self' | 'anyone'} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
      * @returns {SymmetricKey} - The derived symmetric key.
      * @throws {Error} - Throws an error if attempting to derive a symmetric key for 'anyone'.
      */
-  deriveSymmetricKey (protocolID: [0 | 1 | 2, string], keyID: string, counterparty: PublicKey | string | 'self' | 'anyone'): SymmetricKey {
+  deriveSymmetricKey (protocolID: [SecurityLevel, string], keyID: string, counterparty: PublicKey | string | 'self' | 'anyone'): SymmetricKey {
     if (counterparty === 'anyone') {
       throw new Error(
         'Symmetric keys (such as encryption keys or HMAC keys) should not be derivable by everyone, because messages would be decryptable by anyone who knows the identity public key of the user, and HMACs would be similarly forgeable.'
@@ -97,11 +98,11 @@ export default class KeyDeriver {
   /**
      * Reveals the specific key association for a given protocol ID, key ID, and counterparty.
      * @param {PublicKey | string | 'self' | 'anyone'} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
-     * @param {[0 | 1 | 2, string]} protocolID - The protocol ID including a security level and protocol name.
+     * @param {[SecurityLevel, string]} protocolID - The protocol ID including a security level and protocol name.
      * @param {string} keyID - The key identifier.
      * @returns {number[]} - The specific key association as a number array.
      */
-  revealSpecificSecret (counterparty: PublicKey | string | 'self' | 'anyone', protocolID: [0 | 1 | 2, string], keyID: string): number[] {
+  revealSpecificSecret (counterparty: PublicKey | string | 'self' | 'anyone', protocolID: [SecurityLevel, string], keyID: string): number[] {
     counterparty = this.normalizeCounterparty(counterparty)
     const sharedSecret = this.rootKey.deriveSharedSecret(counterparty)
     const invoiceNumberBin = Utils.toArray(this.computeInvoiceNumber(protocolID, keyID), 'utf8')
@@ -130,12 +131,12 @@ export default class KeyDeriver {
 
   /**
      * Computes the invoice number based on the protocol ID and key ID.
-     * @param {[0 | 1 | 2, string]} protocolID - The protocol ID including a security level and protocol name.
+     * @param {[SecurityLevel, string]} protocolID - The protocol ID including a security level and protocol name.
      * @param {string} keyID - The key identifier.
      * @returns {string} - The computed invoice number.
      * @throws {Error} - Throws an error if protocol ID or key ID are invalid.
      */
-  private computeInvoiceNumber (protocolID: [0 | 1 | 2, string], keyID: string): string {
+  private computeInvoiceNumber (protocolID: [SecurityLevel, string], keyID: string): string {
     const securityLevel = protocolID[0]
     if (!Number.isInteger(securityLevel) || securityLevel < 0 || securityLevel > 2) {
       throw new Error('Protocol security level must be 0, 1, or 2')

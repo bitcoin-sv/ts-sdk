@@ -1,4 +1,4 @@
-import { AcquireCertificateArgs, AcquireCertificateResult, AtomicBEEF, Base64String, BasketStringUnder300Bytes, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Bytes, CreateActionArgs, CreateActionResult, DescriptionString5to50Bytes, DiscoverCertificatesResult, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, InternalizeActionArgs, ISOTimestampString, KeyIDStringUnder800Bytes, LabelStringUnder300Bytes, ListActionsArgs, ListActionsResult, ListCertificatesResult, ListOutputsArgs, ListOutputsResult, OriginatorDomainNameStringUnder250Bytes, OutpointString, OutputTagStringUnder300Bytes, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, ProveCertificateArgs, ProveCertificateResult, PubKeyHex, SatoshiValue, SignActionArgs, SignActionResult, TXIDHexString, VersionString7To30Bytes, Wallet } from '../Wallet.interfaces.js'
+import { AcquireCertificateArgs, AcquireCertificateResult, SecurityLevel, Base64String, BasketStringUnder300Bytes, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Bytes, CreateActionArgs, CreateActionResult, DescriptionString5to50Bytes, DiscoverCertificatesResult, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, InternalizeActionArgs, ISOTimestampString, KeyIDStringUnder800Bytes, LabelStringUnder300Bytes, ListActionsArgs, ListActionsResult, ListCertificatesResult, ListOutputsArgs, ListOutputsResult, OriginatorDomainNameStringUnder250Bytes, OutpointString, OutputTagStringUnder300Bytes, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, ProveCertificateArgs, ProveCertificateResult, PubKeyHex, SatoshiValue, SignActionArgs, SignActionResult, TXIDHexString, VersionString7To30Bytes, Wallet } from '../Wallet.interfaces.js'
 import WalletWire from './WalletWire.js'
 import Certificate from '../../auth/Certificate.js'
 import { Utils } from '../../primitives/index.js'
@@ -908,7 +908,7 @@ export default class WalletWireTransceiver implements Wallet {
     return `${txid}.${index}`
   }
 
-  async getPublicKey(args: { seekPermission?: BooleanDefaultTrue, identityKey?: true, protocolID?: [0 | 1 | 2, ProtocolString5To400Bytes], keyID?: KeyIDStringUnder800Bytes, privileged?: BooleanDefaultFalse, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', forSelf?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ publicKey: PubKeyHex }> {
+  async getPublicKey(args: { seekPermission?: BooleanDefaultTrue, identityKey?: true, protocolID?: [SecurityLevel, ProtocolString5To400Bytes], keyID?: KeyIDStringUnder800Bytes, privileged?: BooleanDefaultFalse, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', forSelf?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ publicKey: PubKeyHex }> {
     const paramWriter = new Utils.Writer()
     paramWriter.writeUInt8(args.identityKey ? 1 : 0)
     if (!args.identityKey) {
@@ -957,7 +957,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async revealSpecificKeyLinkage(args: { counterparty: PubKeyHex, verifier: PubKeyHex, protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ prover: PubKeyHex, verifier: PubKeyHex, counterparty: PubKeyHex, protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, encryptedLinkage: Byte[], encryptedLinkageProof: Byte[], proofType: Byte }> {
+  async revealSpecificKeyLinkage(args: { counterparty: PubKeyHex, verifier: PubKeyHex, protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ prover: PubKeyHex, verifier: PubKeyHex, counterparty: PubKeyHex, protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, encryptedLinkage: Byte[], encryptedLinkageProof: Byte[], proofType: Byte }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(this.encodeKeyRelatedParams(args.protocolID, args.keyID, args.counterparty, args.privileged, args.privilegedReason))
     paramWriter.write(Utils.toArray(args.verifier, 'hex'))
@@ -980,7 +980,7 @@ export default class WalletWireTransceiver implements Wallet {
       prover,
       verifier,
       counterparty,
-      protocolID: [securityLevel as 0 | 1 | 2, protocol],
+      protocolID: [securityLevel as SecurityLevel, protocol],
       keyID,
       encryptedLinkage,
       encryptedLinkageProof,
@@ -988,7 +988,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async encrypt(args: { seekPermission?: BooleanDefaultTrue, plaintext: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ ciphertext: Byte[] }> {
+  async encrypt(args: { seekPermission?: BooleanDefaultTrue, plaintext: Byte[], protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ ciphertext: Byte[] }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(this.encodeKeyRelatedParams(args.protocolID, args.keyID, args.counterparty, args.privileged, args.privilegedReason))
     paramWriter.writeVarIntNum(args.plaintext.length)
@@ -1000,7 +1000,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async decrypt(args: { seekPermission?: BooleanDefaultTrue, ciphertext: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ plaintext: Byte[] }> {
+  async decrypt(args: { seekPermission?: BooleanDefaultTrue, ciphertext: Byte[], protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ plaintext: Byte[] }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(this.encodeKeyRelatedParams(args.protocolID, args.keyID, args.counterparty, args.privileged, args.privilegedReason))
     paramWriter.writeVarIntNum(args.ciphertext.length)
@@ -1012,7 +1012,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async createHmac(args: { seekPermission?: BooleanDefaultTrue, data: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ hmac: Byte[] }> {
+  async createHmac(args: { seekPermission?: BooleanDefaultTrue, data: Byte[], protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ hmac: Byte[] }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(this.encodeKeyRelatedParams(args.protocolID, args.keyID, args.counterparty, args.privileged, args.privilegedReason))
     paramWriter.writeVarIntNum(args.data.length)
@@ -1024,7 +1024,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async verifyHmac(args: { seekPermission?: BooleanDefaultTrue, data: Byte[], hmac: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ valid: true }> {
+  async verifyHmac(args: { seekPermission?: BooleanDefaultTrue, data: Byte[], hmac: Byte[], protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ valid: true }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(this.encodeKeyRelatedParams(args.protocolID, args.keyID, args.counterparty, args.privileged, args.privilegedReason))
     paramWriter.write(args.hmac)
@@ -1036,7 +1036,7 @@ export default class WalletWireTransceiver implements Wallet {
     return { valid: true }
   }
 
-  async createSignature(args: { seekPermission?: BooleanDefaultTrue, data?: Byte[], hashToDirectlySign?: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ signature: Byte[] }> {
+  async createSignature(args: { seekPermission?: BooleanDefaultTrue, data?: Byte[], hashToDirectlySign?: Byte[], protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ signature: Byte[] }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(this.encodeKeyRelatedParams(args.protocolID, args.keyID, args.counterparty, args.privileged, args.privilegedReason))
     if (typeof args.data === 'object') {
@@ -1054,7 +1054,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
   }
 
-  async verifySignature(args: { seekPermission?: BooleanDefaultTrue, data?: Byte[], hashToDirectlyVerify?: Byte[], signature: Byte[], protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', forSelf?: BooleanDefaultFalse, privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ valid: true }> {
+  async verifySignature(args: { seekPermission?: BooleanDefaultTrue, data?: Byte[], hashToDirectlyVerify?: Byte[], signature: Byte[], protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, privilegedReason?: DescriptionString5to50Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', forSelf?: BooleanDefaultFalse, privileged?: BooleanDefaultFalse }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ valid: true }> {
     const paramWriter = new Utils.Writer()
     paramWriter.write(this.encodeKeyRelatedParams(args.protocolID, args.keyID, args.counterparty, args.privileged, args.privilegedReason))
     if (typeof args.forSelf === 'boolean') {
@@ -1078,7 +1078,7 @@ export default class WalletWireTransceiver implements Wallet {
     return { valid: true }
   }
 
-  private encodeKeyRelatedParams(protocolID: [0 | 1 | 2, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: boolean, privilegedReason?: string): number[] {
+  private encodeKeyRelatedParams(protocolID: [SecurityLevel, ProtocolString5To400Bytes], keyID: KeyIDStringUnder800Bytes, counterparty?: PubKeyHex | 'self' | 'anyone', privileged?: boolean, privilegedReason?: string): number[] {
     const paramWriter = new Utils.Writer()
     paramWriter.writeUInt8(protocolID[0])
     const protocolAsArray = Utils.toArray(protocolID[1], 'utf8')

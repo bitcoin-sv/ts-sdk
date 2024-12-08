@@ -2,6 +2,7 @@ import { ScriptTemplate, LockingScript, UnlockingScript, OP } from '../index.js'
 import { Utils, Hash, TransactionSignature, Signature, PublicKey } from '../../primitives/index.js'
 import { Wallet } from '../../wallet/Wallet.interfaces.js'
 import { Transaction } from '../../transaction/index.js'
+import { SecurityLevel } from '../../wallet/Wallet.interfaces.js'
 
 /**
  * For a given piece of data to push onto the stack in script, creates the correct minimally-encoded script chunk,
@@ -93,14 +94,14 @@ export default class PushDrop implements ScriptTemplate {
    * Creates a PushDrop locking script with arbitrary data fields and a public key lock.
    *
    * @param {number[][]} fields - The token fields to include in the locking script.
-   * @param {[0 | 1 | 2, string]} protocolID - The protocol ID to use.
+   * @param {[SecurityLevel, string]} protocolID - The protocol ID to use.
    * @param {string} keyID - The key ID to use.
    * @param {string} counterparty - The counterparty involved in the transaction, "self" or "anyone".
    * @param {boolean} [forSelf=false] - Flag indicating if the lock is for the creator (default no).
    * @param {boolean} [includeSignature=true] - Flag indicating if a signature should be included in the script (default yes).
    * @returns {Promise<LockingScript>} The generated PushDrop locking script.
    */
-  async lock(fields: number[][], protocolID: [0 | 1 | 2, string], keyID: string, counterparty: string, forSelf = false, includeSignature = true, lockPosition: 'before' | 'after' = 'before'): Promise<LockingScript> {
+  async lock(fields: number[][], protocolID: [SecurityLevel, string], keyID: string, counterparty: string, forSelf = false, includeSignature = true, lockPosition: 'before' | 'after' = 'before'): Promise<LockingScript> {
     const { publicKey } = await this.wallet.getPublicKey({
       protocolID,
       keyID,
@@ -148,7 +149,7 @@ export default class PushDrop implements ScriptTemplate {
   /**
    * Creates an unlocking script for spending a PushDrop token output.
    *
-   * @param {[0 | 1 | 2, string]} protocolID - The protocol ID to use.
+   * @param {[SecurityLevel, string]} protocolID - The protocol ID to use.
    * @param {string} keyID - The key ID to use.
    * @param {string} counterparty - The counterparty involved in the transaction, "self" or "anyone".
    * @param {string} [sourceTXID] - The TXID of the source transaction.
@@ -159,7 +160,7 @@ export default class PushDrop implements ScriptTemplate {
    * @returns {Object} An object containing functions to sign the transaction and estimate the script length.
    */
   unlock(
-    protocolID: [0 | 1 | 2, string],
+    protocolID: [SecurityLevel, string],
     keyID: string,
     counterparty: string,
     signOutputs: 'all' | 'none' | 'single' = 'all',

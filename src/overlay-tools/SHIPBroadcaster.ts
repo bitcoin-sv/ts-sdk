@@ -18,14 +18,20 @@ export interface TaggedBEEF {
  */
 export interface AdmittanceInstructions {
   /**
-     * The indices of all admissable outputs into the managed topic from the provided transaction.
-     */
+   * The indices of all admissible outputs into the managed topic from the provided transaction.
+   */
   outputsToAdmit: number[]
 
   /**
-     * The indices of all inputs from the provided transaction which spend previously-admitted outputs that should be retained for historical record-keeping.
-     */
+   * The indices of all inputs from the provided transaction which spend previously-admitted outputs that should be retained for historical record-keeping.
+   */
   coinsToRetain: number[]
+
+  /**
+   * The indices of all inputs from the provided transaction which reference previously-admitted outputs,
+   * which are now considered spent and have been removed from the managed topic.
+   */
+  coinsRemoved?: number[]
 }
 
 /**
@@ -180,8 +186,9 @@ export default class SHIPCast implements Broadcaster {
       for (const [topic, instructions] of Object.entries(steak)) {
         const outputsToAdmit = instructions.outputsToAdmit
         const coinsToRetain = instructions.coinsToRetain
-        // TODO: Account for coins removed property on STEAK
-        if ((outputsToAdmit && outputsToAdmit.length > 0) || (coinsToRetain && coinsToRetain.length > 0)) {
+        const coinsRemoved = instructions.coinsRemoved
+
+        if ((outputsToAdmit?.length > 0) || (coinsToRetain?.length > 0) || (coinsRemoved?.length > 0)) {
           acknowledgedTopics.add(topic)
         }
       }

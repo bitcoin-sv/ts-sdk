@@ -84,6 +84,12 @@ export default class PublicKey extends Point {
     if (x instanceof Point) {
       super(x.getX(), x.getY())
     } else {
+      // Common gotcha: constructing PublicKey with a DER value when you should use .fromString()
+      if (y === null && isRed && typeof x === 'string') {
+        if (x.length === 66 || x.length === 130) {
+          throw new Error('You are using the "new PublicKey()" constructor with a DER hex string. You need to use "PublicKey.fromString()" instead.')
+        }
+      }
       super(x, y, isRed)
     }
   }

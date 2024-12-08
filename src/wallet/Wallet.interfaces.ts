@@ -191,7 +191,30 @@ export type ErrorDescriptionString20To200Bytes = string
 
 export type WalletNetwork = 'mainnet' | 'testnet'
 
-export type WalletProtocol = [0 | 1 | 2, ProtocolString5To400Bytes]
+/**
+ * @enum {number} SecurityLevels
+ *
+ * Silent = 0 Silently grants the request with no user interation.
+ * App = 1 Requires user approval for every application.
+ * Counterparty = 2 Requires user approval per counterparty per application.
+ */
+export enum SecurityLevels {
+  Silent = 0,
+  App = 1,
+  Counterparty = 2
+}
+
+/**
+ *
+ * SecurityLevel for protocols.
+ * 0 = Silently grants the request with no user interation.
+ * 1 = Requires user approval for every application.
+ * 2 = Requires user approval per counterparty per application.
+ *
+ */
+export type SecurityLevel = 0 | 1 | 2
+
+export type WalletProtocol = [SecurityLevel, ProtocolString5To400Bytes]
 
 export type WalletCounterparty = PubKeyHex | 'self' | 'anyone'
 
@@ -528,13 +551,20 @@ export interface ListOutputsResult {
 
 /**
    * @param {WalletProtocol} protocolID - The security level and protocol string under which the data should be encrypted.
+   * @param {SecurityLevel} securityLevel - The security level of the protocol.
+   * @param {WalletProtocol} protocolID - The security level and protocol string under which the data should be encrypted.
+   * @param {SecurityLevel} protocolID[0] - SecurityLevel:
+   * 0 = Silently grants the request with no user interation.
+   * 1 = Requires user approval for every application.
+   * 2 = Requires user approval per counterparty per application.
+   * @param {ProtocolString5To400Bytes} protocolID[1] - The name of the protocol.
    * @param {KeyIDStringUnder800Bytes} keyID - Key ID under which the encryption will be performed.
    * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
    * @param {WalletCounterparty} [counterparty] - Public key of the counterparty (if two-party encryption is desired).
    * @param {BooleanDefaultFalse} [privileged] - Whether this is a privileged request.
  */
 export interface KeyLinkageArgs {
-  protocolID: WalletProtocol
+  protocolID: [SecurityLevel, ProtocolString5To400Bytes]
   keyID: KeyIDStringUnder800Bytes
   counterparty?: WalletCounterparty
   privileged?: BooleanDefaultFalse
@@ -584,6 +614,7 @@ export interface RevealCounterpartyKeyLinkageArgs {
  */
 export interface RevealSpecificKeyLinkageArgs extends KeyLinkageArgs {
   verifier: PubKeyHex
+  counterparty: WalletCounterparty
 }
 
 /**

@@ -479,13 +479,9 @@ export default class Transaction {
    * @param changeDistribution - Specifies how the change should be distributed
    * amongst the change outputs
    *
-   * TODO: Benford's law change distribution.
    */
-  async fee (modelOrFee?: FeeModel | number, changeDistribution: 'equal' | 'random' = 'equal'): Promise<void> {
+  async fee (modelOrFee: FeeModel | number = new SatoshisPerKilobyte(10), changeDistribution: 'equal' | 'random' = 'equal'): Promise<void> {
     this.cachedHash = undefined
-    if (typeof modelOrFee === 'undefined') {
-      modelOrFee = new SatoshisPerKilobyte(10)
-    }
     if (typeof modelOrFee === 'number') {
       const sats = modelOrFee
       modelOrFee = {

@@ -1,6 +1,6 @@
 # API
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ## Interfaces
 
@@ -14,7 +14,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [SHIPBroadcasterConfig](#interface-shipbroadcasterconfig) |
 | [TaggedBEEF](#interface-taggedbeef) |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 
@@ -26,12 +26,22 @@ Instructs the Overlay Services Engine about which outputs to admit and which pre
 export interface AdmittanceInstructions {
     outputsToAdmit: number[];
     coinsToRetain: number[];
+    coinsRemoved?: number[];
 }
 ```
 
 <details>
 
 <summary>Interface AdmittanceInstructions Details</summary>
+
+#### Property coinsRemoved
+
+The indices of all inputs from the provided transaction which reference previously-admitted outputs,
+which are now considered spent and have been removed from the managed topic.
+
+```ts
+coinsRemoved?: number[]
+```
 
 #### Property coinsToRetain
 
@@ -43,7 +53,7 @@ coinsToRetain: number[]
 
 #### Property outputsToAdmit
 
-The indices of all admissable outputs into the managed topic from the provided transaction.
+The indices of all admissible outputs into the managed topic from the provided transaction.
 
 ```ts
 outputsToAdmit: number[]
@@ -51,7 +61,7 @@ outputsToAdmit: number[]
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Interface: LookupQuestion
@@ -88,7 +98,7 @@ service: string
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Interface: LookupResolverConfig
@@ -145,7 +155,7 @@ slapTrackers?: string[]
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Interface: OverlayBroadcastFacilitator
@@ -160,7 +170,7 @@ export interface OverlayBroadcastFacilitator {
 
 See also: [STEAK](#type-steak), [TaggedBEEF](#interface-taggedbeef)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Interface: OverlayLookupFacilitator
@@ -190,7 +200,7 @@ See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookup
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Interface: SHIPBroadcasterConfig
@@ -257,7 +267,7 @@ See also: [LookupResolver](#class-lookupresolver)
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Interface: TaggedBEEF
@@ -271,7 +281,7 @@ export interface TaggedBEEF {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ## Classes
@@ -284,7 +294,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [OverlayAdminTokenTemplate](#class-overlayadmintokentemplate) |
 | [SHIPCast](#class-shipcast) |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 
@@ -300,7 +310,7 @@ export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilit
 
 See also: [OverlayBroadcastFacilitator](#interface-overlaybroadcastfacilitator), [STEAK](#type-steak), [TaggedBEEF](#interface-taggedbeef)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: HTTPSOverlayLookupFacilitator
@@ -315,7 +325,7 @@ export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
 
 See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookupquestion), [OverlayLookupFacilitator](#interface-overlaylookupfacilitator)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: LookupResolver
@@ -346,7 +356,7 @@ See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookup
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: OverlayAdminTokenTemplate
@@ -459,7 +469,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: SHIPCast
@@ -515,7 +525,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ## Functions
@@ -527,7 +537,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [LookupAnswer](#type-lookupanswer) |
 | [STEAK](#type-steak) |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 
@@ -549,7 +559,7 @@ export type LookupAnswer = {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Type: STEAK
@@ -562,9 +572,11 @@ export type STEAK = Record<string, AdmittanceInstructions>
 
 See also: [AdmittanceInstructions](#interface-admittanceinstructions)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
+## Enums
+
 ## Variables
 
 ### Variable: DEFAULT_SLAP_TRACKERS
@@ -577,6 +589,6 @@ DEFAULT_SLAP_TRACKERS: string[] = [
 ]
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---

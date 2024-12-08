@@ -1,6 +1,6 @@
 # API
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ## Interfaces
 
@@ -9,7 +9,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [ScriptChunk](#interface-scriptchunk) |
 | [ScriptTemplate](#interface-scripttemplate) |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 
@@ -24,7 +24,7 @@ export default interface ScriptChunk {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Interface: ScriptTemplate
@@ -72,7 +72,7 @@ See also: [Transaction](#class-transaction), [UnlockingScript](#class-unlockings
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ## Classes
@@ -87,7 +87,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [Spend](#class-spend) |
 | [UnlockingScript](#class-unlockingscript) |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 
@@ -133,7 +133,7 @@ Always returns false for a LockingScript instance.
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: P2PKH
@@ -212,7 +212,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: PushDrop
@@ -226,11 +226,11 @@ export default class PushDrop implements ScriptTemplate {
     } 
     constructor(wallet: Wallet) 
     async lock(fields: number[][], protocolID: [
-        0 | 1 | 2,
+        SecurityLevel,
         string
     ], keyID: string, counterparty: string, forSelf = false, includeSignature = true, lockPosition: "before" | "after" = "before"): Promise<LockingScript> 
     unlock(protocolID: [
-        0 | 1 | 2,
+        SecurityLevel,
         string
     ], keyID: string, counterparty: string, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay = false, sourceSatoshis?: number, lockingScript?: LockingScript): {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
@@ -239,7 +239,7 @@ export default class PushDrop implements ScriptTemplate {
 }
 ```
 
-See also: [LockingScript](#class-lockingscript), [PublicKey](#class-publickey), [ScriptTemplate](#interface-scripttemplate), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [Wallet](#interface-wallet), [sign](#variable-sign)
+See also: [LockingScript](#class-lockingscript), [PublicKey](#class-publickey), [ScriptTemplate](#interface-scripttemplate), [SecurityLevel](#type-securitylevel), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [Wallet](#interface-wallet), [sign](#variable-sign)
 
 <details>
 
@@ -287,11 +287,11 @@ Creates a PushDrop locking script with arbitrary data fields and a public key lo
 
 ```ts
 async lock(fields: number[][], protocolID: [
-    0 | 1 | 2,
+    SecurityLevel,
     string
 ], keyID: string, counterparty: string, forSelf = false, includeSignature = true, lockPosition: "before" | "after" = "before"): Promise<LockingScript> 
 ```
-See also: [LockingScript](#class-lockingscript)
+See also: [LockingScript](#class-lockingscript), [SecurityLevel](#type-securitylevel)
 
 Returns
 
@@ -318,14 +318,14 @@ Creates an unlocking script for spending a PushDrop token output.
 
 ```ts
 unlock(protocolID: [
-    0 | 1 | 2,
+    SecurityLevel,
     string
 ], keyID: string, counterparty: string, signOutputs: "all" | "none" | "single" = "all", anyoneCanPay = false, sourceSatoshis?: number, lockingScript?: LockingScript): {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
     estimateLength: () => Promise<73>;
 } 
 ```
-See also: [LockingScript](#class-lockingscript), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [sign](#variable-sign)
+See also: [LockingScript](#class-lockingscript), [SecurityLevel](#type-securitylevel), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [sign](#variable-sign)
 
 Returns
 
@@ -352,7 +352,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: RPuzzle
@@ -442,7 +442,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: Script
@@ -752,7 +752,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: Spend
@@ -890,7 +890,7 @@ if (spend.validate()) {
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: UnlockingScript
@@ -935,12 +935,14 @@ Always returns true for an UnlockingScript instance.
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ## Functions
 
 ## Types
+
+## Enums
 
 ## Variables
 
