@@ -592,6 +592,7 @@ export class Beef {
     constructor(version?: BeefVersion) 
     get magic(): number 
     findTxid(txid: string): BeefTx | undefined 
+    makeTxidOnly(txid: string): BeefTx | undefined 
     findBump(txid: string): MerklePath | undefined 
     findTransactionForSigning(txid: string): Transaction | undefined 
     findAtomicTransaction(txid: string): Transaction | undefined 
@@ -779,6 +780,23 @@ Argument Details
 + **allowTxidOnly**
   + optional. If true, transaction txid only is assumed valid
 
+#### Method makeTxidOnly
+
+Replaces `BeefTx` for this txid with txidOnly.
+
+Replacement is done so that a `clone()` can be
+updated by this method without affecting the
+original.
+
+```ts
+makeTxidOnly(txid: string): BeefTx | undefined 
+```
+See also: [BeefTx](#class-beeftx)
+
+Returns
+
+undefined if txid is unknown.
+
 #### Method mergeBump
 
 Merge a MerklePath that is assumed to be fully valid.
@@ -847,7 +865,7 @@ Argument Details
 #### Method sortTxs
 
 Sort the `txs` by input txid dependency order:
-- Oldest Tx Anchored by Path
+- Oldest Tx Anchored by Path or txid only
 - Newer Txs depending on Older parents
 - Newest Tx
 
