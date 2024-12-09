@@ -1,6 +1,4 @@
 import { Wallet, CreateActionArgs, OriginatorDomainNameStringUnder250Bytes, CreateActionResult, BooleanDefaultTrue, AcquireCertificateArgs, AcquireCertificateResult, Base64String, BasketStringUnder300Bytes, BooleanDefaultFalse, Byte, CertificateFieldNameUnder50Bytes, DescriptionString5to50Bytes, DiscoverCertificatesResult, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, InternalizeActionArgs, ISOTimestampString, KeyIDStringUnder800Bytes, ListActionsArgs, ListActionsResult, ListCertificatesResult, ListOutputsArgs, ListOutputsResult, OutpointString, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, ProveCertificateArgs, ProveCertificateResult, PubKeyHex, SecurityLevel, SignActionArgs, SignActionResult, VersionString7To30Bytes } from '../Wallet.interfaces.js'
-import { Utils } from '../../primitives/index.js'
-import Certificate from '../../auth/Certificate.js'
 
 export default class HTTPWalletJSON implements Wallet {
   baseUrl: string
