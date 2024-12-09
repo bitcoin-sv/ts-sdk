@@ -80,16 +80,7 @@ export default class PrivateKey extends BigNumber {
    * const privateKey = PrivateKey.fromRandom();
    */
   static fromRandom(): PrivateKey {
-    const curve = new Curve()
-    let key
-
-    do {
-      const bytes = Random(32)
-      bytes[0] |= 0x80 // Force highest bit to ensure 256-bit range
-      key = new BigNumber(bytes)
-    } while (key.cmp(curve.n) >= 0) // Ensure key is less than curve.n
-
-    return new PrivateKey(key.toArray())
+    return new PrivateKey(Random(32))
   }
 
   /**
@@ -102,8 +93,21 @@ export default class PrivateKey extends BigNumber {
    * @returns The generated Private Key.
    * @throws Will throw an error if the string is not valid.
    **/
-  static fromString(str: string, base: number | 'hex'): PrivateKey {
-    return new PrivateKey(BigNumber.fromString(str, base).toArray())
+  static fromString(str: string, base: number | 'hex' = 'hex'): PrivateKey {
+    return new PrivateKey(super.fromString(str, base).toArray())
+  }
+
+  /**
+   * Generates a private key from a hexadecimal string.
+   *
+   * @method fromHex
+   * @static
+   * @param {string} str - The hexadecimal string representing the private key. The string must represent a valid private key in big-endian format.
+   * @returns {PrivateKey} The generated Private Key instance.
+   * @throws {Error} If the string is not a valid hexadecimal or represents an invalid private key.
+   **/
+  static fromHex(str: string): PrivateKey {
+    return new PrivateKey(super.fromHex(str, 'big'))
   }
 
   /**
@@ -173,6 +177,7 @@ export default class PrivateKey extends BigNumber {
    * @returns { inField, modN } where modN is this PrivateKey's current BigNumber value mod curve.n, and inField is true only if modN equals current BigNumber value.
    */
   checkInField(): { inField: boolean, modN: BigNumber } {
+    debugger
     const curve = new Curve()
     const modN = this.mod(curve.n)
     const inField = this.cmp(modN) === 0
@@ -281,6 +286,34 @@ export default class PrivateKey extends BigNumber {
    */
   toAddress(prefix: number[] | string = [0x00]): string {
     return this.toPublicKey().toAddress(prefix)
+  }
+
+  /**
+   * Converts this PrivateKey to a hexadecimal string.
+   *
+   * @method toHex
+   * @param length - The minimum length of the hex string
+   * @returns Returns a string representing the hexadecimal value of this BigNumber.
+   *
+   * @example
+   * const bigNumber = new BigNumber(255);
+   * const hex = bigNumber.toHex();
+   */
+  toHex(): string {
+    return super.toHex(32)
+  }
+
+  /**
+   * Converts this PrivateKey to a string representation.
+   *
+   * @method toString
+   * @param {number | 'hex'} [base='hex'] - The base for representing the number. Default is hexadecimal ('hex').
+   * @param {number} [padding=64] - The minimum number of digits for the output string. Default is 64, ensuring a 256-bit representation in hexadecimal.
+   * @returns {string} A string representation of the PrivateKey in the specified base, padded to the specified length.
+   *
+   **/
+  toString(base: number | 'hex' = 'hex', padding: number = 64): string {
+    return super.toString(base, padding)
   }
 
   /**
