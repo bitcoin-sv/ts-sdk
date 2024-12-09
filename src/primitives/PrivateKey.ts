@@ -177,7 +177,6 @@ export default class PrivateKey extends BigNumber {
    * @returns { inField, modN } where modN is this PrivateKey's current BigNumber value mod curve.n, and inField is true only if modN equals current BigNumber value.
    */
   checkInField(): { inField: boolean, modN: BigNumber } {
-    debugger
     const curve = new Curve()
     const modN = this.mod(curve.n)
     const inField = this.cmp(modN) === 0

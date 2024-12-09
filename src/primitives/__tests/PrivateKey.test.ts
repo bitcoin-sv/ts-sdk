@@ -8,39 +8,33 @@ describe('PrivateKey', () => {
   describe('BRC42 vectors', () => {
     const curve = new Curve()
 
-    for (let i = 0; i < BRC42Private.length; i++) {
-      it(`Passes BRC42 private vector #${i + 1}`, () => {
-        const v = BRC42Private[i]
-        const publicKey = PublicKey.fromString(v.senderPublicKey)
-        const privateKey = PrivateKey.fromString(v.recipientPrivateKey, 16)
-        const derived = privateKey.deriveChild(publicKey, v.invoiceNumber)
-        expect(derived.toHex(32)).toEqual(v.privateKey)
+    BRC42Private.forEach((vector, index) => {
+      it(`Passes BRC42 private vector #${index + 1}`, () => {
+        const publicKey = PublicKey.fromString(vector.senderPublicKey)
+        const privateKey = PrivateKey.fromString(vector.recipientPrivateKey, 16)
+        const derived = privateKey.deriveChild(publicKey, vector.invoiceNumber)
+        expect(derived.toHex(32)).toEqual(vector.privateKey)
       })
-    }
+    })
   })
 
-  describe('PrivateKey Validation', () => {
+  describe('PrivateKey Validation and Conversion', () => {
     const curve = new Curve()
 
     const isValidPrivateKey = (key) => {
       try {
         const keyAsNumber = new BigNumber(key, 16)
-        const isZero = keyAsNumber.isZero()
-        const exceedsCurve = keyAsNumber.cmp(curve.n) >= 0
-        const isHexLengthValid = key.length === 64
-
-        // if (isZero) console.log(`Key is zero: ${key}`)
-        // if (exceedsCurve) console.log(`Key exceeds curve.n: ${key}`)
-        // if (!isHexLengthValid) console.log(`Key is not 256 bits in hex: ${key} (Hex Length: ${key.length})`)
-
-        return !isZero && !exceedsCurve && isHexLengthValid
+        return (
+          !keyAsNumber.isZero() &&
+          keyAsNumber.cmp(curve.n) < 0 &&
+          key.length === 64
+        )
       } catch (e) {
-        console.error(`Error validating key: ${key}`, e)
         return false
       }
     }
 
-    it('Validates manually provided valid private keys', () => {
+    it('Validates and converts valid private keys between hex and string', () => {
       const validKeys = [
         '0000000000000000000000000000000000000000000000000000000000000001',
         'fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140',
@@ -49,13 +43,20 @@ describe('PrivateKey', () => {
       ]
 
       validKeys.forEach((key, index) => {
-        const isValid = isValidPrivateKey(key)
-        // console.log(`Valid Key Test #${index + 1}: ${key} (Valid: ${isValid})`)
-        expect(isValid).toBe(true)
+        const privateKeyFromHex = PrivateKey.fromHex(key)
+        const privateKeyFromString = PrivateKey.fromString(key, 'hex')
+        const privateKeyToHex = privateKeyFromHex.toHex()
+        const privateKeyToString = privateKeyFromString.toString('hex')
+        expect(isValidPrivateKey(privateKeyToHex)).toBe(true)
+        expect(isValidPrivateKey(privateKeyToString)).toBe(true)
+
+        // Round-trip conversion checks
+        expect(privateKeyToHex).toEqual(key)
+        expect(privateKeyToString).toEqual(key)
       })
     })
 
-    it('Validates manually provided invalid private keys', () => {
+    it('Rejects invalid private keys during validation and conversion', () => {
       const invalidKeys = [
         '0000000000000000000000000000000000000000000000000000000000000000',
         'fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141',
@@ -68,19 +69,28 @@ describe('PrivateKey', () => {
 
       invalidKeys.forEach((key, index) => {
         const isValid = isValidPrivateKey(key)
-        // console.log(`Invalid Key Test #${index + 1}: ${key} (Valid: ${isValid})`)
         expect(isValid).toBe(false)
+        // Ensure invalid keys throw an error during conversion
+        expect(() => PrivateKey.fromHex(key)).toThrow()
+        expect(() => PrivateKey.fromString(key, 'hex')).toThrow()
       })
     })
 
-    it('Tests 10000 PrivateKey.fromRandom() instances for validity', () => {
+    it('Tests 10,000 random private keys for valid conversions', () => {
       for (let i = 0; i < 10000; i++) {
         const privateKey = PrivateKey.fromRandom()
-        const privateKeyValue = privateKey.toString('hex')
-        const isValid = isValidPrivateKey(privateKeyValue)
+        const privateKeyHex = privateKey.toHex()
+        const privateKeyString = privateKey.toString('hex')
 
-        // console.log(`Random Key Test #${i + 1}: ${privateKeyValue} (Valid: ${isValid})`)
-        expect(isValid).toBe(true)
+        // Validate the random key's format
+        expect(isValidPrivateKey(privateKeyHex)).toBe(true)
+        expect(isValidPrivateKey(privateKeyString)).toBe(true)
+
+        // Round-trip conversion checks
+        const roundTripHex = PrivateKey.fromHex(privateKeyHex).toHex()
+        const roundTripString = PrivateKey.fromString(privateKeyString, 'hex').toString('hex')
+        expect(roundTripHex).toEqual(privateKeyHex)
+        expect(roundTripString).toEqual(privateKeyString)
       }
     })
   })
