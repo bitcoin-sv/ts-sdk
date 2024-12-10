@@ -103,6 +103,15 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+
+## [1.2.9] - 2024-12-10
+
+### [1.2.9] Fixed
+
+- Added fix to ensure PrivateKeys as hex are always 64 chars in length ensuring 256 bit keys.
+
+---
+
 ## [1.2.8] - 2024-12-02
 
 ### [1.2.8] Fixed
