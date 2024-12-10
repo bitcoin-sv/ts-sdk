@@ -99,6 +99,26 @@ export class Beef {
   }
 
   /**
+   * Replaces `BeefTx` for this txid with txidOnly.
+   *
+   * Replacement is done so that a `clone()` can be
+   * updated by this method without affecting the
+   * original.
+   *
+   * @param txid
+   * @returns undefined if txid is unknown.
+   */
+  makeTxidOnly (txid: string): BeefTx | undefined {
+    const i = this.txs.findIndex(tx => tx.txid === txid)
+    if (i === -1) return undefined
+    let btx = this.txs[i]
+    if (btx.isTxidOnly) { return btx }
+    this.txs.slice(i, i + 1)
+    btx = this.mergeTxidOnly(txid)
+    return btx
+  }
+
+  /**
    * @returns `MerklePath` with level zero hash equal to txid or undefined.
    */
   findBump (txid: string): MerklePath | undefined {
@@ -518,7 +538,7 @@ export class Beef {
 
   /**
      * Sort the `txs` by input txid dependency order:
-     * - Oldest Tx Anchored by Path
+     * - Oldest Tx Anchored by Path or txid only
      * - Newer Txs depending on Older parents
      * - Newest Tx
      *
@@ -553,7 +573,10 @@ export class Beef {
       if (tx.isValid) {
         validTxids[tx.txid] = true
         result.push(tx)
-      } else if (tx.isTxidOnly) { txidOnly.push(tx) } else { queue.push(tx) }
+      } else if (tx.isTxidOnly && tx.inputTxids.length === 0) {
+        validTxids[tx.txid] = true
+        txidOnly.push(tx)
+      } else { queue.push(tx) }
     }
 
     // Hashtable of unknown input txids used to fund transactions without their own proof.
@@ -564,17 +587,18 @@ export class Beef {
     const possiblyMissingInputs = queue
     queue = []
 
+    // all tx are isValid false, hasProof false.
+    // if isTxidOnly then has inputTxids
     for (const tx of possiblyMissingInputs) {
       let hasMissingInput = false
-      if (!tx.isValid) {
-        // For all the unproven transactions,
-        // link their inputs that exist in this beef,
-        // make a note of missing inputs.
-        for (const inputTxid of tx.inputTxids) {
-          if (!txidToTx[inputTxid]) {
-            missingInputs[inputTxid] = true
-            hasMissingInput = true
-          }
+
+      // For all the unproven transactions,
+      // link their inputs that exist in this beef,
+      // make a note of missing inputs.
+      for (const inputTxid of tx.inputTxids) {
+        if (!txidToTx[inputTxid]) {
+          missingInputs[inputTxid] = true
+          hasMissingInput = true
         }
       }
       if (hasMissingInput) { txsMissingInputs.push(tx) } else { queue.push(tx) }
@@ -584,6 +608,8 @@ export class Beef {
     while (queue.length > 0) {
       const oldQueue = queue
       queue = []
+      // all tx are isValid false, hasProof false.
+      // if isTxidOnly then has inputTxids
       for (const tx of oldQueue) {
         if (tx.inputTxids.every(txid => validTxids[txid])) {
           validTxids[tx.txid] = true
@@ -596,8 +622,8 @@ export class Beef {
     // transactions that don't have proofs and don't chain to proofs
     const txsNotValid = queue
 
-    // New order of txs is sorted, unsortable, txidOnly (no raw transaction)
-    this.txs = result.concat(queue).concat(txidOnly).concat(txsMissingInputs)
+    // New order of txs is unsortable (missing inputs or depends on missing inputs), txidOnly, sorted (so newest sorted is last)
+    this.txs = txsMissingInputs.concat(txsNotValid).concat(txidOnly).concat(result)
 
     return {
       missingInputs: Object.keys(missingInputs),
