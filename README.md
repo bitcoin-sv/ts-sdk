@@ -45,7 +45,7 @@ const input = {
   unlockingScriptTemplate: new P2PKH().unlock(privKey),
 }
 const output = {
-  lockingScript: new P2PKH().lock(privKey.toPublicKey().toHash()),
+  lockingScript: new P2PKH().lock(privKey.toAddress()),
   change: true
 }
 
@@ -76,7 +76,10 @@ For a more detailed tutorial and advanced examples, check our [Documentation](#d
 
 ## Documentation
 
-The SDK is richly documented with code-level annotations. This should show up well within editors like VSCode. For complete API docs, check out [the docs folder](./docs). Please refer to the [Libraries Wiki](#) (link to be provided) for a deep dive into each feature, tutorials, and usage examples.
+[The Docs](https://bitcoin-sv.github.io/ts-sdk) are available here on Github pages.  
+[Example code](https://docs.bsvblockchain.org/guides/sdks/ts/examples) is available over on our gitbook.  
+
+The SDK is richly documented with code-level annotations. This should show up well within editors like VSCode.  
 
 ## Contribution Guidelines
 
