@@ -305,6 +305,24 @@ describe('Beef tests', () => {
         expect(atomic).toEqual(beef2)
       }
     })
+    test('9_sortTxs', async () => {
+      {
+        const beef = new Beef()
+        beef.mergeTxidOnly('a')
+        const btx = beef.mergeTxidOnly('b')
+        btx.inputTxids = ['a']
+        beef.sortTxs()
+        expect(beef.txs[1].txid).toBe('b')
+      }
+      {
+        const beef = new Beef()
+        const atx = beef.mergeTxidOnly('a')
+        const btx = beef.mergeTxidOnly('b')
+        atx.inputTxids = ['b']
+        beef.sortTxs()
+        expect(beef.txs[1].txid).toBe('a')
+      }
+    })
 })
 
 const txs: string[] = [
