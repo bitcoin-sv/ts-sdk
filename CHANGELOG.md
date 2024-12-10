@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file. The format 
   - [Table of Contents](#table-of-contents)
   - [\[Unreleased\]](#unreleased)
     - [Added](#added)
+      JSON HTTP substrate, with corresponding swagger-ui documentation.
+      
     - [Changed](#changed)
     - [Deprecated](#deprecated)
     - [Removed](#removed)
