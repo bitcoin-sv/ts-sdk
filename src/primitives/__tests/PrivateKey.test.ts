@@ -11,9 +11,9 @@ describe('PrivateKey', () => {
     BRC42Private.forEach((vector, index) => {
       it(`Passes BRC42 private vector #${index + 1}`, () => {
         const publicKey = PublicKey.fromString(vector.senderPublicKey)
-        const privateKey = PrivateKey.fromString(vector.recipientPrivateKey, 16)
+        const privateKey = PrivateKey.fromString(vector.recipientPrivateKey)
         const derived = privateKey.deriveChild(publicKey, vector.invoiceNumber)
-        expect(derived.toHex(32)).toEqual(vector.privateKey)
+        expect(derived.toHex()).toEqual(vector.privateKey)
       })
     })
   })
