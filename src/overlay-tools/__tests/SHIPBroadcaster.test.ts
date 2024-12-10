@@ -652,6 +652,88 @@ describe('SHIPCast', () => {
     })
   })
 
+  it('should succeed when interested hosts only remove coins in a transaction broadcast', async () => {
+    const shipHostKey1 = new PrivateKey(42)
+    const shipWallet1 = new ProtoWallet(shipHostKey1)
+    const shipLib1 = new OverlayAdminTokenTemplate(shipWallet1)
+    const shipScript1 = await shipLib1.lock('SHIP', 'https://shiphost1.com', 'tm_foo')
+    const shipTx1 = new Transaction(1, [], [{
+      lockingScript: shipScript1,
+      satoshis: 1
+    }], 0)
+
+    const shipHostKey2 = new PrivateKey(43)
+    const shipWallet2 = new ProtoWallet(shipHostKey2)
+    const shipLib2 = new OverlayAdminTokenTemplate(shipWallet2)
+    const shipScript2 = await shipLib2.lock('SHIP', 'https://shiphost2.com', 'tm_bar')
+    const shipTx2 = new Transaction(1, [], [{
+      lockingScript: shipScript2,
+      satoshis: 1
+    }], 0)
+
+    // Resolver returns two hosts
+    mockResolver.query.mockReturnValueOnce({
+      type: 'output-list',
+      outputs: [
+        { beef: shipTx1.toBEEF(), outputIndex: 0 },
+        { beef: shipTx2.toBEEF(), outputIndex: 0 }
+      ]
+    })
+
+    // First host acknowledges 'tm_foo' with coinsRemoved
+    mockFacilitator.send.mockImplementationOnce(async (host, { beef, topics }) => {
+      const steak = {}
+      for (const topic of topics) {
+        steak[topic] = {
+          outputsToAdmit: [],
+          coinsToRetain: [],
+          coinsRemoved: topic === 'tm_foo' ? [0] : []
+        }
+      }
+      return steak
+    })
+
+    // Second host does not acknowledge 'tm_bar'
+    mockFacilitator.send.mockImplementationOnce(async (host, { beef, topics }) => {
+      const steak = {}
+      for (const topic of topics) {
+        steak[topic] = {
+          outputsToAdmit: [],
+          coinsToRetain: [],
+          coinsRemoved: []
+        }
+      }
+      return steak
+    })
+
+    const b = new SHIPCast(['tm_foo', 'tm_bar'], {
+      facilitator: mockFacilitator,
+      resolver: mockResolver as unknown as LookupResolver,
+      requireAcknowledgmentFromSpecificHostsForTopics: {
+        'https://shiphost1.com': ['tm_foo']
+      },
+      requireAcknowledgmentFromAllHostsForTopics: [],
+      requireAcknowledgmentFromAnyHostForTopics: []
+    })
+
+    const testTx = new Transaction(1, [], [], 0)
+    const response = await b.broadcast(testTx)
+
+    expect(response).toEqual({
+      status: 'success',
+      txid: testTx.id('hex'),
+      message: 'Sent to 2 Overlay Services hosts.'
+    })
+
+    // Verify the resolver was queried correctly
+    expect(mockResolver.query).toHaveBeenCalledWith({
+      service: 'ls_ship',
+      query: {
+        topics: ['tm_foo', 'tm_bar']
+      }
+    }, 1000)
+  })
+
   it('should fail when specific hosts do not acknowledge required topics', async () => {
     const shipHostKey1 = new PrivateKey(42)
     const shipWallet1 = new ProtoWallet(shipHostKey1)
