@@ -5254,7 +5254,8 @@ create a corresponding public key and derive a shared secret from a public key.
 ```ts
 export default class PrivateKey extends BigNumber {
     static fromRandom(): PrivateKey 
-    static fromString(str: string, base: number | "hex"): PrivateKey 
+    static fromString(str: string, base: number | "hex" = "hex"): PrivateKey 
+    static fromHex(str: string): PrivateKey 
     static fromWif(wif: string, prefixLength: number = 1): PrivateKey 
     constructor(number: BigNumber | number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be", modN: "apply" | "nocheck" | "error" = "apply") 
     checkInField(): {
@@ -5267,6 +5268,8 @@ export default class PrivateKey extends BigNumber {
     toPublicKey(): PublicKey 
     toWif(prefix: number[] = [128]): string 
     toAddress(prefix: number[] | string = [0]): string 
+    toHex(): string 
+    toString(base: number | "hex" = "hex", padding: number = 64): string 
     deriveSharedSecret(key: PublicKey): Point 
     deriveChild(publicKey: PublicKey, invoiceNumber: string): PrivateKey 
     toKeyShares(threshold: number, totalShares: number): KeyShares 
@@ -5276,7 +5279,7 @@ export default class PrivateKey extends BigNumber {
 }
 ```
 
-See also: [BigNumber](#class-bignumber), [KeyShares](#class-keyshares), [Point](#class-point), [PublicKey](#class-publickey), [Signature](#class-signature), [sign](#variable-sign), [verify](#variable-verify)
+See also: [BigNumber](#class-bignumber), [KeyShares](#class-keyshares), [Point](#class-point), [PublicKey](#class-publickey), [Signature](#class-signature), [sign](#variable-sign), [toHex](#variable-tohex), [verify](#variable-verify)
 
 <details>
 
@@ -5394,6 +5397,28 @@ const share2 = 'Cm5fuUc39X5xgdedao8Pr1kvCSm8Gk7Cfenc7xUKcfLX.2juyK9BxCWn2DiY5JUA
 const recoveredKey = PrivateKey.fromBackupShares([share1, share2])
 ```
 
+#### Method fromHex
+
+Generates a private key from a hexadecimal string.
+
+```ts
+static fromHex(str: string): PrivateKey 
+```
+See also: [PrivateKey](#class-privatekey)
+
+Returns
+
+The generated Private Key instance.
+
+Argument Details
+
++ **str**
+  + The hexadecimal string representing the private key. The string must represent a valid private key in big-endian format.
+
+Throws
+
+If the string is not a valid hexadecimal or represents an invalid private key.
+
 #### Method fromKeyShares
 
 Combines shares to reconstruct the private key.
@@ -5438,7 +5463,7 @@ const privateKey = PrivateKey.fromRandom();
 Generates a private key from a string.
 
 ```ts
-static fromString(str: string, base: number | "hex"): PrivateKey 
+static fromString(str: string, base: number | "hex" = "hex"): PrivateKey 
 ```
 See also: [PrivateKey](#class-privatekey)
 
@@ -5562,6 +5587,30 @@ Argument Details
 + **totalShares**
   + The number of shares to generate for distribution.
 
+#### Method toHex
+
+Converts this PrivateKey to a hexadecimal string.
+
+```ts
+toHex(): string 
+```
+
+Returns
+
+Returns a string representing the hexadecimal value of this BigNumber.
+
+Argument Details
+
++ **length**
+  + The minimum length of the hex string
+
+Example
+
+```ts
+const bigNumber = new BigNumber(255);
+const hex = bigNumber.toHex();
+```
+
 #### Method toKeyShares
 
 Splits the private key into shares using Shamir's Secret Sharing Scheme.
@@ -5612,6 +5661,27 @@ Example
 const privateKey = PrivateKey.fromRandom();
 const publicKey = privateKey.toPublicKey();
 ```
+
+#### Method toString
+
+function toString() { [native code] }
+
+Converts this PrivateKey to a string representation.
+
+```ts
+toString(base: number | "hex" = "hex", padding: number = 64): string 
+```
+
+Returns
+
+A string representation of the PrivateKey in the specified base, padded to the specified length.
+
+Argument Details
+
++ **base**
+  + The base for representing the number. Default is hexadecimal ('hex').
++ **padding**
+  + The minimum number of digits for the output string. Default is 64, ensuring a 256-bit representation in hexadecimal.
 
 #### Method toWif
 

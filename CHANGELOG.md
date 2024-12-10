@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file. The format 
     - [Removed](#removed)
     - [Fixed](#fixed)
     - [Security](#security)
+  - [\[1.2.11\]](#1211---2024-12-10)
+    - [Fixed](#1211-fixed)
   - [\[1.2.10\]](#1210)
     - [Added](#added-1)
     - [Fixed](#fixed-1)
@@ -104,6 +106,11 @@ All notable changes to this project will be documented in this file. The format 
 ### Security
 
 ---
+
+## [1.2.11] - 2024-12-10
+### [1.2.11] Fixed
+
+- Added a fix to ensure PrivateKeys as hex are always 64 chars in length ensuring 256 bit keys.
 
 ## [1.2.10]
 
