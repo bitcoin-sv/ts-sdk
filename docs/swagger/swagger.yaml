@@ -18,17 +18,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateActionArgs'
+              $ref: "#/components/schemas/CreateActionArgs"
       responses:
-        '200':
+        "200":
           description: The created transaction result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateActionResult'
-        '400':
+                $ref: "#/components/schemas/CreateActionResult"
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
   /signAction:
     post:
@@ -40,17 +40,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SignActionArgs'
+              $ref: "#/components/schemas/SignActionArgs"
       responses:
-        '200':
+        "200":
           description: The signed transaction result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SignActionResult'
-        '400':
+                $ref: "#/components/schemas/SignActionResult"
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
   /abortAction:
     post:
@@ -62,17 +62,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AbortActionArgs'
+              $ref: "#/components/schemas/AbortActionArgs"
       responses:
-        '200':
+        "200":
           description: The abortion result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AbortActionResult'
-        '400':
+                $ref: "#/components/schemas/AbortActionResult"
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
   /listActions:
     post:
@@ -84,17 +84,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ListActionsArgs'
+              $ref: "#/components/schemas/ListActionsArgs"
       responses:
-        '200':
+        "200":
           description: The list of actions
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListActionsResult'
-        '400':
+                $ref: "#/components/schemas/ListActionsResult"
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
   /internalizeAction:
     post:
@@ -106,17 +106,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InternalizeActionArgs'
+              $ref: "#/components/schemas/InternalizeActionArgs"
       responses:
-        '200':
+        "200":
           description: The internalization result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalizeActionResult'
-        '400':
+                $ref: "#/components/schemas/InternalizeActionResult"
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
   /listOutputs:
     post:
@@ -128,17 +128,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ListOutputsArgs'
+              $ref: "#/components/schemas/ListOutputsArgs"
       responses:
-        '200':
+        "200":
           description: The list of outputs
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListOutputsResult'
-        '400':
+                $ref: "#/components/schemas/ListOutputsResult"
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
   /relinquishOutput:
     post:
@@ -153,11 +153,11 @@ paths:
               type: object
               properties:
                 basket:
-                  $ref: '#/components/schemas/BasketStringUnder300Bytes'
+                  $ref: "#/components/schemas/BasketStringUnder300Bytes"
                 output:
-                  $ref: '#/components/schemas/OutpointString'
+                  $ref: "#/components/schemas/OutpointString"
       responses:
-        '200':
+        "200":
           description: The relinquishment result
           content:
             application/json:
@@ -168,9 +168,9 @@ paths:
                     type: boolean
                     examples:
                       - true
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
   /getPublicKey:
     post:
@@ -192,8 +192,8 @@ paths:
                 protocolID:
                   type: array
                   prefixItems:
-                      - type: integer
-                      - type: string
+                    - type: integer
+                    - type: string
                   minItems: 2
                   maxItems: 2
                 keyID:
@@ -209,7 +209,7 @@ paths:
                   type: boolean
                   default: false
       responses:
-        '200':
+        "200":
           description: The public key
           content:
             application/json:
@@ -218,9 +218,9 @@ paths:
                 properties:
                   publicKey:
                     type: string
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /revealCounterpartyKeyLinkage:
@@ -245,7 +245,7 @@ paths:
                   type: boolean
                   default: false
       responses:
-        '200':
+        "200":
           description: The counterparty key linkage
           content:
             application/json:
@@ -268,9 +268,9 @@ paths:
                     type: array
                     items:
                       type: integer
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /revealSpecificKeyLinkage:
@@ -302,7 +302,7 @@ paths:
                   type: boolean
                   default: false
       responses:
-        '200':
+        "200":
           description: The specific key linkage
           content:
             application/json:
@@ -334,9 +334,9 @@ paths:
                       type: integer
                   proofType:
                     type: integer
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /encrypt:
@@ -373,7 +373,7 @@ paths:
                   type: boolean
                   default: false
       responses:
-        '200':
+        "200":
           description: The encrypted data
           content:
             application/json:
@@ -384,9 +384,9 @@ paths:
                     type: array
                     items:
                       type: integer
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /decrypt:
@@ -423,7 +423,7 @@ paths:
                   type: boolean
                   default: false
       responses:
-        '200':
+        "200":
           description: The decrypted data
           content:
             application/json:
@@ -434,9 +434,9 @@ paths:
                     type: array
                     items:
                       type: integer
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /createHmac:
@@ -473,7 +473,7 @@ paths:
                   type: boolean
                   default: false
       responses:
-        '200':
+        "200":
           description: The HMAC
           content:
             application/json:
@@ -484,9 +484,9 @@ paths:
                     type: array
                     items:
                       type: integer
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /verifyHmac:
@@ -527,7 +527,7 @@ paths:
                   type: boolean
                   default: false
       responses:
-        '200':
+        "200":
           description: The verification result
           content:
             application/json:
@@ -536,9 +536,9 @@ paths:
                 properties:
                   valid:
                     type: boolean
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /createSignature:
@@ -579,7 +579,7 @@ paths:
                   type: boolean
                   default: false
       responses:
-        '200':
+        "200":
           description: The signature
           content:
             application/json:
@@ -590,9 +590,9 @@ paths:
                     type: array
                     items:
                       type: integer
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /verifySignature:
@@ -640,7 +640,7 @@ paths:
                   type: boolean
                   default: false
       responses:
-        '200':
+        "200":
           description: The verification result
           content:
             application/json:
@@ -649,9 +649,9 @@ paths:
                 properties:
                   valid:
                     type: boolean
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /acquireCertificate:
@@ -664,17 +664,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AcquireCertificateArgs'
+              $ref: "#/components/schemas/AcquireCertificateArgs"
       responses:
-        '200':
+        "200":
           description: The acquired certificate
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AcquireCertificateResult'
-        '400':
+                $ref: "#/components/schemas/AcquireCertificateResult"
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /listCertificates:
@@ -707,15 +707,15 @@ paths:
                 privilegedReason:
                   type: string
       responses:
-        '200':
+        "200":
           description: The list of certificates
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListCertificatesResult'
-        '400':
+                $ref: "#/components/schemas/ListCertificatesResult"
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /proveCertificate:
@@ -728,17 +728,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProveCertificateArgs'
+              $ref: "#/components/schemas/ProveCertificateArgs"
       responses:
-        '200':
+        "200":
           description: The proof of the certificate
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProveCertificateResult'
-        '400':
+                $ref: "#/components/schemas/ProveCertificateResult"
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /relinquishCertificate:
@@ -760,7 +760,7 @@ paths:
                 certifier:
                   type: string
       responses:
-        '200':
+        "200":
           description: The relinquishment result
           content:
             application/json:
@@ -771,9 +771,9 @@ paths:
                     type: boolean
                     examples:
                       - true
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /discoverByIdentityKey:
@@ -798,15 +798,15 @@ paths:
                 offset:
                   type: integer
       responses:
-        '200':
+        "200":
           description: The discovered certificates
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DiscoverCertificatesResult'
-        '400':
+                $ref: "#/components/schemas/DiscoverCertificatesResult"
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /discoverByAttributes:
@@ -833,15 +833,15 @@ paths:
                 offset:
                   type: integer
       responses:
-        '200':
+        "200":
           description: The discovered certificates
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DiscoverCertificatesResult'
-        '400':
+                $ref: "#/components/schemas/DiscoverCertificatesResult"
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /isAuthenticated:
@@ -850,7 +850,7 @@ paths:
         - HTTPWalletJSON
       summary: Checks if the user is authenticated
       responses:
-        '200':
+        "200":
           description: The authentication status
           content:
             application/json:
@@ -859,9 +859,9 @@ paths:
                 properties:
                   authenticated:
                     type: boolean
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /waitForAuthentication:
@@ -870,7 +870,7 @@ paths:
         - HTTPWalletJSON
       summary: Waits for user authentication
       responses:
-        '200':
+        "200":
           description: The authentication result
           content:
             application/json:
@@ -881,9 +881,9 @@ paths:
                     type: boolean
                     examples:
                       - true
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /getHeight:
@@ -892,7 +892,7 @@ paths:
         - HTTPWalletJSON
       summary: Retrieves the current blockchain height
       responses:
-        '200':
+        "200":
           description: The current blockchain height
           content:
             application/json:
@@ -901,9 +901,9 @@ paths:
                 properties:
                   height:
                     type: integer
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /getHeaderForHeight:
@@ -921,7 +921,7 @@ paths:
                 height:
                   type: integer
       responses:
-        '200':
+        "200":
           description: The block header
           content:
             application/json:
@@ -930,9 +930,9 @@ paths:
                 properties:
                   header:
                     type: string
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /getNetwork:
@@ -941,7 +941,7 @@ paths:
         - HTTPWalletJSON
       summary: Retrieves the current network
       responses:
-        '200':
+        "200":
           description: The current network
           content:
             application/json:
@@ -953,9 +953,9 @@ paths:
                     enum:
                       - mainnet
                       - testnet
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 
   /getVersion:
@@ -964,7 +964,7 @@ paths:
         - HTTPWalletJSON
       summary: Retrieves the current version
       responses:
-        '200':
+        "200":
           description: The current version
           content:
             application/json:
@@ -973,9 +973,9 @@ paths:
                 properties:
                   version:
                     type: string
-        '400':
+        "400":
           description: Invalid input
-        '500':
+        "500":
           description: Internal server error
 components:
   schemas:
@@ -984,58 +984,76 @@ components:
       properties:
         description:
           type: string
+          examples:
+            - "human readable purpose of this action"
         inputBEEF:
           type: array
+          examples:
+            - [1, 1, 1, 1]
           items:
             type: number
         inputs:
           type: array
           items:
-            $ref: '#/components/schemas/CreateActionInput'
+            $ref: "#/components/schemas/CreateActionInput"
         outputs:
           type: array
           items:
-            $ref: '#/components/schemas/CreateActionOutput'
+            $ref: "#/components/schemas/CreateActionOutput"
         lockTime:
           type: number
+          examples:
+            - 0
         version:
           type: number
+          examples:
+            - 1
         labels:
           type: array
+          examples:
+            - ["todo create"]
           items:
             type: string
         options:
-          $ref: '#/components/schemas/CreateActionOptions'
+          $ref: "#/components/schemas/CreateActionOptions"
     CreateActionResult:
       type: object
       properties:
         txid:
           type: string
+          examples:
+            - "16bed6368b8b1542cd6eb87f5bc20dc830b41a2258dde40438a75fa701d24e9a"
         tx:
           type: array
+          examples:
+            - [1, 1, 1, 1]
           items:
             type: number
         noSendChange:
           type: array
+          examples:
+            - [
+                "11df9f39662e276dc2f637f063919ce3ca86cbc2d55ee8d661408d22b1f49018.0",
+              ]
           items:
             type: string
         sendWithResults:
           type: array
           items:
-            $ref: '#/components/schemas/SendWithResult'
+            $ref: "#/components/schemas/SendWithResult"
         signableTransaction:
-          $ref: '#/components/schemas/SignableTransaction'
+          $ref: "#/components/schemas/SignableTransaction"
     SignActionArgs:
       type: object
       properties:
         spends:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/SignActionSpend'
+            $ref: "#/components/schemas/SignActionSpend"
         reference:
           type: string
         options:
-          $ref: '#/components/schemas/SignActionOptions'
+          $ref: "#/components/schemas/SignActionOptions"
     SignActionResult:
       type: object
       properties:
@@ -1048,7 +1066,7 @@ components:
         sendWithResults:
           type: array
           items:
-            $ref: '#/components/schemas/SendWithResult'
+            $ref: "#/components/schemas/SendWithResult"
     AbortActionArgs:
       type: object
       properties:
@@ -1097,7 +1115,7 @@ components:
         actions:
           type: array
           items:
-            $ref: '#/components/schemas/WalletAction'
+            $ref: "#/components/schemas/WalletAction"
     InternalizeActionArgs:
       type: object
       properties:
@@ -1108,7 +1126,7 @@ components:
         outputs:
           type: array
           items:
-            $ref: '#/components/schemas/InternalizeOutput'
+            $ref: "#/components/schemas/InternalizeOutput"
         description:
           type: string
         labels:
@@ -1163,35 +1181,57 @@ components:
         outputs:
           type: array
           items:
-            $ref: '#/components/schemas/WalletOutput'
+            $ref: "#/components/schemas/WalletOutput"
     CreateActionInput:
       type: object
       properties:
         outpoint:
           type: string
+          examples:
+            - "ef01fee61a0d00090280027a0ec9df2e605fa46a903dfa1bd249b96aa3001490.0"
         inputDescription:
           type: string
+          examples:
+            - "why this token is being spent"
         unlockingScript:
           type: string
+          examples:
+            - "47304402200aa56a892e310a7575035fb3c0bcf466bbc16e97dae197cc1d40412313f94b89022011944d2b1b0fa72dbe7893c400624a0652a6efcc40d459216c0e00d5d135f7fc412103820b289317fa9ba995ca05bc084a77ae6077dbb424206424d92b51653521bb90"
         unlockingScriptLength:
           type: number
+          examples:
+            - 106
         sequenceNumber:
           type: number
+          examples:
+            - 4294967295
     CreateActionOutput:
       type: object
       properties:
         lockingScript:
           type: string
+          examples:
+            - "76a914978bf440c1ae52331b2e95b641c0041debaa87ce88ac"
         satoshis:
           type: number
+          examples:
+            - 1234
         outputDescription:
           type: string
+          examples:
+            - "why this token is being created"
         basket:
           type: string
+          examples:
+            - "todo token"
         customInstructions:
           type: string
+          examples:
+            - "invoice1234,keyId1,03820b289317fa9ba995ca05bc084a77ae6077dbb424206424d92b51653521bb90"
         tags:
           type: array
+          examples:
+            - ["todo", "productivity"]
           items:
             type: string
     CreateActionOptions:
@@ -1214,10 +1254,18 @@ components:
           type: boolean
         noSendChange:
           type: array
+          examples:
+            - [
+                "11df9f39662e276dc2f637f063919ce3ca86cbc2d55ee8d661408d22b1f49018.0",
+              ]
           items:
             type: string
         sendWith:
           type: array
+          examples:
+            - [
+                "c2d37dd0575766e4deedf7ba072ad35b87e9223af01d2829a81960ba7164f606",
+              ]
           items:
             type: string
         randomizeOutputs:
@@ -1227,6 +1275,8 @@ components:
       properties:
         txid:
           type: string
+          examples:
+            - "a0084f73e13afdcc284cc810b4d22af004a38dcf404d8ddbe43ac9fb1a77a4be"
         status:
           type: string
           enum: [unproven, sending, failed]
@@ -1235,10 +1285,14 @@ components:
       properties:
         tx:
           type: array
+          examples:
+            - [1, 1, 1, 1]
           items:
             type: number
         reference:
           type: string
+          examples:
+            - "unique id for this transaction"
     SignActionSpend:
       type: object
       properties:
@@ -1296,7 +1350,16 @@ components:
           type: number
         status:
           type: string
-          enum: [completed, unprocessed, sending, unproven, unsigned, nosend, nonfinal]
+          enum:
+            [
+              completed,
+              unprocessed,
+              sending,
+              unproven,
+              unsigned,
+              nosend,
+              nonfinal,
+            ]
         isOutgoing:
           type: boolean
         description:
@@ -1312,11 +1375,11 @@ components:
         inputs:
           type: array
           items:
-            $ref: '#/components/schemas/WalletActionInput'
+            $ref: "#/components/schemas/WalletActionInput"
         outputs:
           type: array
           items:
-            $ref: '#/components/schemas/WalletActionOutput'
+            $ref: "#/components/schemas/WalletActionOutput"
     WalletActionInput:
       type: object
       properties:
@@ -1419,7 +1482,7 @@ components:
         certificates:
           type: array
           items:
-          $ref: '#/components/schemas/AcquireCertificateResult'
+          $ref: "#/components/schemas/AcquireCertificateResult"
     ProveCertificateArgs:
       type: object
       properties:
@@ -1446,4 +1509,4 @@ components:
         certificates:
           type: array
           items:
-          $ref: '#/components/schemas/AcquireCertificateResult'
+          $ref: "#/components/schemas/AcquireCertificateResult"
