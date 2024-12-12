@@ -1048,10 +1048,19 @@ components:
       properties:
         spends:
           type: object
+          examples:
+            - 0:
+                unlockingScript: "47304402206ba4a1c0aa4e1ba7f2cd79de36..."
+                sequenceNumber: 4294967295
+              1:
+                unlockingScript: "473044022031d6c05d21ea4ee96da0fa17ea..."
+                sequenceNumber: 4294967295
           additionalProperties:
             $ref: "#/components/schemas/SignActionSpend"
         reference:
           type: string
+          examples:
+            - "C1HST7xvPKzh66npoiJ5fKwnLtnH3xxQ4ylxaGBTTOA="
         options:
           $ref: "#/components/schemas/SignActionOptions"
     SignActionResult:
@@ -1059,8 +1068,12 @@ components:
       properties:
         txid:
           type: string
+          examples:
+            - "cd8345f101b2c6163921d9ff08526d88aa24cb68456f546eec935c6485155838"
         tx:
           type: array
+          examples:
+            - [1, 1, 1, 1]
           items:
             type: number
         sendWithResults:
@@ -1292,14 +1305,18 @@ components:
         reference:
           type: string
           examples:
-            - "unique id for this transaction"
+            - "C1HST7xvPKzh66npoiJ5fKwnLtnH3xxQ4ylxaGBTTOA="
     SignActionSpend:
       type: object
       properties:
         unlockingScript:
           type: string
+          examples:
+            - "47304402206ba4a1c0aa4e1ba7f2cd79de3617c9b1..."
         sequenceNumber:
           type: number
+          examples:
+            - 4294967295
     SignActionOptions:
       type: object
       properties:
@@ -1311,6 +1328,10 @@ components:
           type: boolean
         sendWith:
           type: array
+          examples:
+            - [
+                "c2d37dd0575766e4deedf7ba072ad35b87e9223af01d2829a81960ba7164f606",
+              ]
           items:
             type: string
     InternalizeOutput:
