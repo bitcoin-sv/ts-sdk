@@ -247,10 +247,16 @@ paths:
               properties:
                 counterparty:
                   type: string
+                  examples:
+                    - "027facf8e28228eea25abd69c4f23f15573e1d0f9180718af297e1458827cd5aef"
                 verifier:
                   type: string
+                  examples:
+                    - "03c378a866d72c391343eddeadf64c4f896637c4160ac6073e7b80b5717310153b"
                 privilegedReason:
                   type: string
+                  examples:
+                    - "extra sensitive"
                 privileged:
                   type: boolean
                   default: false
@@ -264,12 +270,20 @@ paths:
                 properties:
                   prover:
                     type: string
+                    examples:
+                      - "02790ab2d725d04af29e20bf46e1dbc40ba8b49f1355146884c5bd06819273d101"
                   verifier:
                     type: string
+                    examples:
+                      - "03c378a866d72c391343eddeadf64c4f896637c4160ac6073e7b80b5717310153b"
                   counterparty:
                     type: string
+                    examples:
+                      - "027facf8e28228eea25abd69c4f23f15573e1d0f9180718af297e1458827cd5aef"
                   revelationTime:
                     type: string
+                    examples:
+                      - "2024-12-12T12:12:12.120Z"
                   encryptedLinkage:
                     type: array
                     items:
@@ -1042,7 +1056,9 @@ components:
         noSendChange:
           type: array
           examples:
-            - ["11df9f39662e276dc2f637f063919ce3ca86cbc2d55ee8d661408d22b1f49018.0"]
+            - [
+                "11df9f39662e276dc2f637f063919ce3ca86cbc2d55ee8d661408d22b1f49018.0",
+              ]
           items:
             type: string
         sendWithResults:
@@ -1161,8 +1177,7 @@ components:
         outputs:
           type: array
           examples:
-            - 
-              - outputIndex: 0
+            - - outputIndex: 0
                 protocol: "wallet payment"
                 paymentRemittance:
                   derivationPrefix: "12345678"
@@ -1332,13 +1347,17 @@ components:
         noSendChange:
           type: array
           examples:
-            - ["11df9f39662e276dc2f637f063919ce3ca86cbc2d55ee8d661408d22b1f49018.0"]
+            - [
+                "11df9f39662e276dc2f637f063919ce3ca86cbc2d55ee8d661408d22b1f49018.0",
+              ]
           items:
             type: string
         sendWith:
           type: array
           examples:
-            - ["c2d37dd0575766e4deedf7ba072ad35b87e9223af01d2829a81960ba7164f606"]
+            - [
+                "c2d37dd0575766e4deedf7ba072ad35b87e9223af01d2829a81960ba7164f606",
+              ]
           items:
             type: string
         randomizeOutputs:
@@ -1389,7 +1408,9 @@ components:
         sendWith:
           type: array
           examples:
-            - ["c2d37dd0575766e4deedf7ba072ad35b87e9223af01d2829a81960ba7164f606"]
+            - [
+                "c2d37dd0575766e4deedf7ba072ad35b87e9223af01d2829a81960ba7164f606",
+              ]
           items:
             type: string
     InternalizeOutput:
@@ -1457,7 +1478,7 @@ components:
             type: string
         version:
           type: number
-          examples: 
+          examples:
             - 1
         lockTime:
           type: number
