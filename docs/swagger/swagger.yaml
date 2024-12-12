@@ -1032,9 +1032,7 @@ components:
         noSendChange:
           type: array
           examples:
-            - [
-                "11df9f39662e276dc2f637f063919ce3ca86cbc2d55ee8d661408d22b1f49018.0",
-              ]
+            - ["11df9f39662e276dc2f637f063919ce3ca86cbc2d55ee8d661408d22b1f49018.0"]
           items:
             type: string
         sendWithResults:
@@ -1146,16 +1144,38 @@ components:
       properties:
         tx:
           type: array
+          examples:
+            - [1, 1, 1, 1]
           items:
             type: number
         outputs:
           type: array
+          examples:
+            - 
+              - outputIndex: 0
+                protocol: "wallet payment"
+                paymentRemittance:
+                  derivationPrefix: "12345678"
+                  derivationSuffix: "00000"
+                  senderIdentity: "02ffc4f361307f34a82069edbcbe2c9f4bd5498165549f42bdeb698ffdcab1ea38"
+              - outputIndex: 1
+                protocol: "basket insertion"
+                insertionRemittance:
+                  basket: "todo token"
+                  customInstructions: "3453,3462346,self"
+                  tags:
+                    - "foose"
+                    - "goose"
           items:
             $ref: "#/components/schemas/InternalizeOutput"
         description:
           type: string
+          examples:
+            - "Creation of a new thing."
         labels:
           type: array
+          examples:
+            - ["todo create", "productivity"]
           items:
             type: string
         seekPermission:
@@ -1280,17 +1300,13 @@ components:
         noSendChange:
           type: array
           examples:
-            - [
-                "11df9f39662e276dc2f637f063919ce3ca86cbc2d55ee8d661408d22b1f49018.0",
-              ]
+            - ["11df9f39662e276dc2f637f063919ce3ca86cbc2d55ee8d661408d22b1f49018.0"]
           items:
             type: string
         sendWith:
           type: array
           examples:
-            - [
-                "c2d37dd0575766e4deedf7ba072ad35b87e9223af01d2829a81960ba7164f606",
-              ]
+            - ["c2d37dd0575766e4deedf7ba072ad35b87e9223af01d2829a81960ba7164f606"]
           items:
             type: string
         randomizeOutputs:
@@ -1341,9 +1357,7 @@ components:
         sendWith:
           type: array
           examples:
-            - [
-                "c2d37dd0575766e4deedf7ba072ad35b87e9223af01d2829a81960ba7164f606",
-              ]
+            - ["c2d37dd0575766e4deedf7ba072ad35b87e9223af01d2829a81960ba7164f606"]
           items:
             type: string
     InternalizeOutput:
@@ -1411,7 +1425,7 @@ components:
             type: string
         version:
           type: number
-          examples:
+          examples: 
             - 1
         lockTime:
           type: number
