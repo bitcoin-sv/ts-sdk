@@ -681,20 +681,30 @@ paths:
                   default: true
                 data:
                   type: array
+                  examples:
+                    - [115, 101, 99, 114, 101, 116, 115]
                   items:
                     type: integer
                 hashToDirectlySign:
                   type: array
+                  examples:
+                    - []
                   items:
                     type: integer
                 protocolID:
                   $ref: "#/components/schemas/ProtocolID"
                 keyID:
                   type: string
+                  examples:
+                    - "1"
                 privilegedReason:
                   type: string
+                  examples:
+                    - "I love to be secure"
                 counterparty:
                   type: string
+                  examples:
+                    - "anyone"
                 privileged:
                   type: boolean
                   default: false
@@ -736,20 +746,134 @@ paths:
                     type: integer
                 hashToDirectlyVerify:
                   type: array
+                  examples:
+                    - [
+                        114,
+                        178,
+                        137,
+                        236,
+                        120,
+                        224,
+                        169,
+                        40,
+                        197,
+                        101,
+                        72,
+                        10,
+                        67,
+                        84,
+                        83,
+                        227,
+                        10,
+                        203,
+                        146,
+                        237,
+                        219,
+                        59,
+                        120,
+                        255,
+                        22,
+                        139,
+                        40,
+                        115,
+                        124,
+                        246,
+                        168,
+                        73,
+                      ]
                   items:
                     type: integer
                 signature:
                   type: array
+                  examples:
+                    - [
+                        48,
+                        69,
+                        2,
+                        33,
+                        0,
+                        189,
+                        197,
+                        179,
+                        187,
+                        162,
+                        114,
+                        42,
+                        69,
+                        21,
+                        51,
+                        96,
+                        183,
+                        226,
+                        242,
+                        212,
+                        49,
+                        221,
+                        96,
+                        197,
+                        178,
+                        63,
+                        241,
+                        43,
+                        248,
+                        36,
+                        212,
+                        243,
+                        226,
+                        144,
+                        198,
+                        47,
+                        238,
+                        2,
+                        32,
+                        54,
+                        138,
+                        29,
+                        195,
+                        78,
+                        4,
+                        222,
+                        220,
+                        219,
+                        226,
+                        234,
+                        189,
+                        122,
+                        78,
+                        27,
+                        129,
+                        253,
+                        196,
+                        59,
+                        189,
+                        167,
+                        195,
+                        66,
+                        73,
+                        69,
+                        115,
+                        126,
+                        200,
+                        16,
+                        65,
+                        114,
+                        64,
+                        65,
+                      ]
                   items:
                     type: integer
                 protocolID:
                   $ref: "#/components/schemas/ProtocolID"
                 keyID:
                   type: string
+                  examples:
+                    - "1"
                 privilegedReason:
                   type: string
                 counterparty:
                   type: string
+                  examples:
+                    - "anyone"
                 forSelf:
                   type: boolean
                   default: false
