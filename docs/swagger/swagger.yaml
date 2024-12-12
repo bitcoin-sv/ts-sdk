@@ -190,14 +190,7 @@ paths:
                 identityKey:
                   type: boolean
                 protocolID:
-                  type: array
-                  examples:
-                    - [0, "todo token"]
-                  prefixItems:
-                    - type: integer
-                    - type: string
-                  minItems: 2
-                  maxItems: 2
+                  $ref: "#/components/schemas/ProtocolID"
                 keyID:
                   type: string
                   examples:
@@ -311,17 +304,22 @@ paths:
               properties:
                 counterparty:
                   type: string
+                  examples:
+                    - "027facf8e28228eea25abd69c4f23f15573e1d0f9180718af297e1458827cd5aef"
                 verifier:
                   type: string
+                  examples:
+                    - "03c378a866d72c391343eddeadf64c4f896637c4160ac6073e7b80b5717310153b"
                 protocolID:
-                  type: array
-                  items:
-                    - type: integer
-                    - type: string
+                  $ref: "#/components/schemas/ProtocolID"
                 keyID:
                   type: string
+                  examples:
+                    - "1"
                 privilegedReason:
                   type: string
+                  examples:
+                    - "special stuff"
                 privileged:
                   type: boolean
                   default: false
@@ -335,19 +333,26 @@ paths:
                 properties:
                   prover:
                     type: string
+                    examples:
+                      - "02790ab2d725d04af29e20bf46e1dbc40ba8b49f1355146884c5bd06819273d101"
                   verifier:
                     type: string
+                    examples:
+                      - "03c378a866d72c391343eddeadf64c4f896637c4160ac6073e7b80b5717310153b"
                   counterparty:
                     type: string
+                    examples:
+                      - "027facf8e28228eea25abd69c4f23f15573e1d0f9180718af297e1458827cd5aef"
+                  revelationTime:
+                    type: string
+                    examples:
+                      - "2024-12-12T12:12:12.120Z"
                   protocolID:
-                    type: array
-                    prefixItems:
-                      - type: integer
-                      - type: string
-                    minItems: 2
-                    maxItems: 2
+                    $ref: "#/components/schemas/ProtocolID"
                   keyID:
                     type: string
+                    examples:
+                      - "1"
                   encryptedLinkage:
                     type: array
                     items:
@@ -383,10 +388,7 @@ paths:
                   items:
                     type: integer
                 protocolID:
-                  type: array
-                  items:
-                    - type: integer
-                    - type: string
+                  $ref: "#/components/schemas/ProtocolID"
                 keyID:
                   type: string
                 privilegedReason:
@@ -433,10 +435,7 @@ paths:
                   items:
                     type: integer
                 protocolID:
-                  type: array
-                  items:
-                    - type: integer
-                    - type: string
+                  $ref: "#/components/schemas/ProtocolID"
                 keyID:
                   type: string
                 privilegedReason:
@@ -483,10 +482,7 @@ paths:
                   items:
                     type: integer
                 protocolID:
-                  type: array
-                  items:
-                    - type: integer
-                    - type: string
+                  $ref: "#/components/schemas/ProtocolID"
                 keyID:
                   type: string
                 privilegedReason:
@@ -537,10 +533,7 @@ paths:
                   items:
                     type: integer
                 protocolID:
-                  type: array
-                  items:
-                    - type: integer
-                    - type: string
+                  $ref: "#/components/schemas/ProtocolID"
                 keyID:
                   type: string
                 privilegedReason:
@@ -589,10 +582,7 @@ paths:
                   items:
                     type: integer
                 protocolID:
-                  type: array
-                  items:
-                    - type: integer
-                    - type: string
+                  $ref: "#/components/schemas/ProtocolID"
                 keyID:
                   type: string
                 privilegedReason:
@@ -647,10 +637,7 @@ paths:
                   items:
                     type: integer
                 protocolID:
-                  type: array
-                  items:
-                    - type: integer
-                    - type: string
+                  $ref: "#/components/schemas/ProtocolID"
                 keyID:
                   type: string
                 privilegedReason:
@@ -1650,3 +1637,12 @@ components:
           type: array
           items:
           $ref: "#/components/schemas/AcquireCertificateResult"
+    ProtocolID:
+      type: array
+      examples:
+        - [0, "todo token"]
+      prefixItems:
+        - type: integer
+        - type: string
+      minItems: 2
+      maxItems: 2
