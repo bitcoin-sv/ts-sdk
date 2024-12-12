@@ -1085,6 +1085,8 @@ components:
       properties:
         reference:
           type: string
+          examples:
+            - "C1HST7xvPKzh66npoiJ5fKwnLtnH3xxQ4ylxaGBTTOA="
     AbortActionResult:
       type: object
       properties:
@@ -1097,6 +1099,8 @@ components:
       properties:
         labels:
           type: array
+          examples:
+            - ["todo create"]
           items:
             type: string
         labelQueryMode:
@@ -1104,6 +1108,8 @@ components:
           enum: [any, all]
         includeLabels:
           type: boolean
+          examples:
+            - false
         includeInputs:
           type: boolean
         includeInputSourceLockingScripts:
@@ -1116,8 +1122,12 @@ components:
           type: boolean
         limit:
           type: number
+          examples:
+            - 10
         offset:
           type: number
+          examples:
+            - 0
         seekPermission:
           type: boolean
     ListActionsResult:
@@ -1125,6 +1135,8 @@ components:
       properties:
         totalActions:
           type: number
+          examples:
+            - 1
         actions:
           type: array
           items:
@@ -1367,8 +1379,12 @@ components:
       properties:
         txid:
           type: string
+          examples:
+            - "ab69c16801e6ea2bb78bde521c6e3654f7e665d0900e4236b5945e47a1482d3c"
         satoshis:
           type: number
+          examples:
+            - 1
         status:
           type: string
           enum:
@@ -1385,12 +1401,18 @@ components:
           type: boolean
         description:
           type: string
+          examples:
+            - "The creation of a token which captures an item of a todo list."
         labels:
           type: array
+          examples:
+            - ["todo create"]
           items:
             type: string
         version:
           type: number
+          examples:
+            - 1
         lockTime:
           type: number
         inputs:
@@ -1406,37 +1428,63 @@ components:
       properties:
         sourceOutpoint:
           type: string
+          examples:
+            - "50e7365af507f6c862b6ca77cef2571ae63544bcd8e19c3c2abc44b20d0aeb6c.3"
         sourceSatoshis:
           type: number
+          examples:
+            - 4000
         sourceLockingScript:
           type: string
+          examples:
+            - "76a9144f427ee5f3099f0ac571f6b723a628e7b08fb64c88ac"
         unlockingScript:
           type: string
+          examples:
+            - "47304402200aa56a892e310a7575035fb3c0bcf4..."
         inputDescription:
           type: string
+          examples:
+            - "spending of a token of some sort"
         sequenceNumber:
           type: number
+          examples:
+            - 4294967295
     WalletActionOutput:
       type: object
       properties:
         satoshis:
           type: number
+          examples:
+            - 1000
         lockingScript:
           type: string
+          examples:
+            - "76a914dd8b1abde0304820ace0adf1478a3ef2291a833788ac"
         spendable:
           type: boolean
         customInstructions:
           type: string
+          examples:
+            - "invoice5678,keyId2,02ffc4f361307f34a82069edbcbe2c9f4bd5498165549f42bdeb698ffdcab1ea38"
         tags:
           type: array
+          examples:
+            - ["todo create", "productivity"]
           items:
             type: string
         outputIndex:
           type: number
+          examples:
+            - 0
         outputDescription:
           type: string
+          examples:
+            - "a special token of some description"
         basket:
           type: string
+          examples:
+            - "todo token"
     WalletOutput:
       type: object
       properties:
