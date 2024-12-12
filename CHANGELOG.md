@@ -109,7 +109,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-## [1.2.11] - 2024-12-12
+## [1.2.12] - 2024-12-12
 ### [1.2.12] Fixed
 
 - Added optional broadcastMany to Broadcaster interface.

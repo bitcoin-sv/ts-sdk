@@ -45,9 +45,9 @@ export interface BroadcastFailure {
  */
 export interface Broadcaster {
   broadcast: (transaction: Transaction) =>
-    Promise<BroadcastResponse | BroadcastFailure>
-  broadcastMany ?: (txs: Transaction[]) =>
-    Promise<Array<object>>
+  Promise<BroadcastResponse | BroadcastFailure>
+  broadcastMany?: (txs: Transaction[]) =>
+  Promise<object[]>
 }
 
 /**
