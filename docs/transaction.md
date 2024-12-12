@@ -135,6 +135,7 @@ This interface defines a standard method for broadcasting transactions.
 ```ts
 export interface Broadcaster {
     broadcast: (transaction: Transaction) => Promise<BroadcastResponse | BroadcastFailure>;
+    broadcastMany?: (txs: Transaction[]) => Promise<Array<object>>;
 }
 ```
 
