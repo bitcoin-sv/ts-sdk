@@ -385,16 +385,24 @@ paths:
                   default: true
                 plaintext:
                   type: array
+                  examples:
+                    - [ 115, 101, 99, 114, 101, 116, 115 ]
                   items:
                     type: integer
                 protocolID:
                   $ref: "#/components/schemas/ProtocolID"
                 keyID:
                   type: string
+                  examples:
+                    - "1"
                 privilegedReason:
                   type: string
+                  examples:
+                    - "extra secure"
                 counterparty:
                   type: string
+                  examples:
+                    - "self"
                 privileged:
                   type: boolean
                   default: false
@@ -408,6 +416,8 @@ paths:
                 properties:
                   ciphertext:
                     type: array
+                    examples:
+                      - [47, 102, 55, 54, 51, 52, 42, 38, 9]
                     items:
                       type: integer
         "400":
@@ -432,16 +442,24 @@ paths:
                   default: true
                 ciphertext:
                   type: array
+                  examples:
+                    - [47, 102, 55, 54, 51, 52, 42, 38, 9]
                   items:
                     type: integer
                 protocolID:
                   $ref: "#/components/schemas/ProtocolID"
                 keyID:
                   type: string
+                  examples:
+                    - "1"
                 privilegedReason:
                   type: string
+                  examples:
+                    - "extra secure"
                 counterparty:
                   type: string
+                  examples:
+                    - "self"
                 privileged:
                   type: boolean
                   default: false
@@ -455,6 +473,8 @@ paths:
                 properties:
                   plaintext:
                     type: array
+                    examples:
+                      - [115, 101, 99, 114, 101, 116, 115]
                     items:
                       type: integer
         "400":
@@ -1043,9 +1063,7 @@ components:
         noSendChange:
           type: array
           examples:
-            - [
-                "11df9f39662e276dc2f637f063919ce3ca86cbc2d55ee8d661408d22b1f49018.0",
-              ]
+            - ["11df9f39662e276dc2f637f063919ce3ca86cbc2d55ee8d661408d22b1f49018.0"]
           items:
             type: string
         sendWithResults:
@@ -1164,7 +1182,8 @@ components:
         outputs:
           type: array
           examples:
-            - - outputIndex: 0
+            - 
+              - outputIndex: 0
                 protocol: "wallet payment"
                 paymentRemittance:
                   derivationPrefix: "12345678"
@@ -1334,17 +1353,13 @@ components:
         noSendChange:
           type: array
           examples:
-            - [
-                "11df9f39662e276dc2f637f063919ce3ca86cbc2d55ee8d661408d22b1f49018.0",
-              ]
+            - ["11df9f39662e276dc2f637f063919ce3ca86cbc2d55ee8d661408d22b1f49018.0"]
           items:
             type: string
         sendWith:
           type: array
           examples:
-            - [
-                "c2d37dd0575766e4deedf7ba072ad35b87e9223af01d2829a81960ba7164f606",
-              ]
+            - ["c2d37dd0575766e4deedf7ba072ad35b87e9223af01d2829a81960ba7164f606"]
           items:
             type: string
         randomizeOutputs:
@@ -1395,9 +1410,7 @@ components:
         sendWith:
           type: array
           examples:
-            - [
-                "c2d37dd0575766e4deedf7ba072ad35b87e9223af01d2829a81960ba7164f606",
-              ]
+            - ["c2d37dd0575766e4deedf7ba072ad35b87e9223af01d2829a81960ba7164f606"]
           items:
             type: string
     InternalizeOutput:
