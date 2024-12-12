@@ -40,10 +40,14 @@ export interface BroadcastFailure {
  * @interface
  * @property {function} broadcast - A function that takes a Transaction object and returns a promise.
  *                                  The promise resolves to either a BroadcastResponse or a BroadcastFailure.
+ * @property {function} broadcastMany - A function that takes an array of Transaction objects and returns a promise.
+ *                                  The promise resolves to an array of broadcast result response objects.
  */
 export interface Broadcaster {
   broadcast: (transaction: Transaction) =>
   Promise<BroadcastResponse | BroadcastFailure>
+  broadcastMany?: (txs: Transaction[]) =>
+  Promise<object[]>
 }
 
 /**
