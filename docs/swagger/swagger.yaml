@@ -1048,15 +1048,19 @@ paths:
             schema:
               type: object
               properties:
+                identityKey:
+                  type: string
+                  examples:
+                    - "03ed91c6e33a5ef6fc3d927b2d7064af0c78447cfc304c069715ea7bdd2e5c6ea8"
+                limit:
+                  type: integer
+                  examples:
+                    - 10
+                offset:
+                  type: integer
                 seekPermission:
                   type: boolean
                   default: true
-                identityKey:
-                  type: string
-                limit:
-                  type: integer
-                offset:
-                  type: integer
       responses:
         "200":
           description: The discovered certificates
@@ -1081,17 +1085,21 @@ paths:
             schema:
               type: object
               properties:
-                seekPermission:
-                  type: boolean
-                  default: true
                 attributes:
                   type: object
+                  examples:
+                    - firstName: "David"
                   additionalProperties:
                     type: string
                 limit:
                   type: integer
+                  examples:
+                    - 10
                 offset:
                   type: integer
+                seekPermission:
+                  type: boolean
+                  default: true
       responses:
         "200":
           description: The discovered certificates
@@ -1927,6 +1935,8 @@ components:
       properties:
         totalCertificates:
           type: number
+          examples:
+            - 1
         certificates:
           type: array
           items:
