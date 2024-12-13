@@ -7,14 +7,17 @@ All notable changes to this project will be documented in this file. The format 
 - [CHANGELOG for `@bsv/sdk`](#changelog-for-bsvsdk)
   - [Table of Contents](#table-of-contents)
   - [\[Unreleased\]](#unreleased)
-    - [Added](#added)
-      JSON HTTP substrate, with corresponding swagger-ui documentation.
-      
+    - [Added](#added)      
     - [Changed](#changed)
     - [Deprecated](#deprecated)
     - [Removed](#removed)
     - [Fixed](#fixed)
     - [Security](#security)
+  - [\[1.2.13\]](#1213---2024-12-13)
+    - [Added](#1213-added)
+    - [Fixed](#1213-fixed)
+  - [\[1.2.12\]](#1212---2024-12-12)
+    - [Fixed](#1212-fixed)
   - [\[1.2.11\]](#1211---2024-12-10)
     - [Fixed](#1211-fixed)
   - [\[1.2.10\]](#1210)
@@ -106,6 +109,16 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+## [1.2.13] - 2024-12-13
+
+### [1.2.13] Added
+- JSON HTTP substrate, with corresponding swagger-ui documentation.
+- Example args and responses to the swagger-ui
+
+### [1.2.13] Fixed
+- PrivateKey test linter errors
 
 ---
 
