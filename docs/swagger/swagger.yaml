@@ -914,7 +914,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AcquireCertificateResult"
+                $ref: "#/components/schemas/Certificate"
         "400":
           description: Invalid input
         "500":
@@ -943,7 +943,7 @@ paths:
                 types:
                   type: array
                   examples:
-                    - - "60Tlwe2P7yCqOvGh1zfMQJSjGCPQh8y11oGrlrbi/z4="
+                    - - "W/iqV/xaa8VH3s8cxttj8Q3rVaPGxd9JfWMfs9leGr8="
                       - "xrhnMvBJoy7tWi92bFzci3cGNhmiC+yU8iK8vSSeZWI="
                   items:
                     type: string
@@ -1837,7 +1837,7 @@ components:
         privileged:
           type: boolean
           default: false
-    AcquireCertificateResult:
+    Certificate:
       type: object
       properties:
         type:
@@ -1872,35 +1872,50 @@ components:
               dob: "12/12/2001"
           additionalProperties:
             type: string
-        expirationTime:
-          type: string
     ListCertificatesResult:
       type: object
       properties:
         totalCertificates:
           type: number
+          examples:
+            - 1
         certificates:
           type: array
           items:
-            $ref: "#/components/schemas/AcquireCertificateResult"
+            $ref: "#/components/schemas/Certificate"
     ProveCertificateArgs:
       type: object
       properties:
-        certifier:
-          type: string
-        type:
-          type: string
-        serialNumber:
-          type: string
-        proof:
+        certificate:
+          $ref: "#/components/schemas/Certificate"
+        fieldsToReveal:
           type: array
           items:
-            type: integer
+            type: string
+            examples:
+              - "dob"
+        verifier:
+          type: string
+          examples:
+            - "02a3ffa2ea5db22192aed65131a6683c0f626fb35a8c717c783587e08a4daec380"
+        privileged:
+          type: boolean
+          default: false
+        privilegedReason:
+          type: string
+          examples:
+            - "-"
     ProveCertificateResult:
       type: object
       properties:
-        valid:
-          type: boolean
+        keyringForVerifier:
+          type: object
+          examples:
+            - firstName: "ZGF2aWQ="
+              lastName: "SW52ZXJuZXNz"
+              dob: "MTIvMTIvMTk4OA=="
+          additionalProperties:
+            type: string
     DiscoverCertificatesResult:
       type: object
       properties:
@@ -1909,7 +1924,7 @@ components:
         certificates:
           type: array
           items:
-            $ref: "#/components/schemas/AcquireCertificateResult"
+            $ref: "#/components/schemas/Certificate"
     ProtocolID:
       type: array
       examples:
