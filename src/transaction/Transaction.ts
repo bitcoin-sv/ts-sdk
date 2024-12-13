@@ -12,7 +12,7 @@ import Spend from '../script/Spend.js'
 import ChainTracker from './ChainTracker.js'
 import { defaultBroadcaster } from './broadcasters/DefaultBroadcaster.js'
 import { defaultChainTracker } from './chaintrackers/DefaultChainTracker.js'
-import { BEEF_MAGIC } from './Beef.js'
+import { ATOMIC_BEEF, BEEF_MAGIC } from './Beef.js'
 
 /**
  * Represents a complete Bitcoin transaction. This class encapsulates all the details
@@ -119,8 +119,8 @@ export default class Transaction {
     const reader = new Reader(beef)
     // Read the Atomic BEEF prefix
     const prefix = reader.readUInt32LE()
-    if (prefix !== 0x01010101) {
-      throw new Error(`Invalid Atomic BEEF prefix. Expected 0x01010101, received ${prefix.toString(16)}.`)
+    if (prefix !== ATOMIC_BEEF) {
+      throw new Error(`Invalid Atomic BEEF prefix. Expected 0x01010101, received 0x${prefix.toString(16)}.`)
     }
 
     // Read the subject TXID
