@@ -1169,6 +1169,8 @@ paths:
                 properties:
                   height:
                     type: integer
+                    examples:
+                      - 875002
         "400":
           description: Invalid input
         "500":
@@ -1188,6 +1190,8 @@ paths:
               properties:
                 height:
                   type: integer
+                  examples:
+                    - 875002
       responses:
         "200":
           description: The block header
@@ -1198,6 +1202,8 @@ paths:
                 properties:
                   header:
                     type: string
+                    examples:
+                      - "0020372d395bfcfc03b467e747f873da7e4f4fd0afcc89301787b10a0000000000000000724ab3c241848b826766b46947e008e022b95877629498ec3e7dd85f1ae0b383f8f8826566280d184b11f02a"
         "400":
           description: Invalid input
         "500":
@@ -1241,6 +1247,8 @@ paths:
                 properties:
                   version:
                     type: string
+                    examples:
+                      - "BSVA-1.0.0"
         "400":
           description: Invalid input
         "500":
