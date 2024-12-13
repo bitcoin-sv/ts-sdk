@@ -129,7 +129,7 @@ export default class MerklePath {
 
     let root: string
     // every txid must calculate to the same root.
-    this.path[0].map((leaf, idx) => {
+    this.path[0]?.map((leaf, idx) => {
       if (idx === 0) root = this.computeRoot(leaf.hash)
       if (root !== this.computeRoot(leaf.hash)) {
         throw new Error('Mismatched roots')
