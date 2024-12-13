@@ -1009,10 +1009,16 @@ paths:
               properties:
                 type:
                   type: string
+                  examples:
+                    - "W/iqV/xaa8VH3s8cxttj8Q3rVaPGxd9JfWMfs9leGr8="
                 serialNumber:
                   type: string
+                  examples:
+                    - "oXTshKWy209Lv8MFVDxmsFzZQQ"
                 certifier:
                   type: string
+                  examples:
+                    - "03d40063722f77cc57a96bdf963c56fd29085b1297e598471ad63dd51b1b54db6e"
       responses:
         "200":
           description: The relinquishment result
