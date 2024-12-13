@@ -934,14 +934,23 @@ paths:
               properties:
                 certifiers:
                   type: array
+                  examples:
+                    - - "0322f8f64b95234a4b531109c2c271e01cd2a9ee497e71a788cae384b6aae54d75"
+                      - "02e3dfb8196c17baab7353e139693a1c0813d60ecd022f5c52779faf2cff341374"
+                      - "0334b3dd693269d37e0ef35aace5dc07fdd510ff0f1596399ed7bf8b27dc025bdd"
                   items:
                     type: string
                 types:
                   type: array
+                  examples:
+                    - - "60Tlwe2P7yCqOvGh1zfMQJSjGCPQh8y11oGrlrbi/z4="
+                      - "xrhnMvBJoy7tWi92bFzci3cGNhmiC+yU8iK8vSSeZWI="
                   items:
                     type: string
                 limit:
                   type: integer
+                  examples:
+                    - 10
                 offset:
                   type: integer
                 privileged:
@@ -949,6 +958,8 @@ paths:
                   default: false
                 privilegedReason:
                   type: string
+                  examples:
+                    - "-"
       responses:
         "200":
           description: The list of certificates
@@ -1871,7 +1882,7 @@ components:
         certificates:
           type: array
           items:
-          $ref: "#/components/schemas/AcquireCertificateResult"
+            $ref: "#/components/schemas/AcquireCertificateResult"
     ProveCertificateArgs:
       type: object
       properties:
@@ -1898,7 +1909,7 @@ components:
         certificates:
           type: array
           items:
-          $ref: "#/components/schemas/AcquireCertificateResult"
+            $ref: "#/components/schemas/AcquireCertificateResult"
     ProtocolID:
       type: array
       examples:
