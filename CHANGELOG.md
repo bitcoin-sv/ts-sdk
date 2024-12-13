@@ -109,6 +109,11 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.2.13] - 2024-12-13
+### [1.2.13] Fixed
+
+- Fixed MerklePath constructor to allow for null initialisation.
+
 ## [1.2.12] - 2024-12-12
 ### [1.2.12] Fixed
 
