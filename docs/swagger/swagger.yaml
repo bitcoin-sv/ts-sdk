@@ -870,6 +870,8 @@ paths:
                     - "1"
                 privilegedReason:
                   type: string
+                  examples:
+                    - "-"
                 counterparty:
                   type: string
                   examples:
@@ -1803,14 +1805,24 @@ components:
       properties:
         certifier:
           type: string
+          examples:
+            - "035836f24728af22bdeb3524c35b2e6c6126a45587dd11fcab826c054e170f97b8"
         type:
           type: string
+          examples:
+            - "passport check"
         attributes:
           type: object
+          examples:
+            - firstName: "Michael"
+              lastName: "Huntington"
+              dob: "12/12/2001"
           additionalProperties:
             type: string
         privilegedReason:
           type: string
+          examples:
+            - "-"
         privileged:
           type: boolean
           default: false
