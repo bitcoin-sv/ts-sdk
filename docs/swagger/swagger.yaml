@@ -1810,8 +1810,8 @@ components:
         type:
           type: string
           examples:
-            - "passport check"
-        attributes:
+            - "W/iqV/xaa8VH3s8cxttj8Q3rVaPGxd9JfWMfs9leGr8="
+        fields:
           type: object
           examples:
             - firstName: "Michael"
@@ -1829,18 +1829,38 @@ components:
     AcquireCertificateResult:
       type: object
       properties:
-        certifier:
-          type: string
         type:
           type: string
+          examples:
+            - "W/iqV/xaa8VH3s8cxttj8Q3rVaPGxd9JfWMfs9leGr8="
+        subject:
+          type: string
+          examples:
+            - "02d292971b665575c90e8183e20d7c528e2ec1734fcb9f69c7e65e5046596767f3"
         serialNumber:
           type: string
-        attributes:
+          examples:
+            - "6d4U5qznZnQmWJF3sEqKXsi5pB8sUhD0MWcadrxzKas="
+        certifier:
+          type: string
+          examples:
+            - "035836f24728af22bdeb3524c35b2e6c6126a45587dd11fcab826c054e170f97b8"
+        revocationOutput:
+          type: string
+          examples:
+            - "e38a285d99d8a70448240255b5e92090bef87d7c5abab34a1263966fcde40621.3"
+        signature:
+          type: string
+          examples:
+            - "30450221008a9e150a43dc22652f4b627d08cae1d..."
+        fields:
           type: object
+          examples:
+            - firstName: "Michael"
+              lastName: "Huntington"
+              dob: "12/12/2001"
           additionalProperties:
             type: string
-        issuanceTime:
-          type: string
         expirationTime:
           type: string
     ListCertificatesResult:
