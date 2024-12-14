@@ -94,12 +94,22 @@ export default class MerklePath {
     return MerklePath.fromReader(reader)
   }
 
+  /**
+   *
+   * @static
+   * @param {string} txid - The coinbase txid.
+   * @returns {MerklePath} - A new MerklePath instance which assumes the tx is in a block with no other transactions.
+   */
+  static fromTxid (txid: string): MerklePath {
+    return new MerklePath(0, [[{ offset: 0, hash: txid, txid: true }]])
+  }
+
   constructor (blockHeight: number, path: Array<Array<{
     offset: number
     hash?: string
     txid?: boolean
     duplicate?: boolean
-  }>>) {
+  }>>){
     this.blockHeight = blockHeight
     this.path = path
 
@@ -127,9 +137,9 @@ export default class MerklePath {
       })
     })
 
-    let root: string
     // every txid must calculate to the same root.
-    this.path[0]?.map((leaf, idx) => {
+    let root: string
+    this.path[0].map((leaf, idx) => {
       if (idx === 0) root = this.computeRoot(leaf.hash)
       if (root !== this.computeRoot(leaf.hash)) {
         throw new Error('Mismatched roots')
@@ -198,6 +208,10 @@ export default class MerklePath {
       hash256(toArray(m, 'hex').reverse())
     ).reverse())
     let workingHash = txid
+
+    // special case for blocks with only one transaction
+    if (this.path.length === 1 && this.path[0].length === 1) return workingHash
+
     for (let height = 0; height < this.path.length; height++) {
       const leaves = this.path[height]
       const offset = index >> height ^ 1
