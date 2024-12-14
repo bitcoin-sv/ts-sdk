@@ -96,11 +96,15 @@ export default class MerklePath {
 
   /**
    *
-   * @static
+   * @static fromCoinbaseTxid
+   * 
+   * Creates a MerklePath instance for a coinbase transaction in an empty block.
+   * This edge case is difficult to retrieve from standard APIs.
+   * 
    * @param {string} txid - The coinbase txid.
    * @returns {MerklePath} - A new MerklePath instance which assumes the tx is in a block with no other transactions.
    */
-  static fromTxid (txid: string): MerklePath {
+  static fromCoinbaseTxid (txid: string): MerklePath {
     return new MerklePath(0, [[{ offset: 0, hash: txid, txid: true }]])
   }
 

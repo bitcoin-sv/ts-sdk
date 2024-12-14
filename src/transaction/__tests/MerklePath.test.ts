@@ -185,11 +185,11 @@ describe('MerklePath', () => {
       expect(() => MerklePath.fromHex(valid.bump)).not.toThrowError()
     }
   })
-  it('Validates a MerklePath which only has 1 tx', () => {
+  it('Validates a MerklePath for a block which only has 1 tx', () => {
     const path = MerklePath.fromHex('fdd2040101000202ef57aa9f29c8141ae17935c88434457b2117890f23efba0d0e0cba7a7a37d5')
     expect(path.computeRoot('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02')).toEqual('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02')
   })
   it('Creates a valid MerklePath from a txid', () => {
-    expect(() => MerklePath.fromTxid('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02')).not.toThrowError()
+    expect(() => MerklePath.fromCoinbaseTxid('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02')).not.toThrowError()
   })
 })
