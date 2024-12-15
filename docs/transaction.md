@@ -1219,6 +1219,7 @@ export default class MerklePath {
     static fromHex(hex: string): MerklePath 
     static fromReader(reader: Reader): MerklePath 
     static fromBinary(bump: number[]): MerklePath 
+    static fromCoinbaseTxidAndHeight(txid: string, height: number): MerklePath 
     constructor(blockHeight: number, path: Array<Array<{
         offset: number;
         hash?: string;
@@ -1308,6 +1309,24 @@ Argument Details
 
 + **bump**
   + The binary array representation of the Merkle Path.
+
+#### Method fromCoinbaseTxidAndHeight
+
+```ts
+static fromCoinbaseTxidAndHeight(txid: string, height: number): MerklePath 
+```
+See also: [MerklePath](#class-merklepath)
+
+Returns
+
+- A new MerklePath instance which assumes the tx is in a block with no other transactions.
+
+Argument Details
+
++ **txid**
+  + The coinbase txid.
++ **height**
+  + The height of the block.
 
 #### Method fromHex
 

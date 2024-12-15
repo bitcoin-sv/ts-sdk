@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file. The format 
     - [Removed](#removed)
     - [Fixed](#fixed)
     - [Security](#security)
+  - [\[1.2.14\]](#1214---2024-12-14)
+    - [Added](#1214-added)
   - [\[1.2.13\]](#1213---2024-12-13)
     - [Added](#1213-added)
     - [Fixed](#1213-fixed)
@@ -111,6 +113,21 @@ All notable changes to this project will be documented in this file. The format 
 ### Security
 
 ---
+
+## [1.2.14] - 2024-12-14
+
+### [1.2.14] Added
+- fromCoinbaseTxidAndHeight method to the MerklePath class for that special case
+- added test demonstrating how to validate scripts only for one tx even when you don't have a merkle path for the previous tx.
+  ```js
+  // merklePath just has to be set to any object.
+  sourceTransaction.merklePath = { assumeValid: true }
+  tx.inputs[0].sourceTransaction = sourceTransaction
+  await tx.verify('scripts only')
+  ```
+
+---
+
 ## [1.2.13] - 2024-12-13
 
 ### [1.2.13] Added

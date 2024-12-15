@@ -94,6 +94,21 @@ export default class MerklePath {
     return MerklePath.fromReader(reader)
   }
 
+  /**
+   *
+   * @static fromCoinbaseTxid
+   *
+   * Creates a MerklePath instance for a coinbase transaction in an empty block.
+   * This edge case is difficult to retrieve from standard APIs.
+   *
+   * @param {string} txid - The coinbase txid.
+   * @param {number} height - The height of the block.
+   * @returns {MerklePath} - A new MerklePath instance which assumes the tx is in a block with no other transactions.
+   */
+  static fromCoinbaseTxidAndHeight (txid: string, height: number): MerklePath {
+    return new MerklePath(height, [[{ offset: 0, hash: txid, txid: true }]])
+  }
+
   constructor (blockHeight: number, path: Array<Array<{
     offset: number
     hash?: string
@@ -127,8 +142,8 @@ export default class MerklePath {
       })
     })
 
-    let root: string
     // every txid must calculate to the same root.
+    let root: string
     this.path[0].map((leaf, idx) => {
       if (idx === 0) root = this.computeRoot(leaf.hash)
       if (root !== this.computeRoot(leaf.hash)) {
@@ -198,6 +213,10 @@ export default class MerklePath {
       hash256(toArray(m, 'hex').reverse())
     ).reverse())
     let workingHash = txid
+
+    // special case for blocks with only one transaction
+    if (this.path.length === 1 && this.path[0].length === 1) return workingHash
+
     for (let height = 0; height < this.path.length; height++) {
       const leaves = this.path[height]
       const offset = index >> height ^ 1
