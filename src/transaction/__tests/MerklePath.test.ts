@@ -190,6 +190,6 @@ describe('MerklePath', () => {
     expect(path.computeRoot('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02')).toEqual('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02')
   })
   it('Creates a valid MerklePath from a txid', () => {
-    expect(() => MerklePath.fromCoinbaseTxid('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02')).not.toThrowError()
+    expect(() => MerklePath.fromCoinbaseTxidAndHeight('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02', 1)).not.toThrowError()
   })
 })

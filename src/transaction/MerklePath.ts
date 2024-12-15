@@ -97,15 +97,16 @@ export default class MerklePath {
   /**
    *
    * @static fromCoinbaseTxid
-   * 
+   *
    * Creates a MerklePath instance for a coinbase transaction in an empty block.
    * This edge case is difficult to retrieve from standard APIs.
-   * 
+   *
    * @param {string} txid - The coinbase txid.
+   * @param {number} height - The height of the block.
    * @returns {MerklePath} - A new MerklePath instance which assumes the tx is in a block with no other transactions.
    */
-  static fromCoinbaseTxid (txid: string): MerklePath {
-    return new MerklePath(0, [[{ offset: 0, hash: txid, txid: true }]])
+  static fromCoinbaseTxidAndHeight (txid: string, height: number): MerklePath {
+    return new MerklePath(height, [[{ offset: 0, hash: txid, txid: true }]])
   }
 
   constructor (blockHeight: number, path: Array<Array<{
@@ -113,7 +114,7 @@ export default class MerklePath {
     hash?: string
     txid?: boolean
     duplicate?: boolean
-  }>>){
+  }>>) {
     this.blockHeight = blockHeight
     this.path = path
 
