@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file. The format 
     - [Removed](#removed)
     - [Fixed](#fixed)
     - [Security](#security)
+  - [\[1.2.14\]](#1214---2024-12-14)
+    - [Added](#1214-added)
   - [\[1.2.13\]](#1213---2024-12-13)
     - [Added](#1213-added)
     - [Fixed](#1213-fixed)
