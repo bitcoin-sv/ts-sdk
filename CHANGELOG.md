@@ -114,6 +114,13 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.2.15] - 2024-12-16
+
+### [1.2.15] Added
+- A helper function for most commonly used output type. `tx.addP2PKHOutput(address, satoshis)`
+
+---
+
 ## [1.2.14] - 2024-12-14
 
 ### [1.2.14] Added
