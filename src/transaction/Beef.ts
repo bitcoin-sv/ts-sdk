@@ -3,6 +3,7 @@ import Transaction from './Transaction.js'
 import ChainTracker from './ChainTracker.js'
 import BeefTx from './BeefTx.js'
 import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
+import { hash256 } from '../primitives/Hash.js'
 
 export const BEEF_MAGIC = 4022206465 // 0100BEEF in LE order
 export const BEEF_MAGIC_V2 = 4022206466 // 0200BEEF in LE order
@@ -442,8 +443,9 @@ export class Beef {
   /**
    * Serialize this Beef as AtomicBEEF.
    *
-   * `txid` must exist and be the last transaction
-   * in sorted (dependency) order.
+   * `txid` must exist
+   * 
+   * after sorting, if txid is not last txid, creates a clone and removes newer txs
    *
    * @param txid
    * @returns serialized contents of this Beef with AtomicBEEF prefix.
@@ -452,11 +454,16 @@ export class Beef {
     this.sortTxs()
     const tx = this.findTxid(txid)
     if (!tx) { throw new Error(`${txid} does not exist in this Beef`) }
-    if (this.txs[this.txs.length - 1] !== tx) { throw new Error(`${txid} is not the last transaction in this Beef`) }
+    let beef: Beef = this
+    if (this.txs[this.txs.length - 1] !== tx) {
+      beef = this.clone()
+      const i = this.txs.findIndex(t => t.txid === txid)
+      beef.txs.splice(i + 1)
+    }
     const writer = new Writer()
     writer.writeUInt32LE(ATOMIC_BEEF)
     writer.write(toArray(txid, 'hex'))
-    this.toWriter(writer)
+    beef.toWriter(writer)
     return writer.toArray()
   }
 
@@ -697,6 +704,38 @@ export class Beef {
     }
     return log
   }
+
+  /**
+   * In some circumstances it may be helpful for the BUMP MerkePaths to include
+   * leaves that can be computed from row zero.
+   */
+  addComputedLeaves() {
+    const beef = this
+    const hash = (m: string): string => toHex((
+      hash256(toArray(m, 'hex').reverse())
+    ).reverse())
+
+    for (const bump of beef.bumps) {
+      for (let row = 1; row < bump.path.length; row++) {
+        for (const leafL of bump.path[row - 1]) {
+          if (leafL.hash && (leafL.offset & 1) === 0) {
+            const leafR = bump.path[row - 1].find(l => l.offset === leafL.offset + 1)
+            const offsetOnRow = leafL.offset >> 1
+            if (leafR && leafR.hash && -1 === bump.path[row].findIndex(l => l.offset === offsetOnRow)) {
+              // computable leaf is missing... add it.
+              // not handling duplicate leaves, assuming not required to workaround bug at ARC.
+              bump.path[row].push({
+                offset: offsetOnRow,
+                // string concatenation puts the right leaf on the left of the left leaf hash :-)
+                hash: hash(leafR.hash + leafL.hash)
+              })
+            }
+          }
+        }
+      }
+    }
+  }
+
 }
 
 export default Beef
