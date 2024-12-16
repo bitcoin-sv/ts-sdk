@@ -623,6 +623,7 @@ export class Beef {
     trimKnownTxids(knownTxids: string[]) 
     getValidTxids(): string[] 
     toLogString(): string 
+    addComputedLeaves() 
 }
 ```
 
@@ -631,6 +632,15 @@ See also: [BeefTx](#class-beeftx), [BeefVersion](#type-beefversion), [ChainTrack
 <details>
 
 <summary>Class Beef Details</summary>
+
+#### Method addComputedLeaves
+
+In some circumstances it may be helpful for the BUMP MerkePaths to include
+leaves that can be computed from row zero.
+
+```ts
+addComputedLeaves() 
+```
 
 #### Method clone
 
@@ -901,8 +911,9 @@ A binary array representing the BEEF
 
 Serialize this Beef as AtomicBEEF.
 
-`txid` must exist and be the last transaction
-in sorted (dependency) order.
+`txid` must exist
+
+after sorting, if txid is not last txid, creates a clone and removes newer txs
 
 ```ts
 toBinaryAtomic(txid: string) 
