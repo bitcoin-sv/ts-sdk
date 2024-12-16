@@ -13,6 +13,7 @@ import ChainTracker from './ChainTracker.js'
 import { defaultBroadcaster } from './broadcasters/DefaultBroadcaster.js'
 import { defaultChainTracker } from './chaintrackers/DefaultChainTracker.js'
 import { ATOMIC_BEEF, BEEF_MAGIC } from './Beef.js'
+import P2PKH from '../script/templates/P2PKH.js'
 
 /**
  * Represents a complete Bitcoin transaction. This class encapsulates all the details
@@ -455,7 +456,28 @@ export default class Transaction {
    */
   addOutput (output: TransactionOutput): void {
     this.cachedHash = undefined
+    if (!output.change) {
+      if (typeof output.satoshis === 'undefined') throw new Error('either satoshis must be defined or change must be set to true')
+      if (output.satoshis <= 0) throw new Error('satoshis must be a positive integer or zero')
+    }
+    if (!output.lockingScript) throw new Error('lockingScript must be defined')
     this.outputs.push(output)
+  }
+
+  /**
+   * Adds a new P2PKH output to the transaction.
+   *
+   * @param {number[] | string} address - The P2PKH address of the output.
+   * @param {number} [satoshis] - The number of satoshis to send to the address - if not provided, the output is considered a change output.
+   *
+   */
+  addP2PKHOutput (address: number[] | string, satoshis?: number): void {
+    const lockingScript = new P2PKH().lock(address)
+    if (typeof satoshis === 'undefined') { return this.addOutput({ lockingScript, change: true }) }
+    this.addOutput({
+      lockingScript,
+      satoshis
+    })
   }
 
   /**

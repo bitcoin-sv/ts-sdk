@@ -1524,6 +1524,7 @@ export default class Transaction {
     constructor(version: number = 1, inputs: TransactionInput[] = [], outputs: TransactionOutput[] = [], lockTime: number = 0, metadata: Record<string, any> = {}, merklePath?: MerklePath) 
     addInput(input: TransactionInput): void 
     addOutput(output: TransactionOutput): void 
+    addP2PKHOutput(address: number[] | string, satoshis?: number): void 
     updateMetadata(metadata: Record<string, any>): void 
     async fee(modelOrFee: FeeModel | number = new SatoshisPerKilobyte(10), changeDistribution: "equal" | "random" = "equal"): Promise<void> 
     getFee(): number 
@@ -1582,6 +1583,21 @@ Argument Details
 
 + **output**
   + The TransactionOutput object to add to the transaction.
+
+#### Method addP2PKHOutput
+
+Adds a new P2PKH output to the transaction.
+
+```ts
+addP2PKHOutput(address: number[] | string, satoshis?: number): void 
+```
+
+Argument Details
+
++ **address**
+  + The P2PKH address of the output.
++ **satoshis**
+  + The number of satoshis to send to the address - if not provided, the output is considered a change output.
 
 #### Method broadcast
 
