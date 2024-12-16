@@ -1008,11 +1008,9 @@ describe('Transaction', () => {
       expect(tx.outputs[0].change).toBeTruthy()
       expect(tx.outputs[0].satoshis).toBeUndefined()
     })
-    it('should set the output to a change output if the satoshi value is negative', async () => {
+    it('throw error when satoshi value is negative', async () => {
       const tx = new Transaction()
-      tx.addP2PKHOutput('18E63MgXH43KBb288ETM8u91J2cqdGNEmg', -1000)
-      expect(tx.outputs[0].change).toBeTruthy()
-      expect(tx.outputs[0].satoshis).toBeUndefined()
+      expect(() => tx.addP2PKHOutput('18E63MgXH43KBb288ETM8u91J2cqdGNEmg', -1000)).toThrow('satoshis must be a positive number')
     })
   })
 })
