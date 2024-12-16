@@ -118,6 +118,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ### [1.2.15] Added
 - A helper function for most commonly used output type. `tx.addP2PKHOutput(address, satoshis)`
+- Make sure to check the provided hash is 20 bytes.
 
 ---
 

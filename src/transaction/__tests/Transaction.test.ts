@@ -989,5 +989,18 @@ describe('Transaction', () => {
       expect(tx.outputs[0].satoshis).toEqual(10000)
       expect(tx.outputs[0].lockingScript.toHex() === lockingScript.toHex()).toBeTruthy()
     })
+    it('should error is the address is non base58', async () => {
+      const tx = new Transaction()    
+      expect(() => tx.addP2PKHOutput('A small chicken', 10000)).toThrow("Invalid base58 character ")
+    })
+    it('should error if the address is incorrectly copied', async () => {
+      const tx = new Transaction()
+      expect(() => tx.addP2PKHOutput('14afWk1jLH9Uwi2mC9C5ehrsvcFxTLYDp', 10000)).toThrow("Invalid checksum")
+    })
+    it('should error if the address is a hash of wrong length', async () => {
+      const tx = new Transaction()
+      const address = [1,2,3,4,5]
+      expect(() => tx.addP2PKHOutput(address, 10000)).toThrow("P2PKH hash length must be 20 bytes")
+    })
   })
 })
