@@ -1010,7 +1010,11 @@ describe('Transaction', () => {
     })
     it('throw error when satoshi value is negative', async () => {
       const tx = new Transaction()
-      expect(() => tx.addP2PKHOutput('18E63MgXH43KBb288ETM8u91J2cqdGNEmg', -1000)).toThrow('satoshis must be a positive number')
+      expect(() => tx.addP2PKHOutput('18E63MgXH43KBb288ETM8u91J2cqdGNEmg', -1000)).toThrow('satoshis must be a positive integer or zero')
+    })
+    it('throw error when output does not set satoshi value', async () => {
+      const tx = new Transaction()
+      expect(() => tx.addOutput({ lockingScript: Script.fromASM('OP_TRUE') })).toThrow('either satoshis must be defined or change must be set to true')
     })
   })
 })

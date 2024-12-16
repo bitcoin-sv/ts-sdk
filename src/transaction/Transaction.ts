@@ -456,6 +456,11 @@ export default class Transaction {
    */
   addOutput (output: TransactionOutput): void {
     this.cachedHash = undefined
+    if (!output.change) {
+      if (typeof output.satoshis === 'undefined') throw new Error('either satoshis must be defined or change must be set to true')
+      if (output.satoshis <= 0) throw new Error('satoshis must be a positive integer or zero')
+    }
+    if (!output.lockingScript) throw new Error('lockingScript must be defined')
     this.outputs.push(output)
   }
 
@@ -468,8 +473,7 @@ export default class Transaction {
    */
   addP2PKHOutput (address: number[] | string, satoshis?: number): void {
     const lockingScript = new P2PKH().lock(address)
-    if (typeof satoshis === 'undefined') this.addOutput({ lockingScript: new LockingScript(), change: true })
-    if (satoshis <= 0) throw new Error('satoshis must be a positive number')
+    if (typeof satoshis === 'undefined') { return this.addOutput({ lockingScript, change: true }) }
     this.addOutput({
       lockingScript,
       satoshis
