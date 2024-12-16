@@ -1002,5 +1002,11 @@ describe('Transaction', () => {
       const address = [1,2,3,4,5]
       expect(() => tx.addP2PKHOutput(address, 10000)).toThrow("P2PKH hash length must be 20 bytes")
     })
+    it('should set the output to a change output if the satoshi value is not given', async () => {
+      const tx = new Transaction()
+      tx.addP2PKHOutput('18E63MgXH43KBb288ETM8u91J2cqdGNEmg')
+      expect(tx.outputs[0].change).toBeTruthy()
+      expect(tx.outputs[0].satoshis).toBeUndefined()
+    })
   })
 })
