@@ -463,12 +463,13 @@ export default class Transaction {
    * Adds a new P2PKH output to the transaction.
    *
    * @param {number[] | string} address - The P2PKH address of the output.
-   * @param {number} satoshis - The number of satoshis to send to the address - if not provided, the output is considered a change output.
+   * @param {number} [satoshis] - The number of satoshis to send to the address - if not provided, the output is considered a change output.
    *
    */
   addP2PKHOutput (address: number[] | string, satoshis?: number): void {
     const lockingScript = new P2PKH().lock(address)
-    if (!satoshis) this.addOutput({ lockingScript: new LockingScript(), change: true })
+    if (typeof satoshis === 'undefined') this.addOutput({ lockingScript: new LockingScript(), change: true })
+    if (satoshis <= 0) throw new Error('satoshis must be a positive number')
     this.addOutput({
       lockingScript,
       satoshis
