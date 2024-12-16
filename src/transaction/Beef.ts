@@ -723,7 +723,6 @@ export class Beef {
             const offsetOnRow = leafL.offset >> 1
             if (leafR && leafR.hash && -1 === bump.path[row].findIndex(l => l.offset === offsetOnRow)) {
               // computable leaf is missing... add it.
-              // not handling duplicate leaves, assuming not required to workaround bug at ARC.
               bump.path[row].push({
                 offset: offsetOnRow,
                 // string concatenation puts the right leaf on the left of the left leaf hash :-)
