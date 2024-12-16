@@ -309,9 +309,12 @@ export class Beef {
 
   mergeBeefTx (btx: BeefTx): BeefTx {
     let beefTx = this.findTxid(btx.txid)
-    if (!beefTx && btx.isTxidOnly) { beefTx = this.mergeTxidOnly(btx.txid) } else if (!beefTx || beefTx.isTxidOnly) {
-      if (btx._tx) { beefTx = this.mergeTransaction(btx._tx) } else { beefTx = this.mergeRawTx(btx._rawTx) }
-    }
+    if (btx.isTxidOnly && !beefTx)
+      beefTx = this.mergeTxidOnly(btx.txid)
+    else if (btx._tx && (!beefTx || beefTx.isTxidOnly))
+      beefTx = this.mergeTransaction(btx._tx)
+    else if (btx._rawTx && (!beefTx || beefTx.isTxidOnly))
+      beefTx = this.mergeRawTx(btx._rawTx)
     return beefTx
   }
 
