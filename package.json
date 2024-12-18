@@ -1,6 +1,6 @@
 {
   "name": "@bsv/sdk",
-  "version": "1.2.15",
+  "version": "1.2.17",
   "type": "module",
   "description": "BSV Blockchain Software Development Kit",
   "main": "dist/cjs/mod.js",
@@ -188,7 +188,7 @@
     "build:umd": "webpack --config webpack.config.js",
     "dev": "tsc -b -w",
     "prepublish": "npm run build",
-    "doc": "ts2md --inputFilename=src/script/index.ts --outputFilename=docs/script.md --filenameSubString=script --firstHeadingLevel=1 && ts2md --inputFilename=src/primitives/index.ts --outputFilename=docs/primitives.md --filenameSubString=primitives --firstHeadingLevel=1 && ts2md --inputFilename=src/transaction/index.ts --outputFilename=docs/transaction.md --filenameSubString=transaction --firstHeadingLevel=1 && ts2md --inputFilename=src/messages/index.ts --outputFilename=docs/messages.md --filenameSubString=messages --firstHeadingLevel=1 && ts2md --inputFilename=src/compat/index.ts --outputFilename=docs/compat.md --filenameSubString=compat --firstHeadingLevel=1 && ts2md --inputFilename=src/wallet/index.ts --outputFilename=docs/wallet.md --filenameSubString=wallet --firstHeadingLevel=1 && ts2md --inputFilename=src/totp/index.ts --outputFilename=docs/totp.md --filenameSubString=totp --firstHeadingLevel=1 && ts2md --inputFilename=src/overlay-tools/index.ts --outputFilename=docs/overlay-tools.md --filenameSubString=overlay-tools --firstHeadingLevel=1"
+    "doc": "ts2md --inputFilename=src/script/index.ts --outputFilename=docs/script.md --filenameSubString=script --firstHeadingLevel=1 && ts2md --inputFilename=src/primitives/index.ts --outputFilename=docs/primitives.md --filenameSubString=primitives --firstHeadingLevel=1 && ts2md --inputFilename=src/transaction/index.ts --outputFilename=docs/transaction.md --filenameSubString=transaction --firstHeadingLevel=1 && ts2md --inputFilename=src/messages/index.ts --outputFilename=docs/messages.md --filenameSubString=messages --firstHeadingLevel=1 && ts2md --inputFilename=src/compat/index.ts --outputFilename=docs/compat.md --filenameSubString=compat --firstHeadingLevel=1 && ts2md --inputFilename=src/wallet/index.ts --outputFilename=docs/wallet.md --filenameSubString=wallet --firstHeadingLevel=1 && ts2md --inputFilename=src/wallet/substrates/index.ts --outputFilename=docs/wallet-substrates.md --filenameSubString=wallet/substrates --firstHeadingLevel=1 && ts2md --inputFilename=src/totp/index.ts --outputFilename=docs/totp.md --filenameSubString=totp --firstHeadingLevel=1 && ts2md --inputFilename=src/overlay-tools/index.ts --outputFilename=docs/overlay-tools.md --filenameSubString=overlay-tools --firstHeadingLevel=1"
   },
   "repository": {
     "type": "git",

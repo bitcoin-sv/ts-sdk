@@ -50,7 +50,7 @@ export default class MerklePath {
     return MerklePath.fromBinary(toArray(hex, 'hex'))
   }
 
-  static fromReader (reader: Reader): MerklePath {
+  static fromReader (reader: Reader, legalOffsetsOnly: boolean = true): MerklePath {
     const blockHeight = reader.readVarIntNum()
     const treeHeight = reader.readUInt8()
     const path = Array(treeHeight).fill(0).map(() => ([]))
@@ -79,7 +79,7 @@ export default class MerklePath {
       }
       path[level].sort((a, b) => a.offset - b.offset)
     }
-    return new MerklePath(blockHeight, path)
+    return new MerklePath(blockHeight, path, legalOffsetsOnly)
   }
 
   /**
@@ -114,7 +114,7 @@ export default class MerklePath {
     hash?: string
     txid?: boolean
     duplicate?: boolean
-  }>>) {
+  }>>, legalOffsetsOnly: boolean = true) {
     this.blockHeight = blockHeight
     this.path = path
 
@@ -135,7 +135,7 @@ export default class MerklePath {
             }
           }
         } else {
-          if (!legalOffsets[height].has(leaf.offset)) {
+          if (legalOffsetsOnly && !legalOffsets[height].has(leaf.offset)) {
             throw new Error(`Invalid offset: ${leaf.offset}, at height: ${height}, with legal offsets: ${Array.from(legalOffsets[height]).join(', ')}`)
           }
         }
