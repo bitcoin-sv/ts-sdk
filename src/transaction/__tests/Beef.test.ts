@@ -4,13 +4,17 @@ import Beef from "../../../dist/cjs/src/transaction/Beef"
 import BeefParty from "../../../dist/cjs/src/transaction/BeefParty"
 import { BEEF_MAGIC, BEEF_MAGIC_V2 } from "../../../dist/cjs/src/transaction/Beef"
 import Transaction from "../../../dist/cjs/src/transaction/Transaction"
+import { fromBase58 } from '../../../dist/cjs/src/primitives/utils'
 
 // The following imports allow full type checking by the VsCode editor, but tests will fail to run:
-//import BeefTx from '../BeefTx'
-//import Beef from '../Beef'
-//import BeefParty from "../BeefParty"
-//import { BEEF_MAGIC, BEEF_MAGIC_V2 } from "../Beef"
-//import Transaction from "../Transaction"
+/*
+import BeefTx from '../BeefTx'
+import Beef from '../Beef'
+import BeefParty from "../BeefParty"
+import { BEEF_MAGIC, BEEF_MAGIC_V2 } from "../Beef"
+import Transaction from "../Transaction"
+import { fromBase58 } from "../../primitives/utils"
+*/
 
 describe('Beef tests', () => {
     jest.setTimeout(99999999)
@@ -323,7 +327,22 @@ describe('Beef tests', () => {
         expect(beef.txs[1].txid).toBe('a')
       }
     })
+
+    test('10_deserialize beef with extra leaves', async () => {
+      const b58Beef = b58Beef_10
+
+      const beef = Beef.fromBinary(fromBase58(b58Beef))
+      expect(beef.verifyValid().valid).toBe(true)
+      const abeef = beef.toBinaryAtomic(beef.txs[beef.txs.length -1].txid)
+      const pbeef = Beef.fromBinary(abeef)
+      pbeef.addComputedLeaves();
+      const pbeefBinary = pbeef.toBinary();
+      expect(pbeefBinary).toBeTruthy()
+      expect(pbeef.verifyValid().valid).toBe(true)
+    })
 })
+
+const b58Beef_10 = 'gno9MC7VXii1KoCkc2nsVyYJpqzN3dhBzYATETJcys62emMKfpBof4R7GozwYEaSapUtnNvqQ57aaYYjm3U2dv9eUJ1sV46boHkQgppYmAz9YH8FdZduV8aJayPViaKcyPmbDhEw6UW8TM5iFZLXNs7HBnJHUKCeTdNK4FUEL7vAugxAV9WUUZ43BZjJk2SmSeps9TCXjt1Ci9fKWp3d9QSoYvTpxwzyUFHjRKtbUgwq55ZfkBp5bV2Bpz9qSuKywKewW7Hh4S1nCUScwwzpKDozb3zic1V9p2k8rQxoPsRxjUJ8bjhNDdsN8d7KukFuc3n47fXzdWttvnxwsujLJRGnQbgJuknQqx3KLf5kJXHzwjG6TzigZk2t24qeB6d3hbYiaDr2fFkUJBL3tukTHhfNkQYRXuz3kucVDzvejHyqJaF51mXG8BjMN5aQj91ZJXCaPVqkMWCzmvyaqmXMdRiJdSAynhXbQK91xf6RwdNhz1tg5f9B6oJJMhsi9UYSVymmax8VLKD9AKzBCBDcfyD83m3jyS1VgKGZn3SkQmr6bsoWq88L3GsMnnmYUGogvdAYarTqg3pzkjCMxHzmJBMN6ofnUk8c1sRTXQue7BbyUaN5uZu3KW6CmFsEfpuqVvnqFW93TU1jrPP2S8yz8AexAnARPCKE8Yz7RfVaT6RCavwQKL3u5iookwRWEZXW1QWmM37yJWHD87SjVynyg327a1CLwcBxmE2CB48QeNVGyQki4CTQMqw2o8TMhDPJej1g68oniAjBcxBLSCs7KGvK3k7AfrHbCMULX9CTibYhCjdFjbsbBoocqJpxxcvkMo1fEEiAzZuiBVZQDYktDdTVbhKHvYkW25HcYX75NJrpNAhm7AjFeKLzEVxqAQkMfvTufpESNRZF4kQqg2Rg8h2ajcKTd5cpEPwXCrZLHm4EaZEmZVbg3QNfGhn7BJu1bHMtLqPD4y8eJxm2uGrW6saf6qKYmmu64F8A667NbD4yskPRQ1S863VzwGpxxmgLc1Ta3R46jEqsAoRDoZVUaCgBBZG3Yg1CTgi1EVBMXU7qvY4n3h8o2FLCEMWY4KadnV3iD4FbcdCmg4yxBosNAZgbPjhgGjCimjh4YsLd9zymGLmivmz2ZBg5m3xaiXT9NN81X9C1JUujd'
 
 const txs: string[] = [
     // 0

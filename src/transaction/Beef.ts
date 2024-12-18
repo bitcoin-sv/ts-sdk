@@ -490,7 +490,7 @@ export class Beef {
     const beef = new Beef(version === BEEF_MAGIC_V2 ? 'V2' : undefined)
     const bumpsLength = br.readVarIntNum()
     for (let i = 0; i < bumpsLength; i++) {
-      const bump = MerklePath.fromReader(br)
+      const bump = MerklePath.fromReader(br, false)
       beef.bumps.push(bump)
     }
     const txsLength = br.readVarIntNum()
