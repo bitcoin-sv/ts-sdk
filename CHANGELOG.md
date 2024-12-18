@@ -13,16 +13,7 @@ All notable changes to this project will be documented in this file. The format 
     - [Removed](#removed)
     - [Fixed](#fixed)
     - [Security](#security)
-  - [\[1.2.14\]](#1214---2024-12-14)
-    - [Added](#1214-added)
-  - [\[1.2.13\]](#1213---2024-12-13)
-    - [Added](#1213-added)
-    - [Fixed](#1213-fixed)
-  - [\[1.2.12\]](#1212---2024-12-12)
-    - [Fixed](#1212-fixed)
-  - [\[1.2.11\]](#1211---2024-12-10)
-    - [Fixed](#1211-fixed)
-  - [\[1.2.10\]](#1210)
+  - [\[1.2.16\] - 2024-12-18](#1216---2024-12-18)
     - [Added](#added-1)
     - [Fixed](#fixed-1)
   - [\[1.2.15\] - 2024-12-16](#1215---2024-12-16)
@@ -128,16 +119,18 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-## [1.2.16]
+## [1.2.16] - 2024-12-18
 
 ### Added
 
 Beef addComputedLeaves
+MerklePath.fromReader and MerklePath constructor legalOffsetsOnly optional argument
 
 ### Fixed
 
 Beef toBinaryAtomic now prunes transactions newer than target txid.
 Beef mergeBeefTx error if both isTxidOnly
+Bug [#162](https://github.com/bitcoin-sv/ts-sdk/issues/162)
 
 ---
 
