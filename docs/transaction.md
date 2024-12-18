@@ -1227,14 +1227,14 @@ export default class MerklePath {
         duplicate?: boolean;
     }>>;
     static fromHex(hex: string): MerklePath 
-    static fromReader(reader: Reader): MerklePath 
+    static fromReader(reader: Reader, legalOffsetsOnly: boolean = true): MerklePath 
     static fromBinary(bump: number[]): MerklePath 
     constructor(blockHeight: number, path: Array<Array<{
         offset: number;
         hash?: string;
         txid?: boolean;
         duplicate?: boolean;
-    }>>) 
+    }>>, legalOffsetsOnly: boolean = true) 
     toBinary(): number[] 
     toHex(): string 
     computeRoot(txid?: string): string 
