@@ -1,8 +1,7 @@
 // The following imports allow flag a large number type checking errors by the VsCode editor due to missing type information:
 import BeefTx from "../../../dist/cjs/src/transaction/BeefTx"
-import Beef from "../../../dist/cjs/src/transaction/Beef"
 import BeefParty from "../../../dist/cjs/src/transaction/BeefParty"
-import { BEEF_MAGIC, BEEF_MAGIC_V2 } from "../../../dist/cjs/src/transaction/Beef"
+import Beef, { BEEF_MAGIC, BEEF_MAGIC_V2 } from "../../../dist/cjs/src/transaction/Beef"
 import Transaction from "../../../dist/cjs/src/transaction/Transaction"
 import { fromBase58 } from '../../../dist/cjs/src/primitives/utils'
 
