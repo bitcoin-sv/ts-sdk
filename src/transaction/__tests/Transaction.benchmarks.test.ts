@@ -42,7 +42,7 @@ describe('Transaction Verification Benchmark', () => {
         }
 
         // Build the chain
-        for (let i = 0; i < depth; i++) {
+        for (let i = 1; i < depth + 1; i++) {
             const newTx = new Transaction()
             newTx.addInput({
                 sourceTransaction: tx,
@@ -52,7 +52,7 @@ describe('Transaction Verification Benchmark', () => {
             })
             newTx.addOutput({
                 lockingScript: p2pkh.lock(publicKeyHash),
-                satoshis: 100000 - 1000 * (i + 1)
+                satoshis: 100000 - (i * 10)
             })
             await newTx.sign()
             tx = newTx

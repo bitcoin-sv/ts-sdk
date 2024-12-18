@@ -135,6 +135,7 @@ This interface defines a standard method for broadcasting transactions.
 ```ts
 export interface Broadcaster {
     broadcast: (transaction: Transaction) => Promise<BroadcastResponse | BroadcastFailure>;
+    broadcastMany?: (txs: Transaction[]) => Promise<object[]>;
 }
 ```
 
@@ -1229,6 +1230,7 @@ export default class MerklePath {
     static fromHex(hex: string): MerklePath 
     static fromReader(reader: Reader, legalOffsetsOnly: boolean = true): MerklePath 
     static fromBinary(bump: number[]): MerklePath 
+    static fromCoinbaseTxidAndHeight(txid: string, height: number): MerklePath 
     constructor(blockHeight: number, path: Array<Array<{
         offset: number;
         hash?: string;
@@ -1318,6 +1320,24 @@ Argument Details
 
 + **bump**
   + The binary array representation of the Merkle Path.
+
+#### Method fromCoinbaseTxidAndHeight
+
+```ts
+static fromCoinbaseTxidAndHeight(txid: string, height: number): MerklePath 
+```
+See also: [MerklePath](#class-merklepath)
+
+Returns
+
+- A new MerklePath instance which assumes the tx is in a block with no other transactions.
+
+Argument Details
+
++ **txid**
+  + The coinbase txid.
++ **height**
+  + The height of the block.
 
 #### Method fromHex
 
@@ -1515,6 +1535,7 @@ export default class Transaction {
     constructor(version: number = 1, inputs: TransactionInput[] = [], outputs: TransactionOutput[] = [], lockTime: number = 0, metadata: Record<string, any> = {}, merklePath?: MerklePath) 
     addInput(input: TransactionInput): void 
     addOutput(output: TransactionOutput): void 
+    addP2PKHOutput(address: number[] | string, satoshis?: number): void 
     updateMetadata(metadata: Record<string, any>): void 
     async fee(modelOrFee: FeeModel | number = new SatoshisPerKilobyte(10), changeDistribution: "equal" | "random" = "equal"): Promise<void> 
     getFee(): number 
@@ -1573,6 +1594,21 @@ Argument Details
 
 + **output**
   + The TransactionOutput object to add to the transaction.
+
+#### Method addP2PKHOutput
+
+Adds a new P2PKH output to the transaction.
+
+```ts
+addP2PKHOutput(address: number[] | string, satoshis?: number): void 
+```
+
+Argument Details
+
++ **address**
+  + The P2PKH address of the output.
++ **satoshis**
+  + The number of satoshis to send to the address - if not provided, the output is considered a change output.
 
 #### Method broadcast
 

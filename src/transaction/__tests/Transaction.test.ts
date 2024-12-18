@@ -661,6 +661,15 @@ describe('Transaction', () => {
       const verified = await tx.verify("scripts only")
       expect(verified).toBe(true)
     })
+
+    it('Verifies tx scripts only when our input has no MerklePath.', async () => {
+      const sourceTransaction = Transaction.fromHex('01000000013834506e4af751dc3a0d73e9bdd067709ade5248860967fb3eb72854be6011dc020000006b4830450221008abf2ce1afbcc3c4895265b0966ac69e2275fb35a738f9873b5416cd3bb68cc102202c906f9771d2d6868f81a34d6a3af4cd7de070969286db7097c5e0f3a009b638412102f6a81c442dcd903c7808a75abde9217268bb70417ad538c18fb597b4c553c354ffffffff0301000000000000007c21039bf52152665699e24c1018bf5b48e575de316f844962a79db32b93b7e328bf71ac1062656e63686d61726b546f6b656e5f36463044022034ca3cc49163e4d5bc24f41c5ea4631efd4ae7c243f904c90e1db6e6a55e8f0e02206bb031baca2fc6d64da5ad722ce2e07137718e5e58092e5ecf54e52fcdd664ab6dc8000000000000001976a91470763a553d615a8144fa0889a0e1f93d1d8da8b088acaf430000000000001976a9145aa12f9be0121eee54e7331d8f995fe4dded72f588ac00000000')
+      const tx = Transaction.fromHex('01000000015c22e8d34a95a761a0685b8b5a99a0845e9f03d87d5716a7351d08939db5cd92020000006a47304402205101f2bdc40098cbde1a270071a5bfdd5a6fbefc8a38a8b4a1adaca0a6ff55e702200ec5c0a57cb65dfc6aa22e6856bb4c62b8987a7b9fa32cb601c94b579ba67d83412103c8be6b217fc55939851e28239fbbf731f997e026ad344aa9d4b739181fe96743ffffffff0301000000000000007c21039bf52152665699e24c1018bf5b48e575de316f844962a79db32b93b7e328bf71ac1062656e63686d61726b546f6b656e5f374630440220026808e9453f75ca1fc3c7bb0f7be1efaca5cea6b1eda96ab7db56c519b6793202207d1fa5e7d54254d2142256947f93a061781280a6ed2464052470633a7c888d1f6dc8000000000000001976a91428bb6f207ac8f4b7f6c1c5914e143a6165586b2488ace5420000000000001976a914197cbde77abbcb985ca60a85c2988b2ac32c541a88ac00000000')
+      sourceTransaction.merklePath = { assumeValid: true } // can be any object.
+      tx.inputs[0].sourceTransaction = sourceTransaction
+      const verified = await tx.verify('scripts only', undefined)
+      expect(verified).toBe(true)
+    })
   })
 
   describe('vectors: a 1mb transaction', () => {
@@ -962,6 +971,50 @@ describe('Transaction', () => {
       expect(() => {
         Transaction.fromBEEF(beefData, '00'.repeat(32))
       }).toThrowError('Transaction with TXID 0000000000000000000000000000000000000000000000000000000000000000 not found in BEEF data.')
+    })
+  })
+
+  describe('addP2PKHOutput', () => {
+    it('should create an output on the current transaction using an address hash or string', async () => {
+      const privateKey = PrivateKey.fromRandom()
+      const lockingScript = new P2PKH().lock(privateKey.toAddress())
+      const tx = new Transaction()
+      tx.addInput({
+        sourceTXID: '00'.repeat(32),
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: new P2PKH().unlock(privateKey),
+      })
+      tx.addP2PKHOutput(privateKey.toAddress(), 10000)
+      expect(tx.outputs.length).toEqual(1)
+      expect(tx.outputs[0].satoshis).toEqual(10000)
+      expect(tx.outputs[0].lockingScript.toHex() === lockingScript.toHex()).toBeTruthy()
+    })
+    it('should error is the address is non base58', async () => {
+      const tx = new Transaction()    
+      expect(() => tx.addP2PKHOutput('A small chicken', 10000)).toThrow("Invalid base58 character ")
+    })
+    it('should error if the address is incorrectly copied', async () => {
+      const tx = new Transaction()
+      expect(() => tx.addP2PKHOutput('14afWk1jLH9Uwi2mC9C5ehrsvcFxTLYDp', 10000)).toThrow("Invalid checksum")
+    })
+    it('should error if the address is a hash of wrong length', async () => {
+      const tx = new Transaction()
+      const address = [1,2,3,4,5]
+      expect(() => tx.addP2PKHOutput(address, 10000)).toThrow("P2PKH hash length must be 20 bytes")
+    })
+    it('should set the output to a change output if the satoshi value is not given', async () => {
+      const tx = new Transaction()
+      tx.addP2PKHOutput('18E63MgXH43KBb288ETM8u91J2cqdGNEmg')
+      expect(tx.outputs[0].change).toBeTruthy()
+      expect(tx.outputs[0].satoshis).toBeUndefined()
+    })
+    it('throw error when satoshi value is negative', async () => {
+      const tx = new Transaction()
+      expect(() => tx.addP2PKHOutput('18E63MgXH43KBb288ETM8u91J2cqdGNEmg', -1000)).toThrow('satoshis must be a positive integer or zero')
+    })
+    it('throw error when output does not set satoshi value', async () => {
+      const tx = new Transaction()
+      expect(() => tx.addOutput({ lockingScript: Script.fromASM('OP_TRUE') })).toThrow('either satoshis must be defined or change must be set to true')
     })
   })
 })

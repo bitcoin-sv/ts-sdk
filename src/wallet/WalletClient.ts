@@ -3,6 +3,7 @@ import WindowCWISubstrate from './substrates/window.CWI.js'
 import XDMSubstrate from './substrates/XDM.js'
 import WalletWireTransceiver from './substrates/WalletWireTransceiver.js'
 import HTTPWalletWire from './substrates/HTTPWalletWire.js'
+import HTTPWalletJSON from './substrates/HTTPWalletJSON.js'
 
 const MAX_XDM_RESPONSE_WAIT = 200
 
@@ -12,10 +13,11 @@ const MAX_XDM_RESPONSE_WAIT = 200
 export default class WalletClient implements Wallet {
   public substrate: 'auto' | Wallet
   originator?: OriginatorDomainNameStringUnder250Bytes
-  constructor (substrate: 'auto' | 'Cicada' | 'XDM' | 'window.CWI' | Wallet = 'auto', originator?: OriginatorDomainNameStringUnder250Bytes) {
+  constructor (substrate: 'auto' | 'Cicada' | 'XDM' | 'window.CWI' | 'json-api' | Wallet = 'auto', originator?: OriginatorDomainNameStringUnder250Bytes) {
     if (substrate === 'Cicada') substrate = new WalletWireTransceiver(new HTTPWalletWire(originator))
     if (substrate === 'window.CWI') substrate = new WindowCWISubstrate()
     if (substrate === 'XDM') substrate = new XDMSubstrate()
+    if (substrate === 'json-api') substrate = new HTTPWalletJSON(originator)
     this.substrate = substrate
     this.originator = originator
   }
@@ -54,7 +56,13 @@ export default class WalletClient implements Wallet {
           await checkSub()
           this.substrate = sub
         } catch (e) {
-          throw new Error('No wallet available over any communication substrate. Install a BSV wallet today!')
+          try {
+            sub = new HTTPWalletJSON(this.originator)
+            await checkSub()
+            this.substrate = sub
+          } catch (e) {
+            throw new Error('No wallet available over any communication substrate. Install a BSV wallet today!')
+          }
         }
       }
     }

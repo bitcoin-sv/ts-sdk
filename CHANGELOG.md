@@ -13,14 +13,32 @@ All notable changes to this project will be documented in this file. The format 
     - [Removed](#removed)
     - [Fixed](#fixed)
     - [Security](#security)
-  - [\[1.2.16\]](#1216)
-    - [Fixed](#fixed-1)
-  - [\[1.2.15\]](#1215)
+  - [\[1.2.14\]](#1214---2024-12-14)
+    - [Added](#1214-added)
+  - [\[1.2.13\]](#1213---2024-12-13)
+    - [Added](#1213-added)
+    - [Fixed](#1213-fixed)
+  - [\[1.2.12\]](#1212---2024-12-12)
+    - [Fixed](#1212-fixed)
+  - [\[1.2.11\]](#1211---2024-12-10)
+    - [Fixed](#1211-fixed)
+  - [\[1.2.10\]](#1210)
     - [Added](#added-1)
-    - [Fixed](#fixed-2)
+    - [Fixed](#fixed-1)
+  - [\[1.2.15\] - 2024-12-16](#1215---2024-12-16)
+    - [\[1.2.15\] Added](#1215-added)
+  - [\[1.2.14\] - 2024-12-14](#1214---2024-12-14)
+    - [\[1.2.14\] Added](#1214-added)
+  - [\[1.2.13\] - 2024-12-13](#1213---2024-12-13)
+    - [\[1.2.13\] Added](#1213-added)
+    - [\[1.2.13\] Fixed](#1213-fixed)
+  - [\[1.2.12\] - 2024-12-12](#1212---2024-12-12)
+    - [\[1.2.12\] Fixed](#1212-fixed)
+  - [\[1.2.11\] - 2024-12-10](#1211---2024-12-10)
+    - [\[1.2.11\] Fixed](#1211-fixed)
   - [\[1.2.10\]](#1210)
     - [Added](#added-2)
-    - [Fixed](#fixed-3)
+    - [Fixed](#fixed-2)
     - [Security](#security-1)
   - [\[1.2.9\] - 2024-12-06](#129---2024-12-06)
     - [\[1.2.9\] Added](#129-added)
@@ -45,16 +63,16 @@ All notable changes to this project will be documented in this file. The format 
     - [\[1.2.0\] Added](#120-added)
   - [\[1.1.33\] - 2024-11-22](#1133---2024-11-22)
     - [Added](#added-3)
-    - [Fixed](#fixed-4)
+    - [Fixed](#fixed-3)
   - [\[1.1.32\] - 2024-11-22](#1132---2024-11-22)
     - [Added](#added-4)
-    - [Fixed](#fixed-5)
+    - [Fixed](#fixed-4)
     - [Removed](#removed-1)
   - [\[1.1.30\] - 2024-11-02](#1130---2024-11-02)
     - [Added](#added-5)
     - [Changed](#changed-1)
   - [\[1.1.29\] - 2024-10-23](#1129---2024-10-23)
-    - [Fixed](#fixed-6)
+    - [Fixed](#fixed-5)
   - [\[1.1.28\] - 2024-10-23](#1128---2024-10-23)
     - [Added](#added-6)
   - [\[1.1.26\] - 2024-10-22](#1126---2024-10-22)
@@ -62,7 +80,7 @@ All notable changes to this project will be documented in this file. The format 
   - [\[1.1.25\] - 2024-10-21](#1125---2024-10-21)
     - [Added](#added-8)
   - [\[1.1.24\] - 2024-10-04](#1124---2024-10-04)
-    - [Fixed](#fixed-7)
+    - [Fixed](#fixed-6)
   - [\[1.1.22\] - 2024-09-02](#1122---2024-09-02)
     - [Added](#added-9)
   - [\[1.1.21\] - 2024-09-02](#1121---2024-09-02)
@@ -73,22 +91,22 @@ All notable changes to this project will be documented in this file. The format 
   - [\[1.1.14\] - 2024-07-30](#1114---2024-07-30)
     - [Added](#added-12)
   - [\[1.1.13\] - 2024-07-19](#1113---2024-07-19)
-    - [Fixed](#fixed-8)
+    - [Fixed](#fixed-7)
   - [\[1.1.10\] - 2024-06-28](#1110---2024-06-28)
-    - [Fixed](#fixed-9)
+    - [Fixed](#fixed-8)
   - [\[1.1.8\] - 2024-06-19](#118---2024-06-19)
     - [Added](#added-13)
   - [\[1.1.6\] - 2024-06-12](#116---2024-06-12)
     - [Added](#added-14)
   - [\[1.1.5\] - 2024-06-11](#115---2024-06-11)
-    - [Fixed](#fixed-10)
+    - [Fixed](#fixed-9)
   - [\[1.1.4\] - 2024-05-10](#114---2024-05-10)
     - [Added](#added-15)
     - [Changed](#changed-3)
   - [\[1.1.0\] - 2024-05-06](#110---2024-05-06)
     - [Added](#added-16)
     - [Removed](#removed-2)
-    - [Fixed](#fixed-11)
+    - [Fixed](#fixed-10)
     - [New Contributors](#new-contributors)
   - [\[1.0.0\] - 2024-02-10](#100---2024-02-10)
     - [Added](#added-17)
@@ -112,14 +130,6 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [1.2.16]
 
-### Fixed
-
-Beef mergeBeefTx error if both isTxidOnly
-
----
-
-## [1.2.15]
-
 ### Added
 
 Beef addComputedLeaves
@@ -127,8 +137,52 @@ Beef addComputedLeaves
 ### Fixed
 
 Beef toBinaryAtomic now prunes transactions newer than target txid.
+Beef mergeBeefTx error if both isTxidOnly
 
 ---
+
+## [1.2.15] - 2024-12-16
+
+### [1.2.15] Added
+- A helper function for most commonly used output type. `tx.addP2PKHOutput(address, satoshis)`
+- Make sure to check the provided hash is 20 bytes.
+
+---
+
+## [1.2.14] - 2024-12-14
+
+### [1.2.14] Added
+- fromCoinbaseTxidAndHeight method to the MerklePath class for that special case
+- added test demonstrating how to validate scripts only for one tx even when you don't have a merkle path for the previous tx.
+  ```js
+  // merklePath just has to be set to any object.
+  sourceTransaction.merklePath = { assumeValid: true }
+  tx.inputs[0].sourceTransaction = sourceTransaction
+  await tx.verify('scripts only')
+  ```
+
+---
+
+## [1.2.13] - 2024-12-13
+
+### [1.2.13] Added
+- JSON HTTP substrate, with corresponding swagger-ui documentation.
+- Example args and responses to the swagger-ui
+
+### [1.2.13] Fixed
+- PrivateKey test linter errors
+
+---
+
+## [1.2.12] - 2024-12-12
+### [1.2.12] Fixed
+
+- Added optional broadcastMany to Broadcaster interface.
+
+## [1.2.11] - 2024-12-10
+### [1.2.11] Fixed
+
+- Added a fix to ensure PrivateKeys as hex are always 64 chars in length ensuring 256 bit keys.
 
 ## [1.2.10]
 

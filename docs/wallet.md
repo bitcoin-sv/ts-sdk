@@ -1294,6 +1294,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | |
 | --- |
 | [CachedKeyDeriver](#class-cachedkeyderiver) |
+| [HTTPWalletJSON](#class-httpwalletjson) |
 | [HTTPWalletWire](#class-httpwalletwire) |
 | [KeyDeriver](#class-keyderiver) |
 | [ProtoWallet](#class-protowallet) |
@@ -1497,6 +1498,230 @@ Argument Details
   + The key identifier.
 
 </details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
+### Class: HTTPWalletJSON
+
+```ts
+export default class HTTPWalletJSON implements Wallet {
+    baseUrl: string;
+    httpClient: typeof fetch;
+    originator: OriginatorDomainNameStringUnder250Bytes | undefined;
+    api: (call: string, args: any) => Promise<any>;
+    constructor(originator: OriginatorDomainNameStringUnder250Bytes | undefined, baseUrl: string = "http://localhost:3321", httpClient = fetch) 
+    async createAction(args: CreateActionArgs): Promise<CreateActionResult> 
+    async signAction(args: SignActionArgs): Promise<SignActionResult> 
+    async abortAction(args: {
+        reference: Base64String;
+    }): Promise<{
+        aborted: true;
+    }> 
+    async listActions(args: ListActionsArgs): Promise<ListActionsResult> 
+    async internalizeAction(args: InternalizeActionArgs): Promise<{
+        accepted: true;
+    }> 
+    async listOutputs(args: ListOutputsArgs): Promise<ListOutputsResult> 
+    async relinquishOutput(args: {
+        basket: BasketStringUnder300Bytes;
+        output: OutpointString;
+    }): Promise<{
+        relinquished: true;
+    }> 
+    async getPublicKey(args: {
+        seekPermission?: BooleanDefaultTrue;
+        identityKey?: true;
+        protocolID?: [
+            SecurityLevel,
+            ProtocolString5To400Bytes
+        ];
+        keyID?: KeyIDStringUnder800Bytes;
+        privileged?: BooleanDefaultFalse;
+        privilegedReason?: DescriptionString5to50Bytes;
+        counterparty?: PubKeyHex | "self" | "anyone";
+        forSelf?: BooleanDefaultFalse;
+    }): Promise<{
+        publicKey: PubKeyHex;
+    }> 
+    async revealCounterpartyKeyLinkage(args: {
+        counterparty: PubKeyHex;
+        verifier: PubKeyHex;
+        privilegedReason?: DescriptionString5to50Bytes;
+        privileged?: BooleanDefaultFalse;
+    }): Promise<{
+        prover: PubKeyHex;
+        verifier: PubKeyHex;
+        counterparty: PubKeyHex;
+        revelationTime: ISOTimestampString;
+        encryptedLinkage: Byte[];
+        encryptedLinkageProof: number[];
+    }> 
+    async revealSpecificKeyLinkage(args: {
+        counterparty: PubKeyHex;
+        verifier: PubKeyHex;
+        protocolID: [
+            SecurityLevel,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
+        privileged?: BooleanDefaultFalse;
+    }): Promise<{
+        prover: PubKeyHex;
+        verifier: PubKeyHex;
+        counterparty: PubKeyHex;
+        protocolID: [
+            SecurityLevel,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        encryptedLinkage: Byte[];
+        encryptedLinkageProof: Byte[];
+        proofType: Byte;
+    }> 
+    async encrypt(args: {
+        seekPermission?: BooleanDefaultTrue;
+        plaintext: Byte[];
+        protocolID: [
+            SecurityLevel,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
+        counterparty?: PubKeyHex | "self" | "anyone";
+        privileged?: BooleanDefaultFalse;
+    }): Promise<{
+        ciphertext: Byte[];
+    }> 
+    async decrypt(args: {
+        seekPermission?: BooleanDefaultTrue;
+        ciphertext: Byte[];
+        protocolID: [
+            SecurityLevel,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
+        counterparty?: PubKeyHex | "self" | "anyone";
+        privileged?: BooleanDefaultFalse;
+    }): Promise<{
+        plaintext: Byte[];
+    }> 
+    async createHmac(args: {
+        seekPermission?: BooleanDefaultTrue;
+        data: Byte[];
+        protocolID: [
+            SecurityLevel,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
+        counterparty?: PubKeyHex | "self" | "anyone";
+        privileged?: BooleanDefaultFalse;
+    }): Promise<{
+        hmac: Byte[];
+    }> 
+    async verifyHmac(args: {
+        seekPermission?: BooleanDefaultTrue;
+        data: Byte[];
+        hmac: Byte[];
+        protocolID: [
+            SecurityLevel,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
+        counterparty?: PubKeyHex | "self" | "anyone";
+        privileged?: BooleanDefaultFalse;
+    }): Promise<{
+        valid: true;
+    }> 
+    async createSignature(args: {
+        seekPermission?: BooleanDefaultTrue;
+        data?: Byte[];
+        hashToDirectlySign?: Byte[];
+        protocolID: [
+            SecurityLevel,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
+        counterparty?: PubKeyHex | "self" | "anyone";
+        privileged?: BooleanDefaultFalse;
+    }): Promise<{
+        signature: Byte[];
+    }> 
+    async verifySignature(args: {
+        seekPermission?: BooleanDefaultTrue;
+        data?: Byte[];
+        hashToDirectlyVerify?: Byte[];
+        signature: Byte[];
+        protocolID: [
+            SecurityLevel,
+            ProtocolString5To400Bytes
+        ];
+        keyID: KeyIDStringUnder800Bytes;
+        privilegedReason?: DescriptionString5to50Bytes;
+        counterparty?: PubKeyHex | "self" | "anyone";
+        forSelf?: BooleanDefaultFalse;
+        privileged?: BooleanDefaultFalse;
+    }): Promise<{
+        valid: true;
+    }> 
+    async acquireCertificate(args: AcquireCertificateArgs): Promise<AcquireCertificateResult> 
+    async listCertificates(args: {
+        certifiers: PubKeyHex[];
+        types: Base64String[];
+        limit?: PositiveIntegerDefault10Max10000;
+        offset?: PositiveIntegerOrZero;
+        privileged?: BooleanDefaultFalse;
+        privilegedReason?: DescriptionString5to50Bytes;
+    }): Promise<ListCertificatesResult> 
+    async proveCertificate(args: ProveCertificateArgs): Promise<ProveCertificateResult> 
+    async relinquishCertificate(args: {
+        type: Base64String;
+        serialNumber: Base64String;
+        certifier: PubKeyHex;
+    }): Promise<{
+        relinquished: true;
+    }> 
+    async discoverByIdentityKey(args: {
+        seekPermission?: BooleanDefaultTrue;
+        identityKey: PubKeyHex;
+        limit?: PositiveIntegerDefault10Max10000;
+        offset?: PositiveIntegerOrZero;
+    }): Promise<DiscoverCertificatesResult> 
+    async discoverByAttributes(args: {
+        seekPermission?: BooleanDefaultTrue;
+        attributes: Record<CertificateFieldNameUnder50Bytes, string>;
+        limit?: PositiveIntegerDefault10Max10000;
+        offset?: PositiveIntegerOrZero;
+    }): Promise<DiscoverCertificatesResult> 
+    async isAuthenticated(args: {}): Promise<{
+        authenticated: boolean;
+    }> 
+    async waitForAuthentication(args: {}): Promise<{
+        authenticated: true;
+    }> 
+    async getHeight(args: {}): Promise<{
+        height: PositiveInteger;
+    }> 
+    async getHeaderForHeight(args: {
+        height: PositiveInteger;
+    }): Promise<{
+        header: HexString;
+    }> 
+    async getNetwork(args: {}): Promise<{
+        network: "mainnet" | "testnet";
+    }> 
+    async getVersion(args: {}): Promise<{
+        version: VersionString7To30Bytes;
+    }> 
+}
+```
+
+See also: [AcquireCertificateArgs](#interface-acquirecertificateargs), [AcquireCertificateResult](#interface-acquirecertificateresult), [Base64String](#type-base64string), [BasketStringUnder300Bytes](#type-basketstringunder300bytes), [BooleanDefaultFalse](#type-booleandefaultfalse), [BooleanDefaultTrue](#type-booleandefaulttrue), [Byte](#type-byte), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [CreateActionArgs](#interface-createactionargs), [CreateActionResult](#interface-createactionresult), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [DiscoverCertificatesResult](#interface-discovercertificatesresult), [HexString](#type-hexstring), [ISOTimestampString](#type-isotimestampstring), [InternalizeActionArgs](#interface-internalizeactionargs), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [ListActionsArgs](#interface-listactionsargs), [ListActionsResult](#interface-listactionsresult), [ListCertificatesResult](#interface-listcertificatesresult), [ListOutputsArgs](#interface-listoutputsargs), [ListOutputsResult](#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [OutpointString](#type-outpointstring), [PositiveInteger](#type-positiveinteger), [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000), [PositiveIntegerOrZero](#type-positiveintegerorzero), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [ProveCertificateArgs](#interface-provecertificateargs), [ProveCertificateResult](#interface-provecertificateresult), [PubKeyHex](#type-pubkeyhex), [SecurityLevel](#type-securitylevel), [SignActionArgs](#interface-signactionargs), [SignActionResult](#interface-signactionresult), [VersionString7To30Bytes](#type-versionstring7to30bytes), [Wallet](#interface-wallet), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -2157,7 +2382,7 @@ The SDK is how applications communicate with wallets over a communications subst
 export default class WalletClient implements Wallet {
     public substrate: "auto" | Wallet;
     originator?: OriginatorDomainNameStringUnder250Bytes;
-    constructor(substrate: "auto" | "Cicada" | "XDM" | "window.CWI" | Wallet = "auto", originator?: OriginatorDomainNameStringUnder250Bytes) 
+    constructor(substrate: "auto" | "Cicada" | "XDM" | "window.CWI" | "json-api" | Wallet = "auto", originator?: OriginatorDomainNameStringUnder250Bytes) 
     async connectToSubstrate() 
     async createAction(args: CreateActionArgs): Promise<CreateActionResult> 
     async signAction(args: SignActionArgs): Promise<SignActionResult> 

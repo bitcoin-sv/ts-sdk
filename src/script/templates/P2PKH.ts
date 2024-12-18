@@ -30,6 +30,7 @@ export default class P2PKH implements ScriptTemplate {
     } else {
       data = pubkeyhash
     }
+    if (data.length !== 20) throw new Error('P2PKH hash length must be 20 bytes')
     return new LockingScript([
       { op: OP.OP_DUP },
       { op: OP.OP_HASH160 },
