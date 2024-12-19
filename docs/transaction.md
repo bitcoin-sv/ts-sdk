@@ -588,10 +588,9 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export class Beef {
     bumps: MerklePath[] = [];
     txs: BeefTx[] = [];
-    version: BeefVersion = undefined;
+    version: number = BEEF_V2;
     atomicTxid: string | undefined = undefined;
-    constructor(version?: BeefVersion) 
-    get magic(): number 
+    constructor(version: number = BEEF_V2) 
     findTxid(txid: string): BeefTx | undefined 
     makeTxidOnly(txid: string): BeefTx | undefined 
     findBump(txid: string): MerklePath | undefined 
@@ -628,7 +627,7 @@ export class Beef {
 }
 ```
 
-See also: [BeefTx](#class-beeftx), [BeefVersion](#type-beefversion), [ChainTracker](#interface-chaintracker), [MerklePath](#class-merklepath), [Reader](#class-reader), [Transaction](#class-transaction), [Writer](#class-writer), [toHex](#variable-tohex), [verify](#variable-verify)
+See also: [BEEF_V2](#variable-beef_v2), [BeefTx](#class-beeftx), [ChainTracker](#interface-chaintracker), [MerklePath](#class-merklepath), [Reader](#class-reader), [Transaction](#class-transaction), [Writer](#class-writer), [toHex](#variable-tohex), [verify](#variable-verify)
 
 <details>
 

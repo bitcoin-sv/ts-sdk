@@ -61,9 +61,9 @@ export default class Transaction {
 
   // Recursive function for adding merkle proofs or input transactions
   private static addPathOrInputs (obj: { pathIndex?: number, tx: Transaction }, transactions: Record<string, {
-    pathIndex?: number;
-    tx: Transaction;
-}>, BUMPs: MerklePath[]): void {
+    pathIndex?: number
+    tx: Transaction
+  }>, BUMPs: MerklePath[]): void {
     if (typeof obj.pathIndex === 'number') {
       const path = BUMPs[obj.pathIndex]
       if (typeof path !== 'object') {
@@ -492,7 +492,7 @@ export default class Transaction {
       }
     }
     const fee = await modelOrFee.computeFee(this)
-    let change = this.calculateChange(fee)
+    const change = this.calculateChange(fee)
     if (change <= 0) {
       this.outputs = this.outputs.filter(output => !output.change)
       return
@@ -500,7 +500,7 @@ export default class Transaction {
     this.distributeChange(change, changeDistribution)
   }
 
-  private calculateChange(fee: number): number {
+  private calculateChange (fee: number): number {
     let change = 0
     for (const input of this.inputs) {
       if (typeof input.sourceTransaction !== 'object') {
@@ -517,7 +517,7 @@ export default class Transaction {
     return change
   }
 
-  private distributeChange(change: number, changeDistribution: 'equal' | 'random'): void {
+  private distributeChange (change: number, changeDistribution: 'equal' | 'random'): void {
     let distributedChange = 0
     const changeOutputs = this.outputs.filter(out => out.change)
     if (changeDistribution === 'random') {
@@ -530,7 +530,7 @@ export default class Transaction {
     }
   }
 
-  private distributeRandomChange(change: number, changeOutputs: TransactionOutput[]): number {
+  private distributeRandomChange (change: number, changeOutputs: TransactionOutput[]): number {
     let distributedChange = 0
     let changeToUse = change
     const benfordNumbers = Array(changeOutputs.length).fill(1)
@@ -548,7 +548,7 @@ export default class Transaction {
     return distributedChange
   }
 
-  private distributeEqualChange(change: number, changeOutputs: TransactionOutput[]): number {
+  private distributeEqualChange (change: number, changeOutputs: TransactionOutput[]): number {
     let distributedChange = 0
     const perOutput = Math.floor(change / changeOutputs.length)
     for (const out of changeOutputs) {
@@ -558,7 +558,7 @@ export default class Transaction {
     return distributedChange
   }
 
-  private benfordNumber(min: number, max: number): number {
+  private benfordNumber (min: number, max: number): number {
     const d = Math.floor(Math.random() * 9) + 1
     return Math.floor(min + (max - min) * Math.log10(1 + 1 / d) / Math.log10(10))
   }

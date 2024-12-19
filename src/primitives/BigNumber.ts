@@ -695,7 +695,7 @@ export default class BigNumber {
     throw new Error('Base should be between 2 and 36')
   }
 
-  private toHexString(padding: number): string {
+  private toHexString (padding: number): string {
     let out = ''
     let off = 0
     let carry = 0
@@ -729,7 +729,7 @@ export default class BigNumber {
     return out
   }
 
-  private toBaseString(base: number, padding: number): string {
+  private toBaseString (base: number, padding: number): string {
     const groupSize = BigNumber.groupSizes[base]
     const groupBase = BigNumber.groupBases[base]
     let out = ''
