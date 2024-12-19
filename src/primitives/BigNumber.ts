@@ -11,7 +11,7 @@ export default class BigNumber {
   /**
    * @privateinitializer
    */
-  static zeros: string[] = [
+  public static readonly zeros: string[] = [
     '',
     '0',
     '00',
@@ -43,7 +43,7 @@ export default class BigNumber {
   /**
    * @privateinitializer
    */
-  static groupSizes: number[] = [
+  static readonly groupSizes: number[] = [
     0, 0,
     25, 16, 12, 11, 10, 9, 8,
     8, 7, 7, 7, 7, 6, 6,
@@ -55,7 +55,7 @@ export default class BigNumber {
   /**
    * @privateinitializer
    */
-  static groupBases: number[] = [
+  static readonly groupBases: number[] = [
     0, 0,
     33554432, 43046721, 16777216, 48828125, 60466176, 40353607, 16777216,
     43046721, 10000000, 19487171, 35831808, 62748517, 7529536, 11390625,
@@ -72,7 +72,7 @@ export default class BigNumber {
    * @example
    * console.log(BigNumber.wordSize);  // output: 26
    */
-  static wordSize: number = 26
+  static readonly wordSize: number = 26
 
   /**
    * Negative flag. Indicates whether the big number is a negative number.
