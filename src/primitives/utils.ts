@@ -21,8 +21,8 @@ export const zero2 = (word: string): string => {
  */
 export const toHex = (msg: number[]): string => {
   let res = ''
-  for (let i = 0; i < msg.length; i++) {
-    res += zero2(msg[i].toString(16))
+  for (const num of msg) {
+    res += zero2(num.toString(16))
   }
   return res
 }
@@ -36,59 +36,63 @@ export const toHex = (msg: number[]): string => {
  * @returns {any[]} - Array representation of the input.
  */
 export const toArray = (msg: any, enc?: 'hex' | 'utf8' | 'base64'): any[] => {
-  // Return a copy if already an array
-  if (Array.isArray(msg)) { return msg.slice() }
+  if (Array.isArray(msg)) return msg.slice()
+  if (!msg) return []
 
-  // Return empty array for falsy values
-  if (!(msg as boolean)) { return [] }
-  const res: any[] = []
-
-  // Convert non-string messages to numbers
   if (typeof msg !== 'string') {
-    for (let i = 0; i < msg.length; i++) { res[i] = msg[i] | 0 }
-    return res
+    return Array.from(msg, (item: any) => item | 0)
   }
 
-  // Handle hexadecimal encoding
-  if (enc === 'hex') {
-    msg = msg.replace(/[^a-z0-9]+/ig, '')
-    if (msg.length % 2 !== 0) { msg = '0' + (msg as string) }
-    for (let i = 0; i < msg.length; i += 2) {
-      res.push(
-        parseInt((msg[i] as string) + (msg[i + 1] as string), 16)
-      )
+  switch (enc) {
+    case 'hex':
+      return hexToArray(msg)
+    case 'base64':
+      return base64ToArray(msg)
+    default:
+      return utf8ToArray(msg)
+  }
+}
+
+const hexToArray = (msg: string): number[] => {
+  msg = msg.replace(/[^a-z0-9]+/ig, '')
+  if (msg.length % 2 !== 0) msg = '0' + msg
+  const res: number[] = []
+  for (let i = 0; i < msg.length; i += 2) {
+    res.push(parseInt(msg[i] + msg[i + 1], 16))
+  }
+  return res
+}
+
+const base64ToArray = (msg: string): number[] => {
+  const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+  const result: number[] = []
+  let currentBit = 0
+  let currentByte = 0
+
+  for (const char of msg.replace(/=+$/, '')) {
+    currentBit = (currentBit << 6) | base64Chars.indexOf(char)
+    currentByte += 6
+
+    if (currentByte >= 8) {
+      currentByte -= 8
+      result.push((currentBit >> currentByte) & 0xFF)
+      currentBit &= (1 << currentByte) - 1
     }
+  }
 
-    // Handle base64
-  } else if (enc === 'base64') {
-    const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-    const result: number[] = []
-    let currentBit: number = 0
-    let currentByte: number = 0
+  return result
+}
 
-    for (const char of msg.replace(/=+$/, '')) {
-      currentBit = (currentBit << 6) | base64Chars.indexOf(char)
-      currentByte += 6
-
-      if (currentByte >= 8) {
-        currentByte -= 8
-        result.push((currentBit >> currentByte) & 0xFF)
-        currentBit &= (1 << currentByte) - 1
-      }
-    }
-
-    return result
-  } else {
-    // Handle UTF-8 encoding
-    for (let i = 0; i < msg.length; i++) {
-      const c = msg.charCodeAt(i)
-      const hi = c >> 8
-      const lo = c & 0xff
-      if (hi as unknown as boolean) {
-        res.push(hi, lo)
-      } else {
-        res.push(lo)
-      }
+const utf8ToArray = (msg: string): number[] => {
+  const res: number[] = []
+  for (let i = 0; i < msg.length; i++) {
+    const c = msg.charCodeAt(i)
+    const hi = c >> 8
+    const lo = c & 0xff
+    if (hi) {
+      res.push(hi, lo)
+    } else {
+      res.push(lo)
     }
   }
   return res
