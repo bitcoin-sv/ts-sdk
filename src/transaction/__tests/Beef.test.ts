@@ -22,6 +22,7 @@ describe('Beef tests', () => {
       isValidRootForHeight: async (root: string, height: number) => {
         switch (height) {
           case 1631619: return root === "b3975a6b69b5ce7fa200649d879f79a11f4d95c054cfe024570be7d60306ecf6"
+          case 875732: return root === "a19c54129ab996c72cda7721b4555b47d11b21e1fe67aa63c59843edb302b6c2"
           default: throw new Error(`unknown height ${height}`)
         }
       }
@@ -261,7 +262,7 @@ describe('Beef tests', () => {
       {
         const beef = Beef.fromString(beefs[0])
         expect(beef.toHex()).toBe(beefs[0])
-        const sr = beef.sortTxs()
+        beef.sortTxs()
         const beefHex = beef.toHex()
         const tx = beef.txs[beef.txs.length - 1].tx!
         expect(tx).toBeTruthy()
@@ -283,7 +284,7 @@ describe('Beef tests', () => {
         const beef = Beef.fromString(beefs[0])
         expect(beef.toHex()).toBe(beefs[0])
         beef.mergeTransaction(Transaction.fromHex(txs[0]))
-        const sr = beef.sortTxs()
+        beef.sortTxs()
         const beefHex = beef.toHex()
         const tx = beef.txs[beef.txs.length - 1].tx!
         expect(tx).toBeTruthy()
@@ -300,8 +301,8 @@ describe('Beef tests', () => {
         const beef = Beef.fromString(beefs[0])
         const tx = Transaction.fromHex(txs[0])
         beef.mergeTransaction(tx)
-        const sr = beef.sortTxs()
-        const log = beef.toLogString()
+        beef.sortTxs()
+        beef.toLogString()
         const atomic = beef.toBinaryAtomic(tx.id('hex'))
         const t2 = Transaction.fromAtomicBEEF(atomic)
         const beef2 = t2.toAtomicBEEF()
@@ -320,7 +321,7 @@ describe('Beef tests', () => {
       {
         const beef = new Beef()
         const atx = beef.mergeTxidOnly('a')
-        const btx = beef.mergeTxidOnly('b')
+        beef.mergeTxidOnly('b')
         atx.inputTxids = ['b']
         beef.sortTxs()
         expect(beef.txs[1].txid).toBe('a')
