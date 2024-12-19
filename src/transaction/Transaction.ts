@@ -90,8 +90,7 @@ export default class Transaction {
         }
         obj.tx.merklePath = path
       } else {
-        for (let i = 0; i < obj.tx.inputs.length; i++) {
-          const input = obj.tx.inputs[i]
+        for (const input of obj.tx.inputs) {
           const sourceObj = transactions[input.sourceTXID]
           if (typeof sourceObj !== 'object') {
             throw new Error(`Reference to unknown TXID in BEEF: ${input.sourceTXID}`)
@@ -181,8 +180,7 @@ export default class Transaction {
         }
         obj.tx.merklePath = path
       } else {
-        for (let i = 0; i < obj.tx.inputs.length; i++) {
-          const input = obj.tx.inputs[i]
+        for (const input of obj.tx.inputs) {
           const sourceObj = transactions[input.sourceTXID]
           if (typeof sourceObj !== 'object') {
             throw new Error(`Reference to unknown TXID in BEEF: ${input.sourceTXID}`)
