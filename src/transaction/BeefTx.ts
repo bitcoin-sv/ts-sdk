@@ -1,7 +1,7 @@
 import { hash256 } from '../primitives/Hash.js'
 import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
 import Transaction from './Transaction.js'
-import { BEEF_MAGIC, BEEF_MAGIC_TXID_ONLY_EXTENSION } from './Beef.js'
+import { BEEF_V1, BEEF_V2, TX_DATA_FORMAT } from './Beef.js'
 
 /**
  * A single bitcoin transaction associated with a `Beef` validity proof set.
@@ -42,20 +42,32 @@ export default class BeefTx {
 
   get txid () {
     if (this._txid) return this._txid
-    if (this._tx) return this._txid = this._tx.id('hex')
-    if (this._rawTx) return this._txid = toHex(hash256(this._rawTx))
+    if (this._tx) {
+      this._txid = this._tx.id('hex')
+      return this._txid
+    }
+    if (this._rawTx) {
+      this._txid = toHex(hash256(this._rawTx))
+      return this._txid
+    }
     throw new Error('Internal')
   }
 
   get tx () {
     if (this._tx) return this._tx
-    if (this._rawTx) return this._tx = Transaction.fromBinary(this._rawTx)
+    if (this._rawTx) {
+      this._tx = Transaction.fromBinary(this._rawTx)
+      return this._tx
+    }
     return undefined
   }
 
   get rawTx () {
     if (this._rawTx) return this._rawTx
-    if (this._tx) return this._rawTx = this._tx.toBinary()
+    if (this._tx) {
+      this._rawTx = this._tx.toBinary()
+      return this._rawTx
+    }
     return undefined
   }
 
@@ -66,21 +78,32 @@ export default class BeefTx {
   constructor (tx: Transaction | number[] | string, bumpIndex?: number) {
     if (typeof tx === 'string') {
       this._txid = tx
+    } else if (Array.isArray(tx)) {
+      this._rawTx = tx
     } else {
-      if (Array.isArray(tx)) {
-        this._rawTx = tx
-      } else {
-        this._tx = tx
-      }
+      this._tx = tx
     }
     this.bumpIndex = bumpIndex
     this.updateInputTxids()
   }
 
+  static fromTx (tx: Transaction, bumpIndex?: number): BeefTx {
+    return new BeefTx(tx, bumpIndex)
+  }
+
+  static fromRawTx (rawTx: number[], bumpIndex?: number): BeefTx {
+    return new BeefTx(rawTx, bumpIndex)
+  }
+
+  static fromTxid (txid: string, bumpIndex?: number): BeefTx {
+    return new BeefTx(txid, bumpIndex)
+  }
+
   private updateInputTxids () {
-    if (this.hasProof || !this.tx)
-    // If we have a proof, or don't have a parsed transaction
-    { this.inputTxids = [] } else {
+    if (this.hasProof || !this.tx) {
+      // If we have a proof, or don't have a parsed transaction
+      this.inputTxids = []
+    } else {
       const inputTxids = {}
       for (const input of this.tx.inputs) { inputTxids[input.sourceTXID] = true }
       this.inputTxids = Object.keys(inputTxids)
@@ -88,65 +111,92 @@ export default class BeefTx {
   }
 
   toWriter (writer: Writer, magic: number): void {
-    if (magic === BEEF_MAGIC) {
-      // V1
-      if (this.isTxidOnly) {
-        // Encode just the txid of a known transaction using the txid
-        writer.writeUInt32LE(BEEF_MAGIC_TXID_ONLY_EXTENSION)
-        writer.writeReverse(toArray(this._txid, 'hex'))
-      } else if (this._rawTx) { writer.write(this._rawTx) } else if (this._tx) { writer.write(this._tx.toBinary()) } else { throw new Error('a valid serialized Transaction is expected') }
-      if (this.bumpIndex === undefined) {
-        writer.writeUInt8(0)
+    const writeByte = bb => {
+      writer.writeUInt8(bb)
+    }
+
+    const writeTxid = () => {
+      writer.writeReverse(toArray(this._txid, 'hex'))
+    }
+
+    const writeTx = () => {
+      if (this._rawTx) {
+        writer.write(this._rawTx)
+      } else if (this._tx) {
+        writer.write(this._tx.toBinary())
       } else {
-        writer.writeUInt8(1)
+        throw new Error('a valid serialized Transaction is expected')
+      }
+    }
+
+    const writeBumpIndex = () => {
+      if (this.bumpIndex === undefined) {
+        writeByte(TX_DATA_FORMAT.RAWTX) // 0
+      } else {
+        writeByte(TX_DATA_FORMAT.RAWTX_AND_BUMP_INDEX) // 1
+        writer.writeVarIntNum(this.bumpIndex) // the index of the associated bump
+      }
+    }
+
+    if (magic === BEEF_V2) {
+      if (this.isTxidOnly) {
+        writeByte(TX_DATA_FORMAT.RAWTX)
+        writeTxid()
+      } else if (this.bumpIndex !== undefined) {
+        writeByte(TX_DATA_FORMAT.RAWTX_AND_BUMP_INDEX)
         writer.writeVarIntNum(this.bumpIndex)
+        writeTx()
+      } else {
+        writeByte(TX_DATA_FORMAT.TXID_ONLY)
+        writeTx()
       }
     } else {
-      // V2
+      // V1 BEEF
+      // TODO: drop support once V2 is widely adopted
       if (this.isTxidOnly) {
-        // Encode just the txid of a known transaction using the txid
-        writer.writeUInt8(2)
-        writer.writeReverse(toArray(this._txid, 'hex'))
+        // TODO: remove once existing systems have migrated
+        // This is for backward compatibility with a vestigial txid-only format
+        writer.writeUInt32LE(TX_DATA_FORMAT.VESTIGIAL_DEPRECATED)
+        writeTxid()
       } else {
-        if (this.bumpIndex === undefined) {
-          writer.writeUInt8(0)
-        } else {
-          writer.writeUInt8(1)
-          writer.writeVarIntNum(this.bumpIndex)
-        }
-        if (this._rawTx) { writer.write(this._rawTx) } else if (this._tx) { writer.write(this._tx.toBinary()) } else { throw new Error('a valid serialized Transaction is expected') }
+        writeTx()
       }
+      writeBumpIndex()
     }
   }
 
   static fromReader (br: Reader, magic: number): BeefTx {
-    let tx: Transaction | number[] | string | undefined
+    let data: Transaction | number[] | string | undefined
     let bumpIndex: number | undefined
-
-    if (magic === BEEF_MAGIC) {
+    let beefTx: BeefTx | undefined
+    if (magic === BEEF_V1) {
       // V1
       const version = br.readUInt32LE()
-      if (version === BEEF_MAGIC_TXID_ONLY_EXTENSION) {
-        // This is the extension to support known transactions
-        tx = toHex(br.readReverse(32))
+      if (version === TX_DATA_FORMAT.VESTIGIAL_DEPRECATED) {
+        // TODO: remove once existing systems have migrated
+        // This is for backward compatibility with a vestigial txid-only format
+        data = toHex(br.readReverse(32))
+        beefTx = BeefTx.fromTxid(data)
       } else {
         br.pos -= 4 // Unread the version...
-        tx = Transaction.fromReader(br)
+        data = Transaction.fromReader(br)
+        bumpIndex = br.readUInt8() ? br.readVarIntNum() : undefined
+        beefTx = BeefTx.fromTx(data, bumpIndex)
       }
-      bumpIndex = br.readUInt8() ? br.readVarIntNum() : undefined
     } else {
       // V2
       const format = br.readUInt8()
-      if (format === 2) {
-        // txid only
-        tx = toHex(br.readReverse(32))
+      if (format === TX_DATA_FORMAT.TXID_ONLY) {
+        beefTx = BeefTx.fromTxid(toHex(br.readReverse(32)))
       } else {
-        if (format === 1) { bumpIndex = br.readVarIntNum() }
-        tx = Transaction.fromReader(br)
+        if (format === TX_DATA_FORMAT.RAWTX_AND_BUMP_INDEX) {
+          bumpIndex = br.readVarIntNum()
+        }
+        data = Transaction.fromReader(br)
+        beefTx = BeefTx.fromTx(data, bumpIndex)
       }
     }
 
-    const beefTx = new BeefTx(tx, bumpIndex)
     return beefTx
   }
 }

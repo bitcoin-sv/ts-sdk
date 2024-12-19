@@ -12,7 +12,7 @@ import Spend from '../script/Spend.js'
 import ChainTracker from './ChainTracker.js'
 import { defaultBroadcaster } from './broadcasters/DefaultBroadcaster.js'
 import { defaultChainTracker } from './chaintrackers/DefaultChainTracker.js'
-import { ATOMIC_BEEF, BEEF_MAGIC } from './Beef.js'
+import { ATOMIC_BEEF, BEEF_V1 } from './Beef.js'
 import P2PKH from '../script/templates/P2PKH.js'
 
 /**
@@ -207,8 +207,8 @@ export default class Transaction {
   private static parseBEEFData (reader: Reader): { transactions: Record<string, { pathIndex?: number, tx: Transaction }>, BUMPs: MerklePath[] } {
     // Read the version
     const version = reader.readUInt32LE()
-    if (version !== BEEF_MAGIC) {
-      throw new Error(`Invalid BEEF version. Expected ${BEEF_MAGIC}, received ${version}.`)
+    if (version !== BEEF_V1) {
+      throw new Error(`Invalid BEEF version. Expected ${BEEF_V1}, received ${version}.`)
     }
 
     // Read the BUMPs
@@ -529,15 +529,10 @@ export default class Transaction {
       }
     }
 
-    if (change <= changeCount) {
+    if (change <= 0) {
       // There is not enough change to distribute among the change outputs.
       // We'll remove all change outputs and leave the extra for the miners.
-      for (let i = 0; i < this.outputs.length; i++) {
-        if (this.outputs[i].change) {
-          this.outputs.splice(i, 1)
-          i--
-        }
-      }
+      this.outputs = this.outputs.filter(output => !output.change)
       return
     }
 
@@ -564,11 +559,8 @@ export default class Transaction {
         changeToUse -= portion
       }
 
-      for (let i = 0; i < this.outputs.length; i++) {
-        if (this.outputs[i].change) {
-          const t = benfordNumbers.shift()
-          this.outputs[i].satoshis = t
-        }
+      for (const output of this.outputs) {
+        if (output.change) output.satoshis = benfordNumbers.shift()
       }
     } else if (changeDistribution === 'equal') {
       const perOutput = Math.floor(change / changeCount)
@@ -923,9 +915,8 @@ export default class Transaction {
    * @throws Error if there are any missing sourceTransactions unless `allowPartial` is true.
    */
   toBEEF (allowPartial?: boolean): number[] {
-    this.outputs.length
     const writer = new Writer()
-    writer.writeUInt32LE(4022206465)
+    writer.writeUInt32LE(BEEF_V1)
     const BUMPs: MerklePath[] = []
     const txs: Array<{ tx: Transaction, pathIndex?: number }> = []
 

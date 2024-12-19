@@ -1,7 +1,7 @@
 // The following imports allow flag a large number type checking errors by the VsCode editor due to missing type information:
 import BeefTx from "../../../dist/cjs/src/transaction/BeefTx"
 import BeefParty from "../../../dist/cjs/src/transaction/BeefParty"
-import Beef, { BEEF_MAGIC, BEEF_MAGIC_V2 } from "../../../dist/cjs/src/transaction/Beef"
+import Beef, { BEEF_V1, BEEF_V2 } from "../../../dist/cjs/src/transaction/Beef"
 import Transaction from "../../../dist/cjs/src/transaction/Transaction"
 import { fromBase58 } from '../../../dist/cjs/src/primitives/utils'
 
@@ -10,7 +10,7 @@ import { fromBase58 } from '../../../dist/cjs/src/primitives/utils'
 import BeefTx from '../BeefTx'
 import Beef from '../Beef'
 import BeefParty from "../BeefParty"
-import { BEEF_MAGIC, BEEF_MAGIC_V2 } from "../Beef"
+import { BEEF_V1, BEEF_V2 } from "../Beef"
 import Transaction from "../Transaction"
 import { fromBase58 } from "../../primitives/utils"
 */
@@ -100,7 +100,7 @@ describe('Beef tests', () => {
         {
           const version = 4290641921
           expect(() => Beef.fromString(beefs[1]))
-          .toThrow(`Serialized BEEF must start with ${BEEF_MAGIC} or ${BEEF_MAGIC_V2} but starts with ${version}`)
+          .toThrow(`Serialized BEEF must start with ${BEEF_V1} or ${BEEF_V2} but starts with ${version}`)
         }
     })
 
