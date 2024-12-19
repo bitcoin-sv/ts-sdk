@@ -511,7 +511,15 @@ export default class Transaction {
       }
     }
     const fee = await modelOrFee.computeFee(this)
-    // change = inputs - fee - non-change outputs
+    let change = this.calculateChange(fee)
+    if (change <= 0) {
+      this.outputs = this.outputs.filter(output => !output.change)
+      return
+    }
+    this.distributeChange(change, changeDistribution)
+  }
+
+  private calculateChange(fee: number): number {
     let change = 0
     for (const input of this.inputs) {
       if (typeof input.sourceTransaction !== 'object') {
@@ -520,61 +528,58 @@ export default class Transaction {
       change += input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
     }
     change -= fee
-    let changeCount = 0
     for (const out of this.outputs) {
       if (!out.change) {
         change -= out.satoshis
-      } else {
-        changeCount++
       }
     }
+    return change
+  }
 
-    if (change <= 0) {
-      // There is not enough change to distribute among the change outputs.
-      // We'll remove all change outputs and leave the extra for the miners.
-      this.outputs = this.outputs.filter(output => !output.change)
-      return
-    }
-
-    // Distribute change among change outputs
+  private distributeChange(change: number, changeDistribution: 'equal' | 'random'): void {
     let distributedChange = 0
+    const changeOutputs = this.outputs.filter(out => out.change)
     if (changeDistribution === 'random') {
-      // Implement Benford's Law distribution for change outputs
-      const changeOutputs = this.outputs.filter(out => out.change)
-      let changeToUse = change
-
-      // Helper function to generate a number approximating Benford's Law
-      const benfordNumber = (min: number, max: number): number => {
-        const d = Math.floor(Math.random() * 9) + 1
-        return Math.floor(min + (max - min) * Math.log10(1 + 1 / d) / Math.log10(10))
-      }
-
-      const benfordNumbers = Array(changeOutputs.length).fill(1)
-      changeToUse -= changeOutputs.length
-      distributedChange += changeOutputs.length
-      for (let i = 0; i < changeOutputs.length - 1; i++) {
-        const portion = benfordNumber(0, changeToUse)
-        benfordNumbers[i] += portion
-        distributedChange += portion
-        changeToUse -= portion
-      }
-
-      for (const output of this.outputs) {
-        if (output.change) output.satoshis = benfordNumbers.shift()
-      }
+      distributedChange = this.distributeRandomChange(change, changeOutputs)
     } else if (changeDistribution === 'equal') {
-      const perOutput = Math.floor(change / changeCount)
-      for (const out of this.outputs) {
-        if (out.change) {
-          distributedChange += perOutput
-          out.satoshis = perOutput
-        }
-      }
+      distributedChange = this.distributeEqualChange(change, changeOutputs)
     }
-    // if there's any remaining change, add it to the last output
     if (distributedChange < change) {
       this.outputs[this.outputs.length - 1].satoshis += (change - distributedChange)
     }
+  }
+
+  private distributeRandomChange(change: number, changeOutputs: TransactionOutput[]): number {
+    let distributedChange = 0
+    let changeToUse = change
+    const benfordNumbers = Array(changeOutputs.length).fill(1)
+    changeToUse -= changeOutputs.length
+    distributedChange += changeOutputs.length
+    for (let i = 0; i < changeOutputs.length - 1; i++) {
+      const portion = this.benfordNumber(0, changeToUse)
+      benfordNumbers[i] += portion
+      distributedChange += portion
+      changeToUse -= portion
+    }
+    for (const output of this.outputs) {
+      if (output.change) output.satoshis = benfordNumbers.shift()
+    }
+    return distributedChange
+  }
+
+  private distributeEqualChange(change: number, changeOutputs: TransactionOutput[]): number {
+    let distributedChange = 0
+    const perOutput = Math.floor(change / changeOutputs.length)
+    for (const out of changeOutputs) {
+      distributedChange += perOutput
+      out.satoshis = perOutput
+    }
+    return distributedChange
+  }
+
+  private benfordNumber(min: number, max: number): number {
+    const d = Math.floor(Math.random() * 9) + 1
+    return Math.floor(min + (max - min) * Math.log10(1 + 1 / d) / Math.log10(10))
   }
 
   /**
