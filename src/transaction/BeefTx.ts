@@ -152,9 +152,9 @@ export default class BeefTx {
       }
     } else {
       // V1 BEEF
-      // TODO: drop support once V2 is widely adopted
+      // NOTE: drop support once V2 is widely adopted
       if (this.isTxidOnly) {
-        // TODO: remove once existing systems have migrated
+        // NOTE: remove once existing systems have migrated
         // This is for backward compatibility with a vestigial txid-only format
         writer.writeUInt32LE(TX_DATA_FORMAT.VESTIGIAL_DEPRECATED)
         writeTxid()
@@ -173,7 +173,7 @@ export default class BeefTx {
       // V1
       const version = br.readUInt32LE()
       if (version === TX_DATA_FORMAT.VESTIGIAL_DEPRECATED) {
-        // TODO: remove once existing systems have migrated
+        // NOTE: remove once existing systems have migrated
         // This is for backward compatibility with a vestigial txid-only format
         data = toHex(br.readReverse(32))
         beefTx = BeefTx.fromTxid(data)
