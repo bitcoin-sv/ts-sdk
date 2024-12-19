@@ -469,7 +469,6 @@ export class Beef {
       version = br.readUInt32LE()
     }
     if (version !== BEEF_V1 && version !== BEEF_V2) { throw new Error(`Serialized BEEF must start with ${BEEF_V1} or ${BEEF_V2} but starts with ${version}`) }
-    console.log({ version })
     const beef = new Beef(version)
     const bumpsLength = br.readVarIntNum()
     for (let i = 0; i < bumpsLength; i++) {
