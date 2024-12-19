@@ -140,14 +140,14 @@ export default class BeefTx {
 
     if (magic === BEEF_V2) {
       if (this.isTxidOnly) {
-        writeByte(TX_DATA_FORMAT.RAWTX)
+        writeByte(TX_DATA_FORMAT.TXID_ONLY)
         writeTxid()
       } else if (this.bumpIndex !== undefined) {
         writeByte(TX_DATA_FORMAT.RAWTX_AND_BUMP_INDEX)
         writer.writeVarIntNum(this.bumpIndex)
         writeTx()
       } else {
-        writeByte(TX_DATA_FORMAT.TXID_ONLY)
+        writeByte(TX_DATA_FORMAT.RAWTX)
         writeTx()
       }
     } else {
