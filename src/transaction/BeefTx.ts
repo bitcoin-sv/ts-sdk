@@ -1,7 +1,7 @@
 import { hash256 } from '../primitives/Hash.js'
 import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
 import Transaction from './Transaction.js'
-import { BEEF_V1, BEEF_V2, TX_DATA_FORMAT } from './Beef.js'
+import { BEEF_V2, TX_DATA_FORMAT } from './Beef.js'
 
 /**
  * A single bitcoin transaction associated with a `Beef` validity proof set.
@@ -110,8 +110,8 @@ export default class BeefTx {
     }
   }
 
-  toWriter (writer: Writer, magic: number): void {
-    const writeByte = bb => {
+  toWriter (writer: Writer, version: number): void {
+    const writeByte = (bb: number) => {
       writer.writeUInt8(bb)
     }
 
@@ -138,7 +138,7 @@ export default class BeefTx {
       }
     }
 
-    if (magic === BEEF_V2) {
+    if (version === BEEF_V2) {
       if (this.isTxidOnly) {
         writeByte(TX_DATA_FORMAT.TXID_ONLY)
         writeTxid()
@@ -151,39 +151,16 @@ export default class BeefTx {
         writeTx()
       }
     } else {
-      // V1 BEEF
-      // NOTE: drop support once V2 is widely adopted
-      if (this.isTxidOnly) {
-        // NOTE: remove once existing systems have migrated
-        // This is for backward compatibility with a vestigial txid-only format
-        writer.writeUInt32LE(TX_DATA_FORMAT.VESTIGIAL_DEPRECATED)
-        writeTxid()
-      } else {
-        writeTx()
-      }
+      writeTx()
       writeBumpIndex()
     }
   }
 
-  static fromReader (br: Reader, magic: number): BeefTx {
+  static fromReader (br: Reader, version: number): BeefTx {
     let data: Transaction | number[] | string | undefined
     let bumpIndex: number | undefined
     let beefTx: BeefTx | undefined
-    if (magic === BEEF_V1) {
-      // V1
-      const version = br.readUInt32LE()
-      if (version === TX_DATA_FORMAT.VESTIGIAL_DEPRECATED) {
-        // NOTE: remove once existing systems have migrated
-        // This is for backward compatibility with a vestigial txid-only format
-        data = toHex(br.readReverse(32))
-        beefTx = BeefTx.fromTxid(data)
-      } else {
-        br.pos -= 4 // Unread the version...
-        data = Transaction.fromReader(br)
-        bumpIndex = br.readUInt8() ? br.readVarIntNum() : undefined
-        beefTx = BeefTx.fromTx(data, bumpIndex)
-      }
-    } else {
+    if (version === BEEF_V2) {
       // V2
       const format = br.readUInt8()
       if (format === TX_DATA_FORMAT.TXID_ONLY) {
@@ -195,6 +172,11 @@ export default class BeefTx {
         data = Transaction.fromReader(br)
         beefTx = BeefTx.fromTx(data, bumpIndex)
       }
+    } else {
+      // V1
+      data = Transaction.fromReader(br)
+      bumpIndex = br.readUInt8() ? br.readVarIntNum() : undefined
+      beefTx = BeefTx.fromTx(data, bumpIndex)
     }
 
     return beefTx

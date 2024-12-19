@@ -1150,8 +1150,8 @@ export default class BeefTx {
     static fromTx(tx: Transaction, bumpIndex?: number): BeefTx 
     static fromRawTx(rawTx: number[], bumpIndex?: number): BeefTx 
     static fromTxid(txid: string, bumpIndex?: number): BeefTx 
-    toWriter(writer: Writer, magic: number): void 
-    static fromReader(br: Reader, magic: number): BeefTx 
+    toWriter(writer: Writer, version: number): void 
+    static fromReader(br: Reader, version: number): BeefTx 
 }
 ```
 
@@ -2187,7 +2187,6 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | |
 | --- |
-| [BeefVersion](#type-beefversion) |
 | [Fetch](#type-fetch) |
 | [HttpClientResponse](#type-httpclientresponse) |
 
@@ -2195,15 +2194,6 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ---
 
-### Type: BeefVersion
-
-```ts
-export type BeefVersion = undefined | "V1" | "V2"
-```
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
-
----
 ### Type: Fetch
 
 fetch function interface limited to options needed by ts-sdk
@@ -2248,8 +2238,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export enum TX_DATA_FORMAT {
     RAWTX = 0,
     RAWTX_AND_BUMP_INDEX = 1,
-    TXID_ONLY = 2,
-    VESTIGIAL_DEPRECATED = 4022206465
+    TXID_ONLY = 2
 }
 ```
 

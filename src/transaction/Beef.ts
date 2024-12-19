@@ -12,10 +12,7 @@ export enum TX_DATA_FORMAT {
   RAWTX = 0, // rawtx without BUMP
   RAWTX_AND_BUMP_INDEX = 1, // rawtx with bump index
   TXID_ONLY = 2, // txid only
-  VESTIGIAL_DEPRECATED = 4022206465 // deprecated format
 }
-
-export type BeefVersion = undefined | 'V1' | 'V2'
 
 /*
  * BEEF standard: BRC-62: Background Evaluation Extended Format (BEEF) Transactions
