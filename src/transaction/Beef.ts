@@ -73,27 +73,11 @@ export type BeefVersion = undefined | 'V1' | 'V2'
 export class Beef {
   bumps: MerklePath[] = []
   txs: BeefTx[] = []
-  version: BeefVersion = undefined
+  version: number = BEEF_V2
   atomicTxid: string | undefined = undefined
 
-  constructor (version?: BeefVersion) {
+  constructor (version: number = BEEF_V2) {
     this.version = version
-  }
-
-  /**
-     * BEEF_V1 is the original V1 version.
-     * BEEF_V2 includes support for txidOnly transactions in serialized beefs.
-     * @returns version magic value based on current contents and constructor version parameter.
-     */
-  get magic (): number {
-    if (this.version === 'V1') { return BEEF_V1 }
-
-    if (this.version === 'V2') { return BEEF_V2 }
-
-    const hasTxidOnly = this.txs.findIndex(tx => tx.isTxidOnly) > -1
-    if (hasTxidOnly) { return BEEF_V2 }
-
-    return BEEF_V1
   }
 
   /**
@@ -301,8 +285,6 @@ export class Beef {
   }
 
   mergeTxidOnly (txid: string): BeefTx {
-    if (this.version === 'V1') { throw new Error('BEEF V1 format does not support txid only transactions.') }
-
     let tx = this.txs.find(t => t.txid === txid)
     if (!tx) {
       tx = new BeefTx(txid)
@@ -420,7 +402,7 @@ export class Beef {
    * @param writer
    */
   toWriter (writer: Writer) {
-    writer.writeUInt32LE(this.magic)
+    writer.writeUInt32LE(this.version)
 
     writer.writeVarIntNum(this.bumps.length)
     for (const b of this.bumps) {
@@ -429,7 +411,7 @@ export class Beef {
 
     writer.writeVarIntNum(this.txs.length)
     for (const tx of this.txs) {
-      tx.toWriter(writer, this.magic)
+      tx.toWriter(writer, this.version)
     }
   }
 
@@ -487,7 +469,8 @@ export class Beef {
       version = br.readUInt32LE()
     }
     if (version !== BEEF_V1 && version !== BEEF_V2) { throw new Error(`Serialized BEEF must start with ${BEEF_V1} or ${BEEF_V2} but starts with ${version}`) }
-    const beef = new Beef(version === BEEF_V2 ? 'V2' : undefined)
+    console.log({ version })
+    const beef = new Beef(version)
     const bumpsLength = br.readVarIntNum()
     for (let i = 0; i < bumpsLength; i++) {
       const bump = MerklePath.fromReader(br, false)
