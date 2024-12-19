@@ -6,7 +6,7 @@ class Rand {
     }
     if (typeof self === 'object') {
       /* eslint-disable-next-line */
-      if (self.crypto && self.crypto.getRandomValues) {
+      if (self.crypto?.getRandomValues) {
         this._rand = n => {
           const arr = new Uint8Array(n)
           /* eslint-disable-next-line */
@@ -21,7 +21,7 @@ class Rand {
         /* eslint-disable-next-line */
         const crypto = require('crypto')
         if (typeof crypto.randomBytes === 'function') {
-          this._rand = n => [...crypto.randomBytes(n)]
+          this._rand = (n: number) => [...crypto.randomBytes(n)]
         }
       } catch (e) {
         this._rand = noRand
