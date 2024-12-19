@@ -59,6 +59,29 @@ export default class Transaction {
   merklePath?: MerklePath
   private cachedHash?: number[]
 
+  // Recursive function for adding merkle proofs or input transactions
+  private static addPathOrInputs (obj: { pathIndex?: number, tx: Transaction }, transactions: Record<string, {
+    pathIndex?: number;
+    tx: Transaction;
+}>, BUMPs: MerklePath[]): void {
+    if (typeof obj.pathIndex === 'number') {
+      const path = BUMPs[obj.pathIndex]
+      if (typeof path !== 'object') {
+        throw new Error('Invalid merkle path index found in BEEF!')
+      }
+      obj.tx.merklePath = path
+    } else {
+      for (const input of obj.tx.inputs) {
+        const sourceObj = transactions[input.sourceTXID]
+        if (typeof sourceObj !== 'object') {
+          throw new Error(`Reference to unknown TXID in BEEF: ${input.sourceTXID}`)
+        }
+        input.sourceTransaction = sourceObj.tx
+        this.addPathOrInputs(sourceObj, transactions, BUMPs)
+      }
+    }
+  }
+
   /**
    * Creates a new transaction, linked to its inputs and their associated merkle paths, from a BEEF (BRC-62) structure.
    * Optionally, you can provide a specific TXID to retrieve a particular transaction from the BEEF data.
@@ -81,27 +104,7 @@ export default class Transaction {
       throw new Error(`Transaction with TXID ${targetTXID} not found in BEEF data.`)
     }
 
-    // Recursive function for adding merkle proofs or input transactions
-    const addPathOrInputs = (obj: { pathIndex?: number, tx: Transaction }): void => {
-      if (typeof obj.pathIndex === 'number') {
-        const path = BUMPs[obj.pathIndex]
-        if (typeof path !== 'object') {
-          throw new Error('Invalid merkle path index found in BEEF!')
-        }
-        obj.tx.merklePath = path
-      } else {
-        for (const input of obj.tx.inputs) {
-          const sourceObj = transactions[input.sourceTXID]
-          if (typeof sourceObj !== 'object') {
-            throw new Error(`Reference to unknown TXID in BEEF: ${input.sourceTXID}`)
-          }
-          input.sourceTransaction = sourceObj.tx
-          addPathOrInputs(sourceObj)
-        }
-      }
-    }
-
-    addPathOrInputs(transactions[targetTXID])
+    this.addPathOrInputs(transactions[targetTXID], transactions, BUMPs)
 
     return transactions[targetTXID].tx
   }
@@ -171,27 +174,7 @@ export default class Transaction {
       throw new Error(`Unrelated transaction with TXID ${txid} found in Atomic BEEF data.`)
     }
 
-    // Build the transaction by linking inputs and merkle paths
-    const addPathOrInputs = (obj: { pathIndex?: number, tx: Transaction }): void => {
-      if (typeof obj.pathIndex === 'number') {
-        const path = BUMPs[obj.pathIndex]
-        if (typeof path !== 'object') {
-          throw new Error('Invalid merkle path index found in BEEF!')
-        }
-        obj.tx.merklePath = path
-      } else {
-        for (const input of obj.tx.inputs) {
-          const sourceObj = transactions[input.sourceTXID]
-          if (typeof sourceObj !== 'object') {
-            throw new Error(`Reference to unknown TXID in BEEF: ${input.sourceTXID}`)
-          }
-          input.sourceTransaction = sourceObj.tx
-          addPathOrInputs(sourceObj)
-        }
-      }
-    }
-
-    addPathOrInputs(transactions[subjectTXID])
+    this.addPathOrInputs(transactions[subjectTXID], transactions, BUMPs)
 
     return transactions[subjectTXID].tx
   }
