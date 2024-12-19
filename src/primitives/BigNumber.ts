@@ -208,11 +208,13 @@ export default class BigNumber {
       }
 
       if (typeof number === 'number') {
-        return this.initNumber(number, base, endian)
+        this.initNumber(number, base, endian)
+        return
       }
 
       if (typeof number === 'object') {
-        return this.initArray(number, endian)
+        this.initArray(number, endian)
+        return
       }
 
       if (base === 'hex') {
@@ -222,7 +224,7 @@ export default class BigNumber {
 
       number = number.toString().replace(/\s+/g, '')
       let start = 0
-      if (number[0] === '-') {
+      if (number.startsWith('-')) {
         start++
         this.negative = 1
       }
@@ -263,7 +265,7 @@ export default class BigNumber {
    * @param endian - The endianness ('be' for big-endian, 'le' for little-endian).
    * @returns The current BigNumber instance.
    */
-  private initNumber (number, base, endian): BigNumber {
+  private initNumber (number, base, endian): this {
     if (number < 0) {
       this.negative = 1
       number = -number
@@ -279,7 +281,7 @@ export default class BigNumber {
       this.length = 2
     } else {
       this.assert(
-        number < 0x20000000000000,
+        number <= 0x1FFFFFFFFFFFFF,
         'The number is larger than 2 ^ 53 (unsafe)'
       )
       this.words = [
@@ -408,44 +410,35 @@ export default class BigNumber {
    * @param endian - The endianness ('be', 'le').
    * @return The current BigNumber instance.
    */
-  private parseHex (number: string, start: number, endian): BigNumber {
-    // Create possibly bigger array to ensure that it fits the number
+  private parseHex (number: string, start: number, endian: 'be' | 'le'): BigNumber {
+    // Initialize the words array
     this.length = Math.ceil((number.length - start) / 6)
-    this.words = new Array(this.length)
-    let i = 0
-    for (; i < this.length; i++) {
-      this.words[i] = 0
-    }
+    this.words = new Array(this.length).fill(0)
 
     // 24-bits chunks
     let off = 0
     let j = 0
 
-    let w
+    const processHexByte = (i: number): void => {
+      const w = this.parseHexByte(number, start, i) << off
+      this.words[j] |= w & 0x3ffffff
+      if (off >= 18) {
+        off -= 18
+        j += 1
+        this.words[j] |= w >>> 26
+      } else {
+        off += 8
+      }
+    }
+
     if (endian === 'be') {
-      for (i = number.length - 1; i >= start; i -= 2) {
-        w = this.parseHexByte(number, start, i) << off
-        this.words[j] |= w & 0x3ffffff
-        if (off >= 18) {
-          off -= 18
-          j += 1
-          this.words[j] |= w >>> 26
-        } else {
-          off += 8
-        }
+      for (let i = number.length - 1; i >= start; i -= 2) {
+        processHexByte(i)
       }
     } else {
       const parseLength = number.length - start
-      for (i = parseLength % 2 === 0 ? start + 1 : start; i < number.length; i += 2) {
-        w = this.parseHexByte(number, start, i) << off
-        this.words[j] |= w & 0x3ffffff
-        if (off >= 18) {
-          off -= 18
-          j += 1
-          this.words[j] |= w >>> 26
-        } else {
-          off += 8
-        }
+      for (let i = parseLength % 2 === 0 ? start + 1 : start; i < number.length; i += 2) {
+        processHexByte(i)
       }
     }
 
@@ -613,14 +606,14 @@ export default class BigNumber {
    * Increases the BigNumber length up to a certain size and initializes new elements with 0.
    *
    * @method expand
-   * @param size - The desired size to grow the BigNumber length.
+   * @param {number} size - The desired size to grow the BigNumber length.
    * @returns The BigNumber instance after expansion.
    *
    * @example
    * const bn = new BigNumber('123456', 10, 'be');
    * bn.expand(10);
    */
-  expand (size): BigNumber {
+  expand (size: number): this {
     while (this.length < size) {
       this.words[this.length++] = 0
     }
@@ -638,7 +631,7 @@ export default class BigNumber {
    * bn.strip();
    * // bn now represents 0
    */
-  strip (): BigNumber {
+  strip (): this {
     while (this.length > 1 && this.words[this.length - 1] === 0) {
       this.length--
     }
@@ -655,7 +648,7 @@ export default class BigNumber {
    * const bn = new BigNumber('-0', 10, 'be');
    * bn.normSign();
    */
-  normSign (): BigNumber {
+  normSign (): this {
     // -0 = 0
     if (this.length === 1 && this.words[0] === 0) {
       this.negative = 0
@@ -691,70 +684,77 @@ export default class BigNumber {
    * bn.toString(16); // Converts the BigNumber to a hexadecimal string.
    */
   toString (base: number | 'hex' = 10, padding: number = 1): string {
-    let out: string
     if (base === 16 || base === 'hex') {
-      out = ''
-      let off = 0
-      let carry = 0
-      for (let i = 0; i < this.length; i++) {
-        const w = this.words[i]
-        const word = (((w << off) | carry) & 0xffffff).toString(16)
-        carry = (w >>> (24 - off)) & 0xffffff
-        off += 2
-        if (off >= 26) {
-          off -= 26
-          i--
-        }
-        if (carry !== 0 || i !== this.length - 1) {
-          out = BigNumber.zeros[6 - word.length] + word + out
-        } else {
-          out = word + out
-        }
-      }
-      if (carry !== 0) {
-        out = carry.toString(16) + out
-      }
-      if (padding === 0 && out === '0') {
-        return ''
-      }
-      while (out.length % padding !== 0 && padding !== 0) {
-        out = '0' + out
-      }
-      if (this.negative !== 0) {
-        out = '-' + out
-      }
-      return out
+      return this.toHexString(padding)
     }
 
     if (base === (base | 0) && base >= 2 && base <= 36) {
-      const groupSize = BigNumber.groupSizes[base]
-      const groupBase = BigNumber.groupBases[base]
-      out = ''
-      let c = this.clone()
-      c.negative = 0
-      while (!c.isZero()) {
-        const r = c.modrn(groupBase).toString(base)
-        c = c.idivn(groupBase)
-
-        if (!c.isZero()) {
-          out = BigNumber.zeros[groupSize - r.length] + r + out
-        } else {
-          out = r + out
-        }
-      }
-      if (this.isZero()) {
-        out = '0' + out
-      }
-      while (out.length % padding !== 0) {
-        out = '0' + out
-      }
-      if (this.negative !== 0) {
-        out = '-' + out
-      }
-      return out
+      return this.toBaseString(base, padding)
     }
 
     throw new Error('Base should be between 2 and 36')
+  }
+
+  private toHexString(padding: number): string {
+    let out = ''
+    let off = 0
+    let carry = 0
+    for (let i = 0; i < this.length; i++) {
+      const w = this.words[i]
+      const word = (((w << off) | carry) & 0xffffff).toString(16)
+      carry = (w >>> (24 - off)) & 0xffffff
+      off += 2
+      if (off >= 26) {
+        off -= 26
+        i--
+      }
+      if (carry !== 0 || i !== this.length - 1) {
+        out = BigNumber.zeros[6 - word.length] + word + out
+      } else {
+        out = word + out
+      }
+    }
+    if (carry !== 0) {
+      out = carry.toString(16) + out
+    }
+    if (padding === 0 && out === '0') {
+      return ''
+    }
+    while (out.length % padding !== 0 && padding !== 0) {
+      out = '0' + out
+    }
+    if (this.negative !== 0) {
+      out = '-' + out
+    }
+    return out
+  }
+
+  private toBaseString(base: number, padding: number): string {
+    const groupSize = BigNumber.groupSizes[base]
+    const groupBase = BigNumber.groupBases[base]
+    let out = ''
+    let c = this.clone()
+    c.negative = 0
+    while (!c.isZero()) {
+      const r = c.modrn(groupBase).toString(base)
+      c = c.idivn(groupBase)
+
+      if (!c.isZero()) {
+        out = BigNumber.zeros[groupSize - r.length] + r + out
+      } else {
+        out = r + out
+      }
+    }
+    if (this.isZero()) {
+      out = '0' + out
+    }
+    while (out.length % padding !== 0) {
+      out = '0' + out
+    }
+    if (this.negative !== 0) {
+      out = '-' + out
+    }
+    return out
   }
 
   /**
@@ -1336,7 +1336,7 @@ export default class BigNumber {
    * const num2 = new BigNumber('20');
    * console.log(num1.iuxor(num2).toString());
    */
-  iuxor (num: BigNumber): BigNumber {
+  iuxor (num: BigNumber): this {
     if (this.length > num.length) {
       for (let i = 0; i < num.length; i++) {
         this.words[i] = this.words[i] ^ num.words[i]
@@ -1368,7 +1368,7 @@ export default class BigNumber {
    * const num2 = new BigNumber('20');
    * console.log(num1.ixor(num2).toString());
    */
-  ixor (num: BigNumber): BigNumber {
+  ixor (num: BigNumber): this {
     this.assert(
       (this.negative | num.negative) === 0,
       'Neither number can be negative'
@@ -1484,7 +1484,7 @@ export default class BigNumber {
    * num.setn(2, 1);
    * console.log(num.toString());
    */
-  setn (bit: number, val: 0 | 1 | true | false): BigNumber {
+  setn (bit: number, val: 0 | 1 | true | false): this {
     this.assert(typeof bit === 'number' && bit >= 0)
 
     const off = (bit / 26) | 0
@@ -1513,7 +1513,7 @@ export default class BigNumber {
    * num1.iadd(new BigNumber('20'));
    * console.log(num1.toString());
    */
-  iadd (num: BigNumber): BigNumber {
+  iadd (num: BigNumber): this {
     let r
 
     // negative + positive
@@ -2551,7 +2551,7 @@ export default class BigNumber {
    * let myNumber = new BigNumber(4);
    * myNumber.iushln(2); // Returns BigNumber of value 16
    */
-  iushln (bits: number): BigNumber {
+  iushln (bits: number): this {
     this.assert(typeof bits === 'number' && bits >= 0)
     const r = bits % 26
     const s = (bits - r) / 26
@@ -2600,7 +2600,7 @@ export default class BigNumber {
    * let myNumber = new BigNumber(4);
    * myNumber.ishln(2); // Returns BigNumber of value 16
    */
-  ishln (bits: number): BigNumber {
+  ishln (bits: number): this {
     this.assert(this.negative === 0)
     return this.iushln(bits)
   }
@@ -2618,7 +2618,7 @@ export default class BigNumber {
    * let myNumber = new BigNumber(16);
    * myNumber.iushrn(2); // Returns BigNumber of value 4
    */
-  iushrn (bits: number, hint?: number, extended?: BigNumber): BigNumber {
+  iushrn (bits: number, hint?: number, extended?: BigNumber): this {
     this.assert(typeof bits === 'number' && bits >= 0)
     let h
     if (typeof hint === 'number' && hint !== 0) {
@@ -2689,7 +2689,7 @@ export default class BigNumber {
    * let myNumber = new BigNumber(16);
    * myNumber.ishrn(2); // Returns BigNumber of value 4
    */
-  ishrn (bits, hint?, extended?): BigNumber {
+  ishrn (bits, hint?, extended?): this {
     this.assert(this.negative === 0)
     return this.iushrn(bits, hint, extended)
   }
@@ -2795,7 +2795,7 @@ export default class BigNumber {
    * const myNumber = new BigNumber(52);
    * myNumber.imaskn(2); // myNumber becomes 0 because lower 2 bits of 52 (110100) are 00.
    */
-  imaskn (bits): BigNumber {
+  imaskn (bits): this {
     this.assert(typeof bits === 'number' && bits >= 0)
     const r = bits % 26
     let s = (bits - r) / 26
@@ -2872,7 +2872,7 @@ export default class BigNumber {
    * @param num - The plain number to add.
    * @returns Returns the BigNumber after the addition.
    */
-  _iaddn (num: number): BigNumber {
+  _iaddn (num: number): this {
     this.words[0] += num
 
     // Carry
@@ -2962,7 +2962,7 @@ export default class BigNumber {
    * const myNumber = new BigNumber(-50);
    * myNumber.iabs(); // myNumber becomes 50.
    */
-  iabs (): BigNumber {
+  iabs (): this {
     this.negative = 0
     return this
   }
@@ -2998,7 +2998,7 @@ export default class BigNumber {
    * number._ishlnsubmul(new BigNumber(2), 3, 1);
    * console.log(number.toString()); // Outputs result after performing operations
    */
-  _ishlnsubmul (num: BigNumber, mul, shift: number): BigNumber {
+  _ishlnsubmul (num: BigNumber, mul, shift: number): this {
     const len = num.length + shift
     let i: number
 
@@ -3692,7 +3692,7 @@ export default class BigNumber {
    * let a = new BigNumber(5);
    * a.bincn(2); // a = 7
    */
-  bincn (bit: number): BigNumber {
+  bincn (bit: number): this {
     this.assert(typeof bit === 'number')
     const r = bit % 26
     const s = (bit - r) / 26
@@ -4037,7 +4037,7 @@ export default class BigNumber {
    * let redCtx = new ReductionContext();
    * bigNum.forceRed(redCtx);
    */
-  forceRed (ctx: ReductionContext): BigNumber {
+  forceRed (ctx: ReductionContext): this {
     // this.assert(this.red == null, 'Already a number in reduction context')
     this.red = ctx
     return this
