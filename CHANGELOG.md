@@ -4,104 +4,49 @@ All notable changes to this project will be documented in this file. The format 
 
 ## Table of Contents
 
-- [CHANGELOG for `@bsv/sdk`](#changelog-for-bsvsdk)
-  - [Table of Contents](#table-of-contents)
-  - [\[Unreleased\]](#unreleased)
-    - [Added](#added)
-    - [Changed](#changed)
-    - [Deprecated](#deprecated)
-    - [Removed](#removed)
-    - [Fixed](#fixed)
-    - [Security](#security)
-  - [\[1.2.17\] - 2024-12-18](#1217---2024-12-18)
-    - [Added](#added-1)
-    - [Fixed](#fixed-1)
-  - [\[1.2.15\] - 2024-12-16](#1215---2024-12-16)
-    - [\[1.2.15\] Added](#1215-added)
-  - [\[1.2.14\] - 2024-12-14](#1214---2024-12-14)
-    - [\[1.2.14\] Added](#1214-added)
-  - [\[1.2.13\] - 2024-12-13](#1213---2024-12-13)
-    - [\[1.2.13\] Added](#1213-added)
-    - [\[1.2.13\] Fixed](#1213-fixed)
-  - [\[1.2.12\] - 2024-12-12](#1212---2024-12-12)
-    - [\[1.2.12\] Fixed](#1212-fixed)
-  - [\[1.2.11\] - 2024-12-10](#1211---2024-12-10)
-    - [\[1.2.11\] Fixed](#1211-fixed)
-  - [\[1.2.10\]](#1210)
-    - [Added](#added-2)
-    - [Fixed](#fixed-2)
-    - [Security](#security-1)
-  - [\[1.2.9\] - 2024-12-06](#129---2024-12-06)
-    - [\[1.2.9\] Added](#129-added)
-  - [\[1.2.8\] - 2024-12-02](#128---2024-12-02)
-    - [\[1.2.8\] Fixed](#128-fixed)
-  - [\[1.2.7\] - 2024-12-02](#127---2024-12-02)
-    - [\[1.2.7\] Added](#127-added)
-    - [\[1.2.7\] Fixed](#127-fixed)
-  - [\[1.2.6\] - 2024-11-30](#126---2024-11-30)
-    - [\[1.2.6\] Fixed](#126-fixed)
-  - [\[1.2.5\] - 2024-11-30](#125---2024-11-30)
-    - [\[1.2.5\] Added](#125-added)
-  - [\[1.2.4\] - 2024-11-29](#124---2024-11-29)
-    - [\[1.2.4\] Added](#124-added)
-  - [\[1.2.3\] - 2024-11-26](#123---2024-11-26)
-    - [\[1.2.3\] Added](#123-added)
-  - [\[1.2.2\] - 2024-11-26](#122---2024-11-26)
-    - [\[1.2.2\] Added](#122-added)
-  - [\[1.2.1\] - 2024-11-25](#121---2024-11-25)
-    - [\[1.2.1\] Added](#121-added)
-  - [\[1.2.0\] - 2024-11-25](#120---2024-11-25)
-    - [\[1.2.0\] Added](#120-added)
-  - [\[1.1.33\] - 2024-11-22](#1133---2024-11-22)
-    - [Added](#added-3)
-    - [Fixed](#fixed-3)
-  - [\[1.1.32\] - 2024-11-22](#1132---2024-11-22)
-    - [Added](#added-4)
-    - [Fixed](#fixed-4)
-    - [Removed](#removed-1)
-  - [\[1.1.30\] - 2024-11-02](#1130---2024-11-02)
-    - [Added](#added-5)
-    - [Changed](#changed-1)
-  - [\[1.1.29\] - 2024-10-23](#1129---2024-10-23)
-    - [Fixed](#fixed-5)
-  - [\[1.1.28\] - 2024-10-23](#1128---2024-10-23)
-    - [Added](#added-6)
-  - [\[1.1.26\] - 2024-10-22](#1126---2024-10-22)
-    - [Added](#added-7)
-  - [\[1.1.25\] - 2024-10-21](#1125---2024-10-21)
-    - [Added](#added-8)
-  - [\[1.1.24\] - 2024-10-04](#1124---2024-10-04)
-    - [Fixed](#fixed-6)
-  - [\[1.1.22\] - 2024-09-02](#1122---2024-09-02)
-    - [Added](#added-9)
-  - [\[1.1.21\] - 2024-09-02](#1121---2024-09-02)
-    - [Added](#added-10)
-    - [Changed](#changed-2)
-  - [\[1.1.17\] - 2024-08-21](#1117---2024-08-21)
-    - [Added](#added-11)
-  - [\[1.1.14\] - 2024-07-30](#1114---2024-07-30)
-    - [Added](#added-12)
-  - [\[1.1.13\] - 2024-07-19](#1113---2024-07-19)
-    - [Fixed](#fixed-7)
-  - [\[1.1.10\] - 2024-06-28](#1110---2024-06-28)
-    - [Fixed](#fixed-8)
-  - [\[1.1.8\] - 2024-06-19](#118---2024-06-19)
-    - [Added](#added-13)
-  - [\[1.1.6\] - 2024-06-12](#116---2024-06-12)
-    - [Added](#added-14)
-  - [\[1.1.5\] - 2024-06-11](#115---2024-06-11)
-    - [Fixed](#fixed-9)
-  - [\[1.1.4\] - 2024-05-10](#114---2024-05-10)
-    - [Added](#added-15)
-    - [Changed](#changed-3)
-  - [\[1.1.0\] - 2024-05-06](#110---2024-05-06)
-    - [Added](#added-16)
-    - [Removed](#removed-2)
-    - [Fixed](#fixed-10)
-    - [New Contributors](#new-contributors)
-  - [\[1.0.0\] - 2024-02-10](#100---2024-02-10)
-    - [Added](#added-17)
-    - [Template for New Releases:](#template-for-new-releases)
+- [Unreleased](#unreleased)
+- [1.2.18 - 2024-12-19](#1218---2024-12-19)
+- [1.2.17 - 2024-12-18](#1217---2024-12-18)
+- [1.2.15 - 2024-12-16](#1215---2024-12-16)
+- [1.2.14 - 2024-12-14](#1214---2024-12-14)
+- [1.2.13 - 2024-12-13](#1213---2024-12-13)
+- [1.2.12 - 2024-12-12](#1212---2024-12-12)
+- [1.2.11 - 2024-12-10](#1211---2024-12-10)
+- [1.2.10 - 2024-12-10](#1210---2024-12-10)
+- [1.2.9 - 2024-12-06](#129---2024-12-06)
+- [1.2.8 - 2024-12-02](#128---2024-12-02)
+- [1.2.7 - 2024-12-02](#127---2024-12-02)
+- [1.2.6 - 2024-11-30](#126---2024-11-30)
+- [1.2.5 - 2024-11-30](#125---2024-11-30)
+- [1.2.4 - 2024-11-29](#124---2024-11-29)
+- [1.2.3 - 2024-11-26](#123---2024-11-26)
+- [1.2.2 - 2024-11-26](#122---2024-11-26)
+- [1.2.1 - 2024-11-25](#121---2024-11-25)
+- [1.2.0 - 2024-11-25](#120---2024-11-25)
+  - Scope increase to include [wallet](./src/wallet/) and [overlay-tools](./src/overlay-tools/)
+- [1.1.33 - 2024-11-22](#1133---2024-11-22)
+- [1.1.32 - 2024-11-22](#1132---2024-11-22)
+- [1.1.30 - 2024-11-02](#1130---2024-11-02)
+- [1.1.29 - 2024-10-23](#1129---2024-10-23)
+- [1.1.28 - 2024-10-23](#1128---2024-10-23)
+- [1.1.26 - 2024-10-22](#1126---2024-10-22)
+- [1.1.25 - 2024-10-21](#1125---2024-10-21)
+- [1.1.24 - 2024-10-04](#1124---2024-10-04)
+- [1.1.22 - 2024-09-02](#1122---2024-09-02)
+- [1.1.21 - 2024-09-02](#1121---2024-09-02)
+- [1.1.17 - 2024-08-21](#1117---2024-08-21)
+- [1.1.14 - 2024-07-30](#1114---2024-07-30)
+- [1.1.13 - 2024-07-19](#1113---2024-07-19)
+- [1.1.10 - 2024-06-28](#1110---2024-06-28)
+- [1.1.8 - 2024-06-19](#118---2024-06-19)
+- [1.1.6 - 2024-06-12](#116---2024-06-12)
+- [1.1.5 - 2024-06-11](#115---2024-06-11)
+- [1.1.4 - 2024-05-10](#114---2024-05-10)
+- [1.1.0 - 2024-05-06](#110---2024-05-06)
+  - First changes from open source community
+- [1.0.0 - 2024-02-10](#100---2024-02-10)
+  - Open Source launch
+- [Template for New Releases](#template-for-new-releases)
 
 ## [Unreleased]
 
@@ -116,6 +61,29 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.2.18] - 2024-12-19
+
+### Added
+
+- Enumerated constants for the tx data type in beef encoded transaction lists.
+
+### Removed
+
+- Removed the idea of "V1" and "V2" beef. There is already a version number which is encoded in the bytes, I think it's clearer if we stick to one.
+- Removed the V1 capability to use txidOnly.
+
+### Fixed
+
+- There was a slice of the BeefTxs array in Beef which should be a splice (remove a tx) 
+
+### Changed
+
+- Refactored a bunch of functions on advice from Sonar Qube which suggested they were a little to dense for most people to follow.
+- Refactored for loops into for-of loops where possible.
+- Refactored loops where the loop counter is updated within the loop which is advised against. 
 
 ---
 
@@ -136,7 +104,7 @@ Bug [#162](https://github.com/bitcoin-sv/ts-sdk/issues/162)
 
 ## [1.2.15] - 2024-12-16
 
-### [1.2.15] Added
+### Added
 - A helper function for most commonly used output type. `tx.addP2PKHOutput(address, satoshis)`
 - Make sure to check the provided hash is 20 bytes.
 
@@ -144,7 +112,7 @@ Bug [#162](https://github.com/bitcoin-sv/ts-sdk/issues/162)
 
 ## [1.2.14] - 2024-12-14
 
-### [1.2.14] Added
+### Added
 - fromCoinbaseTxidAndHeight method to the MerklePath class for that special case
 - added test demonstrating how to validate scripts only for one tx even when you don't have a merkle path for the previous tx.
   ```js
@@ -158,26 +126,26 @@ Bug [#162](https://github.com/bitcoin-sv/ts-sdk/issues/162)
 
 ## [1.2.13] - 2024-12-13
 
-### [1.2.13] Added
+### Added
 - JSON HTTP substrate, with corresponding swagger-ui documentation.
 - Example args and responses to the swagger-ui
 
-### [1.2.13] Fixed
+### Added
 - PrivateKey test linter errors
 
 ---
 
 ## [1.2.12] - 2024-12-12
-### [1.2.12] Fixed
+### Added
 
 - Added optional broadcastMany to Broadcaster interface.
 
 ## [1.2.11] - 2024-12-10
-### [1.2.11] Fixed
+### Added
 
 - Added a fix to ensure PrivateKeys as hex are always 64 chars in length ensuring 256 bit keys.
 
-## [1.2.10]
+## [1.2.10] - 2024-12-10
 
 ### Added
 
@@ -193,7 +161,7 @@ Beef sortTx fix for partially valid and txidOnly data.
 
 ## [1.2.9] - 2024-12-06
 
-### [1.2.9] Added
+### Added
 
 - Added support for returning coinsRemoved in an overlay Submitted Transaction Execution AcKnowledgment (STEAK) message.
 
@@ -201,7 +169,7 @@ Beef sortTx fix for partially valid and txidOnly data.
 
 ## [1.2.8] - 2024-12-02
 
-### [1.2.8] Fixed
+### Added
 
 - Stop people inadvertently creating corrupted public keys.
 
@@ -209,11 +177,11 @@ Beef sortTx fix for partially valid and txidOnly data.
 
 ## [1.2.7] - 2024-12-02
 
-### [1.2.7] Added
+### Added
 
 - Define the security level of protocolIDs as a type so that we can attach a JSDoc explaining what each value means.
 
-### [1.2.7] Fixed
+### Added
 
 - Use a default value in the async fee() function when no args are used rather than requiring a value and then setting if undefined.
 
@@ -221,14 +189,14 @@ Beef sortTx fix for partially valid and txidOnly data.
 
 ## [1.2.6] - 2024-11-30
 
-### [1.2.6] Fixed
+### Added
 - revealSpecificKeyLinkage requires a counterparty. 
 - ProtoWallet now correctly implements the wallet interface.
 
 ---
 ## [1.2.5] - 2024-11-30
 
-### [1.2.5] Added
+### Added
 - Testnet capabilities & config override for node to function without error to defaultBroadcaster
 - broadcastMany function to ARCBroadcaster
 
@@ -236,34 +204,34 @@ Beef sortTx fix for partially valid and txidOnly data.
 
 ## [1.2.4] - 2024-11-29
 
-### [1.2.4] Added
+### Added
 - A "random" distributioun mode for change allocation which approximates Benford's Law in attempt to distribute the remainder of: (inputSats - knownOutputSats - txFee) across the outputs marked "change: true".
 
 ---
 
 ## [1.2.3] - 2024-11-26
 
-### [1.2.3] Added
+### Added
 - Added support for Overlay broadcast and lookup timeouts.
 ---
 
 ## [1.2.2] - 2024-11-26
 
-### [1.2.2] Added
+### Added
 - Updated the default ShipBroadcast config, tests, and docs.
 
 ---
 
 ## [1.2.1] - 2024-11-25
 
-### [1.2.1] Added
+### Added
 - [NPM package provenance](https://github.blog/security/supply-chain-security/introducing-npm-package-provenance/) support
 
 ---
 
 ## [1.2.0] - 2024-11-25
 
-### [1.2.0] Added
+### Added
 - Implement BRC-100 wallet interface
 - Add PushDrop token template
 - SHIP and SLAP overlay tooling including broadcaster and lookup
