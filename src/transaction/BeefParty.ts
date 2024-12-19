@@ -41,7 +41,7 @@ export class BeefParty extends Beef {
 
   /**
      * @param party
-     * @returns `true` if `party` has already beed added to this `BeefParty`.
+     * @returns `true` if `party` has already been added to this `BeefParty`.
      */
   isParty (party: string) {
     const r = Object.keys(this.knownTo).includes(party)

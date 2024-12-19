@@ -5,12 +5,14 @@ import BeefTx from './BeefTx.js'
 import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
 import { hash256 } from '../primitives/Hash.js'
 
-export const BEEF_MAGIC = 4022206465 // 0100BEEF in LE order
-export const BEEF_MAGIC_V2 = 4022206466 // 0200BEEF in LE order
-export const BEEF_MAGIC_TXID_ONLY_EXTENSION = 4022206465 // 0100BEEF in LE order
-export const ATOMIC_BEEF = 0x01010101 // Atomic Beef serialization prefix
-
-export type BeefVersion = undefined | 'V1' | 'V2'
+export const BEEF_V1 = 4022206465 // 0100BEEF in LE order
+export const BEEF_V2 = 4022206466 // 0200BEEF in LE order
+export const ATOMIC_BEEF = 0x01010101 // 01010101
+export enum TX_DATA_FORMAT {
+  RAWTX = 0, // rawtx without BUMP
+  RAWTX_AND_BUMP_INDEX = 1, // rawtx with bump index
+  TXID_ONLY = 2, // txid only
+}
 
 /*
  * BEEF standard: BRC-62: Background Evaluation Extended Format (BEEF) Transactions
@@ -68,27 +70,11 @@ export type BeefVersion = undefined | 'V1' | 'V2'
 export class Beef {
   bumps: MerklePath[] = []
   txs: BeefTx[] = []
-  version: BeefVersion = undefined
+  version: number = BEEF_V2
   atomicTxid: string | undefined = undefined
 
-  constructor (version?: BeefVersion) {
+  constructor (version: number = BEEF_V2) {
     this.version = version
-  }
-
-  /**
-     * BEEF_MAGIC is the original V1 version.
-     * BEEF_MAGIC_V2 includes support for txidOnly transactions in serialized beefs.
-     * @returns version magic value based on current contents and constructor version parameter.
-     */
-  get magic (): number {
-    if (this.version === 'V1') { return BEEF_MAGIC }
-
-    if (this.version === 'V2') { return BEEF_MAGIC_V2 }
-
-    const hasTxidOnly = this.txs.findIndex(tx => tx.isTxidOnly) > -1
-    if (hasTxidOnly) { return BEEF_MAGIC_V2 }
-
-    return BEEF_MAGIC
   }
 
   /**
@@ -114,7 +100,7 @@ export class Beef {
     if (i === -1) return undefined
     let btx = this.txs[i]
     if (btx.isTxidOnly) { return btx }
-    this.txs.slice(i, i + 1)
+    this.txs.splice(i, 1)
     btx = this.mergeTxidOnly(txid)
     return btx
   }
@@ -296,8 +282,6 @@ export class Beef {
   }
 
   mergeTxidOnly (txid: string): BeefTx {
-    if (this.version === 'V1') { throw new Error('BEEF V1 format does not support txid only transactions.') }
-
     let tx = this.txs.find(t => t.txid === txid)
     if (!tx) {
       tx = new BeefTx(txid)
@@ -309,12 +293,7 @@ export class Beef {
 
   mergeBeefTx (btx: BeefTx): BeefTx {
     let beefTx = this.findTxid(btx.txid)
-    if (btx.isTxidOnly && !beefTx)
-      beefTx = this.mergeTxidOnly(btx.txid)
-    else if (btx._tx && (!beefTx || beefTx.isTxidOnly))
-      beefTx = this.mergeTransaction(btx._tx)
-    else if (btx._rawTx && (!beefTx || beefTx.isTxidOnly))
-      beefTx = this.mergeRawTx(btx._rawTx)
+    if (btx.isTxidOnly && !beefTx) { beefTx = this.mergeTxidOnly(btx.txid) } else if (btx._tx && (!beefTx || beefTx.isTxidOnly)) { beefTx = this.mergeTransaction(btx._tx) } else if (btx._rawTx && (!beefTx || beefTx.isTxidOnly)) { beefTx = this.mergeRawTx(btx._rawTx) }
     return beefTx
   }
 
@@ -420,7 +399,7 @@ export class Beef {
    * @param writer
    */
   toWriter (writer: Writer) {
-    writer.writeUInt32LE(this.magic)
+    writer.writeUInt32LE(this.version)
 
     writer.writeVarIntNum(this.bumps.length)
     for (const b of this.bumps) {
@@ -429,7 +408,7 @@ export class Beef {
 
     writer.writeVarIntNum(this.txs.length)
     for (const tx of this.txs) {
-      tx.toWriter(writer, this.magic)
+      tx.toWriter(writer, this.version)
     }
   }
 
@@ -447,7 +426,7 @@ export class Beef {
    * Serialize this Beef as AtomicBEEF.
    *
    * `txid` must exist
-   * 
+   *
    * after sorting, if txid is not last txid, creates a clone and removes newer txs
    *
    * @param txid
@@ -486,8 +465,8 @@ export class Beef {
       atomicTxid = toHex(br.read(32))
       version = br.readUInt32LE()
     }
-    if (version !== BEEF_MAGIC && version !== BEEF_MAGIC_V2) { throw new Error(`Serialized BEEF must start with ${BEEF_MAGIC} or ${BEEF_MAGIC_V2} but starts with ${version}`) }
-    const beef = new Beef(version === BEEF_MAGIC_V2 ? 'V2' : undefined)
+    if (version !== BEEF_V1 && version !== BEEF_V2) { throw new Error(`Serialized BEEF must start with ${BEEF_V1} or ${BEEF_V2} but starts with ${version}`) }
+    const beef = new Beef(version)
     const bumpsLength = br.readVarIntNum()
     for (let i = 0; i < bumpsLength; i++) {
       const bump = MerklePath.fromReader(br, false)
@@ -518,8 +497,7 @@ export class Beef {
      * @param enc The encoding of the string value from which BEEF should be constructed
      * @returns An instance of the Beef class constructed from the string
      */
-  static fromString (s: string, enc?: 'hex' | 'utf8' | 'base64'): Beef {
-    enc ||= 'hex'
+  static fromString (s: string, enc: 'hex' | 'utf8' | 'base64' = 'hex'): Beef {
     const bin = toArray(s, enc)
     const br = new Reader(bin)
     return Beef.fromReader(br)
@@ -712,7 +690,7 @@ export class Beef {
    * In some circumstances it may be helpful for the BUMP MerkePaths to include
    * leaves that can be computed from row zero.
    */
-  addComputedLeaves() {
+  addComputedLeaves () {
     const beef = this
     const hash = (m: string): string => toHex((
       hash256(toArray(m, 'hex').reverse())
@@ -724,7 +702,7 @@ export class Beef {
           if (leafL.hash && (leafL.offset & 1) === 0) {
             const leafR = bump.path[row - 1].find(l => l.offset === leafL.offset + 1)
             const offsetOnRow = leafL.offset >> 1
-            if (leafR && leafR.hash && -1 === bump.path[row].findIndex(l => l.offset === offsetOnRow)) {
+            if (leafR && leafR.hash && bump.path[row].findIndex(l => l.offset === offsetOnRow) === -1) {
               // computable leaf is missing... add it.
               bump.path[row].push({
                 offset: offsetOnRow,
@@ -737,7 +715,6 @@ export class Beef {
       }
     }
   }
-
 }
 
 export default Beef

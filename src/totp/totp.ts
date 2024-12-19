@@ -106,7 +106,6 @@ function generateHOTP (
   options: Required<TOTPOptions>
 ): string {
   const timePad = new BigNumber(counter).toArray('be', 8)
-  // console.log({ timePad })
   const hmac = calcHMAC(secret, timePad, options.algorithm)
   const signature = hmac.digest()
 

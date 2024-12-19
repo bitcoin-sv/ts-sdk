@@ -11,7 +11,7 @@ import Curve from '../../../dist/cjs/src/primitives/Curve'
 import P2PKH from '../../../dist/cjs/src/script/templates/P2PKH'
 import fromUtxo from '../../../dist/cjs/src/compat/Utxo'
 import MerklePath from '../../../dist/cjs/src/transaction/MerklePath'
-import { BEEF_MAGIC } from '../../../dist/cjs/src/transaction/Beef'
+import { BEEF_V1 } from '../../../dist/cjs/src/transaction/Beef'
 
 import sighashVectors from '../../primitives/__tests/sighash.vectors'
 import invalidTransactions from './tx.invalid.vectors'
@@ -817,7 +817,7 @@ describe('Transaction', () => {
       const fakeTXID = toArray('00'.repeat(32), 'hex')
       writer.write(fakeTXID)
       // Write empty BEEF data
-      writer.writeUInt32LE(BEEF_MAGIC) // BEEF version
+      writer.writeUInt32LE(BEEF_V1) // BEEF version
       writer.writeVarIntNum(0) // No BUMPs
       writer.writeVarIntNum(0) // No transactions
 
@@ -890,7 +890,7 @@ describe('Transaction', () => {
 
       // Build BEEF data
       const beefWriter = new Writer()
-      beefWriter.writeUInt32LE(BEEF_MAGIC) // BEEF version
+      beefWriter.writeUInt32LE(BEEF_V1) // BEEF version
       // BUMPs
       beefWriter.writeVarIntNum(2)
       beefWriter.write(sourceTx1.merklePath.toBinary())

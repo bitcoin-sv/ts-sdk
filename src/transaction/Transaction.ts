@@ -12,7 +12,7 @@ import Spend from '../script/Spend.js'
 import ChainTracker from './ChainTracker.js'
 import { defaultBroadcaster } from './broadcasters/DefaultBroadcaster.js'
 import { defaultChainTracker } from './chaintrackers/DefaultChainTracker.js'
-import { ATOMIC_BEEF, BEEF_MAGIC } from './Beef.js'
+import { ATOMIC_BEEF, BEEF_V1 } from './Beef.js'
 import P2PKH from '../script/templates/P2PKH.js'
 
 /**
@@ -59,6 +59,29 @@ export default class Transaction {
   merklePath?: MerklePath
   private cachedHash?: number[]
 
+  // Recursive function for adding merkle proofs or input transactions
+  private static addPathOrInputs (obj: { pathIndex?: number, tx: Transaction }, transactions: Record<string, {
+    pathIndex?: number
+    tx: Transaction
+  }>, BUMPs: MerklePath[]): void {
+    if (typeof obj.pathIndex === 'number') {
+      const path = BUMPs[obj.pathIndex]
+      if (typeof path !== 'object') {
+        throw new Error('Invalid merkle path index found in BEEF!')
+      }
+      obj.tx.merklePath = path
+    } else {
+      for (const input of obj.tx.inputs) {
+        const sourceObj = transactions[input.sourceTXID]
+        if (typeof sourceObj !== 'object') {
+          throw new Error(`Reference to unknown TXID in BEEF: ${input.sourceTXID}`)
+        }
+        input.sourceTransaction = sourceObj.tx
+        this.addPathOrInputs(sourceObj, transactions, BUMPs)
+      }
+    }
+  }
+
   /**
    * Creates a new transaction, linked to its inputs and their associated merkle paths, from a BEEF (BRC-62) structure.
    * Optionally, you can provide a specific TXID to retrieve a particular transaction from the BEEF data.
@@ -81,28 +104,7 @@ export default class Transaction {
       throw new Error(`Transaction with TXID ${targetTXID} not found in BEEF data.`)
     }
 
-    // Recursive function for adding merkle proofs or input transactions
-    const addPathOrInputs = (obj: { pathIndex?: number, tx: Transaction }): void => {
-      if (typeof obj.pathIndex === 'number') {
-        const path = BUMPs[obj.pathIndex]
-        if (typeof path !== 'object') {
-          throw new Error('Invalid merkle path index found in BEEF!')
-        }
-        obj.tx.merklePath = path
-      } else {
-        for (let i = 0; i < obj.tx.inputs.length; i++) {
-          const input = obj.tx.inputs[i]
-          const sourceObj = transactions[input.sourceTXID]
-          if (typeof sourceObj !== 'object') {
-            throw new Error(`Reference to unknown TXID in BEEF: ${input.sourceTXID}`)
-          }
-          input.sourceTransaction = sourceObj.tx
-          addPathOrInputs(sourceObj)
-        }
-      }
-    }
-
-    addPathOrInputs(transactions[targetTXID])
+    this.addPathOrInputs(transactions[targetTXID], transactions, BUMPs)
 
     return transactions[targetTXID].tx
   }
@@ -172,28 +174,7 @@ export default class Transaction {
       throw new Error(`Unrelated transaction with TXID ${txid} found in Atomic BEEF data.`)
     }
 
-    // Build the transaction by linking inputs and merkle paths
-    const addPathOrInputs = (obj: { pathIndex?: number, tx: Transaction }): void => {
-      if (typeof obj.pathIndex === 'number') {
-        const path = BUMPs[obj.pathIndex]
-        if (typeof path !== 'object') {
-          throw new Error('Invalid merkle path index found in BEEF!')
-        }
-        obj.tx.merklePath = path
-      } else {
-        for (let i = 0; i < obj.tx.inputs.length; i++) {
-          const input = obj.tx.inputs[i]
-          const sourceObj = transactions[input.sourceTXID]
-          if (typeof sourceObj !== 'object') {
-            throw new Error(`Reference to unknown TXID in BEEF: ${input.sourceTXID}`)
-          }
-          input.sourceTransaction = sourceObj.tx
-          addPathOrInputs(sourceObj)
-        }
-      }
-    }
-
-    addPathOrInputs(transactions[subjectTXID])
+    this.addPathOrInputs(transactions[subjectTXID], transactions, BUMPs)
 
     return transactions[subjectTXID].tx
   }
@@ -207,8 +188,8 @@ export default class Transaction {
   private static parseBEEFData (reader: Reader): { transactions: Record<string, { pathIndex?: number, tx: Transaction }>, BUMPs: MerklePath[] } {
     // Read the version
     const version = reader.readUInt32LE()
-    if (version !== BEEF_MAGIC) {
-      throw new Error(`Invalid BEEF version. Expected ${BEEF_MAGIC}, received ${version}.`)
+    if (version !== BEEF_V1) {
+      throw new Error(`Invalid BEEF version. Expected ${BEEF_V1}, received ${version}.`)
     }
 
     // Read the BUMPs
@@ -511,7 +492,15 @@ export default class Transaction {
       }
     }
     const fee = await modelOrFee.computeFee(this)
-    // change = inputs - fee - non-change outputs
+    const change = this.calculateChange(fee)
+    if (change <= 0) {
+      this.outputs = this.outputs.filter(output => !output.change)
+      return
+    }
+    this.distributeChange(change, changeDistribution)
+  }
+
+  private calculateChange (fee: number): number {
     let change = 0
     for (const input of this.inputs) {
       if (typeof input.sourceTransaction !== 'object') {
@@ -520,69 +509,58 @@ export default class Transaction {
       change += input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
     }
     change -= fee
-    let changeCount = 0
     for (const out of this.outputs) {
       if (!out.change) {
         change -= out.satoshis
-      } else {
-        changeCount++
       }
     }
+    return change
+  }
 
-    if (change <= changeCount) {
-      // There is not enough change to distribute among the change outputs.
-      // We'll remove all change outputs and leave the extra for the miners.
-      for (let i = 0; i < this.outputs.length; i++) {
-        if (this.outputs[i].change) {
-          this.outputs.splice(i, 1)
-          i--
-        }
-      }
-      return
-    }
-
-    // Distribute change among change outputs
+  private distributeChange (change: number, changeDistribution: 'equal' | 'random'): void {
     let distributedChange = 0
+    const changeOutputs = this.outputs.filter(out => out.change)
     if (changeDistribution === 'random') {
-      // Implement Benford's Law distribution for change outputs
-      const changeOutputs = this.outputs.filter(out => out.change)
-      let changeToUse = change
-
-      // Helper function to generate a number approximating Benford's Law
-      const benfordNumber = (min: number, max: number): number => {
-        const d = Math.floor(Math.random() * 9) + 1
-        return Math.floor(min + (max - min) * Math.log10(1 + 1 / d) / Math.log10(10))
-      }
-
-      const benfordNumbers = Array(changeOutputs.length).fill(1)
-      changeToUse -= changeOutputs.length
-      distributedChange += changeOutputs.length
-      for (let i = 0; i < changeOutputs.length - 1; i++) {
-        const portion = benfordNumber(0, changeToUse)
-        benfordNumbers[i] += portion
-        distributedChange += portion
-        changeToUse -= portion
-      }
-
-      for (let i = 0; i < this.outputs.length; i++) {
-        if (this.outputs[i].change) {
-          const t = benfordNumbers.shift()
-          this.outputs[i].satoshis = t
-        }
-      }
+      distributedChange = this.distributeRandomChange(change, changeOutputs)
     } else if (changeDistribution === 'equal') {
-      const perOutput = Math.floor(change / changeCount)
-      for (const out of this.outputs) {
-        if (out.change) {
-          distributedChange += perOutput
-          out.satoshis = perOutput
-        }
-      }
+      distributedChange = this.distributeEqualChange(change, changeOutputs)
     }
-    // if there's any remaining change, add it to the last output
     if (distributedChange < change) {
       this.outputs[this.outputs.length - 1].satoshis += (change - distributedChange)
     }
+  }
+
+  private distributeRandomChange (change: number, changeOutputs: TransactionOutput[]): number {
+    let distributedChange = 0
+    let changeToUse = change
+    const benfordNumbers = Array(changeOutputs.length).fill(1)
+    changeToUse -= changeOutputs.length
+    distributedChange += changeOutputs.length
+    for (let i = 0; i < changeOutputs.length - 1; i++) {
+      const portion = this.benfordNumber(0, changeToUse)
+      benfordNumbers[i] += portion
+      distributedChange += portion
+      changeToUse -= portion
+    }
+    for (const output of this.outputs) {
+      if (output.change) output.satoshis = benfordNumbers.shift()
+    }
+    return distributedChange
+  }
+
+  private distributeEqualChange (change: number, changeOutputs: TransactionOutput[]): number {
+    let distributedChange = 0
+    const perOutput = Math.floor(change / changeOutputs.length)
+    for (const out of changeOutputs) {
+      distributedChange += perOutput
+      out.satoshis = perOutput
+    }
+    return distributedChange
+  }
+
+  private benfordNumber (min: number, max: number): number {
+    const d = Math.floor(Math.random() * 9) + 1
+    return Math.floor(min + (max - min) * Math.log10(1 + 1 / d) / Math.log10(10))
   }
 
   /**
@@ -923,9 +901,8 @@ export default class Transaction {
    * @throws Error if there are any missing sourceTransactions unless `allowPartial` is true.
    */
   toBEEF (allowPartial?: boolean): number[] {
-    this.outputs.length
     const writer = new Writer()
-    writer.writeUInt32LE(4022206465)
+    writer.writeUInt32LE(BEEF_V1)
     const BUMPs: MerklePath[] = []
     const txs: Array<{ tx: Transaction, pathIndex?: number }> = []
 

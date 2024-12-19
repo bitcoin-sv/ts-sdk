@@ -235,9 +235,12 @@ export default class PublicKey extends Point {
       throw new Error('Invalid Compact Byte')
     }
     let r = data[0] - 27
-    let compressed = false // we don't really use this in the modern era, always use compressed.
+    // NOTE: We don't use uncompressed pubkeys in this library,
+    // but whether the key is compressed is captured in the recovery param.
+    // Code below is commented out for reference of how you could capture this.
+    // let compressed = false
     if (r > 3) {
-      compressed = true
+      // compressed = true
       r -= 4
     }
     const s = new Signature(

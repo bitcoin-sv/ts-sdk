@@ -1,6 +1,6 @@
 # API
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ## Interfaces
 
@@ -19,7 +19,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [MontgomoryMethod](#class-montgomorymethod) | [SHA1HMAC](#class-sha1hmac) |  |
 | [Point](#class-point) | [SHA256](#class-sha256) |  |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 
@@ -49,7 +49,7 @@ export default abstract class BasePoint {
 
 See also: [Curve](#class-curve)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: BigNumber
@@ -60,10 +60,10 @@ numbers.
 
 ```ts
 export default class BigNumber {
-    static zeros: string[] 
-    static groupSizes: number[] 
-    static groupBases: number[] 
-    static wordSize: number = 26;
+    public static readonly zeros: string[] 
+    static readonly groupSizes: number[] 
+    static readonly groupBases: number[] 
+    static readonly wordSize: number = 26;
     negative: number;
     words: number[];
     length: number;
@@ -75,9 +75,9 @@ export default class BigNumber {
     copy(dest: BigNumber): void 
     static move(dest: BigNumber, src: BigNumber): void 
     clone(): BigNumber 
-    expand(size): BigNumber 
-    strip(): BigNumber 
-    normSign(): BigNumber 
+    expand(size: number): this 
+    strip(): this 
+    normSign(): this 
     inspect(): string 
     toString(base: number | "hex" = 10, padding: number = 1): string 
     toNumber(): number 
@@ -101,14 +101,14 @@ export default class BigNumber {
     iand(num: BigNumber): BigNumber 
     and(num: BigNumber): BigNumber 
     uand(num: BigNumber): BigNumber 
-    iuxor(num: BigNumber): BigNumber 
-    ixor(num: BigNumber): BigNumber 
+    iuxor(num: BigNumber): this 
+    ixor(num: BigNumber): this 
     xor(num: BigNumber): BigNumber 
     uxor(num: BigNumber): BigNumber 
     inotn(width: number): BigNumber 
     notn(width: number): BigNumber 
-    setn(bit: number, val: 0 | 1 | true | false): BigNumber 
-    iadd(num: BigNumber): BigNumber 
+    setn(bit: number, val: 0 | 1 | true | false): this 
+    iadd(num: BigNumber): this 
     add(num: BigNumber): BigNumber 
     isub(num: BigNumber): BigNumber 
     sub(num: BigNumber): BigNumber 
@@ -121,24 +121,24 @@ export default class BigNumber {
     sqr(): BigNumber 
     isqr(): BigNumber 
     pow(num: BigNumber): BigNumber 
-    iushln(bits: number): BigNumber 
-    ishln(bits: number): BigNumber 
-    iushrn(bits: number, hint?: number, extended?: BigNumber): BigNumber 
-    ishrn(bits, hint?, extended?): BigNumber 
+    iushln(bits: number): this 
+    ishln(bits: number): this 
+    iushrn(bits: number, hint?: number, extended?: BigNumber): this 
+    ishrn(bits, hint?, extended?): this 
     shln(bits): BigNumber 
     ushln(bits): BigNumber 
     shrn(bits): BigNumber 
     ushrn(bits): BigNumber 
     testn(bit: number): boolean 
-    imaskn(bits): BigNumber 
+    imaskn(bits): this 
     maskn(bits): BigNumber 
     iaddn(num: number): BigNumber 
     isubn(num: number): BigNumber 
     addn(num: number): BigNumber 
     subn(num: number): BigNumber 
-    iabs(): BigNumber 
+    iabs(): this 
     abs(): BigNumber 
-    _ishlnsubmul(num: BigNumber, mul, shift: number): BigNumber 
+    _ishlnsubmul(num: BigNumber, mul, shift: number): this 
     divmod(num: BigNumber, mode?: "div" | "mod", positive?: boolean): any 
     div(num: BigNumber): BigNumber 
     mod(num: BigNumber): BigNumber 
@@ -158,7 +158,7 @@ export default class BigNumber {
     isEven(): boolean 
     isOdd(): boolean 
     andln(num: number): number 
-    bincn(bit: number): BigNumber 
+    bincn(bit: number): this 
     isZero(): boolean 
     cmpn(num: number): 1 | 0 | -1 
     cmp(num: BigNumber): 1 | 0 | -1 
@@ -175,7 +175,7 @@ export default class BigNumber {
     eq(num: BigNumber): boolean 
     toRed(ctx: ReductionContext): BigNumber 
     fromRed(): BigNumber 
-    forceRed(ctx: ReductionContext): BigNumber 
+    forceRed(ctx: ReductionContext): this 
     redAdd(num: BigNumber): BigNumber 
     redIAdd(num: BigNumber): BigNumber 
     redSub(num: BigNumber): BigNumber 
@@ -277,7 +277,7 @@ See also: [ReductionContext](#class-reductioncontext)
 The word size of big number chunks.
 
 ```ts
-static wordSize: number = 26
+static readonly wordSize: number = 26
 ```
 
 Example
@@ -334,7 +334,7 @@ Perform an in-place shift left, subtract, and multiply operation on a BigNumber 
 This method modifies the existing BigNumber instance.
 
 ```ts
-_ishlnsubmul(num: BigNumber, mul, shift: number): BigNumber 
+_ishlnsubmul(num: BigNumber, mul, shift: number): this 
 ```
 See also: [BigNumber](#class-bignumber)
 
@@ -490,9 +490,8 @@ let result = a.andln(13); // 12
 Increments the value at the bit position specified by the input parameter.
 
 ```ts
-bincn(bit: number): BigNumber 
+bincn(bit: number): this 
 ```
-See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -835,9 +834,8 @@ let isEqual = bigNumber.eqn(1234); // Returns true
 Increases the BigNumber length up to a certain size and initializes new elements with 0.
 
 ```ts
-expand(size): BigNumber 
+expand(size: number): this 
 ```
-See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -860,9 +858,9 @@ bn.expand(10);
 Forces the current BigNumber into a reduction context, irrespective of the BigNumber's current state.
 
 ```ts
-forceRed(ctx: ReductionContext): BigNumber 
+forceRed(ctx: ReductionContext): this 
 ```
-See also: [BigNumber](#class-bignumber), [ReductionContext](#class-reductioncontext)
+See also: [ReductionContext](#class-reductioncontext)
 
 Returns
 
@@ -1254,9 +1252,8 @@ let isGreater = bigNumber.gtn(1234); // Returns true
 Performs an in-place operation to make the BigNumber an absolute value.
 
 ```ts
-iabs(): BigNumber 
+iabs(): this 
 ```
-See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1274,7 +1271,7 @@ myNumber.iabs(); // myNumber becomes 50.
 Add `num` to `this` BigNumber in-place.
 
 ```ts
-iadd(num: BigNumber): BigNumber 
+iadd(num: BigNumber): this 
 ```
 See also: [BigNumber](#class-bignumber)
 
@@ -1385,9 +1382,8 @@ bigNum.idivn(num); // the bigNum here directly becomes '2'
 Performs an in-place operation to keep only the lower bits of the number.
 
 ```ts
-imaskn(bits): BigNumber 
+imaskn(bits): this 
 ```
-See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1696,9 +1692,8 @@ let isZero = a.isZero(); // true
 Performs an in-place left shift operation on the BigNumber instance only if it is non-negative.
 
 ```ts
-ishln(bits: number): BigNumber 
+ishln(bits: number): this 
 ```
-See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1721,9 +1716,8 @@ myNumber.ishln(2); // Returns BigNumber of value 16
 Performs an in-place right shift operation on the BigNumber instance only if it is non-negative.
 
 ```ts
-ishrn(bits, hint?, extended?): BigNumber 
+ishrn(bits, hint?, extended?): this 
 ```
-See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1882,9 +1876,8 @@ bn1.iuor(bn2); // now, bn1 binary: 1110
 Performs in-place bitwise left shift operation on the BigNumber instance.
 
 ```ts
-iushln(bits: number): BigNumber 
+iushln(bits: number): this 
 ```
-See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -1907,7 +1900,7 @@ myNumber.iushln(2); // Returns BigNumber of value 16
 Performs an in-place unsigned bitwise right shift operation on the BigNumber instance.
 
 ```ts
-iushrn(bits: number, hint?: number, extended?: BigNumber): BigNumber 
+iushrn(bits: number, hint?: number, extended?: BigNumber): this 
 ```
 See also: [BigNumber](#class-bignumber)
 
@@ -1938,7 +1931,7 @@ in-place with the provided BigNumber. It keeps the bits set in the result only i
 corresponding bits in the operands are different.
 
 ```ts
-iuxor(num: BigNumber): BigNumber 
+iuxor(num: BigNumber): this 
 ```
 See also: [BigNumber](#class-bignumber)
 
@@ -1967,7 +1960,7 @@ instance only if neither operand is negative. This method is similar to the iuxo
 checks for negative values before operation.
 
 ```ts
-ixor(num: BigNumber): BigNumber 
+ixor(num: BigNumber): this 
 ```
 See also: [BigNumber](#class-bignumber)
 
@@ -2355,9 +2348,8 @@ const neg = bn.neg(); // -1234
 Normalizes the sign of the BigNumber. Changes -0 to 0.
 
 ```ts
-normSign(): BigNumber 
+normSign(): this 
 ```
-See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2821,9 +2813,8 @@ Set `bit` of `this` BigNumber. The `bit` is a position in the binary representat
 and `val` is the value to be set at that position (`0` or `1`).
 
 ```ts
-setn(bit: number, val: 0 | 1 | true | false): BigNumber 
+setn(bit: number, val: 0 | 1 | true | false): this 
 ```
-See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -2921,9 +2912,8 @@ const result = bn.sqr();
 Removes leading zeros.
 
 ```ts
-strip(): BigNumber 
+strip(): this 
 ```
-See also: [BigNumber](#class-bignumber)
 
 Returns
 
@@ -3537,7 +3527,7 @@ const zeroBits = bn.zeroBits(); // 3
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: Curve
@@ -3607,7 +3597,7 @@ export default class Curve {
 
 See also: [BigNumber](#class-bignumber), [Point](#class-point), [ReductionContext](#class-reductioncontext)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: DRBG
@@ -3706,7 +3696,7 @@ drbg.update('e13af...');
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: JacobianPoint
@@ -4047,7 +4037,7 @@ const pointP = pointJ.toP();  // The point in affine coordinates.
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: K256
@@ -4144,7 +4134,7 @@ k256.split(input, output);
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: KeyShares
@@ -4168,7 +4158,7 @@ export class KeyShares {
 
 See also: [PointInFiniteField](#class-pointinfinitefield)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: Mersenne
@@ -4322,7 +4312,7 @@ mersenne.split(new BigNumber('2345', 16), new BigNumber());
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: MontgomoryMethod
@@ -4545,7 +4535,7 @@ const product = montMethod.mul(a, b);
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: Point
@@ -5180,7 +5170,7 @@ const isValid = aPoint.validate();
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: PointInFiniteField
@@ -5211,7 +5201,7 @@ toString(): string
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: Polynomial
@@ -5241,7 +5231,7 @@ export default class Polynomial {
 
 See also: [BigNumber](#class-bignumber), [PointInFiniteField](#class-pointinfinitefield), [PrivateKey](#class-privatekey)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: PrivateKey
@@ -5747,7 +5737,7 @@ const isSignatureValid = privateKey.verify('Hello, World!', signature);
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: PublicKey
@@ -6057,7 +6047,7 @@ const isVerified = myPubKey.verify(myMessage, mySignature)
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: RIPEMD160
@@ -6097,7 +6087,7 @@ h: number[]
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: Reader
@@ -6130,7 +6120,7 @@ export class Reader {
 
 See also: [BigNumber](#class-bignumber)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: ReductionContext
@@ -6686,7 +6676,7 @@ this.verify2(new BigNumber(10).toRed(this), new BigNumber(20)); //throws an Erro
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: SHA1
@@ -6744,7 +6734,7 @@ k: number[]
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: SHA1HMAC
@@ -6763,7 +6753,7 @@ export class SHA1HMAC {
 
 See also: [SHA1](#class-sha1)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: SHA256
@@ -6822,7 +6812,7 @@ k: number[]
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: SHA256HMAC
@@ -6973,7 +6963,7 @@ myHMAC.update('deadbeef', 'hex');
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: SHA512
@@ -7032,7 +7022,7 @@ k: number[]
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: SHA512HMAC
@@ -7183,7 +7173,7 @@ myHMAC.update('deadbeef', 'hex');
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: Schnorr
@@ -7297,7 +7287,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: Signature
@@ -7591,7 +7581,7 @@ const isVerified = signature.verify(msg, publicKey);
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: SymmetricKey
@@ -7695,7 +7685,7 @@ const symmetricKey = SymmetricKey.fromRandom();
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: TransactionSignature
@@ -7746,7 +7736,7 @@ public hasLowS(): boolean
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Class: Writer
@@ -7757,23 +7747,23 @@ export class Writer {
     constructor(bufs?: number[][]) 
     getLength(): number 
     toArray(): number[] 
-    write(buf: number[]): Writer 
-    writeReverse(buf: number[]): Writer 
-    writeUInt8(n: number): Writer 
-    writeInt8(n: number): Writer 
-    writeUInt16BE(n: number): Writer 
-    writeInt16BE(n: number): Writer 
-    writeUInt16LE(n: number): Writer 
-    writeInt16LE(n: number): Writer 
-    writeUInt32BE(n: number): Writer 
-    writeInt32BE(n: number): Writer 
-    writeUInt32LE(n: number): Writer 
-    writeInt32LE(n: number): Writer 
-    writeUInt64BEBn(bn: BigNumber): Writer 
-    writeUInt64LEBn(bn: BigNumber): Writer 
-    writeUInt64LE(n: number): Writer 
-    writeVarIntNum(n: number): Writer 
-    writeVarIntBn(bn: BigNumber): Writer 
+    write(buf: number[]): this 
+    writeReverse(buf: number[]): this 
+    writeUInt8(n: number): this 
+    writeInt8(n: number): this 
+    writeUInt16BE(n: number): this 
+    writeInt16BE(n: number): this 
+    writeUInt16LE(n: number): this 
+    writeInt16LE(n: number): this 
+    writeUInt32BE(n: number): this 
+    writeInt32BE(n: number): this 
+    writeUInt32LE(n: number): this 
+    writeInt32LE(n: number): this 
+    writeUInt64BEBn(bn: BigNumber): this 
+    writeUInt64LEBn(bn: BigNumber): this 
+    writeUInt64LE(n: number): this 
+    writeVarIntNum(n: number): this 
+    writeVarIntBn(bn: BigNumber): this 
     static varIntNum(n: number): number[] 
     static varIntBn(bn: BigNumber): number[] 
 }
@@ -7781,7 +7771,7 @@ export class Writer {
 
 See also: [BigNumber](#class-bignumber), [toArray](#variable-toarray)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ## Functions
@@ -7796,7 +7786,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [toArray](#function-toarray) |
 | [toBase64](#function-tobase64) |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 
@@ -7806,7 +7796,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export function AES(input: number[], key: number[]): number[] 
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Function: AESGCM
@@ -7818,7 +7808,7 @@ export function AESGCM(plainText: number[], additionalAuthenticatedData: number[
 } 
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Function: AESGCMDecrypt
@@ -7827,7 +7817,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export function AESGCMDecrypt(cipherText: number[], additionalAuthenticatedData: number[], initializationVector: number[], authenticationTag: number[], key: number[]): number[] | null 
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Function: ghash
@@ -7836,7 +7826,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export function ghash(input: number[], hashSubKey: number[]): number[] 
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Function: pbkdf2
@@ -7870,7 +7860,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Function: toArray
@@ -7894,7 +7884,7 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Function: toBase64
@@ -7927,10 +7917,12 @@ Argument Details
 
 </details>
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ## Types
+
+## Enums
 
 ## Variables
 
@@ -7946,7 +7938,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [hash256](#variable-hash256) | [sha512](#variable-sha512) | [zero2](#variable-zero2) |
 | [incrementLeastSignificantThirtyTwoBits](#variable-incrementleastsignificantthirtytwobits) | [sha512hmac](#variable-sha512hmac) |  |
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 
@@ -7958,7 +7950,7 @@ checkBit = function (byteArray: number[], byteIndex: number, bitIndex: number): 
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: encode
@@ -7978,7 +7970,7 @@ encode = (arr: number[], enc?: "hex" | "utf8"): string | number[] => {
 
 See also: [toHex](#variable-tohex), [toUTF8](#variable-toutf8)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: exclusiveOR
@@ -7994,7 +7986,7 @@ exclusiveOR = function (block0: number[], block1: number[]): number[] {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: fromBase58
@@ -8013,7 +8005,7 @@ fromBase58 = (str: string): number[] => {
     const uint8 = new Uint8Array([
         ...new Uint8Array(psz),
         ...str
-            .match(/.{1}/gmu)
+            .match(/./gmu)
             .map((i) => base58chars.indexOf(i))
             .reduce((acc, i) => {
             acc = acc.map((j) => {
@@ -8030,7 +8022,7 @@ fromBase58 = (str: string): number[] => {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: fromBase58Check
@@ -8057,7 +8049,7 @@ fromBase58Check = (str: string, enc?: "hex", prefixLength: number = 1) => {
 
 See also: [fromBase58](#variable-frombase58), [hash256](#variable-hash256), [toHex](#variable-tohex)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: getBytes
@@ -8073,7 +8065,7 @@ getBytes = function (numericValue: number): number[] {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: hash160
@@ -8087,7 +8079,7 @@ hash160 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
 
 See also: [RIPEMD160](#class-ripemd160), [SHA256](#class-sha256)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: hash256
@@ -8101,7 +8093,7 @@ hash256 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
 
 See also: [SHA256](#class-sha256)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: incrementLeastSignificantThirtyTwoBits
@@ -8123,7 +8115,7 @@ incrementLeastSignificantThirtyTwoBits = function (block: number[]): number[] {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: minimallyEncode
@@ -8146,19 +8138,20 @@ minimallyEncode = (buf: number[]): number[] => {
     for (let i = buf.length - 1; i > 0; i--) {
         if (buf[i - 1] !== 0) {
             if ((buf[i - 1] & 128) !== 0) {
-                buf[i++] = last;
+                buf[i] = last;
+                return buf.slice(0, i + 1);
             }
             else {
                 buf[i - 1] |= last;
+                return buf.slice(0, i);
             }
-            return buf.slice(0, i);
         }
     }
     return [];
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: multiply
@@ -8188,7 +8181,7 @@ multiply = function (block0: number[], block1: number[]): number[] {
 
 See also: [checkBit](#variable-checkbit), [exclusiveOR](#variable-exclusiveor), [rightShift](#variable-rightshift)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: rightShift
@@ -8210,7 +8203,7 @@ rightShift = function (block: number[]): number[] {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: ripemd160
@@ -8223,7 +8216,7 @@ ripemd160 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
 
 See also: [RIPEMD160](#class-ripemd160)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: sha1
@@ -8236,7 +8229,7 @@ sha1 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
 
 See also: [SHA1](#class-sha1)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: sha256
@@ -8249,7 +8242,7 @@ sha256 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
 
 See also: [SHA256](#class-sha256)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: sha256hmac
@@ -8262,7 +8255,7 @@ sha256hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): numb
 
 See also: [SHA256HMAC](#class-sha256hmac)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: sha512
@@ -8275,7 +8268,7 @@ sha512 = (msg: number[] | string, enc?: "hex" | "utf8"): number[] => {
 
 See also: [SHA512](#class-sha512)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: sha512hmac
@@ -8288,7 +8281,7 @@ sha512hmac = (key: number[] | string, msg: number[] | string, enc?: "hex"): numb
 
 See also: [SHA512HMAC](#class-sha512hmac)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: sign
@@ -8536,69 +8529,32 @@ sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: Bi
 
 See also: [BigNumber](#class-bignumber), [Curve](#class-curve), [DRBG](#class-drbg), [Signature](#class-signature), [toArray](#variable-toarray)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: toArray
 
 ```ts
 toArray = (msg: any, enc?: "hex" | "utf8" | "base64"): any[] => {
-    if (Array.isArray(msg)) {
+    if (Array.isArray(msg))
         return msg.slice();
-    }
-    if (!(msg as boolean)) {
+    if (!msg)
         return [];
-    }
-    const res: any[] = [];
     if (typeof msg !== "string") {
-        for (let i = 0; i < msg.length; i++) {
-            res[i] = msg[i] | 0;
-        }
-        return res;
+        return Array.from(msg, (item: any) => item | 0);
     }
-    if (enc === "hex") {
-        msg = msg.replace(/[^a-z0-9]+/ig, "");
-        if (msg.length % 2 !== 0) {
-            msg = "0" + (msg as string);
-        }
-        for (let i = 0; i < msg.length; i += 2) {
-            res.push(parseInt((msg[i] as string) + (msg[i + 1] as string), 16));
-        }
+    switch (enc) {
+        case "hex":
+            return hexToArray(msg);
+        case "base64":
+            return base64ToArray(msg);
+        default:
+            return utf8ToArray(msg);
     }
-    else if (enc === "base64") {
-        const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-        const result: number[] = [];
-        let currentBit: number = 0;
-        let currentByte: number = 0;
-        for (const char of msg.replace(/=+$/, "")) {
-            currentBit = (currentBit << 6) | base64Chars.indexOf(char);
-            currentByte += 6;
-            if (currentByte >= 8) {
-                currentByte -= 8;
-                result.push((currentBit >> currentByte) & 255);
-                currentBit &= (1 << currentByte) - 1;
-            }
-        }
-        return result;
-    }
-    else {
-        for (let i = 0; i < msg.length; i++) {
-            const c = msg.charCodeAt(i);
-            const hi = c >> 8;
-            const lo = c & 255;
-            if (hi as unknown as boolean) {
-                res.push(hi, lo);
-            }
-            else {
-                res.push(lo);
-            }
-        }
-    }
-    return res;
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: toBase58
@@ -8633,7 +8589,7 @@ toBase58 = (bin: number[]): string => {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: toBase58Check
@@ -8648,7 +8604,7 @@ toBase58Check = (bin: number[], prefix: number[] = [0]) => {
 
 See also: [hash256](#variable-hash256), [toBase58](#variable-tobase58)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: toHex
@@ -8656,8 +8612,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 toHex = (msg: number[]): string => {
     let res = "";
-    for (let i = 0; i < msg.length; i++) {
-        res += zero2(msg[i].toString(16));
+    for (const num of msg) {
+        res += zero2(num.toString(16));
     }
     return res;
 }
@@ -8665,7 +8621,7 @@ toHex = (msg: number[]): string => {
 
 See also: [zero2](#variable-zero2)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: toUTF8
@@ -8673,26 +8629,34 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 toUTF8 = (arr: number[]): string => {
     let result = "";
+    let skip = 0;
     for (let i = 0; i < arr.length; i++) {
         const byte = arr[i];
+        if (skip > 0) {
+            skip--;
+            continue;
+        }
         if (byte <= 127) {
             result += String.fromCharCode(byte);
         }
         else if (byte >= 192 && byte <= 223) {
-            const byte2 = arr[++i];
+            const byte2 = arr[i + 1];
+            skip = 1;
             const codePoint = ((byte & 31) << 6) | (byte2 & 63);
             result += String.fromCharCode(codePoint);
         }
         else if (byte >= 224 && byte <= 239) {
-            const byte2 = arr[++i];
-            const byte3 = arr[++i];
+            const byte2 = arr[i + 1];
+            const byte3 = arr[i + 2];
+            skip = 2;
             const codePoint = ((byte & 15) << 12) | ((byte2 & 63) << 6) | (byte3 & 63);
             result += String.fromCharCode(codePoint);
         }
         else if (byte >= 240 && byte <= 247) {
-            const byte2 = arr[++i];
-            const byte3 = arr[++i];
-            const byte4 = arr[++i];
+            const byte2 = arr[i + 1];
+            const byte3 = arr[i + 2];
+            const byte4 = arr[i + 3];
+            skip = 3;
             const codePoint = ((byte & 7) << 18) | ((byte2 & 63) << 12) | ((byte3 & 63) << 6) | (byte4 & 63);
             const surrogate1 = 55296 + ((codePoint - 65536) >> 10);
             const surrogate2 = 56320 + ((codePoint - 65536) & 1023);
@@ -8703,7 +8667,7 @@ toUTF8 = (arr: number[]): string => {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: verify
@@ -8870,7 +8834,7 @@ verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
 
 See also: [BigNumber](#class-bignumber), [Curve](#class-curve), [JacobianPoint](#class-jacobianpoint), [Point](#class-point), [Signature](#class-signature)
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 ### Variable: zero2
@@ -8886,6 +8850,6 @@ zero2 = (word: string): string => {
 }
 ```
 
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
