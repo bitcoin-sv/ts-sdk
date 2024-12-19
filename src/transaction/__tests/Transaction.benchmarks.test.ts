@@ -20,7 +20,7 @@ async function measureTime(fn: () => Promise<void>): Promise<number> {
 describe('Transaction Verification Benchmark', () => {
     const privateKey = new PrivateKey(1)
     const publicKey = privateKey.toPublicKey()
-    const publicKeyHash = hash160(publicKey.toDER())
+    const publicKeyHash = publicKey.toHash()
     const p2pkh = new P2PKH()
 
     it('verifies a transaction with a deep input chain', async () => {
