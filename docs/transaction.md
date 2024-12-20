@@ -160,12 +160,16 @@ const chainTracker = {
   isValidRootForHeight: async (root, height) => {
     // Implementation to check if the Merkle root is valid for the specified block height.
   }
+ currentHeight: async () => {
+   // Implementation to get the current block height.
+ }
 };
 ```
 
 ```ts
 export default interface ChainTracker {
     isValidRootForHeight: (root: string, height: number) => Promise<boolean>;
+    currentHeight: () => Promise<number>;
 }
 ```
 
@@ -1101,7 +1105,7 @@ isParty(party: string)
 
 Returns
 
-`true` if `party` has already beed added to this `BeefParty`.
+`true` if `party` has already been added to this `BeefParty`.
 
 #### Method mergeBeefFromParty
 
@@ -2076,6 +2080,7 @@ export default class WhatsOnChain implements ChainTracker {
     readonly apiKey: string;
     constructor(network: "main" | "test" | "stn" = "main", config: WhatsOnChainConfig = {}) 
     async isValidRootForHeight(root: string, height: number): Promise<boolean> 
+    async currentHeight(): Promise<number> 
 }
 ```
 

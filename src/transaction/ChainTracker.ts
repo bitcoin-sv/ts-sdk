@@ -9,7 +9,7 @@
  * @interface ChainTracker
  * @function isValidRootForHeight - A method to verify the validity of a Merkle root
  *          for a given block height.
- * 
+ *
  * @function currentHeight - A method to get the current block height.
  *
  * @example

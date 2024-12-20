@@ -192,8 +192,8 @@ export default class MerklePath {
     return toHex(this.toBinary())
   }
 
-  // 
-  private indexOf(txid: string): number {
+  //
+  private indexOf (txid: string): number {
     return this.path[0].find(l => l.hash === txid).offset
   }
 
