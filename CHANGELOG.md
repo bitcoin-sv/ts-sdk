@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.2.19 - 2024-12-19](#1219---2024-12-19)
 - [1.2.18 - 2024-12-19](#1218---2024-12-19)
 - [1.2.17 - 2024-12-18](#1217---2024-12-18)
 - [1.2.15 - 2024-12-16](#1215---2024-12-16)
@@ -61,6 +62,15 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.2.19] - 2024-12-19
+
+### Added
+
+- new method on the interface for ChainTrackers which returns the current height of the blockchain.
+- Implemented a Coinbase specific MerklePath .verify conditional block which ensures the input is spendable if it's a coinbase output.
 
 ---
 
