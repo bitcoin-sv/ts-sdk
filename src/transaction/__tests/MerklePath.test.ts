@@ -1,4 +1,5 @@
-import MerklePath from '../../../dist/cjs/src/transaction/MerklePath'
+import ChainTracker from '../ChainTracker'
+import MerklePath from '../../../dist/cjs/src/transaction/MerklePath.js'
 import invalidBumps from './bump.invalid.vectors'
 import validBumps from './bump.valid.vectors'
 
@@ -111,6 +112,15 @@ const BRC74TXID1 = '304e737fdfcb017a1a322e78b067ecebb5e07b44f0a36ed1f01264d2014f
 const BRC74TXID2 = 'd888711d588021e588984e8278a2decf927298173a06737066e43f3e75534e00'
 const BRC74TXID3 = '98c9c5dd79a18f40837061d5e0395ffb52e700a2689e641d19f053fc9619445e'
 
+class FakeChainTracker implements ChainTracker {
+  async isValidRootForHeight (root: string, height: number): Promise<boolean> {
+    return root === 'd5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02' && height === 10000
+  }
+  async currentHeight (): Promise<number> {
+    return 10100
+  }
+}
+
 describe('MerklePath', () => {
   it('Parses from hex', () => {
     const path = MerklePath.fromHex(BRC74Hex)
@@ -129,7 +139,8 @@ describe('MerklePath', () => {
   it('Verifies using a ChainTracker', async () => {
     const path = new MerklePath(BRC74JSON.blockHeight, BRC74JSON.path)
     const tracker = {
-      isValidRootForHeight: jest.fn((root, height) => root === BRC74Root && height === BRC74JSON.blockHeight)
+      isValidRootForHeight: jest.fn(async (root, height) => root === BRC74Root && height === BRC74JSON.blockHeight),
+      currentHeight: jest.fn(async () => 2029209)
     }
     const result = await path.verify(BRC74TXID1, tracker)
     expect(result).toBe(true)
@@ -190,6 +201,14 @@ describe('MerklePath', () => {
     expect(path.computeRoot('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02')).toEqual('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02')
   })
   it('Creates a valid MerklePath from a txid', () => {
+    expect(() => MerklePath.fromCoinbaseTxidAndHeight('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02', 1)).not.toThrowError()
+  })
+  it('Valid for Coinbase if currentHeight is more than 100 blocks prior', async () => {
+    const mp = MerklePath.fromCoinbaseTxidAndHeight('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02', 10000)
+    const isValid = await mp.verify('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02', new FakeChainTracker())
+    expect(isValid).toBe(true)
+  })
+  it('Invalid for Coinbase if currentheight is less than 100 blocks prior ', () => {
     expect(() => MerklePath.fromCoinbaseTxidAndHeight('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02', 1)).not.toThrowError()
   })
 })

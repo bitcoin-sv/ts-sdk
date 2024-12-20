@@ -40,7 +40,7 @@ export default class WhatsOnChain implements ChainTracker {
   async isValidRootForHeight (root: string, height: number): Promise<boolean> {
     const requestOptions = {
       method: 'GET',
-      headers: this.getHeaders()
+      headers: this.getHttpHeaders()
     }
 
     const response = await this.httpClient.request<WhatsOnChainBlockHeader>(`${this.URL}/block/${height}/header`, requestOptions)
@@ -54,7 +54,25 @@ export default class WhatsOnChain implements ChainTracker {
     }
   }
 
-  private getHeaders () {
+  async currentHeight (): Promise<number> {
+    try {
+      const requestOptions = {
+        method: 'GET',
+        headers: this.getHttpHeaders()
+      }
+
+      const response = await this.httpClient.request<{ height: number }>(`${this.URL}/block/headers`, requestOptions)
+      if (response.ok) {
+        return response.data[0].height
+      } else {
+        throw new Error(`Failed to get current height because of an error: ${JSON.stringify(response.data)} `)
+      }
+    } catch (error) {
+      throw new Error(`Failed to get current height because of an error: ${error?.message}`)
+    }
+  }
+
+  private getHttpHeaders () {
     const headers: Record<string, string> = {
       Accept: 'application/json'
     }

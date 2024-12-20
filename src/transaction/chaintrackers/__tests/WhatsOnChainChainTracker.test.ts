@@ -29,7 +29,7 @@ describe('WhatsOnChain ChainTracker', () => {
   it('should verify merkleroot successfully using Node.js https', async () => {
     // Mocking Node.js https module
     mockedHttps(successResponse)
-    delete global.window
+    if (global.window) global.window = {} as any
 
     const chainTracker = new WhatsOnChain(network)
     const response = await chainTracker.isValidRootForHeight(merkleroot, height)
@@ -85,6 +85,37 @@ describe('WhatsOnChain ChainTracker', () => {
     const chainTracker = new WhatsOnChain(network, { httpClient: new FetchHttpClient(mockFetch) })
 
     await expect(chainTracker.isValidRootForHeight(merkleroot, height)).rejects.toThrow(/Failed to verify merkleroot for height \d+ because of an error: .*/)
+  })
+
+  it('should return the current height', async () => {
+    const mockFetch = mockedFetch({
+      status: 200,
+      data: [
+        {
+          hash: '00000000000000000af9958a79fd4dbac1b04a553cc00c80e108718561ccb5a5',
+          confirmations: 1,
+          size: 29605652,
+          height: 875904,
+          version: 704643072,
+          versionHex: '2a000000',
+          merkleroot: '8af5a2d4325ec30e30103b1f365c303d4b49d11e42d26b0d7e9b6866724392e9',
+          time: 1734667612,
+          mediantime: 1734663717,
+          nonce: 157007350,
+          bits: '180f2b74',
+          difficulty: 72479484799.59058,
+          chainwork: '00000000000000000000000000000000000000000160c2f41c8793b90f4500dd',
+          previousblockhash: '00000000000000000128f312a7c62ef5f9a91a3f845a4464d10cfbaaecd233a0',
+          nextblockhash: '',
+          nTx: 0,
+          num_tx: 167567
+        }
+      ]
+    })
+
+    const chainTracker = new WhatsOnChain(network, { httpClient: new FetchHttpClient(mockFetch) })
+
+    await expect(await chainTracker.currentHeight()).toBe(875904)
   })
 
   function mockedFetch (response) {

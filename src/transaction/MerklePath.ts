@@ -192,6 +192,11 @@ export default class MerklePath {
     return toHex(this.toBinary())
   }
 
+  // 
+  private indexOf(txid: string): number {
+    return this.path[0].find(l => l.hash === txid).offset
+  }
+
   /**
    * Computes the Merkle root from the provided transaction ID.
    *
@@ -204,7 +209,7 @@ export default class MerklePath {
       txid = this.path[0].find(leaf => Boolean(leaf?.hash)).hash
     }
     // Find the index of the txid at the lowest level of the Merkle tree
-    const index = this.path[0].find(l => l.hash === txid).offset
+    const index = this.indexOf(txid)
     if (typeof index !== 'number') {
       throw new Error(`This proof does not contain the txid: ${txid}`)
     }
@@ -282,6 +287,13 @@ export default class MerklePath {
    */
   async verify (txid: string, chainTracker: ChainTracker): Promise<boolean> {
     const root = this.computeRoot(txid)
+    if (this.indexOf(txid) === 0) {
+      // Coinbase transaction outputs can only be spent once they're 100 blocks deep.
+      const height = await chainTracker.currentHeight()
+      if (this.blockHeight + 100 < height) {
+        return false
+      }
+    }
     // Use the chain tracker to determine whether this is a valid merkle root at the given block height
     return await chainTracker.isValidRootForHeight(root, this.blockHeight)
   }
