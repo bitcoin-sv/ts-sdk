@@ -208,7 +208,9 @@ describe('MerklePath', () => {
     const isValid = await mp.verify('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02', new FakeChainTracker())
     expect(isValid).toBe(true)
   })
-  it('Invalid for Coinbase if currentheight is less than 100 blocks prior ', () => {
-    expect(() => MerklePath.fromCoinbaseTxidAndHeight('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02', 1)).not.toThrowError()
+  it('Invalid for Coinbase if currentheight is less than 100 blocks prior ', async () => {
+    const mp = MerklePath.fromCoinbaseTxidAndHeight('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02', 10099)
+    const isValid = await mp.verify('d5377a7aba0c0e0dbaef230f8917217b453484c83579e11a14c8299faa57ef02', new FakeChainTracker())
+    expect(isValid).toBe(false)
   })
 })
