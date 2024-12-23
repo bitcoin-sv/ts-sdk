@@ -722,13 +722,39 @@ export interface AcquireCertificateArgs {
   privilegedReason?: DescriptionString5to50Bytes
 }
 
+/**
+ * Represents an Identity Certificate as per the Wallet interface specifications.
+ *
+ * This class provides methods to serialize and deserialize certificates, as well as signing and verifying the certificate's signature.
+ */
 export interface WalletCertificate {
+  /**
+   * Type identifier for the certificate, base64 encoded string, 32 bytes.
+   */
   type: Base64String
+  /**
+   * The public key belonging to the certificate's subject, compressed public key hex string.
+   */
   subject: PubKeyHex
+  /**
+   * Unique serial number of the certificate, base64 encoded string, 32 bytes.
+   */
   serialNumber: Base64String
+  /**
+   * Public key of the certifier who issued the certificate, compressed public key hex string.
+   */
   certifier: PubKeyHex
+  /**
+   * The outpoint used to confirm that the certificate has not been revoked (TXID.OutputIndex), as a string.
+   */
   revocationOutpoint: OutpointString
+  /**
+   * Certificate signature by the certifier's private key, hex string.
+  */
   signature: HexString
+  /**
+   * All the fields present in the certificate, with field names as keys and field values as strings.
+   */
   fields: Record<CertificateFieldNameUnder50Bytes, string>
 }
 
