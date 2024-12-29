@@ -439,7 +439,7 @@ export default class Transaction {
     this.cachedHash = undefined
     if (!output.change) {
       if (typeof output.satoshis === 'undefined') throw new Error('either satoshis must be defined or change must be set to true')
-      if (output.satoshis <= 0) throw new Error('satoshis must be a positive integer or zero')
+      if (output.satoshis < 0) throw new Error('satoshis must be a positive integer or zero')
     }
     if (!output.lockingScript) throw new Error('lockingScript must be defined')
     this.outputs.push(output)
