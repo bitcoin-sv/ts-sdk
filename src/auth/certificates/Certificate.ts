@@ -1,6 +1,13 @@
-import { Utils } from '../primitives/index.js'
-import { Wallet, Base64String, PubKeyHex, HexString, OutpointString, CertificateFieldNameUnder50Bytes } from '../wallet/Wallet.interfaces.js'
-import ProtoWallet from '../wallet/ProtoWallet.js'
+import {
+  Utils,
+  Wallet,
+  Base64String,
+  PubKeyHex,
+  HexString,
+  OutpointString,
+  CertificateFieldNameUnder50Bytes,
+  ProtoWallet
+} from '../../../mod.js'
 
 /**
  * Represents an Identity Certificate as per the Wallet interface specifications.
@@ -54,7 +61,7 @@ export default class Certificate {
    * @param {Record<CertificateFieldNameUnder50Bytes, string>} fields - All the fields present in the certificate.
    * @param {HexString} signature - Certificate signature by the certifier's private key, DER encoded hex string.
    */
-  constructor (
+  constructor(
     type: Base64String,
     serialNumber: Base64String,
     subject: PubKeyHex,
@@ -78,7 +85,7 @@ export default class Certificate {
    * @param {boolean} [includeSignature=true] - Whether to include the signature in the serialization.
    * @returns {number[]} - The serialized certificate in binary format.
    */
-  toBin (includeSignature: boolean = true): number[] {
+  toBin(includeSignature: boolean = true): number[] {
     const writer = new Utils.Writer()
 
     // Write type (Base64String, 32 bytes)
@@ -134,7 +141,7 @@ export default class Certificate {
    * @param {number[]} bin - The binary data representing the certificate.
    * @returns {Certificate} - The deserialized Certificate object.
    */
-  static fromBin (bin: number[]): Certificate {
+  static fromBin(bin: number[]): Certificate {
     const reader = new Utils.Reader(bin)
 
     // Read type
@@ -200,7 +207,7 @@ export default class Certificate {
    *
    * @returns {Promise<boolean>} - A promise that resolves to true if the signature is valid.
    */
-  async verify (): Promise<boolean> {
+  async verify(): Promise<boolean> {
     // A verifier can be any wallet capable of verifying signatures
     const verifier = new ProtoWallet('anyone')
     const verificationData = this.toBin(false) // Exclude the signature from the verification data
@@ -221,7 +228,7 @@ export default class Certificate {
    * @param {Wallet} certifier - The wallet representing the certifier.
    * @returns {Promise<void>}
    */
-  async sign (certifier: Wallet): Promise<void> {
+  async sign(certifier: Wallet): Promise<void> {
     const preimage = this.toBin(false) // Exclude the signature when signing
     const { signature } = await certifier.createSignature({
       data: preimage,

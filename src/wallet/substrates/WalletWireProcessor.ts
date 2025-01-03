@@ -2,7 +2,7 @@ import { Wallet } from '../Wallet.interfaces.js'
 import WalletWire from './WalletWire.js'
 import { Utils } from '../../primitives/index.js'
 import calls from './WalletWireCalls.js'
-import Certificate from '../../auth/Certificate.js'
+import Certificate from '../../auth/certificates/Certificate.js'
 import { SecurityLevel } from '../Wallet.interfaces.js'
 
 /**
