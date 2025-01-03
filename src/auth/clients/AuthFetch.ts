@@ -10,9 +10,12 @@ import { Writer } from 'src/primitives/utils.js'
 type SimplifiedFetchRequestOptions = {
   method?: string,
   headers?: Record<string, string>,
-  body?: any
+  body?: any,
+  retryCounter?: number
 }
 type AuthPeer = { peer: Peer, identityKey?: string, supportsMutualAuth?: boolean }
+
+const PAYMENT_VERSION = '1.0'
 
 /**
  * AuthFetch provides a lightweight fetch client for interacting with servers
@@ -55,6 +58,12 @@ export class AuthFetch {
    * @throws Will throw an error if unsupported headers are used or other validation fails.
    */
   async fetch(url: string, config: SimplifiedFetchRequestOptions = {}): Promise<Response> {
+    if (config.retryCounter) {
+      if (config.retryCounter <= 0) {
+        throw new Error('Request failed after maximum number of retries.')
+      }
+      config.retryCounter--
+    }
     const response = await new Promise<Response>(async (resolve, reject) => {
       try {
         // Apply defaults
@@ -92,7 +101,7 @@ export class AuthFetch {
         }
 
         // Serialize the simplified fetch request.
-        const requestNonce = await Random(32)
+        const requestNonce = Random(32)
         const requestNonceAsBase64 = Utils.toBase64(requestNonce)
 
         const writer = await this.serializeRequest(
@@ -182,12 +191,7 @@ export class AuthFetch {
     // Check if server requires payment to access the requested route
     if (response.status === 402) {
       // Create and attach a payment, then retry
-      const paidResponse = await this.handlePaymentAndRetry(url, config, response)
-      if (!paidResponse || paidResponse.status === 402) {
-        // Note: Currently just responds to a single 402 Payment Required response.
-        throw new Error('Payment failed, unable to proceed.')
-      }
-      return paidResponse
+      return await this.handlePaymentAndRetry(url, config, response)
     }
 
     return response
@@ -361,38 +365,39 @@ export class AuthFetch {
    */
   private async handlePaymentAndRetry(
     url: string,
-    config: SimplifiedFetchRequestOptions,
+    config: SimplifiedFetchRequestOptions = {},
     originalResponse: Response
   ): Promise<Response | null> {
+    // Make sure the server is using the correct payment version
+    const paymentVersion = originalResponse.headers.get('x-bsv-payment-version')
+    if (!paymentVersion || paymentVersion !== PAYMENT_VERSION) {
+      throw new Error(`Unsupported x-bsv-payment-version response header. Client version: ${PAYMENT_VERSION}, Server version: ${paymentVersion}`)
+    }
+
     // Get required headers from the 402 response
     const satoshisRequiredHeader = originalResponse.headers.get(
       'x-bsv-payment-satoshis-required'
     )
     if (!satoshisRequiredHeader) {
-      console.error('Missing x-bsv-payment-satoshis-required response header.')
-      return null
+      throw new Error('Missing x-bsv-payment-satoshis-required response header.')
     }
-
     const satoshisRequired = parseInt(satoshisRequiredHeader)
     if (isNaN(satoshisRequired) || satoshisRequired <= 0) {
-      console.error('Invalid x-bsv-payment-satoshis-required response header value.')
-      return null
+      throw new Error('Invalid x-bsv-payment-satoshis-required response header value.')
     }
 
     const serverIdentityKey = originalResponse.headers.get('x-bsv-auth-identity-key')
     if (!serverIdentityKey) {
-      console.error('Missing x-bsv-auth-identity-key response header.')
-      return null
+      throw new Error('Missing x-bsv-auth-identity-key response header.')
     }
 
     const derivationPrefix = originalResponse.headers.get('x-bsv-payment-derivation-prefix')
     if (!derivationPrefix) {
-      console.error('Missing x-bsv-payment-derivation-prefix response header.')
-      return null
+      throw new Error('Missing x-bsv-payment-derivation-prefix response header.')
     }
 
     // Create a random suffix for the derivation path
-    const derivationSuffix = Utils.toBase64(await Random(10))
+    const derivationSuffix = Utils.toBase64(Random(10))
 
     // Derive the script hex from the server identity key
     const { publicKey: derivedPublicKey } = await this.wallet.getPublicKey({
@@ -403,34 +408,22 @@ export class AuthFetch {
     const lockingScript = new P2PKH().lock(PublicKey.fromString(derivedPublicKey).toHash()).toHex()
 
     // Create the payment transaction using createAction
-    // const { tx } = await this.wallet.createAction({
-    //   description: `Payment for request to ${url}`,
-    //   outputs: [{
-    //     satoshis: satoshisRequired,
-    //     lockingScript,
-    //     outputDescription: 'HTTP request payment'
-    //   }]
-    // })
-
-    // TODO: Remove this temp mock tx! Only for testing! --------------------------
-    const tx = {
-      inputs: [],
-      outputs: [
-        {
-          vout: 0,
-          satoshis: satoshisRequired,
-          derivationSuffix
-        }
-      ]
-    }
-    // ---------------------------------------------------------------------------
+    const { tx } = await this.wallet.createAction({
+      description: `Payment for request to ${new URL(url).origin}`,
+      outputs: [{
+        satoshis: satoshisRequired,
+        lockingScript,
+        outputDescription: 'HTTP request payment'
+      }]
+    })
 
     // Attach the payment to the request headers
     config.headers = config.headers || {}
     config.headers['x-bsv-payment'] = JSON.stringify({
       derivationPrefix,
-      transaction: tx,
+      transaction: Utils.toBase64(tx)
     })
+    config.retryCounter ??= 3
 
     // Re-attempt request with payment attached
     return this.fetch(url, config)
