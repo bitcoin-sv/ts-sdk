@@ -1,5 +1,64 @@
 {
-  "inputFilename": "mod.ts",
-  "outputFilename": "./API.md",
-  "firstHeadingLevel": 1
+  "options": [
+    {
+      "inputFilename": "src/auth/index.ts",
+      "outputFilename": "docs/auth.md",
+      "firstHeadingLevel": 1,
+      "filenameSubString": "auth"
+    },
+    {
+      "inputFilename": "src/compat/index.ts",
+      "outputFilename": "docs/compat.md",
+      "firstHeadingLevel": 1,
+      "filenameSubString": "compat"
+    },
+    {
+      "inputFilename": "src/messages/index.ts",
+      "outputFilename": "docs/messages.md",
+      "firstHeadingLevel": 1,
+      "filenameSubString": "messages"
+    },
+    {
+      "inputFilename": "src/overlay-tools/index.ts",
+      "outputFilename": "docs/overlay-tools.md",
+      "firstHeadingLevel": 1,
+      "filenameSubString": "overlay-tools"
+    },
+    {
+      "inputFilename": "src/primitives/index.ts",
+      "outputFilename": "docs/primitives.md",
+      "firstHeadingLevel": 1,
+      "filenameSubString": "primitives"
+    },
+    {
+      "inputFilename": "src/script/index.ts",
+      "outputFilename": "docs/script.md",
+      "firstHeadingLevel": 1,
+      "filenameSubString": "script"
+    },
+    {
+      "inputFilename": "src/totp/index.ts",
+      "outputFilename": "docs/totp.md",
+      "firstHeadingLevel": 1,
+      "filenameSubString": "totp"
+    },
+    {
+      "inputFilename": "src/transaction/index.ts",
+      "outputFilename": "docs/transaction.md",
+      "firstHeadingLevel": 1,
+      "filenameSubString": "transaction"
+    },
+    {
+      "inputFilename": "src/wallet/index.ts",
+      "outputFilename": "docs/wallet.md",
+      "firstHeadingLevel": 1,
+      "filenameSubString": "wallet"
+    },
+    {
+      "inputFilename": "src/wallet/substrates/index.ts",
+      "outputFilename": "docs/wallet-substrates.md",
+      "firstHeadingLevel": 1,
+      "filenameSubString": "wallet/substrates"
+    }
+  ]
 }

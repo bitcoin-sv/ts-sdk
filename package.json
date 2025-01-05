@@ -1,6 +1,6 @@
 {
   "name": "@bsv/sdk",
-  "version": "1.2.20",
+  "version": "1.2.21",
   "type": "module",
   "description": "BSV Blockchain Software Development Kit",
   "main": "dist/cjs/mod.js",
@@ -164,6 +164,16 @@
       "require": "./dist/cjs/src/auth/*.js",
       "types": "./dist/types/src/auth/*.d.ts"
     },
+    "./auth/certificate": {
+      "import": "./dist/esm/src/auth/certificate/index.js",
+      "require": "./dist/cjs/src/auth/certificate/index.js",
+      "types": "./dist/types/src/auth/certificate/index.d.ts"
+    },
+    "./auth/certificate/*": {
+      "import": "./dist/esm/src/auth/certificate/*.js",
+      "require": "./dist/cjs/src/auth/certificate/*.js",
+      "types": "./dist/types/src/auth/certificate/*.d.ts"
+    },
     "./overlay-tools": {
       "import": "./dist/esm/src/overlay-tools/index.js",
       "require": "./dist/cjs/src/overlay-tools/index.js",
@@ -188,7 +198,7 @@
     "build:umd": "webpack --config webpack.config.js",
     "dev": "tsc -b -w",
     "prepublish": "npm run build",
-    "doc": "ts2md --inputFilename=src/script/index.ts --outputFilename=docs/script.md --filenameSubString=script --firstHeadingLevel=1 && ts2md --inputFilename=src/primitives/index.ts --outputFilename=docs/primitives.md --filenameSubString=primitives --firstHeadingLevel=1 && ts2md --inputFilename=src/transaction/index.ts --outputFilename=docs/transaction.md --filenameSubString=transaction --firstHeadingLevel=1 && ts2md --inputFilename=src/messages/index.ts --outputFilename=docs/messages.md --filenameSubString=messages --firstHeadingLevel=1 && ts2md --inputFilename=src/compat/index.ts --outputFilename=docs/compat.md --filenameSubString=compat --firstHeadingLevel=1 && ts2md --inputFilename=src/wallet/index.ts --outputFilename=docs/wallet.md --filenameSubString=wallet --firstHeadingLevel=1 && ts2md --inputFilename=src/wallet/substrates/index.ts --outputFilename=docs/wallet-substrates.md --filenameSubString=wallet/substrates --firstHeadingLevel=1 && ts2md --inputFilename=src/totp/index.ts --outputFilename=docs/totp.md --filenameSubString=totp --firstHeadingLevel=1 && ts2md --inputFilename=src/overlay-tools/index.ts --outputFilename=docs/overlay-tools.md --filenameSubString=overlay-tools --firstHeadingLevel=1"
+    "doc": "ts2md"
   },
   "repository": {
     "type": "git",
@@ -214,7 +224,7 @@
     "ts-jest": "^29.1.1",
     "ts-loader": "^9.5.1",
     "ts-standard": "^12.0.2",
-    "ts2md": "^0.2.4",
+    "ts2md": "^0.2.5",
     "tsconfig-to-dual-package": "^1.2.0",
     "typescript": "^5.2.2",
     "webpack": "^5.95.0",
