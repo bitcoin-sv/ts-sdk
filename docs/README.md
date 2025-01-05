@@ -9,6 +9,7 @@ The documentation is split into various pages, each covering a set of related fu
 - [TOTP](./totp.md) - Covers Time-based One Time Password, useful for validating counterparties across unsecured mediums.
 - [Wallet](./wallet-substrates.md) - Covers the Wallet Substrates for communication between applications and wallets using a standard interface.
 - [Overlay Tools](./overlay-tools.md) - Covers the use of Overlays for broadcast of transactions based on topics, as well as distributed lookup of tokens.
+- [Auth](./auth.md) - Mutual Authentication and Service Monetization Framework
 - [Compat](./compat.md) — Covers deprecated functionality for legacy systems like BIP32 and ECIES
 
 ## Swagger
