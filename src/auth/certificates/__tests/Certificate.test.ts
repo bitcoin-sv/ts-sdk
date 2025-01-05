@@ -1,4 +1,4 @@
-import Certificate from '../../../../dist/cjs/src/auth/certificates/Certificate.js'
+import { Certificate } from '../../../../dist/cjs/src/auth/index.js'
 import { ProtoWallet } from '../../../../dist/cjs/src/wallet/index.js'
 import { Utils, PrivateKey } from '../../../../dist/cjs/src/primitives/index.js'
 
@@ -73,7 +73,7 @@ describe('Certificate', () => {
     )
 
     // Sign the certificate
-    const certifierWallet: ProtoWallet = new ProtoWallet(sampleCertifierPrivateKey)
+    const certifierWallet = new ProtoWallet(sampleCertifierPrivateKey)
     await certificate.sign(certifierWallet)
 
     const serialized = certificate.toBin(true) // Include signature
@@ -100,7 +100,7 @@ describe('Certificate', () => {
     )
 
     // Sign the certificate
-    const certifierWallet: ProtoWallet = new ProtoWallet(sampleCertifierPrivateKey)
+    const certifierWallet = new ProtoWallet(sampleCertifierPrivateKey)
     await certificate.sign(certifierWallet)
 
     // Verify the signature
@@ -120,7 +120,7 @@ describe('Certificate', () => {
     )
 
     // Sign the certificate
-    const certifierWallet: ProtoWallet = new ProtoWallet(sampleCertifierPrivateKey)
+    const certifierWallet = new ProtoWallet(sampleCertifierPrivateKey)
     await certificate.sign(certifierWallet)
 
     // Tamper with the certificate (modify a field)
@@ -172,7 +172,7 @@ describe('Certificate', () => {
     )
 
     // Sign the certificate
-    const certifierWallet: ProtoWallet = new ProtoWallet(sampleCertifierPrivateKey)
+    const certifierWallet = new ProtoWallet(sampleCertifierPrivateKey)
     await certificate.sign(certifierWallet)
 
     // Serialize and deserialize
@@ -223,7 +223,7 @@ describe('Certificate', () => {
     )
 
     // Sign the certificate
-    const certifierWallet: ProtoWallet = new ProtoWallet(sampleCertifierPrivateKey)
+    const certifierWallet = new ProtoWallet(sampleCertifierPrivateKey)
     await certificate.sign(certifierWallet)
 
     // Serialize and deserialize
@@ -266,7 +266,7 @@ describe('Certificate', () => {
     )
 
     // Sign the certificate
-    const certifierWallet: ProtoWallet = new ProtoWallet(sampleCertifierPrivateKey)
+    const certifierWallet = new ProtoWallet(sampleCertifierPrivateKey)
     await certificate.sign(certifierWallet)
 
     // Serialize and deserialize

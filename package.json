@@ -164,6 +164,16 @@
       "require": "./dist/cjs/src/auth/*.js",
       "types": "./dist/types/src/auth/*.d.ts"
     },
+    "./auth/certificate": {
+      "import": "./dist/esm/src/auth/certificate/index.js",
+      "require": "./dist/cjs/src/auth/certificate/index.js",
+      "types": "./dist/types/src/auth/certificate/index.d.ts"
+    },
+    "./auth/certificate/*": {
+      "import": "./dist/esm/src/auth/certificate/*.js",
+      "require": "./dist/cjs/src/auth/certificate/*.js",
+      "types": "./dist/types/src/auth/certificate/*.d.ts"
+    },
     "./overlay-tools": {
       "import": "./dist/esm/src/overlay-tools/index.js",
       "require": "./dist/cjs/src/overlay-tools/index.js",
