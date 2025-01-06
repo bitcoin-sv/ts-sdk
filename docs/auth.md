@@ -987,13 +987,51 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | |
 | --- |
+| [createMasterCertificate](#function-createmastercertificate) |
 | [createNonce](#function-createnonce) |
+| [createVerifiableCertificate](#function-createverifiablecertificate) |
 | [verifyNonce](#function-verifynonce) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 
+### Function: createMasterCertificate
+
+Creates a Master Certificate by encrypting provided fields and generating a master keyring.
+
+```ts
+export async function createMasterCertificate(wallet: Wallet, fields: Record<string, string>, certificateType: string, certificateSerialNumber: string, certifierPublicKey: string): Promise<MasterCertificate> 
+```
+
+See also: [MasterCertificate](#class-mastercertificate), [Wallet](#interface-wallet)
+
+<details>
+
+<summary>Function createMasterCertificate Details</summary>
+
+Returns
+
+A promise resolving to the created Master Certificate.
+
+Argument Details
+
++ **wallet**
+  + The wallet instance used for encryption and public key retrieval.
++ **fields**
+  + The certificate fields to encrypt.
++ **certificateType**
+  + The type of the certificate being created.
++ **certificateSerialNumber**
+  + The serial number of the certificate.
++ **certifierPublicKey**
+  + The public key of the certifier.
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
 ### Function: createNonce
 
 Creates a nonce derived from a privateKey
@@ -1011,6 +1049,42 @@ See also: [Wallet](#interface-wallet)
 Returns
 
 A random nonce derived with a wallet
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
+### Function: createVerifiableCertificate
+
+Creates a Verifiable Certificate by signing a Master Certificate and generating a keyring for a verifier.
+
+```ts
+export async function createVerifiableCertificate(masterCertificate: MasterCertificate, wallet: Wallet, verifierIdentityKey: string, fieldsToReveal: string[], certifierPrivateKey: PrivateKey): Promise<VerifiableCertificate> 
+```
+
+See also: [MasterCertificate](#class-mastercertificate), [PrivateKey](#class-privatekey), [VerifiableCertificate](#class-verifiablecertificate), [Wallet](#interface-wallet)
+
+<details>
+
+<summary>Function createVerifiableCertificate Details</summary>
+
+Returns
+
+A promise resolving to the created Verifiable Certificate.
+
+Argument Details
+
++ **masterCertificate**
+  + The master certificate to convert into a verifiable certificate.
++ **wallet**
+  + The wallet instance used for generating a keyring for the verifier.
++ **verifierIdentityKey**
+  + The identity key of the verifier.
++ **fieldsToReveal**
+  + The list of fields to reveal to the verifier.
++ **certifierPrivateKey**
+  + The private key of the certifier for signing the certificate.
 
 </details>
 
