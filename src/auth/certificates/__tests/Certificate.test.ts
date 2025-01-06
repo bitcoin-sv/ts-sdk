@@ -49,8 +49,8 @@ describe('Certificate', () => {
       undefined // No signature
     )
 
-    const serialized = certificate.toBin(false) // Exclude signature
-    const deserializedCertificate = Certificate.fromBin(serialized)
+    const serialized = certificate.toBinary(false) // Exclude signature
+    const deserializedCertificate = Certificate.fromBinary(serialized)
 
     expect(deserializedCertificate.type).toEqual(sampleType)
     expect(deserializedCertificate.serialNumber).toEqual(sampleSerialNumber)
@@ -76,8 +76,8 @@ describe('Certificate', () => {
     const certifierWallet = new ProtoWallet(sampleCertifierPrivateKey)
     await certificate.sign(certifierWallet)
 
-    const serialized = certificate.toBin(true) // Include signature
-    const deserializedCertificate = Certificate.fromBin(serialized)
+    const serialized = certificate.toBinary(true) // Include signature
+    const deserializedCertificate = Certificate.fromBinary(serialized)
 
     expect(deserializedCertificate.type).toEqual(sampleType)
     expect(deserializedCertificate.serialNumber).toEqual(sampleSerialNumber)
@@ -176,8 +176,8 @@ describe('Certificate', () => {
     await certificate.sign(certifierWallet)
 
     // Serialize and deserialize
-    const serialized = certificate.toBin(true)
-    const deserializedCertificate = Certificate.fromBin(serialized)
+    const serialized = certificate.toBinary(true)
+    const deserializedCertificate = Certificate.fromBinary(serialized)
 
     expect(deserializedCertificate.fields).toEqual(sampleFieldsEmpty)
 
@@ -198,8 +198,8 @@ describe('Certificate', () => {
     )
 
     // Serialize without signature
-    const serialized = certificate.toBin(false)
-    const deserializedCertificate = Certificate.fromBin(serialized)
+    const serialized = certificate.toBinary(false)
+    const deserializedCertificate = Certificate.fromBinary(serialized)
 
     expect(deserializedCertificate.signature).toBeUndefined() // Signature should be empty
     expect(deserializedCertificate.fields).toEqual(sampleFields)
@@ -227,8 +227,8 @@ describe('Certificate', () => {
     await certificate.sign(certifierWallet)
 
     // Serialize and deserialize
-    const serialized = certificate.toBin(true)
-    const deserializedCertificate = Certificate.fromBin(serialized)
+    const serialized = certificate.toBinary(true)
+    const deserializedCertificate = Certificate.fromBinary(serialized)
 
     expect(deserializedCertificate.fields).toEqual(fields)
 
@@ -248,8 +248,8 @@ describe('Certificate', () => {
       undefined // No signature
     )
 
-    const serialized = certificate.toBin(false)
-    const deserializedCertificate = Certificate.fromBin(serialized)
+    const serialized = certificate.toBinary(false)
+    const deserializedCertificate = Certificate.fromBinary(serialized)
 
     expect(deserializedCertificate.revocationOutpoint).toEqual(sampleRevocationOutpoint)
   })
@@ -270,8 +270,8 @@ describe('Certificate', () => {
     await certificate.sign(certifierWallet)
 
     // Serialize and deserialize
-    const serialized = certificate.toBin(true)
-    const deserializedCertificate = Certificate.fromBin(serialized)
+    const serialized = certificate.toBinary(true)
+    const deserializedCertificate = Certificate.fromBinary(serialized)
 
     expect(deserializedCertificate.fields).toEqual({})
 
