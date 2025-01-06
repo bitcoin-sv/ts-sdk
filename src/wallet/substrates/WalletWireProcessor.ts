@@ -1571,7 +1571,7 @@ export default class WalletWireProcessor implements WalletWire {
               acquireResult.fields,
               acquireResult.signature
             )
-            const certBin = cert.toBin()
+            const certBin = cert.toBinary()
 
             // Return success code and certificate binary
             const responseWriter = new Utils.Writer()
@@ -1651,7 +1651,7 @@ export default class WalletWireProcessor implements WalletWire {
                 cert.fields,
                 cert.signature
               )
-              const certBin = certificate.toBin()
+              const certBin = certificate.toBinary()
 
               // Write certificate binary length and data
               resultWriter.writeVarIntNum(certBin.length)
@@ -1961,7 +1961,7 @@ export default class WalletWireProcessor implements WalletWire {
         cert.fields,
         cert.signaturre
       )
-      const certBin = certificate.toBin()
+      const certBin = certificate.toBinary()
 
       // Write certificate binary length and data
       resultWriter.writeVarIntNum(certBin.length)
