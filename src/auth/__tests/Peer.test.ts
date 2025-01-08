@@ -7,6 +7,7 @@ import { Utils, PrivateKey, SymmetricKey } from '../../../dist/cjs/src/primitive
 import { VerifiableCertificate, } from "../../../dist/cjs/src/auth/certificates/VerifiableCertificate.js"
 import { MasterCertificate } from '../../../dist/cjs/src/auth/certificates/MasterCertificate.js'
 import { getVerifiableCertificates } from '../../../dist/cjs/src/auth/utils/getVerifiableCertificates.js'
+import { createVerifiableCertificate } from '../../../dist/cjs/src/auth/utils/certificateHelpers.js'
 jest.mock('../../../dist/cjs/src/auth/utils/getVerifiableCertificates.js')
 
 /**
@@ -113,28 +114,6 @@ describe('Peer class mutual authentication and certificate exchange', () => {
       'revocationOutpoint',
       certificateFields,
       masterKeyring
-    )
-  }
-
-  async function createVerifiableCertificate(
-    masterCertificate: MasterCertificate,
-    wallet: Wallet,
-    verifierIdentityKey: string,
-    fieldsToReveal: string[]
-  ): Promise<VerifiableCertificate> {
-    const certifierWallet = new ProtoWallet(certifierPrivateKey)
-    await masterCertificate.sign(certifierWallet)
-
-    const keyringForVerifier = await masterCertificate.createKeyringForVerifier(wallet, verifierIdentityKey, fieldsToReveal)
-    return new VerifiableCertificate(
-      masterCertificate.type,
-      masterCertificate.serialNumber,
-      masterCertificate.subject,
-      masterCertificate.certifier,
-      masterCertificate.revocationOutpoint,
-      masterCertificate.fields,
-      masterCertificate.signature,
-      keyringForVerifier
     )
   }
 

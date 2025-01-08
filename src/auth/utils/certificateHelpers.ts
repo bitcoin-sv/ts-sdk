@@ -62,9 +62,8 @@ export async function createVerifiableCertificate(
   wallet: Wallet,
   verifierIdentityKey: string,
   fieldsToReveal: string[],
-  certifierPrivateKey: PrivateKey
+  certifierWallet: Wallet
 ): Promise<VerifiableCertificate> {
-  const certifierWallet = new ProtoWallet(certifierPrivateKey)
   await masterCertificate.sign(certifierWallet)
 
   const keyringForVerifier = await masterCertificate.createKeyringForVerifier(
