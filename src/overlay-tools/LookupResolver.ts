@@ -1,4 +1,4 @@
-import { Transaction } from '../transaction/index.js'
+import { Beef, Transaction } from '../transaction/index.js'
 import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate.js'
 
 /**
@@ -23,8 +23,9 @@ export interface LookupQuestion {
  */
 export type LookupAnswer = {
   type: 'output-list'
+  beef: number[]
   outputs: Array<{
-    beef: number[]
+    txid: string
     outputIndex: number
   }>
 } | {
@@ -78,11 +79,11 @@ export interface OverlayLookupFacilitator {
 export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
   fetchClient: typeof fetch
 
-  constructor (httpClient = fetch) {
+  constructor(httpClient = fetch) {
     this.fetchClient = httpClient
   }
 
-  async lookup (url: string, question: LookupQuestion, timeout: number = 5000): Promise<LookupAnswer> {
+  async lookup(url: string, question: LookupQuestion, timeout: number = 5000): Promise<LookupAnswer> {
     if (!url.startsWith('https:')) {
       throw new Error('HTTPS facilitator can only use URLs that start with "https:"')
     }
@@ -117,7 +118,7 @@ export default class LookupResolver {
   private readonly hostOverrides: Record<string, string[]>
   private readonly additionalHosts: Record<string, string[]>
 
-  constructor (config?: LookupResolverConfig) {
+  constructor(config?: LookupResolverConfig) {
     const { facilitator, slapTrackers, hostOverrides, additionalHosts } = config ?? {} as LookupResolverConfig
     this.facilitator = facilitator ?? new HTTPSOverlayLookupFacilitator()
     this.slapTrackers = slapTrackers ?? DEFAULT_SLAP_TRACKERS
@@ -128,7 +129,7 @@ export default class LookupResolver {
   /**
    * Given a LookupQuestion, returns a LookupAnswer. Aggregates across multiple services and supports resiliency.
    */
-  async query (question: LookupQuestion, timeout?: number): Promise<LookupAnswer> {
+  async query(question: LookupQuestion, timeout?: number): Promise<LookupAnswer> {
     let competentHosts: string[] = []
     if (question.service === 'ls_slap') {
       competentHosts = this.slapTrackers
@@ -166,15 +167,17 @@ export default class LookupResolver {
       return successfulResponses[0]
     } else {
       // Aggregate outputs from all successful responses
-      const outputs = new Map<string, { beef: number[], outputIndex: number }>()
+      let beef = new Beef()
+      const outputs = new Map<string, { txid: string, outputIndex: number }>()
       for (const response of successfulResponses) {
         if (response.type !== 'output-list') {
           continue
         }
+        beef.mergeBeef(response.beef)
         try {
           for (const output of response.outputs) {
             try {
-              const key = `${Transaction.fromBEEF(output.beef).id('hex')}.${output.outputIndex}`
+              const key = `${output.txid}.${output.outputIndex}`
               outputs.set(key, output)
             } catch (e) {
               continue
@@ -186,6 +189,7 @@ export default class LookupResolver {
       }
       return {
         type: 'output-list',
+        beef: beef.toBinary(),
         outputs: Array.from(outputs.values())
       }
     }
@@ -196,7 +200,7 @@ export default class LookupResolver {
      * @param service Service for which competent hosts are to be returned
      * @returns Array of hosts competent for resolving queries
      */
-  private async findCompetentHosts (service: string): Promise<string[]> {
+  private async findCompetentHosts(service: string): Promise<string[]> {
     const query: LookupQuestion = {
       service: 'ls_slap',
       query: {
@@ -215,12 +219,11 @@ export default class LookupResolver {
       if (result.status === 'fulfilled') {
         const answer = result.value
         if (answer.type !== 'output-list') {
-          // Log invalid response and continue
           continue
         }
         for (const output of answer.outputs) {
           try {
-            const tx = Transaction.fromBEEF(output.beef)
+            const tx = Transaction.fromBEEF(answer.beef, output.txid)
             const script = tx.outputs[output.outputIndex].lockingScript
             const parsed = OverlayAdminTokenTemplate.decode(script)
             if (parsed.topicOrService !== service || parsed.protocol !== 'SLAP') {
