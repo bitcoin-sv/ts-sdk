@@ -459,7 +459,7 @@ and sending and receiving general messages over a transport layer.
 export class Peer {
     public sessionManager: SessionManager;
     certificatesToRequest: RequestedCertificateSet;
-    constructor(wallet: Wallet, transport: Transport, certificatesToRequest?: RequestedCertificateSet, sessionManager?: SessionManager) 
+    constructor(wallet: Wallet, transport: Transport, certificatesToRequest?: RequestedCertificateSet, sessionManager?: SessionManager, autoPersistLastSession?: boolean) 
     async toPeer(message: number[], identityKey?: string, maxWaitTime?: number): Promise<void> 
     async requestCertificates(certificatesToRequest: RequestedCertificateSet, identityKey?: string, maxWaitTime = 10000): Promise<void> 
     async getAuthenticatedSession(identityKey?: string, maxWaitTime?: number): Promise<PeerSession> 
@@ -485,7 +485,7 @@ See also: [AuthMessage](#interface-authmessage), [PeerSession](#interface-peerse
 Creates a new Peer instance
 
 ```ts
-constructor(wallet: Wallet, transport: Transport, certificatesToRequest?: RequestedCertificateSet, sessionManager?: SessionManager) 
+constructor(wallet: Wallet, transport: Transport, certificatesToRequest?: RequestedCertificateSet, sessionManager?: SessionManager, autoPersistLastSession?: boolean) 
 ```
 See also: [RequestedCertificateSet](#interface-requestedcertificateset), [SessionManager](#class-sessionmanager), [Transport](#interface-transport), [Wallet](#interface-wallet)
 
@@ -499,6 +499,8 @@ Argument Details
   + Optional set of certificates to request from a peer during the initial handshake.
 + **sessionManager**
   + Optional SessionManager to be used for managing peer sessions.
++ **autoPersistLastSession**
+  + Whether to auto-persist the session with the last-interacted-with peer. Defaults to true.
 
 #### Method getAuthenticatedSession
 
