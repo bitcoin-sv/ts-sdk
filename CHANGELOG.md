@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.2.23 - 2025-01-09](#1223---2025-01-09)
 - [1.2.22 - 2025-01-06](#1222---2025-01-06)
 - [1.2.21 - 2025-01-03](#1221---2025-01-03)
 - [1.2.19 - 2024-12-19](#1219---2024-12-19)
@@ -64,6 +65,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.2.23] - 2025-01-09
+
+### Added
+
+- Support for last session persistence in Peer
 
 ---
 
