@@ -4,7 +4,7 @@ import { SimplifiedFetchTransport } from '../transports/SimplifiedFetchTransport
 import { SessionManager } from '../SessionManager.js'
 import { RequestedCertificateSet } from '../types.js'
 import { VerifiableCertificate } from '../certificates/VerifiableCertificate.js'
-import { Writer } from 'src/primitives/utils.js'
+import { Writer } from '../../primitives/utils.js'
 
 type SimplifiedFetchRequestOptions = {
   method?: string,
