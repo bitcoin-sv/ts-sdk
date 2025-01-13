@@ -5,7 +5,10 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
-- [1.2.23 - 2025-01-09](#1223---2025-01-09)
+- [1.3.2 - 2025-01-13](#132---2025-01-13)
+- [1.3.1 - 2025-01-13](#131---2025-01-13)
+- [1.3.0 - 2025-01-11](#130---2025-01-11)
+  - Scope increase to include [auth](./src/auth/) Mutual Authentication and Monetization Framework
 - [1.2.22 - 2025-01-06](#1222---2025-01-06)
 - [1.2.21 - 2025-01-03](#1221---2025-01-03)
 - [1.2.19 - 2024-12-19](#1219---2024-12-19)
@@ -68,11 +71,26 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-## [1.2.23] - 2025-01-09
+## [1.3.2] - 2025-01-13
 
 ### Added
 
 - Support for last session persistence in Peer
+
+## [1.3.1] - 2025-01-13
+
+### Fixed
+
+- Updated the Auth SimplifiedFetchTransport to bind window.fetch in a browser context.
+
+---
+
+## [1.3.0] - 2025-01-11
+
+### Changed
+
+- Minor Version release (should have been done at 1.2.21 due to Mutual Authentication Scope increase)
+- Renamed toBin => toBinary and fromBin => fromBinary so that the methods match other classes.
 
 ---
 

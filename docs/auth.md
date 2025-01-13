@@ -134,7 +134,7 @@ See also: [RequestedCertificateSet](#interface-requestedcertificateset), [Sessio
 
 #### Constructor
 
-Constructs a new SimplifiedFetch instance.
+Constructs a new AuthFetch instance.
 
 ```ts
 constructor(wallet: Wallet, requestedCertificates?: RequestedCertificateSet, sessionManager?: SessionManager) 
@@ -214,8 +214,8 @@ export default class Certificate {
     fields: Record<CertificateFieldNameUnder50Bytes, string>;
     signature?: HexString;
     constructor(type: Base64String, serialNumber: Base64String, subject: PubKeyHex, certifier: PubKeyHex, revocationOutpoint: OutpointString, fields: Record<CertificateFieldNameUnder50Bytes, string>, signature?: HexString) 
-    toBin(includeSignature: boolean = true): number[] 
-    static fromBin(bin: number[]): Certificate 
+    toBinary(includeSignature: boolean = true): number[] 
+    static fromBinary(bin: number[]): Certificate 
     async verify(): Promise<boolean> 
     async sign(certifier: Wallet): Promise<void> 
 }
@@ -316,12 +316,12 @@ type: Base64String
 ```
 See also: [Base64String](#type-base64string)
 
-#### Method fromBin
+#### Method fromBinary
 
 Deserializes a certificate from binary format.
 
 ```ts
-static fromBin(bin: number[]): Certificate 
+static fromBinary(bin: number[]): Certificate 
 ```
 See also: [Certificate](#class-certificate)
 
@@ -348,12 +348,12 @@ Argument Details
 + **certifier**
   + The wallet representing the certifier.
 
-#### Method toBin
+#### Method toBinary
 
 Serializes the certificate into binary format, with or without a signature.
 
 ```ts
-toBin(includeSignature: boolean = true): number[] 
+toBinary(includeSignature: boolean = true): number[] 
 ```
 
 Returns
@@ -824,7 +824,7 @@ This class integrates with fetch to send and receive authenticated messages betw
 export class SimplifiedFetchTransport implements Transport {
     fetchClient: typeof fetch;
     baseUrl: string;
-    constructor(baseUrl: string, fetchClient = fetch) 
+    constructor(baseUrl: string, fetchClient = defaultFetch) 
     async send(message: AuthMessage): Promise<void> 
     async onData(callback: (message: AuthMessage) => Promise<void>): Promise<void> 
     deserializeRequestPayload(payload: number[]): {
@@ -848,7 +848,7 @@ See also: [AuthMessage](#interface-authmessage), [Transport](#interface-transpor
 Constructs a new instance of SimplifiedFetchTransport.
 
 ```ts
-constructor(baseUrl: string, fetchClient = fetch) 
+constructor(baseUrl: string, fetchClient = defaultFetch) 
 ```
 
 Argument Details

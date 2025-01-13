@@ -4,7 +4,7 @@ import { SimplifiedFetchTransport } from '../transports/SimplifiedFetchTransport
 import { SessionManager } from '../SessionManager.js'
 import { RequestedCertificateSet } from '../types.js'
 import { VerifiableCertificate } from '../certificates/VerifiableCertificate.js'
-import { Writer } from 'src/primitives/utils.js'
+import { Writer } from '../../primitives/utils.js'
 
 type SimplifiedFetchRequestOptions = {
   method?: string,
@@ -33,7 +33,7 @@ export class AuthFetch {
   peers: Record<string, AuthPeer> = {}
 
   /**
-  * Constructs a new SimplifiedFetch instance.
+  * Constructs a new AuthFetch instance.
   * @param wallet - The wallet instance for signing and authentication.
   * @param requestedCertificates - Optional set of certificates to request from peers.
   */
