@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.3.1 - 2025-01-13](#131---2025-01-13)
 - [1.3.0 - 2025-01-11](#130---2025-01-11)
   - Scope increase to include [auth](./src/auth/) Mutual Authentication and Monetization Framework
 - [1.2.22 - 2025-01-06](#1222---2025-01-06)
@@ -66,6 +67,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.3.1] - 2025-01-13
+
+### Fixed
+
+- Updated the Auth SimplifiedFetchTransport to bind window.fetch in a browser context.
 
 ---
 
