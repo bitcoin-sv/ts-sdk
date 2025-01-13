@@ -1153,7 +1153,7 @@ export default class WalletWireTransceiver implements Wallet {
     }
 
     const result = await this.transmit('acquireCertificate', originator, paramWriter.toArray())
-    const cert = Certificate.fromBin(result)
+    const cert = Certificate.fromBinary(result)
     return {
       ...cert,
       signature: cert.signature as string
@@ -1214,7 +1214,7 @@ export default class WalletWireTransceiver implements Wallet {
     for (let i = 0; i < totalCertificates; i++) {
       const certificateLength = resultReader.readVarIntNum()
       const certificateBin = resultReader.read(certificateLength)
-      const cert = Certificate.fromBin(certificateBin)
+      const cert = Certificate.fromBinary(certificateBin)
       certificates.push({
         ...cert,
         signature: cert.signature as string
@@ -1328,7 +1328,7 @@ export default class WalletWireTransceiver implements Wallet {
     for (let i = 0; i < totalCertificates; i++) {
       const certBinLen = resultReader.readVarIntNum()
       const certBin = resultReader.read(certBinLen)
-      const cert = Certificate.fromBin(certBin)
+      const cert = Certificate.fromBinary(certBin)
       const nameLength = resultReader.readVarIntNum()
       const name = Utils.toUTF8(resultReader.read(nameLength))
       const iconUrlLength = resultReader.readVarIntNum()
