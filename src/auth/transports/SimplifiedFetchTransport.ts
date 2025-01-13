@@ -3,6 +3,9 @@ import { Utils } from '../../../mod.js'
 
 const SUCCESS_STATUS_CODES = [200, 402]
 
+// Only bind window.fetch in the browser
+const defaultFetch = typeof window !== 'undefined' ? fetch.bind(window) : fetch;
+
 /**
  * Implements an HTTP-specific transport for handling Peer mutual authentication messages.
  * This class integrates with fetch to send and receive authenticated messages between peers.
@@ -17,7 +20,7 @@ export class SimplifiedFetchTransport implements Transport {
    * @param baseUrl - The base URL for all HTTP requests made by this transport.
    * @param fetchClient - A fetch implementation to use for HTTP requests (default: global fetch).
    */
-  constructor(baseUrl: string, fetchClient = fetch) {
+  constructor(baseUrl: string, fetchClient = defaultFetch) {
     this.fetchClient = fetchClient
     this.baseUrl = baseUrl
   }
