@@ -1361,7 +1361,7 @@ describe('WalletWire Integration Tests', () => {
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
         certifier: '02' + 'b'.repeat(64),
         revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-        signature: '00',
+        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         fields: {
           field1: 'value1',
           field2: 'value2'
@@ -1383,7 +1383,7 @@ describe('WalletWire Integration Tests', () => {
         },
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
         revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-        signature: '00',
+        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         keyringRevealer: 'certifier',
         keyringForSubject: {}
       }
@@ -1405,7 +1405,7 @@ describe('WalletWire Integration Tests', () => {
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
         certifier: '02' + 'b'.repeat(64),
         revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-        signature: '00',
+        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         fields: {
           field1: 'value1',
           field2: 'value2'
@@ -1427,7 +1427,7 @@ describe('WalletWire Integration Tests', () => {
         },
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
         revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-        signature: '00',
+        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         keyringRevealer: 'certifier' as 'certifier',
         keyringForSubject: {
           field1: Utils.toBase64([0x01, 0x02, 0x03]),
@@ -1453,7 +1453,7 @@ describe('WalletWire Integration Tests', () => {
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
         certifier: '02' + 'b'.repeat(64),
         revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-        signature: '00',
+        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         fields: {
           field1: 'value1',
           field2: 'value2'
@@ -1476,7 +1476,7 @@ describe('WalletWire Integration Tests', () => {
         },
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
         revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-        signature: '00',
+        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         keyringRevealer: keyringRevealerPubKey,
         keyringForSubject: {
           field1: Utils.toBase64([0x01, 0x02, 0x03]),
@@ -1502,7 +1502,7 @@ describe('WalletWire Integration Tests', () => {
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
         certifier: '02' + 'b'.repeat(64),
         revocationOutpoint: 'cafebabedeadbeefcafebabedeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.1',
-        signature: '01',
+        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         fields: {
           field3: 'value3',
           field4: 'value4'
@@ -1543,7 +1543,7 @@ describe('WalletWire Integration Tests', () => {
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
         certifier: '02' + 'b'.repeat(64),
         revocationOutpoint: 'beadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbead.2',
-        signature: '02',
+        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         fields: {
           field5: 'value5'
         }
@@ -1563,7 +1563,7 @@ describe('WalletWire Integration Tests', () => {
         },
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
         revocationOutpoint: 'beadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbead.2',
-        signature: '02',
+        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         keyringRevealer: 'certifier' as 'certifier',
         keyringForSubject: {} // Empty keyring
       }
@@ -1592,7 +1592,7 @@ describe('WalletWire Integration Tests', () => {
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'b'.repeat(64),
             revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-            signature: '00',
+            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {
               field1: 'value1',
               field2: 'value2'
@@ -1629,7 +1629,7 @@ describe('WalletWire Integration Tests', () => {
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'b'.repeat(64),
             revocationOutpoint: 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.0',
-            signature: '00',
+            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {
               field1: 'value1',
               field2: 'value2'
@@ -1641,7 +1641,7 @@ describe('WalletWire Integration Tests', () => {
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'b'.repeat(64),
             revocationOutpoint: 'cafebabecafebabecafebabecafebabecafebabecafebabecafebabecafebabe.1',
-            signature: '01',
+            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {
               field3: 'value3',
               field4: 'value4',
@@ -1688,7 +1688,7 @@ describe('WalletWire Integration Tests', () => {
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'e'.repeat(64),
             revocationOutpoint: 'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe.2',
-            signature: '03',
+            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {
               field6: 'value6'
             }
@@ -1738,7 +1738,7 @@ describe('WalletWire Integration Tests', () => {
           serialNumber: Utils.toBase64(new Array(32).fill(2)),
           certifier: '02' + 'b'.repeat(64),
           revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-          signature: '00',
+          signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
           fields: {
             field1: 'value1',
             field2: 'value2'
@@ -1772,7 +1772,7 @@ describe('WalletWire Integration Tests', () => {
           serialNumber: Utils.toBase64(new Array(32).fill(2)),
           certifier: '02' + 'b'.repeat(64),
           revocationOutpoint: 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.0',
-          signature: '00',
+          signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
           fields: {
             field1: 'value1',
             field2: 'value2',
@@ -1806,7 +1806,7 @@ describe('WalletWire Integration Tests', () => {
           serialNumber: Utils.toBase64(new Array(32).fill(2)),
           certifier: '02' + 'b'.repeat(64),
           revocationOutpoint: 'cafebabecafebabecafebabecafebabecafebabecafebabecafebabecafebabe.1',
-          signature: '01',
+          signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
           fields: {
             field4: 'value4',
             field5: 'value5'
@@ -1917,7 +1917,7 @@ describe('WalletWire Integration Tests', () => {
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'b'.repeat(64),
             revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-            signature: '00',
+            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {},
             certifierInfo: {
               name: 'Test Certifier',
@@ -1958,7 +1958,7 @@ describe('WalletWire Integration Tests', () => {
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'b'.repeat(64),
             revocationOutpoint: 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.0',
-            signature: '00',
+            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {},
             certifierInfo: {
               name: 'Test Certifier',
@@ -2001,7 +2001,7 @@ describe('WalletWire Integration Tests', () => {
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'b'.repeat(64),
             revocationOutpoint: 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.0',
-            signature: '00',
+            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {},
             certifierInfo: {
               name: 'Certifier One',
@@ -2022,7 +2022,7 @@ describe('WalletWire Integration Tests', () => {
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'c'.repeat(64),
             revocationOutpoint: 'cafebabecafebabecafebabecafebabecafebabecafebabecafebabecafebabe.1',
-            signature: '01',
+            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {},
             certifierInfo: {
               name: 'Certifier Two',
@@ -2070,7 +2070,7 @@ describe('WalletWire Integration Tests', () => {
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'b'.repeat(64),
             revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-            signature: '00',
+            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {},
             certifierInfo: {
               name: 'Test Certifier',
@@ -2128,7 +2128,7 @@ describe('WalletWire Integration Tests', () => {
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'e'.repeat(64),
             revocationOutpoint: 'beadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbead.2',
-            signature: '02',
+            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {},
             certifierInfo: {
               name: 'Certifier Three',
