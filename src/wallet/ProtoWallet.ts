@@ -692,7 +692,7 @@ export default class ProtoWallet implements Wallet {
   async isAuthenticated (
     args: {},
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ): Promise<{ authenticated: boolean }> {
+  ): Promise<{ authenticated: true }> {
     return { authenticated: true }
   }
 

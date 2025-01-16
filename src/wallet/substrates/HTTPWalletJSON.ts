@@ -117,7 +117,7 @@ export default class HTTPWalletJSON implements Wallet {
     return await this.api('discoverByAttributes', args)
   }
 
-  async isAuthenticated(args: {}): Promise<{ authenticated: boolean }> {
+  async isAuthenticated(args: {}): Promise<{ authenticated: true }> {
     return await this.api('isAuthenticated', args)
   }
 

@@ -39,7 +39,7 @@ export default class WindowCWISubstrate implements Wallet {
     return this.CWI.internalizeAction(args, originator)
   }
 
-  async listOutputs(args: { basket: BasketStringUnder300Bytes, tags?: OutputTagStringUnder300Bytes[], tagQueryMode?: 'all' | 'any', include?: 'locking scripts' | 'entire transactions', includeCustomInstructions?: BooleanDefaultFalse, includeTags?: BooleanDefaultFalse, includeLabels?: BooleanDefaultFalse, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ totalOutputs: PositiveIntegerOrZero, outputs: Array<{ outpoint: OutpointString, satoshis: SatoshiValue, lockingScript?: HexString, tx?: BEEF, spendable: true, customInstructions?: string, tags?: OutputTagStringUnder300Bytes[], labels?: LabelStringUnder300Bytes[] }> }> {
+  async listOutputs(args: { basket: BasketStringUnder300Bytes, tags?: OutputTagStringUnder300Bytes[], tagQueryMode?: 'all' | 'any', include?: 'locking scripts' | 'entire transactions', includeCustomInstructions?: BooleanDefaultFalse, includeTags?: BooleanDefaultFalse, includeLabels?: BooleanDefaultFalse, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ totalOutputs: PositiveIntegerOrZero, outputs: Array<{ outpoint: OutpointString, satoshis: SatoshiValue, lockingScript?: HexString, tx?: BEEF, spendable: boolean, customInstructions?: string, tags?: OutputTagStringUnder300Bytes[], labels?: LabelStringUnder300Bytes[] }> }> {
     return this.CWI.listOutputs(args, originator)
   }
 
@@ -107,7 +107,7 @@ export default class WindowCWISubstrate implements Wallet {
     return this.CWI.discoverByAttributes(args, originator)
   }
 
-  async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ authenticated: boolean }> {
+  async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ authenticated: true }> {
     return this.CWI.isAuthenticated(args, originator)
   }
 
