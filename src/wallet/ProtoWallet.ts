@@ -1,18 +1,50 @@
 import { KeyDeriver, KeyDeriverApi } from './KeyDeriver.js'
-import { PrivateKey } from '../primitives/index.js'
-import { WalletCrypto } from './WalletCrypto.js'
-import { AbortActionArgs, AcquireCertificateArgs, CreateActionArgs, InternalizeActionArgs, ListActionsArgs, ListCertificatesArgs, ListOutputsArgs, ProveCertificateArgs, SignActionArgs, AbortActionResult, AcquireCertificateResult, AuthenticatedResult, CreateActionResult, DiscoverByAttributesArgs, DiscoverByIdentityKeyArgs, DiscoverCertificatesResult, GetHeaderArgs, GetHeaderResult, GetHeightResult, GetNetworkResult, GetVersionResult, InternalizeActionResult, ListActionsResult, ListCertificatesResult, ListOutputsResult, OriginatorDomainNameStringUnder250Bytes, ProveCertificateResult, RelinquishCertificateArgs, RelinquishCertificateResult, RelinquishOutputArgs, RelinquishOutputResult, SignActionResult, Wallet } from './Wallet.interfaces.js'
+import { Hash, ECDSA, BigNumber, Signature, Schnorr, PublicKey, Point, PrivateKey } from '../primitives/index.js'
+import {
+  AuthenticatedResult,
+  CreateHmacArgs,
+  CreateHmacResult,
+  CreateSignatureArgs,
+  CreateSignatureResult,
+  GetNetworkResult,
+  GetPublicKeyArgs,
+  GetVersionResult,
+  OriginatorDomainNameStringUnder250Bytes,
+  ProtoWalletApi,
+  PubKeyHex,
+  RevealCounterpartyKeyLinkageArgs,
+  RevealCounterpartyKeyLinkageResult,
+  RevealSpecificKeyLinkageArgs,
+  RevealSpecificKeyLinkageResult,
+  VerifyHmacArgs,
+  VerifyHmacResult,
+  VerifySignatureArgs,
+  VerifySignatureResult,
+  WalletDecryptArgs,
+  WalletDecryptResult,
+  WalletEncryptArgs,
+  WalletEncryptResult
+} from './Wallet.interfaces.js'
+
+//import { WERR_INVALID_PARAMETER } from './WERR_errors'
+//const privilegedError = new WERR_INVALID_PARAMETER('args.privileged', 'false or undefined. Wallet is a single-keyring wallet, operating without context about whether its configured keyring is privileged.')
+const privilegedError = new Error('ProtoWallet is a single-keyring wallet, operating without context about whether its configured keyring is privileged.')
 
 /**
- * A ProtoWallet is a structure that fulfills the Wallet interface, capable of performing all foundational cryptographic operations. It can derive keys, create signatures, facilitate encryption and HMAC operations, and reveal key linkages. However, ProtoWallet does not create transactions, manage outputs, interact with the blockchain, enable the management of identity certificates, or store any data.
+ * A ProtoWallet is precursor to a full wallet, capable of performing all foundational cryptographic operations.
+ * It can derive keys, create signatures, facilitate encryption and HMAC operations, and reveal key linkages.
+ * 
+ * However, ProtoWallet does not create transactions, manage outputs, interact with the blockchain,
+ * enable the management of identity certificates, or store any data.
  */
-export class ProtoWallet extends WalletCrypto implements Wallet {
+export class ProtoWallet implements ProtoWalletApi {
+  keyDeriver: KeyDeriverApi
 
   constructor(rootKeyOrKeyDeriver: PrivateKey | 'anyone' | KeyDeriverApi) {
     if (typeof rootKeyOrKeyDeriver['identityKey'] !== 'string') {
       rootKeyOrKeyDeriver = new KeyDeriver(rootKeyOrKeyDeriver as PrivateKey | 'anyone')
     }
-    super(rootKeyOrKeyDeriver as KeyDeriverApi)
+    this.keyDeriver = rootKeyOrKeyDeriver as KeyDeriver
   }
 
   async isAuthenticated(args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AuthenticatedResult> {
@@ -31,64 +63,227 @@ export class ProtoWallet extends WalletCrypto implements Wallet {
     return { version: 'proto-1.0.0' }
   }
 
-  async createAction(args: CreateActionArgs, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<CreateActionResult> {
-    throw new Error('ProtoWallet does not support creating transactions.')
+  /**
+   * Convenience method to obtain the identityKey.
+   * @param originator 
+   * @returns `await this.getPublicKey({ identityKey: true }, originator)`
+   */
+  async getIdentityKey(
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<{ publicKey: PubKeyHex }> {
+    return await this.getPublicKey({ identityKey: true }, originator)
   }
 
-  async signAction(args: SignActionArgs, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<SignActionResult> {
-    throw new Error('ProtoWallet does not support creating transactions.')
+  async getPublicKey(
+    args: GetPublicKeyArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<{ publicKey: PubKeyHex }> {
+    if (args.privileged) {
+      throw privilegedError
+    }
+    if (args.identityKey) {
+      return { publicKey: this.keyDeriver.rootKey.toPublicKey().toString() }
+    } else {
+      if (!args.protocolID || !args.keyID) {
+        throw new Error('protocolID and keyID are required if identityKey is false or undefined.')
+      }
+      return {
+        publicKey: this.keyDeriver
+          .derivePublicKey(
+            args.protocolID,
+            args.keyID,
+            args.counterparty || 'self',
+            args.forSelf
+          )
+          .toString()
+      }
+    }
   }
 
-  async abortAction(args: AbortActionArgs, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AbortActionResult> {
-    throw new Error('ProtoWallet does not support aborting transactions.')
+  async revealCounterpartyKeyLinkage(
+    args: RevealCounterpartyKeyLinkageArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<RevealCounterpartyKeyLinkageResult> {
+    if (args.privileged) {
+      throw privilegedError
+    }
+    const { publicKey: identityKey } = await this.getPublicKey({ identityKey: true })
+    const linkage = this.keyDeriver.revealCounterpartySecret(args.counterparty)
+    const linkageProof = new Schnorr().generateProof(this.keyDeriver.rootKey, this.keyDeriver.rootKey.toPublicKey(), PublicKey.fromString(args.counterparty), Point.fromDER(linkage))
+    const linkageProofBin = [
+      ...linkageProof.R.encode(true),
+      ...linkageProof.SPrime.encode(true),
+      ...linkageProof.z.toArray()
+    ] as number[]
+    const revelationTime = new Date().toISOString()
+    const { ciphertext: encryptedLinkage } = await this.encrypt({
+      plaintext: linkage,
+      protocolID: [2, 'counterparty linkage revelation'],
+      keyID: revelationTime,
+      counterparty: args.verifier
+    })
+    const { ciphertext: encryptedLinkageProof } = await this.encrypt({
+      plaintext: linkageProofBin,
+      protocolID: [2, 'counterparty linkage revelation'],
+      keyID: revelationTime,
+      counterparty: args.verifier
+    })
+    return {
+      prover: identityKey,
+      verifier: args.verifier,
+      counterparty: args.counterparty,
+      revelationTime,
+      encryptedLinkage,
+      encryptedLinkageProof
+    }
   }
 
-  async listActions(args: ListActionsArgs, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ListActionsResult> {
-    throw new Error('ProtoWallet does not support retrieving transactions.')
+  async revealSpecificKeyLinkage(
+    args: RevealSpecificKeyLinkageArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<RevealSpecificKeyLinkageResult> {
+    if (args.privileged) {
+      throw privilegedError
+    }
+    const { publicKey: identityKey } = await this.getPublicKey({ identityKey: true })
+    const linkage = this.keyDeriver.revealSpecificSecret(
+      args.counterparty,
+      args.protocolID,
+      args.keyID
+    )
+    const { ciphertext: encryptedLinkage } = await this.encrypt({
+      plaintext: linkage,
+      protocolID: [2, `specific linkage revelation ${args.protocolID[0]} ${args.protocolID[1]}`],
+      keyID: args.keyID,
+      counterparty: args.verifier
+    })
+    const { ciphertext: encryptedLinkageProof } = await this.encrypt({
+      plaintext: [0], // Proof type 0, no proof provided
+      protocolID: [2, `specific linkage revelation ${args.protocolID[0]} ${args.protocolID[1]}`],
+      keyID: args.keyID,
+      counterparty: args.verifier
+    })
+    return {
+      prover: identityKey,
+      verifier: args.verifier,
+      counterparty: args.counterparty,
+      protocolID: args.protocolID,
+      keyID: args.keyID,
+      encryptedLinkage,
+      encryptedLinkageProof,
+      proofType: 0
+    }
   }
 
-  async internalizeAction(args: InternalizeActionArgs, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<InternalizeActionResult> {
-    throw new Error('ProtoWallet does not support internalizing transactions.')
+  async encrypt(
+    args: WalletEncryptArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<WalletEncryptResult> {
+    if (args.privileged) {
+      throw privilegedError
+    }
+    const key = this.keyDeriver.deriveSymmetricKey(
+      args.protocolID,
+      args.keyID,
+      args.counterparty || 'self'
+    )
+    return { ciphertext: key.encrypt(args.plaintext) as number[] }
   }
 
-  async listOutputs(args: ListOutputsArgs, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ListOutputsResult> {
-    throw new Error('ProtoWallet does not support retrieving outputs.')
+  async decrypt(
+    args: WalletDecryptArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<WalletDecryptResult> {
+    if (args.privileged) {
+      throw privilegedError
+    }
+    const key = this.keyDeriver.deriveSymmetricKey(
+      args.protocolID,
+      args.keyID,
+      args.counterparty || 'self'
+    )
+    return { plaintext: key.decrypt(args.ciphertext) as number[] }
   }
 
-  async relinquishOutput(args: RelinquishOutputArgs, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<RelinquishOutputResult> {
-    throw new Error('ProtoWallet does not support deleting outputs.')
+  async createHmac(
+    args: CreateHmacArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<CreateHmacResult> {
+    if (args.privileged) {
+      throw privilegedError
+    }
+    const key = this.keyDeriver.deriveSymmetricKey(
+      args.protocolID,
+      args.keyID,
+      args.counterparty || 'self'
+    )
+    return { hmac: Hash.sha256hmac(key.toArray(), args.data) }
   }
 
-  async acquireCertificate(args: AcquireCertificateArgs, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AcquireCertificateResult> {
-    throw new Error('ProtoWallet does not support acquiring certificates.')
+  async verifyHmac(
+    args: VerifyHmacArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<VerifyHmacResult> {
+    if (args.privileged) {
+      throw privilegedError
+    }
+    const key = this.keyDeriver.deriveSymmetricKey(
+      args.protocolID,
+      args.keyID,
+      args.counterparty || 'self'
+    )
+    const valid = Hash.sha256hmac(key.toArray(), args.data).toString() === args.hmac.toString()
+    if (!valid) {
+      const e = new Error('HMAC is not valid');
+      (e as any).code = 'ERR_INVALID_HMAC'
+      throw e
+    }
+    return { valid }
   }
 
-  async listCertificates(args: ListCertificatesArgs, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ListCertificatesResult> {
-    throw new Error('ProtoWallet does not support retrieving certificates.')
+  async createSignature(
+    args: CreateSignatureArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<CreateSignatureResult> {
+    if (args.privileged) {
+      throw privilegedError
+    }
+    if (!args.hashToDirectlySign && !args.data) {
+      throw new Error('args.data or args.hashToDirectlySign must be valid')
+    }
+    const hash: number[] = args.hashToDirectlySign || Hash.sha256(args.data!)
+    const key = this.keyDeriver.derivePrivateKey(
+      args.protocolID,
+      args.keyID,
+      args.counterparty || 'anyone'
+    )
+    return { signature: ECDSA.sign(new BigNumber(hash), key, true).toDER() as number[] }
   }
 
-  async proveCertificate(args: ProveCertificateArgs, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ProveCertificateResult> {
-    throw new Error('ProtoWallet does not support proving certificates.')
-  }
-
-  async relinquishCertificate(args: RelinquishCertificateArgs, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<RelinquishCertificateResult> {
-    throw new Error('ProtoWallet does not support deleting certificates.')
-  }
-
-  async discoverByIdentityKey(args: DiscoverByIdentityKeyArgs, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<DiscoverCertificatesResult> {
-    throw new Error('ProtoWallet does not support resolving identities.')
-  }
-
-  async discoverByAttributes(args: DiscoverByAttributesArgs, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<DiscoverCertificatesResult> {
-    throw new Error('ProtoWallet does not support resolving identities.')
-  }
-
-  async getHeight(args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetHeightResult> {
-    throw new Error('ProtoWallet does not support blockchain tracking.')
-  }
-
-  async getHeaderForHeight(args: GetHeaderArgs, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetHeaderResult> {
-    throw new Error('ProtoWallet does not support blockchain tracking.')
+  async verifySignature(
+    args: VerifySignatureArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<VerifySignatureResult> {
+    if (args.privileged) {
+      throw privilegedError
+    }
+    if (!args.hashToDirectlyVerify && !args.data) {
+      throw new Error('args.data or args.hashToDirectlyVerify must be valid')
+    }
+    const hash: number[] = args.hashToDirectlyVerify || Hash.sha256(args.data!)
+    const key = this.keyDeriver.derivePublicKey(
+      args.protocolID,
+      args.keyID,
+      args.counterparty || 'self',
+      args.forSelf
+    )
+    const valid = ECDSA.verify(new BigNumber(hash), Signature.fromDER(args.signature), key)
+    if (!valid) {
+      const e = new Error('Signature is not valid');
+      (e as any).code = 'ERR_INVALID_SIGNATURE'
+      throw e
+    }
+    return { valid }
   }
 }
 

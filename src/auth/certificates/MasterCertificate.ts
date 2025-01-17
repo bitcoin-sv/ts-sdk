@@ -6,7 +6,8 @@ import {
   HexString,
   OutpointString,
   PubKeyHex,
-  Wallet
+  Wallet,
+  ProtoWallet
 } from '../../../mod.js'
 import Certificate from './Certificate.js'
 
@@ -58,7 +59,7 @@ export class MasterCertificate extends Certificate {
    *   - fieldsToReveal is empty or a field in `fieldsToReveal` does not exist in the certificate.
    *   - The decrypted master field key fails to decrypt the corresponding field (indicating an invalid key).
    */
-  async createKeyringForVerifier(subjectWallet: Wallet, verifierIdentityKey: string, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
+  async createKeyringForVerifier(subjectWallet: ProtoWallet, verifierIdentityKey: string, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
     if (!Array.isArray(fieldsToReveal)) {
       throw new Error('fieldsToReveal must be an array of strings')
     }

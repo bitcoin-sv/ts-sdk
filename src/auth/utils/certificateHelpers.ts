@@ -1,11 +1,11 @@
-import { PrivateKey, SymmetricKey, Utils, Wallet, ProtoWallet } from "../../../mod.js"
+import { PrivateKey, SymmetricKey, Utils, ProtoWallet } from "../../../mod.js"
 import { MasterCertificate } from "../certificates/MasterCertificate.js"
 import { VerifiableCertificate } from "../certificates/VerifiableCertificate.js"
 
 /**
  * Creates a Master Certificate by encrypting provided fields and generating a master keyring.
  * 
- * @param {Wallet} wallet - The wallet instance used for encryption and public key retrieval.
+ * @param {ProtoWallet} wallet - The wallet instance used for encryption and public key retrieval.
  * @param {Record<string, string>} fields - The certificate fields to encrypt.
  * @param {string} certificateType - The type of the certificate being created.
  * @param {string} certificateSerialNumber - The serial number of the certificate.
@@ -13,7 +13,7 @@ import { VerifiableCertificate } from "../certificates/VerifiableCertificate.js"
  * @returns {Promise<MasterCertificate>} A promise resolving to the created Master Certificate.
  */
 export async function createMasterCertificate(
-  wallet: Wallet,
+  wallet: ProtoWallet,
   fields: Record<string, string>,
   certificateType: string,
   certificateSerialNumber: string,
@@ -51,7 +51,7 @@ export async function createMasterCertificate(
  * Creates a Verifiable Certificate by signing a Master Certificate and generating a keyring for a verifier.
  * 
  * @param {MasterCertificate} masterCertificate - The master certificate to convert into a verifiable certificate.
- * @param {Wallet} wallet - The wallet instance used for generating a keyring for the verifier.
+ * @param {ProtoWallet} wallet - The wallet instance used for generating a keyring for the verifier.
  * @param {string} verifierIdentityKey - The identity key of the verifier.
  * @param {string[]} fieldsToReveal - The list of fields to reveal to the verifier.
  * @param {PrivateKey} certifierPrivateKey - The private key of the certifier for signing the certificate.
@@ -59,7 +59,7 @@ export async function createMasterCertificate(
  */
 export async function createVerifiableCertificate(
   masterCertificate: MasterCertificate,
-  wallet: Wallet,
+  wallet: ProtoWallet,
   verifierIdentityKey: string,
   fieldsToReveal: string[],
   certifierPrivateKey: PrivateKey

@@ -917,7 +917,7 @@ export interface GetPublicKeyResult {
 }
 
 /**
- * The WalletCryptoObject interface defines a wallet cryptographic capabilities including:
+ * The ProtoWalletApi interface defines a wallet cryptographic capabilities including:
  * key derivation, encryption, decryption, hmac creation and verification, signature generation and verification
  *
  * Error Handling
@@ -927,7 +927,7 @@ export interface GetPublicKeyResult {
  * Serialization layers can rely on the `isError` property being unique to error objects to
  * deserialize and rethrow `WalletErrorObject` conforming objects.
  */
-export interface WalletCryptoObject {
+export interface ProtoWalletApi {
   /**
    * Retrieves a derived or identity public key based on the requested protocol, key ID, counterparty, and other factors.
    *
@@ -1051,7 +1051,7 @@ export interface WalletCryptoObject {
  * Serialization layers can rely on the `isError` property being unique to error objects to
  * deserialize and rethrow `WalletErrorObject` conforming objects.
  */
-export interface Wallet extends WalletCryptoObject {
+export interface Wallet extends ProtoWalletApi {
   /**
    * Creates a new Bitcoin transaction based on the provided inputs, outputs, labels, locks, and other options.
    *
