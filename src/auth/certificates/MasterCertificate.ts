@@ -25,10 +25,10 @@ export class MasterCertificate extends Certificate {
   declare subject: PubKeyHex
   declare certifier: PubKeyHex
   declare revocationOutpoint: OutpointString
-  declare fields: Record<CertificateFieldNameUnder50Bytes, string>
+  declare fields: Record<CertificateFieldNameUnder50Bytes, Base64String>
   declare signature?: HexString
 
-  masterKeyring: Record<CertificateFieldNameUnder50Bytes, string>
+  masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>
 
   constructor(
     type: Base64String,
@@ -36,8 +36,8 @@ export class MasterCertificate extends Certificate {
     subject: PubKeyHex,
     certifier: PubKeyHex,
     revocationOutpoint: OutpointString,
-    fields: Record<CertificateFieldNameUnder50Bytes, string>,
-    masterKeyring: Record<CertificateFieldNameUnder50Bytes, string>,
+    fields: Record<CertificateFieldNameUnder50Bytes, Base64String>,
+    masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>,
     signature?: HexString
   ) {
     super(type, serialNumber, subject, certifier, revocationOutpoint, fields, signature)
@@ -53,6 +53,43 @@ export class MasterCertificate extends Certificate {
     }
 
     this.masterKeyring = masterKeyring
+  }
+
+  /**
+   * Decrypts all fields in the MasterCertificate using the subject's wallet.
+   * 
+   * This method uses the `masterKeyring` to decrypt each field's encryption key and then
+   * decrypts the field values. The result is a record of plaintext field names and values.
+   * 
+   * @param {ProtoWallet} subjectWallet - The wallet of the subject, used to decrypt the master keyring and field values.
+   * @returns {Promise<Record<CertificateFieldNameUnder50Bytes, string>>} - A record of field names and their decrypted values in plaintext.
+   * 
+   * @throws {Error} Throws an error if the `masterKeyring` is invalid or if decryption fails for any field.
+   */
+  async decryptFields(subjectWallet: ProtoWallet): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
+    // const fields: Record<CertificateFieldNameUnder50Bytes, Base64String> = this.fields
+    const decryptedFields: Record<CertificateFieldNameUnder50Bytes, string> = {}
+    if (!this.masterKeyring || Object.keys(this.masterKeyring).length === 0) {
+      throw new Error('A MasterCertificate must have a valid masterKeyring!')
+    }
+
+    try {
+      // Note: we want to iterate through all fields, not just masterKeyring keys/value pairs.
+      for (const fieldName of Object.keys(this.fields)) {
+        const { plaintext: fieldRevelationKey } = await subjectWallet.decrypt({
+          ciphertext: Utils.toArray(this.masterKeyring[fieldName], 'base64'),
+          counterparty: this.subject,
+          protocolID: [2, 'certificate field encryption'],
+          keyID: `${this.serialNumber} ${fieldName}`
+        })
+
+        const fieldValue = new SymmetricKey(fieldRevelationKey).decrypt(Utils.toArray(this.fields[fieldName], 'base64'))
+        decryptedFields[fieldName] = Utils.toUTF8(fieldValue as number[])
+      }
+      return decryptedFields
+    } catch (e) {
+      throw new Error('Failed to decrypt all master certificate fields.')
+    }
   }
 
   /**
@@ -127,7 +164,7 @@ export class MasterCertificate extends Certificate {
    * 
    * @param {ProtoWallet} certifierWallet - The wallet of the certifier, used to sign the certificate and encrypt field keys.
    * @param {string} subject - The public identity key of the subject for whom the certificate is issued.
-   * @param {Record<CertificateFieldNameUnder50Bytes, string>} fields - A certificate fields to include, with their names and values.
+   * @param {Record<CertificateFieldNameUnder50Bytes, string>} fields - Unencrypted certificate fields to include, with their names and values.
    * @param {string} certificateType - The type of certificate being issued.
    * @param {function(string, Record<CertificateFieldNameUnder50Bytes, string>?): Promise<string>} getRevocationOutpoint - 
    *   Optional function to obtain a revocation outpoint for the certificate. Defaults to a placeholder.
@@ -150,8 +187,8 @@ export class MasterCertificate extends Certificate {
     // 1. Generate serialNumber
     const serialNumber = Utils.toBase64(Random(32))
 
-    const encryptedCertificateFields: Record<CertificateFieldNameUnder50Bytes, string> = {}
-    const masterKeyringForSubject: Record<CertificateFieldNameUnder50Bytes, string> = {}
+    const encryptedCertificateFields: Record<CertificateFieldNameUnder50Bytes, Base64String> = {}
+    const masterKeyringForSubject: Record<CertificateFieldNameUnder50Bytes, Base64String> = {}
 
     // 2. For each field, generate a random key -> encrypt field -> encrypt key
     for (const [fieldName, fieldValue] of Object.entries(fields)) {
