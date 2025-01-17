@@ -228,7 +228,7 @@ export default class Certificate {
    * @param {Wallet} certifier - The wallet representing the certifier.
    * @returns {Promise<void>}
    */
-  async sign(certifier: Wallet): Promise<void> {
+  async sign(certifier: ProtoWallet): Promise<void> {
     const preimage = this.toBinary(false) // Exclude the signature when signing
     const { signature } = await certifier.createSignature({
       data: preimage,

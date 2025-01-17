@@ -1411,8 +1411,9 @@ export default class WalletWireTransceiver implements Wallet {
     return this.parseDiscoveryResult(result)
   }
 
-  async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ authenticated: boolean }> {
+  async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ authenticated: true }> {
     const result = await this.transmit('isAuthenticated', originator)
+    // @ts-ignore
     return { authenticated: !!result[0] }
   }
 

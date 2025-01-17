@@ -217,11 +217,11 @@ export default class Certificate {
     toBinary(includeSignature: boolean = true): number[] 
     static fromBinary(bin: number[]): Certificate 
     async verify(): Promise<boolean> 
-    async sign(certifier: Wallet): Promise<void> 
+    async sign(certifier: ProtoWallet): Promise<void> 
 }
 ```
 
-See also: [Base64String](#type-base64string), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [PubKeyHex](#type-pubkeyhex), [Wallet](#interface-wallet), [sign](#variable-sign), [verify](#variable-verify)
+See also: [Base64String](#type-base64string), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [ProtoWallet](#class-protowallet), [PubKeyHex](#type-pubkeyhex), [sign](#variable-sign), [verify](#variable-verify)
 
 <details>
 
@@ -339,9 +339,9 @@ Argument Details
 Signs the certificate using the provided certifier wallet.
 
 ```ts
-async sign(certifier: Wallet): Promise<void> 
+async sign(certifier: ProtoWallet): Promise<void> 
 ```
-See also: [Wallet](#interface-wallet)
+See also: [ProtoWallet](#class-protowallet)
 
 Argument Details
 
@@ -401,11 +401,11 @@ export class MasterCertificate extends Certificate {
     declare signature?: HexString;
     masterKeyring: Record<CertificateFieldNameUnder50Bytes, string>;
     constructor(type: Base64String, serialNumber: Base64String, subject: PubKeyHex, certifier: PubKeyHex, revocationOutpoint: OutpointString, fields: Record<CertificateFieldNameUnder50Bytes, string>, masterKeyring: Record<CertificateFieldNameUnder50Bytes, string>, signature?: HexString) 
-    async createKeyringForVerifier(subjectWallet: Wallet, verifierIdentityKey: string, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+    async createKeyringForVerifier(subjectWallet: ProtoWallet, verifierIdentityKey: string, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 }
 ```
 
-See also: [Base64String](#type-base64string), [Certificate](#class-certificate), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [PubKeyHex](#type-pubkeyhex), [Wallet](#interface-wallet)
+See also: [Base64String](#type-base64string), [Certificate](#class-certificate), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [ProtoWallet](#class-protowallet), [PubKeyHex](#type-pubkeyhex)
 
 <details>
 
@@ -419,9 +419,9 @@ for the verifier's identity key. The resulting certificate structure includes on
 revealed and a verifier-specific keyring for field decryption.
 
 ```ts
-async createKeyringForVerifier(subjectWallet: Wallet, verifierIdentityKey: string, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+async createKeyringForVerifier(subjectWallet: ProtoWallet, verifierIdentityKey: string, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 ```
-See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [Wallet](#interface-wallet)
+See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [ProtoWallet](#class-protowallet)
 
 Returns
 
@@ -1003,10 +1003,10 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 Creates a Master Certificate by encrypting provided fields and generating a master keyring.
 
 ```ts
-export async function createMasterCertificate(wallet: Wallet, fields: Record<string, string>, certificateType: string, certificateSerialNumber: string, certifierPublicKey: string): Promise<MasterCertificate> 
+export async function createMasterCertificate(wallet: ProtoWallet, fields: Record<string, string>, certificateType: string, certificateSerialNumber: string, certifierPublicKey: string): Promise<MasterCertificate> 
 ```
 
-See also: [MasterCertificate](#class-mastercertificate), [Wallet](#interface-wallet)
+See also: [MasterCertificate](#class-mastercertificate), [ProtoWallet](#class-protowallet)
 
 <details>
 
@@ -1062,10 +1062,10 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 Creates a Verifiable Certificate by signing a Master Certificate and generating a keyring for a verifier.
 
 ```ts
-export async function createVerifiableCertificate(masterCertificate: MasterCertificate, wallet: Wallet, verifierIdentityKey: string, fieldsToReveal: string[], certifierPrivateKey: PrivateKey): Promise<VerifiableCertificate> 
+export async function createVerifiableCertificate(masterCertificate: MasterCertificate, wallet: ProtoWallet, verifierIdentityKey: string, fieldsToReveal: string[], certifierPrivateKey: PrivateKey): Promise<VerifiableCertificate> 
 ```
 
-See also: [MasterCertificate](#class-mastercertificate), [PrivateKey](#class-privatekey), [VerifiableCertificate](#class-verifiablecertificate), [Wallet](#interface-wallet)
+See also: [MasterCertificate](#class-mastercertificate), [PrivateKey](#class-privatekey), [ProtoWallet](#class-protowallet), [VerifiableCertificate](#class-verifiablecertificate)
 
 <details>
 

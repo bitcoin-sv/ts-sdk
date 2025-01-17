@@ -229,7 +229,7 @@ export default class HTTPWalletJSON implements Wallet {
         offset?: PositiveIntegerOrZero;
     }): Promise<DiscoverCertificatesResult> 
     async isAuthenticated(args: {}): Promise<{
-        authenticated: boolean;
+        authenticated: true;
     }> 
     async waitForAuthentication(args: {}): Promise<{
         authenticated: true;
@@ -486,7 +486,7 @@ export default class WalletWireTransceiver implements Wallet {
         offset?: PositiveIntegerOrZero;
     }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<DiscoverCertificatesResult> 
     async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        authenticated: boolean;
+        authenticated: true;
     }> 
     async waitForAuthentication(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         authenticated: true;
@@ -671,7 +671,7 @@ export default class WindowCWISubstrate implements Wallet {
             satoshis: SatoshiValue;
             lockingScript?: HexString;
             tx?: BEEF;
-            spendable: true;
+            spendable: boolean;
             customInstructions?: string;
             tags?: OutputTagStringUnder300Bytes[];
             labels?: LabelStringUnder300Bytes[];
@@ -929,7 +929,7 @@ export default class WindowCWISubstrate implements Wallet {
         }>;
     }> 
     async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        authenticated: boolean;
+        authenticated: true;
     }> 
     async waitForAuthentication(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         authenticated: true;
@@ -1115,7 +1115,7 @@ export default class XDMSubstrate implements Wallet {
             satoshis: SatoshiValue;
             lockingScript?: HexString;
             tx?: BEEF;
-            spendable: true;
+            spendable: boolean;
             customInstructions?: string;
             tags?: OutputTagStringUnder300Bytes[];
             labels?: LabelStringUnder300Bytes[];
@@ -1373,7 +1373,7 @@ export default class XDMSubstrate implements Wallet {
         }>;
     }> 
     async isAuthenticated(args: {}): Promise<{
-        authenticated: boolean;
+        authenticated: true;
     }> 
     async waitForAuthentication(args: {}): Promise<{
         authenticated: true;
