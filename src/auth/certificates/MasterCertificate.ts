@@ -138,7 +138,7 @@ export class MasterCertificate extends Certificate {
    */
   static async issueCertificateForSubject(
     certifierWallet: ProtoWallet,
-    subject: string,
+    subject: string, // Can be 'self' or 'anyone'
     fields: Record<CertificateFieldNameUnder50Bytes, string>,
     certificateType: string,
     getRevocationOutpoint = async (
@@ -151,7 +151,7 @@ export class MasterCertificate extends Certificate {
     const serialNumber = Utils.toBase64(Random(32))
 
     const encryptedCertificateFields: Record<CertificateFieldNameUnder50Bytes, string> = {}
-    const keyringForSubject: Record<CertificateFieldNameUnder50Bytes, string> = {}
+    const masterKeyringForSubject: Record<CertificateFieldNameUnder50Bytes, string> = {}
 
     // 2. For each field, generate a random key -> encrypt field -> encrypt key
     for (const [fieldName, fieldValue] of Object.entries(fields)) {
@@ -164,7 +164,7 @@ export class MasterCertificate extends Certificate {
         keyID: `${serialNumber} ${fieldName}`,
         counterparty: subject
       })
-      keyringForSubject[fieldName] = Utils.toBase64(encryptedFieldRevelationKey)
+      masterKeyringForSubject[fieldName] = Utils.toBase64(encryptedFieldRevelationKey)
     }
 
     // 3. Obtain a revocation outpoint (ex. certifier can call wallet.createAction())
@@ -179,7 +179,7 @@ export class MasterCertificate extends Certificate {
       (await certifierWallet.getPublicKey({ identityKey: true })).publicKey,
       revocationOutpoint,
       encryptedCertificateFields,
-      keyringForSubject
+      masterKeyringForSubject
     )
 
     // 5. Sign and return the new MasterCertificate certifying the subject.
