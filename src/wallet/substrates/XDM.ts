@@ -63,7 +63,7 @@ export default class XDMSubstrate implements Wallet {
     return await this.invoke('internalizeAction', args)
   }
 
-  async listOutputs(args: { basket: BasketStringUnder300Bytes, tags?: OutputTagStringUnder300Bytes[], tagQueryMode?: 'all' | 'any', include?: 'locking scripts' | 'entire transactions', includeCustomInstructions?: BooleanDefaultFalse, includeTags?: BooleanDefaultFalse, includeLabels?: BooleanDefaultFalse, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }): Promise<{ totalOutputs: PositiveIntegerOrZero, outputs: Array<{ outpoint: OutpointString, satoshis: SatoshiValue, lockingScript?: HexString, tx?: BEEF, spendable: boolean, customInstructions?: string, tags?: OutputTagStringUnder300Bytes[], labels?: LabelStringUnder300Bytes[] }> }> {
+  async listOutputs(args: { basket: BasketStringUnder300Bytes, tags?: OutputTagStringUnder300Bytes[], tagQueryMode?: 'all' | 'any', include?: 'locking scripts' | 'entire transactions', includeCustomInstructions?: BooleanDefaultFalse, includeTags?: BooleanDefaultFalse, includeLabels?: BooleanDefaultFalse, limit?: PositiveIntegerDefault10Max10000, offset?: PositiveIntegerOrZero }): Promise<{ totalOutputs: PositiveIntegerOrZero, outputs: Array<{ outpoint: OutpointString, satoshis: SatoshiValue, lockingScript?: HexString, tx?: BEEF, spendable: true, customInstructions?: string, tags?: OutputTagStringUnder300Bytes[], labels?: LabelStringUnder300Bytes[] }> }> {
     return await this.invoke('listOutputs', args)
   }
 
@@ -131,7 +131,7 @@ export default class XDMSubstrate implements Wallet {
     return await this.invoke('discoverByAttributes', args)
   }
 
-  async isAuthenticated(args: {}): Promise<{ authenticated: true }> {
+  async isAuthenticated(args: {}): Promise<{ authenticated: boolean }> {
     return await this.invoke('isAuthenticated', args)
   }
 

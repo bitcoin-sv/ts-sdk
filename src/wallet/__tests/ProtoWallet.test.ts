@@ -6,6 +6,52 @@ const sampleData = [3, 1, 4, 1, 5, 9]
 describe('ProtoWallet', () => {
   it('Throws when functions are not supported', async () => {
     const wallet = new ProtoWallet('anyone')
+    await expect(() => {
+      return (wallet as any).createAction()
+    }).rejects.toThrow()
+    await expect(() => {
+      return (wallet as any).abortAction()
+    }).rejects.toThrow()
+    await expect(() => {
+      return (wallet as any).signAction()
+    }).rejects.toThrow()
+    await expect(() => {
+      return (wallet as any).listOutputs()
+    }).rejects.toThrow()
+    await expect(() => {
+      return (wallet as any).relinquishOutput()
+    }).rejects.toThrow()
+    await expect(() => {
+      return (wallet as any).listActions()
+    }).rejects.toThrow()
+    await expect(() => {
+      return (wallet as any).internalizeAction()
+    }).rejects.toThrow()
+    await expect(() => {
+      return (wallet as any).acquireCertificate()
+    }).rejects.toThrow()
+    await expect(() => {
+      return (wallet as any).proveCertificate()
+    }).rejects.toThrow()
+    await expect(() => {
+      return (wallet as any).listCertificates()
+    }).rejects.toThrow()
+    await expect(() => {
+      return (wallet as any).relinquishCertificate()
+    }).rejects.toThrow()
+    await expect(() => {
+      return (wallet as any).getHeight()
+    }).rejects.toThrow()
+    await expect(() => {
+      return (wallet as any).getHeaderForHeight()
+    }).rejects.toThrow()
+    // TODO: Remove these two from the throw list once they are implemented.
+    await expect(() => {
+      return (wallet as any).discoverByIdentityKey()
+    }).rejects.toThrow()
+    await expect(() => {
+      return (wallet as any).discoverByAttributes()
+    }).rejects.toThrow()
   })
   it('Throws the privileged error when the privileged flag is set', async () => {
     const wallet = new ProtoWallet('anyone')
@@ -292,6 +338,13 @@ describe('ProtoWallet', () => {
       keyID: '4',
       counterparty: counterpartyKey.toPublicKey().toString()
     })).rejects.toThrow()
+  })
+  it('Returns the expected version, network, and authentication status', async () => {
+    const wallet = new ProtoWallet('anyone')
+    expect(await wallet.getVersion({})).toEqual({ version: 'proto-1.0.0' })
+    expect(await wallet.getNetwork({})).toEqual({ network: 'mainnet' })
+    expect(await wallet.isAuthenticated({})).toEqual({ authenticated: true })
+    expect(await wallet.waitForAuthentication({})).toEqual({ authenticated: true })
   })
   it('Uses anyone for creating signatures and self for other operations if no counterparty is provided', async () => {
     const userKey = PrivateKey.fromRandom()

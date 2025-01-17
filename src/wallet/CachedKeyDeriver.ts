@@ -1,6 +1,6 @@
 import { PrivateKey, PublicKey, SymmetricKey } from '../primitives/index.js'
-import { Counterparty, KeyDeriver } from './KeyDeriver.js'
-import { WalletProtocol } from './Wallet.interfaces.js'
+import KeyDeriver from './KeyDeriver.js'
+import { SecurityLevel } from './Wallet.interfaces.js'
 
 /**
  * A cached version of KeyDeriver that caches the results of key derivation methods.
@@ -24,20 +24,19 @@ export default class CachedKeyDeriver {
     this.maxCacheSize = options?.maxCacheSize || 1000
   }
 
-
   /**
      * Derives a public key based on protocol ID, key ID, and counterparty.
      * Caches the result for future calls with the same parameters.
-     * @param {WalletProtocol} protocolID - The protocol ID including a security level and protocol name.
+     * @param {[SecurityLevel, string]} protocolID - The protocol ID including a security level and protocol name.
      * @param {string} keyID - The key identifier.
-     * @param {Counterparty} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
+     * @param {PublicKey | string | 'self' | 'anyone'} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
      * @param {boolean} [forSelf=false] - Whether deriving for self.
      * @returns {PublicKey} - The derived public key.
      */
   derivePublicKey (
-    protocolID: WalletProtocol,
+    protocolID: [SecurityLevel, string],
     keyID: string,
-    counterparty: Counterparty,
+    counterparty: PublicKey | string | 'self' | 'anyone',
     forSelf: boolean = false
   ): PublicKey {
     const cacheKey = this.generateCacheKey('derivePublicKey', protocolID, keyID, counterparty, forSelf)
@@ -53,15 +52,15 @@ export default class CachedKeyDeriver {
   /**
      * Derives a private key based on protocol ID, key ID, and counterparty.
      * Caches the result for future calls with the same parameters.
-     * @param {WalletProtocol} protocolID - The protocol ID including a security level and protocol name.
+     * @param {[SecurityLevel, string]} protocolID - The protocol ID including a security level and protocol name.
      * @param {string} keyID - The key identifier.
-     * @param {Counterparty} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
+     * @param {PublicKey | string | 'self' | 'anyone'} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
      * @returns {PrivateKey} - The derived private key.
      */
   derivePrivateKey (
-    protocolID: WalletProtocol,
+    protocolID: [SecurityLevel, string],
     keyID: string,
-    counterparty: Counterparty
+    counterparty: PublicKey | string | 'self' | 'anyone'
   ): PrivateKey {
     const cacheKey = this.generateCacheKey('derivePrivateKey', protocolID, keyID, counterparty)
     if (this.cache.has(cacheKey)) {
@@ -76,16 +75,16 @@ export default class CachedKeyDeriver {
   /**
      * Derives a symmetric key based on protocol ID, key ID, and counterparty.
      * Caches the result for future calls with the same parameters.
-     * @param {WalletProtocol} protocolID - The protocol ID including a security level and protocol name.
+     * @param {[SecurityLevel, string]} protocolID - The protocol ID including a security level and protocol name.
      * @param {string} keyID - The key identifier.
-     * @param {Counterparty} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
+     * @param {PublicKey | string | 'self' | 'anyone'} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
      * @returns {SymmetricKey} - The derived symmetric key.
      * @throws {Error} - Throws an error if attempting to derive a symmetric key for 'anyone'.
      */
   deriveSymmetricKey (
-    protocolID: WalletProtocol,
+    protocolID: [SecurityLevel, string],
     keyID: string,
-    counterparty: Counterparty
+    counterparty: PublicKey | string | 'self' | 'anyone'
   ): SymmetricKey {
     const cacheKey = this.generateCacheKey('deriveSymmetricKey', protocolID, keyID, counterparty)
     if (this.cache.has(cacheKey)) {
@@ -100,11 +99,11 @@ export default class CachedKeyDeriver {
   /**
      * Reveals the shared secret between the root key and the counterparty.
      * Caches the result for future calls with the same parameters.
-     * @param {Counterparty} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
+     * @param {PublicKey | string | 'self' | 'anyone'} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
      * @returns {number[]} - The shared secret as a number array.
      * @throws {Error} - Throws an error if attempting to reveal a shared secret for 'self'.
      */
-  revealCounterpartySecret (counterparty: Counterparty): number[] {
+  revealCounterpartySecret (counterparty: PublicKey | string | 'self' | 'anyone'): number[] {
     const cacheKey = this.generateCacheKey('revealCounterpartySecret', counterparty)
     if (this.cache.has(cacheKey)) {
       return this.cacheGet(cacheKey)
@@ -118,14 +117,14 @@ export default class CachedKeyDeriver {
   /**
      * Reveals the specific key association for a given protocol ID, key ID, and counterparty.
      * Caches the result for future calls with the same parameters.
-     * @param {Counterparty} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
-     * @param {WalletProtocol} protocolID - The protocol ID including a security level and protocol name.
+     * @param {PublicKey | string | 'self' | 'anyone'} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
+     * @param {[SecurityLevel, string]} protocolID - The protocol ID including a security level and protocol name.
      * @param {string} keyID - The key identifier.
      * @returns {number[]} - The specific key association as a number array.
      */
   revealSpecificSecret (
-    counterparty: Counterparty,
-    protocolID: WalletProtocol,
+    counterparty: PublicKey | string | 'self' | 'anyone',
+    protocolID: [SecurityLevel, string],
     keyID: string
   ): number[] {
     const cacheKey = this.generateCacheKey('revealSpecificSecret', counterparty, protocolID, keyID)
@@ -188,7 +187,7 @@ export default class CachedKeyDeriver {
     if (this.cache.size >= this.maxCacheSize) {
       // Evict the least recently used item (first item in Map)
       const firstKey = this.cache.keys().next().value
-      this.cache.delete(firstKey!)
+      this.cache.delete(firstKey)
     }
     this.cache.set(cacheKey, value)
   }

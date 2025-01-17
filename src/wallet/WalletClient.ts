@@ -4,7 +4,6 @@ import XDMSubstrate from './substrates/XDM.js'
 import WalletWireTransceiver from './substrates/WalletWireTransceiver.js'
 import HTTPWalletWire from './substrates/HTTPWalletWire.js'
 import HTTPWalletJSON from './substrates/HTTPWalletJSON.js'
-import { AuthenticatedResult } from './Wallet.interfaces.js'
 
 const MAX_XDM_RESPONSE_WAIT = 200
 
@@ -178,7 +177,7 @@ export default class WalletClient implements Wallet {
     return await (this.substrate as Wallet).discoverByAttributes(args, this.originator)
   }
 
-  async isAuthenticated (args: {} = {}): Promise<AuthenticatedResult> {
+  async isAuthenticated (args: {} = {}): Promise<{ authenticated: boolean }> {
     await this.connectToSubstrate()
     return await (this.substrate as Wallet).isAuthenticated(args, this.originator)
   }
