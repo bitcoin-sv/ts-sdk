@@ -26,8 +26,6 @@ import {
   WalletEncryptResult
 } from './Wallet.interfaces.js'
 
-//import { WERR_INVALID_PARAMETER } from './WERR_errors'
-//const privilegedError = new WERR_INVALID_PARAMETER('args.privileged', 'false or undefined. Wallet is a single-keyring wallet, operating without context about whether its configured keyring is privileged.')
 const privilegedError = new Error('ProtoWallet is a single-keyring wallet, operating without context about whether its configured keyring is privileged.')
 
 /**
