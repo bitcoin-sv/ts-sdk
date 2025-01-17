@@ -6,7 +6,8 @@ import {
   HexString,
   OutpointString,
   CertificateFieldNameUnder50Bytes,
-  ProtoWallet
+  ProtoWallet,
+  Signature
 } from '../../../mod.js'
 
 /**
@@ -128,7 +129,6 @@ export default class Certificate {
     // Write signature if included
     if (includeSignature && this.signature && this.signature.length > 0) {
       const signatureBytes = Utils.toArray(this.signature, 'hex')
-      writer.writeVarIntNum(signatureBytes.length)
       writer.write(signatureBytes)
     }
 
@@ -186,9 +186,9 @@ export default class Certificate {
     // Read signature if present
     let signature: string | undefined
     if (!reader.eof()) {
-      const signatureLength = reader.readVarIntNum()
-      const signatureBytes = reader.read(signatureLength)
-      signature = Utils.toHex(signatureBytes)
+      const signatureBytes = reader.read()
+      const sig = Signature.fromDER(signatureBytes)
+      signature = sig.toString('hex') as string
     }
 
     return new Certificate(

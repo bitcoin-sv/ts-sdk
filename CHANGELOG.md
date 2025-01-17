@@ -13,15 +13,17 @@ All notable changes to this project will be documented in this file. The format 
     - [Removed](#removed)
     - [Fixed](#fixed)
     - [Security](#security)
-  - [\[1.3.3\] - 2025-01-16](#133---2025-01-16)
+  - [\[1.3.4\] - 2025-01-17](#134---2025-01-17)
     - [Changed](#changed-1)
     - [Added](#added-1)
+  - [\[1.3.3\] - 2025-01-13](#133---2025-01-13)
+    - [Changed](#changed-2)
   - [\[1.3.2\] - 2025-01-13](#132---2025-01-13)
     - [Added](#added-2)
   - [\[1.3.1\] - 2025-01-13](#131---2025-01-13)
     - [Fixed](#fixed-1)
   - [\[1.3.0\] - 2025-01-11](#130---2025-01-11)
-    - [Changed](#changed-2)
+    - [Changed](#changed-3)
   - [\[1.2.22\] - 2025-01-06](#1222---2025-01-06)
     - [Fixed](#fixed-2)
   - [\[1.2.21\] - 2025-01-03](#1221---2025-01-03)
@@ -32,7 +34,7 @@ All notable changes to this project will be documented in this file. The format 
     - [Added](#added-5)
     - [Removed](#removed-1)
     - [Fixed](#fixed-3)
-    - [Changed](#changed-3)
+    - [Changed](#changed-4)
   - [\[1.2.17\] - 2024-12-18](#1217---2024-12-18)
     - [Added](#added-6)
     - [Fixed](#fixed-4)
@@ -81,7 +83,7 @@ All notable changes to this project will be documented in this file. The format 
     - [Removed](#removed-2)
   - [\[1.1.30\] - 2024-11-02](#1130---2024-11-02)
     - [Added](#added-27)
-    - [Changed](#changed-4)
+    - [Changed](#changed-5)
   - [\[1.1.29\] - 2024-10-23](#1129---2024-10-23)
     - [Fixed](#fixed-8)
   - [\[1.1.28\] - 2024-10-23](#1128---2024-10-23)
@@ -96,7 +98,7 @@ All notable changes to this project will be documented in this file. The format 
     - [Added](#added-31)
   - [\[1.1.21\] - 2024-09-02](#1121---2024-09-02)
     - [Added](#added-32)
-    - [Changed](#changed-5)
+    - [Changed](#changed-6)
   - [\[1.1.17\] - 2024-08-21](#1117---2024-08-21)
     - [Added](#added-33)
   - [\[1.1.14\] - 2024-07-30](#1114---2024-07-30)
@@ -113,7 +115,7 @@ All notable changes to this project will be documented in this file. The format 
     - [Fixed](#fixed-12)
   - [\[1.1.4\] - 2024-05-10](#114---2024-05-10)
     - [Added](#added-37)
-    - [Changed](#changed-6)
+    - [Changed](#changed-7)
   - [\[1.1.0\] - 2024-05-06](#110---2024-05-06)
     - [Added](#added-38)
     - [Removed](#removed-3)
@@ -139,7 +141,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-## [1.3.3] - 2025-01-16
+## [1.3.4] - 2025-01-17
 
 ### Changed
 
@@ -160,6 +162,16 @@ Changes to cleanup and normalize types in Wallet.interfaces.ts and dependent fil
 ### Added
 
 - WalletCrypto.ts: Pulled out of ProtoWallet for reuse as a base class.
+
+---
+
+## [1.3.3] - 2025-01-13
+
+### Changed
+
+- Removed unnecessary length byte of signatures in the encoding of a Certificate in Binary.
+
+---
 
 ## [1.3.2] - 2025-01-13
 
