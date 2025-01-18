@@ -1,8 +1,8 @@
 import { PrivateKey } from "mod.js"
-import { ProtoWallet, Wallet, CreateActionArgs, OriginatorDomainNameStringUnder250Bytes, CreateActionResult, SignActionArgs, SignActionResult, AbortActionArgs, AbortActionResult, ListActionsArgs, ListActionsResult, InternalizeActionArgs, InternalizeActionResult, ListOutputsArgs, ListOutputsResult, RelinquishOutputArgs, RelinquishOutputResult, AcquireCertificateArgs, AcquireCertificateResult, ListCertificatesArgs, ListCertificatesResult, ProveCertificateArgs, ProveCertificateResult, RelinquishCertificateArgs, RelinquishCertificateResult, DiscoverByIdentityKeyArgs, DiscoverCertificatesResult, DiscoverByAttributesArgs, GetHeightResult, GetHeaderArgs, GetHeaderResult, KeyDeriverApi, KeyDeriver, GetPublicKeyArgs, GetPublicKeyResult } from "../../../wallet/index.js"
+import { ProtoWallet, Wallet, CreateActionArgs, OriginatorDomainNameStringUnder250Bytes, CreateActionResult, SignActionArgs, SignActionResult, AbortActionArgs, AbortActionResult, ListActionsArgs, ListActionsResult, InternalizeActionArgs, InternalizeActionResult, ListOutputsArgs, ListOutputsResult, RelinquishOutputArgs, RelinquishOutputResult, AcquireCertificateArgs, AcquireCertificateResult, ListCertificatesArgs, ListCertificatesResult, ProveCertificateArgs, ProveCertificateResult, RelinquishCertificateArgs, RelinquishCertificateResult, DiscoverByIdentityKeyArgs, DiscoverCertificatesResult, DiscoverByAttributesArgs, GetHeightResult, GetHeaderArgs, GetHeaderResult, KeyDeriverApi, KeyDeriver, GetPublicKeyArgs, GetPublicKeyResult, PubKeyHex } from "../../../wallet/index.js"
 
 export class CompletedProtoWallet extends ProtoWallet implements Wallet {
-  declare getPublicKey: (args: GetPublicKeyArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetPublicKeyResult>
+  // declare getPublicKey: (args: GetPublicKeyArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetPublicKeyResult>
 
   constructor(rootKeyOrKeyDeriver: PrivateKey | 'anyone' | KeyDeriverApi) {
     super(rootKeyOrKeyDeriver)
@@ -10,6 +10,33 @@ export class CompletedProtoWallet extends ProtoWallet implements Wallet {
       rootKeyOrKeyDeriver = new KeyDeriver(rootKeyOrKeyDeriver as PrivateKey | 'anyone')
     }
     this.keyDeriver = rootKeyOrKeyDeriver as KeyDeriver
+  }
+
+
+  async getPublicKey(
+    args: GetPublicKeyArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<{ publicKey: PubKeyHex }> {
+    if (args.privileged) {
+      throw new Error('no privilege support')
+    }
+    if (args.identityKey) {
+      return { publicKey: this.keyDeriver.rootKey.toPublicKey().toString() }
+    } else {
+      if (!args.protocolID || !args.keyID) {
+        throw new Error('protocolID and keyID are required if identityKey is false or undefined.')
+      }
+      return {
+        publicKey: this.keyDeriver
+          .derivePublicKey(
+            args.protocolID,
+            args.keyID,
+            args.counterparty || 'self',
+            args.forSelf
+          )
+          .toString()
+      }
+    }
   }
 
   async createAction(args: CreateActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes)

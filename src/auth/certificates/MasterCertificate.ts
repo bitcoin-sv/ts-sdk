@@ -128,7 +128,7 @@ export class MasterCertificate extends Certificate {
         ciphertext: Utils.toArray(encryptedMasterFieldKey, 'base64'),
         protocolID: [2, 'certificate field encryption'],
         keyID,
-        counterparty: 'self'
+        counterparty: this.certifier // Is this ever 'self'?
       }, originator)
 
       // Verify that derived key actually decrypts requested field

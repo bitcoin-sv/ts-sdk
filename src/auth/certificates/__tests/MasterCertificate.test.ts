@@ -1,7 +1,3 @@
-/**
- * @file MasterCertificate.test.ts
- * @description Tests for the MasterCertificate class.
- */
 import { MasterCertificate } from '../../../../dist/cjs/src/auth/certificates/MasterCertificate.js'
 import { VerifiableCertificate } from '../../../../dist/cjs/src/auth/certificates/VerifiableCertificate.js'
 import { PrivateKey, SymmetricKey, Utils, Random } from '../../../../dist/cjs/src/primitives/index.js'
@@ -95,19 +91,15 @@ describe('MasterCertificate', () => {
 
     it('should throw if masterKeyring is empty or invalid', async () => {
       // Manually create a MasterCertificate with an empty masterKeyring
-      const emptyMasterKeyringCert = new MasterCertificate(
+      expect(() => new MasterCertificate(
         Utils.toBase64(Random(16)),
         Utils.toBase64(Random(16)),
         subjectPubKey,
         certifierPubKey,
         mockRevocationOutpoint,
-        { name: Utils.toBase64([1, 2, 3]) }, // one field
-        {} // empty masterKeyring
-      )
-
-      await expect(emptyMasterKeyringCert.decryptFields(subjectWallet))
-        .rejects
-        .toThrow('A MasterCertificate must have a valid masterKeyring!')
+        { name: Utils.toBase64([1, 2, 3]) },
+        {}
+      )).toThrow("Master keyring must contain a value for every field. Missing key for field: \"name\"");
     })
 
     it('should throw if decryption fails for any field', async () => {
@@ -133,12 +125,13 @@ describe('MasterCertificate', () => {
 
   describe('createKeyringForVerifier', () => {
     const verifierPrivateKey = PrivateKey.fromRandom()
-    const verifierPubKey = verifierPrivateKey.toPublicKey().toString()
     const verifierWallet = new CompletedProtoWallet(verifierPrivateKey)
+    let verifierPubKey
 
     let issuedCert: MasterCertificate
 
     beforeAll(async () => {
+      verifierPubKey = (await verifierWallet.getPublicKey({ identityKey: true })).publicKey
       issuedCert = await MasterCertificate.issueCertificateForSubject(
         certifierWallet,
         subjectPubKey,
