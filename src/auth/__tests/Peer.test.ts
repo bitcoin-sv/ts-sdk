@@ -87,33 +87,26 @@ describe('Peer class mutual authentication and certificate exchange', () => {
   const aliceFields = { name: 'Alice', email: 'alice@example.com', libraryCardNumber: 'A123456' }
   const bobFields = { name: 'Bob', email: 'bob@example.com', libraryCardNumber: 'B654321' }
 
-  async function createMasterCertificate(wallet: Wallet, fields: Record<string, string>) {
-    const certificateFields: Record<string, string> = {}
-    const masterKeyring: Record<string, string> = {}
+  async function createMasterCertificate(subjectWallet: Wallet, fields: Record<string, string>) {
+    const subjectPubKey = (await subjectWallet.getPublicKey({ identityKey: true })).publicKey
+    const certifierWallet = new ProtoWallet(certifierPrivateKey)
 
-    for (const fieldName in fields) {
-      const fieldSymmetricKey = SymmetricKey.fromRandom()
-      const encryptedFieldValue = fieldSymmetricKey.encrypt(Utils.toArray(fields[fieldName], 'utf8'))
-      certificateFields[fieldName] = Utils.toBase64(encryptedFieldValue as number[])
-
-      const encryptedFieldKey = await wallet.encrypt({
-        plaintext: fieldSymmetricKey.toArray(),
-        protocolID: [2, 'certificate field encryption'],
-        keyID: `${certificateSerialNumber} ${fieldName}`,
-        counterparty: 'self'
-      })
-      masterKeyring[fieldName] = Utils.toBase64(encryptedFieldKey.ciphertext)
-    }
-
-    return new MasterCertificate(
+    // Issue a new MasterCertificate for the subject (e.g. Alice/Bob)
+    const masterCertificate = await MasterCertificate.issueCertificateForSubject(
+      certifierWallet,
+      subjectPubKey,
+      fields,
       certificateType,
-      certificateSerialNumber,
-      (await wallet.getPublicKey({ identityKey: true })).publicKey,
-      certifierPublicKey,
-      'revocationOutpoint',
-      certificateFields,
-      masterKeyring
+      async () => 'revocationOutpoint' // or any revocation outpoint logic you want
     )
+
+    // For test consistency, override the automatically generated serialNumber 
+    // with the globally used 'certificateSerialNumber' and re-sign:
+    // masterCertificate.signature = undefined
+    // masterCertificate.serialNumber = certificateSerialNumber
+    // await masterCertificate.sign(certifierWallet)
+
+    return masterCertificate
   }
 
   async function createVerifiableCertificate(
@@ -123,7 +116,6 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     fieldsToReveal: string[]
   ): Promise<VerifiableCertificate> {
     const certifierWallet = new ProtoWallet(certifierPrivateKey)
-    await masterCertificate.sign(certifierWallet)
 
     const keyringForVerifier = await masterCertificate.createKeyringForVerifier(wallet, verifierIdentityKey, fieldsToReveal)
     return new VerifiableCertificate(
