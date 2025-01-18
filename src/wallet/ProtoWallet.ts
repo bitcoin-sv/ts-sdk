@@ -39,7 +39,7 @@ export class ProtoWallet implements ProtoWalletApi {
   keyDeriver: KeyDeriverApi
 
   constructor (rootKeyOrKeyDeriver: PrivateKey | 'anyone' | KeyDeriverApi) {
-    if (typeof rootKeyOrKeyDeriver['identityKey'] !== 'string') {
+    if (!(rootKeyOrKeyDeriver instanceof KeyDeriver)) {
       rootKeyOrKeyDeriver = new KeyDeriver(rootKeyOrKeyDeriver as PrivateKey | 'anyone')
     }
     this.keyDeriver = rootKeyOrKeyDeriver as KeyDeriver
