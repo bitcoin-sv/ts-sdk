@@ -78,7 +78,7 @@ export class MasterCertificate extends Certificate {
       for (const fieldName of Object.keys(this.fields)) {
         const { plaintext: fieldRevelationKey } = await subjectWallet.decrypt({
           ciphertext: Utils.toArray(this.masterKeyring[fieldName], 'base64'),
-          counterparty: this.subject,
+          counterparty: this.certifier,
           protocolID: [2, 'certificate field encryption'],
           keyID: `${this.serialNumber} ${fieldName}`
         })
