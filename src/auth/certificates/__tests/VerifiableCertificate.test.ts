@@ -1,8 +1,3 @@
-/**
- * @file VerifiableCertificate.test.ts
- * @description Tests for the VerifiableCertificate class.
- */
-
 import { VerifiableCertificate } from '../../../../dist/cjs/src/auth/certificates/VerifiableCertificate.js'
 import { PrivateKey, SymmetricKey, Utils } from '../../../../dist/cjs/src/primitives/index.js'
 import { CompletedProtoWallet } from '../../../../dist/cjs/src/auth/certificates/__tests/MockWallet.js'
