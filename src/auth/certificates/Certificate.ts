@@ -225,37 +225,23 @@ export default class Certificate {
   /**
    * Signs the certificate using the provided certifier wallet.
    *
-   * @param {Wallet} certifier - The wallet representing the certifier.
+   * @param {Wallet} certifierWallet - The wallet representing the certifier.
    * @returns {Promise<void>}
    */
-  async sign(certifier: ProtoWallet): Promise<void> {
-    try {
-      await this.canSign(certifier);
-    } catch (error) {
-      console.error('Signing failed:', { certifier: this.certifier, error })
-      throw error
+  async sign(certifierWallet: ProtoWallet): Promise<void> {
+    if (this.signature) {
+      throw new Error(`Certificate has already been signed! Signature present: ${this.signature}`)
     }
 
+    // Ensure the certifier declared is the one actually signing
+    this.certifier = (await certifierWallet.getPublicKey({ identityKey: true })).publicKey
+
     const preimage = this.toBinary(false) // Exclude the signature when signing
-    const { signature } = await certifier.createSignature({
+    const { signature } = await certifierWallet.createSignature({
       data: preimage,
       protocolID: [2, 'certificate signature'],
       keyID: `${this.type} ${this.serialNumber}`
     })
     this.signature = Utils.toHex(signature)
-  }
-
-  /**
-   * Checks if the certifier wallet is authorized to sign.
-   * Derived classes can override this method to enforce specific signing rules such as key-linkage.
-   * 
-   * @param certifierWallet - The wallet to be validated.
-   * @throws An error if the wallet's public key does not match the certifier's public key.
-   */
-  protected async canSign(certifierWallet: ProtoWallet): Promise<void> {
-    const { publicKey } = await certifierWallet.getPublicKey({ identityKey: true })
-    if (publicKey !== this.certifier) {
-      throw new Error('The provided certifier wallet\'s identity key does not match the expected certifier public key.')
-    }
   }
 }
