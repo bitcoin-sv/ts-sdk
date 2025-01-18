@@ -179,10 +179,8 @@ export class MasterCertificate extends Certificate {
     fields: Record<CertificateFieldNameUnder50Bytes, string>,
     certificateType: string,
     getRevocationOutpoint = async (
-      serialNumber: string,
-      fields?: Record<CertificateFieldNameUnder50Bytes, string>
-    ): Promise<string> => { return 'Certificate revocation not tracked.' },
-    updateProgress: (message: string) => Promise<void> = async () => { }
+      serialNumber: string
+    ): Promise<string> => { return 'Certificate revocation not tracked.' }
   ): Promise<MasterCertificate> {
     // 1. Generate serialNumber
     const serialNumber = Utils.toBase64(Random(32))

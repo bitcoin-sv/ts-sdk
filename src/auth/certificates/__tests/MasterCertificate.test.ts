@@ -2,16 +2,14 @@
  * @file MasterCertificate.test.ts
  * @description Tests for the MasterCertificate class.
  */
-
-import { MasterCertificate } from '../MasterCertificate'
-import { VerifiableCertificate } from '../VerifiableCertificate'
-import { ProtoWallet, PrivateKey, SymmetricKey, Utils, Random } from '../../../../mod'
+import { MasterCertificate } from '../../../../dist/cjs/src/auth/certificates/MasterCertificate.js'
+import { VerifiableCertificate } from '../../../../dist/cjs/src/auth/certificates/VerifiableCertificate.js'
+import { PrivateKey, SymmetricKey, Utils, Random } from '../../../../dist/cjs/src/primitives/index.js'
+import { CompletedProtoWallet } from '../../../../dist/cjs/src/auth/certificates/__tests/MockWallet.js'
 
 describe('MasterCertificate', () => {
   const subjectPrivateKey = PrivateKey.fromRandom()
-  const subjectPubKey = subjectPrivateKey.toPublicKey().toString()
   const certifierPrivateKey = PrivateKey.fromRandom()
-  const certifierPubKey = certifierPrivateKey.toPublicKey().toString()
 
   // A mock revocation outpoint for testing
   const mockRevocationOutpoint = 'deadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000.1'
@@ -23,8 +21,14 @@ describe('MasterCertificate', () => {
     department: 'Engineering'
   }
 
-  const subjectWallet = new ProtoWallet(subjectPrivateKey)
-  const certifierWallet = new ProtoWallet(certifierPrivateKey)
+  const subjectWallet = new CompletedProtoWallet(subjectPrivateKey)
+  const certifierWallet = new CompletedProtoWallet(certifierPrivateKey)
+  let subjectPubKey, certifierPubKey
+
+  beforeAll(async () => {
+    subjectPubKey = (await subjectWallet.getPublicKey({ identityKey: true })).publicKey
+    certifierPubKey = (await certifierWallet.getPublicKey({ identityKey: true })).publicKey
+  })
 
   describe('constructor', () => {
     it('should construct a MasterCertificate successfully when masterKeyring is valid', () => {
@@ -130,7 +134,7 @@ describe('MasterCertificate', () => {
   describe('createKeyringForVerifier', () => {
     const verifierPrivateKey = PrivateKey.fromRandom()
     const verifierPubKey = verifierPrivateKey.toPublicKey().toString()
-    const verifierWallet = new ProtoWallet(verifierPrivateKey)
+    const verifierWallet = new CompletedProtoWallet(verifierPrivateKey)
 
     let issuedCert: MasterCertificate
 
@@ -201,7 +205,7 @@ describe('MasterCertificate', () => {
 
       await expect(
         tamperedCert.createKeyringForVerifier(subjectWallet, verifierPubKey, ['name'])
-      ).rejects.toThrow('Decryption of the "name" field with its revelation key failed.')
+      ).rejects.toThrow('Decryption failed!')
     })
 
     it('should support optional originator parameter', async () => {
@@ -225,7 +229,6 @@ describe('MasterCertificate', () => {
       }
 
       const revocationFn = jest.fn().mockResolvedValue(mockRevocationOutpoint)
-      const progressFn = jest.fn().mockResolvedValue(undefined)
 
       const newCert = await MasterCertificate.issueCertificateForSubject(
         certifierWallet,
@@ -233,7 +236,6 @@ describe('MasterCertificate', () => {
         newPlaintextFields,
         'TEST_CERT',
         revocationFn,
-        progressFn
       )
 
       expect(newCert).toBeInstanceOf(MasterCertificate)
@@ -249,9 +251,8 @@ describe('MasterCertificate', () => {
       expect(newCert.revocationOutpoint).toEqual(mockRevocationOutpoint)
       // Check we have a signature
       expect(newCert.signature).toBeDefined()
-      // Check that the progressFn and revocationFn were called
-      expect(revocationFn).toHaveBeenCalledWith(newCert.serialNumber, expect.anything())
-      expect(progressFn).toHaveBeenCalled()
+      // Check that the revocationFn were called
+      expect(revocationFn).toHaveBeenCalledWith(newCert.serialNumber)
     })
   })
 })
