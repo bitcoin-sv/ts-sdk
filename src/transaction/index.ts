@@ -6,5 +6,5 @@ export type { Broadcaster, BroadcastFailure, BroadcastResponse } from './Broadca
 export { isBroadcastResponse, isBroadcastFailure } from './Broadcaster.js'
 export type { default as ChainTracker } from './ChainTracker.js'
 export { default as BeefTx } from './BeefTx.js'
-export { default as Beef } from './Beef.js'
+export * from './Beef.js'
 export { default as BeefParty } from './BeefParty.js'
