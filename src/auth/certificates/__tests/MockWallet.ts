@@ -1,9 +1,9 @@
 import { PrivateKey } from "mod.js"
 import { ProtoWallet, Wallet, CreateActionArgs, OriginatorDomainNameStringUnder250Bytes, CreateActionResult, SignActionArgs, SignActionResult, AbortActionArgs, AbortActionResult, ListActionsArgs, ListActionsResult, InternalizeActionArgs, InternalizeActionResult, ListOutputsArgs, ListOutputsResult, RelinquishOutputArgs, RelinquishOutputResult, AcquireCertificateArgs, AcquireCertificateResult, ListCertificatesArgs, ListCertificatesResult, ProveCertificateArgs, ProveCertificateResult, RelinquishCertificateArgs, RelinquishCertificateResult, DiscoverByIdentityKeyArgs, DiscoverCertificatesResult, DiscoverByAttributesArgs, GetHeightResult, GetHeaderArgs, GetHeaderResult, KeyDeriverApi, KeyDeriver, GetPublicKeyArgs, GetPublicKeyResult, PubKeyHex } from "../../../wallet/index.js"
 
+// Test Mock wallet which extends ProtoWallet but still implements Wallet interface
+// Unsupported methods throw
 export class CompletedProtoWallet extends ProtoWallet implements Wallet {
-  // declare getPublicKey: (args: GetPublicKeyArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetPublicKeyResult>
-
   constructor(rootKeyOrKeyDeriver: PrivateKey | 'anyone' | KeyDeriverApi) {
     super(rootKeyOrKeyDeriver)
     if (typeof rootKeyOrKeyDeriver['identityKey'] !== 'string') {
@@ -11,7 +11,6 @@ export class CompletedProtoWallet extends ProtoWallet implements Wallet {
     }
     this.keyDeriver = rootKeyOrKeyDeriver as KeyDeriver
   }
-
 
   async getPublicKey(
     args: GetPublicKeyArgs,
