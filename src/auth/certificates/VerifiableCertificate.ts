@@ -6,7 +6,8 @@ import {
   HexString,
   OutpointString,
   PubKeyHex,
-  Wallet
+  Wallet,
+  ProtoWallet
 } from '../../../mod.js'
 import Certificate from './Certificate.js'
 
