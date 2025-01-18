@@ -97,6 +97,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | --- |
 | [AuthFetch](#class-authfetch) |
 | [Certificate](#class-certificate) |
+| [CompletedProtoWallet](#class-completedprotowallet) |
 | [MasterCertificate](#class-mastercertificate) |
 | [Peer](#class-peer) |
 | [SessionManager](#class-sessionmanager) |
@@ -217,7 +218,7 @@ export default class Certificate {
     toBinary(includeSignature: boolean = true): number[] 
     static fromBinary(bin: number[]): Certificate 
     async verify(): Promise<boolean> 
-    async sign(certifier: ProtoWallet): Promise<void> 
+    async sign(certifierWallet: ProtoWallet): Promise<void> 
 }
 ```
 
@@ -339,13 +340,13 @@ Argument Details
 Signs the certificate using the provided certifier wallet.
 
 ```ts
-async sign(certifier: ProtoWallet): Promise<void> 
+async sign(certifierWallet: ProtoWallet): Promise<void> 
 ```
 See also: [ProtoWallet](#class-protowallet)
 
 Argument Details
 
-+ **certifier**
++ **certifierWallet**
   + The wallet representing the certifier.
 
 #### Method toBinary
@@ -382,6 +383,37 @@ Returns
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
+### Class: CompletedProtoWallet
+
+```ts
+export class CompletedProtoWallet extends ProtoWallet implements Wallet {
+    constructor(rootKeyOrKeyDeriver: PrivateKey | "anyone" | KeyDeriverApi) 
+    async getPublicKey(args: GetPublicKeyArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        publicKey: PubKeyHex;
+    }> 
+    async createAction(args: CreateActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<CreateActionResult> 
+    async signAction(args: SignActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<SignActionResult> 
+    async abortAction(args: AbortActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AbortActionResult> 
+    async listActions(args: ListActionsArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ListActionsResult> 
+    async internalizeAction(args: InternalizeActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<InternalizeActionResult> 
+    async listOutputs(args: ListOutputsArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ListOutputsResult> 
+    async relinquishOutput(args: RelinquishOutputArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<RelinquishOutputResult> 
+    async acquireCertificate(args: AcquireCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AcquireCertificateResult> 
+    async listCertificates(args: ListCertificatesArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ListCertificatesResult> 
+    async proveCertificate(args: ProveCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ProveCertificateResult> 
+    async relinquishCertificate(args: RelinquishCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<RelinquishCertificateResult> 
+    async discoverByIdentityKey(args: DiscoverByIdentityKeyArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<DiscoverCertificatesResult> 
+    async discoverByAttributes(args: DiscoverByAttributesArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<DiscoverCertificatesResult> 
+    async getHeight(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetHeightResult> 
+    async getHeaderForHeight(args: GetHeaderArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetHeaderResult> 
+}
+```
+
+See also: [AbortActionArgs](#interface-abortactionargs), [AbortActionResult](#interface-abortactionresult), [AcquireCertificateArgs](#interface-acquirecertificateargs), [AcquireCertificateResult](#interface-acquirecertificateresult), [CreateActionArgs](#interface-createactionargs), [CreateActionResult](#interface-createactionresult), [DiscoverByAttributesArgs](#interface-discoverbyattributesargs), [DiscoverByIdentityKeyArgs](#interface-discoverbyidentitykeyargs), [DiscoverCertificatesResult](#interface-discovercertificatesresult), [GetHeaderArgs](#interface-getheaderargs), [GetHeaderResult](#interface-getheaderresult), [GetHeightResult](#interface-getheightresult), [GetPublicKeyArgs](#interface-getpublickeyargs), [InternalizeActionArgs](#interface-internalizeactionargs), [InternalizeActionResult](#interface-internalizeactionresult), [KeyDeriverApi](#interface-keyderiverapi), [ListActionsArgs](#interface-listactionsargs), [ListActionsResult](#interface-listactionsresult), [ListCertificatesArgs](#interface-listcertificatesargs), [ListCertificatesResult](#interface-listcertificatesresult), [ListOutputsArgs](#interface-listoutputsargs), [ListOutputsResult](#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [PrivateKey](#class-privatekey), [ProtoWallet](#class-protowallet), [ProveCertificateArgs](#interface-provecertificateargs), [ProveCertificateResult](#interface-provecertificateresult), [PubKeyHex](#type-pubkeyhex), [RelinquishCertificateArgs](#interface-relinquishcertificateargs), [RelinquishCertificateResult](#interface-relinquishcertificateresult), [RelinquishOutputArgs](#interface-relinquishoutputargs), [RelinquishOutputResult](#interface-relinquishoutputresult), [SignActionArgs](#interface-signactionargs), [SignActionResult](#interface-signactionresult), [Wallet](#interface-wallet)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
 ### Class: MasterCertificate
 
 MasterCertificate extends the base Certificate class to manage a master keyring, enabling the creation of verifiable certificates.
@@ -397,11 +429,13 @@ export class MasterCertificate extends Certificate {
     declare subject: PubKeyHex;
     declare certifier: PubKeyHex;
     declare revocationOutpoint: OutpointString;
-    declare fields: Record<CertificateFieldNameUnder50Bytes, string>;
+    declare fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
     declare signature?: HexString;
-    masterKeyring: Record<CertificateFieldNameUnder50Bytes, string>;
-    constructor(type: Base64String, serialNumber: Base64String, subject: PubKeyHex, certifier: PubKeyHex, revocationOutpoint: OutpointString, fields: Record<CertificateFieldNameUnder50Bytes, string>, masterKeyring: Record<CertificateFieldNameUnder50Bytes, string>, signature?: HexString) 
+    masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
+    constructor(type: Base64String, serialNumber: Base64String, subject: PubKeyHex, certifier: PubKeyHex, revocationOutpoint: OutpointString, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, signature?: HexString) 
+    async decryptFields(subjectWallet: ProtoWallet): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
     async createKeyringForVerifier(subjectWallet: ProtoWallet, verifierIdentityKey: string, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+    static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: string, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => { return "Certificate revocation not tracked."; }): Promise<MasterCertificate> 
 }
 ```
 
@@ -413,10 +447,10 @@ See also: [Base64String](#type-base64string), [Certificate](#class-certificate),
 
 #### Method createKeyringForVerifier
 
-Creates a verifiable certificate structure for a specific verifier, allowing them access to specified fields.
-This method decrypts the master field keys for each field specified in `fieldsToReveal` and re-encrypts them
-for the verifier's identity key. The resulting certificate structure includes only the fields intended to be
-revealed and a verifier-specific keyring for field decryption.
+Creates a keyring for a verifier, enabling them to decrypt specific certificate fields.
+This method decrypts the master field keys for the specified fields and re-encrypts them
+for the verifier's identity key. The result is a keyring containing the keys necessary
+for the verifier to access the designated fields.
 
 ```ts
 async createKeyringForVerifier(subjectWallet: ProtoWallet, verifierIdentityKey: string, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
@@ -425,7 +459,7 @@ See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50by
 
 Returns
 
-- A new certificate structure containing the original encrypted fields, the verifier-specific field decryption keyring, and essential certificate metadata.
+- A keyring mapping field names to encrypted field revelation keys, allowing the verifier to decrypt specified fields.
 
 Argument Details
 
@@ -441,8 +475,72 @@ Argument Details
 Throws
 
 Throws an error if:
-- fieldsToReveal is empty or a field in `fieldsToReveal` does not exist in the certificate.
+- fieldsToReveal is not an array of strings.
+- A field in `fieldsToReveal` does not exist in the certificate.
 - The decrypted master field key fails to decrypt the corresponding field (indicating an invalid key).
+
+#### Method decryptFields
+
+Decrypts all fields in the MasterCertificate using the subject's wallet.
+
+This method uses the `masterKeyring` to decrypt each field's encryption key and then
+decrypts the field values. The result is a record of plaintext field names and values.
+
+```ts
+async decryptFields(subjectWallet: ProtoWallet): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+```
+See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [ProtoWallet](#class-protowallet)
+
+Returns
+
+- A record of field names and their decrypted values in plaintext.
+
+Argument Details
+
++ **subjectWallet**
+  + The wallet of the subject, used to decrypt the master keyring and field values.
+
+Throws
+
+Throws an error if the `masterKeyring` is invalid or if decryption fails for any field.
+
+#### Method issueCertificateForSubject
+
+Issues a new MasterCertificate for a specified subject.
+
+This method generates a certificate containing encrypted fields and a keyring
+for the subject to decrypt all fields. Each field is encrypted with a randomly
+generated symmetric key, which is then encrypted for the subject. The certificate
+can also includes a revocation outpoint to manage potential revocation.
+
+```ts
+static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: string, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => { return "Certificate revocation not tracked."; }): Promise<MasterCertificate> 
+```
+See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [MasterCertificate](#class-mastercertificate), [ProtoWallet](#class-protowallet)
+
+Returns
+
+- A signed MasterCertificate instance containing the encrypted fields and subject specific keyring.
+
+Argument Details
+
++ **certifierWallet**
+  + The wallet of the certifier, used to sign the certificate and encrypt field keys.
++ **subject**
+  + The public identity key of the subject for whom the certificate is issued.
++ **fields**
+  + Unencrypted certificate fields to include, with their names and values.
++ **certificateType**
+  + The type of certificate being issued.
++ **getRevocationOutpoint**
+  + 
+Optional function to obtain a revocation outpoint for the certificate. Defaults to a placeholder.
++ **updateProgress**
+  + Optional callback for reporting progress updates during the operation. Defaults to a no-op.
+
+Throws
+
+Throws an error if any operation (e.g., encryption, signing) fails during certificate issuance.
 
 </details>
 
@@ -960,7 +1058,7 @@ See also: [Base64String](#type-base64string), [Certificate](#class-certificate),
 
 #### Method decryptFields
 
-Decrypts certificate fields using the provided keyring and verifier wallet
+Decrypts selectively revealed certificate fields using the provided keyring and verifier wallet
 
 ```ts
 async decryptFields(verifierWallet: Wallet): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
@@ -989,51 +1087,13 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | |
 | --- |
-| [createMasterCertificate](#function-createmastercertificate) |
 | [createNonce](#function-createnonce) |
-| [createVerifiableCertificate](#function-createverifiablecertificate) |
 | [verifyNonce](#function-verifynonce) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 
-### Function: createMasterCertificate
-
-Creates a Master Certificate by encrypting provided fields and generating a master keyring.
-
-```ts
-export async function createMasterCertificate(wallet: ProtoWallet, fields: Record<string, string>, certificateType: string, certificateSerialNumber: string, certifierPublicKey: string): Promise<MasterCertificate> 
-```
-
-See also: [MasterCertificate](#class-mastercertificate), [ProtoWallet](#class-protowallet)
-
-<details>
-
-<summary>Function createMasterCertificate Details</summary>
-
-Returns
-
-A promise resolving to the created Master Certificate.
-
-Argument Details
-
-+ **wallet**
-  + The wallet instance used for encryption and public key retrieval.
-+ **fields**
-  + The certificate fields to encrypt.
-+ **certificateType**
-  + The type of the certificate being created.
-+ **certificateSerialNumber**
-  + The serial number of the certificate.
-+ **certifierPublicKey**
-  + The public key of the certifier.
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
-
----
 ### Function: createNonce
 
 Creates a nonce derived from a privateKey
@@ -1051,42 +1111,6 @@ See also: [Wallet](#interface-wallet)
 Returns
 
 A random nonce derived with a wallet
-
-</details>
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
-
----
-### Function: createVerifiableCertificate
-
-Creates a Verifiable Certificate by signing a Master Certificate and generating a keyring for a verifier.
-
-```ts
-export async function createVerifiableCertificate(masterCertificate: MasterCertificate, wallet: ProtoWallet, verifierIdentityKey: string, fieldsToReveal: string[], certifierPrivateKey: PrivateKey): Promise<VerifiableCertificate> 
-```
-
-See also: [MasterCertificate](#class-mastercertificate), [PrivateKey](#class-privatekey), [ProtoWallet](#class-protowallet), [VerifiableCertificate](#class-verifiablecertificate)
-
-<details>
-
-<summary>Function createVerifiableCertificate Details</summary>
-
-Returns
-
-A promise resolving to the created Verifiable Certificate.
-
-Argument Details
-
-+ **masterCertificate**
-  + The master certificate to convert into a verifiable certificate.
-+ **wallet**
-  + The wallet instance used for generating a keyring for the verifier.
-+ **verifierIdentityKey**
-  + The identity key of the verifier.
-+ **fieldsToReveal**
-  + The list of fields to reveal to the verifier.
-+ **certifierPrivateKey**
-  + The private key of the certifier for signing the certificate.
 
 </details>
 
