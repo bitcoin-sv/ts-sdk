@@ -1,5 +1,5 @@
 export * from './Wallet.interfaces.js'
-export { default as KeyDeriver } from './KeyDeriver.js'
+export * from './KeyDeriver.js'
 export { default as CachedKeyDeriver } from './CachedKeyDeriver.js'
 export { default as ProtoWallet } from './ProtoWallet.js'
 export { default as WalletClient } from './WalletClient.js'
