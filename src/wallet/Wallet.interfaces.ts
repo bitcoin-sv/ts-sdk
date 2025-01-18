@@ -295,7 +295,6 @@ export interface SendWithResult {
   status: SendWithResultStatus
 }
 
-
 export interface SignableTransaction {
   tx: AtomicBEEF
   reference: Base64String
@@ -366,7 +365,7 @@ export interface SignActionArgs {
 }
 
 /**
- * 
+ *
  */
 export interface SignActionResult {
   txid?: TXIDHexString
@@ -580,9 +579,9 @@ export interface WalletEncryptionArgs {
 
 /**
    * When `identityKey` is true, `WalletEncryptionArgs` are not used.
-   * 
+   *
    * When `identityKey` is undefined, `WalletEncryptionArgs` are required.
-   * 
+   *
    * @param {BooleanDefaultFalse|true} [identityKey] - Use true to retrieve the current user's own identity key, overriding any protocol ID, key ID, or counterparty specified.
    * @param {BooleanDefaultFalse} [forSelf] - Whether to return the public key derived from the current user's own identity (as opposed to the counterparty's identity).
  */
@@ -910,7 +909,7 @@ export interface WalletErrorObject extends Error {
 }
 
 /**
- * 
+ *
  */
 export interface GetPublicKeyResult {
   publicKey: PubKeyHex
@@ -921,7 +920,7 @@ export interface GetPublicKeyResult {
  * key derivation, encryption, decryption, hmac creation and verification, signature generation and verification
  *
  * Error Handling
- * 
+ *
  * Every method of the `Wallet` interface has a return value of the form `Promise<object>`.
  * When an error occurs, an exception object may be thrown which must conform to the `WalletErrorObject` interface.
  * Serialization layers can rely on the `isError` property being unique to error objects to
@@ -1043,9 +1042,9 @@ export interface ProtoWalletApi {
  * encryption, decryption, identity certificate management, identity verification, and communication
  * with applications as per the BRC standards. This interface allows applications to interact with
  * the wallet for a range of functionalities aligned with the Babbage architectural principles.
- * 
+ *
  * Error Handling
- * 
+ *
  * Every method of the `Wallet` interface has a return value of the form `Promise<object>`.
  * When an error occurs, an exception object may be thrown which must conform to the `WalletErrorObject` interface.
  * Serialization layers can rely on the `isError` property being unique to error objects to

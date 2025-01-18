@@ -25,7 +25,7 @@ export class Peer {
   private callbackIdCounter: number = 0
 
   // Whether to auto-persist the session with the last-interacted-with peer
-  private autoPersistLastSession: boolean = true
+  private readonly autoPersistLastSession: boolean = true
 
   // Last-interacted-with peer identity key
   private lastInteractedWithPeer: string | undefined
@@ -39,7 +39,7 @@ export class Peer {
    * @param {SessionManager} [sessionManager] - Optional SessionManager to be used for managing peer sessions.
    * @param {boolean} [autoPersistLastSession] - Whether to auto-persist the session with the last-interacted-with peer. Defaults to true.
    */
-  constructor(
+  constructor (
     wallet: Wallet,
     transport: Transport,
     certificatesToRequest?: RequestedCertificateSet,
@@ -51,7 +51,7 @@ export class Peer {
     this.certificatesToRequest = certificatesToRequest ?? { certifiers: [], types: {} }
     this.transport.onData(this.handleIncomingMessage.bind(this))
     this.sessionManager = sessionManager || new SessionManager()
-    if (autoPersistLastSession === false) {
+    if (!autoPersistLastSession) {
       this.autoPersistLastSession = false
     } else {
       this.autoPersistLastSession = true
@@ -66,7 +66,7 @@ export class Peer {
    * @returns {Promise<void>}
    * @throws Will throw an error if the message fails to send.
    */
-  async toPeer(message: number[], identityKey?: string, maxWaitTime?: number): Promise<void> {
+  async toPeer (message: number[], identityKey?: string, maxWaitTime?: number): Promise<void> {
     if (this.autoPersistLastSession && this.lastInteractedWithPeer && typeof identityKey !== 'string') {
       identityKey = this.lastInteractedWithPeer
     }
@@ -111,7 +111,7 @@ export class Peer {
   * @returns {Promise<void>} Resolves if the certificate request message is successfully sent.
   * @throws Will throw an error if the peer session is not authenticated or if sending the request fails.
   */
-  async requestCertificates(certificatesToRequest: RequestedCertificateSet, identityKey?: string, maxWaitTime = 10000): Promise<void> {
+  async requestCertificates (certificatesToRequest: RequestedCertificateSet, identityKey?: string, maxWaitTime = 10000): Promise<void> {
     const peerSession = await this.getAuthenticatedSession(identityKey, maxWaitTime)
 
     // Prepare the general message
@@ -152,7 +152,7 @@ export class Peer {
    * @returns {Promise<PeerSession>} - A promise that resolves with an authenticated `PeerSession`.
    * @throws {Error} - Throws an error if the transport is not connected or if the handshake fails.
    */
-  async getAuthenticatedSession(identityKey?: string, maxWaitTime?: number): Promise<PeerSession> {
+  async getAuthenticatedSession (identityKey?: string, maxWaitTime?: number): Promise<PeerSession> {
     if (!this.transport) {
       throw new Error('Peer transport is not connected!')
     }
@@ -175,7 +175,7 @@ export class Peer {
    * @param {(senderPublicKey: string, payload: number[]) => void} callback - The function to call when a general message is received.
    * @returns {number} The ID of the callback listener.
    */
-  listenForGeneralMessages(callback: (senderPublicKey: string, payload: number[]) => void): number {
+  listenForGeneralMessages (callback: (senderPublicKey: string, payload: number[]) => void): number {
     const callbackID = this.callbackIdCounter++
     this.onGeneralMessageReceivedCallbacks.set(callbackID, callback)
     return callbackID
@@ -186,7 +186,7 @@ export class Peer {
    *
    * @param {number} callbackID - The ID of the callback to remove.
    */
-  stopListeningForGeneralMessages(callbackID: number): void {
+  stopListeningForGeneralMessages (callbackID: number): void {
     this.onGeneralMessageReceivedCallbacks.delete(callbackID)
   }
 
@@ -196,7 +196,7 @@ export class Peer {
    * @param {(certs: VerifiableCertificate[]) => void} callback - The function to call when certificates are received.
    * @returns {number} The ID of the callback listener.
    */
-  listenForCertificatesReceived(callback: (senderPublicKey: string, certs: VerifiableCertificate[]) => void): number {
+  listenForCertificatesReceived (callback: (senderPublicKey: string, certs: VerifiableCertificate[]) => void): number {
     const callbackID = this.callbackIdCounter++
     this.onCertificatesReceivedCallbacks.set(callbackID, callback)
     return callbackID
@@ -207,7 +207,7 @@ export class Peer {
    *
    * @param {number} callbackID - The ID of the certificates received callback to cancel.
    */
-  stopListeningForCertificatesReceived(callbackID: number): void {
+  stopListeningForCertificatesReceived (callbackID: number): void {
     this.onCertificatesReceivedCallbacks.delete(callbackID)
   }
 
@@ -217,7 +217,7 @@ export class Peer {
    * @param {(requestedCertificates: RequestedCertificateSet) => void} callback - The function to call when a certificate request is received
    * @returns {number} The ID of the callback listener.
    */
-  listenForCertificatesRequested(callback: (senderPublicKey: string, requestedCertificates: RequestedCertificateSet) => void): number {
+  listenForCertificatesRequested (callback: (senderPublicKey: string, requestedCertificates: RequestedCertificateSet) => void): number {
     const callbackID = this.callbackIdCounter++
     this.onCertificateRequestReceivedCallbacks.set(callbackID, callback)
     return callbackID
@@ -228,7 +228,7 @@ export class Peer {
    *
    * @param {number} callbackID - The ID of the requested certificates callback to cancel.
    */
-  stopListeningForCertificatesRequested(callbackID: number): void {
+  stopListeningForCertificatesRequested (callbackID: number): void {
     this.onCertificateRequestReceivedCallbacks.delete(callbackID)
   }
 
@@ -239,7 +239,7 @@ export class Peer {
    * @param {string} [identityKey] - The identity public key of the peer.
    * @returns {Promise<string>} A promise that resolves to the session nonce.
    */
-  private async initiateHandshake(identityKey?: string, maxWaitTime = 10000): Promise<string> {
+  private async initiateHandshake (identityKey?: string, maxWaitTime = 10000): Promise<string> {
     const sessionNonce = await createNonce(this.wallet) // Initial request nonce
     this.sessionManager.addSession({
       isAuthenticated: false,
@@ -265,7 +265,7 @@ export class Peer {
    * @param {string} sessionNonce - The session nonce created in the initial request.
    * @returns {Promise<string>} A promise that resolves with the session nonce when the initial response is received.
    */
-  private async waitForInitialResponse(sessionNonce: string, maxWaitTime = 10000): Promise<string> {
+  private async waitForInitialResponse (sessionNonce: string, maxWaitTime = 10000): Promise<string> {
     return await new Promise((resolve, reject) => {
       const callbackID = this.listenForInitialResponse(sessionNonce, (sessionNonce) => {
         clearTimeout(timeoutHandle)
@@ -288,7 +288,7 @@ export class Peer {
    * @param {(sessionNonce: string) => void} callback - The callback to invoke when the initial response is received.
    * @returns {number} The ID of the callback listener.
    */
-  private listenForInitialResponse(sessionNonce: string, callback: (sessionNonce: string) => void) {
+  private listenForInitialResponse (sessionNonce: string, callback: (sessionNonce: string) => void) {
     const callbackID = this.callbackIdCounter++
     this.onInitialResponseReceivedCallbacks.set(callbackID, { callback, sessionNonce })
     return callbackID
@@ -300,7 +300,7 @@ export class Peer {
    * @private
    * @param {number} callbackID - The ID of the callback to remove.
    */
-  private stopListeningForInitialResponses(callbackID: number) {
+  private stopListeningForInitialResponses (callbackID: number) {
     this.onInitialResponseReceivedCallbacks.delete(callbackID)
   }
 
@@ -310,7 +310,7 @@ export class Peer {
    * @param {AuthMessage} message - The incoming message to process.
    * @returns {Promise<void>}
    */
-  private async handleIncomingMessage(message: AuthMessage): Promise<void> {
+  private async handleIncomingMessage (message: AuthMessage): Promise<void> {
     if (!message.version || message.version !== AUTH_VERSION) {
       console.error(`Invalid message auth version! Received: ${message.version}, expected: ${AUTH_VERSION}`)
       return
@@ -343,7 +343,7 @@ export class Peer {
    * @param {AuthMessage} message - The incoming initial request message.
    * @returns {Promise<void>}
    */
-  async processInitialRequest(message: AuthMessage) {
+  async processInitialRequest (message: AuthMessage) {
     if (!message.identityKey || !message.initialNonce) {
       throw new Error('Missing required fields in initialResponse message.')
     }
@@ -406,7 +406,7 @@ export class Peer {
    * @returns {Promise<void>}
    * @throws Will throw an error if nonce verification or signature verification fails.
    */
-  private async processInitialResponse(message: AuthMessage) {
+  private async processInitialResponse (message: AuthMessage) {
     const validNonce = await verifyNonce(message.yourNonce, this.wallet)
     if (!validNonce) {
       throw new Error(`Initial response nonce verification failed from peer: ${message.identityKey}`)
@@ -478,7 +478,7 @@ export class Peer {
    * @param {AuthMessage} message - The certificate request message received from the peer.
    * @throws {Error} Throws an error if nonce verification fails, or the message signature is invalid.
    */
-  private async processCertificateRequest(message: AuthMessage) {
+  private async processCertificateRequest (message: AuthMessage) {
     const validNonce = await verifyNonce(message.yourNonce, this.wallet)
     if (!validNonce) {
       throw new Error(`Unable to verify nonce for certificate request message from: ${message.identityKey}`)
@@ -520,7 +520,7 @@ export class Peer {
    *
    * @throws {Error} Throws an error if the peer session could not be authenticated or if message signing fails.
    */
-  async sendCertificateResponse(
+  async sendCertificateResponse (
     verifierIdentityKey: string,
     certificates: VerifiableCertificate[]
   ) {
@@ -559,7 +559,7 @@ export class Peer {
    * @returns {Promise<void>}
    * @throws Will throw an error if nonce verification or signature verification fails.
    */
-  private async processCertificateResponse(
+  private async processCertificateResponse (
     message: AuthMessage
   ) {
     const validNonce = await verifyNonce(message.yourNonce, this.wallet)
@@ -597,7 +597,7 @@ export class Peer {
    * @returns {Promise<void>}
    * @throws Will throw an error if nonce verification or signature verification fails.
    */
-  private async processGeneralMessage(message: AuthMessage) {
+  private async processGeneralMessage (message: AuthMessage) {
     const validNonce = await verifyNonce(message.yourNonce, this.wallet)
     if (!validNonce) {
       throw new Error(`Unable to verify nonce for general message from: ${message.identityKey}`)
