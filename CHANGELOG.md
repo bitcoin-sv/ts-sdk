@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.3.7 - 2025-01-18](#137---2025-01-18)
 - [1.3.6 - 2025-01-17](#136---2025-01-17)
 - [1.3.4 - 2025-01-17](#134---2025-01-17)
 - [1.3.3 - 2025-01-13](#133---2025-01-13)
@@ -72,6 +73,13 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Security
 
+---
+
+## [1.3.7] - 2025-01-18
+
+### Fixed
+
+- Fixed the double export of Beef class as named and default which was messing up the constructor somehow. Now it's a named export and that means the BEEF_V1 and V2 constants are also available as exported values.
 
 ---
 
