@@ -212,6 +212,28 @@ describe('MasterCertificate', () => {
       )
       expect(keyringForVerifier).toHaveProperty('name')
     })
+
+    it('should support counterparty of "anyone"', async () => {
+      // Create a keyring for public disclosure of selected fields.
+      const fieldsToReveal = ['name']
+      const keyringForVerifier = await issuedCert.createKeyringForVerifier(
+        subjectWallet,
+        'anyone',
+        fieldsToReveal,
+        'my-originator'
+      )
+      expect(keyringForVerifier).toHaveProperty('name')
+    })
+    it('should support counterparty of "self"', async () => {
+      const fieldsToReveal = ['name']
+      const keyringForVerifier = await issuedCert.createKeyringForVerifier(
+        subjectWallet,
+        'self',
+        fieldsToReveal,
+        'my-originator'
+      )
+      expect(keyringForVerifier).toHaveProperty('name')
+    })
   })
 
   describe('issueCertificateForSubject', () => {

@@ -43,8 +43,7 @@ export class MasterCertificate extends Certificate {
   ) {
     super(type, serialNumber, subject, certifier, revocationOutpoint, fields, signature)
 
-    // Ensure every field in `fields` has a corresponding key in `masterKeyring`
-    // TODO: Consider additional checks that would be helpful
+    // Ensure every field in `fields` is a string and has a corresponding key in `masterKeyring`
     for (const fieldName of Object.keys(fields)) {
       if (!masterKeyring[fieldName]) {
         throw new Error(
@@ -100,7 +99,7 @@ export class MasterCertificate extends Certificate {
    * for the verifier to access the designated fields.
    *
    * @param {ProtoWallet} subjectWallet - The wallet instance of the subject, used to decrypt and re-encrypt field keys.
-   * @param {string} verifierIdentityKey - The public identity key of the verifier who will receive access to the specified fields.
+   * @param {WalletCounterparty} verifier - The verifier who will receive access to the selectively revealed fields. Can be an identity key as hex, 'anyone', or 'self'.
    * @param {string[]} fieldsToReveal - An array of field names to be revealed to the verifier. Must be a subset of the certificate's fields.
    * @param {string} [originator] - Optional originator identifier, used if additional context is needed for decryption and encryption operations.
    * @returns {Promise<Record<CertificateFieldNameUnder50Bytes, string>>} - A keyring mapping field names to encrypted field revelation keys, allowing the verifier to decrypt specified fields.
@@ -109,7 +108,7 @@ export class MasterCertificate extends Certificate {
    *   - A field in `fieldsToReveal` does not exist in the certificate.
    *   - The decrypted master field key fails to decrypt the corresponding field (indicating an invalid key).
    */
-  async createKeyringForVerifier(subjectWallet: ProtoWallet, verifierIdentityKey: string, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
+  async createKeyringForVerifier(subjectWallet: ProtoWallet, verifier: WalletCounterparty, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
     if (!Array.isArray(fieldsToReveal)) {
       throw new Error('fieldsToReveal must be an array of strings')
     }
@@ -144,7 +143,7 @@ export class MasterCertificate extends Certificate {
         plaintext: masterFieldKey,
         protocolID: [2, 'certificate field encryption'],
         keyID: `${this.serialNumber} ${fieldName}`,
-        counterparty: verifierIdentityKey
+        counterparty: verifier
       }, originator)
 
       // Add encryptedFieldRevelationKey to fieldRevelationKeyring
