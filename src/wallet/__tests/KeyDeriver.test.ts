@@ -79,8 +79,8 @@ describe('KeyDeriver', () => {
     expect(derivedSymmetricKey.toHex()).toEqual(new SymmetricKey(priv.deriveSharedSecret(pub).x?.toArray()).toHex())
   })
 
-  test('should not derive symmetric key with anyone', () => {
-    expect(() => keyDeriver.deriveSymmetricKey(protocolID, keyID, 'anyone')).toThrow()
+  test('should be able to derive symmetric key with anyone', () => {
+    expect(() => keyDeriver.deriveSymmetricKey(protocolID, keyID, 'anyone')).not.toThrow()
   })
 
   test('should reveal the correct counterparty shared secret', () => {
