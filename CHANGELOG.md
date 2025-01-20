@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.3.8 - 2025-01-20](#138---2025-01-20)
 - [1.3.7 - 2025-01-18](#137---2025-01-18)
 - [1.3.6 - 2025-01-17](#136---2025-01-17)
 - [1.3.4 - 2025-01-17](#134---2025-01-17)
@@ -72,6 +73,12 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+## [1.3.8] - 2025-01-20
+
+### Fixed
+
+- Do not use `instanceof` check in the ProtoWallet constructor, it was not reliable in real-world usage.
 
 ---
 
