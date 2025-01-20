@@ -111,9 +111,12 @@ export default class Certificate {
     writer.writeVarIntNum(Number(outputIndex))
 
     // Write fields
-    const fieldEntries = Object.entries(this.fields)
-    writer.writeVarIntNum(fieldEntries.length)
-    for (const [fieldName, fieldValue] of fieldEntries) {
+    // Sort field names lexicographically
+    const fieldNames = Object.keys(this.fields).sort()
+    writer.writeVarIntNum(fieldNames.length)
+    for (const fieldName of fieldNames) {
+      const fieldValue = this.fields[fieldName]
+
       // Field name
       const fieldNameBytes = Utils.toArray(fieldName, 'utf8')
       writer.writeVarIntNum(fieldNameBytes.length)
