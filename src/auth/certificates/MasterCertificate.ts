@@ -126,7 +126,7 @@ export class MasterCertificate extends Certificate {
       const { plaintext: masterFieldKey } = await subjectWallet.decrypt({
         ciphertext: Utils.toArray(encryptedMasterFieldKey, 'base64'),
         ...Certificate.getCertificateFieldEncryptionDetails(this.serialNumber, fieldName),
-        counterparty: this.certifier // Is this ever 'self'?
+        counterparty: this.certifier
       }, originator)
 
       // Verify that derived key actually decrypts requested field
