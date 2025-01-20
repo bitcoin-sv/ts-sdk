@@ -58,8 +58,7 @@ export class VerifiableCertificate extends Certificate {
       for (const fieldName in this.keyring) {
         const { plaintext: fieldRevelationKey } = await verifierWallet.decrypt({
           ciphertext: Utils.toArray(this.keyring[fieldName], 'base64'),
-          protocolID: [2, 'certificate field encryption'],
-          keyID: `${this.serialNumber} ${fieldName}`,
+          ...Certificate.getCertificateFieldEncryptionDetails(this.serialNumber, fieldName),
           counterparty: this.subject
         })
 

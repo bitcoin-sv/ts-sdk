@@ -1,6 +1,7 @@
 import { VerifiableCertificate } from '../../../../dist/cjs/src/auth/certificates/VerifiableCertificate.js'
 import { PrivateKey, SymmetricKey, Utils } from '../../../../dist/cjs/src/primitives/index.js'
 import { CompletedProtoWallet } from '../../../../dist/cjs/src/auth/certificates/__tests/MockWallet.js'
+import { Certificate } from '../../../../dist/cjs/src/auth/certificates/index.js'
 
 describe('VerifiableCertificate', () => {
   const subjectPrivateKey = PrivateKey.fromRandom()
@@ -40,8 +41,7 @@ describe('VerifiableCertificate', () => {
       // Now encrypt the fieldSymKey for the verifier
       const { ciphertext: encryptedRevelationKey } = await subjectWallet.encrypt({
         plaintext: fieldSymKey.toArray(),
-        protocolID: [2, 'certificate field encryption'],
-        keyID: `${sampleSerialNumber} ${fieldName}`,
+        ...Certificate.getCertificateFieldEncryptionDetails(sampleSerialNumber, fieldName),
         counterparty: verifierPubKey
       })
       keyring[fieldName] = Utils.toBase64(encryptedRevelationKey)

@@ -79,8 +79,7 @@ export class MasterCertificate extends Certificate {
         const { plaintext: fieldRevelationKey } = await subjectWallet.decrypt({
           ciphertext: Utils.toArray(this.masterKeyring[fieldName], 'base64'),
           counterparty: this.certifier,
-          protocolID: [2, 'certificate field encryption'],
-          keyID: `${this.serialNumber} ${fieldName}`
+          ...Certificate.getCertificateFieldEncryptionDetails(this.serialNumber, fieldName)
         })
 
         const fieldValue = new SymmetricKey(fieldRevelationKey).decrypt(Utils.toArray(this.fields[fieldName], 'base64'))
@@ -126,8 +125,7 @@ export class MasterCertificate extends Certificate {
       // Decrypt the master field key
       const { plaintext: masterFieldKey } = await subjectWallet.decrypt({
         ciphertext: Utils.toArray(encryptedMasterFieldKey, 'base64'),
-        protocolID: [2, 'certificate field encryption'],
-        keyID,
+        ...Certificate.getCertificateFieldEncryptionDetails(this.serialNumber, fieldName),
         counterparty: this.certifier // Is this ever 'self'?
       }, originator)
 
@@ -141,8 +139,7 @@ export class MasterCertificate extends Certificate {
       // Encrypt derived fieldRevelationKey for verifier
       const { ciphertext: encryptedFieldRevelationKey } = await subjectWallet.encrypt({
         plaintext: masterFieldKey,
-        protocolID: [2, 'certificate field encryption'],
-        keyID: `${this.serialNumber} ${fieldName}`,
+        ...Certificate.getCertificateFieldEncryptionDetails(this.serialNumber, fieldName),
         counterparty: verifier
       }, originator)
 
@@ -195,8 +192,7 @@ export class MasterCertificate extends Certificate {
       encryptedCertificateFields[fieldName] = Utils.toBase64(encryptedFieldValue as number[])
       const { ciphertext: encryptedFieldRevelationKey } = await certifierWallet.encrypt({
         plaintext: fieldSymmetricKey.toArray(),
-        protocolID: [2, 'certificate field encryption'], // Standard certificate protocol ID
-        keyID: `${serialNumber} ${fieldName}`,
+        ...Certificate.getCertificateFieldEncryptionDetails(serialNumber, fieldName),
         counterparty: subject
       })
       masterKeyringForSubject[fieldName] = Utils.toBase64(encryptedFieldRevelationKey)

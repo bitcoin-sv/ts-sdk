@@ -6,7 +6,8 @@ import {
   OutpointString,
   CertificateFieldNameUnder50Bytes,
   ProtoWallet,
-  Signature
+  Signature,
+  WalletProtocol
 } from '../../../mod.js'
 
 /**
@@ -245,5 +246,18 @@ export default class Certificate {
       keyID: `${this.type} ${this.serialNumber}`
     })
     this.signature = Utils.toHex(signature)
+  }
+
+  /**
+   * Helper function which retrieves the protocol ID and key ID for certificate field encryption.
+   *
+   * @param serialNumber - The serial number of the certificate.
+   * @param fieldName - The name of the field within the certificate to be encrypted.
+   * @returns An object containing the protocol ID and key ID:
+   *   - `protocolID` (WalletProtocol): The protocol ID for certificate field encryption.
+   *   - `keyID` (string): A unique key identifier derived from the serial number and field name.
+   */
+  static getCertificateFieldEncryptionDetails(serialNumber: string, fieldName: string): { protocolID: WalletProtocol, keyID: string } {
+    return { protocolID: [2, 'certificate field encryption'], keyID: `${serialNumber} ${fieldName}` }
   }
 }

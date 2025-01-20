@@ -7,6 +7,7 @@ import { Utils, PrivateKey, SymmetricKey } from '../../../dist/cjs/src/primitive
 import { VerifiableCertificate, } from "../../../dist/cjs/src/auth/certificates/VerifiableCertificate.js"
 import { MasterCertificate } from '../../../dist/cjs/src/auth/certificates/MasterCertificate.js'
 import { getVerifiableCertificates } from '../../../dist/cjs/src/auth/utils/getVerifiableCertificates.js'
+import { Certificate } from "../../../dist/cjs/src/auth/certificates/index.js"
 jest.mock('../../../dist/cjs/src/auth/utils/getVerifiableCertificates.js')
 
 /**
@@ -22,8 +23,7 @@ async function decryptCertificateFields(
       // Decrypt the per-field symmetric key
       const { plaintext: masterFieldKey } = await localWallet.decrypt({
         ciphertext: Utils.toArray(encryptedKey, 'base64'),
-        protocolID: [2, 'certificate field encryption'],
-        keyID: `${cert.serialNumber} ${fieldName}`,
+        ...Certificate.getCertificateFieldEncryptionDetails(cert.serialNumber, fieldName),
         counterparty: (await counterpartyWallet.getPublicKey({ identityKey: true })).publicKey,
       })
 
