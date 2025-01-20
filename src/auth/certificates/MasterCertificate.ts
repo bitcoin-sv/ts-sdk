@@ -118,8 +118,6 @@ export class MasterCertificate extends Certificate {
         throw new Error(`Fields to reveal must be a subset of the certificate fields. Missing the "${fieldName}" field.`)
       }
 
-      // Create a keyID
-      const keyID = `${this.serialNumber} ${fieldName}`
       const encryptedMasterFieldKey = this.masterKeyring[fieldName]
 
       // Decrypt the master field key
