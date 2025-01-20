@@ -1,13 +1,13 @@
 import {
   Utils,
-  Wallet,
   Base64String,
   PubKeyHex,
   HexString,
   OutpointString,
   CertificateFieldNameUnder50Bytes,
   ProtoWallet,
-  Signature
+  Signature,
+  WalletProtocol
 } from '../../../mod.js'
 
 /**
@@ -112,9 +112,12 @@ export default class Certificate {
     writer.writeVarIntNum(Number(outputIndex))
 
     // Write fields
-    const fieldEntries = Object.entries(this.fields)
-    writer.writeVarIntNum(fieldEntries.length)
-    for (const [fieldName, fieldValue] of fieldEntries) {
+    // Sort field names lexicographically
+    const fieldNames = Object.keys(this.fields).sort()
+    writer.writeVarIntNum(fieldNames.length)
+    for (const fieldName of fieldNames) {
+      const fieldValue = this.fields[fieldName]
+
       // Field name
       const fieldNameBytes = Utils.toArray(fieldName, 'utf8')
       writer.writeVarIntNum(fieldNameBytes.length)
@@ -225,16 +228,36 @@ export default class Certificate {
   /**
    * Signs the certificate using the provided certifier wallet.
    *
-   * @param {Wallet} certifier - The wallet representing the certifier.
+   * @param {Wallet} certifierWallet - The wallet representing the certifier.
    * @returns {Promise<void>}
    */
-  async sign(certifier: ProtoWallet): Promise<void> {
+  async sign(certifierWallet: ProtoWallet): Promise<void> {
+    if (this.signature) {
+      throw new Error(`Certificate has already been signed! Signature present: ${this.signature}`)
+    }
+
+    // Ensure the certifier declared is the one actually signing
+    this.certifier = (await certifierWallet.getPublicKey({ identityKey: true })).publicKey
+
     const preimage = this.toBinary(false) // Exclude the signature when signing
-    const { signature } = await certifier.createSignature({
+    const { signature } = await certifierWallet.createSignature({
       data: preimage,
       protocolID: [2, 'certificate signature'],
       keyID: `${this.type} ${this.serialNumber}`
     })
     this.signature = Utils.toHex(signature)
+  }
+
+  /**
+   * Helper function which retrieves the protocol ID and key ID for certificate field encryption.
+   *
+   * @param serialNumber - The serial number of the certificate.
+   * @param fieldName - The name of the field within the certificate to be encrypted.
+   * @returns An object containing the protocol ID and key ID:
+   *   - `protocolID` (WalletProtocol): The protocol ID for certificate field encryption.
+   *   - `keyID` (string): A unique key identifier derived from the serial number and field name.
+   */
+  static getCertificateFieldEncryptionDetails(serialNumber: string, fieldName: string): { protocolID: WalletProtocol, keyID: string } {
+    return { protocolID: [2, 'certificate field encryption'], keyID: `${serialNumber} ${fieldName}` }
   }
 }

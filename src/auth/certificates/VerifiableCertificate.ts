@@ -6,7 +6,8 @@ import {
   HexString,
   OutpointString,
   PubKeyHex,
-  Wallet
+  Wallet,
+  WalletError
 } from '../../../mod.js'
 import Certificate from './Certificate.js'
 
@@ -43,7 +44,7 @@ export class VerifiableCertificate extends Certificate {
   }
 
   /**
-   * Decrypts certificate fields using the provided keyring and verifier wallet
+   * Decrypts selectively revealed certificate fields using the provided keyring and verifier wallet
    * @param {Wallet} verifierWallet - The wallet instance of the certificate's verifier, used to decrypt field keys.
    * @returns {Promise<Record<CertificateFieldNameUnder50Bytes, string>>} - A promise that resolves to an object where each key is a field name and each value is the decrypted field value as a string.
    * @throws {Error} Throws an error if any of the decryption operations fail, with a message indicating the failure context.
@@ -53,12 +54,11 @@ export class VerifiableCertificate extends Certificate {
       throw new Error('A keyring is required to decrypt certificate fields for the verifier.')
     }
     try {
-      const decryptedFields = {}
+      const decryptedFields: Record<CertificateFieldNameUnder50Bytes, string> = {}
       for (const fieldName in this.keyring) {
         const { plaintext: fieldRevelationKey } = await verifierWallet.decrypt({
           ciphertext: Utils.toArray(this.keyring[fieldName], 'base64'),
-          protocolID: [2, 'certificate field encryption'],
-          keyID: `${this.serialNumber} ${fieldName}`,
+          ...Certificate.getCertificateFieldEncryptionDetails(this.serialNumber, fieldName),
           counterparty: this.subject
         })
 
@@ -67,7 +67,7 @@ export class VerifiableCertificate extends Certificate {
       }
       return decryptedFields
     } catch (error) {
-      throw new Error(`Failed to decrypt certificate fields using keyring: ${error instanceof Error ? error.message : error}`)
+      throw new Error(`Failed to decrypt selectively revealed certificate fields using keyring: ${error instanceof Error ? error.message : error}`)
     }
   }
 }

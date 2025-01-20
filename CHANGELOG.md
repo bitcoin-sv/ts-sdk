@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.3.6 - 2025-01-17](#136---2025-01-17)
 - [1.3.4 - 2025-01-17](#134---2025-01-17)
 - [1.3.3 - 2025-01-13](#133---2025-01-13)
 - [1.3.2 - 2025-01-13](#132---2025-01-13)
@@ -70,6 +71,16 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+
+---
+
+## [1.3.6] - 2025-01-17
+
+### Added
+
+- Consolidated certificate functionality
+- Added certificate tests
 
 ---
 

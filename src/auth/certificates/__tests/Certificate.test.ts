@@ -1,5 +1,5 @@
 import { Certificate } from '../../../../dist/cjs/src/auth/index.js'
-import { ProtoWallet } from '../../../../dist/cjs/src/wallet/index.js'
+import { CompletedProtoWallet } from '../../../../dist/cjs/src/auth/certificates/__tests/CompletedProtoWallet.js'
 import { Utils, PrivateKey } from '../../../../dist/cjs/src/primitives/index.js'
 
 describe('Certificate', () => {
@@ -73,7 +73,7 @@ describe('Certificate', () => {
     )
 
     // Sign the certificate
-    const certifierWallet = new ProtoWallet(sampleCertifierPrivateKey)
+    const certifierWallet = new CompletedProtoWallet(sampleCertifierPrivateKey)
     await certificate.sign(certifierWallet)
 
     const serialized = certificate.toBinary(true) // Include signature
@@ -100,7 +100,7 @@ describe('Certificate', () => {
     )
 
     // Sign the certificate
-    const certifierWallet = new ProtoWallet(sampleCertifierPrivateKey)
+    const certifierWallet = new CompletedProtoWallet(sampleCertifierPrivateKey)
     await certificate.sign(certifierWallet)
 
     // Verify the signature
@@ -120,7 +120,7 @@ describe('Certificate', () => {
     )
 
     // Sign the certificate
-    const certifierWallet = new ProtoWallet(sampleCertifierPrivateKey)
+    const certifierWallet = new CompletedProtoWallet(sampleCertifierPrivateKey)
     await certificate.sign(certifierWallet)
 
     // Tamper with the certificate (modify a field)
@@ -172,7 +172,7 @@ describe('Certificate', () => {
     )
 
     // Sign the certificate
-    const certifierWallet = new ProtoWallet(sampleCertifierPrivateKey)
+    const certifierWallet = new CompletedProtoWallet(sampleCertifierPrivateKey)
     await certificate.sign(certifierWallet)
 
     // Serialize and deserialize
@@ -223,7 +223,7 @@ describe('Certificate', () => {
     )
 
     // Sign the certificate
-    const certifierWallet = new ProtoWallet(sampleCertifierPrivateKey)
+    const certifierWallet = new CompletedProtoWallet(sampleCertifierPrivateKey)
     await certificate.sign(certifierWallet)
 
     // Serialize and deserialize
@@ -266,7 +266,7 @@ describe('Certificate', () => {
     )
 
     // Sign the certificate
-    const certifierWallet = new ProtoWallet(sampleCertifierPrivateKey)
+    const certifierWallet = new CompletedProtoWallet(sampleCertifierPrivateKey)
     await certificate.sign(certifierWallet)
 
     // Serialize and deserialize
@@ -279,4 +279,42 @@ describe('Certificate', () => {
     const isValid = await deserializedCertificate.verify()
     expect(isValid).toBe(true)
   })
+
+  it('should throw if already signed, and should update the certifier field if it differs from the wallet\'s public key', async () => {
+    // Scenario 1: Certificate already has a signature
+    const preSignedCertificate = new Certificate(
+      sampleType,
+      sampleSerialNumber,
+      sampleSubjectPubKey,
+      sampleCertifierPubKey, // We'll pretend this was signed by them
+      sampleRevocationOutpoint,
+      sampleFields,
+      'deadbeef' // Already has a placeholder signature
+    )
+    const certifierWallet = new CompletedProtoWallet(sampleCertifierPrivateKey)
+
+    // Trying to sign again should throw
+    await expect(preSignedCertificate.sign(certifierWallet)).rejects.toThrow(
+      'Certificate has already been signed!'
+    )
+
+    // Scenario 2: The certifier property is set to something different from the wallet's public key
+    const mismatchedCertifierPubKey = PrivateKey.fromRandom().toPublicKey().toString()
+    const certificateWithMismatch = new Certificate(
+      sampleType,
+      sampleSerialNumber,
+      sampleSubjectPubKey,
+      mismatchedCertifierPubKey, // Different from actual wallet key
+      sampleRevocationOutpoint,
+      sampleFields
+    )
+
+    // Sign the certificate; it should automatically update
+    // the certifier field to match the wallet's actual public key
+    const certifierPubKey = ((await certifierWallet.getPublicKey({ identityKey: true })).publicKey)
+    await certificateWithMismatch.sign(certifierWallet)
+    expect(certificateWithMismatch.certifier).toBe(certifierPubKey)
+    expect(await certificateWithMismatch.verify()).toBe(true)
+  })
+
 })

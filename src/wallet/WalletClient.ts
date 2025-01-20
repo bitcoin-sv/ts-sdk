@@ -1,10 +1,9 @@
-import { AcquireCertificateArgs, AcquireCertificateResult, Base64String, BasketStringUnder300Bytes, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Bytes, CreateActionArgs, CreateActionResult, DescriptionString5to50Bytes, DiscoverCertificatesResult, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, InternalizeActionArgs, ISOTimestampString, KeyIDStringUnder800Bytes, LabelStringUnder300Bytes, ListActionsArgs, ListActionsResult, ListCertificatesResult, ListOutputsArgs, ListOutputsResult, OriginatorDomainNameStringUnder250Bytes, OutpointString, OutputTagStringUnder300Bytes, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, ProveCertificateArgs, ProveCertificateResult, PubKeyHex, SatoshiValue, SecurityLevel, SignActionArgs, SignActionResult, TXIDHexString, VersionString7To30Bytes, Wallet } from './Wallet.interfaces.js'
+import { AcquireCertificateArgs, AcquireCertificateResult, Base64String, BasketStringUnder300Bytes, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Bytes, CreateActionArgs, CreateActionResult, DescriptionString5to50Bytes, DiscoverCertificatesResult, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, InternalizeActionArgs, ISOTimestampString, KeyIDStringUnder800Bytes, LabelStringUnder300Bytes, ListActionsArgs, ListActionsResult, ListCertificatesResult, ListOutputsArgs, ListOutputsResult, OriginatorDomainNameStringUnder250Bytes, OutpointString, OutputTagStringUnder300Bytes, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, ProveCertificateArgs, ProveCertificateResult, PubKeyHex, SatoshiValue, SecurityLevel, SignActionArgs, SignActionResult, TXIDHexString, VersionString7To30Bytes, Wallet, AuthenticatedResult } from './Wallet.interfaces.js'
 import WindowCWISubstrate from './substrates/window.CWI.js'
 import XDMSubstrate from './substrates/XDM.js'
 import WalletWireTransceiver from './substrates/WalletWireTransceiver.js'
 import HTTPWalletWire from './substrates/HTTPWalletWire.js'
 import HTTPWalletJSON from './substrates/HTTPWalletJSON.js'
-import { AuthenticatedResult } from './Wallet.interfaces.js'
 
 const MAX_XDM_RESPONSE_WAIT = 200
 

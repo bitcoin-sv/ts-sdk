@@ -24,7 +24,6 @@ export default class CachedKeyDeriver {
     this.maxCacheSize = options?.maxCacheSize || 1000
   }
 
-
   /**
      * Derives a public key based on protocol ID, key ID, and counterparty.
      * Caches the result for future calls with the same parameters.
@@ -188,7 +187,7 @@ export default class CachedKeyDeriver {
     if (this.cache.size >= this.maxCacheSize) {
       // Evict the least recently used item (first item in Map)
       const firstKey = this.cache.keys().next().value
-      this.cache.delete(firstKey!)
+      this.cache.delete(firstKey)
     }
     this.cache.set(cacheKey, value)
   }

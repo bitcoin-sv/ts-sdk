@@ -505,11 +505,11 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export interface KeyDeriverApi {
     rootKey: PrivateKey;
     identityKey: string;
-    derivePublicKey(protocolID: WalletProtocol, keyID: string, counterparty: Counterparty, forSelf?: boolean): PublicKey;
-    derivePrivateKey(protocolID: WalletProtocol, keyID: string, counterparty: Counterparty): PrivateKey;
-    deriveSymmetricKey(protocolID: WalletProtocol, keyID: string, counterparty: Counterparty): SymmetricKey;
-    revealCounterpartySecret(counterparty: Counterparty): number[];
-    revealSpecificSecret(counterparty: Counterparty, protocolID: WalletProtocol, keyID: string): number[];
+    derivePublicKey: (protocolID: WalletProtocol, keyID: string, counterparty: Counterparty, forSelf?: boolean) => PublicKey;
+    derivePrivateKey: (protocolID: WalletProtocol, keyID: string, counterparty: Counterparty) => PrivateKey;
+    deriveSymmetricKey: (protocolID: WalletProtocol, keyID: string, counterparty: Counterparty) => SymmetricKey;
+    revealCounterpartySecret: (counterparty: Counterparty) => number[];
+    revealSpecificSecret: (counterparty: Counterparty, protocolID: WalletProtocol, keyID: string) => number[];
 }
 ```
 
@@ -519,6 +519,34 @@ See also: [Counterparty](#type-counterparty), [PrivateKey](#class-privatekey), [
 
 <summary>Interface KeyDeriverApi Details</summary>
 
+#### Property derivePrivateKey
+
+Derives a private key based on protocol ID, key ID, and counterparty.
+
+```ts
+derivePrivateKey: (protocolID: WalletProtocol, keyID: string, counterparty: Counterparty) => PrivateKey
+```
+See also: [Counterparty](#type-counterparty), [PrivateKey](#class-privatekey), [WalletProtocol](#type-walletprotocol)
+
+#### Property derivePublicKey
+
+Derives a public key based on protocol ID, key ID, and counterparty.
+
+```ts
+derivePublicKey: (protocolID: WalletProtocol, keyID: string, counterparty: Counterparty, forSelf?: boolean) => PublicKey
+```
+See also: [Counterparty](#type-counterparty), [PublicKey](#class-publickey), [WalletProtocol](#type-walletprotocol)
+
+#### Property deriveSymmetricKey
+
+Derives a symmetric key based on protocol ID, key ID, and counterparty.
+Note: Symmetric keys should not be derivable by everyone due to security risks.
+
+```ts
+deriveSymmetricKey: (protocolID: WalletProtocol, keyID: string, counterparty: Counterparty) => SymmetricKey
+```
+See also: [Counterparty](#type-counterparty), [SymmetricKey](#class-symmetrickey), [WalletProtocol](#type-walletprotocol)
+
 #### Property identityKey
 
 The identity of this key deriver which is normally the public key associated with the `rootKey`
@@ -526,6 +554,25 @@ The identity of this key deriver which is normally the public key associated wit
 ```ts
 identityKey: string
 ```
+
+#### Property revealCounterpartySecret
+
+Reveals the shared secret between the root key and the counterparty.
+Note: This should not be used for 'self'.
+
+```ts
+revealCounterpartySecret: (counterparty: Counterparty) => number[]
+```
+See also: [Counterparty](#type-counterparty)
+
+#### Property revealSpecificSecret
+
+Reveals the specific key association for a given protocol ID, key ID, and counterparty.
+
+```ts
+revealSpecificSecret: (counterparty: Counterparty, protocolID: WalletProtocol, keyID: string) => number[]
+```
+See also: [Counterparty](#type-counterparty), [WalletProtocol](#type-walletprotocol)
 
 #### Property rootKey
 
@@ -535,124 +582,6 @@ The root key from which all other keys are derived.
 rootKey: PrivateKey
 ```
 See also: [PrivateKey](#class-privatekey)
-
-#### Method derivePrivateKey
-
-Derives a private key based on protocol ID, key ID, and counterparty.
-
-```ts
-derivePrivateKey(protocolID: WalletProtocol, keyID: string, counterparty: Counterparty): PrivateKey
-```
-See also: [Counterparty](#type-counterparty), [PrivateKey](#class-privatekey), [WalletProtocol](#type-walletprotocol)
-
-Returns
-
-- The derived private key.
-
-Argument Details
-
-+ **protocolID**
-  + The protocol ID including a security level and protocol name.
-+ **keyID**
-  + The key identifier.
-+ **counterparty**
-  + The counterparty's public key or a predefined value ('self' or 'anyone').
-
-#### Method derivePublicKey
-
-Derives a public key based on protocol ID, key ID, and counterparty.
-
-```ts
-derivePublicKey(protocolID: WalletProtocol, keyID: string, counterparty: Counterparty, forSelf?: boolean): PublicKey
-```
-See also: [Counterparty](#type-counterparty), [PublicKey](#class-publickey), [WalletProtocol](#type-walletprotocol)
-
-Returns
-
-- The derived public key.
-
-Argument Details
-
-+ **protocolID**
-  + The protocol ID including a security level and protocol name.
-+ **keyID**
-  + The key identifier.
-+ **counterparty**
-  + The counterparty's public key or a predefined value ('self' or 'anyone').
-+ **forSelf**
-  + Optional. false if undefined. Whether deriving for self.
-
-#### Method deriveSymmetricKey
-
-Derives a symmetric key based on protocol ID, key ID, and counterparty.
-Note: Symmetric keys should not be derivable by everyone due to security risks.
-
-```ts
-deriveSymmetricKey(protocolID: WalletProtocol, keyID: string, counterparty: Counterparty): SymmetricKey
-```
-See also: [Counterparty](#type-counterparty), [SymmetricKey](#class-symmetrickey), [WalletProtocol](#type-walletprotocol)
-
-Returns
-
-- The derived symmetric key.
-
-Argument Details
-
-+ **protocolID**
-  + The protocol ID including a security level and protocol name.
-+ **keyID**
-  + The key identifier.
-+ **counterparty**
-  + The counterparty's public key or a predefined value ('self' or 'anyone').
-
-Throws
-
-- Throws an error if attempting to derive a symmetric key for 'anyone'.
-
-#### Method revealCounterpartySecret
-
-Reveals the shared secret between the root key and the counterparty.
-Note: This should not be used for 'self'.
-
-```ts
-revealCounterpartySecret(counterparty: Counterparty): number[]
-```
-See also: [Counterparty](#type-counterparty)
-
-Returns
-
-- The shared secret as a number array.
-
-Argument Details
-
-+ **counterparty**
-  + The counterparty's public key or a predefined value ('self' or 'anyone').
-
-Throws
-
-- Throws an error if attempting to reveal a shared secret for 'self'.
-
-#### Method revealSpecificSecret
-
-Reveals the specific key association for a given protocol ID, key ID, and counterparty.
-
-```ts
-revealSpecificSecret(counterparty: Counterparty, protocolID: WalletProtocol, keyID: string): number[]
-```
-See also: [Counterparty](#type-counterparty), [WalletProtocol](#type-walletprotocol)
-
-Returns
-
-- The specific key association as a number array.
-
-Argument Details
-
-+ **counterparty**
-  + The counterparty's public key or a predefined value ('self' or 'anyone').
-+ **protocolID**
-  + The protocol ID including a security level and protocol name.
-+ **keyID**
-  + The key identifier.
 
 </details>
 
