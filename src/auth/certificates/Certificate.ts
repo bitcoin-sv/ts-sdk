@@ -1,6 +1,5 @@
 import {
   Utils,
-  Wallet,
   Base64String,
   PubKeyHex,
   HexString,

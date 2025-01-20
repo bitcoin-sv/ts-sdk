@@ -7,7 +7,8 @@ import {
   OutpointString,
   PubKeyHex,
   ProtoWallet,
-  Random
+  Random,
+  WalletCounterparty
 } from '../../../mod.js'
 import Certificate from './Certificate.js'
 
@@ -48,7 +49,7 @@ export class MasterCertificate extends Certificate {
       if (!masterKeyring[fieldName]) {
         throw new Error(
           `Master keyring must contain a value for every field. Missing key for field: "${fieldName}".`
-        );
+        )
       }
     }
 
@@ -175,7 +176,7 @@ export class MasterCertificate extends Certificate {
    */
   static async issueCertificateForSubject(
     certifierWallet: ProtoWallet,
-    subject: string, // Can be 'self' or 'anyone'
+    subject: WalletCounterparty,
     fields: Record<CertificateFieldNameUnder50Bytes, string>,
     certificateType: string,
     getRevocationOutpoint = async (
