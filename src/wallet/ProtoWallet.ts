@@ -38,26 +38,26 @@ const privilegedError = new Error('ProtoWallet is a single-keyring wallet, opera
 export class ProtoWallet implements ProtoWalletApi {
   keyDeriver: KeyDeriverApi
 
-  constructor (rootKeyOrKeyDeriver: PrivateKey | 'anyone' | KeyDeriverApi) {
-    if (!(rootKeyOrKeyDeriver instanceof KeyDeriver)) {
+  constructor(rootKeyOrKeyDeriver: PrivateKey | 'anyone' | KeyDeriverApi) {
+    if (typeof (rootKeyOrKeyDeriver as KeyDeriver).identityKey !== 'string') {
       rootKeyOrKeyDeriver = new KeyDeriver(rootKeyOrKeyDeriver as PrivateKey | 'anyone')
     }
     this.keyDeriver = rootKeyOrKeyDeriver as KeyDeriver
   }
 
-  async isAuthenticated (args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AuthenticatedResult> {
+  async isAuthenticated(args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AuthenticatedResult> {
     return { authenticated: true }
   }
 
-  async waitForAuthentication (args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AuthenticatedResult> {
+  async waitForAuthentication(args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AuthenticatedResult> {
     return { authenticated: true }
   }
 
-  async getNetwork (args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetNetworkResult> {
+  async getNetwork(args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetNetworkResult> {
     return { network: 'mainnet' }
   }
 
-  async getVersion (args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetVersionResult> {
+  async getVersion(args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetVersionResult> {
     return { version: 'proto-1.0.0' }
   }
 
@@ -66,13 +66,13 @@ export class ProtoWallet implements ProtoWalletApi {
    * @param originator
    * @returns `await this.getPublicKey({ identityKey: true }, originator)`
    */
-  async getIdentityKey (
+  async getIdentityKey(
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ publicKey: PubKeyHex }> {
     return await this.getPublicKey({ identityKey: true }, originator)
   }
 
-  async getPublicKey (
+  async getPublicKey(
     args: GetPublicKeyArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ publicKey: PubKeyHex }> {
@@ -98,7 +98,7 @@ export class ProtoWallet implements ProtoWalletApi {
     }
   }
 
-  async revealCounterpartyKeyLinkage (
+  async revealCounterpartyKeyLinkage(
     args: RevealCounterpartyKeyLinkageArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<RevealCounterpartyKeyLinkageResult> {
@@ -136,7 +136,7 @@ export class ProtoWallet implements ProtoWalletApi {
     }
   }
 
-  async revealSpecificKeyLinkage (
+  async revealSpecificKeyLinkage(
     args: RevealSpecificKeyLinkageArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<RevealSpecificKeyLinkageResult> {
@@ -173,7 +173,7 @@ export class ProtoWallet implements ProtoWalletApi {
     }
   }
 
-  async encrypt (
+  async encrypt(
     args: WalletEncryptArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<WalletEncryptResult> {
@@ -188,7 +188,7 @@ export class ProtoWallet implements ProtoWalletApi {
     return { ciphertext: key.encrypt(args.plaintext) as number[] }
   }
 
-  async decrypt (
+  async decrypt(
     args: WalletDecryptArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<WalletDecryptResult> {
@@ -203,7 +203,7 @@ export class ProtoWallet implements ProtoWalletApi {
     return { plaintext: key.decrypt(args.ciphertext) as number[] }
   }
 
-  async createHmac (
+  async createHmac(
     args: CreateHmacArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<CreateHmacResult> {
@@ -218,7 +218,7 @@ export class ProtoWallet implements ProtoWalletApi {
     return { hmac: Hash.sha256hmac(key.toArray(), args.data) }
   }
 
-  async verifyHmac (
+  async verifyHmac(
     args: VerifyHmacArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<VerifyHmacResult> {
@@ -239,7 +239,7 @@ export class ProtoWallet implements ProtoWalletApi {
     return { valid }
   }
 
-  async createSignature (
+  async createSignature(
     args: CreateSignatureArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<CreateSignatureResult> {
@@ -258,7 +258,7 @@ export class ProtoWallet implements ProtoWalletApi {
     return { signature: ECDSA.sign(new BigNumber(hash), key, true).toDER() as number[] }
   }
 
-  async verifySignature (
+  async verifySignature(
     args: VerifySignatureArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<VerifySignatureResult> {
