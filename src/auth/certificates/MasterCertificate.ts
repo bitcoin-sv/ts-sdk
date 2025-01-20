@@ -163,7 +163,7 @@ export class MasterCertificate extends Certificate {
    * can also includes a revocation outpoint to manage potential revocation.
    * 
    * @param {ProtoWallet} certifierWallet - The wallet of the certifier, used to sign the certificate and encrypt field keys.
-   * @param {string} subject - The public identity key of the subject for whom the certificate is issued.
+   * @param {WalletCounterparty} subject - The subject for whom the certificate is issued.
    * @param {Record<CertificateFieldNameUnder50Bytes, string>} fields - Unencrypted certificate fields to include, with their names and values.
    * @param {string} certificateType - The type of certificate being issued.
    * @param {function(string, Record<CertificateFieldNameUnder50Bytes, string>?): Promise<string>} getRevocationOutpoint - 

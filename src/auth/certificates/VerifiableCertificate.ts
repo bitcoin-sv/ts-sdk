@@ -7,7 +7,7 @@ import {
   OutpointString,
   PubKeyHex,
   Wallet,
-  ProtoWallet
+  WalletError
 } from '../../../mod.js'
 import Certificate from './Certificate.js'
 
