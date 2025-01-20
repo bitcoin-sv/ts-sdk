@@ -1,7 +1,7 @@
 import { MasterCertificate } from '../../../../dist/cjs/src/auth/certificates/MasterCertificate.js'
 import { VerifiableCertificate } from '../../../../dist/cjs/src/auth/certificates/VerifiableCertificate.js'
 import { PrivateKey, SymmetricKey, Utils, Random } from '../../../../dist/cjs/src/primitives/index.js'
-import { CompletedProtoWallet } from '../../../../dist/cjs/src/auth/certificates/__tests/MockWallet.js'
+import { CompletedProtoWallet } from '../../../../dist/cjs/src/auth/certificates/__tests/CompletedProtoWallet.js'
 
 describe('MasterCertificate', () => {
   const subjectPrivateKey = PrivateKey.fromRandom()

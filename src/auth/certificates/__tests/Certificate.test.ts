@@ -1,5 +1,5 @@
 import { Certificate } from '../../../../dist/cjs/src/auth/index.js'
-import { CompletedProtoWallet } from '../../../../dist/cjs/src/auth/certificates/__tests/MockWallet.js'
+import { CompletedProtoWallet } from '../../../../dist/cjs/src/auth/certificates/__tests/CompletedProtoWallet.js'
 import { Utils, PrivateKey } from '../../../../dist/cjs/src/primitives/index.js'
 
 describe('Certificate', () => {
