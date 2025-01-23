@@ -10,7 +10,6 @@ import {
   GetPublicKeyArgs,
   GetVersionResult,
   OriginatorDomainNameStringUnder250Bytes,
-  ProtoWalletApi,
   PubKeyHex,
   RevealCounterpartyKeyLinkageArgs,
   RevealCounterpartyKeyLinkageResult,
@@ -26,16 +25,14 @@ import {
   WalletEncryptResult
 } from './Wallet.interfaces.js'
 
-const privilegedError = new Error('ProtoWallet is a single-keyring wallet, operating without context about whether its configured keyring is privileged.')
-
 /**
  * A ProtoWallet is precursor to a full wallet, capable of performing all foundational cryptographic operations.
  * It can derive keys, create signatures, facilitate encryption and HMAC operations, and reveal key linkages.
  *
  * However, ProtoWallet does not create transactions, manage outputs, interact with the blockchain,
- * enable the management of identity certificates, or store any data.
+ * enable the management of identity certificates, or store any data. It is also not concerned with privileged keys.
  */
-export class ProtoWallet implements ProtoWalletApi {
+export class ProtoWallet {
   keyDeriver: KeyDeriverApi
 
   constructor(rootKeyOrKeyDeriver: PrivateKey | 'anyone' | KeyDeriverApi) {
@@ -45,40 +42,9 @@ export class ProtoWallet implements ProtoWalletApi {
     this.keyDeriver = rootKeyOrKeyDeriver as KeyDeriver
   }
 
-  async isAuthenticated(args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AuthenticatedResult> {
-    return { authenticated: true }
-  }
-
-  async waitForAuthentication(args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AuthenticatedResult> {
-    return { authenticated: true }
-  }
-
-  async getNetwork(args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetNetworkResult> {
-    return { network: 'mainnet' }
-  }
-
-  async getVersion(args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetVersionResult> {
-    return { version: 'proto-1.0.0' }
-  }
-
-  /**
-   * Convenience method to obtain the identityKey.
-   * @param originator
-   * @returns `await this.getPublicKey({ identityKey: true }, originator)`
-   */
-  async getIdentityKey(
-    originator?: OriginatorDomainNameStringUnder250Bytes
-  ): Promise<{ publicKey: PubKeyHex }> {
-    return await this.getPublicKey({ identityKey: true }, originator)
-  }
-
   async getPublicKey(
-    args: GetPublicKeyArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: GetPublicKeyArgs
   ): Promise<{ publicKey: PubKeyHex }> {
-    if (args.privileged) {
-      throw privilegedError
-    }
     if (args.identityKey) {
       return { publicKey: this.keyDeriver.rootKey.toPublicKey().toString() }
     } else {
@@ -99,12 +65,8 @@ export class ProtoWallet implements ProtoWalletApi {
   }
 
   async revealCounterpartyKeyLinkage(
-    args: RevealCounterpartyKeyLinkageArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: RevealCounterpartyKeyLinkageArgs
   ): Promise<RevealCounterpartyKeyLinkageResult> {
-    if (args.privileged) {
-      throw privilegedError
-    }
     const { publicKey: identityKey } = await this.getPublicKey({ identityKey: true })
     const linkage = this.keyDeriver.revealCounterpartySecret(args.counterparty)
     const linkageProof = new Schnorr().generateProof(this.keyDeriver.rootKey, this.keyDeriver.rootKey.toPublicKey(), PublicKey.fromString(args.counterparty), Point.fromDER(linkage))
@@ -137,12 +99,8 @@ export class ProtoWallet implements ProtoWalletApi {
   }
 
   async revealSpecificKeyLinkage(
-    args: RevealSpecificKeyLinkageArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: RevealSpecificKeyLinkageArgs
   ): Promise<RevealSpecificKeyLinkageResult> {
-    if (args.privileged) {
-      throw privilegedError
-    }
     const { publicKey: identityKey } = await this.getPublicKey({ identityKey: true })
     const linkage = this.keyDeriver.revealSpecificSecret(
       args.counterparty,
@@ -174,12 +132,8 @@ export class ProtoWallet implements ProtoWalletApi {
   }
 
   async encrypt(
-    args: WalletEncryptArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: WalletEncryptArgs
   ): Promise<WalletEncryptResult> {
-    if (args.privileged) {
-      throw privilegedError
-    }
     const key = this.keyDeriver.deriveSymmetricKey(
       args.protocolID,
       args.keyID,
@@ -189,12 +143,8 @@ export class ProtoWallet implements ProtoWalletApi {
   }
 
   async decrypt(
-    args: WalletDecryptArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: WalletDecryptArgs
   ): Promise<WalletDecryptResult> {
-    if (args.privileged) {
-      throw privilegedError
-    }
     const key = this.keyDeriver.deriveSymmetricKey(
       args.protocolID,
       args.keyID,
@@ -204,12 +154,8 @@ export class ProtoWallet implements ProtoWalletApi {
   }
 
   async createHmac(
-    args: CreateHmacArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: CreateHmacArgs
   ): Promise<CreateHmacResult> {
-    if (args.privileged) {
-      throw privilegedError
-    }
     const key = this.keyDeriver.deriveSymmetricKey(
       args.protocolID,
       args.keyID,
@@ -219,12 +165,8 @@ export class ProtoWallet implements ProtoWalletApi {
   }
 
   async verifyHmac(
-    args: VerifyHmacArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: VerifyHmacArgs
   ): Promise<VerifyHmacResult> {
-    if (args.privileged) {
-      throw privilegedError
-    }
     const key = this.keyDeriver.deriveSymmetricKey(
       args.protocolID,
       args.keyID,
@@ -240,12 +182,8 @@ export class ProtoWallet implements ProtoWalletApi {
   }
 
   async createSignature(
-    args: CreateSignatureArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: CreateSignatureArgs
   ): Promise<CreateSignatureResult> {
-    if (args.privileged) {
-      throw privilegedError
-    }
     if (!args.hashToDirectlySign && !args.data) {
       throw new Error('args.data or args.hashToDirectlySign must be valid')
     }
@@ -259,12 +197,8 @@ export class ProtoWallet implements ProtoWalletApi {
   }
 
   async verifySignature(
-    args: VerifySignatureArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: VerifySignatureArgs
   ): Promise<VerifySignatureResult> {
-    if (args.privileged) {
-      throw privilegedError
-    }
     if (!args.hashToDirectlyVerify && !args.data) {
       throw new Error('args.data or args.hashToDirectlyVerify must be valid')
     }

@@ -7,37 +7,6 @@ describe('ProtoWallet', () => {
   it('Throws when functions are not supported', async () => {
     const wallet = new ProtoWallet('anyone')
   })
-  it('Throws the privileged error when the privileged flag is set', async () => {
-    const wallet = new ProtoWallet('anyone')
-    const privilegedError = 'ProtoWallet is a single-keyring wallet, operating without context about whether its configured keyring is privileged.'
-    await expect(() => {
-      return (wallet as any).encrypt({ privileged: true })
-    }).rejects.toThrow(new Error(privilegedError))
-    await expect(() => {
-      return (wallet as any).decrypt({ privileged: true })
-    }).rejects.toThrow(new Error(privilegedError))
-    await expect(() => {
-      return (wallet as any).createSignature({ privileged: true })
-    }).rejects.toThrow(new Error(privilegedError))
-    await expect(() => {
-      return (wallet as any).verifySignature({ privileged: true })
-    }).rejects.toThrow(new Error(privilegedError))
-    await expect(() => {
-      return (wallet as any).createHmac({ privileged: true })
-    }).rejects.toThrow(new Error(privilegedError))
-    await expect(() => {
-      return (wallet as any).verifyHmac({ privileged: true })
-    }).rejects.toThrow(new Error(privilegedError))
-    await expect(() => {
-      return (wallet as any).getPublicKey({ privileged: true })
-    }).rejects.toThrow(new Error(privilegedError))
-    await expect(() => {
-      return (wallet as any).revealCounterpartyKeyLinkage({ privileged: true })
-    }).rejects.toThrow(new Error(privilegedError))
-    await expect(() => {
-      return (wallet as any).revealSpecificKeyLinkage({ privileged: true })
-    }).rejects.toThrow(new Error(privilegedError))
-  })
   it('Validates the BRC-3 compliance vector', async () => {
     const wallet = new ProtoWallet('anyone')
     const { valid } = await wallet.verifySignature({

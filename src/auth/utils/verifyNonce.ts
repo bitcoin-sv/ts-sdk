@@ -1,4 +1,4 @@
-import { Utils, Wallet } from '../../../mod.js'
+import { Utils, WalletInterface } from '../../../mod.js'
 
 /**
  * Verifies a nonce derived from a wallet
@@ -6,7 +6,7 @@ import { Utils, Wallet } from '../../../mod.js'
  * @param wallet
  * @returns The status of the validation
  */
-export async function verifyNonce(nonce: string, wallet: Wallet): Promise<boolean> {
+export async function verifyNonce(nonce: string, wallet: WalletInterface): Promise<boolean> {
   // Convert nonce from base64 string to Uint8Array
   const buffer = Utils.toArray(nonce, 'base64')
 

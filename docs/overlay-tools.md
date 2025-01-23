@@ -372,7 +372,7 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
         domain: string;
         topicOrService: string;
     } 
-    constructor(wallet: Wallet) 
+    constructor(wallet: WalletInterface) 
     async lock(protocol: "SHIP" | "SLAP", domain: string, topicOrService: string): Promise<LockingScript> 
     unlock(protocol: "SHIP" | "SLAP"): {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
@@ -381,7 +381,7 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
 }
 ```
 
-See also: [LockingScript](#class-lockingscript), [PushDrop](#class-pushdrop), [ScriptTemplate](#interface-scripttemplate), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [Wallet](#interface-wallet), [sign](#variable-sign)
+See also: [LockingScript](#class-lockingscript), [PushDrop](#class-pushdrop), [ScriptTemplate](#interface-scripttemplate), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [WalletInterface](#interface-walletinterface), [sign](#variable-sign)
 
 <details>
 
@@ -392,9 +392,9 @@ See also: [LockingScript](#class-lockingscript), [PushDrop](#class-pushdrop), [S
 Constructs a new Overlay Admin template instance
 
 ```ts
-constructor(wallet: Wallet) 
+constructor(wallet: WalletInterface) 
 ```
-See also: [Wallet](#interface-wallet)
+See also: [WalletInterface](#interface-walletinterface)
 
 Argument Details
 

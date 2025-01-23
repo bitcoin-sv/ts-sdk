@@ -1,5 +1,5 @@
 import { VerifiableCertificate } from "../certificates/VerifiableCertificate.js"
-import { Wallet } from "../../../mod.js"
+import { WalletInterface } from "../../../mod.js"
 import { RequestedCertificateSet } from "../types.js"
 
 /**
@@ -10,7 +10,7 @@ import { RequestedCertificateSet } from "../types.js"
  * @param {string} verifierIdentityKey - The public key of the verifier requesting the certificates.
  * @returns {Promise<VerifiableCertificate[]>} An array of verifiable certificates.
  */
-export const getVerifiableCertificates = async (wallet: Wallet, requestedCertificates: RequestedCertificateSet, verifierIdentityKey: string): Promise<VerifiableCertificate[]> => {
+export const getVerifiableCertificates = async (wallet: WalletInterface, requestedCertificates: RequestedCertificateSet, verifierIdentityKey: string): Promise<VerifiableCertificate[]> => {
   // Find matching certificates we have
   // Note: This may return multiple certificates that match the correct type.
   const matchingCertificates = await wallet.listCertificates({

@@ -6,9 +6,9 @@ import {
   HexString,
   OutpointString,
   PubKeyHex,
-  ProtoWallet,
   Random,
-  WalletCounterparty
+  WalletCounterparty,
+  WalletInterface
 } from '../../../mod.js'
 import Certificate from './Certificate.js'
 
@@ -61,12 +61,12 @@ export class MasterCertificate extends Certificate {
    * This method uses the `masterKeyring` to decrypt each field's encryption key and then
    * decrypts the field values. The result is a record of plaintext field names and values.
    * 
-   * @param {ProtoWallet} subjectWallet - The wallet of the subject, used to decrypt the master keyring and field values.
+   * @param {WalletInterface} subjectWallet - The wallet of the subject, used to decrypt the master keyring and field values.
    * @returns {Promise<Record<CertificateFieldNameUnder50Bytes, string>>} - A record of field names and their decrypted values in plaintext.
    * 
    * @throws {Error} Throws an error if the `masterKeyring` is invalid or if decryption fails for any field.
    */
-  async decryptFields(subjectWallet: ProtoWallet): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
+  async decryptFields(subjectWallet: WalletInterface): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
     // const fields: Record<CertificateFieldNameUnder50Bytes, Base64String> = this.fields
     const decryptedFields: Record<CertificateFieldNameUnder50Bytes, string> = {}
     if (!this.masterKeyring || Object.keys(this.masterKeyring).length === 0) {
@@ -97,7 +97,7 @@ export class MasterCertificate extends Certificate {
    * for the verifier's identity key. The result is a keyring containing the keys necessary
    * for the verifier to access the designated fields.
    *
-   * @param {ProtoWallet} subjectWallet - The wallet instance of the subject, used to decrypt and re-encrypt field keys.
+   * @param {WalletInterface} subjectWallet - The wallet instance of the subject, used to decrypt and re-encrypt field keys.
    * @param {WalletCounterparty} verifier - The verifier who will receive access to the selectively revealed fields. Can be an identity key as hex, 'anyone', or 'self'.
    * @param {string[]} fieldsToReveal - An array of field names to be revealed to the verifier. Must be a subset of the certificate's fields.
    * @param {string} [originator] - Optional originator identifier, used if additional context is needed for decryption and encryption operations.
@@ -107,7 +107,7 @@ export class MasterCertificate extends Certificate {
    *   - A field in `fieldsToReveal` does not exist in the certificate.
    *   - The decrypted master field key fails to decrypt the corresponding field (indicating an invalid key).
    */
-  async createKeyringForVerifier(subjectWallet: ProtoWallet, verifier: WalletCounterparty, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
+  async createKeyringForVerifier(subjectWallet: WalletInterface, verifier: WalletCounterparty, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
     if (!Array.isArray(fieldsToReveal)) {
       throw new Error('fieldsToReveal must be an array of strings')
     }
@@ -157,7 +157,7 @@ export class MasterCertificate extends Certificate {
    * generated symmetric key, which is then encrypted for the subject. The certificate
    * can also includes a revocation outpoint to manage potential revocation.
    * 
-   * @param {ProtoWallet} certifierWallet - The wallet of the certifier, used to sign the certificate and encrypt field keys.
+   * @param {WalletInterface} certifierWallet - The wallet of the certifier, used to sign the certificate and encrypt field keys.
    * @param {WalletCounterparty} subject - The subject for whom the certificate is issued.
    * @param {Record<CertificateFieldNameUnder50Bytes, string>} fields - Unencrypted certificate fields to include, with their names and values.
    * @param {string} certificateType - The type of certificate being issued.
@@ -169,7 +169,7 @@ export class MasterCertificate extends Certificate {
    * @throws {Error} Throws an error if any operation (e.g., encryption, signing) fails during certificate issuance.
    */
   static async issueCertificateForSubject(
-    certifierWallet: ProtoWallet,
+    certifierWallet: WalletInterface,
     subject: WalletCounterparty,
     fields: Record<CertificateFieldNameUnder50Bytes, string>,
     certificateType: string,

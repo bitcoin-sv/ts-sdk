@@ -1,6 +1,6 @@
-import { Wallet, CreateActionArgs, OriginatorDomainNameStringUnder250Bytes, CreateActionResult, BooleanDefaultTrue, AcquireCertificateArgs, AcquireCertificateResult, Base64String, BasketStringUnder300Bytes, BooleanDefaultFalse, Byte, CertificateFieldNameUnder50Bytes, DescriptionString5to50Bytes, DiscoverCertificatesResult, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, InternalizeActionArgs, ISOTimestampString, KeyIDStringUnder800Bytes, ListActionsArgs, ListActionsResult, ListCertificatesResult, ListOutputsArgs, ListOutputsResult, OutpointString, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, ProveCertificateArgs, ProveCertificateResult, PubKeyHex, SecurityLevel, SignActionArgs, SignActionResult, VersionString7To30Bytes } from '../Wallet.interfaces.js'
+import { WalletInterface, CreateActionArgs, OriginatorDomainNameStringUnder250Bytes, CreateActionResult, BooleanDefaultTrue, AcquireCertificateArgs, AcquireCertificateResult, Base64String, BasketStringUnder300Bytes, BooleanDefaultFalse, Byte, CertificateFieldNameUnder50Bytes, DescriptionString5to50Bytes, DiscoverCertificatesResult, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, InternalizeActionArgs, ISOTimestampString, KeyIDStringUnder800Bytes, ListActionsArgs, ListActionsResult, ListCertificatesResult, ListOutputsArgs, ListOutputsResult, OutpointString, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, ProveCertificateArgs, ProveCertificateResult, PubKeyHex, SecurityLevel, SignActionArgs, SignActionResult, VersionString7To30Bytes } from '../Wallet.interfaces.js'
 
-export default class HTTPWalletJSON implements Wallet {
+export default class HTTPWalletJSON implements WalletInterface {
   baseUrl: string
   httpClient: typeof fetch
   originator: OriginatorDomainNameStringUnder250Bytes | undefined
@@ -23,7 +23,7 @@ export default class HTTPWalletJSON implements Wallet {
         })).json()
         return response
       } catch (error) {
-        console.log({ 'HTTPWalletJSON': { call, args, error }})
+        console.log({ 'HTTPWalletJSON': { call, args, error } })
         throw error
       }
     }

@@ -1,4 +1,4 @@
-import { AcquireCertificateArgs, AcquireCertificateResult, SecurityLevel, Base64String, BasketStringUnder300Bytes, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Bytes, CreateActionArgs, CreateActionResult, DescriptionString5to50Bytes, DiscoverCertificatesResult, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, InternalizeActionArgs, ISOTimestampString, KeyIDStringUnder800Bytes, LabelStringUnder300Bytes, ListActionsArgs, ListActionsResult, ListCertificatesResult, ListOutputsArgs, ListOutputsResult, OriginatorDomainNameStringUnder250Bytes, OutpointString, OutputTagStringUnder300Bytes, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, ProveCertificateArgs, ProveCertificateResult, PubKeyHex, SatoshiValue, SignActionArgs, SignActionResult, TXIDHexString, VersionString7To30Bytes, Wallet } from '../Wallet.interfaces.js'
+import { AcquireCertificateArgs, AcquireCertificateResult, SecurityLevel, Base64String, BasketStringUnder300Bytes, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Bytes, CreateActionArgs, CreateActionResult, DescriptionString5to50Bytes, DiscoverCertificatesResult, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, InternalizeActionArgs, ISOTimestampString, KeyIDStringUnder800Bytes, LabelStringUnder300Bytes, ListActionsArgs, ListActionsResult, ListCertificatesResult, ListOutputsArgs, ListOutputsResult, OriginatorDomainNameStringUnder250Bytes, OutpointString, OutputTagStringUnder300Bytes, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, ProveCertificateArgs, ProveCertificateResult, PubKeyHex, SatoshiValue, SignActionArgs, SignActionResult, TXIDHexString, VersionString7To30Bytes, WalletInterface } from '../Wallet.interfaces.js'
 import WalletWire from './WalletWire.js'
 import { Certificate } from '../../auth/index.js'
 import { Utils } from '../../primitives/index.js'
@@ -8,7 +8,7 @@ import { WalletError } from '../WalletError.js'
 /**
  * A way to make remote calls to a wallet over a wallet wire.
  */
-export default class WalletWireTransceiver implements Wallet {
+export default class WalletWireTransceiver implements WalletInterface {
   wire: WalletWire
 
   constructor(wire: WalletWire) {

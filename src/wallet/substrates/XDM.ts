@@ -1,4 +1,4 @@
-import { Base64String, BasketStringUnder300Bytes, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Bytes, DescriptionString5to50Bytes, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, ISOTimestampString, KeyIDStringUnder800Bytes, LabelStringUnder300Bytes, OriginatorDomainNameStringUnder250Bytes, OutpointString, OutputTagStringUnder300Bytes, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, PubKeyHex, SatoshiValue, SecurityLevel, TXIDHexString, VersionString7To30Bytes, Wallet } from '../Wallet.interfaces.js'
+import { Base64String, BasketStringUnder300Bytes, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Bytes, DescriptionString5to50Bytes, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, ISOTimestampString, KeyIDStringUnder800Bytes, LabelStringUnder300Bytes, OriginatorDomainNameStringUnder250Bytes, OutpointString, OutputTagStringUnder300Bytes, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, PubKeyHex, SatoshiValue, SecurityLevel, TXIDHexString, VersionString7To30Bytes, WalletInterface } from '../Wallet.interfaces.js'
 import { Utils, Random } from '../../primitives/index.js'
 import { WalletError } from '../WalletError.js'
 import { CallType } from 'mod.js'
@@ -6,9 +6,9 @@ import { CallType } from 'mod.js'
 /**
  * Facilitates wallet operations over cross-document messaging.
  */
-export default class XDMSubstrate implements Wallet {
+export default class XDMSubstrate implements WalletInterface {
   private readonly domain: string
-  
+
   constructor(domain: string = '*') {
     if (typeof window !== 'object') {
       throw new Error('The XDM substrate requires a global window object.')

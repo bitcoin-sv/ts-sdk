@@ -916,8 +916,10 @@ export interface GetPublicKeyResult {
 }
 
 /**
- * The ProtoWalletApi interface defines a wallet cryptographic capabilities including:
- * key derivation, encryption, decryption, hmac creation and verification, signature generation and verification
+ * The Wallet interface defines a wallet capable of various tasks including transaction creation and signing,
+ * encryption, decryption, identity certificate management, identity verification, and communication
+ * with applications as per the BRC standards. This interface allows applications to interact with
+ * the wallet for a range of functionalities aligned with the Babbage architectural principles.
  *
  * Error Handling
  *
@@ -926,7 +928,7 @@ export interface GetPublicKeyResult {
  * Serialization layers can rely on the `isError` property being unique to error objects to
  * deserialize and rethrow `WalletErrorObject` conforming objects.
  */
-export interface ProtoWalletApi {
+export interface WalletInterface {
   /**
    * Retrieves a derived or identity public key based on the requested protocol, key ID, counterparty, and other factors.
    *
@@ -1035,22 +1037,6 @@ export interface ProtoWalletApi {
     originator?: OriginatorDomainNameStringUnder250Bytes
   ) => Promise<VerifySignatureResult>
 
-}
-
-/**
- * The Wallet interface defines a wallet capable of various tasks including transaction creation and signing,
- * encryption, decryption, identity certificate management, identity verification, and communication
- * with applications as per the BRC standards. This interface allows applications to interact with
- * the wallet for a range of functionalities aligned with the Babbage architectural principles.
- *
- * Error Handling
- *
- * Every method of the `Wallet` interface has a return value of the form `Promise<object>`.
- * When an error occurs, an exception object may be thrown which must conform to the `WalletErrorObject` interface.
- * Serialization layers can rely on the `isError` property being unique to error objects to
- * deserialize and rethrow `WalletErrorObject` conforming objects.
- */
-export interface Wallet extends ProtoWalletApi {
   /**
    * Creates a new Bitcoin transaction based on the provided inputs, outputs, labels, locks, and other options.
    *
