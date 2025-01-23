@@ -2111,55 +2111,27 @@ A ProtoWallet is precursor to a full wallet, capable of performing all foundatio
 It can derive keys, create signatures, facilitate encryption and HMAC operations, and reveal key linkages.
 
 However, ProtoWallet does not create transactions, manage outputs, interact with the blockchain,
-enable the management of identity certificates, or store any data.
+enable the management of identity certificates, or store any data. It is also not concerned with privileged keys.
 
 ```ts
 export class ProtoWallet {
     keyDeriver: KeyDeriverApi;
     constructor(rootKeyOrKeyDeriver: PrivateKey | "anyone" | KeyDeriverApi) 
-    async isAuthenticated(args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AuthenticatedResult> 
-    async waitForAuthentication(args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AuthenticatedResult> 
-    async getNetwork(args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetNetworkResult> 
-    async getVersion(args: {}, Originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetVersionResult> 
-    async getIdentityKey(originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+    async getPublicKey(args: GetPublicKeyArgs): Promise<{
         publicKey: PubKeyHex;
     }> 
-    async getPublicKey(args: GetPublicKeyArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-        publicKey: PubKeyHex;
-    }> 
-    async revealCounterpartyKeyLinkage(args: RevealCounterpartyKeyLinkageArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<RevealCounterpartyKeyLinkageResult> 
-    async revealSpecificKeyLinkage(args: RevealSpecificKeyLinkageArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<RevealSpecificKeyLinkageResult> 
-    async encrypt(args: WalletEncryptArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<WalletEncryptResult> 
-    async decrypt(args: WalletDecryptArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<WalletDecryptResult> 
-    async createHmac(args: CreateHmacArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<CreateHmacResult> 
-    async verifyHmac(args: VerifyHmacArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<VerifyHmacResult> 
-    async createSignature(args: CreateSignatureArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<CreateSignatureResult> 
-    async verifySignature(args: VerifySignatureArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<VerifySignatureResult> 
+    async revealCounterpartyKeyLinkage(args: RevealCounterpartyKeyLinkageArgs): Promise<RevealCounterpartyKeyLinkageResult> 
+    async revealSpecificKeyLinkage(args: RevealSpecificKeyLinkageArgs): Promise<RevealSpecificKeyLinkageResult> 
+    async encrypt(args: WalletEncryptArgs): Promise<WalletEncryptResult> 
+    async decrypt(args: WalletDecryptArgs): Promise<WalletDecryptResult> 
+    async createHmac(args: CreateHmacArgs): Promise<CreateHmacResult> 
+    async verifyHmac(args: VerifyHmacArgs): Promise<VerifyHmacResult> 
+    async createSignature(args: CreateSignatureArgs): Promise<CreateSignatureResult> 
+    async verifySignature(args: VerifySignatureArgs): Promise<VerifySignatureResult> 
 }
 ```
 
-See also: [AuthenticatedResult](#interface-authenticatedresult), [CreateHmacArgs](#interface-createhmacargs), [CreateHmacResult](#interface-createhmacresult), [CreateSignatureArgs](#interface-createsignatureargs), [CreateSignatureResult](#interface-createsignatureresult), [GetNetworkResult](#interface-getnetworkresult), [GetPublicKeyArgs](#interface-getpublickeyargs), [GetVersionResult](#interface-getversionresult), [KeyDeriverApi](#interface-keyderiverapi), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [PrivateKey](#class-privatekey), [PubKeyHex](#type-pubkeyhex), [RevealCounterpartyKeyLinkageArgs](#interface-revealcounterpartykeylinkageargs), [RevealCounterpartyKeyLinkageResult](#interface-revealcounterpartykeylinkageresult), [RevealSpecificKeyLinkageArgs](#interface-revealspecifickeylinkageargs), [RevealSpecificKeyLinkageResult](#interface-revealspecifickeylinkageresult), [VerifyHmacArgs](#interface-verifyhmacargs), [VerifyHmacResult](#interface-verifyhmacresult), [VerifySignatureArgs](#interface-verifysignatureargs), [VerifySignatureResult](#interface-verifysignatureresult), [WalletDecryptArgs](#interface-walletdecryptargs), [WalletDecryptResult](#interface-walletdecryptresult), [WalletEncryptArgs](#interface-walletencryptargs), [WalletEncryptResult](#interface-walletencryptresult), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
-
-<details>
-
-<summary>Class ProtoWallet Details</summary>
-
-#### Method getIdentityKey
-
-Convenience method to obtain the identityKey.
-
-```ts
-async getIdentityKey(originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
-    publicKey: PubKeyHex;
-}> 
-```
-See also: [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [PubKeyHex](#type-pubkeyhex)
-
-Returns
-
-`await this.getPublicKey({ identityKey: true }, originator)`
-
-</details>
+See also: [CreateHmacArgs](#interface-createhmacargs), [CreateHmacResult](#interface-createhmacresult), [CreateSignatureArgs](#interface-createsignatureargs), [CreateSignatureResult](#interface-createsignatureresult), [GetPublicKeyArgs](#interface-getpublickeyargs), [KeyDeriverApi](#interface-keyderiverapi), [PrivateKey](#class-privatekey), [PubKeyHex](#type-pubkeyhex), [RevealCounterpartyKeyLinkageArgs](#interface-revealcounterpartykeylinkageargs), [RevealCounterpartyKeyLinkageResult](#interface-revealcounterpartykeylinkageresult), [RevealSpecificKeyLinkageArgs](#interface-revealspecifickeylinkageargs), [RevealSpecificKeyLinkageResult](#interface-revealspecifickeylinkageresult), [VerifyHmacArgs](#interface-verifyhmacargs), [VerifyHmacResult](#interface-verifyhmacresult), [VerifySignatureArgs](#interface-verifysignatureargs), [VerifySignatureResult](#interface-verifysignatureresult), [WalletDecryptArgs](#interface-walletdecryptargs), [WalletDecryptResult](#interface-walletdecryptresult), [WalletEncryptArgs](#interface-walletencryptargs), [WalletEncryptResult](#interface-walletencryptresult), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 

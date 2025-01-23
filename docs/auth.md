@@ -218,7 +218,7 @@ export default class Certificate {
     toBinary(includeSignature: boolean = true): number[] 
     static fromBinary(bin: number[]): Certificate 
     async verify(): Promise<boolean> 
-    async sign(certifierWallet: ProtoWallet): Promise<void> 
+    async sign(certifierWallet: WalletInterface): Promise<void> 
     static getCertificateFieldEncryptionDetails(serialNumber: string, fieldName: string): {
         protocolID: WalletProtocol;
         keyID: string;
@@ -226,7 +226,7 @@ export default class Certificate {
 }
 ```
 
-See also: [Base64String](#type-base64string), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [ProtoWallet](#class-protowallet), [PubKeyHex](#type-pubkeyhex), [WalletProtocol](#type-walletprotocol), [sign](#variable-sign), [verify](#variable-verify)
+See also: [Base64String](#type-base64string), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [PubKeyHex](#type-pubkeyhex), [WalletInterface](#interface-walletinterface), [WalletProtocol](#type-walletprotocol), [sign](#variable-sign), [verify](#variable-verify)
 
 <details>
 
@@ -369,9 +369,9 @@ Argument Details
 Signs the certificate using the provided certifier wallet.
 
 ```ts
-async sign(certifierWallet: ProtoWallet): Promise<void> 
+async sign(certifierWallet: WalletInterface): Promise<void> 
 ```
-See also: [ProtoWallet](#class-protowallet)
+See also: [WalletInterface](#interface-walletinterface)
 
 Argument Details
 
@@ -417,6 +417,10 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export class CompletedProtoWallet extends ProtoWallet implements WalletInterface {
     constructor(rootKeyOrKeyDeriver: PrivateKey | "anyone" | KeyDeriverApi) 
+    isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AuthenticatedResult> 
+    waitForAuthentication(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AuthenticatedResult> 
+    getNetwork(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetNetworkResult> 
+    getVersion(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetVersionResult> 
     async getPublicKey(args: GetPublicKeyArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         publicKey: PubKeyHex;
     }> 
@@ -438,7 +442,7 @@ export class CompletedProtoWallet extends ProtoWallet implements WalletInterface
 }
 ```
 
-See also: [AbortActionArgs](#interface-abortactionargs), [AbortActionResult](#interface-abortactionresult), [AcquireCertificateArgs](#interface-acquirecertificateargs), [AcquireCertificateResult](#interface-acquirecertificateresult), [CreateActionArgs](#interface-createactionargs), [CreateActionResult](#interface-createactionresult), [DiscoverByAttributesArgs](#interface-discoverbyattributesargs), [DiscoverByIdentityKeyArgs](#interface-discoverbyidentitykeyargs), [DiscoverCertificatesResult](#interface-discovercertificatesresult), [GetHeaderArgs](#interface-getheaderargs), [GetHeaderResult](#interface-getheaderresult), [GetHeightResult](#interface-getheightresult), [GetPublicKeyArgs](#interface-getpublickeyargs), [InternalizeActionArgs](#interface-internalizeactionargs), [InternalizeActionResult](#interface-internalizeactionresult), [KeyDeriverApi](#interface-keyderiverapi), [ListActionsArgs](#interface-listactionsargs), [ListActionsResult](#interface-listactionsresult), [ListCertificatesArgs](#interface-listcertificatesargs), [ListCertificatesResult](#interface-listcertificatesresult), [ListOutputsArgs](#interface-listoutputsargs), [ListOutputsResult](#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [PrivateKey](#class-privatekey), [ProtoWallet](#class-protowallet), [ProveCertificateArgs](#interface-provecertificateargs), [ProveCertificateResult](#interface-provecertificateresult), [PubKeyHex](#type-pubkeyhex), [RelinquishCertificateArgs](#interface-relinquishcertificateargs), [RelinquishCertificateResult](#interface-relinquishcertificateresult), [RelinquishOutputArgs](#interface-relinquishoutputargs), [RelinquishOutputResult](#interface-relinquishoutputresult), [SignActionArgs](#interface-signactionargs), [SignActionResult](#interface-signactionresult), [WalletInterface](#interface-walletinterface)
+See also: [AbortActionArgs](#interface-abortactionargs), [AbortActionResult](#interface-abortactionresult), [AcquireCertificateArgs](#interface-acquirecertificateargs), [AcquireCertificateResult](#interface-acquirecertificateresult), [AuthenticatedResult](#interface-authenticatedresult), [CreateActionArgs](#interface-createactionargs), [CreateActionResult](#interface-createactionresult), [DiscoverByAttributesArgs](#interface-discoverbyattributesargs), [DiscoverByIdentityKeyArgs](#interface-discoverbyidentitykeyargs), [DiscoverCertificatesResult](#interface-discovercertificatesresult), [GetHeaderArgs](#interface-getheaderargs), [GetHeaderResult](#interface-getheaderresult), [GetHeightResult](#interface-getheightresult), [GetNetworkResult](#interface-getnetworkresult), [GetPublicKeyArgs](#interface-getpublickeyargs), [GetVersionResult](#interface-getversionresult), [InternalizeActionArgs](#interface-internalizeactionargs), [InternalizeActionResult](#interface-internalizeactionresult), [KeyDeriverApi](#interface-keyderiverapi), [ListActionsArgs](#interface-listactionsargs), [ListActionsResult](#interface-listactionsresult), [ListCertificatesArgs](#interface-listcertificatesargs), [ListCertificatesResult](#interface-listcertificatesresult), [ListOutputsArgs](#interface-listoutputsargs), [ListOutputsResult](#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [PrivateKey](#class-privatekey), [ProtoWallet](#class-protowallet), [ProveCertificateArgs](#interface-provecertificateargs), [ProveCertificateResult](#interface-provecertificateresult), [PubKeyHex](#type-pubkeyhex), [RelinquishCertificateArgs](#interface-relinquishcertificateargs), [RelinquishCertificateResult](#interface-relinquishcertificateresult), [RelinquishOutputArgs](#interface-relinquishoutputargs), [RelinquishOutputResult](#interface-relinquishoutputresult), [SignActionArgs](#interface-signactionargs), [SignActionResult](#interface-signactionresult), [WalletInterface](#interface-walletinterface)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -462,13 +466,13 @@ export class MasterCertificate extends Certificate {
     declare signature?: HexString;
     masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
     constructor(type: Base64String, serialNumber: Base64String, subject: PubKeyHex, certifier: PubKeyHex, revocationOutpoint: OutpointString, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, signature?: HexString) 
-    async decryptFields(subjectWallet: ProtoWallet): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
-    async createKeyringForVerifier(subjectWallet: ProtoWallet, verifier: WalletCounterparty, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
-    static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => { return "Certificate revocation not tracked."; }): Promise<MasterCertificate> 
+    async decryptFields(subjectWallet: WalletInterface): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+    async createKeyringForVerifier(subjectWallet: WalletInterface, verifier: WalletCounterparty, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+    static async issueCertificateForSubject(certifierWallet: WalletInterface, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => { return "Certificate revocation not tracked."; }): Promise<MasterCertificate> 
 }
 ```
 
-See also: [Base64String](#type-base64string), [Certificate](#class-certificate), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [ProtoWallet](#class-protowallet), [PubKeyHex](#type-pubkeyhex), [WalletCounterparty](#type-walletcounterparty)
+See also: [Base64String](#type-base64string), [Certificate](#class-certificate), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [PubKeyHex](#type-pubkeyhex), [WalletCounterparty](#type-walletcounterparty), [WalletInterface](#interface-walletinterface)
 
 <details>
 
@@ -482,9 +486,9 @@ for the verifier's identity key. The result is a keyring containing the keys nec
 for the verifier to access the designated fields.
 
 ```ts
-async createKeyringForVerifier(subjectWallet: ProtoWallet, verifier: WalletCounterparty, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+async createKeyringForVerifier(subjectWallet: WalletInterface, verifier: WalletCounterparty, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 ```
-See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [ProtoWallet](#class-protowallet), [WalletCounterparty](#type-walletcounterparty)
+See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [WalletCounterparty](#type-walletcounterparty), [WalletInterface](#interface-walletinterface)
 
 Returns
 
@@ -516,9 +520,9 @@ This method uses the `masterKeyring` to decrypt each field's encryption key and 
 decrypts the field values. The result is a record of plaintext field names and values.
 
 ```ts
-async decryptFields(subjectWallet: ProtoWallet): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+async decryptFields(subjectWallet: WalletInterface): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 ```
-See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [ProtoWallet](#class-protowallet)
+See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [WalletInterface](#interface-walletinterface)
 
 Returns
 
@@ -543,9 +547,9 @@ generated symmetric key, which is then encrypted for the subject. The certificat
 can also includes a revocation outpoint to manage potential revocation.
 
 ```ts
-static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => { return "Certificate revocation not tracked."; }): Promise<MasterCertificate> 
+static async issueCertificateForSubject(certifierWallet: WalletInterface, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => { return "Certificate revocation not tracked."; }): Promise<MasterCertificate> 
 ```
-See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [MasterCertificate](#class-mastercertificate), [ProtoWallet](#class-protowallet), [WalletCounterparty](#type-walletcounterparty)
+See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [MasterCertificate](#class-mastercertificate), [WalletCounterparty](#type-walletcounterparty), [WalletInterface](#interface-walletinterface)
 
 Returns
 
