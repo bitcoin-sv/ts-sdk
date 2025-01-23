@@ -1,4 +1,4 @@
-import { Wallet } from '../Wallet.interfaces.js'
+import { WalletInterface } from '../Wallet.interfaces.js'
 import WalletWire from './WalletWire.js'
 import { Utils } from '../../primitives/index.js'
 import calls from './WalletWireCalls.js'
@@ -9,9 +9,9 @@ import { SecurityLevel } from '../Wallet.interfaces.js'
  * Processes incoming wallet calls received over a wallet wire, with a given wallet.
  */
 export default class WalletWireProcessor implements WalletWire {
-  wallet: Wallet
+  wallet: WalletInterface
 
-  constructor(wallet: Wallet) {
+  constructor(wallet: WalletInterface) {
     this.wallet = wallet
   }
 

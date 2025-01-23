@@ -1,4 +1,4 @@
-import { Wallet } from "../../wallet/index.js"
+import { WalletInterface } from "../../wallet/index.js"
 import { AuthMessage, RequestedCertificateSet } from "../types.js"
 import { VerifiableCertificate } from "../certificates/VerifiableCertificate.js"
 
@@ -10,7 +10,7 @@ import { VerifiableCertificate } from "../certificates/VerifiableCertificate.js"
  * @returns {Promise<void>}
  * @throws Will throw an error if certificate validation or field decryption fails.
  */
-export const validateCertificates = async (verifierWallet: Wallet, message: AuthMessage, certificatesRequested?: RequestedCertificateSet): Promise<void> => {
+export const validateCertificates = async (verifierWallet: WalletInterface, message: AuthMessage, certificatesRequested?: RequestedCertificateSet): Promise<void> => {
   await Promise.all(message.certificates.map(async (incomingCert: VerifiableCertificate) => {
     if (incomingCert.subject !== message.identityKey) {
       throw new Error(`The subject of one of your certificates ("${incomingCert.subject}") is not the same as the request sender ("${message.identityKey}").`)

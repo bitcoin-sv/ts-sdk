@@ -1,6 +1,6 @@
 import { ScriptTemplate, LockingScript, UnlockingScript, OP } from '../index.js'
 import { Utils, Hash, TransactionSignature, Signature, PublicKey } from '../../primitives/index.js'
-import { Wallet } from '../../wallet/Wallet.interfaces.js'
+import { WalletInterface } from '../../wallet/Wallet.interfaces.js'
 import { Transaction } from '../../transaction/index.js'
 import { SecurityLevel } from '../../wallet/Wallet.interfaces.js'
 
@@ -44,7 +44,7 @@ const createMinimallyEncodedScriptChunk = (data: number[]): { op: number, data?:
 }
 
 export default class PushDrop implements ScriptTemplate {
-  wallet: Wallet
+  wallet: WalletInterface
 
   /**
    * Decodes a PushDrop script back into its token fields and the locking public key. If a signature was present, it will be the last field returned.
@@ -84,9 +84,9 @@ export default class PushDrop implements ScriptTemplate {
   /**
    * Constructs a new instance of the PushDrop class.
    *
-   * @param {Wallet} wallet - The wallet interface used for creating signatures and accessing public keys.
+   * @param {WalletInterface} wallet - The wallet interface used for creating signatures and accessing public keys.
    */
-  constructor(wallet: Wallet) {
+  constructor(wallet: WalletInterface) {
     this.wallet = wallet
   }
 

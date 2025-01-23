@@ -5,9 +5,10 @@ import {
   HexString,
   OutpointString,
   CertificateFieldNameUnder50Bytes,
-  ProtoWallet,
+  WalletInterface,
   Signature,
-  WalletProtocol
+  WalletProtocol,
+  ProtoWallet
 } from '../../../mod.js'
 
 /**
@@ -231,7 +232,7 @@ export default class Certificate {
    * @param {Wallet} certifierWallet - The wallet representing the certifier.
    * @returns {Promise<void>}
    */
-  async sign(certifierWallet: ProtoWallet): Promise<void> {
+  async sign(certifierWallet: WalletInterface): Promise<void> {
     if (this.signature) {
       throw new Error(`Certificate has already been signed! Signature present: ${this.signature}`)
     }

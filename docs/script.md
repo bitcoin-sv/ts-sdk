@@ -219,12 +219,12 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export default class PushDrop implements ScriptTemplate {
-    wallet: Wallet;
+    wallet: WalletInterface;
     static decode(script: LockingScript): {
         lockingPublicKey: PublicKey;
         fields: number[][];
     } 
-    constructor(wallet: Wallet) 
+    constructor(wallet: WalletInterface) 
     async lock(fields: number[][], protocolID: [
         SecurityLevel,
         string
@@ -239,7 +239,7 @@ export default class PushDrop implements ScriptTemplate {
 }
 ```
 
-See also: [LockingScript](#class-lockingscript), [PublicKey](#class-publickey), [ScriptTemplate](#interface-scripttemplate), [SecurityLevel](#type-securitylevel), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [Wallet](#interface-wallet), [sign](#variable-sign)
+See also: [LockingScript](#class-lockingscript), [PublicKey](#class-publickey), [ScriptTemplate](#interface-scripttemplate), [SecurityLevel](#type-securitylevel), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [WalletInterface](#interface-walletinterface), [sign](#variable-sign)
 
 <details>
 
@@ -250,9 +250,9 @@ See also: [LockingScript](#class-lockingscript), [PublicKey](#class-publickey), 
 Constructs a new instance of the PushDrop class.
 
 ```ts
-constructor(wallet: Wallet) 
+constructor(wallet: WalletInterface) 
 ```
-See also: [Wallet](#interface-wallet)
+See also: [WalletInterface](#interface-walletinterface)
 
 Argument Details
 

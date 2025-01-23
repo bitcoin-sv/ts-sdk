@@ -1,14 +1,14 @@
-import { Base64String, BasketStringUnder300Bytes, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Bytes, DescriptionString5to50Bytes, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, ISOTimestampString, KeyIDStringUnder800Bytes, LabelStringUnder300Bytes, OriginatorDomainNameStringUnder250Bytes, OutpointString, OutputTagStringUnder300Bytes, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, PubKeyHex, SatoshiValue, SecurityLevel, TXIDHexString, VersionString7To30Bytes, Wallet } from '../Wallet.interfaces.js'
+import { Base64String, BasketStringUnder300Bytes, BEEF, BooleanDefaultFalse, BooleanDefaultTrue, Byte, CertificateFieldNameUnder50Bytes, DescriptionString5to50Bytes, EntityIconURLStringMax500Bytes, EntityNameStringMax100Bytes, HexString, ISOTimestampString, KeyIDStringUnder800Bytes, LabelStringUnder300Bytes, OriginatorDomainNameStringUnder250Bytes, OutpointString, OutputTagStringUnder300Bytes, PositiveInteger, PositiveIntegerDefault10Max10000, PositiveIntegerMax10, PositiveIntegerOrZero, ProtocolString5To400Bytes, PubKeyHex, SatoshiValue, SecurityLevel, TXIDHexString, VersionString7To30Bytes, WalletInterface } from '../Wallet.interfaces.js'
 
 declare const window: {
-  CWI?: Wallet
+  CWI?: WalletInterface
 } & Window
 
 /**
  * Facilitates wallet operations over the window.CWI interface.
  */
-export default class WindowCWISubstrate implements Wallet {
-  private CWI: Wallet
+export default class WindowCWISubstrate implements WalletInterface {
+  private CWI: WalletInterface
   constructor() {
     if (typeof window !== 'object') {
       throw new Error('The window.CWI substrate requires a global window object.')
@@ -16,7 +16,7 @@ export default class WindowCWISubstrate implements Wallet {
     if (typeof window.CWI !== 'object') {
       throw new Error('The window.CWI interface does not appear to be bound to the window object.')
     }
-    this.CWI = window.CWI as Wallet // Binding CWI to prevent changes
+    this.CWI = window.CWI as WalletInterface // Binding CWI to prevent changes
   }
 
   async createAction(args: { description: DescriptionString5to50Bytes, inputs?: Array<{ tx?: BEEF, outpoint: OutpointString, unlockingScript?: HexString, unlockingScriptLength?: PositiveInteger, inputDescription: DescriptionString5to50Bytes, sequenceNumber?: PositiveIntegerOrZero }>, outputs?: Array<{ lockingScript: HexString, satoshis: SatoshiValue, outputDescription: DescriptionString5to50Bytes, basket?: BasketStringUnder300Bytes, customInstructions?: string, tags?: OutputTagStringUnder300Bytes[] }>, lockTime?: PositiveIntegerOrZero, version?: PositiveIntegerOrZero, labels?: LabelStringUnder300Bytes[], options?: { signAndProcess?: BooleanDefaultTrue, acceptDelayedBroadcast?: BooleanDefaultTrue, trustSelf?: 'known', knownTxids?: TXIDHexString[], returnTXIDOnly?: BooleanDefaultFalse, noSend?: BooleanDefaultFalse, noSendChange?: OutpointString[], sendWith?: TXIDHexString[] } }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{ txid?: TXIDHexString, tx?: BEEF, noSendChange?: OutpointString[], sendWithResults?: Array<{ txid: TXIDHexString, status: 'unproven' | 'sending' | 'failed' }>, signableTransaction?: { tx: BEEF, reference: Base64String } }> {

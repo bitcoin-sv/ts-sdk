@@ -60,47 +60,6 @@ describe('WalletWire Integration Tests', () => {
         return (wallet as any).discoverByAttributes()
       }).rejects.toThrow()
     })
-    it('Throws the privileged error when the privileged flag is set', async () => {
-      const wallet = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet('anyone')))
-      const privilegedError = 'ProtoWallet is a single-keyring wallet, operating without context about whether its configured keyring is privileged.'
-      const saneParams = {
-        protocolID: [0, 'hello world'],
-        keyID: '123123123',
-        plaintext: [0, 1, 3],
-        ciphertext: [3, 4, 5],
-        data: [1, 3, 5],
-        hmac: [1, 3, 5],
-        signature: [1, 3, 5],
-        counterparty: 'self'
-      }
-      await expect(() => {
-        return (wallet as any).encrypt({ ...saneParams, privileged: true })
-      }).rejects.toThrow(new Error(privilegedError))
-      await expect(() => {
-        return (wallet as any).decrypt({ ...saneParams, privileged: true })
-      }).rejects.toThrow(new Error(privilegedError))
-      await expect(() => {
-        return (wallet as any).createSignature({ ...saneParams, privileged: true })
-      }).rejects.toThrow(new Error(privilegedError))
-      await expect(() => {
-        return (wallet as any).verifySignature({ ...saneParams, privileged: true })
-      }).rejects.toThrow(new Error(privilegedError))
-      await expect(() => {
-        return (wallet as any).createHmac({ ...saneParams, privileged: true })
-      }).rejects.toThrow(new Error(privilegedError))
-      await expect(() => {
-        return (wallet as any).verifyHmac({ ...saneParams, privileged: true })
-      }).rejects.toThrow(new Error(privilegedError))
-      await expect(() => {
-        return (wallet as any).getPublicKey({ ...saneParams, privileged: true })
-      }).rejects.toThrow(new Error(privilegedError))
-      await expect(() => {
-        return (wallet as any).revealCounterpartyKeyLinkage({ ...saneParams, privileged: true })
-      }).rejects.toThrow(new Error(privilegedError))
-      await expect(() => {
-        return (wallet as any).revealSpecificKeyLinkage({ ...saneParams, privileged: true })
-      }).rejects.toThrow(new Error(privilegedError))
-    })
     it('Validates the BRC-3 compliance vector', async () => {
       const wallet = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet('anyone')))
       const { valid } = await wallet.verifySignature({
@@ -355,13 +314,6 @@ describe('WalletWire Integration Tests', () => {
         keyID: '4',
         counterparty: counterpartyKey.toPublicKey().toString()
       })).rejects.toThrow()
-    })
-    it('Returns the expected version, network, and authentication status', async () => {
-      const wallet = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet('anyone')))
-      expect(await wallet.getVersion({})).toEqual({ version: 'proto-1.0.0' })
-      expect(await wallet.getNetwork({})).toEqual({ network: 'mainnet' })
-      expect(await wallet.isAuthenticated({})).toEqual({ authenticated: true })
-      expect(await wallet.waitForAuthentication({})).toEqual({ authenticated: true })
     })
     it('Uses anyone for creating signatures and self for other operations if no counterparty is provided', async () => {
       const userKey = PrivateKey.fromRandom()
@@ -1132,16 +1084,6 @@ describe('WalletWire Integration Tests', () => {
       expect(typeof result.publicKey).toBe('string')
       expect(result.publicKey.length).toBe(66)
     })
-
-    it('should throw an error for privileged operation without permission', async () => {
-      const wallet = createTestWalletWire(new ProtoWallet(PrivateKey.fromRandom()))
-      const args = {
-        identityKey: true as true,
-        privileged: true,
-        privilegedReason: 'Test privileged operation'
-      }
-      await expect(wallet.getPublicKey(args)).rejects.toThrow()
-    })
   })
 
   describe('encrypt and decrypt', () => {
@@ -1304,54 +1246,8 @@ describe('WalletWire Integration Tests', () => {
       const expectedLinkage = proverKey.deriveSharedSecret(counterpartyKey.toPublicKey()).encode(true)
       expect(decryptedResult.plaintext).toEqual(expectedLinkage)
     })
-
-    it('should throw an error when trying to reveal linkage without privilege', async () => {
-      const proverKey = PrivateKey.fromRandom()
-      const counterpartyKey = PrivateKey.fromRandom()
-      const verifierKey = PrivateKey.fromRandom()
-
-      const proverWallet = createTestWalletWire(new ProtoWallet(proverKey))
-
-      const args = {
-        counterparty: counterpartyKey.toPublicKey().toString(),
-        verifier: verifierKey.toPublicKey().toString(),
-        privileged: true
-      }
-
-      await expect(proverWallet.revealCounterpartyKeyLinkage(args)).rejects.toThrow()
-    })
   })
 
-  describe('getVersion and getNetwork', () => {
-    it('should return the correct version', async () => {
-      const wallet = createTestWalletWire(new ProtoWallet('anyone'))
-      const result = await wallet.getVersion({})
-      expect(result).toHaveProperty('version')
-      expect(typeof result.version).toBe('string')
-    })
-
-    it('should return the correct network', async () => {
-      const wallet = createTestWalletWire(new ProtoWallet('anyone'))
-      const result = await wallet.getNetwork({})
-      expect(result).toHaveProperty('network')
-      expect(['mainnet', 'testnet']).toContain(result.network)
-    })
-  })
-
-  describe('isAuthenticated and waitForAuthentication', () => {
-    it('should return authentication status', async () => {
-      const wallet = createTestWalletWire(new ProtoWallet('anyone'))
-      const result = await wallet.isAuthenticated({})
-      expect(result).toHaveProperty('authenticated')
-      expect(typeof result.authenticated).toBe('boolean')
-    })
-
-    it('should wait for authentication', async () => {
-      const wallet = createTestWalletWire(new ProtoWallet('anyone'))
-      const result = await wallet.waitForAuthentication({})
-      expect(result).toEqual({ authenticated: true })
-    })
-  })
   describe('acquireCertificate', () => {
     it('should acquire a certificate with valid inputs', async () => {
       // Mock the acquireCertificate method

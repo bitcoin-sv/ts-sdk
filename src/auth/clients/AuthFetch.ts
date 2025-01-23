@@ -1,4 +1,4 @@
-import { Utils, Random, P2PKH, PublicKey, Wallet } from '../../../mod.js'
+import { Utils, Random, P2PKH, PublicKey, WalletInterface } from '../../../mod.js'
 import { Peer } from '../Peer.js'
 import { SimplifiedFetchTransport } from '../transports/SimplifiedFetchTransport.js'
 import { SessionManager } from '../SessionManager.js'
@@ -26,7 +26,7 @@ const PAYMENT_VERSION = '1.0'
  */
 export class AuthFetch {
   private sessionManager: SessionManager
-  private wallet: Wallet
+  private wallet: WalletInterface
   private callbacks: Record<string, { resolve: Function, reject: Function }> = {}
   private certificatesReceived: VerifiableCertificate[] = []
   private requestedCertificates?: RequestedCertificateSet
@@ -37,7 +37,7 @@ export class AuthFetch {
   * @param wallet - The wallet instance for signing and authentication.
   * @param requestedCertificates - Optional set of certificates to request from peers.
   */
-  constructor(wallet: Wallet, requestedCertificates?: RequestedCertificateSet, sessionManager?: SessionManager) {
+  constructor(wallet: WalletInterface, requestedCertificates?: RequestedCertificateSet, sessionManager?: SessionManager) {
     this.wallet = wallet
     this.requestedCertificates = requestedCertificates
     this.sessionManager = sessionManager || new SessionManager()
