@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.3.9 - 2025-01-23](#139---2025-01-23)
 - [1.3.8 - 2025-01-20](#138---2025-01-20)
 - [1.3.7 - 2025-01-18](#137---2025-01-18)
 - [1.3.6 - 2025-01-17](#136---2025-01-17)
@@ -74,11 +75,20 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Security
 
+## [1.3.9] - 2025-01-23
+
+### Changed
+
+- Export `WalletInterface` and `ProtoWallet` but not `Wallet`
+- ProtoWallet does not deal with privilege or originators
+
+---
+
 ## [1.3.8] - 2025-01-20
 
 ### Fixed
 
-- Do not use `instanceof` check in the ProtoWallet constructor, it was not reliable in real-world usage.
+- Fixed the double export of Beef class as named and default which was messing up the constructor somehow. Now it's a named export and that means the BEEF_V1 and V2 constants are also available as exported values.
 
 ---
 
