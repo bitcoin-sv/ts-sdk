@@ -1,12 +1,13 @@
-import { Utils, WalletInterface } from '../../../mod.js'
+import { Utils, WalletCounterparty, WalletInterface } from '../../../mod.js'
 
 /**
  * Verifies a nonce derived from a wallet
  * @param nonce - A nonce to verify as a base64 string.
  * @param wallet
+ * @param counterparty - The counterparty to the nonce creation. Defaults to 'self'.
  * @returns The status of the validation
  */
-export async function verifyNonce(nonce: string, wallet: WalletInterface): Promise<boolean> {
+export async function verifyNonce(nonce: string, wallet: WalletInterface, counterparty: WalletCounterparty = 'self'): Promise<boolean> {
   // Convert nonce from base64 string to Uint8Array
   const buffer = Utils.toArray(nonce, 'base64')
 
@@ -20,7 +21,7 @@ export async function verifyNonce(nonce: string, wallet: WalletInterface): Promi
     hmac,
     protocolID: [2, 'server hmac'],
     keyID: Utils.toUTF8(data),
-    counterparty: 'self'
+    counterparty
   })
 
   return valid
