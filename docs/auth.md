@@ -1129,13 +1129,13 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ### Function: createNonce
 
-Creates a nonce derived from a privateKey
+Creates a nonce derived from a wallet
 
 ```ts
-export async function createNonce(wallet: WalletInterface): Promise<string> 
+export async function createNonce(wallet: WalletInterface, counterparty: WalletCounterparty = "self"): Promise<string> 
 ```
 
-See also: [WalletInterface](#interface-walletinterface)
+See also: [WalletCounterparty](#type-walletcounterparty), [WalletInterface](#interface-walletinterface)
 
 <details>
 
@@ -1144,6 +1144,11 @@ See also: [WalletInterface](#interface-walletinterface)
 Returns
 
 A random nonce derived with a wallet
+
+Argument Details
+
++ **counterparty**
+  + The counterparty to the nonce creation. Defaults to 'self'.
 
 </details>
 
@@ -1155,10 +1160,10 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 Verifies a nonce derived from a wallet
 
 ```ts
-export async function verifyNonce(nonce: string, wallet: WalletInterface): Promise<boolean> 
+export async function verifyNonce(nonce: string, wallet: WalletInterface, counterparty: WalletCounterparty = "self"): Promise<boolean> 
 ```
 
-See also: [WalletInterface](#interface-walletinterface)
+See also: [WalletCounterparty](#type-walletcounterparty), [WalletInterface](#interface-walletinterface)
 
 <details>
 
@@ -1172,6 +1177,8 @@ Argument Details
 
 + **nonce**
   + A nonce to verify as a base64 string.
++ **counterparty**
+  + The counterparty to the nonce creation. Defaults to 'self'.
 
 </details>
 

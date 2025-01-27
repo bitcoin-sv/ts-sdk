@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.3.10 - 2025-01-27](#139---2025-01-27)
 - [1.3.9 - 2025-01-23](#139---2025-01-23)
 - [1.3.8 - 2025-01-20](#138---2025-01-20)
 - [1.3.7 - 2025-01-18](#137---2025-01-18)
@@ -75,7 +76,14 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Security
 
-## [1.3.9] - 2025-01-23
+## [1.3.10] - 2025-01-27
+
+### Changed
+
+- Create and Verify Nonce utility functions now support optional counterparty param.
+- This enables the verification of nonces created by a counterparty.
+
+---
 
 ### Changed
 
