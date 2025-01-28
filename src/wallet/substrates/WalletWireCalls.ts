@@ -27,8 +27,8 @@ enum calls {
   getHeight = 25,
   getHeaderForHeight = 26,
   getNetwork = 27,
-  getVersion = 28
+  getVersion = 28,
 }
 
-export default calls
-export type CallType = keyof typeof calls
+export default calls;
+export type CallType = keyof typeof calls;

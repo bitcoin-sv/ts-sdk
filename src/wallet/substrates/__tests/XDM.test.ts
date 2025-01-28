@@ -2,11 +2,11 @@
  * @jest-environment jsdom
  */
 
-import XDMSubstrate from '../../../../dist/cjs/src/wallet/substrates/XDM.js'
-import { WalletError } from '../../../../dist/cjs/src/wallet/WalletError.js'
-import { Utils } from '../../../../dist/cjs/src/primitives/index.js'
+import XDMSubstrate from "../../../wallet/substrates/XDM";
+import { WalletError } from "../../../wallet/WalletError";
+import { Utils } from "../../../primitives/index";
 
-describe('XDMSubstrate', () => {
+describe("XDMSubstrate", () => {
   let xdmSubstrate;
   let originalWindow;
   let eventHandlers = {};
@@ -29,7 +29,7 @@ describe('XDMSubstrate', () => {
       }),
     } as unknown as Window & typeof globalThis;
 
-    jest.spyOn(window.parent, 'postMessage')
+    jest.spyOn(window.parent, "postMessage");
   });
 
   afterEach(() => {
@@ -38,107 +38,109 @@ describe('XDMSubstrate', () => {
     jest.restoreAllMocks();
   });
 
-  describe('constructor', () => {
-    it('should throw if window is not an object', () => {
-      delete (global as any).window
+  describe("constructor", () => {
+    it("should throw if window is not an object", () => {
+      delete (global as any).window;
       expect(() => {
         const _ = new XDMSubstrate();
-      }).toThrow('The XDM substrate requires a global window object.');
+      }).toThrow("The XDM substrate requires a global window object.");
     });
 
-    it('should throw if window.postMessage is not an object', () => {
-      delete (global as any).window.postMessage
+    it("should throw if window.postMessage is not an object", () => {
+      delete (global as any).window.postMessage;
       expect(() => {
         const _ = new XDMSubstrate();
-      }).toThrow('The window object does not seem to support postMessage calls.');
+      }).toThrow(
+        "The window object does not seem to support postMessage calls."
+      );
     });
 
-    it('should construct successfully if window and window.postMessage are defined', () => {
+    it("should construct successfully if window and window.postMessage are defined", () => {
       expect(() => {
         xdmSubstrate = new XDMSubstrate();
       }).not.toThrow();
     });
   });
 
-  describe('invoke', () => {
+  describe("invoke", () => {
     beforeEach(() => {
       xdmSubstrate = new XDMSubstrate();
     });
 
-    it('should send a message to window.parent.postMessage with correct parameters', async () => {
-      const call = 'testCall';
-      const args = { foo: 'bar' };
-      const mockId = 'mockedId';
+    it("should send a message to window.parent.postMessage with correct parameters", async () => {
+      const call = "testCall";
+      const args = { foo: "bar" };
+      const mockId = "mockedId";
 
-      jest.spyOn(Utils, 'toBase64').mockReturnValue(mockId);
+      jest.spyOn(Utils, "toBase64").mockReturnValue(mockId);
 
       xdmSubstrate.invoke(call, args);
       expect(window.parent.postMessage).toHaveBeenCalledWith(
         {
-          type: 'CWI',
+          type: "CWI",
           isInvocation: true,
           id: mockId,
           call,
           args,
         },
-        '*'
-      )
-    })
+        "*"
+      );
+    });
 
-    it('should resolve when receiving a valid message', async () => {
-      const call = 'testCall';
-      const args = { foo: 'bar' };
-      const result = { data: 'some data' };
-      const mockId = 'mockedId';
+    it("should resolve when receiving a valid message", async () => {
+      const call = "testCall";
+      const args = { foo: "bar" };
+      const result = { data: "some data" };
+      const mockId = "mockedId";
 
-      jest.spyOn(Utils, 'toBase64').mockReturnValue(mockId)
+      jest.spyOn(Utils, "toBase64").mockReturnValue(mockId);
 
       const invokePromise = xdmSubstrate.invoke(call, args);
 
       // Simulate receiving the message
       const event = {
         data: {
-          type: 'CWI',
+          type: "CWI",
           isInvocation: false,
           id: mockId,
-          status: 'success',
+          status: "success",
           result,
         },
         isTrusted: true,
       };
 
-      eventHandlers['message'](event);
+      eventHandlers["message"](event);
 
       const res = await invokePromise;
 
       expect(res).toEqual(result);
     });
 
-    it('should reject when receiving an error message', async () => {
-      const call = 'testCall';
-      const args = { foo: 'bar' };
-      const errorDescription = 'An error occurred';
+    it("should reject when receiving an error message", async () => {
+      const call = "testCall";
+      const args = { foo: "bar" };
+      const errorDescription = "An error occurred";
       const errorCode = 123;
-      const mockId = 'mockedId';
+      const mockId = "mockedId";
 
-      jest.spyOn(Utils, 'toBase64').mockReturnValue(mockId);
+      jest.spyOn(Utils, "toBase64").mockReturnValue(mockId);
 
       const invokePromise = xdmSubstrate.invoke(call, args);
 
       // Simulate receiving the message
       const event = {
         data: {
-          type: 'CWI',
+          type: "CWI",
           isInvocation: false,
           id: mockId,
-          status: 'error',
+          status: "error",
           description: errorDescription,
           code: errorCode,
         },
         isTrusted: true,
       };
 
-      eventHandlers['message'](event);
+      eventHandlers["message"](event);
 
       await expect(invokePromise).rejects.toThrow(WalletError);
       await expect(invokePromise).rejects.toThrow(errorDescription);
@@ -149,30 +151,29 @@ describe('XDMSubstrate', () => {
       }
     });
 
-    it('should ignore messages with incorrect type', async () => {
-      const call = 'testCall';
-      const args = { foo: 'bar' };
-      const result = { data: 'some data' };
-      const mockId = 'mockedId';
+    it("should ignore messages with incorrect type", async () => {
+      const call = "testCall";
+      const args = { foo: "bar" };
+      const result = { data: "some data" };
+      const mockId = "mockedId";
 
-      jest.spyOn(Utils, 'toBase64').mockReturnValue(mockId);
-
+      jest.spyOn(Utils, "toBase64").mockReturnValue(mockId);
 
       const invokePromise = xdmSubstrate.invoke(call, args);
 
       // Simulate receiving an unrelated message
       const event = {
         data: {
-          type: 'WrongType',
+          type: "WrongType",
           isInvocation: false,
           id: mockId,
-          status: 'success',
+          status: "success",
           result,
         },
         isTrusted: true,
       };
 
-      eventHandlers['message'](event);
+      eventHandlers["message"](event);
 
       // The promise should still be pending
       let isResolved = false;
@@ -185,30 +186,29 @@ describe('XDMSubstrate', () => {
       expect(isResolved).toBe(false);
     });
 
-    it('should ignore messages with incorrect id', async () => {
-      const call = 'testCall';
-      const args = { foo: 'bar' };
-      const result = { data: 'some data' };
-      const mockId = 'mockedId';
+    it("should ignore messages with incorrect id", async () => {
+      const call = "testCall";
+      const args = { foo: "bar" };
+      const result = { data: "some data" };
+      const mockId = "mockedId";
 
-      jest.spyOn(Utils, 'toBase64').mockReturnValue(mockId);
-
+      jest.spyOn(Utils, "toBase64").mockReturnValue(mockId);
 
       const invokePromise = xdmSubstrate.invoke(call, args);
 
       // Simulate receiving a message with wrong id
       const event = {
         data: {
-          type: 'CWI',
+          type: "CWI",
           isInvocation: false,
-          id: 'wrongId',
-          status: 'success',
+          id: "wrongId",
+          status: "success",
           result,
         },
         isTrusted: true,
       };
 
-      eventHandlers['message'](event);
+      eventHandlers["message"](event);
 
       // The promise should still be pending
       let isResolved = false;
@@ -221,30 +221,29 @@ describe('XDMSubstrate', () => {
       expect(isResolved).toBe(false);
     });
 
-    it('should ignore messages where e.isTrusted is false', async () => {
-      const call = 'testCall';
-      const args = { foo: 'bar' };
-      const result = { data: 'some data' };
-      const mockId = 'mockedId';
+    it("should ignore messages where e.isTrusted is false", async () => {
+      const call = "testCall";
+      const args = { foo: "bar" };
+      const result = { data: "some data" };
+      const mockId = "mockedId";
 
-      jest.spyOn(Utils, 'toBase64').mockReturnValue(mockId);
-
+      jest.spyOn(Utils, "toBase64").mockReturnValue(mockId);
 
       const invokePromise = xdmSubstrate.invoke(call, args);
 
       // Simulate receiving a message with isTrusted false
       const event = {
         data: {
-          type: 'CWI',
+          type: "CWI",
           isInvocation: false,
           id: mockId,
-          status: 'success',
+          status: "success",
           result,
         },
         isTrusted: false,
       };
 
-      eventHandlers['message'](event);
+      eventHandlers["message"](event);
 
       // The promise should still be pending
       let isResolved = false;
@@ -257,30 +256,29 @@ describe('XDMSubstrate', () => {
       expect(isResolved).toBe(false);
     });
 
-    it('should ignore messages where e.data.isInvocation is true', async () => {
-      const call = 'testCall';
-      const args = { foo: 'bar' };
-      const result = { data: 'some data' };
-      const mockId = 'mockedId';
+    it("should ignore messages where e.data.isInvocation is true", async () => {
+      const call = "testCall";
+      const args = { foo: "bar" };
+      const result = { data: "some data" };
+      const mockId = "mockedId";
 
-      jest.spyOn(Utils, 'toBase64').mockReturnValue(mockId);
-
+      jest.spyOn(Utils, "toBase64").mockReturnValue(mockId);
 
       const invokePromise = xdmSubstrate.invoke(call, args);
 
       // Simulate receiving a message with isInvocation true
       const event = {
         data: {
-          type: 'CWI',
+          type: "CWI",
           isInvocation: true,
           id: mockId,
-          status: 'success',
+          status: "success",
           result,
         },
         isTrusted: true,
       };
 
-      eventHandlers['message'](event);
+      eventHandlers["message"](event);
 
       // The promise should still be pending
       let isResolved = false;
@@ -303,77 +301,75 @@ describe('XDMSubstrate', () => {
 
       it(`should call invoke with correct arguments and return the result`, async () => {
         const call = methodName;
-        const mockId = 'mockedId';
+        const mockId = "mockedId";
 
-        jest.spyOn(Utils, 'toBase64').mockReturnValue(mockId);
-
+        jest.spyOn(Utils, "toBase64").mockReturnValue(mockId);
 
         const invokePromise = xdmSubstrate[methodName](args);
 
         expect(window.parent.postMessage).toHaveBeenCalledWith(
           {
-            type: 'CWI',
+            type: "CWI",
             isInvocation: true,
             id: mockId,
             call,
             args,
           },
-          '*',
+          "*"
         );
 
         const event = {
           data: {
-            type: 'CWI',
+            type: "CWI",
             isInvocation: false,
             id: mockId,
-            status: 'success',
+            status: "success",
             result,
           },
           isTrusted: true,
         };
 
-        eventHandlers['message'](event);
+        eventHandlers["message"](event);
 
         const res = await invokePromise;
         expect(res).toEqual(result);
       });
 
-      it('should throw error when invoke rejects', async () => {
+      it("should throw error when invoke rejects", async () => {
         const call = methodName;
-        const errorDescription = 'An error occurred';
+        const errorDescription = "An error occurred";
         const errorCode = 123;
-        const mockId = 'mockedId';
+        const mockId = "mockedId";
 
-        jest.spyOn(Utils, 'toBase64').mockReturnValue(mockId);
-
+        jest.spyOn(Utils, "toBase64").mockReturnValue(mockId);
 
         const invokePromise = xdmSubstrate[methodName](args);
 
         expect(window.parent.postMessage).toHaveBeenCalledWith(
           {
-            type: 'CWI',
+            type: "CWI",
             isInvocation: true,
             id: mockId,
             call,
             args,
           },
-          '*',
+          "*"
         );
 
         // Simulate receiving an error message
         const event = {
           data: {
-            type: 'CWI',
+            type: "CWI",
             isInvocation: false,
             id: mockId,
-            status: 'error',
+            status: "error",
             description: errorDescription,
             code: errorCode,
           },
           isTrusted: true,
         };
 
-        eventHandlers['message'](event);
+        eventHandlers["message"](event);
 
         await expect(invokePromise).rejects.toThrow(WalletError);
         await expect(invokePromise).rejects.toThrow(errorDescription);
@@ -387,183 +383,183 @@ describe('XDMSubstrate', () => {
   // List of methods to test
   const methodsToTest = [
     {
-      methodName: 'createAction',
+      methodName: "createAction",
       args: {
-        description: 'Test description',
+        description: "Test description",
         inputs: [],
         outputs: [],
       },
-      result: { txid: 'abc123' },
+      result: { txid: "abc123" },
     },
     {
-      methodName: 'signAction',
+      methodName: "signAction",
       args: {
         spends: {},
-        reference: 'someReference',
+        reference: "someReference",
       },
-      result: { txid: 'abc123' },
+      result: { txid: "abc123" },
     },
     {
-      methodName: 'abortAction',
+      methodName: "abortAction",
       args: {
-        reference: 'someReference',
+        reference: "someReference",
       },
       result: { aborted: true },
     },
     {
-      methodName: 'listActions',
+      methodName: "listActions",
       args: {
         labels: [],
       },
       result: { totalActions: 0, actions: [] },
     },
     {
-      methodName: 'internalizeAction',
+      methodName: "internalizeAction",
       args: {
-        tx: 'someTx',
+        tx: "someTx",
         outputs: [],
-        description: 'Test description',
+        description: "Test description",
       },
       result: { accepted: true },
     },
     {
-      methodName: 'listOutputs',
+      methodName: "listOutputs",
       args: {
-        basket: 'someBasket',
+        basket: "someBasket",
       },
       result: { totalOutputs: 0, outputs: [] },
     },
     {
-      methodName: 'relinquishOutput',
+      methodName: "relinquishOutput",
       args: {
-        basket: 'someBasket',
-        output: 'someOutput',
+        basket: "someBasket",
+        output: "someOutput",
       },
       result: { relinquished: true },
     },
     {
-      methodName: 'getPublicKey',
+      methodName: "getPublicKey",
       args: {
         identityKey: true,
       },
-      result: { publicKey: 'somePubKey' },
+      result: { publicKey: "somePubKey" },
     },
     {
-      methodName: 'revealCounterpartyKeyLinkage',
+      methodName: "revealCounterpartyKeyLinkage",
       args: {
-        counterparty: 'someCounterparty',
-        verifier: 'someVerifier',
+        counterparty: "someCounterparty",
+        verifier: "someVerifier",
       },
       result: {
-        prover: 'someProver',
-        verifier: 'someVerifier',
-        counterparty: 'someCounterparty',
-        revelationTime: 'someTime',
+        prover: "someProver",
+        verifier: "someVerifier",
+        counterparty: "someCounterparty",
+        revelationTime: "someTime",
         encryptedLinkage: [],
         encryptedLinkageProof: [],
       },
     },
     {
-      methodName: 'revealSpecificKeyLinkage',
+      methodName: "revealSpecificKeyLinkage",
       args: {
-        counterparty: 'someCounterparty',
-        verifier: 'someVerifier',
-        protocolID: [0, 'someProtocol'],
-        keyID: 'someKeyID',
+        counterparty: "someCounterparty",
+        verifier: "someVerifier",
+        protocolID: [0, "someProtocol"],
+        keyID: "someKeyID",
       },
       result: {
-        prover: 'someProver',
-        verifier: 'someVerifier',
-        counterparty: 'someCounterparty',
-        protocolID: [0, 'someProtocol'],
-        keyID: 'someKeyID',
+        prover: "someProver",
+        verifier: "someVerifier",
+        counterparty: "someCounterparty",
+        protocolID: [0, "someProtocol"],
+        keyID: "someKeyID",
         encryptedLinkage: [],
         encryptedLinkageProof: [],
         proofType: [],
       },
     },
     {
-      methodName: 'encrypt',
+      methodName: "encrypt",
       args: {
         plaintext: [],
-        protocolID: [0, 'someProtocol'],
-        keyID: 'someKeyID',
+        protocolID: [0, "someProtocol"],
+        keyID: "someKeyID",
       },
       result: { ciphertext: [] },
     },
     {
-      methodName: 'decrypt',
+      methodName: "decrypt",
       args: {
         ciphertext: [],
-        protocolID: [0, 'someProtocol'],
-        keyID: 'someKeyID',
+        protocolID: [0, "someProtocol"],
+        keyID: "someKeyID",
       },
       result: { plaintext: [] },
     },
     {
-      methodName: 'createHmac',
+      methodName: "createHmac",
       args: {
         data: [],
-        protocolID: [0, 'someProtocol'],
-        keyID: 'someKeyID',
+        protocolID: [0, "someProtocol"],
+        keyID: "someKeyID",
       },
       result: { hmac: [] },
     },
     {
-      methodName: 'verifyHmac',
+      methodName: "verifyHmac",
       args: {
         data: [],
         hmac: [],
-        protocolID: [0, 'someProtocol'],
-        keyID: 'someKeyID',
+        protocolID: [0, "someProtocol"],
+        keyID: "someKeyID",
       },
       result: { valid: true },
     },
     {
-      methodName: 'createSignature',
+      methodName: "createSignature",
       args: {
         data: [],
-        protocolID: [0, 'someProtocol'],
-        keyID: 'someKeyID',
+        protocolID: [0, "someProtocol"],
+        keyID: "someKeyID",
       },
       result: { signature: [] },
     },
     {
-      methodName: 'verifySignature',
+      methodName: "verifySignature",
       args: {
         data: [],
         signature: [],
-        protocolID: [0, 'someProtocol'],
-        keyID: 'someKeyID',
+        protocolID: [0, "someProtocol"],
+        keyID: "someKeyID",
       },
       result: { valid: true },
     },
     {
-      methodName: 'acquireCertificate',
+      methodName: "acquireCertificate",
       args: {
-        type: 'someType',
-        subject: 'someSubject',
-        serialNumber: 'someSerialNumber',
-        revocationOutpoint: 'someOutpoint',
-        signature: 'someSignature',
+        type: "someType",
+        subject: "someSubject",
+        serialNumber: "someSerialNumber",
+        revocationOutpoint: "someOutpoint",
+        signature: "someSignature",
         fields: {},
-        certifier: 'someCertifier',
-        keyringRevealer: 'certifier',
+        certifier: "someCertifier",
+        keyringRevealer: "certifier",
         keyringForSubject: {},
-        acquisitionProtocol: 'direct',
+        acquisitionProtocol: "direct",
       },
       result: {
-        type: 'someType',
-        subject: 'someSubject',
-        serialNumber: 'someSerialNumber',
-        certifier: 'someCertifier',
-        revocationOutpoint: 'someOutpoint',
-        signature: 'someSignature',
+        type: "someType",
+        subject: "someSubject",
+        serialNumber: "someSerialNumber",
+        certifier: "someCertifier",
+        revocationOutpoint: "someOutpoint",
+        signature: "someSignature",
         fields: {},
       },
     },
     {
-      methodName: 'listCertificates',
+      methodName: "listCertificates",
       args: {
         certifiers: [],
         types: [],
@@ -574,37 +570,37 @@ describe('XDMSubstrate', () => {
       },
     },
     {
-      methodName: 'proveCertificate',
+      methodName: "proveCertificate",
       args: {
         certificate: {
-          type: 'someType',
-          subject: 'someSubject',
-          serialNumber: 'someSerialNumber',
-          certifier: 'someCertifier',
-          revocationOutpoint: 'someOutpoint',
-          signature: 'someSignature',
+          type: "someType",
+          subject: "someSubject",
+          serialNumber: "someSerialNumber",
+          certifier: "someCertifier",
+          revocationOutpoint: "someOutpoint",
+          signature: "someSignature",
           fields: {},
         },
         fieldsToReveal: [],
-        verifier: 'someVerifier',
+        verifier: "someVerifier",
       },
       result: {
         keyringForVerifier: {},
       },
     },
     {
-      methodName: 'relinquishCertificate',
+      methodName: "relinquishCertificate",
       args: {
-        type: 'someType',
-        serialNumber: 'someSerialNumber',
-        certifier: 'someCertifier',
+        type: "someType",
+        serialNumber: "someSerialNumber",
+        certifier: "someCertifier",
       },
       result: { relinquished: true },
     },
     {
-      methodName: 'discoverByIdentityKey',
+      methodName: "discoverByIdentityKey",
       args: {
-        identityKey: 'someIdentityKey',
+        identityKey: "someIdentityKey",
       },
       result: {
         totalCertificates: 0,
@@ -612,7 +608,7 @@ describe('XDMSubstrate', () => {
       },
     },
     {
-      methodName: 'discoverByAttributes',
+      methodName: "discoverByAttributes",
       args: {
         attributes: {},
       },
@@ -622,34 +618,34 @@ describe('XDMSubstrate', () => {
       },
     },
     {
-      methodName: 'isAuthenticated',
+      methodName: "isAuthenticated",
       args: {},
       result: { authenticated: true },
     },
     {
-      methodName: 'waitForAuthentication',
+      methodName: "waitForAuthentication",
       args: {},
       result: { authenticated: true },
     },
     {
-      methodName: 'getHeight',
+      methodName: "getHeight",
       args: {},
       result: { height: 1000 },
     },
     {
-      methodName: 'getHeaderForHeight',
+      methodName: "getHeaderForHeight",
       args: { height: 1000 },
-      result: { header: 'someHeader' },
+      result: { header: "someHeader" },
     },
     {
-      methodName: 'getNetwork',
+      methodName: "getNetwork",
       args: {},
-      result: { network: 'mainnet' },
+      result: { network: "mainnet" },
     },
     {
-      methodName: 'getVersion',
+      methodName: "getVersion",
       args: {},
-      result: { version: '1.0.0' },
+      result: { version: "1.0.0" },
     },
   ];
 

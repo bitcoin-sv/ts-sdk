@@ -1,5 +1,5 @@
-export * as BSM from './BSM.js'
-export { default as HD } from './HD.js'
-export { default as Mnemonic } from './Mnemonic.js'
-export { default as ECIES } from './ECIES.js'
-export { default as fromUtxo } from './Utxo.js'
+export * as BSM from "./BSM";
+export { default as HD } from "./HD";
+export { default as Mnemonic } from "./Mnemonic";
+export { default as ECIES } from "./ECIES";
+export { default as fromUtxo } from "./Utxo";

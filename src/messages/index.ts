@@ -1,2 +1,2 @@
-export * as SignedMessage from './SignedMessage.js'
-export * as EncryptedMessage from './EncryptedMessage.js'
+export * as SignedMessage from "./SignedMessage";
+export * as EncryptedMessage from "./EncryptedMessage";

@@ -1,1 +1,1 @@
-export * from './totp.js'
+export * from "./totp";

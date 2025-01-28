@@ -1,4 +1,4 @@
-import ReductionContext from './ReductionContext.js'
+import ReductionContext from "./ReductionContext";
 
 /**
  * JavaScript numbers are only precise up to 53 bits. Since Bitcoin relies on
@@ -12,57 +12,52 @@ export default class BigNumber {
    * @privateinitializer
    */
   public static readonly zeros: string[] = [
-    '',
-    '0',
-    '00',
-    '000',
-    '0000',
-    '00000',
-    '000000',
-    '0000000',
-    '00000000',
-    '000000000',
-    '0000000000',
-    '00000000000',
-    '000000000000',
-    '0000000000000',
-    '00000000000000',
-    '000000000000000',
-    '0000000000000000',
-    '00000000000000000',
-    '000000000000000000',
-    '0000000000000000000',
-    '00000000000000000000',
-    '000000000000000000000',
-    '0000000000000000000000',
-    '00000000000000000000000',
-    '000000000000000000000000',
-    '0000000000000000000000000'
-  ]
+    "",
+    "0",
+    "00",
+    "000",
+    "0000",
+    "00000",
+    "000000",
+    "0000000",
+    "00000000",
+    "000000000",
+    "0000000000",
+    "00000000000",
+    "000000000000",
+    "0000000000000",
+    "00000000000000",
+    "000000000000000",
+    "0000000000000000",
+    "00000000000000000",
+    "000000000000000000",
+    "0000000000000000000",
+    "00000000000000000000",
+    "000000000000000000000",
+    "0000000000000000000000",
+    "00000000000000000000000",
+    "000000000000000000000000",
+    "0000000000000000000000000",
+  ];
 
   /**
    * @privateinitializer
    */
   static readonly groupSizes: number[] = [
-    0, 0,
-    25, 16, 12, 11, 10, 9, 8,
-    8, 7, 7, 7, 7, 6, 6,
-    6, 6, 6, 6, 6, 5, 5,
-    5, 5, 5, 5, 5, 5, 5,
-    5, 5, 5, 5, 5, 5, 5
-  ]
+    0, 0, 25, 16, 12, 11, 10, 9, 8, 8, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5,
+    5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+  ];
 
   /**
    * @privateinitializer
    */
   static readonly groupBases: number[] = [
-    0, 0,
-    33554432, 43046721, 16777216, 48828125, 60466176, 40353607, 16777216,
+    0, 0, 33554432, 43046721, 16777216, 48828125, 60466176, 40353607, 16777216,
     43046721, 10000000, 19487171, 35831808, 62748517, 7529536, 11390625,
-    16777216, 24137569, 34012224, 47045881, 64000000, 4084101, 5153632,
-    6436343, 7962624, 9765625, 11881376, 14348907, 17210368, 20511149,
-    24300000, 28629151, 33554432, 39135393, 45435424, 52521875, 60466176
-  ]
+    16777216, 24137569, 34012224, 47045881, 64000000, 4084101, 5153632, 6436343,
+    7962624, 9765625, 11881376, 14348907, 17210368, 20511149, 24300000,
+    28629151, 33554432, 39135393, 45435424, 52521875, 60466176,
+  ];
 
   /**
    * The word size of big number chunks.
@@ -72,7 +67,7 @@ export default class BigNumber {
    * @example
    * console.log(BigNumber.wordSize);  // output: 26
    */
-  static readonly wordSize: number = 26
+  static readonly wordSize: number = 26;
 
   /**
    * Negative flag. Indicates whether the big number is a negative number.
@@ -85,7 +80,7 @@ export default class BigNumber {
    * let num = new BigNumber("-10");
    * console.log(num.negative);  // output: 1
    */
-  negative: number
+  negative: number;
 
   /**
    * Array of numbers, where each number represents a part of the value of the big number.
@@ -96,7 +91,7 @@ export default class BigNumber {
    * let num = new BigNumber(50000);
    * console.log(num.words);  // output: [ 50000 ]
    */
-  words: number[]
+  words: number[];
 
   /**
    * Length of the words array.
@@ -107,14 +102,14 @@ export default class BigNumber {
    * let num = new BigNumber(50000);
    * console.log(num.length);  // output: 1
    */
-  length: number
+  length: number;
 
   /**
    * Reduction context of the big number.
    *
    * @property red
    */
-  red: ReductionContext | null
+  red: ReductionContext | null;
 
   /**
    * Checks whether a value is an instance of BigNumber. If not, then checks the features of the input to determine potential compatibility. Regular JS numbers fail this check.
@@ -130,14 +125,17 @@ export default class BigNumber {
    * const invalidNum = 5;
    * BigNumber.isBN(invalidNum); // returns false
    */
-  static isBN (num: any): boolean {
+  static isBN(num: any): boolean {
     if (num instanceof BigNumber) {
-      return true
+      return true;
     }
 
-    return num !== null && typeof num === 'object' &&
+    return (
+      num !== null &&
+      typeof num === "object" &&
       num.constructor.wordSize === BigNumber.wordSize &&
       Array.isArray(num.words)
+    );
   }
 
   /**
@@ -153,9 +151,9 @@ export default class BigNumber {
    * const bn2 = new BigNumber(10);
    * BigNumber.max(bn1, bn2); // returns bn2
    */
-  static max (left: BigNumber, right: BigNumber): BigNumber {
-    if (left.cmp(right) > 0) return left
-    return right
+  static max(left: BigNumber, right: BigNumber): BigNumber {
+    if (left.cmp(right) > 0) return left;
+    return right;
   }
 
   /**
@@ -171,9 +169,9 @@ export default class BigNumber {
    * const bn2 = new BigNumber(10);
    * BigNumber.min(bn1, bn2); // returns bn1
    */
-  static min (left: BigNumber, right: BigNumber): BigNumber {
-    if (left.cmp(right) < 0) return left
-    return right
+  static min(left: BigNumber, right: BigNumber): BigNumber {
+    if (left.cmp(right) < 0) return left;
+    return right;
   }
 
   /**
@@ -189,53 +187,53 @@ export default class BigNumber {
    * import BigNumber from './BigNumber';
    * const bn = new BigNumber('123456', 10, 'be');
    */
-  constructor (
+  constructor(
     number: number | string | number[] = 0,
-    base: number | 'be' | 'le' | 'hex' = 10,
-    endian: 'be' | 'le' = 'be'
+    base: number | "be" | "le" | "hex" = 10,
+    endian: "be" | "le" = "be"
   ) {
-    this.negative = 0
-    this.words = []
-    this.length = 0
+    this.negative = 0;
+    this.words = [];
+    this.length = 0;
 
     // Reduction context
-    this.red = null
+    this.red = null;
 
     if (number !== null) {
-      if (base === 'le' || base === 'be') {
-        endian = base
-        base = 10
+      if (base === "le" || base === "be") {
+        endian = base;
+        base = 10;
       }
 
-      if (typeof number === 'number') {
-        this.initNumber(number, base, endian)
-        return
+      if (typeof number === "number") {
+        this.initNumber(number, base, endian);
+        return;
       }
 
-      if (typeof number === 'object') {
-        this.initArray(number, endian)
-        return
+      if (typeof number === "object") {
+        this.initArray(number, endian);
+        return;
       }
 
-      if (base === 'hex') {
-        base = 16
+      if (base === "hex") {
+        base = 16;
       }
-      this.assert(base === (base | 0) && base >= 2 && base <= 36)
+      this.assert(base === (base | 0) && base >= 2 && base <= 36);
 
-      number = number.toString().replace(/\s+/g, '')
-      let start = 0
-      if (number.startsWith('-')) {
-        start++
-        this.negative = 1
+      number = number.toString().replace(/\s+/g, "");
+      let start = 0;
+      if (number.startsWith("-")) {
+        start++;
+        this.negative = 1;
       }
 
       if (start < number.length) {
         if (base === 16) {
-          this.parseHex(number, start, endian)
+          this.parseHex(number, start, endian);
         } else {
-          this.parseBase(number, base, start)
-          if (endian === 'le') {
-            this.initArray(this.toArray(), endian)
+          this.parseBase(number, base, start);
+          if (endian === "le") {
+            this.initArray(this.toArray(), endian);
           }
         }
       }
@@ -250,8 +248,8 @@ export default class BigNumber {
    * @param val - The condition to be checked.
    * @param msg - The error message to throw if the condition is not satisfied. Default is 'Assertion failed'.
    */
-  private assert (val: unknown, msg: string = 'Assertion failed'): void {
-    if (!(val as boolean)) throw new Error(msg)
+  private assert(val: unknown, msg: string = "Assertion failed"): void {
+    if (!(val as boolean)) throw new Error(msg);
   }
 
   /**
@@ -265,38 +263,31 @@ export default class BigNumber {
    * @param endian - The endianness ('be' for big-endian, 'le' for little-endian).
    * @returns The current BigNumber instance.
    */
-  private initNumber (number, base, endian): this {
+  private initNumber(number, base, endian): this {
     if (number < 0) {
-      this.negative = 1
-      number = -number
+      this.negative = 1;
+      number = -number;
     }
     if (number < 0x4000000) {
-      this.words = [number & 0x3ffffff]
-      this.length = 1
+      this.words = [number & 0x3ffffff];
+      this.length = 1;
     } else if (number < 0x10000000000000) {
-      this.words = [
-        number & 0x3ffffff,
-        (number / 0x4000000) & 0x3ffffff
-      ]
-      this.length = 2
+      this.words = [number & 0x3ffffff, (number / 0x4000000) & 0x3ffffff];
+      this.length = 2;
     } else {
       this.assert(
-        number <= 0x1FFFFFFFFFFFFF,
-        'The number is larger than 2 ^ 53 (unsafe)'
-      )
-      this.words = [
-        number & 0x3ffffff,
-        (number / 0x4000000) & 0x3ffffff,
-        1
-      ]
-      this.length = 3
+        number <= 0x1fffffffffffff,
+        "The number is larger than 2 ^ 53 (unsafe)"
+      );
+      this.words = [number & 0x3ffffff, (number / 0x4000000) & 0x3ffffff, 1];
+      this.length = 3;
     }
 
-    if (endian !== 'le') return this
+    if (endian !== "le") return this;
 
     // Reverse the bytes
-    this.initArray(this.toArray(), endian)
-    return this
+    this.initArray(this.toArray(), endian);
+    return this;
   }
 
   /**
@@ -308,51 +299,51 @@ export default class BigNumber {
    * @param endian - The endianness ('be' for big-endian, 'le' for little-endian).
    * @return The current BigNumber instance.
    */
-  private initArray (number, endian): BigNumber {
+  private initArray(number, endian): BigNumber {
     // Perhaps a Uint8Array
     this.assert(
-      typeof number.length === 'number',
-      'The number must have a length'
-    )
+      typeof number.length === "number",
+      "The number must have a length"
+    );
     if (number.length <= 0) {
-      this.words = [0]
-      this.length = 1
-      return this
+      this.words = [0];
+      this.length = 1;
+      return this;
     }
 
-    this.length = Math.ceil(number.length / 3)
-    this.words = new Array(this.length)
-    let i = 0
+    this.length = Math.ceil(number.length / 3);
+    this.words = new Array(this.length);
+    let i = 0;
     for (; i < this.length; i++) {
-      this.words[i] = 0
+      this.words[i] = 0;
     }
 
-    let j: number, w
-    let off = 0
-    if (endian === 'be') {
+    let j: number, w;
+    let off = 0;
+    if (endian === "be") {
       for (i = number.length - 1, j = 0; i >= 0; i -= 3) {
-        w = number[i] | (number[i - 1] << 8) | (number[i - 2] << 16)
-        this.words[j] |= (w << off) & 0x3ffffff
-        this.words[j + 1] = (w >>> (26 - off)) & 0x3ffffff
-        off += 24
+        w = number[i] | (number[i - 1] << 8) | (number[i - 2] << 16);
+        this.words[j] |= (w << off) & 0x3ffffff;
+        this.words[j + 1] = (w >>> (26 - off)) & 0x3ffffff;
+        off += 24;
         if (off >= 26) {
-          off -= 26
-          j++
+          off -= 26;
+          j++;
         }
       }
-    } else if (endian === 'le') {
+    } else if (endian === "le") {
       for (i = 0, j = 0; i < number.length; i += 3) {
-        w = number[i] | (number[i + 1] << 8) | (number[i + 2] << 16)
-        this.words[j] |= (w << off) & 0x3ffffff
-        this.words[j + 1] = (w >>> (26 - off)) & 0x3ffffff
-        off += 24
+        w = number[i] | (number[i + 1] << 8) | (number[i + 2] << 16);
+        this.words[j] |= (w << off) & 0x3ffffff;
+        this.words[j + 1] = (w >>> (26 - off)) & 0x3ffffff;
+        off += 24;
         if (off >= 26) {
-          off -= 26
-          j++
+          off -= 26;
+          j++;
         }
       }
     }
-    return this.strip()
+    return this.strip();
   }
 
   /**
@@ -364,19 +355,19 @@ export default class BigNumber {
    * @param index - The index of the hexadecimal character in the string.
    * @return The decimal value corresponding to the hexadecimal character.
    */
-  private parseHex4Bits (string: string, index: number): number {
-    const c = string.charCodeAt(index)
+  private parseHex4Bits(string: string, index: number): number {
+    const c = string.charCodeAt(index);
     // '0' - '9'
     if (c >= 48 && c <= 57) {
-      return c - 48
-    // 'A' - 'F'
+      return c - 48;
+      // 'A' - 'F'
     } else if (c >= 65 && c <= 70) {
-      return c - 55
-    // 'a' - 'f'
+      return c - 55;
+      // 'a' - 'f'
     } else if (c >= 97 && c <= 102) {
-      return c - 87
+      return c - 87;
     } else {
-      throw new Error('Invalid character in ' + string)
+      throw new Error("Invalid character in " + string);
     }
   }
 
@@ -390,14 +381,16 @@ export default class BigNumber {
    * @param index - The index of the second hexadecimal character in the string.
    * @return The decimal value corresponding to the two hexadecimal characters.
    */
-  private parseHexByte (
-    string: string, lowerBound: number, index: number
+  private parseHexByte(
+    string: string,
+    lowerBound: number,
+    index: number
   ): number {
-    let r = this.parseHex4Bits(string, index)
+    let r = this.parseHex4Bits(string, index);
     if (index - 1 >= lowerBound) {
-      r |= this.parseHex4Bits(string, index - 1) << 4
+      r |= this.parseHex4Bits(string, index - 1) << 4;
     }
-    return r
+    return r;
   }
 
   /**
@@ -410,39 +403,47 @@ export default class BigNumber {
    * @param endian - The endianness ('be', 'le').
    * @return The current BigNumber instance.
    */
-  private parseHex (number: string, start: number, endian: 'be' | 'le'): BigNumber {
+  private parseHex(
+    number: string,
+    start: number,
+    endian: "be" | "le"
+  ): BigNumber {
     // Initialize the words array
-    this.length = Math.ceil((number.length - start) / 6)
-    this.words = new Array(this.length).fill(0)
+    this.length = Math.ceil((number.length - start) / 6);
+    this.words = new Array(this.length).fill(0);
 
     // 24-bits chunks
-    let off = 0
-    let j = 0
+    let off = 0;
+    let j = 0;
 
     const processHexByte = (i: number): void => {
-      const w = this.parseHexByte(number, start, i) << off
-      this.words[j] |= w & 0x3ffffff
+      const w = this.parseHexByte(number, start, i) << off;
+      this.words[j] |= w & 0x3ffffff;
       if (off >= 18) {
-        off -= 18
-        j += 1
-        this.words[j] |= w >>> 26
+        off -= 18;
+        j += 1;
+        this.words[j] |= w >>> 26;
       } else {
-        off += 8
+        off += 8;
       }
-    }
+    };
 
-    if (endian === 'be') {
+    if (endian === "be") {
       for (let i = number.length - 1; i >= start; i -= 2) {
-        processHexByte(i)
+        processHexByte(i);
       }
     } else {
-      const parseLength = number.length - start
-      for (let i = parseLength % 2 === 0 ? start + 1 : start; i < number.length; i += 2) {
-        processHexByte(i)
+      const parseLength = number.length - start;
+      for (
+        let i = parseLength % 2 === 0 ? start + 1 : start;
+        i < number.length;
+        i += 2
+      ) {
+        processHexByte(i);
       }
     }
 
-    return this.strip()
+    return this.strip();
   }
 
   /**
@@ -456,31 +457,31 @@ export default class BigNumber {
    * @param mul - The base to be used for the conversion.
    * @return The decimal value of the parsed base word.
    */
-  private parseBaseWord (str, start, end, mul): number {
-    let r = 0
-    let b = 0
-    const len = Math.min(str.length, end)
+  private parseBaseWord(str, start, end, mul): number {
+    let r = 0;
+    let b = 0;
+    const len = Math.min(str.length, end);
     for (let i = start; i < len; i++) {
-      const c = str.charCodeAt(i) - 48
+      const c = str.charCodeAt(i) - 48;
 
-      r *= mul
+      r *= mul;
 
       // 'a'
       if (c >= 49) {
-        b = c - 49 + 0xa
+        b = c - 49 + 0xa;
 
-      // 'A'
+        // 'A'
       } else if (c >= 17) {
-        b = c - 17 + 0xa
+        b = c - 17 + 0xa;
 
-      // '0' - '9'
+        // '0' - '9'
       } else {
-        b = c
+        b = c;
       }
-      this.assert(c >= 0 && b < mul, 'Invalid character')
-      r += b
+      this.assert(c >= 0 && b < mul, "Invalid character");
+      r += b;
     }
-    return r
+    return r;
   }
 
   /**
@@ -493,54 +494,54 @@ export default class BigNumber {
    * @param start - The index to start conversion from.
    * @return The current BigNumber instance.
    */
-  private parseBase (number: string, base: number, start: number): BigNumber {
+  private parseBase(number: string, base: number, start: number): BigNumber {
     // Initialize as zero
-    this.words = [0]
-    this.length = 1
+    this.words = [0];
+    this.length = 1;
 
     // Find length of limb in base
-    let limbLen = 0
-    let limbPow = 1
+    let limbLen = 0;
+    let limbPow = 1;
     for (; limbPow <= 0x3ffffff; limbPow *= base) {
-      limbLen++
+      limbLen++;
     }
-    limbLen--
-    limbPow = (limbPow / base) | 0
+    limbLen--;
+    limbPow = (limbPow / base) | 0;
 
-    const total = number.length - start
-    const mod = total % limbLen
-    const end = Math.min(total, total - mod) + start
+    const total = number.length - start;
+    const mod = total % limbLen;
+    const end = Math.min(total, total - mod) + start;
 
-    let word = 0
-    let i = start
+    let word = 0;
+    let i = start;
     for (; i < end; i += limbLen) {
-      word = this.parseBaseWord(number, i, i + limbLen, base)
+      word = this.parseBaseWord(number, i, i + limbLen, base);
 
-      this.imuln(limbPow)
+      this.imuln(limbPow);
       if (this.words[0] + word < 0x4000000) {
-        this.words[0] += word
+        this.words[0] += word;
       } else {
-        this._iaddn(word)
+        this._iaddn(word);
       }
     }
 
     if (mod !== 0) {
-      let pow = 1
-      word = this.parseBaseWord(number, i, number.length, base)
+      let pow = 1;
+      word = this.parseBaseWord(number, i, number.length, base);
 
       for (i = 0; i < mod; i++) {
-        pow *= base
+        pow *= base;
       }
 
-      this.imuln(pow)
+      this.imuln(pow);
       if (this.words[0] + word < 0x4000000) {
-        this.words[0] += word
+        this.words[0] += word;
       } else {
-        this._iaddn(word)
+        this._iaddn(word);
       }
     }
 
-    return this.strip()
+    return this.strip();
   }
 
   /**
@@ -555,14 +556,14 @@ export default class BigNumber {
    * bn1.copy(bn2);
    * // bn2 is now a BigNumber representing 123456
    */
-  copy (dest: BigNumber): void {
-    dest.words = new Array(this.length)
+  copy(dest: BigNumber): void {
+    dest.words = new Array(this.length);
     for (let i = 0; i < this.length; i++) {
-      dest.words[i] = this.words[i]
+      dest.words[i] = this.words[i];
     }
-    dest.length = this.length
-    dest.negative = this.negative
-    dest.red = this.red
+    dest.length = this.length;
+    dest.negative = this.negative;
+    dest.red = this.red;
   }
 
   /**
@@ -579,11 +580,11 @@ export default class BigNumber {
    * BigNumber.move(dest, src);
    * // dest is now a BigNumber representing 123456
    */
-  static move (dest: BigNumber, src: BigNumber): void {
-    dest.words = src.words
-    dest.length = src.length
-    dest.negative = src.negative
-    dest.red = src.red
+  static move(dest: BigNumber, src: BigNumber): void {
+    dest.words = src.words;
+    dest.length = src.length;
+    dest.negative = src.negative;
+    dest.red = src.red;
   }
 
   /**
@@ -596,10 +597,10 @@ export default class BigNumber {
    * const bn = new BigNumber('123456', 10, 'be');
    * const bnClone = bn.clone();
    */
-  clone (): BigNumber {
-    const r = new BigNumber()
-    this.copy(r)
-    return r
+  clone(): BigNumber {
+    const r = new BigNumber();
+    this.copy(r);
+    return r;
   }
 
   /**
@@ -613,11 +614,11 @@ export default class BigNumber {
    * const bn = new BigNumber('123456', 10, 'be');
    * bn.expand(10);
    */
-  expand (size: number): this {
+  expand(size: number): this {
     while (this.length < size) {
-      this.words[this.length++] = 0
+      this.words[this.length++] = 0;
     }
-    return this
+    return this;
   }
 
   /**
@@ -631,11 +632,11 @@ export default class BigNumber {
    * bn.strip();
    * // bn now represents 0
    */
-  strip (): this {
+  strip(): this {
     while (this.length > 1 && this.words[this.length - 1] === 0) {
-      this.length--
+      this.length--;
     }
-    return this.normSign()
+    return this.normSign();
   }
 
   /**
@@ -648,12 +649,12 @@ export default class BigNumber {
    * const bn = new BigNumber('-0', 10, 'be');
    * bn.normSign();
    */
-  normSign (): this {
+  normSign(): this {
     // -0 = 0
     if (this.length === 1 && this.words[0] === 0) {
-      this.negative = 0
+      this.negative = 0;
     }
-    return this
+    return this;
   }
 
   /**
@@ -666,8 +667,8 @@ export default class BigNumber {
    * const bn = new BigNumber('123456', 10, 'be');
    * bn.inspect();
    */
-  inspect (): string {
-    return (this.red !== null ? '<BN-R: ' : '<BN: ') + this.toString(16) + '>'
+  inspect(): string {
+    return (this.red !== null ? "<BN-R: " : "<BN: ") + this.toString(16) + ">";
   }
 
   /**
@@ -683,78 +684,78 @@ export default class BigNumber {
    * const bn = new BigNumber('123456', 10, 'be');
    * bn.toString(16); // Converts the BigNumber to a hexadecimal string.
    */
-  toString (base: number | 'hex' = 10, padding: number = 1): string {
-    if (base === 16 || base === 'hex') {
-      return this.toHexString(padding)
+  toString(base: number | "hex" = 10, padding: number = 1): string {
+    if (base === 16 || base === "hex") {
+      return this.toHexString(padding);
     }
 
     if (base === (base | 0) && base >= 2 && base <= 36) {
-      return this.toBaseString(base, padding)
+      return this.toBaseString(base, padding);
     }
 
-    throw new Error('Base should be between 2 and 36')
+    throw new Error("Base should be between 2 and 36");
   }
 
-  private toHexString (padding: number): string {
-    let out = ''
-    let off = 0
-    let carry = 0
+  private toHexString(padding: number): string {
+    let out = "";
+    let off = 0;
+    let carry = 0;
     for (let i = 0; i < this.length; i++) {
-      const w = this.words[i]
-      const word = (((w << off) | carry) & 0xffffff).toString(16)
-      carry = (w >>> (24 - off)) & 0xffffff
-      off += 2
+      const w = this.words[i];
+      const word = (((w << off) | carry) & 0xffffff).toString(16);
+      carry = (w >>> (24 - off)) & 0xffffff;
+      off += 2;
       if (off >= 26) {
-        off -= 26
-        i--
+        off -= 26;
+        i--;
       }
       if (carry !== 0 || i !== this.length - 1) {
-        out = BigNumber.zeros[6 - word.length] + word + out
+        out = BigNumber.zeros[6 - word.length] + word + out;
       } else {
-        out = word + out
+        out = word + out;
       }
     }
     if (carry !== 0) {
-      out = carry.toString(16) + out
+      out = carry.toString(16) + out;
     }
-    if (padding === 0 && out === '0') {
-      return ''
+    if (padding === 0 && out === "0") {
+      return "";
     }
     while (out.length % padding !== 0 && padding !== 0) {
-      out = '0' + out
+      out = "0" + out;
     }
     if (this.negative !== 0) {
-      out = '-' + out
+      out = "-" + out;
     }
-    return out
+    return out;
   }
 
-  private toBaseString (base: number, padding: number): string {
-    const groupSize = BigNumber.groupSizes[base]
-    const groupBase = BigNumber.groupBases[base]
-    let out = ''
-    let c = this.clone()
-    c.negative = 0
+  private toBaseString(base: number, padding: number): string {
+    const groupSize = BigNumber.groupSizes[base];
+    const groupBase = BigNumber.groupBases[base];
+    let out = "";
+    let c = this.clone();
+    c.negative = 0;
     while (!c.isZero()) {
-      const r = c.modrn(groupBase).toString(base)
-      c = c.idivn(groupBase)
+      const r = c.modrn(groupBase).toString(base);
+      c = c.idivn(groupBase);
 
       if (!c.isZero()) {
-        out = BigNumber.zeros[groupSize - r.length] + r + out
+        out = BigNumber.zeros[groupSize - r.length] + r + out;
       } else {
-        out = r + out
+        out = r + out;
       }
     }
     if (this.isZero()) {
-      out = '0' + out
+      out = "0" + out;
     }
     while (out.length % padding !== 0) {
-      out = '0' + out
+      out = "0" + out;
     }
     if (this.negative !== 0) {
-      out = '-' + out
+      out = "-" + out;
     }
-    return out
+    return out;
   }
 
   /**
@@ -769,17 +770,17 @@ export default class BigNumber {
    * const bn = new BigNumber('123456', 10, 'be');
    * bn.toNumber();
    */
-  toNumber (): number {
-    let ret = this.words[0]
+  toNumber(): number {
+    let ret = this.words[0];
     if (this.length === 2) {
-      ret += this.words[1] * 0x4000000
+      ret += this.words[1] * 0x4000000;
     } else if (this.length === 3 && this.words[2] === 0x01) {
       // NOTE: at this stage it is known that the top bit is set
-      ret += 0x10000000000000 + (this.words[1] * 0x4000000)
+      ret += 0x10000000000000 + this.words[1] * 0x4000000;
     } else if (this.length > 2) {
-      throw new Error('Number can only safely store up to 53 bits')
+      throw new Error("Number can only safely store up to 53 bits");
     }
-    return (this.negative !== 0) ? -ret : ret
+    return this.negative !== 0 ? -ret : ret;
   }
 
   /**
@@ -792,8 +793,8 @@ export default class BigNumber {
    * const bn = new BigNumber('123456', 10, 'be');
    * bn.toJSON();
    */
-  toJSON (): string {
-    return this.toString(16)
+  toJSON(): string {
+    return this.toString(16);
   }
 
   /**
@@ -805,38 +806,38 @@ export default class BigNumber {
    * @param res - The resultant ArrayType instance
    * @param byteLength - The byte length to define the size of ArrayType
    */
-  private toArrayLikeLE (res, byteLength): void {
-    let position = 0
-    let carry = 0
+  private toArrayLikeLE(res, byteLength): void {
+    let position = 0;
+    let carry = 0;
 
     for (let i = 0, shift = 0; i < this.length; i++) {
-      const word = (this.words[i] << shift) | carry
+      const word = (this.words[i] << shift) | carry;
 
-      res[position++] = word & 0xff
+      res[position++] = word & 0xff;
       if (position < res.length) {
-        res[position++] = (word >> 8) & 0xff
+        res[position++] = (word >> 8) & 0xff;
       }
       if (position < res.length) {
-        res[position++] = (word >> 16) & 0xff
+        res[position++] = (word >> 16) & 0xff;
       }
 
       if (shift === 6) {
         if (position < res.length) {
-          res[position++] = (word >> 24) & 0xff
+          res[position++] = (word >> 24) & 0xff;
         }
-        carry = 0
-        shift = 0
+        carry = 0;
+        shift = 0;
       } else {
-        carry = word >>> 24
-        shift += 2
+        carry = word >>> 24;
+        shift += 2;
       }
     }
 
     if (position < res.length) {
-      res[position++] = carry
+      res[position++] = carry;
 
       while (position < res.length) {
-        res[position++] = 0
+        res[position++] = 0;
       }
     }
   }
@@ -850,38 +851,38 @@ export default class BigNumber {
    * @param res - The resultant ArrayType instance
    * @param byteLength - The byte length to define the size of ArrayType
    */
-  private toArrayLikeBE (res, byteLength): void {
-    let position = res.length - 1
-    let carry = 0
+  private toArrayLikeBE(res, byteLength): void {
+    let position = res.length - 1;
+    let carry = 0;
 
     for (let i = 0, shift = 0; i < this.length; i++) {
-      const word = (this.words[i] << shift) | carry
+      const word = (this.words[i] << shift) | carry;
 
-      res[position--] = word & 0xff
+      res[position--] = word & 0xff;
       if (position >= 0) {
-        res[position--] = (word >> 8) & 0xff
+        res[position--] = (word >> 8) & 0xff;
       }
       if (position >= 0) {
-        res[position--] = (word >> 16) & 0xff
+        res[position--] = (word >> 16) & 0xff;
       }
 
       if (shift === 6) {
         if (position >= 0) {
-          res[position--] = (word >> 24) & 0xff
+          res[position--] = (word >> 24) & 0xff;
         }
-        carry = 0
-        shift = 0
+        carry = 0;
+        shift = 0;
       } else {
-        carry = word >>> 24
-        shift += 2
+        carry = word >>> 24;
+        shift += 2;
       }
     }
 
     if (position >= 0) {
-      res[position--] = carry
+      res[position--] = carry;
 
       while (position >= 0) {
-        res[position--] = 0
+        res[position--] = 0;
       }
     }
   }
@@ -898,21 +899,24 @@ export default class BigNumber {
    * const bn = new BigNumber('123456', 10, 'be');
    * bn.toArray('be', 8);
    */
-  toArray (endian: 'le' | 'be' = 'be', length?: number): number[] {
-    this.strip()
+  toArray(endian: "le" | "be" = "be", length?: number): number[] {
+    this.strip();
 
-    const byteLength = this.byteLength()
-    const reqLength = length ?? Math.max(1, byteLength)
-    this.assert(byteLength <= reqLength, 'byte array longer than desired length')
-    this.assert(reqLength > 0, 'Requested array length <= 0')
+    const byteLength = this.byteLength();
+    const reqLength = length ?? Math.max(1, byteLength);
+    this.assert(
+      byteLength <= reqLength,
+      "byte array longer than desired length"
+    );
+    this.assert(reqLength > 0, "Requested array length <= 0");
 
-    const res = new Array(reqLength)
-    if (endian === 'le') {
-      this.toArrayLikeLE(res, byteLength)
+    const res = new Array(reqLength);
+    if (endian === "le") {
+      this.toArrayLikeLE(res, byteLength);
     } else {
-      this.toArrayLikeBE(res, byteLength)
+      this.toArrayLikeBE(res, byteLength);
     }
-    return res
+    return res;
   }
 
   /**
@@ -924,29 +928,29 @@ export default class BigNumber {
    * @param w - The input number to count the word bits.
    * @returns The number of word bits
    */
-  private countWordBits (w: number): number {
-    if (typeof Math.clz32 === 'function') {
-      return 32 - Math.clz32(w)
+  private countWordBits(w: number): number {
+    if (typeof Math.clz32 === "function") {
+      return 32 - Math.clz32(w);
     }
-    let t = w
-    let r = 0
+    let t = w;
+    let r = 0;
     if (t >= 0x1000) {
-      r += 13
-      t >>>= 13
+      r += 13;
+      t >>>= 13;
     }
     if (t >= 0x40) {
-      r += 7
-      t >>>= 7
+      r += 7;
+      t >>>= 7;
     }
     if (t >= 0x8) {
-      r += 4
-      t >>>= 4
+      r += 4;
+      t >>>= 4;
     }
     if (t >= 0x02) {
-      r += 2
-      t >>>= 2
+      r += 2;
+      t >>>= 2;
     }
-    return r + t
+    return r + t;
   }
 
   /**
@@ -958,32 +962,32 @@ export default class BigNumber {
    * @param w - The input number to count the zero bits.
    * @returns The number of zero bits
    */
-  private zeroWordBits (w: number): number {
+  private zeroWordBits(w: number): number {
     // Short-cut
-    if (w === 0) return 26
+    if (w === 0) return 26;
 
-    let t = w
-    let r = 0
+    let t = w;
+    let r = 0;
     if ((t & 0x1fff) === 0) {
-      r += 13
-      t >>>= 13
+      r += 13;
+      t >>>= 13;
     }
     if ((t & 0x7f) === 0) {
-      r += 7
-      t >>>= 7
+      r += 7;
+      t >>>= 7;
     }
     if ((t & 0xf) === 0) {
-      r += 4
-      t >>>= 4
+      r += 4;
+      t >>>= 4;
     }
     if ((t & 0x3) === 0) {
-      r += 2
-      t >>>= 2
+      r += 2;
+      t >>>= 2;
     }
     if ((t & 0x1) === 0) {
-      r++
+      r++;
     }
-    return r
+    return r;
   }
 
   /**
@@ -992,10 +996,10 @@ export default class BigNumber {
    * @method bitLength
    * @returns The number of used bits
    */
-  bitLength (): number {
-    const w = this.words[this.length - 1]
-    const hi = this.countWordBits(w)
-    return (this.length - 1) * 26 + hi
+  bitLength(): number {
+    const w = this.words[this.length - 1];
+    const hi = this.countWordBits(w);
+    return (this.length - 1) * 26 + hi;
   }
 
   /**
@@ -1011,17 +1015,17 @@ export default class BigNumber {
    * const bn = new BigNumber('6'); // binary: 110
    * const bits = BigNumber.toBitArray(bn); // [1,1,0]
    */
-  static toBitArray (num: BigNumber): Array<0 | 1> {
-    const w = new Array(num.bitLength())
+  static toBitArray(num: BigNumber): Array<0 | 1> {
+    const w = new Array(num.bitLength());
 
     for (let bit = 0; bit < w.length; bit++) {
-      const off = (bit / 26) | 0
-      const wbit = bit % 26
+      const off = (bit / 26) | 0;
+      const wbit = bit % 26;
 
-      w[bit] = (num.words[off] >>> wbit) & 0x01
+      w[bit] = (num.words[off] >>> wbit) & 0x01;
     }
 
-    return w
+    return w;
   }
 
   /**
@@ -1035,8 +1039,8 @@ export default class BigNumber {
    * const bn = new BigNumber('6'); // binary: 110
    * const bits = bn.toBitArray(); // [ 1, 1, 0 ]
    */
-  toBitArray (): Array<0 | 1> {
-    return BigNumber.toBitArray(this)
+  toBitArray(): Array<0 | 1> {
+    return BigNumber.toBitArray(this);
   }
 
   /**
@@ -1049,16 +1053,16 @@ export default class BigNumber {
    * const bn = new BigNumber('8'); // binary: 1000
    * const zeroBits = bn.zeroBits(); // 3
    */
-  zeroBits (): number {
-    if (this.isZero()) return 0
+  zeroBits(): number {
+    if (this.isZero()) return 0;
 
-    let r = 0
+    let r = 0;
     for (let i = 0; i < this.length; i++) {
-      const b = this.zeroWordBits(this.words[i])
-      r += b
-      if (b !== 26) break
+      const b = this.zeroWordBits(this.words[i]);
+      r += b;
+      if (b !== 26) break;
     }
-    return r
+    return r;
   }
 
   /**
@@ -1071,8 +1075,8 @@ export default class BigNumber {
    * const bn = new BigNumber('1234');
    * const byteLen = bn.byteLength();
    */
-  byteLength (): number {
-    return Math.ceil(this.bitLength() / 8)
+  byteLength(): number {
+    return Math.ceil(this.bitLength() / 8);
   }
 
   /**
@@ -1086,11 +1090,11 @@ export default class BigNumber {
    * const bn = new BigNumber('-1234');
    * const twosComp = bn.toTwos(16);
    */
-  toTwos (width: number): BigNumber {
+  toTwos(width: number): BigNumber {
     if (this.negative !== 0) {
-      return this.abs().inotn(width).iaddn(1)
+      return this.abs().inotn(width).iaddn(1);
     }
-    return this.clone()
+    return this.clone();
   }
 
   /**
@@ -1104,11 +1108,11 @@ export default class BigNumber {
    * const bn = new BigNumber('-1234');
    * const fromTwos = bn.fromTwos(16);
    */
-  fromTwos (width: number): BigNumber {
+  fromTwos(width: number): BigNumber {
     if (this.testn(width - 1)) {
-      return this.notn(width).iaddn(1).ineg()
+      return this.notn(width).iaddn(1).ineg();
     }
-    return this.clone()
+    return this.clone();
   }
 
   /**
@@ -1121,8 +1125,8 @@ export default class BigNumber {
    * const bn = new BigNumber('-1234');
    * const isNegative = bn.isNeg(); // true
    */
-  isNeg (): boolean {
-    return this.negative !== 0
+  isNeg(): boolean {
+    return this.negative !== 0;
   }
 
   /**
@@ -1135,8 +1139,8 @@ export default class BigNumber {
    * const bn = new BigNumber('1234');
    * const neg = bn.neg(); // -1234
    */
-  neg (): BigNumber {
-    return this.clone().ineg()
+  neg(): BigNumber {
+    return this.clone().ineg();
   }
 
   /**
@@ -1149,12 +1153,12 @@ export default class BigNumber {
    * const bn = new BigNumber('1234');
    * bn.ineg(); // bn is now -1234
    */
-  ineg (): BigNumber {
+  ineg(): BigNumber {
     if (!this.isZero()) {
-      this.negative ^= 1
+      this.negative ^= 1;
     }
 
-    return this
+    return this;
   }
 
   /**
@@ -1170,16 +1174,16 @@ export default class BigNumber {
    * const bn2 = new(num: BigNumber): BigNumber BigNumber('6'); // binary: 0110
    * bn1.iuor(bn2); // now, bn1 binary: 1110
    */
-  iuor (num: BigNumber): BigNumber {
+  iuor(num: BigNumber): BigNumber {
     while (this.length < num.length) {
-      this.words[this.length++] = 0
+      this.words[this.length++] = 0;
     }
 
     for (let i = 0; i < num.length; i++) {
-      this.words[i] = this.words[i] | num.words[i]
+      this.words[i] = this.words[i] | num.words[i];
     }
 
-    return this.strip()
+    return this.strip();
   }
 
   /**
@@ -1195,9 +1199,9 @@ export default class BigNumber {
    * const bn2 = new BigNumber('6'); // binary: 0110
    * bn1.ior(bn2); // now, bn1 binary: 1110
    */
-  ior (num: BigNumber): BigNumber {
-    this.assert((this.negative | num.negative) === 0)
-    return this.iuor(num)
+  ior(num: BigNumber): BigNumber {
+    this.assert((this.negative | num.negative) === 0);
+    return this.iuor(num);
   }
 
   /**
@@ -1215,9 +1219,9 @@ export default class BigNumber {
    * const num2 = new BigNumber('20');
    * console.log(num1.or(num2).toString());
    */
-  or (num: BigNumber): BigNumber {
-    if (this.length > num.length) return this.clone().ior(num)
-    return num.clone().ior(this)
+  or(num: BigNumber): BigNumber {
+    if (this.length > num.length) return this.clone().ior(num);
+    return num.clone().ior(this);
   }
 
   /**
@@ -1234,9 +1238,9 @@ export default class BigNumber {
    * const num2 = new BigNumber('20');
    * console.log(num1.uor(num2).toString());
    */
-  uor (num: BigNumber): BigNumber {
-    if (this.length > num.length) return this.clone().iuor(num)
-    return num.clone().iuor(this)
+  uor(num: BigNumber): BigNumber {
+    if (this.length > num.length) return this.clone().iuor(num);
+    return num.clone().iuor(this);
   }
 
   /**
@@ -1254,16 +1258,16 @@ export default class BigNumber {
    * const num2 = new BigNumber('20');
    * console.log(num1.iuand(num2).toString());
    */
-  iuand (num: BigNumber): BigNumber {
-    const minLength = Math.min(this.length, num.length)
+  iuand(num: BigNumber): BigNumber {
+    const minLength = Math.min(this.length, num.length);
 
     for (let i = 0; i < minLength; i++) {
-      this.words[i] = this.words[i] & num.words[i]
+      this.words[i] = this.words[i] & num.words[i];
     }
 
-    this.length = minLength
+    this.length = minLength;
 
-    return this.strip()
+    return this.strip();
   }
 
   /**
@@ -1281,9 +1285,9 @@ export default class BigNumber {
    * const num2 = new BigNumber('20');
    * console.log(num1.iand(num2).toString());
    */
-  iand (num: BigNumber): BigNumber {
-    this.assert((this.negative | num.negative) === 0)
-    return this.iuand(num)
+  iand(num: BigNumber): BigNumber {
+    this.assert((this.negative | num.negative) === 0);
+    return this.iuand(num);
   }
 
   /**
@@ -1299,9 +1303,9 @@ export default class BigNumber {
    * const num2 = new BigNumber('20');
    * console.log(num1.and(num2).toString());
    */
-  and (num: BigNumber): BigNumber {
-    if (this.length > num.length) return this.clone().iand(num)
-    return num.clone().iand(this)
+  and(num: BigNumber): BigNumber {
+    if (this.length > num.length) return this.clone().iand(num);
+    return num.clone().iand(this);
   }
 
   /**
@@ -1317,9 +1321,9 @@ export default class BigNumber {
    * const num2 = new BigNumber('20');
    * console.log(num1.uand(num2).toString());
    */
-  uand (num: BigNumber): BigNumber {
-    if (this.length > num.length) return this.clone().iuand(num)
-    return num.clone().iuand(this)
+  uand(num: BigNumber): BigNumber {
+    if (this.length > num.length) return this.clone().iuand(num);
+    return num.clone().iuand(this);
   }
 
   /**
@@ -1336,21 +1340,21 @@ export default class BigNumber {
    * const num2 = new BigNumber('20');
    * console.log(num1.iuxor(num2).toString());
    */
-  iuxor (num: BigNumber): this {
+  iuxor(num: BigNumber): this {
     if (this.length > num.length) {
       for (let i = 0; i < num.length; i++) {
-        this.words[i] = this.words[i] ^ num.words[i]
+        this.words[i] = this.words[i] ^ num.words[i];
       }
     } else {
       for (let i = 0; i < this.length; i++) {
-        this.words[i] = this.words[i] ^ num.words[i]
+        this.words[i] = this.words[i] ^ num.words[i];
       }
       for (let i = this.length; i < num.length; i++) {
-        this.words[i] = num.words[i]
+        this.words[i] = num.words[i];
       }
-      this.length = num.length
+      this.length = num.length;
     }
-    return this.strip()
+    return this.strip();
   }
 
   /**
@@ -1368,12 +1372,12 @@ export default class BigNumber {
    * const num2 = new BigNumber('20');
    * console.log(num1.ixor(num2).toString());
    */
-  ixor (num: BigNumber): this {
+  ixor(num: BigNumber): this {
     this.assert(
       (this.negative | num.negative) === 0,
-      'Neither number can be negative'
-    )
-    return this.iuxor(num)
+      "Neither number can be negative"
+    );
+    return this.iuxor(num);
   }
 
   /**
@@ -1389,9 +1393,9 @@ export default class BigNumber {
    * const num2 = new BigNumber('20');
    * console.log(num1.xor(num2).toString());
    */
-  xor (num: BigNumber): BigNumber {
-    if (this.length > num.length) return this.clone().ixor(num)
-    return num.clone().ixor(this)
+  xor(num: BigNumber): BigNumber {
+    if (this.length > num.length) return this.clone().ixor(num);
+    return num.clone().ixor(this);
   }
 
   /**
@@ -1406,9 +1410,9 @@ export default class BigNumber {
    * const num2 = new BigNumber('40');
    * console.log(num1.uxor(num2).toString()); // Output will be the result of unsigned XOR operation
    */
-  uxor (num: BigNumber): BigNumber {
-    if (this.length > num.length) return this.clone().iuxor(num)
-    return num.clone().iuxor(this)
+  uxor(num: BigNumber): BigNumber {
+    if (this.length > num.length) return this.clone().iuxor(num);
+    return num.clone().iuxor(this);
   }
 
   /**
@@ -1423,35 +1427,35 @@ export default class BigNumber {
    * num.inotn(10);
    * console.log(num.toString());
    */
-  inotn (width: number): BigNumber {
+  inotn(width: number): BigNumber {
     this.assert(
-      typeof width === 'number' && width >= 0,
-      'The width needs to be a number greater than zero'
-    )
+      typeof width === "number" && width >= 0,
+      "The width needs to be a number greater than zero"
+    );
 
-    let bytesNeeded = Math.ceil(width / 26) | 0
-    const bitsLeft = width % 26
+    let bytesNeeded = Math.ceil(width / 26) | 0;
+    const bitsLeft = width % 26;
 
     // Extend the number with leading zeroes
-    this.expand(bytesNeeded)
+    this.expand(bytesNeeded);
 
     if (bitsLeft > 0) {
-      bytesNeeded--
+      bytesNeeded--;
     }
 
     // Handle complete words
-    let i = 0
+    let i = 0;
     for (; i < bytesNeeded; i++) {
-      this.words[i] = ~this.words[i] & 0x3ffffff
+      this.words[i] = ~this.words[i] & 0x3ffffff;
     }
 
     // Handle the residue
     if (bitsLeft > 0) {
-      this.words[i] = ~this.words[i] & (0x3ffffff >> (26 - bitsLeft))
+      this.words[i] = ~this.words[i] & (0x3ffffff >> (26 - bitsLeft));
     }
 
     // And remove leading zeroes
-    return this.strip()
+    return this.strip();
   }
 
   /**
@@ -1466,8 +1470,8 @@ export default class BigNumber {
    * const notnResult = num.notn(10);
    * console.log(notnResult.toString());
    */
-  notn (width: number): BigNumber {
-    return this.clone().inotn(width)
+  notn(width: number): BigNumber {
+    return this.clone().inotn(width);
   }
 
   /**
@@ -1484,21 +1488,21 @@ export default class BigNumber {
    * num.setn(2, 1);
    * console.log(num.toString());
    */
-  setn (bit: number, val: 0 | 1 | true | false): this {
-    this.assert(typeof bit === 'number' && bit >= 0)
+  setn(bit: number, val: 0 | 1 | true | false): this {
+    this.assert(typeof bit === "number" && bit >= 0);
 
-    const off = (bit / 26) | 0
-    const wbit = bit % 26
+    const off = (bit / 26) | 0;
+    const wbit = bit % 26;
 
-    this.expand(off + 1)
+    this.expand(off + 1);
 
     if (val === 1 || val === true) {
-      this.words[off] = this.words[off] | (1 << wbit)
+      this.words[off] = this.words[off] | (1 << wbit);
     } else {
-      this.words[off] = this.words[off] & ~(1 << wbit)
+      this.words[off] = this.words[off] & ~(1 << wbit);
     }
 
-    return this.strip()
+    return this.strip();
   }
 
   /**
@@ -1513,61 +1517,61 @@ export default class BigNumber {
    * num1.iadd(new BigNumber('20'));
    * console.log(num1.toString());
    */
-  iadd (num: BigNumber): this {
-    let r
+  iadd(num: BigNumber): this {
+    let r;
 
     // negative + positive
     if (this.negative !== 0 && num.negative === 0) {
-      this.negative = 0
-      r = this.isub(num)
-      this.negative ^= 1
-      return this.normSign()
+      this.negative = 0;
+      r = this.isub(num);
+      this.negative ^= 1;
+      return this.normSign();
 
-    // positive + negative
+      // positive + negative
     } else if (this.negative === 0 && num.negative !== 0) {
-      num.negative = 0
-      r = this.isub(num)
-      num.negative = 1
-      return r.normSign()
+      num.negative = 0;
+      r = this.isub(num);
+      num.negative = 1;
+      return r.normSign();
     }
 
     // a.length > b.length
-    let a, b
+    let a, b;
     if (this.length > num.length) {
       /* eslint-disable @typescript-eslint/no-this-alias */
-      a = this
-      b = num
+      a = this;
+      b = num;
     } else {
-      a = num
+      a = num;
       /* eslint-disable @typescript-eslint/no-this-alias */
-      b = this
+      b = this;
     }
 
-    let carry = 0
-    let i = 0
+    let carry = 0;
+    let i = 0;
     for (; i < b.length; i++) {
-      r = (a.words[i] | 0) + (b.words[i] | 0) + carry
-      this.words[i] = r & 0x3ffffff
-      carry = r >>> 26
+      r = (a.words[i] | 0) + (b.words[i] | 0) + carry;
+      this.words[i] = r & 0x3ffffff;
+      carry = r >>> 26;
     }
     for (; carry !== 0 && i < a.length; i++) {
-      r = (a.words[i] | 0) + carry
-      this.words[i] = r & 0x3ffffff
-      carry = r >>> 26
+      r = (a.words[i] | 0) + carry;
+      this.words[i] = r & 0x3ffffff;
+      carry = r >>> 26;
     }
 
-    this.length = a.length
+    this.length = a.length;
     if (carry !== 0) {
-      this.words[this.length] = carry
-      this.length++
-    // Copy the rest of the words
+      this.words[this.length] = carry;
+      this.length++;
+      // Copy the rest of the words
     } else if (a !== this) {
       for (; i < a.length; i++) {
-        this.words[i] = a.words[i]
+        this.words[i] = a.words[i];
       }
     }
 
-    return this
+    return this;
   }
 
   /**
@@ -1582,23 +1586,23 @@ export default class BigNumber {
    * const addResult = num1.add(new BigNumber('20'));
    * console.log(addResult.toString());
    */
-  add (num: BigNumber): BigNumber {
-    let res
+  add(num: BigNumber): BigNumber {
+    let res;
     if (num.negative !== 0 && this.negative === 0) {
-      num.negative = 0
-      res = this.sub(num)
-      num.negative ^= 1
-      return res
+      num.negative = 0;
+      res = this.sub(num);
+      num.negative ^= 1;
+      return res;
     } else if (num.negative === 0 && this.negative !== 0) {
-      this.negative = 0
-      res = num.sub(this)
-      this.negative = 1
-      return res
+      this.negative = 0;
+      res = num.sub(this);
+      this.negative = 1;
+      return res;
     }
 
-    if (this.length > num.length) return this.clone().iadd(num)
+    if (this.length > num.length) return this.clone().iadd(num);
 
-    return num.clone().iadd(this)
+    return num.clone().iadd(this);
   }
 
   /**
@@ -1613,73 +1617,73 @@ export default class BigNumber {
    * num1.isub(new BigNumber('10'));
    * console.log(num1.toString());
    */
-  isub (num: BigNumber): BigNumber {
-    let r: BigNumber | number
+  isub(num: BigNumber): BigNumber {
+    let r: BigNumber | number;
     // this - (-num) = this + num
     if (num.negative !== 0) {
-      num.negative = 0
-      r = this.iadd(num)
-      num.negative = 1
-      return r.normSign()
+      num.negative = 0;
+      r = this.iadd(num);
+      num.negative = 1;
+      return r.normSign();
 
-    // -this - num = -(this + num)
+      // -this - num = -(this + num)
     } else if (this.negative !== 0) {
-      this.negative = 0
-      this.iadd(num)
-      this.negative = 1
-      return this.normSign()
+      this.negative = 0;
+      this.iadd(num);
+      this.negative = 1;
+      return this.normSign();
     }
 
     // At this point both numbers are positive
-    const cmp = this.cmp(num)
+    const cmp = this.cmp(num);
 
     // Optimization - zeroify
     if (cmp === 0) {
-      this.negative = 0
-      this.length = 1
-      this.words[0] = 0
-      return this
+      this.negative = 0;
+      this.length = 1;
+      this.words[0] = 0;
+      return this;
     }
 
     // a > b
-    let a, b
+    let a, b;
     if (cmp > 0) {
       /* eslint-disable @typescript-eslint/no-this-alias */
-      a = this
-      b = num
+      a = this;
+      b = num;
     } else {
-      a = num
+      a = num;
       /* eslint-disable @typescript-eslint/no-this-alias */
-      b = this
+      b = this;
     }
 
-    let carry = 0
-    let i = 0
+    let carry = 0;
+    let i = 0;
     for (; i < b.length; i++) {
-      r = (a.words[i] | 0) - (b.words[i] | 0) + carry
-      carry = r >> 26
-      this.words[i] = r & 0x3ffffff
+      r = (a.words[i] | 0) - (b.words[i] | 0) + carry;
+      carry = r >> 26;
+      this.words[i] = r & 0x3ffffff;
     }
     for (; carry !== 0 && i < a.length; i++) {
-      r = (a.words[i] | 0) + carry
-      carry = r >> 26
-      this.words[i] = r & 0x3ffffff
+      r = (a.words[i] | 0) + carry;
+      carry = r >> 26;
+      this.words[i] = r & 0x3ffffff;
     }
 
     // Copy rest of the words
     if (carry === 0 && i < a.length && a !== this) {
       for (; i < a.length; i++) {
-        this.words[i] = a.words[i]
+        this.words[i] = a.words[i];
       }
     }
 
-    this.length = Math.max(this.length, i)
+    this.length = Math.max(this.length, i);
 
     if (a !== this) {
-      this.negative = 1
+      this.negative = 1;
     }
 
-    return this.strip()
+    return this.strip();
   }
 
   /**
@@ -1694,667 +1698,669 @@ export default class BigNumber {
    * const subResult = num1.sub(new BigNumber('10'));
    * console.log(subResult.toString());
    */
-  sub (num: BigNumber): BigNumber {
-    return this.clone().isub(num)
+  sub(num: BigNumber): BigNumber {
+    return this.clone().isub(num);
   }
 
-  private smallMulTo (
-    self: BigNumber, num: BigNumber, out: BigNumber
+  private smallMulTo(
+    self: BigNumber,
+    num: BigNumber,
+    out: BigNumber
   ): BigNumber {
-    out.negative = num.negative ^ self.negative
-    let len = (self.length + num.length) | 0
-    out.length = len
-    len = (len - 1) | 0
+    out.negative = num.negative ^ self.negative;
+    let len = (self.length + num.length) | 0;
+    out.length = len;
+    len = (len - 1) | 0;
 
     // Peel one iteration (compiler can't do it, because of code complexity)
-    let a = self.words[0] | 0
-    let b = num.words[0] | 0
-    let r = a * b
+    let a = self.words[0] | 0;
+    let b = num.words[0] | 0;
+    let r = a * b;
 
-    const lo = r & 0x3ffffff
-    let carry = (r / 0x4000000) | 0
-    out.words[0] = lo
+    const lo = r & 0x3ffffff;
+    let carry = (r / 0x4000000) | 0;
+    out.words[0] = lo;
 
-    let k = 1
+    let k = 1;
     for (; k < len; k++) {
       // Sum all words with the same `i + j = k` and accumulate `ncarry`,
       // note that ncarry could be >= 0x3ffffff
-      let ncarry = carry >>> 26
-      let rword = carry & 0x3ffffff
-      const maxJ = Math.min(k, num.length - 1)
+      let ncarry = carry >>> 26;
+      let rword = carry & 0x3ffffff;
+      const maxJ = Math.min(k, num.length - 1);
       for (let j = Math.max(0, k - self.length + 1); j <= maxJ; j++) {
-        const i = (k - j) | 0
-        a = self.words[i] | 0
-        b = num.words[j] | 0
-        r = a * b + rword
-        ncarry += (r / 0x4000000) | 0
-        rword = r & 0x3ffffff
+        const i = (k - j) | 0;
+        a = self.words[i] | 0;
+        b = num.words[j] | 0;
+        r = a * b + rword;
+        ncarry += (r / 0x4000000) | 0;
+        rword = r & 0x3ffffff;
       }
-      out.words[k] = rword | 0
-      carry = ncarry | 0
+      out.words[k] = rword | 0;
+      carry = ncarry | 0;
     }
     if (carry !== 0) {
-      out.words[k] = carry | 0
+      out.words[k] = carry | 0;
     } else {
-      out.length--
+      out.length--;
     }
 
-    return out.strip()
+    return out.strip();
   }
 
-  comb10MulTo (self: BigNumber, num: BigNumber, out: BigNumber): BigNumber {
-    const a = self.words
-    const b = num.words
-    const o = out.words
-    let c: number = 0
-    let lo: number
-    let mid: number
-    let hi: number
-    const a0 = a[0] | 0
-    const al0 = a0 & 0x1fff
-    const ah0 = a0 >>> 13
-    const a1 = a[1] | 0
-    const al1 = a1 & 0x1fff
-    const ah1 = a1 >>> 13
-    const a2 = a[2] | 0
-    const al2 = a2 & 0x1fff
-    const ah2 = a2 >>> 13
-    const a3 = a[3] | 0
-    const al3 = a3 & 0x1fff
-    const ah3 = a3 >>> 13
-    const a4 = a[4] | 0
-    const al4 = a4 & 0x1fff
-    const ah4 = a4 >>> 13
-    const a5 = a[5] | 0
-    const al5 = a5 & 0x1fff
-    const ah5 = a5 >>> 13
-    const a6 = a[6] | 0
-    const al6 = a6 & 0x1fff
-    const ah6 = a6 >>> 13
-    const a7 = a[7] | 0
-    const al7 = a7 & 0x1fff
-    const ah7 = a7 >>> 13
-    const a8 = a[8] | 0
-    const al8 = a8 & 0x1fff
-    const ah8 = a8 >>> 13
-    const a9 = a[9] | 0
-    const al9 = a9 & 0x1fff
-    const ah9 = a9 >>> 13
-    const b0 = b[0] | 0
-    const bl0 = b0 & 0x1fff
-    const bh0 = b0 >>> 13
-    const b1 = b[1] | 0
-    const bl1 = b1 & 0x1fff
-    const bh1 = b1 >>> 13
-    const b2 = b[2] | 0
-    const bl2 = b2 & 0x1fff
-    const bh2 = b2 >>> 13
-    const b3 = b[3] | 0
-    const bl3 = b3 & 0x1fff
-    const bh3 = b3 >>> 13
-    const b4 = b[4] | 0
-    const bl4 = b4 & 0x1fff
-    const bh4 = b4 >>> 13
-    const b5 = b[5] | 0
-    const bl5 = b5 & 0x1fff
-    const bh5 = b5 >>> 13
-    const b6 = b[6] | 0
-    const bl6 = b6 & 0x1fff
-    const bh6 = b6 >>> 13
-    const b7 = b[7] | 0
-    const bl7 = b7 & 0x1fff
-    const bh7 = b7 >>> 13
-    const b8 = b[8] | 0
-    const bl8 = b8 & 0x1fff
-    const bh8 = b8 >>> 13
-    const b9 = b[9] | 0
-    const bl9 = b9 & 0x1fff
-    const bh9 = b9 >>> 13
+  comb10MulTo(self: BigNumber, num: BigNumber, out: BigNumber): BigNumber {
+    const a = self.words;
+    const b = num.words;
+    const o = out.words;
+    let c: number = 0;
+    let lo: number;
+    let mid: number;
+    let hi: number;
+    const a0 = a[0] | 0;
+    const al0 = a0 & 0x1fff;
+    const ah0 = a0 >>> 13;
+    const a1 = a[1] | 0;
+    const al1 = a1 & 0x1fff;
+    const ah1 = a1 >>> 13;
+    const a2 = a[2] | 0;
+    const al2 = a2 & 0x1fff;
+    const ah2 = a2 >>> 13;
+    const a3 = a[3] | 0;
+    const al3 = a3 & 0x1fff;
+    const ah3 = a3 >>> 13;
+    const a4 = a[4] | 0;
+    const al4 = a4 & 0x1fff;
+    const ah4 = a4 >>> 13;
+    const a5 = a[5] | 0;
+    const al5 = a5 & 0x1fff;
+    const ah5 = a5 >>> 13;
+    const a6 = a[6] | 0;
+    const al6 = a6 & 0x1fff;
+    const ah6 = a6 >>> 13;
+    const a7 = a[7] | 0;
+    const al7 = a7 & 0x1fff;
+    const ah7 = a7 >>> 13;
+    const a8 = a[8] | 0;
+    const al8 = a8 & 0x1fff;
+    const ah8 = a8 >>> 13;
+    const a9 = a[9] | 0;
+    const al9 = a9 & 0x1fff;
+    const ah9 = a9 >>> 13;
+    const b0 = b[0] | 0;
+    const bl0 = b0 & 0x1fff;
+    const bh0 = b0 >>> 13;
+    const b1 = b[1] | 0;
+    const bl1 = b1 & 0x1fff;
+    const bh1 = b1 >>> 13;
+    const b2 = b[2] | 0;
+    const bl2 = b2 & 0x1fff;
+    const bh2 = b2 >>> 13;
+    const b3 = b[3] | 0;
+    const bl3 = b3 & 0x1fff;
+    const bh3 = b3 >>> 13;
+    const b4 = b[4] | 0;
+    const bl4 = b4 & 0x1fff;
+    const bh4 = b4 >>> 13;
+    const b5 = b[5] | 0;
+    const bl5 = b5 & 0x1fff;
+    const bh5 = b5 >>> 13;
+    const b6 = b[6] | 0;
+    const bl6 = b6 & 0x1fff;
+    const bh6 = b6 >>> 13;
+    const b7 = b[7] | 0;
+    const bl7 = b7 & 0x1fff;
+    const bh7 = b7 >>> 13;
+    const b8 = b[8] | 0;
+    const bl8 = b8 & 0x1fff;
+    const bh8 = b8 >>> 13;
+    const b9 = b[9] | 0;
+    const bl9 = b9 & 0x1fff;
+    const bh9 = b9 >>> 13;
 
-    out.negative = self.negative ^ num.negative
-    out.length = 19
+    out.negative = self.negative ^ num.negative;
+    out.length = 19;
     /* k = 0 */
-    lo = Math.imul(al0, bl0)
-    mid = Math.imul(al0, bh0)
-    mid = (mid + Math.imul(ah0, bl0)) | 0
-    hi = Math.imul(ah0, bh0)
-    let w0 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w0 >>> 26)) | 0
-    w0 &= 0x3ffffff
+    lo = Math.imul(al0, bl0);
+    mid = Math.imul(al0, bh0);
+    mid = (mid + Math.imul(ah0, bl0)) | 0;
+    hi = Math.imul(ah0, bh0);
+    let w0 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w0 >>> 26)) | 0;
+    w0 &= 0x3ffffff;
     /* k = 1 */
-    lo = Math.imul(al1, bl0)
-    mid = Math.imul(al1, bh0)
-    mid = (mid + Math.imul(ah1, bl0)) | 0
-    hi = Math.imul(ah1, bh0)
-    lo = (lo + Math.imul(al0, bl1)) | 0
-    mid = (mid + Math.imul(al0, bh1)) | 0
-    mid = (mid + Math.imul(ah0, bl1)) | 0
-    hi = (hi + Math.imul(ah0, bh1)) | 0
-    let w1 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w1 >>> 26)) | 0
-    w1 &= 0x3ffffff
+    lo = Math.imul(al1, bl0);
+    mid = Math.imul(al1, bh0);
+    mid = (mid + Math.imul(ah1, bl0)) | 0;
+    hi = Math.imul(ah1, bh0);
+    lo = (lo + Math.imul(al0, bl1)) | 0;
+    mid = (mid + Math.imul(al0, bh1)) | 0;
+    mid = (mid + Math.imul(ah0, bl1)) | 0;
+    hi = (hi + Math.imul(ah0, bh1)) | 0;
+    let w1 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w1 >>> 26)) | 0;
+    w1 &= 0x3ffffff;
     /* k = 2 */
-    lo = Math.imul(al2, bl0)
-    mid = Math.imul(al2, bh0)
-    mid = (mid + Math.imul(ah2, bl0)) | 0
-    hi = Math.imul(ah2, bh0)
-    lo = (lo + Math.imul(al1, bl1)) | 0
-    mid = (mid + Math.imul(al1, bh1)) | 0
-    mid = (mid + Math.imul(ah1, bl1)) | 0
-    hi = (hi + Math.imul(ah1, bh1)) | 0
-    lo = (lo + Math.imul(al0, bl2)) | 0
-    mid = (mid + Math.imul(al0, bh2)) | 0
-    mid = (mid + Math.imul(ah0, bl2)) | 0
-    hi = (hi + Math.imul(ah0, bh2)) | 0
-    let w2 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w2 >>> 26)) | 0
-    w2 &= 0x3ffffff
+    lo = Math.imul(al2, bl0);
+    mid = Math.imul(al2, bh0);
+    mid = (mid + Math.imul(ah2, bl0)) | 0;
+    hi = Math.imul(ah2, bh0);
+    lo = (lo + Math.imul(al1, bl1)) | 0;
+    mid = (mid + Math.imul(al1, bh1)) | 0;
+    mid = (mid + Math.imul(ah1, bl1)) | 0;
+    hi = (hi + Math.imul(ah1, bh1)) | 0;
+    lo = (lo + Math.imul(al0, bl2)) | 0;
+    mid = (mid + Math.imul(al0, bh2)) | 0;
+    mid = (mid + Math.imul(ah0, bl2)) | 0;
+    hi = (hi + Math.imul(ah0, bh2)) | 0;
+    let w2 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w2 >>> 26)) | 0;
+    w2 &= 0x3ffffff;
     /* k = 3 */
-    lo = Math.imul(al3, bl0)
-    mid = Math.imul(al3, bh0)
-    mid = (mid + Math.imul(ah3, bl0)) | 0
-    hi = Math.imul(ah3, bh0)
-    lo = (lo + Math.imul(al2, bl1)) | 0
-    mid = (mid + Math.imul(al2, bh1)) | 0
-    mid = (mid + Math.imul(ah2, bl1)) | 0
-    hi = (hi + Math.imul(ah2, bh1)) | 0
-    lo = (lo + Math.imul(al1, bl2)) | 0
-    mid = (mid + Math.imul(al1, bh2)) | 0
-    mid = (mid + Math.imul(ah1, bl2)) | 0
-    hi = (hi + Math.imul(ah1, bh2)) | 0
-    lo = (lo + Math.imul(al0, bl3)) | 0
-    mid = (mid + Math.imul(al0, bh3)) | 0
-    mid = (mid + Math.imul(ah0, bl3)) | 0
-    hi = (hi + Math.imul(ah0, bh3)) | 0
-    let w3 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w3 >>> 26)) | 0
-    w3 &= 0x3ffffff
+    lo = Math.imul(al3, bl0);
+    mid = Math.imul(al3, bh0);
+    mid = (mid + Math.imul(ah3, bl0)) | 0;
+    hi = Math.imul(ah3, bh0);
+    lo = (lo + Math.imul(al2, bl1)) | 0;
+    mid = (mid + Math.imul(al2, bh1)) | 0;
+    mid = (mid + Math.imul(ah2, bl1)) | 0;
+    hi = (hi + Math.imul(ah2, bh1)) | 0;
+    lo = (lo + Math.imul(al1, bl2)) | 0;
+    mid = (mid + Math.imul(al1, bh2)) | 0;
+    mid = (mid + Math.imul(ah1, bl2)) | 0;
+    hi = (hi + Math.imul(ah1, bh2)) | 0;
+    lo = (lo + Math.imul(al0, bl3)) | 0;
+    mid = (mid + Math.imul(al0, bh3)) | 0;
+    mid = (mid + Math.imul(ah0, bl3)) | 0;
+    hi = (hi + Math.imul(ah0, bh3)) | 0;
+    let w3 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w3 >>> 26)) | 0;
+    w3 &= 0x3ffffff;
     /* k = 4 */
-    lo = Math.imul(al4, bl0)
-    mid = Math.imul(al4, bh0)
-    mid = (mid + Math.imul(ah4, bl0)) | 0
-    hi = Math.imul(ah4, bh0)
-    lo = (lo + Math.imul(al3, bl1)) | 0
-    mid = (mid + Math.imul(al3, bh1)) | 0
-    mid = (mid + Math.imul(ah3, bl1)) | 0
-    hi = (hi + Math.imul(ah3, bh1)) | 0
-    lo = (lo + Math.imul(al2, bl2)) | 0
-    mid = (mid + Math.imul(al2, bh2)) | 0
-    mid = (mid + Math.imul(ah2, bl2)) | 0
-    hi = (hi + Math.imul(ah2, bh2)) | 0
-    lo = (lo + Math.imul(al1, bl3)) | 0
-    mid = (mid + Math.imul(al1, bh3)) | 0
-    mid = (mid + Math.imul(ah1, bl3)) | 0
-    hi = (hi + Math.imul(ah1, bh3)) | 0
-    lo = (lo + Math.imul(al0, bl4)) | 0
-    mid = (mid + Math.imul(al0, bh4)) | 0
-    mid = (mid + Math.imul(ah0, bl4)) | 0
-    hi = (hi + Math.imul(ah0, bh4)) | 0
-    let w4 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w4 >>> 26)) | 0
-    w4 &= 0x3ffffff
+    lo = Math.imul(al4, bl0);
+    mid = Math.imul(al4, bh0);
+    mid = (mid + Math.imul(ah4, bl0)) | 0;
+    hi = Math.imul(ah4, bh0);
+    lo = (lo + Math.imul(al3, bl1)) | 0;
+    mid = (mid + Math.imul(al3, bh1)) | 0;
+    mid = (mid + Math.imul(ah3, bl1)) | 0;
+    hi = (hi + Math.imul(ah3, bh1)) | 0;
+    lo = (lo + Math.imul(al2, bl2)) | 0;
+    mid = (mid + Math.imul(al2, bh2)) | 0;
+    mid = (mid + Math.imul(ah2, bl2)) | 0;
+    hi = (hi + Math.imul(ah2, bh2)) | 0;
+    lo = (lo + Math.imul(al1, bl3)) | 0;
+    mid = (mid + Math.imul(al1, bh3)) | 0;
+    mid = (mid + Math.imul(ah1, bl3)) | 0;
+    hi = (hi + Math.imul(ah1, bh3)) | 0;
+    lo = (lo + Math.imul(al0, bl4)) | 0;
+    mid = (mid + Math.imul(al0, bh4)) | 0;
+    mid = (mid + Math.imul(ah0, bl4)) | 0;
+    hi = (hi + Math.imul(ah0, bh4)) | 0;
+    let w4 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w4 >>> 26)) | 0;
+    w4 &= 0x3ffffff;
     /* k = 5 */
-    lo = Math.imul(al5, bl0)
-    mid = Math.imul(al5, bh0)
-    mid = (mid + Math.imul(ah5, bl0)) | 0
-    hi = Math.imul(ah5, bh0)
-    lo = (lo + Math.imul(al4, bl1)) | 0
-    mid = (mid + Math.imul(al4, bh1)) | 0
-    mid = (mid + Math.imul(ah4, bl1)) | 0
-    hi = (hi + Math.imul(ah4, bh1)) | 0
-    lo = (lo + Math.imul(al3, bl2)) | 0
-    mid = (mid + Math.imul(al3, bh2)) | 0
-    mid = (mid + Math.imul(ah3, bl2)) | 0
-    hi = (hi + Math.imul(ah3, bh2)) | 0
-    lo = (lo + Math.imul(al2, bl3)) | 0
-    mid = (mid + Math.imul(al2, bh3)) | 0
-    mid = (mid + Math.imul(ah2, bl3)) | 0
-    hi = (hi + Math.imul(ah2, bh3)) | 0
-    lo = (lo + Math.imul(al1, bl4)) | 0
-    mid = (mid + Math.imul(al1, bh4)) | 0
-    mid = (mid + Math.imul(ah1, bl4)) | 0
-    hi = (hi + Math.imul(ah1, bh4)) | 0
-    lo = (lo + Math.imul(al0, bl5)) | 0
-    mid = (mid + Math.imul(al0, bh5)) | 0
-    mid = (mid + Math.imul(ah0, bl5)) | 0
-    hi = (hi + Math.imul(ah0, bh5)) | 0
-    let w5 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w5 >>> 26)) | 0
-    w5 &= 0x3ffffff
+    lo = Math.imul(al5, bl0);
+    mid = Math.imul(al5, bh0);
+    mid = (mid + Math.imul(ah5, bl0)) | 0;
+    hi = Math.imul(ah5, bh0);
+    lo = (lo + Math.imul(al4, bl1)) | 0;
+    mid = (mid + Math.imul(al4, bh1)) | 0;
+    mid = (mid + Math.imul(ah4, bl1)) | 0;
+    hi = (hi + Math.imul(ah4, bh1)) | 0;
+    lo = (lo + Math.imul(al3, bl2)) | 0;
+    mid = (mid + Math.imul(al3, bh2)) | 0;
+    mid = (mid + Math.imul(ah3, bl2)) | 0;
+    hi = (hi + Math.imul(ah3, bh2)) | 0;
+    lo = (lo + Math.imul(al2, bl3)) | 0;
+    mid = (mid + Math.imul(al2, bh3)) | 0;
+    mid = (mid + Math.imul(ah2, bl3)) | 0;
+    hi = (hi + Math.imul(ah2, bh3)) | 0;
+    lo = (lo + Math.imul(al1, bl4)) | 0;
+    mid = (mid + Math.imul(al1, bh4)) | 0;
+    mid = (mid + Math.imul(ah1, bl4)) | 0;
+    hi = (hi + Math.imul(ah1, bh4)) | 0;
+    lo = (lo + Math.imul(al0, bl5)) | 0;
+    mid = (mid + Math.imul(al0, bh5)) | 0;
+    mid = (mid + Math.imul(ah0, bl5)) | 0;
+    hi = (hi + Math.imul(ah0, bh5)) | 0;
+    let w5 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w5 >>> 26)) | 0;
+    w5 &= 0x3ffffff;
     /* k = 6 */
-    lo = Math.imul(al6, bl0)
-    mid = Math.imul(al6, bh0)
-    mid = (mid + Math.imul(ah6, bl0)) | 0
-    hi = Math.imul(ah6, bh0)
-    lo = (lo + Math.imul(al5, bl1)) | 0
-    mid = (mid + Math.imul(al5, bh1)) | 0
-    mid = (mid + Math.imul(ah5, bl1)) | 0
-    hi = (hi + Math.imul(ah5, bh1)) | 0
-    lo = (lo + Math.imul(al4, bl2)) | 0
-    mid = (mid + Math.imul(al4, bh2)) | 0
-    mid = (mid + Math.imul(ah4, bl2)) | 0
-    hi = (hi + Math.imul(ah4, bh2)) | 0
-    lo = (lo + Math.imul(al3, bl3)) | 0
-    mid = (mid + Math.imul(al3, bh3)) | 0
-    mid = (mid + Math.imul(ah3, bl3)) | 0
-    hi = (hi + Math.imul(ah3, bh3)) | 0
-    lo = (lo + Math.imul(al2, bl4)) | 0
-    mid = (mid + Math.imul(al2, bh4)) | 0
-    mid = (mid + Math.imul(ah2, bl4)) | 0
-    hi = (hi + Math.imul(ah2, bh4)) | 0
-    lo = (lo + Math.imul(al1, bl5)) | 0
-    mid = (mid + Math.imul(al1, bh5)) | 0
-    mid = (mid + Math.imul(ah1, bl5)) | 0
-    hi = (hi + Math.imul(ah1, bh5)) | 0
-    lo = (lo + Math.imul(al0, bl6)) | 0
-    mid = (mid + Math.imul(al0, bh6)) | 0
-    mid = (mid + Math.imul(ah0, bl6)) | 0
-    hi = (hi + Math.imul(ah0, bh6)) | 0
-    let w6 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w6 >>> 26)) | 0
-    w6 &= 0x3ffffff
+    lo = Math.imul(al6, bl0);
+    mid = Math.imul(al6, bh0);
+    mid = (mid + Math.imul(ah6, bl0)) | 0;
+    hi = Math.imul(ah6, bh0);
+    lo = (lo + Math.imul(al5, bl1)) | 0;
+    mid = (mid + Math.imul(al5, bh1)) | 0;
+    mid = (mid + Math.imul(ah5, bl1)) | 0;
+    hi = (hi + Math.imul(ah5, bh1)) | 0;
+    lo = (lo + Math.imul(al4, bl2)) | 0;
+    mid = (mid + Math.imul(al4, bh2)) | 0;
+    mid = (mid + Math.imul(ah4, bl2)) | 0;
+    hi = (hi + Math.imul(ah4, bh2)) | 0;
+    lo = (lo + Math.imul(al3, bl3)) | 0;
+    mid = (mid + Math.imul(al3, bh3)) | 0;
+    mid = (mid + Math.imul(ah3, bl3)) | 0;
+    hi = (hi + Math.imul(ah3, bh3)) | 0;
+    lo = (lo + Math.imul(al2, bl4)) | 0;
+    mid = (mid + Math.imul(al2, bh4)) | 0;
+    mid = (mid + Math.imul(ah2, bl4)) | 0;
+    hi = (hi + Math.imul(ah2, bh4)) | 0;
+    lo = (lo + Math.imul(al1, bl5)) | 0;
+    mid = (mid + Math.imul(al1, bh5)) | 0;
+    mid = (mid + Math.imul(ah1, bl5)) | 0;
+    hi = (hi + Math.imul(ah1, bh5)) | 0;
+    lo = (lo + Math.imul(al0, bl6)) | 0;
+    mid = (mid + Math.imul(al0, bh6)) | 0;
+    mid = (mid + Math.imul(ah0, bl6)) | 0;
+    hi = (hi + Math.imul(ah0, bh6)) | 0;
+    let w6 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w6 >>> 26)) | 0;
+    w6 &= 0x3ffffff;
     /* k = 7 */
-    lo = Math.imul(al7, bl0)
-    mid = Math.imul(al7, bh0)
-    mid = (mid + Math.imul(ah7, bl0)) | 0
-    hi = Math.imul(ah7, bh0)
-    lo = (lo + Math.imul(al6, bl1)) | 0
-    mid = (mid + Math.imul(al6, bh1)) | 0
-    mid = (mid + Math.imul(ah6, bl1)) | 0
-    hi = (hi + Math.imul(ah6, bh1)) | 0
-    lo = (lo + Math.imul(al5, bl2)) | 0
-    mid = (mid + Math.imul(al5, bh2)) | 0
-    mid = (mid + Math.imul(ah5, bl2)) | 0
-    hi = (hi + Math.imul(ah5, bh2)) | 0
-    lo = (lo + Math.imul(al4, bl3)) | 0
-    mid = (mid + Math.imul(al4, bh3)) | 0
-    mid = (mid + Math.imul(ah4, bl3)) | 0
-    hi = (hi + Math.imul(ah4, bh3)) | 0
-    lo = (lo + Math.imul(al3, bl4)) | 0
-    mid = (mid + Math.imul(al3, bh4)) | 0
-    mid = (mid + Math.imul(ah3, bl4)) | 0
-    hi = (hi + Math.imul(ah3, bh4)) | 0
-    lo = (lo + Math.imul(al2, bl5)) | 0
-    mid = (mid + Math.imul(al2, bh5)) | 0
-    mid = (mid + Math.imul(ah2, bl5)) | 0
-    hi = (hi + Math.imul(ah2, bh5)) | 0
-    lo = (lo + Math.imul(al1, bl6)) | 0
-    mid = (mid + Math.imul(al1, bh6)) | 0
-    mid = (mid + Math.imul(ah1, bl6)) | 0
-    hi = (hi + Math.imul(ah1, bh6)) | 0
-    lo = (lo + Math.imul(al0, bl7)) | 0
-    mid = (mid + Math.imul(al0, bh7)) | 0
-    mid = (mid + Math.imul(ah0, bl7)) | 0
-    hi = (hi + Math.imul(ah0, bh7)) | 0
-    let w7 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w7 >>> 26)) | 0
-    w7 &= 0x3ffffff
+    lo = Math.imul(al7, bl0);
+    mid = Math.imul(al7, bh0);
+    mid = (mid + Math.imul(ah7, bl0)) | 0;
+    hi = Math.imul(ah7, bh0);
+    lo = (lo + Math.imul(al6, bl1)) | 0;
+    mid = (mid + Math.imul(al6, bh1)) | 0;
+    mid = (mid + Math.imul(ah6, bl1)) | 0;
+    hi = (hi + Math.imul(ah6, bh1)) | 0;
+    lo = (lo + Math.imul(al5, bl2)) | 0;
+    mid = (mid + Math.imul(al5, bh2)) | 0;
+    mid = (mid + Math.imul(ah5, bl2)) | 0;
+    hi = (hi + Math.imul(ah5, bh2)) | 0;
+    lo = (lo + Math.imul(al4, bl3)) | 0;
+    mid = (mid + Math.imul(al4, bh3)) | 0;
+    mid = (mid + Math.imul(ah4, bl3)) | 0;
+    hi = (hi + Math.imul(ah4, bh3)) | 0;
+    lo = (lo + Math.imul(al3, bl4)) | 0;
+    mid = (mid + Math.imul(al3, bh4)) | 0;
+    mid = (mid + Math.imul(ah3, bl4)) | 0;
+    hi = (hi + Math.imul(ah3, bh4)) | 0;
+    lo = (lo + Math.imul(al2, bl5)) | 0;
+    mid = (mid + Math.imul(al2, bh5)) | 0;
+    mid = (mid + Math.imul(ah2, bl5)) | 0;
+    hi = (hi + Math.imul(ah2, bh5)) | 0;
+    lo = (lo + Math.imul(al1, bl6)) | 0;
+    mid = (mid + Math.imul(al1, bh6)) | 0;
+    mid = (mid + Math.imul(ah1, bl6)) | 0;
+    hi = (hi + Math.imul(ah1, bh6)) | 0;
+    lo = (lo + Math.imul(al0, bl7)) | 0;
+    mid = (mid + Math.imul(al0, bh7)) | 0;
+    mid = (mid + Math.imul(ah0, bl7)) | 0;
+    hi = (hi + Math.imul(ah0, bh7)) | 0;
+    let w7 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w7 >>> 26)) | 0;
+    w7 &= 0x3ffffff;
     /* k = 8 */
-    lo = Math.imul(al8, bl0)
-    mid = Math.imul(al8, bh0)
-    mid = (mid + Math.imul(ah8, bl0)) | 0
-    hi = Math.imul(ah8, bh0)
-    lo = (lo + Math.imul(al7, bl1)) | 0
-    mid = (mid + Math.imul(al7, bh1)) | 0
-    mid = (mid + Math.imul(ah7, bl1)) | 0
-    hi = (hi + Math.imul(ah7, bh1)) | 0
-    lo = (lo + Math.imul(al6, bl2)) | 0
-    mid = (mid + Math.imul(al6, bh2)) | 0
-    mid = (mid + Math.imul(ah6, bl2)) | 0
-    hi = (hi + Math.imul(ah6, bh2)) | 0
-    lo = (lo + Math.imul(al5, bl3)) | 0
-    mid = (mid + Math.imul(al5, bh3)) | 0
-    mid = (mid + Math.imul(ah5, bl3)) | 0
-    hi = (hi + Math.imul(ah5, bh3)) | 0
-    lo = (lo + Math.imul(al4, bl4)) | 0
-    mid = (mid + Math.imul(al4, bh4)) | 0
-    mid = (mid + Math.imul(ah4, bl4)) | 0
-    hi = (hi + Math.imul(ah4, bh4)) | 0
-    lo = (lo + Math.imul(al3, bl5)) | 0
-    mid = (mid + Math.imul(al3, bh5)) | 0
-    mid = (mid + Math.imul(ah3, bl5)) | 0
-    hi = (hi + Math.imul(ah3, bh5)) | 0
-    lo = (lo + Math.imul(al2, bl6)) | 0
-    mid = (mid + Math.imul(al2, bh6)) | 0
-    mid = (mid + Math.imul(ah2, bl6)) | 0
-    hi = (hi + Math.imul(ah2, bh6)) | 0
-    lo = (lo + Math.imul(al1, bl7)) | 0
-    mid = (mid + Math.imul(al1, bh7)) | 0
-    mid = (mid + Math.imul(ah1, bl7)) | 0
-    hi = (hi + Math.imul(ah1, bh7)) | 0
-    lo = (lo + Math.imul(al0, bl8)) | 0
-    mid = (mid + Math.imul(al0, bh8)) | 0
-    mid = (mid + Math.imul(ah0, bl8)) | 0
-    hi = (hi + Math.imul(ah0, bh8)) | 0
-    let w8 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w8 >>> 26)) | 0
-    w8 &= 0x3ffffff
+    lo = Math.imul(al8, bl0);
+    mid = Math.imul(al8, bh0);
+    mid = (mid + Math.imul(ah8, bl0)) | 0;
+    hi = Math.imul(ah8, bh0);
+    lo = (lo + Math.imul(al7, bl1)) | 0;
+    mid = (mid + Math.imul(al7, bh1)) | 0;
+    mid = (mid + Math.imul(ah7, bl1)) | 0;
+    hi = (hi + Math.imul(ah7, bh1)) | 0;
+    lo = (lo + Math.imul(al6, bl2)) | 0;
+    mid = (mid + Math.imul(al6, bh2)) | 0;
+    mid = (mid + Math.imul(ah6, bl2)) | 0;
+    hi = (hi + Math.imul(ah6, bh2)) | 0;
+    lo = (lo + Math.imul(al5, bl3)) | 0;
+    mid = (mid + Math.imul(al5, bh3)) | 0;
+    mid = (mid + Math.imul(ah5, bl3)) | 0;
+    hi = (hi + Math.imul(ah5, bh3)) | 0;
+    lo = (lo + Math.imul(al4, bl4)) | 0;
+    mid = (mid + Math.imul(al4, bh4)) | 0;
+    mid = (mid + Math.imul(ah4, bl4)) | 0;
+    hi = (hi + Math.imul(ah4, bh4)) | 0;
+    lo = (lo + Math.imul(al3, bl5)) | 0;
+    mid = (mid + Math.imul(al3, bh5)) | 0;
+    mid = (mid + Math.imul(ah3, bl5)) | 0;
+    hi = (hi + Math.imul(ah3, bh5)) | 0;
+    lo = (lo + Math.imul(al2, bl6)) | 0;
+    mid = (mid + Math.imul(al2, bh6)) | 0;
+    mid = (mid + Math.imul(ah2, bl6)) | 0;
+    hi = (hi + Math.imul(ah2, bh6)) | 0;
+    lo = (lo + Math.imul(al1, bl7)) | 0;
+    mid = (mid + Math.imul(al1, bh7)) | 0;
+    mid = (mid + Math.imul(ah1, bl7)) | 0;
+    hi = (hi + Math.imul(ah1, bh7)) | 0;
+    lo = (lo + Math.imul(al0, bl8)) | 0;
+    mid = (mid + Math.imul(al0, bh8)) | 0;
+    mid = (mid + Math.imul(ah0, bl8)) | 0;
+    hi = (hi + Math.imul(ah0, bh8)) | 0;
+    let w8 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w8 >>> 26)) | 0;
+    w8 &= 0x3ffffff;
     /* k = 9 */
-    lo = Math.imul(al9, bl0)
-    mid = Math.imul(al9, bh0)
-    mid = (mid + Math.imul(ah9, bl0)) | 0
-    hi = Math.imul(ah9, bh0)
-    lo = (lo + Math.imul(al8, bl1)) | 0
-    mid = (mid + Math.imul(al8, bh1)) | 0
-    mid = (mid + Math.imul(ah8, bl1)) | 0
-    hi = (hi + Math.imul(ah8, bh1)) | 0
-    lo = (lo + Math.imul(al7, bl2)) | 0
-    mid = (mid + Math.imul(al7, bh2)) | 0
-    mid = (mid + Math.imul(ah7, bl2)) | 0
-    hi = (hi + Math.imul(ah7, bh2)) | 0
-    lo = (lo + Math.imul(al6, bl3)) | 0
-    mid = (mid + Math.imul(al6, bh3)) | 0
-    mid = (mid + Math.imul(ah6, bl3)) | 0
-    hi = (hi + Math.imul(ah6, bh3)) | 0
-    lo = (lo + Math.imul(al5, bl4)) | 0
-    mid = (mid + Math.imul(al5, bh4)) | 0
-    mid = (mid + Math.imul(ah5, bl4)) | 0
-    hi = (hi + Math.imul(ah5, bh4)) | 0
-    lo = (lo + Math.imul(al4, bl5)) | 0
-    mid = (mid + Math.imul(al4, bh5)) | 0
-    mid = (mid + Math.imul(ah4, bl5)) | 0
-    hi = (hi + Math.imul(ah4, bh5)) | 0
-    lo = (lo + Math.imul(al3, bl6)) | 0
-    mid = (mid + Math.imul(al3, bh6)) | 0
-    mid = (mid + Math.imul(ah3, bl6)) | 0
-    hi = (hi + Math.imul(ah3, bh6)) | 0
-    lo = (lo + Math.imul(al2, bl7)) | 0
-    mid = (mid + Math.imul(al2, bh7)) | 0
-    mid = (mid + Math.imul(ah2, bl7)) | 0
-    hi = (hi + Math.imul(ah2, bh7)) | 0
-    lo = (lo + Math.imul(al1, bl8)) | 0
-    mid = (mid + Math.imul(al1, bh8)) | 0
-    mid = (mid + Math.imul(ah1, bl8)) | 0
-    hi = (hi + Math.imul(ah1, bh8)) | 0
-    lo = (lo + Math.imul(al0, bl9)) | 0
-    mid = (mid + Math.imul(al0, bh9)) | 0
-    mid = (mid + Math.imul(ah0, bl9)) | 0
-    hi = (hi + Math.imul(ah0, bh9)) | 0
-    let w9 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w9 >>> 26)) | 0
-    w9 &= 0x3ffffff
+    lo = Math.imul(al9, bl0);
+    mid = Math.imul(al9, bh0);
+    mid = (mid + Math.imul(ah9, bl0)) | 0;
+    hi = Math.imul(ah9, bh0);
+    lo = (lo + Math.imul(al8, bl1)) | 0;
+    mid = (mid + Math.imul(al8, bh1)) | 0;
+    mid = (mid + Math.imul(ah8, bl1)) | 0;
+    hi = (hi + Math.imul(ah8, bh1)) | 0;
+    lo = (lo + Math.imul(al7, bl2)) | 0;
+    mid = (mid + Math.imul(al7, bh2)) | 0;
+    mid = (mid + Math.imul(ah7, bl2)) | 0;
+    hi = (hi + Math.imul(ah7, bh2)) | 0;
+    lo = (lo + Math.imul(al6, bl3)) | 0;
+    mid = (mid + Math.imul(al6, bh3)) | 0;
+    mid = (mid + Math.imul(ah6, bl3)) | 0;
+    hi = (hi + Math.imul(ah6, bh3)) | 0;
+    lo = (lo + Math.imul(al5, bl4)) | 0;
+    mid = (mid + Math.imul(al5, bh4)) | 0;
+    mid = (mid + Math.imul(ah5, bl4)) | 0;
+    hi = (hi + Math.imul(ah5, bh4)) | 0;
+    lo = (lo + Math.imul(al4, bl5)) | 0;
+    mid = (mid + Math.imul(al4, bh5)) | 0;
+    mid = (mid + Math.imul(ah4, bl5)) | 0;
+    hi = (hi + Math.imul(ah4, bh5)) | 0;
+    lo = (lo + Math.imul(al3, bl6)) | 0;
+    mid = (mid + Math.imul(al3, bh6)) | 0;
+    mid = (mid + Math.imul(ah3, bl6)) | 0;
+    hi = (hi + Math.imul(ah3, bh6)) | 0;
+    lo = (lo + Math.imul(al2, bl7)) | 0;
+    mid = (mid + Math.imul(al2, bh7)) | 0;
+    mid = (mid + Math.imul(ah2, bl7)) | 0;
+    hi = (hi + Math.imul(ah2, bh7)) | 0;
+    lo = (lo + Math.imul(al1, bl8)) | 0;
+    mid = (mid + Math.imul(al1, bh8)) | 0;
+    mid = (mid + Math.imul(ah1, bl8)) | 0;
+    hi = (hi + Math.imul(ah1, bh8)) | 0;
+    lo = (lo + Math.imul(al0, bl9)) | 0;
+    mid = (mid + Math.imul(al0, bh9)) | 0;
+    mid = (mid + Math.imul(ah0, bl9)) | 0;
+    hi = (hi + Math.imul(ah0, bh9)) | 0;
+    let w9 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w9 >>> 26)) | 0;
+    w9 &= 0x3ffffff;
     /* k = 10 */
-    lo = Math.imul(al9, bl1)
-    mid = Math.imul(al9, bh1)
-    mid = (mid + Math.imul(ah9, bl1)) | 0
-    hi = Math.imul(ah9, bh1)
-    lo = (lo + Math.imul(al8, bl2)) | 0
-    mid = (mid + Math.imul(al8, bh2)) | 0
-    mid = (mid + Math.imul(ah8, bl2)) | 0
-    hi = (hi + Math.imul(ah8, bh2)) | 0
-    lo = (lo + Math.imul(al7, bl3)) | 0
-    mid = (mid + Math.imul(al7, bh3)) | 0
-    mid = (mid + Math.imul(ah7, bl3)) | 0
-    hi = (hi + Math.imul(ah7, bh3)) | 0
-    lo = (lo + Math.imul(al6, bl4)) | 0
-    mid = (mid + Math.imul(al6, bh4)) | 0
-    mid = (mid + Math.imul(ah6, bl4)) | 0
-    hi = (hi + Math.imul(ah6, bh4)) | 0
-    lo = (lo + Math.imul(al5, bl5)) | 0
-    mid = (mid + Math.imul(al5, bh5)) | 0
-    mid = (mid + Math.imul(ah5, bl5)) | 0
-    hi = (hi + Math.imul(ah5, bh5)) | 0
-    lo = (lo + Math.imul(al4, bl6)) | 0
-    mid = (mid + Math.imul(al4, bh6)) | 0
-    mid = (mid + Math.imul(ah4, bl6)) | 0
-    hi = (hi + Math.imul(ah4, bh6)) | 0
-    lo = (lo + Math.imul(al3, bl7)) | 0
-    mid = (mid + Math.imul(al3, bh7)) | 0
-    mid = (mid + Math.imul(ah3, bl7)) | 0
-    hi = (hi + Math.imul(ah3, bh7)) | 0
-    lo = (lo + Math.imul(al2, bl8)) | 0
-    mid = (mid + Math.imul(al2, bh8)) | 0
-    mid = (mid + Math.imul(ah2, bl8)) | 0
-    hi = (hi + Math.imul(ah2, bh8)) | 0
-    lo = (lo + Math.imul(al1, bl9)) | 0
-    mid = (mid + Math.imul(al1, bh9)) | 0
-    mid = (mid + Math.imul(ah1, bl9)) | 0
-    hi = (hi + Math.imul(ah1, bh9)) | 0
-    let w10 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w10 >>> 26)) | 0
-    w10 &= 0x3ffffff
+    lo = Math.imul(al9, bl1);
+    mid = Math.imul(al9, bh1);
+    mid = (mid + Math.imul(ah9, bl1)) | 0;
+    hi = Math.imul(ah9, bh1);
+    lo = (lo + Math.imul(al8, bl2)) | 0;
+    mid = (mid + Math.imul(al8, bh2)) | 0;
+    mid = (mid + Math.imul(ah8, bl2)) | 0;
+    hi = (hi + Math.imul(ah8, bh2)) | 0;
+    lo = (lo + Math.imul(al7, bl3)) | 0;
+    mid = (mid + Math.imul(al7, bh3)) | 0;
+    mid = (mid + Math.imul(ah7, bl3)) | 0;
+    hi = (hi + Math.imul(ah7, bh3)) | 0;
+    lo = (lo + Math.imul(al6, bl4)) | 0;
+    mid = (mid + Math.imul(al6, bh4)) | 0;
+    mid = (mid + Math.imul(ah6, bl4)) | 0;
+    hi = (hi + Math.imul(ah6, bh4)) | 0;
+    lo = (lo + Math.imul(al5, bl5)) | 0;
+    mid = (mid + Math.imul(al5, bh5)) | 0;
+    mid = (mid + Math.imul(ah5, bl5)) | 0;
+    hi = (hi + Math.imul(ah5, bh5)) | 0;
+    lo = (lo + Math.imul(al4, bl6)) | 0;
+    mid = (mid + Math.imul(al4, bh6)) | 0;
+    mid = (mid + Math.imul(ah4, bl6)) | 0;
+    hi = (hi + Math.imul(ah4, bh6)) | 0;
+    lo = (lo + Math.imul(al3, bl7)) | 0;
+    mid = (mid + Math.imul(al3, bh7)) | 0;
+    mid = (mid + Math.imul(ah3, bl7)) | 0;
+    hi = (hi + Math.imul(ah3, bh7)) | 0;
+    lo = (lo + Math.imul(al2, bl8)) | 0;
+    mid = (mid + Math.imul(al2, bh8)) | 0;
+    mid = (mid + Math.imul(ah2, bl8)) | 0;
+    hi = (hi + Math.imul(ah2, bh8)) | 0;
+    lo = (lo + Math.imul(al1, bl9)) | 0;
+    mid = (mid + Math.imul(al1, bh9)) | 0;
+    mid = (mid + Math.imul(ah1, bl9)) | 0;
+    hi = (hi + Math.imul(ah1, bh9)) | 0;
+    let w10 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w10 >>> 26)) | 0;
+    w10 &= 0x3ffffff;
     /* k = 11 */
-    lo = Math.imul(al9, bl2)
-    mid = Math.imul(al9, bh2)
-    mid = (mid + Math.imul(ah9, bl2)) | 0
-    hi = Math.imul(ah9, bh2)
-    lo = (lo + Math.imul(al8, bl3)) | 0
-    mid = (mid + Math.imul(al8, bh3)) | 0
-    mid = (mid + Math.imul(ah8, bl3)) | 0
-    hi = (hi + Math.imul(ah8, bh3)) | 0
-    lo = (lo + Math.imul(al7, bl4)) | 0
-    mid = (mid + Math.imul(al7, bh4)) | 0
-    mid = (mid + Math.imul(ah7, bl4)) | 0
-    hi = (hi + Math.imul(ah7, bh4)) | 0
-    lo = (lo + Math.imul(al6, bl5)) | 0
-    mid = (mid + Math.imul(al6, bh5)) | 0
-    mid = (mid + Math.imul(ah6, bl5)) | 0
-    hi = (hi + Math.imul(ah6, bh5)) | 0
-    lo = (lo + Math.imul(al5, bl6)) | 0
-    mid = (mid + Math.imul(al5, bh6)) | 0
-    mid = (mid + Math.imul(ah5, bl6)) | 0
-    hi = (hi + Math.imul(ah5, bh6)) | 0
-    lo = (lo + Math.imul(al4, bl7)) | 0
-    mid = (mid + Math.imul(al4, bh7)) | 0
-    mid = (mid + Math.imul(ah4, bl7)) | 0
-    hi = (hi + Math.imul(ah4, bh7)) | 0
-    lo = (lo + Math.imul(al3, bl8)) | 0
-    mid = (mid + Math.imul(al3, bh8)) | 0
-    mid = (mid + Math.imul(ah3, bl8)) | 0
-    hi = (hi + Math.imul(ah3, bh8)) | 0
-    lo = (lo + Math.imul(al2, bl9)) | 0
-    mid = (mid + Math.imul(al2, bh9)) | 0
-    mid = (mid + Math.imul(ah2, bl9)) | 0
-    hi = (hi + Math.imul(ah2, bh9)) | 0
-    let w11 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w11 >>> 26)) | 0
-    w11 &= 0x3ffffff
+    lo = Math.imul(al9, bl2);
+    mid = Math.imul(al9, bh2);
+    mid = (mid + Math.imul(ah9, bl2)) | 0;
+    hi = Math.imul(ah9, bh2);
+    lo = (lo + Math.imul(al8, bl3)) | 0;
+    mid = (mid + Math.imul(al8, bh3)) | 0;
+    mid = (mid + Math.imul(ah8, bl3)) | 0;
+    hi = (hi + Math.imul(ah8, bh3)) | 0;
+    lo = (lo + Math.imul(al7, bl4)) | 0;
+    mid = (mid + Math.imul(al7, bh4)) | 0;
+    mid = (mid + Math.imul(ah7, bl4)) | 0;
+    hi = (hi + Math.imul(ah7, bh4)) | 0;
+    lo = (lo + Math.imul(al6, bl5)) | 0;
+    mid = (mid + Math.imul(al6, bh5)) | 0;
+    mid = (mid + Math.imul(ah6, bl5)) | 0;
+    hi = (hi + Math.imul(ah6, bh5)) | 0;
+    lo = (lo + Math.imul(al5, bl6)) | 0;
+    mid = (mid + Math.imul(al5, bh6)) | 0;
+    mid = (mid + Math.imul(ah5, bl6)) | 0;
+    hi = (hi + Math.imul(ah5, bh6)) | 0;
+    lo = (lo + Math.imul(al4, bl7)) | 0;
+    mid = (mid + Math.imul(al4, bh7)) | 0;
+    mid = (mid + Math.imul(ah4, bl7)) | 0;
+    hi = (hi + Math.imul(ah4, bh7)) | 0;
+    lo = (lo + Math.imul(al3, bl8)) | 0;
+    mid = (mid + Math.imul(al3, bh8)) | 0;
+    mid = (mid + Math.imul(ah3, bl8)) | 0;
+    hi = (hi + Math.imul(ah3, bh8)) | 0;
+    lo = (lo + Math.imul(al2, bl9)) | 0;
+    mid = (mid + Math.imul(al2, bh9)) | 0;
+    mid = (mid + Math.imul(ah2, bl9)) | 0;
+    hi = (hi + Math.imul(ah2, bh9)) | 0;
+    let w11 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w11 >>> 26)) | 0;
+    w11 &= 0x3ffffff;
     /* k = 12 */
-    lo = Math.imul(al9, bl3)
-    mid = Math.imul(al9, bh3)
-    mid = (mid + Math.imul(ah9, bl3)) | 0
-    hi = Math.imul(ah9, bh3)
-    lo = (lo + Math.imul(al8, bl4)) | 0
-    mid = (mid + Math.imul(al8, bh4)) | 0
-    mid = (mid + Math.imul(ah8, bl4)) | 0
-    hi = (hi + Math.imul(ah8, bh4)) | 0
-    lo = (lo + Math.imul(al7, bl5)) | 0
-    mid = (mid + Math.imul(al7, bh5)) | 0
-    mid = (mid + Math.imul(ah7, bl5)) | 0
-    hi = (hi + Math.imul(ah7, bh5)) | 0
-    lo = (lo + Math.imul(al6, bl6)) | 0
-    mid = (mid + Math.imul(al6, bh6)) | 0
-    mid = (mid + Math.imul(ah6, bl6)) | 0
-    hi = (hi + Math.imul(ah6, bh6)) | 0
-    lo = (lo + Math.imul(al5, bl7)) | 0
-    mid = (mid + Math.imul(al5, bh7)) | 0
-    mid = (mid + Math.imul(ah5, bl7)) | 0
-    hi = (hi + Math.imul(ah5, bh7)) | 0
-    lo = (lo + Math.imul(al4, bl8)) | 0
-    mid = (mid + Math.imul(al4, bh8)) | 0
-    mid = (mid + Math.imul(ah4, bl8)) | 0
-    hi = (hi + Math.imul(ah4, bh8)) | 0
-    lo = (lo + Math.imul(al3, bl9)) | 0
-    mid = (mid + Math.imul(al3, bh9)) | 0
-    mid = (mid + Math.imul(ah3, bl9)) | 0
-    hi = (hi + Math.imul(ah3, bh9)) | 0
-    let w12 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w12 >>> 26)) | 0
-    w12 &= 0x3ffffff
+    lo = Math.imul(al9, bl3);
+    mid = Math.imul(al9, bh3);
+    mid = (mid + Math.imul(ah9, bl3)) | 0;
+    hi = Math.imul(ah9, bh3);
+    lo = (lo + Math.imul(al8, bl4)) | 0;
+    mid = (mid + Math.imul(al8, bh4)) | 0;
+    mid = (mid + Math.imul(ah8, bl4)) | 0;
+    hi = (hi + Math.imul(ah8, bh4)) | 0;
+    lo = (lo + Math.imul(al7, bl5)) | 0;
+    mid = (mid + Math.imul(al7, bh5)) | 0;
+    mid = (mid + Math.imul(ah7, bl5)) | 0;
+    hi = (hi + Math.imul(ah7, bh5)) | 0;
+    lo = (lo + Math.imul(al6, bl6)) | 0;
+    mid = (mid + Math.imul(al6, bh6)) | 0;
+    mid = (mid + Math.imul(ah6, bl6)) | 0;
+    hi = (hi + Math.imul(ah6, bh6)) | 0;
+    lo = (lo + Math.imul(al5, bl7)) | 0;
+    mid = (mid + Math.imul(al5, bh7)) | 0;
+    mid = (mid + Math.imul(ah5, bl7)) | 0;
+    hi = (hi + Math.imul(ah5, bh7)) | 0;
+    lo = (lo + Math.imul(al4, bl8)) | 0;
+    mid = (mid + Math.imul(al4, bh8)) | 0;
+    mid = (mid + Math.imul(ah4, bl8)) | 0;
+    hi = (hi + Math.imul(ah4, bh8)) | 0;
+    lo = (lo + Math.imul(al3, bl9)) | 0;
+    mid = (mid + Math.imul(al3, bh9)) | 0;
+    mid = (mid + Math.imul(ah3, bl9)) | 0;
+    hi = (hi + Math.imul(ah3, bh9)) | 0;
+    let w12 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w12 >>> 26)) | 0;
+    w12 &= 0x3ffffff;
     /* k = 13 */
-    lo = Math.imul(al9, bl4)
-    mid = Math.imul(al9, bh4)
-    mid = (mid + Math.imul(ah9, bl4)) | 0
-    hi = Math.imul(ah9, bh4)
-    lo = (lo + Math.imul(al8, bl5)) | 0
-    mid = (mid + Math.imul(al8, bh5)) | 0
-    mid = (mid + Math.imul(ah8, bl5)) | 0
-    hi = (hi + Math.imul(ah8, bh5)) | 0
-    lo = (lo + Math.imul(al7, bl6)) | 0
-    mid = (mid + Math.imul(al7, bh6)) | 0
-    mid = (mid + Math.imul(ah7, bl6)) | 0
-    hi = (hi + Math.imul(ah7, bh6)) | 0
-    lo = (lo + Math.imul(al6, bl7)) | 0
-    mid = (mid + Math.imul(al6, bh7)) | 0
-    mid = (mid + Math.imul(ah6, bl7)) | 0
-    hi = (hi + Math.imul(ah6, bh7)) | 0
-    lo = (lo + Math.imul(al5, bl8)) | 0
-    mid = (mid + Math.imul(al5, bh8)) | 0
-    mid = (mid + Math.imul(ah5, bl8)) | 0
-    hi = (hi + Math.imul(ah5, bh8)) | 0
-    lo = (lo + Math.imul(al4, bl9)) | 0
-    mid = (mid + Math.imul(al4, bh9)) | 0
-    mid = (mid + Math.imul(ah4, bl9)) | 0
-    hi = (hi + Math.imul(ah4, bh9)) | 0
-    let w13 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w13 >>> 26)) | 0
-    w13 &= 0x3ffffff
+    lo = Math.imul(al9, bl4);
+    mid = Math.imul(al9, bh4);
+    mid = (mid + Math.imul(ah9, bl4)) | 0;
+    hi = Math.imul(ah9, bh4);
+    lo = (lo + Math.imul(al8, bl5)) | 0;
+    mid = (mid + Math.imul(al8, bh5)) | 0;
+    mid = (mid + Math.imul(ah8, bl5)) | 0;
+    hi = (hi + Math.imul(ah8, bh5)) | 0;
+    lo = (lo + Math.imul(al7, bl6)) | 0;
+    mid = (mid + Math.imul(al7, bh6)) | 0;
+    mid = (mid + Math.imul(ah7, bl6)) | 0;
+    hi = (hi + Math.imul(ah7, bh6)) | 0;
+    lo = (lo + Math.imul(al6, bl7)) | 0;
+    mid = (mid + Math.imul(al6, bh7)) | 0;
+    mid = (mid + Math.imul(ah6, bl7)) | 0;
+    hi = (hi + Math.imul(ah6, bh7)) | 0;
+    lo = (lo + Math.imul(al5, bl8)) | 0;
+    mid = (mid + Math.imul(al5, bh8)) | 0;
+    mid = (mid + Math.imul(ah5, bl8)) | 0;
+    hi = (hi + Math.imul(ah5, bh8)) | 0;
+    lo = (lo + Math.imul(al4, bl9)) | 0;
+    mid = (mid + Math.imul(al4, bh9)) | 0;
+    mid = (mid + Math.imul(ah4, bl9)) | 0;
+    hi = (hi + Math.imul(ah4, bh9)) | 0;
+    let w13 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w13 >>> 26)) | 0;
+    w13 &= 0x3ffffff;
     /* k = 14 */
-    lo = Math.imul(al9, bl5)
-    mid = Math.imul(al9, bh5)
-    mid = (mid + Math.imul(ah9, bl5)) | 0
-    hi = Math.imul(ah9, bh5)
-    lo = (lo + Math.imul(al8, bl6)) | 0
-    mid = (mid + Math.imul(al8, bh6)) | 0
-    mid = (mid + Math.imul(ah8, bl6)) | 0
-    hi = (hi + Math.imul(ah8, bh6)) | 0
-    lo = (lo + Math.imul(al7, bl7)) | 0
-    mid = (mid + Math.imul(al7, bh7)) | 0
-    mid = (mid + Math.imul(ah7, bl7)) | 0
-    hi = (hi + Math.imul(ah7, bh7)) | 0
-    lo = (lo + Math.imul(al6, bl8)) | 0
-    mid = (mid + Math.imul(al6, bh8)) | 0
-    mid = (mid + Math.imul(ah6, bl8)) | 0
-    hi = (hi + Math.imul(ah6, bh8)) | 0
-    lo = (lo + Math.imul(al5, bl9)) | 0
-    mid = (mid + Math.imul(al5, bh9)) | 0
-    mid = (mid + Math.imul(ah5, bl9)) | 0
-    hi = (hi + Math.imul(ah5, bh9)) | 0
-    let w14 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w14 >>> 26)) | 0
-    w14 &= 0x3ffffff
+    lo = Math.imul(al9, bl5);
+    mid = Math.imul(al9, bh5);
+    mid = (mid + Math.imul(ah9, bl5)) | 0;
+    hi = Math.imul(ah9, bh5);
+    lo = (lo + Math.imul(al8, bl6)) | 0;
+    mid = (mid + Math.imul(al8, bh6)) | 0;
+    mid = (mid + Math.imul(ah8, bl6)) | 0;
+    hi = (hi + Math.imul(ah8, bh6)) | 0;
+    lo = (lo + Math.imul(al7, bl7)) | 0;
+    mid = (mid + Math.imul(al7, bh7)) | 0;
+    mid = (mid + Math.imul(ah7, bl7)) | 0;
+    hi = (hi + Math.imul(ah7, bh7)) | 0;
+    lo = (lo + Math.imul(al6, bl8)) | 0;
+    mid = (mid + Math.imul(al6, bh8)) | 0;
+    mid = (mid + Math.imul(ah6, bl8)) | 0;
+    hi = (hi + Math.imul(ah6, bh8)) | 0;
+    lo = (lo + Math.imul(al5, bl9)) | 0;
+    mid = (mid + Math.imul(al5, bh9)) | 0;
+    mid = (mid + Math.imul(ah5, bl9)) | 0;
+    hi = (hi + Math.imul(ah5, bh9)) | 0;
+    let w14 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w14 >>> 26)) | 0;
+    w14 &= 0x3ffffff;
     /* k = 15 */
-    lo = Math.imul(al9, bl6)
-    mid = Math.imul(al9, bh6)
-    mid = (mid + Math.imul(ah9, bl6)) | 0
-    hi = Math.imul(ah9, bh6)
-    lo = (lo + Math.imul(al8, bl7)) | 0
-    mid = (mid + Math.imul(al8, bh7)) | 0
-    mid = (mid + Math.imul(ah8, bl7)) | 0
-    hi = (hi + Math.imul(ah8, bh7)) | 0
-    lo = (lo + Math.imul(al7, bl8)) | 0
-    mid = (mid + Math.imul(al7, bh8)) | 0
-    mid = (mid + Math.imul(ah7, bl8)) | 0
-    hi = (hi + Math.imul(ah7, bh8)) | 0
-    lo = (lo + Math.imul(al6, bl9)) | 0
-    mid = (mid + Math.imul(al6, bh9)) | 0
-    mid = (mid + Math.imul(ah6, bl9)) | 0
-    hi = (hi + Math.imul(ah6, bh9)) | 0
-    let w15 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w15 >>> 26)) | 0
-    w15 &= 0x3ffffff
+    lo = Math.imul(al9, bl6);
+    mid = Math.imul(al9, bh6);
+    mid = (mid + Math.imul(ah9, bl6)) | 0;
+    hi = Math.imul(ah9, bh6);
+    lo = (lo + Math.imul(al8, bl7)) | 0;
+    mid = (mid + Math.imul(al8, bh7)) | 0;
+    mid = (mid + Math.imul(ah8, bl7)) | 0;
+    hi = (hi + Math.imul(ah8, bh7)) | 0;
+    lo = (lo + Math.imul(al7, bl8)) | 0;
+    mid = (mid + Math.imul(al7, bh8)) | 0;
+    mid = (mid + Math.imul(ah7, bl8)) | 0;
+    hi = (hi + Math.imul(ah7, bh8)) | 0;
+    lo = (lo + Math.imul(al6, bl9)) | 0;
+    mid = (mid + Math.imul(al6, bh9)) | 0;
+    mid = (mid + Math.imul(ah6, bl9)) | 0;
+    hi = (hi + Math.imul(ah6, bh9)) | 0;
+    let w15 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w15 >>> 26)) | 0;
+    w15 &= 0x3ffffff;
     /* k = 16 */
-    lo = Math.imul(al9, bl7)
-    mid = Math.imul(al9, bh7)
-    mid = (mid + Math.imul(ah9, bl7)) | 0
-    hi = Math.imul(ah9, bh7)
-    lo = (lo + Math.imul(al8, bl8)) | 0
-    mid = (mid + Math.imul(al8, bh8)) | 0
-    mid = (mid + Math.imul(ah8, bl8)) | 0
-    hi = (hi + Math.imul(ah8, bh8)) | 0
-    lo = (lo + Math.imul(al7, bl9)) | 0
-    mid = (mid + Math.imul(al7, bh9)) | 0
-    mid = (mid + Math.imul(ah7, bl9)) | 0
-    hi = (hi + Math.imul(ah7, bh9)) | 0
-    let w16 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w16 >>> 26)) | 0
-    w16 &= 0x3ffffff
+    lo = Math.imul(al9, bl7);
+    mid = Math.imul(al9, bh7);
+    mid = (mid + Math.imul(ah9, bl7)) | 0;
+    hi = Math.imul(ah9, bh7);
+    lo = (lo + Math.imul(al8, bl8)) | 0;
+    mid = (mid + Math.imul(al8, bh8)) | 0;
+    mid = (mid + Math.imul(ah8, bl8)) | 0;
+    hi = (hi + Math.imul(ah8, bh8)) | 0;
+    lo = (lo + Math.imul(al7, bl9)) | 0;
+    mid = (mid + Math.imul(al7, bh9)) | 0;
+    mid = (mid + Math.imul(ah7, bl9)) | 0;
+    hi = (hi + Math.imul(ah7, bh9)) | 0;
+    let w16 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w16 >>> 26)) | 0;
+    w16 &= 0x3ffffff;
     /* k = 17 */
-    lo = Math.imul(al9, bl8)
-    mid = Math.imul(al9, bh8)
-    mid = (mid + Math.imul(ah9, bl8)) | 0
-    hi = Math.imul(ah9, bh8)
-    lo = (lo + Math.imul(al8, bl9)) | 0
-    mid = (mid + Math.imul(al8, bh9)) | 0
-    mid = (mid + Math.imul(ah8, bl9)) | 0
-    hi = (hi + Math.imul(ah8, bh9)) | 0
-    let w17 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w17 >>> 26)) | 0
-    w17 &= 0x3ffffff
+    lo = Math.imul(al9, bl8);
+    mid = Math.imul(al9, bh8);
+    mid = (mid + Math.imul(ah9, bl8)) | 0;
+    hi = Math.imul(ah9, bh8);
+    lo = (lo + Math.imul(al8, bl9)) | 0;
+    mid = (mid + Math.imul(al8, bh9)) | 0;
+    mid = (mid + Math.imul(ah8, bl9)) | 0;
+    hi = (hi + Math.imul(ah8, bh9)) | 0;
+    let w17 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w17 >>> 26)) | 0;
+    w17 &= 0x3ffffff;
     /* k = 18 */
-    lo = Math.imul(al9, bl9)
-    mid = Math.imul(al9, bh9)
-    mid = (mid + Math.imul(ah9, bl9)) | 0
-    hi = Math.imul(ah9, bh9)
-    let w18 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0
-    c = (((hi + (mid >>> 13)) | 0) + (w18 >>> 26)) | 0
-    w18 &= 0x3ffffff
-    o[0] = w0
-    o[1] = w1
-    o[2] = w2
-    o[3] = w3
-    o[4] = w4
-    o[5] = w5
-    o[6] = w6
-    o[7] = w7
-    o[8] = w8
-    o[9] = w9
-    o[10] = w10
-    o[11] = w11
-    o[12] = w12
-    o[13] = w13
-    o[14] = w14
-    o[15] = w15
-    o[16] = w16
-    o[17] = w17
-    o[18] = w18
+    lo = Math.imul(al9, bl9);
+    mid = Math.imul(al9, bh9);
+    mid = (mid + Math.imul(ah9, bl9)) | 0;
+    hi = Math.imul(ah9, bh9);
+    let w18 = (((c + lo) | 0) + ((mid & 0x1fff) << 13)) | 0;
+    c = (((hi + (mid >>> 13)) | 0) + (w18 >>> 26)) | 0;
+    w18 &= 0x3ffffff;
+    o[0] = w0;
+    o[1] = w1;
+    o[2] = w2;
+    o[3] = w3;
+    o[4] = w4;
+    o[5] = w5;
+    o[6] = w6;
+    o[7] = w7;
+    o[8] = w8;
+    o[9] = w9;
+    o[10] = w10;
+    o[11] = w11;
+    o[12] = w12;
+    o[13] = w13;
+    o[14] = w14;
+    o[15] = w15;
+    o[16] = w16;
+    o[17] = w17;
+    o[18] = w18;
     if (c !== 0) {
-      o[19] = c
-      out.length++
+      o[19] = c;
+      out.length++;
     }
-    return out
+    return out;
   }
 
-  private bigMulTo (self: BigNumber, num: BigNumber, out: BigNumber): BigNumber {
-    out.negative = num.negative ^ self.negative
-    out.length = self.length + num.length
+  private bigMulTo(self: BigNumber, num: BigNumber, out: BigNumber): BigNumber {
+    out.negative = num.negative ^ self.negative;
+    out.length = self.length + num.length;
 
-    let carry = 0
-    let hncarry = 0
-    let k = 0
+    let carry = 0;
+    let hncarry = 0;
+    let k = 0;
     for (; k < out.length - 1; k++) {
       // Sum all words with the same `i + j = k` and accumulate `ncarry`,
       // note that ncarry could be >= 0x3ffffff
-      let ncarry = hncarry
-      hncarry = 0
-      let rword = carry & 0x3ffffff
-      const maxJ = Math.min(k, num.length - 1)
+      let ncarry = hncarry;
+      hncarry = 0;
+      let rword = carry & 0x3ffffff;
+      const maxJ = Math.min(k, num.length - 1);
       for (let j = Math.max(0, k - self.length + 1); j <= maxJ; j++) {
-        const i = k - j
-        const a = self.words[i] | 0
-        const b = num.words[j] | 0
-        const r = a * b
+        const i = k - j;
+        const a = self.words[i] | 0;
+        const b = num.words[j] | 0;
+        const r = a * b;
 
-        let lo = r & 0x3ffffff
-        ncarry = (ncarry + ((r / 0x4000000) | 0)) | 0
-        lo = (lo + rword) | 0
-        rword = lo & 0x3ffffff
-        ncarry = (ncarry + (lo >>> 26)) | 0
+        let lo = r & 0x3ffffff;
+        ncarry = (ncarry + ((r / 0x4000000) | 0)) | 0;
+        lo = (lo + rword) | 0;
+        rword = lo & 0x3ffffff;
+        ncarry = (ncarry + (lo >>> 26)) | 0;
 
-        hncarry += ncarry >>> 26
-        ncarry &= 0x3ffffff
+        hncarry += ncarry >>> 26;
+        ncarry &= 0x3ffffff;
       }
-      out.words[k] = rword
-      carry = ncarry
-      ncarry = hncarry
+      out.words[k] = rword;
+      carry = ncarry;
+      ncarry = hncarry;
     }
     if (carry !== 0) {
-      out.words[k] = carry
+      out.words[k] = carry;
     } else {
-      out.length--
+      out.length--;
     }
 
-    return out.strip()
+    return out.strip();
   }
 
   /**
@@ -2372,18 +2378,18 @@ export default class BigNumber {
    * const output = new BigNumber();
    * bn1.mulTo(bn2, output);
    */
-  mulTo (num: BigNumber, out: BigNumber): BigNumber {
-    let res
-    const len = this.length + num.length
+  mulTo(num: BigNumber, out: BigNumber): BigNumber {
+    let res;
+    const len = this.length + num.length;
     if (this.length === 10 && num.length === 10) {
-      res = this.comb10MulTo(this, num, out)
+      res = this.comb10MulTo(this, num, out);
     } else if (len < 63) {
-      res = this.smallMulTo(this, num, out)
+      res = this.smallMulTo(this, num, out);
     } else {
-      res = this.bigMulTo(this, num, out)
+      res = this.bigMulTo(this, num, out);
     }
 
-    return res
+    return res;
   }
 
   /**
@@ -2399,10 +2405,10 @@ export default class BigNumber {
    * const bn2 = new BigNumber('23456');
    * const result = bn1.mul(bn2);
    */
-  mul (num: BigNumber): BigNumber {
-    const out = new BigNumber()
-    out.words = new Array(this.length + num.length)
-    return this.mulTo(num, out)
+  mul(num: BigNumber): BigNumber {
+    const out = new BigNumber();
+    out.words = new Array(this.length + num.length);
+    return this.mulTo(num, out);
   }
 
   /**
@@ -2417,8 +2423,8 @@ export default class BigNumber {
    * const bn2 = new BigNumber('23456');
    * bn1.imul(bn2);
    */
-  imul (num: BigNumber): BigNumber {
-    return this.clone().mulTo(num, this)
+  imul(num: BigNumber): BigNumber {
+    return this.clone().mulTo(num, this);
   }
 
   /**
@@ -2434,32 +2440,32 @@ export default class BigNumber {
    * const bn = new BigNumber('12345');
    * bn.imuln(23456);
    */
-  imuln (num: number): BigNumber {
-    const isNegNum = num < 0
-    if (isNegNum) num = -num
+  imuln(num: number): BigNumber {
+    const isNegNum = num < 0;
+    if (isNegNum) num = -num;
 
-    this.assert(typeof num === 'number')
-    this.assert(num < 0x4000000)
+    this.assert(typeof num === "number");
+    this.assert(num < 0x4000000);
 
     // Carry
-    let carry = 0
-    let i = 0
+    let carry = 0;
+    let i = 0;
     for (; i < this.length; i++) {
-      const w = (this.words[i] | 0) * num
-      const lo = (w & 0x3ffffff) + (carry & 0x3ffffff)
-      carry >>= 26
-      carry += (w / 0x4000000) | 0
+      const w = (this.words[i] | 0) * num;
+      const lo = (w & 0x3ffffff) + (carry & 0x3ffffff);
+      carry >>= 26;
+      carry += (w / 0x4000000) | 0;
       // NOTE: lo is 27bit maximum
-      carry += lo >>> 26
-      this.words[i] = lo & 0x3ffffff
+      carry += lo >>> 26;
+      this.words[i] = lo & 0x3ffffff;
     }
 
     if (carry !== 0) {
-      this.words[i] = carry
-      this.length++
+      this.words[i] = carry;
+      this.length++;
     }
 
-    return isNegNum ? this.ineg() : this
+    return isNegNum ? this.ineg() : this;
   }
 
   /**
@@ -2474,8 +2480,8 @@ export default class BigNumber {
    * const bn = new BigNumber('12345');
    * const result = bn.muln(23456);
    */
-  muln (num: number): BigNumber {
-    return this.clone().imuln(num)
+  muln(num: number): BigNumber {
+    return this.clone().imuln(num);
   }
 
   /**
@@ -2488,8 +2494,8 @@ export default class BigNumber {
    * const bn = new BigNumber('12345');
    * const result = bn.sqr();
    */
-  sqr (): BigNumber {
-    return this.mul(this)
+  sqr(): BigNumber {
+    return this.mul(this);
   }
 
   /**
@@ -2502,8 +2508,8 @@ export default class BigNumber {
    * let myNumber = new BigNumber(4);
    * myNumber.isqr(); // Returns BigNumber of value 16
    */
-  isqr (): BigNumber {
-    return this.imul(this.clone())
+  isqr(): BigNumber {
+    return this.imul(this.clone());
   }
 
   /**
@@ -2518,26 +2524,26 @@ export default class BigNumber {
    * let exponent = new BigNumber(3);
    * base.pow(exponent); // Returns BigNumber of value 8
    */
-  pow (num: BigNumber): BigNumber {
-    const w = BigNumber.toBitArray(num)
-    if (w.length === 0) return new BigNumber(1)
+  pow(num: BigNumber): BigNumber {
+    const w = BigNumber.toBitArray(num);
+    if (w.length === 0) return new BigNumber(1);
 
     // Skip leading zeroes
     /* eslint-disable @typescript-eslint/no-this-alias */
-    let res = this
-    let i = 0
+    let res = this;
+    let i = 0;
     for (; i < w.length; i++, res = res.sqr() as this) {
-      if (w[i] !== 0) break
+      if (w[i] !== 0) break;
     }
 
     if (++i < w.length) {
       for (let q = res.sqr(); i < w.length; i++, q = q.sqr()) {
-        if (w[i] === 0) continue
-        res = res.mul(q) as this
+        if (w[i] === 0) continue;
+        res = res.mul(q) as this;
       }
     }
 
-    return res
+    return res;
   }
 
   /**
@@ -2551,42 +2557,42 @@ export default class BigNumber {
    * let myNumber = new BigNumber(4);
    * myNumber.iushln(2); // Returns BigNumber of value 16
    */
-  iushln (bits: number): this {
-    this.assert(typeof bits === 'number' && bits >= 0)
-    const r = bits % 26
-    const s = (bits - r) / 26
-    const carryMask = (0x3ffffff >>> (26 - r)) << (26 - r)
-    let i: number
+  iushln(bits: number): this {
+    this.assert(typeof bits === "number" && bits >= 0);
+    const r = bits % 26;
+    const s = (bits - r) / 26;
+    const carryMask = (0x3ffffff >>> (26 - r)) << (26 - r);
+    let i: number;
 
     if (r !== 0) {
-      let carry = 0
+      let carry = 0;
 
       for (i = 0; i < this.length; i++) {
-        const newCarry = this.words[i] & carryMask
-        const c = ((this.words[i] | 0) - newCarry) << r
-        this.words[i] = c | carry
-        carry = newCarry >>> (26 - r)
+        const newCarry = this.words[i] & carryMask;
+        const c = ((this.words[i] | 0) - newCarry) << r;
+        this.words[i] = c | carry;
+        carry = newCarry >>> (26 - r);
       }
 
       if (carry !== 0) {
-        this.words[i] = carry
-        this.length++
+        this.words[i] = carry;
+        this.length++;
       }
     }
 
     if (s !== 0) {
       for (i = this.length - 1; i >= 0; i--) {
-        this.words[i + s] = this.words[i]
+        this.words[i + s] = this.words[i];
       }
 
       for (i = 0; i < s; i++) {
-        this.words[i] = 0
+        this.words[i] = 0;
       }
 
-      this.length += s
+      this.length += s;
     }
 
-    return this.strip()
+    return this.strip();
   }
 
   /**
@@ -2600,9 +2606,9 @@ export default class BigNumber {
    * let myNumber = new BigNumber(4);
    * myNumber.ishln(2); // Returns BigNumber of value 16
    */
-  ishln (bits: number): this {
-    this.assert(this.negative === 0)
-    return this.iushln(bits)
+  ishln(bits: number): this {
+    this.assert(this.negative === 0);
+    return this.iushln(bits);
   }
 
   /**
@@ -2618,62 +2624,62 @@ export default class BigNumber {
    * let myNumber = new BigNumber(16);
    * myNumber.iushrn(2); // Returns BigNumber of value 4
    */
-  iushrn (bits: number, hint?: number, extended?: BigNumber): this {
-    this.assert(typeof bits === 'number' && bits >= 0)
-    let h
-    if (typeof hint === 'number' && hint !== 0) {
-      h = (hint - (hint % 26)) / 26
+  iushrn(bits: number, hint?: number, extended?: BigNumber): this {
+    this.assert(typeof bits === "number" && bits >= 0);
+    let h;
+    if (typeof hint === "number" && hint !== 0) {
+      h = (hint - (hint % 26)) / 26;
     } else {
-      h = 0
+      h = 0;
     }
 
-    const r = bits % 26
-    const s = Math.min((bits - r) / 26, this.length)
-    const mask = 0x3ffffff ^ ((0x3ffffff >>> r) << r)
-    const maskedWords = extended
+    const r = bits % 26;
+    const s = Math.min((bits - r) / 26, this.length);
+    const mask = 0x3ffffff ^ ((0x3ffffff >>> r) << r);
+    const maskedWords = extended;
 
-    h -= s
-    h = Math.max(0, h)
+    h -= s;
+    h = Math.max(0, h);
 
     // Extended mode, copy masked part
-    let i = 0
-    if (typeof maskedWords !== 'undefined') {
+    let i = 0;
+    if (typeof maskedWords !== "undefined") {
       for (; i < s; i++) {
-        maskedWords.words[i] = this.words[i]
+        maskedWords.words[i] = this.words[i];
       }
-      maskedWords.length = s
+      maskedWords.length = s;
     }
 
     if (s === 0) {
       // No-op, we should not move anything at all
     } else if (this.length > s) {
-      this.length -= s
+      this.length -= s;
       for (i = 0; i < this.length; i++) {
-        this.words[i] = this.words[i + s]
+        this.words[i] = this.words[i + s];
       }
     } else {
-      this.words[0] = 0
-      this.length = 1
+      this.words[0] = 0;
+      this.length = 1;
     }
 
-    let carry = 0
+    let carry = 0;
     for (i = this.length - 1; i >= 0 && (carry !== 0 || i >= h); i--) {
-      const word = this.words[i] | 0
-      this.words[i] = (carry << (26 - r)) | (word >>> r)
-      carry = word & mask
+      const word = this.words[i] | 0;
+      this.words[i] = (carry << (26 - r)) | (word >>> r);
+      carry = word & mask;
     }
 
     // Push carried bits as a mask
-    if ((maskedWords != null) && carry !== 0) {
-      maskedWords.words[maskedWords.length++] = carry
+    if (maskedWords != null && carry !== 0) {
+      maskedWords.words[maskedWords.length++] = carry;
     }
 
     if (this.length === 0) {
-      this.words[0] = 0
-      this.length = 1
+      this.words[0] = 0;
+      this.length = 1;
     }
 
-    return this.strip()
+    return this.strip();
   }
 
   /**
@@ -2689,9 +2695,9 @@ export default class BigNumber {
    * let myNumber = new BigNumber(16);
    * myNumber.ishrn(2); // Returns BigNumber of value 4
    */
-  ishrn (bits, hint?, extended?): this {
-    this.assert(this.negative === 0)
-    return this.iushrn(bits, hint, extended)
+  ishrn(bits, hint?, extended?): this {
+    this.assert(this.negative === 0);
+    return this.iushrn(bits, hint, extended);
   }
 
   /**
@@ -2706,8 +2712,8 @@ export default class BigNumber {
    * let shiftedNumber = myNumber.shln(2);
    * console.log(shiftedNumber.toString()); // Outputs "16"
    */
-  shln (bits): BigNumber {
-    return this.clone().ishln(bits)
+  shln(bits): BigNumber {
+    return this.clone().ishln(bits);
   }
 
   /**
@@ -2722,8 +2728,8 @@ export default class BigNumber {
    * let shiftedNumber = myNumber.ushln(2);
    * console.log(shiftedNumber.toString()); // Outputs "16"
    */
-  ushln (bits): BigNumber {
-    return this.clone().iushln(bits)
+  ushln(bits): BigNumber {
+    return this.clone().iushln(bits);
   }
 
   /**
@@ -2738,8 +2744,8 @@ export default class BigNumber {
    * let shiftedNumber = myNumber.shrn(3);
    * console.log(shiftedNumber.toString()); // Outputs "2"
    */
-  shrn (bits): BigNumber {
-    return this.clone().ishrn(bits)
+  shrn(bits): BigNumber {
+    return this.clone().ishrn(bits);
   }
 
   /**
@@ -2754,8 +2760,8 @@ export default class BigNumber {
    * let shiftedNumber = myNumber.ushrn(2);
    * console.log(shiftedNumber.toString()); // Outputs "5"
    */
-  ushrn (bits): BigNumber {
-    return this.clone().iushrn(bits)
+  ushrn(bits): BigNumber {
+    return this.clone().iushrn(bits);
   }
 
   /**
@@ -2769,19 +2775,19 @@ export default class BigNumber {
    * let myNumber = new BigNumber(10); // 1010 in binary
    * myNumber.testn(1); // Returns true (indicating that the second bit from right is set)
    */
-  testn (bit: number): boolean {
-    this.assert(typeof bit === 'number' && bit >= 0)
-    const r = bit % 26
-    const s = (bit - r) / 26
-    const q = 1 << r
+  testn(bit: number): boolean {
+    this.assert(typeof bit === "number" && bit >= 0);
+    const r = bit % 26;
+    const s = (bit - r) / 26;
+    const q = 1 << r;
 
     // Fast case: bit is much higher than all existing words
-    if (this.length <= s) return false
+    if (this.length <= s) return false;
 
     // Check bit and return
-    const w = this.words[s]
+    const w = this.words[s];
 
-    return Boolean(w & q)
+    return Boolean(w & q);
   }
 
   /**
@@ -2795,28 +2801,28 @@ export default class BigNumber {
    * const myNumber = new BigNumber(52);
    * myNumber.imaskn(2); // myNumber becomes 0 because lower 2 bits of 52 (110100) are 00.
    */
-  imaskn (bits): this {
-    this.assert(typeof bits === 'number' && bits >= 0)
-    const r = bits % 26
-    let s = (bits - r) / 26
+  imaskn(bits): this {
+    this.assert(typeof bits === "number" && bits >= 0);
+    const r = bits % 26;
+    let s = (bits - r) / 26;
 
-    this.assert(this.negative === 0, 'imaskn works only with positive numbers')
+    this.assert(this.negative === 0, "imaskn works only with positive numbers");
 
     if (this.length <= s) {
-      return this
+      return this;
     }
 
     if (r !== 0) {
-      s++
+      s++;
     }
-    this.length = Math.min(s, this.length)
+    this.length = Math.min(s, this.length);
 
     if (r !== 0) {
-      const mask = 0x3ffffff ^ ((0x3ffffff >>> r) << r)
-      this.words[this.length - 1] &= mask
+      const mask = 0x3ffffff ^ ((0x3ffffff >>> r) << r);
+      this.words[this.length - 1] &= mask;
     }
 
-    return this.strip()
+    return this.strip();
   }
 
   /**
@@ -2828,8 +2834,8 @@ export default class BigNumber {
    * const myNumber = new BigNumber(52);
    * const newNumber = myNumber.maskn(2); // newNumber becomes 0, myNumber doesn't change.
    */
-  maskn (bits): BigNumber {
-    return this.clone().imaskn(bits)
+  maskn(bits): BigNumber {
+    return this.clone().imaskn(bits);
   }
 
   /**
@@ -2842,27 +2848,27 @@ export default class BigNumber {
    * const myNumber = new BigNumber(50);
    * myNumber.iaddn(2); // myNumber becomes 52.
    */
-  iaddn (num: number): BigNumber {
-    this.assert(typeof num === 'number')
-    this.assert(num < 0x4000000, 'num is too large')
-    if (num < 0) return this.isubn(-num)
+  iaddn(num: number): BigNumber {
+    this.assert(typeof num === "number");
+    this.assert(num < 0x4000000, "num is too large");
+    if (num < 0) return this.isubn(-num);
 
     // Possible sign change
     if (this.negative !== 0) {
       if (this.length === 1 && (this.words[0] | 0) <= num) {
-        this.words[0] = num - (this.words[0] | 0)
-        this.negative = 0
-        return this
+        this.words[0] = num - (this.words[0] | 0);
+        this.negative = 0;
+        return this;
       }
 
-      this.negative = 0
-      this.isubn(num)
-      this.negative = 1
-      return this
+      this.negative = 0;
+      this.isubn(num);
+      this.negative = 1;
+      return this;
     }
 
     // Add without checks
-    return this._iaddn(num)
+    return this._iaddn(num);
   }
 
   /**
@@ -2872,22 +2878,22 @@ export default class BigNumber {
    * @param num - The plain number to add.
    * @returns Returns the BigNumber after the addition.
    */
-  _iaddn (num: number): this {
-    this.words[0] += num
+  _iaddn(num: number): this {
+    this.words[0] += num;
 
     // Carry
-    let i = 0
+    let i = 0;
     for (; i < this.length && this.words[i] >= 0x4000000; i++) {
-      this.words[i] -= 0x4000000
+      this.words[i] -= 0x4000000;
       if (i === this.length - 1) {
-        this.words[i + 1] = 1
+        this.words[i + 1] = 1;
       } else {
-        this.words[i + 1]++
+        this.words[i + 1]++;
       }
     }
-    this.length = Math.max(this.length, i + 1)
+    this.length = Math.max(this.length, i + 1);
 
-    return this
+    return this;
   }
 
   /**
@@ -2900,32 +2906,32 @@ export default class BigNumber {
    * const myNumber = new BigNumber(52);
    * myNumber.isubn(2); // myNumber becomes 50.
    */
-  isubn (num: number): BigNumber {
-    this.assert(typeof num === 'number')
-    this.assert(num < 0x4000000)
-    if (num < 0) return this.iaddn(-num)
+  isubn(num: number): BigNumber {
+    this.assert(typeof num === "number");
+    this.assert(num < 0x4000000);
+    if (num < 0) return this.iaddn(-num);
 
     if (this.negative !== 0) {
-      this.negative = 0
-      this.iaddn(num)
-      this.negative = 1
-      return this
+      this.negative = 0;
+      this.iaddn(num);
+      this.negative = 1;
+      return this;
     }
 
-    this.words[0] -= num
+    this.words[0] -= num;
 
     if (this.length === 1 && this.words[0] < 0) {
-      this.words[0] = -this.words[0]
-      this.negative = 1
+      this.words[0] = -this.words[0];
+      this.negative = 1;
     } else {
       // Carry
       for (let i = 0; i < this.length && this.words[i] < 0; i++) {
-        this.words[i] += 0x4000000
-        this.words[i + 1] -= 1
+        this.words[i] += 0x4000000;
+        this.words[i + 1] -= 1;
       }
     }
 
-    return this.strip()
+    return this.strip();
   }
 
   /**
@@ -2937,8 +2943,8 @@ export default class BigNumber {
    * const myNumber = new BigNumber(50);
    * const newNumber = myNumber.addn(2); // newNumber becomes 52, myNumber doesn't change.
    */
-  addn (num: number): BigNumber {
-    return this.clone().iaddn(num)
+  addn(num: number): BigNumber {
+    return this.clone().iaddn(num);
   }
 
   /**
@@ -2950,8 +2956,8 @@ export default class BigNumber {
    * const myNumber = new BigNumber(52);
    * const newNumber = myNumber.subn(2);  // newNumber becomes 50, myNumber doesn't change.
    */
-  subn (num: number): BigNumber {
-    return this.clone().isubn(num)
+  subn(num: number): BigNumber {
+    return this.clone().isubn(num);
   }
 
   /**
@@ -2962,9 +2968,9 @@ export default class BigNumber {
    * const myNumber = new BigNumber(-50);
    * myNumber.iabs(); // myNumber becomes 50.
    */
-  iabs (): this {
-    this.negative = 0
-    return this
+  iabs(): this {
+    this.negative = 0;
+    return this;
   }
 
   /**
@@ -2979,8 +2985,8 @@ export default class BigNumber {
    * let absolute = negativeNumber.abs();
    * console.log(absolute.toString()); // Outputs: "10"
    */
-  abs (): BigNumber {
-    return this.clone().iabs()
+  abs(): BigNumber {
+    return this.clone().iabs();
   }
 
   /**
@@ -2998,40 +3004,40 @@ export default class BigNumber {
    * number._ishlnsubmul(new BigNumber(2), 3, 1);
    * console.log(number.toString()); // Outputs result after performing operations
    */
-  _ishlnsubmul (num: BigNumber, mul, shift: number): this {
-    const len = num.length + shift
-    let i: number
+  _ishlnsubmul(num: BigNumber, mul, shift: number): this {
+    const len = num.length + shift;
+    let i: number;
 
-    this.expand(len)
+    this.expand(len);
 
-    let w
-    let carry = 0
+    let w;
+    let carry = 0;
     for (i = 0; i < num.length; i++) {
-      w = (this.words[i + shift] | 0) + carry
-      const right = (num.words[i] | 0) * mul
-      w -= right & 0x3ffffff
-      carry = (w >> 26) - ((right / 0x4000000) | 0)
-      this.words[i + shift] = w & 0x3ffffff
+      w = (this.words[i + shift] | 0) + carry;
+      const right = (num.words[i] | 0) * mul;
+      w -= right & 0x3ffffff;
+      carry = (w >> 26) - ((right / 0x4000000) | 0);
+      this.words[i + shift] = w & 0x3ffffff;
     }
     for (; i < this.length - shift; i++) {
-      w = (this.words[i + shift] | 0) + carry
-      carry = w >> 26
-      this.words[i + shift] = w & 0x3ffffff
+      w = (this.words[i + shift] | 0) + carry;
+      carry = w >> 26;
+      this.words[i + shift] = w & 0x3ffffff;
     }
 
-    if (carry === 0) return this.strip()
+    if (carry === 0) return this.strip();
 
     // Subtraction overflow
-    this.assert(carry === -1, 'carry must be -1')
-    carry = 0
+    this.assert(carry === -1, "carry must be -1");
+    carry = 0;
     for (i = 0; i < this.length; i++) {
-      w = -(this.words[i] | 0) + carry
-      carry = w >> 26
-      this.words[i] = w & 0x3ffffff
+      w = -(this.words[i] | 0) + carry;
+      carry = w >> 26;
+      this.words[i] = w & 0x3ffffff;
     }
-    this.negative = 1
+    this.negative = 1;
 
-    return this.strip()
+    return this.strip();
   }
 
   /**
@@ -3045,78 +3051,79 @@ export default class BigNumber {
    * @param mode - Specifies the operation mode as 'mod' for modulus or 'div' for division.
    * @returns Object with division (div) and modulo (mod) results, subject to the 'mode' specified.
    */
-  private wordDiv (num: BigNumber, mode): any {
-    let shift = this.length - num.length
+  private wordDiv(num: BigNumber, mode): any {
+    let shift = this.length - num.length;
 
-    let a = this.clone()
-    let b = num
+    let a = this.clone();
+    let b = num;
 
     // Normalize
-    let bhi = b.words[b.length - 1] | 0
-    const bhiBits = this.countWordBits(bhi)
-    shift = 26 - bhiBits
+    let bhi = b.words[b.length - 1] | 0;
+    const bhiBits = this.countWordBits(bhi);
+    shift = 26 - bhiBits;
     if (shift !== 0) {
-      b = b.ushln(shift)
-      a.iushln(shift)
-      bhi = b.words[b.length - 1] | 0
+      b = b.ushln(shift);
+      a.iushln(shift);
+      bhi = b.words[b.length - 1] | 0;
     }
 
     // Initialize quotient
-    const m = a.length - b.length
-    let q: BigNumber | undefined
+    const m = a.length - b.length;
+    let q: BigNumber | undefined;
 
-    if (mode !== 'mod') {
-      q = new BigNumber()
-      q.length = m + 1
-      q.words = new Array(q.length)
+    if (mode !== "mod") {
+      q = new BigNumber();
+      q.length = m + 1;
+      q.words = new Array(q.length);
       for (let i = 0; i < q.length; i++) {
-        q.words[i] = 0
+        q.words[i] = 0;
       }
     }
 
-    const diff = a.clone()._ishlnsubmul(b, 1, m)
+    const diff = a.clone()._ishlnsubmul(b, 1, m);
     if (diff.negative === 0) {
-      a = diff
-      if (typeof q !== 'undefined') {
-        q.words[m] = 1
+      a = diff;
+      if (typeof q !== "undefined") {
+        q.words[m] = 1;
       }
     }
 
     for (let j = m - 1; j >= 0; j--) {
-      let qj = (a.words[b.length + j] | 0) * 0x4000000 +
-        (a.words[b.length + j - 1] | 0)
+      let qj =
+        (a.words[b.length + j] | 0) * 0x4000000 +
+        (a.words[b.length + j - 1] | 0);
 
       // NOTE: (qj / bhi) is (0x3ffffff * 0x4000000 + 0x3ffffff) / 0x2000000 max
       // (0x7ffffff)
-      qj = Math.min((qj / bhi) | 0, 0x3ffffff)
+      qj = Math.min((qj / bhi) | 0, 0x3ffffff);
 
-      a._ishlnsubmul(b, qj, j)
+      a._ishlnsubmul(b, qj, j);
       while (a.negative !== 0) {
-        qj--
-        a.negative = 0
-        a._ishlnsubmul(b, 1, j)
+        qj--;
+        a.negative = 0;
+        a._ishlnsubmul(b, 1, j);
         if (!a.isZero()) {
-          a.negative ^= 1
+          a.negative ^= 1;
         }
       }
-      if (typeof q !== 'undefined') {
-        q.words[j] = qj
+      if (typeof q !== "undefined") {
+        q.words[j] = qj;
       }
     }
-    if (typeof q !== 'undefined') {
-      q.strip()
+    if (typeof q !== "undefined") {
+      q.strip();
     }
-    a.strip()
+    a.strip();
 
     // Denormalize
-    if (mode !== 'div' && shift !== 0) {
-      a.iushrn(shift)
+    if (mode !== "div" && shift !== 0) {
+      a.iushrn(shift);
     }
 
     return {
       div: q ?? null,
-      mod: a
-    }
+      mod: a,
+    };
   }
 
   /**
@@ -3135,64 +3142,64 @@ export default class BigNumber {
    * console.log(result.div.toString()); // Outputs: "3"
    * console.log(result.mod.toString()); // Outputs: "1"
    */
-  divmod (num: BigNumber, mode?: 'div' | 'mod', positive?: boolean): any {
-    this.assert(!num.isZero())
+  divmod(num: BigNumber, mode?: "div" | "mod", positive?: boolean): any {
+    this.assert(!num.isZero());
 
     if (this.isZero()) {
       return {
         div: new BigNumber(0),
-        mod: new BigNumber(0)
-      }
+        mod: new BigNumber(0),
+      };
     }
 
-    let div, mod, res
+    let div, mod, res;
     if (this.negative !== 0 && num.negative === 0) {
-      res = this.neg().divmod(num, mode)
+      res = this.neg().divmod(num, mode);
 
-      if (mode !== 'mod') {
-        div = res.div.neg()
+      if (mode !== "mod") {
+        div = res.div.neg();
       }
 
-      if (mode !== 'div') {
-        mod = res.mod.neg()
+      if (mode !== "div") {
+        mod = res.mod.neg();
         if (positive && mod.negative !== 0) {
-          mod.iadd(num)
+          mod.iadd(num);
         }
       }
 
       return {
         div,
-        mod
-      }
+        mod,
+      };
     }
 
     if (this.negative === 0 && num.negative !== 0) {
-      res = this.divmod(num.neg(), mode)
+      res = this.divmod(num.neg(), mode);
 
-      if (mode !== 'mod') {
-        div = res.div.neg()
+      if (mode !== "mod") {
+        div = res.div.neg();
       }
 
       return {
         div,
-        mod: res.mod
-      }
+        mod: res.mod,
+      };
     }
 
     if ((this.negative & num.negative) !== 0) {
-      res = this.neg().divmod(num.neg(), mode)
+      res = this.neg().divmod(num.neg(), mode);
 
-      if (mode !== 'div') {
-        mod = res.mod.neg()
+      if (mode !== "div") {
+        mod = res.mod.neg();
         if (positive && mod.negative !== 0) {
-          mod.isub(num)
+          mod.isub(num);
         }
       }
 
       return {
         div: res.div,
-        mod
-      }
+        mod,
+      };
     }
 
     // Both numbers are positive at this point
@@ -3201,33 +3208,33 @@ export default class BigNumber {
     if (num.length > this.length || this.cmp(num) < 0) {
       return {
         div: new BigNumber(0),
-        mod: this
-      }
+        mod: this,
+      };
     }
 
     // Very short reduction
     if (num.length === 1) {
-      if (mode === 'div') {
+      if (mode === "div") {
         return {
           div: this.divn(num.words[0]),
-          mod: null
-        }
+          mod: null,
+        };
       }
 
-      if (mode === 'mod') {
+      if (mode === "mod") {
         return {
           div: null,
-          mod: new BigNumber(this.modrn(num.words[0]))
-        }
+          mod: new BigNumber(this.modrn(num.words[0])),
+        };
       }
 
       return {
         div: this.divn(num.words[0]),
-        mod: new BigNumber(this.modrn(num.words[0]))
-      }
+        mod: new BigNumber(this.modrn(num.words[0])),
+      };
     }
 
-    return this.wordDiv(num, mode)
+    return this.wordDiv(num, mode);
   }
 
   /**
@@ -3242,8 +3249,8 @@ export default class BigNumber {
    * let result = number.div(new BigNumber(2));
    * console.log(result.toString()); // Outputs: "5"
    */
-  div (num: BigNumber): BigNumber {
-    return this.divmod(num, 'div', false).div as BigNumber
+  div(num: BigNumber): BigNumber {
+    return this.divmod(num, "div", false).div as BigNumber;
   }
 
   /**
@@ -3258,8 +3265,8 @@ export default class BigNumber {
    * const bigNum2 = new BigNumber('45');
    * const remainder = bigNum1.mod(bigNum2); // remainder here would be '10'
    */
-  mod (num: BigNumber): BigNumber {
-    return this.divmod(num, 'mod', false).mod as BigNumber
+  mod(num: BigNumber): BigNumber {
+    return this.divmod(num, "mod", false).mod as BigNumber;
   }
 
   /**
@@ -3275,8 +3282,8 @@ export default class BigNumber {
    * const bigNum2 = new BigNumber('45');
    * const remainder = bigNum1.umod(bigNum2); // remainder here would be '10' as signs are ignored.
    */
-  umod (num: BigNumber): BigNumber {
-    return this.divmod(num, 'mod', true).mod as BigNumber
+  umod(num: BigNumber): BigNumber {
+    return this.divmod(num, "mod", true).mod as BigNumber;
   }
 
   /**
@@ -3291,27 +3298,25 @@ export default class BigNumber {
    * const bigNum2 = new BigNumber('45');
    * const quotient = bigNum1.divRound(bigNum2); // quotient here would be '2'
    */
-  divRound (num: BigNumber): BigNumber {
-    const dm: { div: BigNumber, mod: BigNumber } = (
-      this.divmod(num) as unknown as { div: BigNumber, mod: BigNumber }
-    )
+  divRound(num: BigNumber): BigNumber {
+    const dm: { div: BigNumber; mod: BigNumber } = this.divmod(
+      num
+    ) as unknown as { div: BigNumber; mod: BigNumber };
 
     // Fast case - exact division
-    if (dm.mod.isZero()) return dm.div
+    if (dm.mod.isZero()) return dm.div;
 
-    const mod = dm.div.negative !== 0
-      ? dm.mod.isub(num)
-      : dm.mod
+    const mod = dm.div.negative !== 0 ? dm.mod.isub(num) : dm.mod;
 
-    const half = num.ushrn(1)
-    const r2: number = num.andln(1)
-    const cmp = mod.cmp(half)
+    const half = num.ushrn(1);
+    const r2: number = num.andln(1);
+    const cmp = mod.cmp(half);
 
     // Round down
-    if (cmp < 0 || (r2 === 1 && cmp === 0)) return dm.div
+    if (cmp < 0 || (r2 === 1 && cmp === 0)) return dm.div;
 
     // Round up
-    return dm.div.negative !== 0 ? dm.div.isubn(1) : dm.div.iaddn(1)
+    return dm.div.negative !== 0 ? dm.div.isubn(1) : dm.div.iaddn(1);
   }
 
   /**
@@ -3326,19 +3331,19 @@ export default class BigNumber {
    * const num = 45;
    * const remainder = bigNum.modrn(num); // remainder here would be '10'
    */
-  modrn (num: number): number {
-    const isNegNum = num < 0
-    if (isNegNum) num = -num
+  modrn(num: number): number {
+    const isNegNum = num < 0;
+    if (isNegNum) num = -num;
 
-    this.assert(num <= 0x3ffffff)
-    const p = (1 << 26) % num
+    this.assert(num <= 0x3ffffff);
+    const p = (1 << 26) % num;
 
-    let acc = 0
+    let acc = 0;
     for (let i = this.length - 1; i >= 0; i--) {
-      acc = (p * acc + (this.words[i] | 0)) % num
+      acc = (p * acc + (this.words[i] | 0)) % num;
     }
 
-    return isNegNum ? -acc : acc
+    return isNegNum ? -acc : acc;
   }
 
   /**
@@ -3354,21 +3359,21 @@ export default class BigNumber {
    * const num = 45;
    * bigNum.idivn(num); // the bigNum here directly becomes '2'
    */
-  idivn (num: number): BigNumber {
-    const isNegNum = num < 0
-    if (isNegNum) num = -num
+  idivn(num: number): BigNumber {
+    const isNegNum = num < 0;
+    if (isNegNum) num = -num;
 
-    this.assert(num <= 0x3ffffff)
+    this.assert(num <= 0x3ffffff);
 
-    let carry = 0
+    let carry = 0;
     for (let i = this.length - 1; i >= 0; i--) {
-      const w = (this.words[i] | 0) + carry * 0x4000000
-      this.words[i] = (w / num) | 0
-      carry = w % num
+      const w = (this.words[i] | 0) + carry * 0x4000000;
+      this.words[i] = (w / num) | 0;
+      carry = w % num;
     }
 
-    this.strip()
-    return isNegNum ? this.ineg() : this
+    this.strip();
+    return isNegNum ? this.ineg() : this;
   }
 
   /**
@@ -3383,8 +3388,8 @@ export default class BigNumber {
    * const num = 45;
    * const quotient = bigNum.divn(num); // quotient here would be '2'
    */
-  divn (num: number): BigNumber {
-    return this.clone().idivn(num)
+  divn(num: number): BigNumber {
+    return this.clone().idivn(num);
   }
 
   /**
@@ -3400,87 +3405,87 @@ export default class BigNumber {
    * const bigNum2 = new BigNumber('45');
    * const result = bigNum1.egcd(bigNum2);
    */
-  egcd (p: BigNumber): { a: BigNumber, b: BigNumber, gcd: BigNumber } {
-    this.assert(p.negative === 0, 'p must not be negative')
-    this.assert(!p.isZero(), 'p must not be zero')
+  egcd(p: BigNumber): { a: BigNumber; b: BigNumber; gcd: BigNumber } {
+    this.assert(p.negative === 0, "p must not be negative");
+    this.assert(!p.isZero(), "p must not be zero");
 
-    let x = this
-    const y = p.clone()
+    let x = this;
+    const y = p.clone();
 
     if (x.negative !== 0) {
-      x = x.umod(p) as this
+      x = x.umod(p) as this;
     } else {
-      x = x.clone() as this
+      x = x.clone() as this;
     }
 
     // A * x + B * y = x
-    const A = new BigNumber(1)
-    const B = new BigNumber(0)
+    const A = new BigNumber(1);
+    const B = new BigNumber(0);
 
     // C * x + D * y = y
-    const C = new BigNumber(0)
-    const D = new BigNumber(1)
+    const C = new BigNumber(0);
+    const D = new BigNumber(1);
 
-    let g = 0
+    let g = 0;
 
     while (x.isEven() && y.isEven()) {
-      x.iushrn(1)
-      y.iushrn(1)
-      ++g
+      x.iushrn(1);
+      y.iushrn(1);
+      ++g;
     }
 
-    const yp = y.clone()
-    const xp = x.clone()
+    const yp = y.clone();
+    const xp = x.clone();
 
     while (!x.isZero()) {
-      let i = 0
-      let im = 1
+      let i = 0;
+      let im = 1;
       for (; (x.words[0] & im) === 0 && i < 26; ++i, im <<= 1);
       if (i > 0) {
-        x.iushrn(i)
+        x.iushrn(i);
         while (i-- > 0) {
           if (A.isOdd() || B.isOdd()) {
-            A.iadd(yp)
-            B.isub(xp)
+            A.iadd(yp);
+            B.isub(xp);
           }
 
-          A.iushrn(1)
-          B.iushrn(1)
+          A.iushrn(1);
+          B.iushrn(1);
         }
       }
 
-      let j = 0
-      let jm = 1
+      let j = 0;
+      let jm = 1;
       for (; (y.words[0] & jm) === 0 && j < 26; ++j, jm <<= 1);
       if (j > 0) {
-        y.iushrn(j)
+        y.iushrn(j);
         while (j-- > 0) {
           if (C.isOdd() || D.isOdd()) {
-            C.iadd(yp)
-            D.isub(xp)
+            C.iadd(yp);
+            D.isub(xp);
           }
 
-          C.iushrn(1)
-          D.iushrn(1)
+          C.iushrn(1);
+          D.iushrn(1);
         }
       }
 
       if (x.cmp(y) >= 0) {
-        x.isub(y)
-        A.isub(C)
-        B.isub(D)
+        x.isub(y);
+        A.isub(C);
+        B.isub(D);
       } else {
-        y.isub(x)
-        C.isub(A)
-        D.isub(B)
+        y.isub(x);
+        C.isub(A);
+        D.isub(B);
       }
     }
 
     return {
       a: C,
       b: D,
-      gcd: y.iushln(g)
-    }
+      gcd: y.iushln(g),
+    };
   }
 
   /**
@@ -3496,74 +3501,74 @@ export default class BigNumber {
    * const p = new BigNumber('100');
    * const inverse = bigNum._invmp(p); // inverse here would be a BigNumber such that (inverse*bigNum) % p = '1'
    */
-  _invmp (p: BigNumber): BigNumber {
-    this.assert(p.negative === 0, 'p must not be negative')
-    this.assert(!p.isZero(), 'p must not be zero')
+  _invmp(p: BigNumber): BigNumber {
+    this.assert(p.negative === 0, "p must not be negative");
+    this.assert(!p.isZero(), "p must not be zero");
 
-    let a = this
-    const b = p.clone()
+    let a = this;
+    const b = p.clone();
 
     if (a.negative !== 0) {
-      a = a.umod(p) as this
+      a = a.umod(p) as this;
     } else {
-      a = a.clone() as this
+      a = a.clone() as this;
     }
 
-    const x1 = new BigNumber(1)
-    const x2 = new BigNumber(0)
+    const x1 = new BigNumber(1);
+    const x2 = new BigNumber(0);
 
-    const delta = b.clone()
+    const delta = b.clone();
 
     while (a.cmpn(1) > 0 && b.cmpn(1) > 0) {
-      let i = 0
-      let im = 1
+      let i = 0;
+      let im = 1;
       for (; (a.words[0] & im) === 0 && i < 26; ++i, im <<= 1);
       if (i > 0) {
-        a.iushrn(i)
+        a.iushrn(i);
         while (i-- > 0) {
           if (x1.isOdd()) {
-            x1.iadd(delta)
+            x1.iadd(delta);
           }
 
-          x1.iushrn(1)
+          x1.iushrn(1);
         }
       }
 
-      let j = 0
-      let jm = 1
+      let j = 0;
+      let jm = 1;
       for (; (b.words[0] & jm) === 0 && j < 26; ++j, jm <<= 1);
       if (j > 0) {
-        b.iushrn(j)
+        b.iushrn(j);
         while (j-- > 0) {
           if (x2.isOdd()) {
-            x2.iadd(delta)
+            x2.iadd(delta);
           }
 
-          x2.iushrn(1)
+          x2.iushrn(1);
         }
       }
 
       if (a.cmp(b) >= 0) {
-        a.isub(b)
-        x1.isub(x2)
+        a.isub(b);
+        x1.isub(x2);
       } else {
-        b.isub(a)
-        x2.isub(x1)
+        b.isub(a);
+        x2.isub(x1);
       }
     }
 
-    let res
+    let res;
     if (a.cmpn(1) === 0) {
-      res = x1
+      res = x1;
     } else {
-      res = x2
+      res = x2;
     }
 
     if (res.cmpn(0) < 0) {
-      res.iadd(p)
+      res.iadd(p);
     }
 
-    return res
+    return res;
   }
 
   /**
@@ -3578,44 +3583,44 @@ export default class BigNumber {
    * let b = new BigNumber(18);
    * let gcd = a.gcd(b);
    */
-  gcd (num: BigNumber): BigNumber {
-    if (this.isZero()) return num.abs()
-    if (num.isZero()) return this.abs()
+  gcd(num: BigNumber): BigNumber {
+    if (this.isZero()) return num.abs();
+    if (num.isZero()) return this.abs();
 
-    let a = this.clone()
-    let b = num.clone()
-    a.negative = 0
-    b.negative = 0
+    let a = this.clone();
+    let b = num.clone();
+    a.negative = 0;
+    b.negative = 0;
 
     // Remove common factor of two
-    let shift = 0
+    let shift = 0;
     for (; a.isEven() && b.isEven(); shift++) {
-      a.iushrn(1)
-      b.iushrn(1)
+      a.iushrn(1);
+      b.iushrn(1);
     }
 
     do {
       while (a.isEven()) {
-        a.iushrn(1)
+        a.iushrn(1);
       }
       while (b.isEven()) {
-        b.iushrn(1)
+        b.iushrn(1);
       }
 
-      const r = a.cmp(b)
+      const r = a.cmp(b);
       if (r < 0) {
         // Swap `a` and `b` to make `a` always bigger than `b`
-        const t = a
-        a = b
-        b = t
+        const t = a;
+        a = b;
+        b = t;
       } else if (r === 0 || b.cmpn(1) === 0) {
-        break
+        break;
       }
 
-      a.isub(b)
-    } while (true)
+      a.isub(b);
+    } while (true);
 
-    return b.iushln(shift)
+    return b.iushln(shift);
   }
 
   /**
@@ -3630,8 +3635,8 @@ export default class BigNumber {
    * let field = new BigNumber(7);
    * let inverse = a.invm(field);
    */
-  invm (num: BigNumber): BigNumber {
-    return this.egcd(num).a.umod(num)
+  invm(num: BigNumber): BigNumber {
+    return this.egcd(num).a.umod(num);
   }
 
   /**
@@ -3645,8 +3650,8 @@ export default class BigNumber {
    * let a = new BigNumber(4);
    * let isEven = a.isEven(); // true
    */
-  isEven (): boolean {
-    return (this.words[0] & 1) === 0
+  isEven(): boolean {
+    return (this.words[0] & 1) === 0;
   }
 
   /**
@@ -3660,8 +3665,8 @@ export default class BigNumber {
    * let a = new BigNumber(3);
    * let isOdd = a.isOdd(); // true
    */
-  isOdd (): boolean {
-    return (this.words[0] & 1) === 1
+  isOdd(): boolean {
+    return (this.words[0] & 1) === 1;
   }
 
   /**
@@ -3677,8 +3682,8 @@ export default class BigNumber {
    * let a = new BigNumber(60);
    * let result = a.andln(13); // 12
    */
-  andln (num: number): number {
-    return this.words[0] & num
+  andln(num: number): number {
+    return this.words[0] & num;
   }
 
   /**
@@ -3692,34 +3697,34 @@ export default class BigNumber {
    * let a = new BigNumber(5);
    * a.bincn(2); // a = 7
    */
-  bincn (bit: number): this {
-    this.assert(typeof bit === 'number')
-    const r = bit % 26
-    const s = (bit - r) / 26
-    const q = 1 << r
+  bincn(bit: number): this {
+    this.assert(typeof bit === "number");
+    const r = bit % 26;
+    const s = (bit - r) / 26;
+    const q = 1 << r;
 
     // Fast case: bit is much higher than all existing words
     if (this.length <= s) {
-      this.expand(s + 1)
-      this.words[s] |= q
-      return this
+      this.expand(s + 1);
+      this.words[s] |= q;
+      return this;
     }
 
     // Add bit and propagate, if needed
-    let carry = q
-    let i = s
+    let carry = q;
+    let i = s;
     for (; carry !== 0 && i < this.length; i++) {
-      let w = this.words[i] | 0
-      w += carry
-      carry = w >>> 26
-      w &= 0x3ffffff
-      this.words[i] = w
+      let w = this.words[i] | 0;
+      w += carry;
+      carry = w >>> 26;
+      w &= 0x3ffffff;
+      this.words[i] = w;
     }
     if (carry !== 0) {
-      this.words[i] = carry
-      this.length++
+      this.words[i] = carry;
+      this.length++;
     }
-    return this
+    return this;
   }
 
   /**
@@ -3733,8 +3738,8 @@ export default class BigNumber {
    * let a = new BigNumber(0);
    * let isZero = a.isZero(); // true
    */
-  isZero (): boolean {
-    return this.length === 1 && this.words[0] === 0
+  isZero(): boolean {
+    return this.length === 1 && this.words[0] === 0;
   }
 
   /**
@@ -3749,29 +3754,29 @@ export default class BigNumber {
    * let a = new BigNumber(15);
    * let result = a.cmpn(10); // 1
    */
-  cmpn (num: number): 1 | 0 | -1 {
-    const negative = num < 0
+  cmpn(num: number): 1 | 0 | -1 {
+    const negative = num < 0;
 
-    if (this.negative !== 0 && !negative) return -1
-    if (this.negative === 0 && negative) return 1
+    if (this.negative !== 0 && !negative) return -1;
+    if (this.negative === 0 && negative) return 1;
 
-    this.strip()
+    this.strip();
 
-    let res: 1 | 0 | -1
+    let res: 1 | 0 | -1;
     if (this.length > 1) {
-      res = 1
+      res = 1;
     } else {
       if (negative) {
-        num = -num
+        num = -num;
       }
 
-      this.assert(num <= 0x3ffffff, 'Number is too big')
+      this.assert(num <= 0x3ffffff, "Number is too big");
 
-      const w = this.words[0] | 0
-      res = w === num ? 0 : w < num ? -1 : 1
+      const w = this.words[0] | 0;
+      res = w === num ? 0 : w < num ? -1 : 1;
     }
-    if (this.negative !== 0) return (-res | 0) as 1 | 0 | -1
-    return res
+    if (this.negative !== 0) return (-res | 0) as 1 | 0 | -1;
+    return res;
   }
 
   /**
@@ -3789,13 +3794,13 @@ export default class BigNumber {
    * const bn2 = new BigNumber('6');
    * const comparisonResult = bn1.cmp(bn2); // 1 - because 10 is greater than 6
    */
-  cmp (num: BigNumber): 1 | 0 | -1 {
-    if (this.negative !== 0 && num.negative === 0) return -1
-    if (this.negative === 0 && num.negative !== 0) return 1
+  cmp(num: BigNumber): 1 | 0 | -1 {
+    if (this.negative !== 0 && num.negative === 0) return -1;
+    if (this.negative === 0 && num.negative !== 0) return 1;
 
-    const res = this.ucmp(num)
-    if (this.negative !== 0) return (-res | 0) as 1 | 0 | -1
-    return res
+    const res = this.ucmp(num);
+    if (this.negative !== 0) return (-res | 0) as 1 | 0 | -1;
+    return res;
   }
 
   /**
@@ -3810,25 +3815,25 @@ export default class BigNumber {
    * let bigNumber2 = new BigNumber('2345');
    * let comparisonResult = bigNumber1.ucmp(bigNumber2); // Returns -1
    */
-  ucmp (num: BigNumber): 1 | 0 | -1 {
+  ucmp(num: BigNumber): 1 | 0 | -1 {
     // At this point both numbers have the same sign
-    if (this.length > num.length) return 1
-    if (this.length < num.length) return -1
+    if (this.length > num.length) return 1;
+    if (this.length < num.length) return -1;
 
-    let res: 1 | 0 | -1 = 0
+    let res: 1 | 0 | -1 = 0;
     for (let i = this.length - 1; i >= 0; i--) {
-      const a = this.words[i] | 0
-      const b = num.words[i] | 0
+      const a = this.words[i] | 0;
+      const b = num.words[i] | 0;
 
-      if (a === b) continue
+      if (a === b) continue;
       if (a < b) {
-        res = -1
+        res = -1;
       } else if (a > b) {
-        res = 1
+        res = 1;
       }
-      break
+      break;
     }
-    return res
+    return res;
   }
 
   /**
@@ -3842,8 +3847,8 @@ export default class BigNumber {
    * let bigNumber = new BigNumber('2345');
    * let isGreater = bigNumber.gtn(1234); // Returns true
    */
-  gtn (num: number): boolean {
-    return this.cmpn(num) === 1
+  gtn(num: number): boolean {
+    return this.cmpn(num) === 1;
   }
 
   /**
@@ -3858,8 +3863,8 @@ export default class BigNumber {
    * let bigNumber2 = new BigNumber('1234');
    * let isGreater = bigNumber1.gt(bigNumber2); // Returns true
    */
-  gt (num: BigNumber): boolean {
-    return this.cmp(num) === 1
+  gt(num: BigNumber): boolean {
+    return this.cmp(num) === 1;
   }
 
   /**
@@ -3873,8 +3878,8 @@ export default class BigNumber {
    * let bigNumber = new BigNumber('1234');
    * let isGreaterOrEqual = bigNumber.gten(1234); // Returns true
    */
-  gten (num: number): boolean {
-    return this.cmpn(num) >= 0
+  gten(num: number): boolean {
+    return this.cmpn(num) >= 0;
   }
 
   /**
@@ -3889,8 +3894,8 @@ export default class BigNumber {
    * let bigNumber2 = new BigNumber('1234');
    * let isGreaterOrEqual = bigNumber1.gte(bigNumber2); // Returns true
    */
-  gte (num: BigNumber): boolean {
-    return this.cmp(num) >= 0
+  gte(num: BigNumber): boolean {
+    return this.cmp(num) >= 0;
   }
 
   /**
@@ -3904,8 +3909,8 @@ export default class BigNumber {
    * let bigNumber = new BigNumber('1234');
    * let isLess = bigNumber.ltn(2345); // Returns true
    */
-  ltn (num: number): boolean {
-    return this.cmpn(num) === -1
+  ltn(num: number): boolean {
+    return this.cmpn(num) === -1;
   }
 
   /**
@@ -3920,8 +3925,8 @@ export default class BigNumber {
    * let bigNumber2 = new BigNumber('2345');
    * let isLess = bigNumber1.lt(bigNumber2); // Returns true
    */
-  lt (num: BigNumber): boolean {
-    return this.cmp(num) === -1
+  lt(num: BigNumber): boolean {
+    return this.cmp(num) === -1;
   }
 
   /**
@@ -3935,8 +3940,8 @@ export default class BigNumber {
    * let bigNumber = new BigNumber('2345');
    * let isLessOrEqual = bigNumber.lten(2345); // Returns true
    */
-  lten (num: number): boolean {
-    return this.cmpn(num) <= 0
+  lten(num: number): boolean {
+    return this.cmpn(num) <= 0;
   }
 
   /**
@@ -3951,8 +3956,8 @@ export default class BigNumber {
    * let bigNumber2 = new BigNumber('2345');
    * let isLessOrEqual = bigNumber1.lte(bigNumber2); // Returns true
    */
-  lte (num: BigNumber): boolean {
-    return this.cmp(num) <= 0
+  lte(num: BigNumber): boolean {
+    return this.cmp(num) <= 0;
   }
 
   /**
@@ -3966,8 +3971,8 @@ export default class BigNumber {
    * let bigNumber = new BigNumber('1234');
    * let isEqual = bigNumber.eqn(1234); // Returns true
    */
-  eqn (num: number): boolean {
-    return this.cmpn(num) === 0
+  eqn(num: number): boolean {
+    return this.cmpn(num) === 0;
   }
 
   /**
@@ -3981,8 +3986,8 @@ export default class BigNumber {
    * let bigNum = new BigNumber(10);
    * bigNum.eq(new BigNumber(10)); // true
    */
-  eq (num: BigNumber): boolean {
-    return this.cmp(num) === 0
+  eq(num: BigNumber): boolean {
+    return this.cmp(num) === 0;
   }
 
   /**
@@ -3998,10 +4003,10 @@ export default class BigNumber {
    * let redCtx = new ReductionContext();
    * bigNum.toRed(redCtx);
    */
-  toRed (ctx: ReductionContext): BigNumber {
-    this.assert(this.red == null, 'Already a number in reduction context')
-    this.assert(this.negative === 0, 'red works only with positives')
-    return ctx.convertTo(this).forceRed(ctx)
+  toRed(ctx: ReductionContext): BigNumber {
+    this.assert(this.red == null, "Already a number in reduction context");
+    this.assert(this.negative === 0, "red works only with positives");
+    return ctx.convertTo(this).forceRed(ctx);
   }
 
   /**
@@ -4017,12 +4022,12 @@ export default class BigNumber {
    * bigNum.toRed(redCtx);
    * bigNum.fromRed();
    */
-  fromRed (): BigNumber {
+  fromRed(): BigNumber {
     this.assert(
       this.red,
-      'fromRed works only with numbers in reduction context'
-    )
-    return (this.red).convertFrom(this)
+      "fromRed works only with numbers in reduction context"
+    );
+    return this.red.convertFrom(this);
   }
 
   /**
@@ -4037,10 +4042,10 @@ export default class BigNumber {
    * let redCtx = new ReductionContext();
    * bigNum.forceRed(redCtx);
    */
-  forceRed (ctx: ReductionContext): this {
+  forceRed(ctx: ReductionContext): this {
     // this.assert(this.red == null, 'Already a number in reduction context')
-    this.red = ctx
-    return this
+    this.red = ctx;
+    return this;
   }
 
   /**
@@ -4057,9 +4062,9 @@ export default class BigNumber {
    * bigNum.toRed(redCtx);
    * bigNum.redAdd(new BigNumber(20)); // returns a BigNumber of 30 in reduction context
    */
-  redAdd (num: BigNumber): BigNumber {
-    this.assert(this.red, 'redAdd works only with red numbers')
-    return (this.red).add(this, num)
+  redAdd(num: BigNumber): BigNumber {
+    this.assert(this.red, "redAdd works only with red numbers");
+    return this.red.add(this, num);
   }
 
   /**
@@ -4076,9 +4081,9 @@ export default class BigNumber {
    * bigNum.toRed(redCtx);
    * bigNum.redIAdd(new BigNumber(20)); // modifies the bigNum to 30 in reduction context
    */
-  redIAdd (num: BigNumber): BigNumber {
-    this.assert(this.red, 'redIAdd works only with red numbers')
-    return (this.red).iadd(this, num)
+  redIAdd(num: BigNumber): BigNumber {
+    this.assert(this.red, "redIAdd works only with red numbers");
+    return this.red.iadd(this, num);
   }
 
   /**
@@ -4095,9 +4100,9 @@ export default class BigNumber {
    * bigNum.toRed(redCtx);
    * bigNum.redSub(new BigNumber(20)); // returns a BigNumber of 10 in reduction context
    */
-  redSub (num: BigNumber): BigNumber {
-    this.assert(this.red, 'redSub works only with red numbers')
-    return (this.red).sub(this, num)
+  redSub(num: BigNumber): BigNumber {
+    this.assert(this.red, "redSub works only with red numbers");
+    return this.red.sub(this, num);
   }
 
   /**
@@ -4114,9 +4119,9 @@ export default class BigNumber {
    * bigNum.toRed(redCtx);
    * bigNum.redISub(new BigNumber(20)); // modifies the bigNum to 10 in reduction context
    */
-  redISub (num: BigNumber): BigNumber {
-    this.assert(this.red, 'redISub works only with red numbers')
-    return (this.red).isub(this, num)
+  redISub(num: BigNumber): BigNumber {
+    this.assert(this.red, "redISub works only with red numbers");
+    return this.red.isub(this, num);
   }
 
   /**
@@ -4133,9 +4138,9 @@ export default class BigNumber {
    * bigNum.toRed(redCtx);
    * bigNum.redShl(2); // returns a BigNumber of 4 in reduction context
    */
-  redShl (num: number): BigNumber {
-    this.assert(this.red, 'redShl works only with red numbers')
-    return (this.red).shl(this, num)
+  redShl(num: number): BigNumber {
+    this.assert(this.red, "redShl works only with red numbers");
+    return this.red.shl(this, num);
   }
 
   /**
@@ -4152,10 +4157,10 @@ export default class BigNumber {
    * bigNum.toRed(redCtx);
    * bigNum.redMul(new BigNumber(20)); // returns a BigNumber of 200 in reduction context
    */
-  redMul (num: BigNumber): BigNumber {
-    this.assert(this.red, 'redMul works only with red numbers')
-    ; (this.red).verify2(this, num)
-    return (this.red).mul(this, num)
+  redMul(num: BigNumber): BigNumber {
+    this.assert(this.red, "redMul works only with red numbers");
+    this.red.verify2(this, num);
+    return this.red.mul(this, num);
   }
 
   /**
@@ -4171,10 +4176,10 @@ export default class BigNumber {
    * let bigNum2 = new BigNumber('5');
    * bigNum1.redIMul(bigNum2);
    */
-  redIMul (num: BigNumber): BigNumber {
-    this.assert(this.red, 'redMul works only with red numbers')
-    ; (this.red).verify2(this, num)
-    return (this.red).imul(this, num)
+  redIMul(num: BigNumber): BigNumber {
+    this.assert(this.red, "redMul works only with red numbers");
+    this.red.verify2(this, num);
+    return this.red.imul(this, num);
   }
 
   /**
@@ -4192,10 +4197,10 @@ export default class BigNumber {
    * const result = num.redSqr();
    * console.log(result.toString()); // Outputs: '625' mod the red value
    */
-  redSqr (): BigNumber {
-    this.assert(this.red, 'redSqr works only with red numbers')
-    ; (this.red).verify1(this)
-    return (this.red).sqr(this)
+  redSqr(): BigNumber {
+    this.assert(this.red, "redSqr works only with red numbers");
+    this.red.verify1(this);
+    return this.red.sqr(this);
   }
 
   /**
@@ -4213,10 +4218,10 @@ export default class BigNumber {
    * num.redISqr();
    * console.log(num.toString()); // Outputs: '625' mod the red value
    */
-  redISqr (): BigNumber {
-    this.assert(this.red, 'redISqr works only with red numbers')
-    ; (this.red).verify1(this)
-    return (this.red).isqr(this)
+  redISqr(): BigNumber {
+    this.assert(this.red, "redISqr works only with red numbers");
+    this.red.verify1(this);
+    return this.red.isqr(this);
   }
 
   /**
@@ -4235,10 +4240,10 @@ export default class BigNumber {
    * const result = num.redSqrt();
    * console.log(result.toString()); // Outputs: '2' mod the red value
    */
-  redSqrt (): BigNumber {
-    this.assert(this.red, 'redSqrt works only with red numbers')
-    ; (this.red).verify1(this)
-    return (this.red).sqrt(this)
+  redSqrt(): BigNumber {
+    this.assert(this.red, "redSqrt works only with red numbers");
+    this.red.verify1(this);
+    return this.red.sqrt(this);
   }
 
   /**
@@ -4254,10 +4259,10 @@ export default class BigNumber {
    * a.red = someReductionContext;
    * let aInverse = a.redInvm();
    */
-  redInvm (): BigNumber {
-    this.assert(this.red, 'redInvm works only with red numbers')
-    ; (this.red).verify1(this)
-    return (this.red).invm(this)
+  redInvm(): BigNumber {
+    this.assert(this.red, "redInvm works only with red numbers");
+    this.red.verify1(this);
+    return this.red.invm(this);
   }
 
   /**
@@ -4273,10 +4278,10 @@ export default class BigNumber {
    * a.red = someReductionContext;
    * let aNeg = a.redNeg();
    */
-  redNeg (): BigNumber {
-    this.assert(this.red, 'redNeg works only with red numbers')
-    ; (this.red).verify1(this)
-    return (this.red).neg(this)
+  redNeg(): BigNumber {
+    this.assert(this.red, "redNeg works only with red numbers");
+    this.red.verify1(this);
+    return this.red.neg(this);
   }
 
   /**
@@ -4294,10 +4299,10 @@ export default class BigNumber {
    * let b = new BigNumber(3);
    * let result = a.redPow(b);  // equivalent to (a^b) mod red
    */
-  redPow (num: BigNumber): BigNumber {
-    this.assert((this.red != null) && (num.red == null), 'redPow(normalNum)')
-    ; (this.red).verify1(this)
-    return (this.red).pow(this, num)
+  redPow(num: BigNumber): BigNumber {
+    this.assert(this.red != null && num.red == null, "redPow(normalNum)");
+    this.red.verify1(this);
+    return this.red.pow(this, num);
   }
 
   /**
@@ -4312,11 +4317,11 @@ export default class BigNumber {
    * const exampleHex = 'a1b2c3';
    * const bigNumber = BigNumber.fromHex(exampleHex);
    */
-  static fromHex (hex: string, endian?: 'little' | 'big'): BigNumber {
-    if (endian === 'big') {
-      return new BigNumber(hex, 16)
+  static fromHex(hex: string, endian?: "little" | "big"): BigNumber {
+    if (endian === "big") {
+      return new BigNumber(hex, 16);
     } else {
-      return new BigNumber(hex, 16, 'le')
+      return new BigNumber(hex, 16, "le");
     }
   }
 
@@ -4331,8 +4336,8 @@ export default class BigNumber {
    * const bigNumber = new BigNumber(255);
    * const hex = bigNumber.toHex();
    */
-  toHex (length: number = 0): string {
-    return this.toString('hex', length * 2)
+  toHex(length: number = 0): string {
+    return this.toString("hex", length * 2);
   }
 
   /**
@@ -4347,8 +4352,8 @@ export default class BigNumber {
    * const serialized = '{"type":"BigNumber","hex":"a1b2c3"}';
    * const bigNumber = BigNumber.fromJSON(serialized);
    */
-  static fromJSON (str: string): BigNumber {
-    return new BigNumber(str)
+  static fromJSON(str: string): BigNumber {
+    return new BigNumber(str);
   }
 
   /**
@@ -4363,8 +4368,8 @@ export default class BigNumber {
    * const number = 1234;
    * const bigNumber = BigNumber.fromNumber(number);
    */
-  static fromNumber (n: number): BigNumber {
-    return new BigNumber(n)
+  static fromNumber(n: number): BigNumber {
+    return new BigNumber(n);
   }
 
   /**
@@ -4380,8 +4385,8 @@ export default class BigNumber {
    * const str = '1234';
    * const bigNumber = BigNumber.fromString(str, 16);
    */
-  static fromString (str: string, base?: number | 'hex'): BigNumber {
-    return new BigNumber(str, base)
+  static fromString(str: string, base?: number | "hex"): BigNumber {
+    return new BigNumber(str, base);
   }
 
   /**
@@ -4397,23 +4402,23 @@ export default class BigNumber {
    * const num = [0x81]
    * const bigNumber = BigNumber.fromSm(num, { endian: 'little' }); // equivalent to BigNumber from '-1'
    */
-  static fromSm (num: number[], endian: 'big' | 'little' = 'big'): BigNumber {
-    let n = num
+  static fromSm(num: number[], endian: "big" | "little" = "big"): BigNumber {
+    let n = num;
     if (num.length === 0) {
-      return new BigNumber(0)
+      return new BigNumber(0);
     }
 
-    if (endian === 'little') {
-      n = [...n]
-      n = n.reverse()
+    if (endian === "little") {
+      n = [...n];
+      n = n.reverse();
     }
 
     if ((n[0] & 0x80) !== 0) {
-      n = [...n]
-      n[0] = n[0] & 0x7f
-      return new BigNumber(n).neg()
+      n = [...n];
+      n[0] = n[0] & 0x7f;
+      return new BigNumber(n).neg();
     } else {
-      return new BigNumber(n)
+      return new BigNumber(n);
     }
   }
 
@@ -4428,31 +4433,31 @@ export default class BigNumber {
    * const bigNumber = new BigNumber(-1);
    * const num = bigNumber.toSm('little'); // [0x81]
    */
-  toSm (endian: 'big' | 'little' = 'big'): number[] {
-    let num: number[]
+  toSm(endian: "big" | "little" = "big"): number[] {
+    let num: number[];
     if (this.cmpn(0) === -1) {
-      num = this.neg().toArray()
+      num = this.neg().toArray();
       if ((num[0] & 0x80) !== 0) {
-        num = [0x80, ...num]
+        num = [0x80, ...num];
       } else {
-        num[0] = num[0] | 0x80
+        num[0] = num[0] | 0x80;
       }
     } else {
-      num = this.toArray()
+      num = this.toArray();
       if ((num[0] & 0x80) !== 0) {
-        num = [0x00, ...num]
+        num = [0x00, ...num];
       }
     }
 
     if (num.length === 1 && num[0] === 0) {
-      num = []
+      num = [];
     }
 
-    if (endian === 'little') {
-      num = num.reverse()
+    if (endian === "little") {
+      num = num.reverse();
     }
 
-    return num
+    return num;
   }
 
   /**
@@ -4469,37 +4474,37 @@ export default class BigNumber {
    * const bits = 0x1d00ffff;
    * const bigNumber = BigNumber.fromBits(bits);
    */
-  static fromBits (bits: number, strict: boolean = false): BigNumber {
+  static fromBits(bits: number, strict: boolean = false): BigNumber {
     // Convert to signed 32-bit value manually without using Buffer
-    bits = (bits & 0x80000000) ? bits - 0x100000000 : bits
+    bits = bits & 0x80000000 ? bits - 0x100000000 : bits;
     if (strict && (bits & 0x00800000) !== 0) {
-      throw new Error('negative bit set')
+      throw new Error("negative bit set");
     }
-    const nsize = bits >> 24
-    const nword = bits & 0x007fffff
+    const nsize = bits >> 24;
+    const nword = bits & 0x007fffff;
 
     // Manually create the byte array (similar to the original buffer)
     let bytes = [
-      (nword >> 24) & 0xFF,
-      (nword >> 16) & 0xFF,
-      (nword >> 8) & 0xFF,
-      nword & 0xFF
-    ]
+      (nword >> 24) & 0xff,
+      (nword >> 16) & 0xff,
+      (nword >> 8) & 0xff,
+      nword & 0xff,
+    ];
 
     if (nsize <= 3) {
-      bytes = bytes.slice(1, 1 + nsize) // remove the most significant byte(s) as necessary
+      bytes = bytes.slice(1, 1 + nsize); // remove the most significant byte(s) as necessary
     } else {
       // add trailing zeros (similar to the original buffer fill)
       for (let i = 0; i < nsize - 3; i++) {
-        bytes.push(0)
+        bytes.push(0);
       }
     }
 
     // Adjust for sign if the negative bit was set, and then convert array to BigNumber
     if ((bits & 0x00800000) !== 0) {
-      return new BigNumber(bytes).neg()
+      return new BigNumber(bytes).neg();
     } else {
-      return new BigNumber(bytes)
+      return new BigNumber(bytes);
     }
   }
 
@@ -4513,52 +4518,52 @@ export default class BigNumber {
    * const bigNumber = new BigNumber(1);
    * const bits = bigNumber.toBits();
    */
-  toBits (): number {
-    let byteArray
+  toBits(): number {
+    let byteArray;
     if (this.ltn(0)) {
-      byteArray = this.neg().toArray('be')
+      byteArray = this.neg().toArray("be");
     } else {
-      byteArray = this.toArray('be')
+      byteArray = this.toArray("be");
     }
 
     // Ensure that the byte array is of a minimum size
     while (byteArray.length < 4) {
-      byteArray.unshift(0)
+      byteArray.unshift(0);
     }
 
     // For the case where byteArray represents '00', the bits should be 0x00000000
-    if (byteArray.every(byte => byte === 0)) {
-      return 0x00000000
+    if (byteArray.every((byte) => byte === 0)) {
+      return 0x00000000;
     }
 
     // Remove leading zeros from the byte array for further processing
     while (byteArray[0] === 0) {
-      byteArray.shift()
+      byteArray.shift();
     }
 
-    let nsize = byteArray.length
+    let nsize = byteArray.length;
 
     // We're interested in the first three bytes for the "nword"
     // or in smaller cases, what's available
-    let nword = byteArray.slice(0, 3).reduce((acc, val) => (acc * 256) + val, 0)
+    let nword = byteArray.slice(0, 3).reduce((acc, val) => acc * 256 + val, 0);
 
     // Ensure we don't have the sign bit set initially
     if ((nword & 0x800000) !== 0) {
       // If the 24th bit is set, we're going to need one more byte to represent this number
-      byteArray.unshift(0) // Unshift a zero byte to not change the actual number
-      nsize += 1
-      nword >>>= 8 // Shift right to make room for that byte
+      byteArray.unshift(0); // Unshift a zero byte to not change the actual number
+      nsize += 1;
+      nword >>>= 8; // Shift right to make room for that byte
     }
 
     // Encode size and the 3 bytes into "nword"
-    let bits = (nsize << 24) | nword
+    let bits = (nsize << 24) | nword;
 
     if (this.ltn(0)) {
       // If the number is negative, set the 0x00800000 bit to indicate sign
-      bits |= 0x00800000
+      bits |= 0x00800000;
     }
 
-    return bits >>> 0 // Convert to unsigned 32-bit integer
+    return bits >>> 0; // Convert to unsigned 32-bit integer
   }
 
   /**
@@ -4576,34 +4581,36 @@ export default class BigNumber {
    * const num = [0x02, 0x01]
    * const bigNumber = BigNumber.fromScriptNum(num, true, 5)
    */
-  static fromScriptNum (
-    num: number[], requireMinimal?: boolean, maxNumSize?: number
+  static fromScriptNum(
+    num: number[],
+    requireMinimal?: boolean,
+    maxNumSize?: number
   ): BigNumber {
     if (maxNumSize === undefined) {
-      maxNumSize = Number.MAX_SAFE_INTEGER
+      maxNumSize = Number.MAX_SAFE_INTEGER;
     }
     if (num.length > maxNumSize) {
-      throw new Error('script number overflow')
+      throw new Error("script number overflow");
     }
     if (requireMinimal && num.length > 0) {
-    // Check that the number is encoded with the minimum possible
-    // number of bytes.
-    //
-    // If the most-significant-byte - excluding the sign bit - is zero
-    // then we're not minimal. Note how this test also rejects the
-    // negative-zero encoding, 0x80.
+      // Check that the number is encoded with the minimum possible
+      // number of bytes.
+      //
+      // If the most-significant-byte - excluding the sign bit - is zero
+      // then we're not minimal. Note how this test also rejects the
+      // negative-zero encoding, 0x80.
       if ((num[num.length - 1] & 0x7f) === 0) {
-      // One exception: if there's more than one byte and the most
-      // significant bit of the second-most-significant-byte is set
-      // it would conflict with the sign bit. An example of this case
-      // is +-255, which encode to 0xff00 and 0xff80 respectively.
-      // (big-endian).
+        // One exception: if there's more than one byte and the most
+        // significant bit of the second-most-significant-byte is set
+        // it would conflict with the sign bit. An example of this case
+        // is +-255, which encode to 0xff00 and 0xff80 respectively.
+        // (big-endian).
         if (num.length <= 1 || (num[num.length - 2] & 0x80) === 0) {
-          throw new Error('non-minimally encoded script number')
+          throw new Error("non-minimally encoded script number");
         }
       }
     }
-    return BigNumber.fromSm(num, 'little')
+    return BigNumber.fromSm(num, "little");
   }
 
   /**
@@ -4616,7 +4623,7 @@ export default class BigNumber {
    * const bigNumber = new BigNumber(258)
    * const num = bigNumber.toScriptNum() // equivalent to bigNumber.toSm('little')
    */
-  toScriptNum (): number[] {
-    return this.toSm('little')
+  toScriptNum(): number[] {
+    return this.toSm("little");
   }
 }

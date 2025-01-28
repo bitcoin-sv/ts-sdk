@@ -1,6 +1,6 @@
-import { VerifiableCertificate } from "../certificates/VerifiableCertificate.js"
-import { WalletInterface } from "../../../mod.js"
-import { RequestedCertificateSet } from "../types.js"
+import { VerifiableCertificate } from "../certificates/VerifiableCertificate";
+import { WalletInterface } from "../../../mod";
+import { RequestedCertificateSet } from "../types";
 
 /**
  * Retrieves an array of verifiable certificates based on the request.
@@ -10,22 +10,26 @@ import { RequestedCertificateSet } from "../types.js"
  * @param {string} verifierIdentityKey - The public key of the verifier requesting the certificates.
  * @returns {Promise<VerifiableCertificate[]>} An array of verifiable certificates.
  */
-export const getVerifiableCertificates = async (wallet: WalletInterface, requestedCertificates: RequestedCertificateSet, verifierIdentityKey: string): Promise<VerifiableCertificate[]> => {
+export const getVerifiableCertificates = async (
+  wallet: WalletInterface,
+  requestedCertificates: RequestedCertificateSet,
+  verifierIdentityKey: string
+): Promise<VerifiableCertificate[]> => {
   // Find matching certificates we have
   // Note: This may return multiple certificates that match the correct type.
   const matchingCertificates = await wallet.listCertificates({
     certifiers: requestedCertificates.certifiers,
-    types: Object.keys(requestedCertificates.types)
-  })
+    types: Object.keys(requestedCertificates.types),
+  });
 
   // For each certificate requested, create a verifiable cert with selectively revealed fields
   return await Promise.all(
-    matchingCertificates.certificates.map(async certificate => {
+    matchingCertificates.certificates.map(async (certificate) => {
       const { keyringForVerifier } = await wallet.proveCertificate({
         certificate,
         fieldsToReveal: requestedCertificates.types[certificate.type],
-        verifier: verifierIdentityKey
-      })
+        verifier: verifierIdentityKey,
+      });
       return new VerifiableCertificate(
         certificate.type,
         certificate.serialNumber,
@@ -35,6 +39,7 @@ export const getVerifiableCertificates = async (wallet: WalletInterface, request
         certificate.fields,
         certificate.signature,
         keyringForVerifier
-      )
-    }))
-}
+      );
+    })
+  );
+};

@@ -1,10 +1,14 @@
-export { default as Transaction } from './Transaction.js'
-export { default as MerklePath } from './MerklePath.js'
-export type { default as TransactionInput } from './TransactionInput.js'
-export type { default as TransactionOutput } from './TransactionOutput.js'
-export type { Broadcaster, BroadcastFailure, BroadcastResponse } from './Broadcaster.js'
-export { isBroadcastResponse, isBroadcastFailure } from './Broadcaster.js'
-export type { default as ChainTracker } from './ChainTracker.js'
-export { default as BeefTx } from './BeefTx.js'
-export * from './Beef.js'
-export { default as BeefParty } from './BeefParty.js'
+export { default as Transaction } from "./Transaction";
+export { default as MerklePath } from "./MerklePath";
+export type { default as TransactionInput } from "./TransactionInput";
+export type { default as TransactionOutput } from "./TransactionOutput";
+export type {
+  Broadcaster,
+  BroadcastFailure,
+  BroadcastResponse,
+} from "./Broadcaster";
+export { isBroadcastResponse, isBroadcastFailure } from "./Broadcaster";
+export type { default as ChainTracker } from "./ChainTracker";
+export { default as BeefTx } from "./BeefTx";
+export * from "./Beef";
+export { default as BeefParty } from "./BeefParty";

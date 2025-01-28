@@ -1,40 +1,42 @@
 class Rand {
-  _rand: Function
-  constructor () {
+  _rand: Function;
+  constructor() {
     const noRand = () => {
-      throw new Error('No secure random number generator is available in this environment.')
-    }
-    if (typeof self === 'object') {
+      throw new Error(
+        "No secure random number generator is available in this environment."
+      );
+    };
+    if (typeof self === "object") {
       /* eslint-disable-next-line */
       if (self.crypto?.getRandomValues) {
-        this._rand = n => {
-          const arr = new Uint8Array(n)
+        this._rand = (n) => {
+          const arr = new Uint8Array(n);
           /* eslint-disable-next-line */
-          self.crypto.getRandomValues(arr)
-          return [...arr]
-        }
-      } else /* if (typeof window === 'object') */ {
-        this._rand = noRand
+          self.crypto.getRandomValues(arr);
+          return [...arr];
+        };
+      } /* if (typeof window === 'object') */ else {
+        this._rand = noRand;
       }
     } else {
       try {
         /* eslint-disable-next-line */
-        const crypto = require('crypto')
-        if (typeof crypto.randomBytes === 'function') {
-          this._rand = (n: number) => [...crypto.randomBytes(n)]
+        const crypto = require("crypto");
+        if (typeof crypto.randomBytes === "function") {
+          this._rand = (n: number) => [...crypto.randomBytes(n)];
         }
       } catch (e) {
-        this._rand = noRand
+        this._rand = noRand;
       }
     }
   }
 
-  generate (len: number): number[] {
-    return this._rand(len)
+  generate(len: number): number[] {
+    return this._rand(len);
   }
 }
 
-let ayn: Rand | null = null
+let ayn: Rand | null = null;
 
 /**
  * Generates a sequence of pseudo-random bytes with the given length.
@@ -49,7 +51,7 @@ let ayn: Rand | null = null
  */
 export default (len: number): number[] => {
   if (ayn == null) {
-    ayn = new Rand()
+    ayn = new Rand();
   }
-  return ayn.generate(len)
-}
+  return ayn.generate(len);
+};

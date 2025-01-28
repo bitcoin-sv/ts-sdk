@@ -1,7 +1,7 @@
-import { toArray } from "../../../dist/cjs/src/primitives/utils.js";
-import { TOTP } from "../../../dist/cjs/src/totp/totp.js";
+import { toArray } from "../../primitives/utils";
+import { TOTP } from "../../totp/totp";
 
-const secret = toArray("48656c6c6f21deadbeef", 'hex');
+const secret = toArray("48656c6c6f21deadbeef", "hex");
 const period = 30; //sec
 const periodMS = 30 * 1000; //ms
 const options = {
