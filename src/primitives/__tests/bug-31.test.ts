@@ -13,7 +13,9 @@ describe('bug-31 tests', () => {
     const bn = c.n.addn(12)
     const sn = new BigNumber(12)
     {
-      expect(() => new PrivateKey(bn.toHex(), 'hex', 'be', 'error')).toThrow('Input is out of field')
+      expect(() => new PrivateKey(bn.toHex(), 'hex', 'be', 'error')).toThrow(
+        'Input is out of field'
+      )
     }
     const o = PrivateKey.fromString(bn.toHex(), 'hex')
     const os = PrivateKey.fromString(sn.toHex(), 'hex')

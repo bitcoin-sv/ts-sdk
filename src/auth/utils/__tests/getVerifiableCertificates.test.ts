@@ -11,15 +11,15 @@ describe('getVerifiableCertificates', () => {
   beforeEach(() => {
     mockWallet = {
       listCertificates: jest.fn(),
-      proveCertificate: jest.fn(),
+      proveCertificate: jest.fn()
     } as unknown as Wallet
 
     requestedCertificates = {
       certifiers: ['certifier1', 'certifier2'],
       types: {
         certType1: ['field1', 'field2'],
-        certType2: ['field3'],
-      },
+        certType2: ['field3']
+      }
     }
 
     verifierIdentityKey = 'verifier_public_key'
@@ -33,27 +33,31 @@ describe('getVerifiableCertificates', () => {
       certifier: 'certifier1',
       revocationOutpoint: 'outpoint1',
       fields: { field1: 'encryptedData1', field2: 'encryptedData2' },
-      signature: 'signature1',
-    };
+      signature: 'signature1'
+    }
 
-    (mockWallet.listCertificates as jest.Mock).mockResolvedValue({
+    ;(mockWallet.listCertificates as jest.Mock).mockResolvedValue({
       certificates: [mockCertificate]
-    });
-    (mockWallet.proveCertificate as jest.Mock).mockResolvedValue({
+    })
+    ;(mockWallet.proveCertificate as jest.Mock).mockResolvedValue({
       keyringForVerifier: { field1: 'key1', field2: 'key2' }
     })
 
-    const result = await getVerifiableCertificates(mockWallet, requestedCertificates, verifierIdentityKey)
+    const result = await getVerifiableCertificates(
+      mockWallet,
+      requestedCertificates,
+      verifierIdentityKey
+    )
 
     expect(mockWallet.listCertificates).toHaveBeenCalledWith({
       certifiers: requestedCertificates.certifiers,
-      types: Object.keys(requestedCertificates.types),
+      types: Object.keys(requestedCertificates.types)
     })
 
     expect(mockWallet.proveCertificate).toHaveBeenCalledWith({
       certificate: mockCertificate,
       fieldsToReveal: requestedCertificates.types[mockCertificate.type],
-      verifier: verifierIdentityKey,
+      verifier: verifierIdentityKey
     })
 
     expect(result).toHaveLength(1)
@@ -70,11 +74,16 @@ describe('getVerifiableCertificates', () => {
     })
   })
 
-
   it('returns an empty array when no matching certificates are found', async () => {
-    (mockWallet.listCertificates as jest.Mock).mockResolvedValue({ certificates: [] })
+    ;(mockWallet.listCertificates as jest.Mock).mockResolvedValue({
+      certificates: []
+    })
 
-    const result = await getVerifiableCertificates(mockWallet, requestedCertificates, verifierIdentityKey)
+    const result = await getVerifiableCertificates(
+      mockWallet,
+      requestedCertificates,
+      verifierIdentityKey
+    )
 
     expect(result).toEqual([])
     expect(mockWallet.listCertificates).toHaveBeenCalled()
@@ -82,11 +91,17 @@ describe('getVerifiableCertificates', () => {
   })
 
   it('propagates errors from listCertificates', async () => {
-    (mockWallet.listCertificates as jest.Mock).mockRejectedValue(new Error('listCertificates failed'))
-
-    await expect(getVerifiableCertificates(mockWallet, requestedCertificates, verifierIdentityKey)).rejects.toThrow(
-      'listCertificates failed'
+    ;(mockWallet.listCertificates as jest.Mock).mockRejectedValue(
+      new Error('listCertificates failed')
     )
+
+    await expect(
+      getVerifiableCertificates(
+        mockWallet,
+        requestedCertificates,
+        verifierIdentityKey
+      )
+    ).rejects.toThrow('listCertificates failed')
   })
 
   it('propagates errors from proveCertificate', async () => {
@@ -97,30 +112,41 @@ describe('getVerifiableCertificates', () => {
       certifier: 'certifier1',
       revocationOutpoint: 'outpoint1',
       fields: { field1: 'encryptedData1', field2: 'encryptedData2' },
-      signature: 'signature1',
-    };
+      signature: 'signature1'
+    }
 
-    (mockWallet.listCertificates as jest.Mock).mockResolvedValue({
-      certificates: [mockCertificate],
-    });
-    (mockWallet.proveCertificate as jest.Mock).mockRejectedValue(new Error('proveCertificate failed'))
-
-    await expect(getVerifiableCertificates(mockWallet, requestedCertificates, verifierIdentityKey)).rejects.toThrow(
-      'proveCertificate failed'
+    ;(mockWallet.listCertificates as jest.Mock).mockResolvedValue({
+      certificates: [mockCertificate]
+    })
+    ;(mockWallet.proveCertificate as jest.Mock).mockRejectedValue(
+      new Error('proveCertificate failed')
     )
+
+    await expect(
+      getVerifiableCertificates(
+        mockWallet,
+        requestedCertificates,
+        verifierIdentityKey
+      )
+    ).rejects.toThrow('proveCertificate failed')
   })
 
   it('handles empty requested certificates gracefully', async () => {
-    requestedCertificates = { certifiers: [], types: {} };
+    requestedCertificates = { certifiers: [], types: {} }
+    ;(mockWallet.listCertificates as jest.Mock).mockResolvedValue({
+      certificates: []
+    })
 
-    (mockWallet.listCertificates as jest.Mock).mockResolvedValue({ certificates: [] })
-
-    const result = await getVerifiableCertificates(mockWallet, requestedCertificates, verifierIdentityKey)
+    const result = await getVerifiableCertificates(
+      mockWallet,
+      requestedCertificates,
+      verifierIdentityKey
+    )
 
     expect(result).toEqual([])
     expect(mockWallet.listCertificates).toHaveBeenCalledWith({
       certifiers: [],
-      types: [],
+      types: []
     })
   })
 })

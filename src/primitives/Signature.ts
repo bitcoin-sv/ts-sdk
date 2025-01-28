@@ -284,7 +284,9 @@ export default class Signature {
     enc?: 'hex' | 'base64'
   ): number[] | string {
     if (recovery < 0 || recovery > 3) throw new Error('Invalid recovery param')
-    if (typeof compressed !== 'boolean') { throw new Error('Invalid compressed param') }
+    if (typeof compressed !== 'boolean') {
+      throw new Error('Invalid compressed param')
+    }
     let compactByte = 27 + recovery
     if (compressed) {
       compactByte += 4

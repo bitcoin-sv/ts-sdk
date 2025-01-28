@@ -3,7 +3,11 @@ import { wordList as enWordList } from '../../../dist/cjs/src/compat/bip-39-word
 import Random from '../../../dist/cjs/src/primitives/Random'
 import vectors from './Mnemonic.vectors'
 import HD from '../../../dist/cjs/src/compat/HD'
-import { toBase58Check, toHex, toArray } from '../../../dist/cjs/src/primitives/utils'
+import {
+  toBase58Check,
+  toHex,
+  toArray
+} from '../../../dist/cjs/src/primitives/utils'
 
 describe('Mnemonic', function () {
   it('should initialize the class', () => {
@@ -22,9 +26,9 @@ describe('Mnemonic', function () {
     //
     // More information here:
     // https://github.com/iancoleman/bip39/issues/58
-    const seed = Mnemonic.fromString('fruit wave dwarf banana earth journey tattoo true farm silk olive fence').toSeed(
-      'banana'
-    )
+    const seed = Mnemonic.fromString(
+      'fruit wave dwarf banana earth journey tattoo true farm silk olive fence'
+    ).toSeed('banana')
     let bip32 = HD.fromSeed(seed)
     bip32 = bip32.derive("m/44'/0'/0'/0/0")
     const pkh = bip32.pubKey.toHash()

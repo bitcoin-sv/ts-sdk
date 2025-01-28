@@ -1,5 +1,9 @@
 import ProtoWallet from '../../../dist/cjs/src/wallet/ProtoWallet.js'
-import { Utils, PrivateKey, Hash } from '../../../dist/cjs/src/primitives/index.js'
+import {
+  Utils,
+  PrivateKey,
+  Hash
+} from '../../../dist/cjs/src/primitives/index.js'
 
 const sampleData = [3, 1, 4, 1, 5, 9]
 
@@ -11,33 +15,64 @@ describe('ProtoWallet', () => {
     const wallet = new ProtoWallet('anyone')
     const { valid } = await wallet.verifySignature({
       data: Utils.toArray('BRC-3 Compliance Validated!', 'utf8'),
-      signature: [48, 68, 2, 32, 43, 34, 58, 156, 219, 32, 50, 70, 29, 240, 155, 137, 88, 60, 200, 95, 243, 198, 201, 21, 56, 82, 141, 112, 69, 196, 170, 73, 156, 6, 44, 48, 2, 32, 118, 125, 254, 201, 44, 87, 177, 170, 93, 11, 193, 134, 18, 70, 9, 31, 234, 27, 170, 177, 54, 96, 181, 140, 166, 196, 144, 14, 230, 118, 106, 105],
+      signature: [
+        48, 68, 2, 32, 43, 34, 58, 156, 219, 32, 50, 70, 29, 240, 155, 137, 88,
+        60, 200, 95, 243, 198, 201, 21, 56, 82, 141, 112, 69, 196, 170, 73, 156,
+        6, 44, 48, 2, 32, 118, 125, 254, 201, 44, 87, 177, 170, 93, 11, 193,
+        134, 18, 70, 9, 31, 234, 27, 170, 177, 54, 96, 181, 140, 166, 196, 144,
+        14, 230, 118, 106, 105
+      ],
       protocolID: [2, 'BRC3 Test'],
       keyID: '42',
-      counterparty: '0294c479f762f6baa97fbcd4393564c1d7bd8336ebd15928135bbcf575cd1a71a1'
+      counterparty:
+        '0294c479f762f6baa97fbcd4393564c1d7bd8336ebd15928135bbcf575cd1a71a1'
     })
     expect(valid).toBe(true)
   })
   it('Validates the BRC-2 HMAC compliance vector', async () => {
-    const wallet = new ProtoWallet(new PrivateKey('6a2991c9de20e38b31d7ea147bf55f5039e4bbc073160f5e0d541d1f17e321b8', 'hex'))
+    const wallet = new ProtoWallet(
+      new PrivateKey(
+        '6a2991c9de20e38b31d7ea147bf55f5039e4bbc073160f5e0d541d1f17e321b8',
+        'hex'
+      )
+    )
     const { valid } = await wallet.verifyHmac({
       data: Utils.toArray('BRC-2 HMAC Compliance Validated!', 'utf8'),
-      hmac: [81, 240, 18, 153, 163, 45, 174, 85, 9, 246, 142, 125, 209, 133, 82, 76, 254, 103, 46, 182, 86, 59, 219, 61, 126, 30, 176, 232, 233, 100, 234, 14],
+      hmac: [
+        81, 240, 18, 153, 163, 45, 174, 85, 9, 246, 142, 125, 209, 133, 82, 76,
+        254, 103, 46, 182, 86, 59, 219, 61, 126, 30, 176, 232, 233, 100, 234, 14
+      ],
       protocolID: [2, 'BRC2 Test'],
       keyID: '42',
-      counterparty: '0294c479f762f6baa97fbcd4393564c1d7bd8336ebd15928135bbcf575cd1a71a1'
+      counterparty:
+        '0294c479f762f6baa97fbcd4393564c1d7bd8336ebd15928135bbcf575cd1a71a1'
     })
     expect(valid).toBe(true)
   })
   it('Validates the BRC-2 Encryption compliance vector', async () => {
-    const wallet = new ProtoWallet(new PrivateKey('6a2991c9de20e38b31d7ea147bf55f5039e4bbc073160f5e0d541d1f17e321b8', 'hex'))
+    const wallet = new ProtoWallet(
+      new PrivateKey(
+        '6a2991c9de20e38b31d7ea147bf55f5039e4bbc073160f5e0d541d1f17e321b8',
+        'hex'
+      )
+    )
     const { plaintext } = await wallet.decrypt({
-      ciphertext: [252, 203, 216, 184, 29, 161, 223, 212, 16, 193, 94, 99, 31, 140, 99, 43, 61, 236, 184, 67, 54, 105, 199, 47, 11, 19, 184, 127, 2, 165, 125, 9, 188, 195, 196, 39, 120, 130, 213, 95, 186, 89, 64, 28, 1, 80, 20, 213, 159, 133, 98, 253, 128, 105, 113, 247, 197, 152, 236, 64, 166, 207, 113, 134, 65, 38, 58, 24, 127, 145, 140, 206, 47, 70, 146, 84, 186, 72, 95, 35, 154, 112, 178, 55, 72, 124],
+      ciphertext: [
+        252, 203, 216, 184, 29, 161, 223, 212, 16, 193, 94, 99, 31, 140, 99, 43,
+        61, 236, 184, 67, 54, 105, 199, 47, 11, 19, 184, 127, 2, 165, 125, 9,
+        188, 195, 196, 39, 120, 130, 213, 95, 186, 89, 64, 28, 1, 80, 20, 213,
+        159, 133, 98, 253, 128, 105, 113, 247, 197, 152, 236, 64, 166, 207, 113,
+        134, 65, 38, 58, 24, 127, 145, 140, 206, 47, 70, 146, 84, 186, 72, 95,
+        35, 154, 112, 178, 55, 72, 124
+      ],
       protocolID: [2, 'BRC2 Test'],
       keyID: '42',
-      counterparty: '0294c479f762f6baa97fbcd4393564c1d7bd8336ebd15928135bbcf575cd1a71a1'
+      counterparty:
+        '0294c479f762f6baa97fbcd4393564c1d7bd8336ebd15928135bbcf575cd1a71a1'
     })
-    expect(Utils.toUTF8(plaintext)).toEqual('BRC-2 Encryption Compliance Validated!')
+    expect(Utils.toUTF8(plaintext)).toEqual(
+      'BRC-2 Encryption Compliance Validated!'
+    )
   })
   it('Encrypts messages decryptable by the counterparty', async () => {
     const userKey = PrivateKey.fromRandom()
@@ -70,24 +105,33 @@ describe('ProtoWallet', () => {
       keyID: '4',
       counterparty: counterpartyKey.toPublicKey().toString()
     })
-    await expect(async () => await counterparty.decrypt({
-      ciphertext,
-      protocolID: [1, 'tests'],
-      keyID: '4',
-      counterparty: userKey.toPublicKey().toString()
-    })).rejects.toThrow()
-    await expect(async () => await counterparty.decrypt({
-      ciphertext,
-      protocolID: [2, 'tests'],
-      keyID: '5',
-      counterparty: userKey.toPublicKey().toString()
-    })).rejects.toThrow()
-    await expect(async () => await counterparty.decrypt({
-      ciphertext,
-      protocolID: [2, 'tests'],
-      keyID: '4',
-      counterparty: counterpartyKey.toPublicKey().toString()
-    })).rejects.toThrow()
+    await expect(
+      async () =>
+        await counterparty.decrypt({
+          ciphertext,
+          protocolID: [1, 'tests'],
+          keyID: '4',
+          counterparty: userKey.toPublicKey().toString()
+        })
+    ).rejects.toThrow()
+    await expect(
+      async () =>
+        await counterparty.decrypt({
+          ciphertext,
+          protocolID: [2, 'tests'],
+          keyID: '5',
+          counterparty: userKey.toPublicKey().toString()
+        })
+    ).rejects.toThrow()
+    await expect(
+      async () =>
+        await counterparty.decrypt({
+          ciphertext,
+          protocolID: [2, 'tests'],
+          keyID: '4',
+          counterparty: counterpartyKey.toPublicKey().toString()
+        })
+    ).rejects.toThrow()
   })
   it('Correctly derives keys for a counterparty', async () => {
     const userKey = PrivateKey.fromRandom()
@@ -103,12 +147,13 @@ describe('ProtoWallet', () => {
       keyID: '4',
       counterparty: counterpartyKey.toPublicKey().toString()
     })
-    const { publicKey: derivedByCounterparty } = await counterparty.getPublicKey({
-      protocolID: [2, 'tests'],
-      keyID: '4',
-      counterparty: userKey.toPublicKey().toString(),
-      forSelf: true
-    })
+    const { publicKey: derivedByCounterparty } =
+      await counterparty.getPublicKey({
+        protocolID: [2, 'tests'],
+        keyID: '4',
+        counterparty: userKey.toPublicKey().toString(),
+        forSelf: true
+      })
     expect(derivedForCounterparty).toEqual(derivedByCounterparty)
   })
   it('Signs messages verifiable by the counterparty', async () => {
@@ -172,34 +217,46 @@ describe('ProtoWallet', () => {
       keyID: '4',
       counterparty: counterpartyKey.toPublicKey().toString()
     })
-    await expect(async () => await counterparty.verifySignature({
-      signature,
-      data: [0, ...sampleData],
-      protocolID: [2, 'tests'],
-      keyID: '4',
-      counterparty: userKey.toPublicKey().toString()
-    })).rejects.toThrow()
-    await expect(async () => await counterparty.verifySignature({
-      signature,
-      data: sampleData,
-      protocolID: [2, 'wrong'],
-      keyID: '4',
-      counterparty: userKey.toPublicKey().toString()
-    })).rejects.toThrow()
-    await expect(async () => await counterparty.verifySignature({
-      signature,
-      data: sampleData,
-      protocolID: [2, 'tests'],
-      keyID: '2',
-      counterparty: userKey.toPublicKey().toString()
-    })).rejects.toThrow()
-    await expect(async () => await counterparty.verifySignature({
-      signature,
-      data: sampleData,
-      protocolID: [2, 'tests'],
-      keyID: '4',
-      counterparty: counterpartyKey.toPublicKey().toString()
-    })).rejects.toThrow()
+    await expect(
+      async () =>
+        await counterparty.verifySignature({
+          signature,
+          data: [0, ...sampleData],
+          protocolID: [2, 'tests'],
+          keyID: '4',
+          counterparty: userKey.toPublicKey().toString()
+        })
+    ).rejects.toThrow()
+    await expect(
+      async () =>
+        await counterparty.verifySignature({
+          signature,
+          data: sampleData,
+          protocolID: [2, 'wrong'],
+          keyID: '4',
+          counterparty: userKey.toPublicKey().toString()
+        })
+    ).rejects.toThrow()
+    await expect(
+      async () =>
+        await counterparty.verifySignature({
+          signature,
+          data: sampleData,
+          protocolID: [2, 'tests'],
+          keyID: '2',
+          counterparty: userKey.toPublicKey().toString()
+        })
+    ).rejects.toThrow()
+    await expect(
+      async () =>
+        await counterparty.verifySignature({
+          signature,
+          data: sampleData,
+          protocolID: [2, 'tests'],
+          keyID: '4',
+          counterparty: counterpartyKey.toPublicKey().toString()
+        })
+    ).rejects.toThrow()
   })
   it('Computes HMAC over messages verifiable by the counterparty', async () => {
     const userKey = PrivateKey.fromRandom()
@@ -233,34 +290,46 @@ describe('ProtoWallet', () => {
       keyID: '4',
       counterparty: counterpartyKey.toPublicKey().toString()
     })
-    await expect(async () => await counterparty.verifyHmac({
-      hmac,
-      data: [0, ...sampleData],
-      protocolID: [2, 'tests'],
-      keyID: '4',
-      counterparty: userKey.toPublicKey().toString()
-    })).rejects.toThrow()
-    await expect(async () => await counterparty.verifyHmac({
-      hmac,
-      data: sampleData,
-      protocolID: [2, 'wrong'],
-      keyID: '4',
-      counterparty: userKey.toPublicKey().toString()
-    })).rejects.toThrow()
-    await expect(async () => await counterparty.verifyHmac({
-      hmac,
-      data: sampleData,
-      protocolID: [2, 'tests'],
-      keyID: '2',
-      counterparty: userKey.toPublicKey().toString()
-    })).rejects.toThrow()
-    await expect(async () => await counterparty.verifyHmac({
-      hmac,
-      data: sampleData,
-      protocolID: [2, 'tests'],
-      keyID: '4',
-      counterparty: counterpartyKey.toPublicKey().toString()
-    })).rejects.toThrow()
+    await expect(
+      async () =>
+        await counterparty.verifyHmac({
+          hmac,
+          data: [0, ...sampleData],
+          protocolID: [2, 'tests'],
+          keyID: '4',
+          counterparty: userKey.toPublicKey().toString()
+        })
+    ).rejects.toThrow()
+    await expect(
+      async () =>
+        await counterparty.verifyHmac({
+          hmac,
+          data: sampleData,
+          protocolID: [2, 'wrong'],
+          keyID: '4',
+          counterparty: userKey.toPublicKey().toString()
+        })
+    ).rejects.toThrow()
+    await expect(
+      async () =>
+        await counterparty.verifyHmac({
+          hmac,
+          data: sampleData,
+          protocolID: [2, 'tests'],
+          keyID: '2',
+          counterparty: userKey.toPublicKey().toString()
+        })
+    ).rejects.toThrow()
+    await expect(
+      async () =>
+        await counterparty.verifyHmac({
+          hmac,
+          data: sampleData,
+          protocolID: [2, 'tests'],
+          keyID: '4',
+          counterparty: counterpartyKey.toPublicKey().toString()
+        })
+    ).rejects.toThrow()
   })
   it('Uses anyone for creating signatures and self for other operations if no counterparty is provided', async () => {
     const userKey = PrivateKey.fromRandom()
@@ -378,7 +447,9 @@ describe('ProtoWallet', () => {
       })
 
       // Compute expected linkage
-      const expectedLinkage = proverKey.deriveSharedSecret(counterpartyKey.toPublicKey()).encode(true)
+      const expectedLinkage = proverKey
+        .deriveSharedSecret(counterpartyKey.toPublicKey())
+        .encode(true)
 
       // Compare linkage and expectedLinkage
       expect(linkage).toEqual(expectedLinkage)
@@ -408,18 +479,27 @@ describe('ProtoWallet', () => {
       // Verifier decrypts the encrypted linkage
       const { plaintext: linkage } = await verifierWallet.decrypt({
         ciphertext: revelation.encryptedLinkage,
-        protocolID: [2, `specific linkage revelation ${protocolID[0]} ${protocolID[1]}`],
+        protocolID: [
+          2,
+          `specific linkage revelation ${protocolID[0]} ${protocolID[1]}`
+        ],
         keyID,
         counterparty: proverKey.toPublicKey().toString()
       })
 
       // Compute expected linkage
-      const sharedSecret = proverKey.deriveSharedSecret(counterpartyKey.toPublicKey()).encode(true)
+      const sharedSecret = proverKey
+        .deriveSharedSecret(counterpartyKey.toPublicKey())
+        .encode(true)
 
       // Function to compute the invoice number
       const computeInvoiceNumber = function (protocolID, keyID) {
         const securityLevel = protocolID[0]
-        if (!Number.isInteger(securityLevel) || securityLevel < 0 || securityLevel > 2) {
+        if (
+          !Number.isInteger(securityLevel) ||
+          securityLevel < 0 ||
+          securityLevel > 2
+        ) {
           throw new Error('Protocol security level must be 0, 1, or 2')
         }
         const protocolName = protocolID[1].toLowerCase().trim()
@@ -436,10 +516,14 @@ describe('ProtoWallet', () => {
           throw new Error('Protocol names must be 5 characters or more')
         }
         if (protocolName.includes('  ')) {
-          throw new Error('Protocol names cannot contain multiple consecutive spaces ("  ")')
+          throw new Error(
+            'Protocol names cannot contain multiple consecutive spaces ("  ")'
+          )
         }
         if (!/^[a-z0-9 ]+$/g.test(protocolName)) {
-          throw new Error('Protocol names can only contain letters, numbers and spaces')
+          throw new Error(
+            'Protocol names can only contain letters, numbers and spaces'
+          )
         }
         if (protocolName.endsWith(' protocol')) {
           throw new Error('No need to end your protocol name with " protocol"')

@@ -1,4 +1,10 @@
-import { PrivateKey, PublicKey, SymmetricKey, Utils, Hash } from '../../../dist/cjs/src/primitives/index.js'
+import {
+  PrivateKey,
+  PublicKey,
+  SymmetricKey,
+  Utils,
+  Hash
+} from '../../../dist/cjs/src/primitives/index.js'
 import KeyDeriver from '../../../dist/cjs/src/wallet/KeyDeriver.js'
 
 describe('KeyDeriver', () => {
@@ -18,7 +24,10 @@ describe('KeyDeriver', () => {
   })
 
   test('should compute the correct invoice number', () => {
-    const invoiceNumber = (keyDeriver as any).computeInvoiceNumber(protocolID, keyID)
+    const invoiceNumber = (keyDeriver as any).computeInvoiceNumber(
+      protocolID,
+      keyID
+    )
     expect(invoiceNumber).toBe('0-testprotocol-12345')
   })
 
@@ -37,57 +46,113 @@ describe('KeyDeriver', () => {
   })
 
   test('should normalize counterparty correctly when given as a hex string', () => {
-    const normalized = (keyDeriver as any).normalizeCounterparty(counterpartyPublicKey.toString())
+    const normalized = (keyDeriver as any).normalizeCounterparty(
+      counterpartyPublicKey.toString()
+    )
     expect(normalized.toString()).toBe(counterpartyPublicKey.toString())
   })
 
   test('should normalize counterparty correctly when given as a public key', () => {
-    const normalized = (keyDeriver as any).normalizeCounterparty(counterpartyPublicKey)
+    const normalized = (keyDeriver as any).normalizeCounterparty(
+      counterpartyPublicKey
+    )
     expect(normalized.toString()).toBe(counterpartyPublicKey.toString())
   })
 
   test('should allow public key derivation as anyone', () => {
     const anyoneDeriver = new KeyDeriver('anyone')
-    const derivedPublicKey = anyoneDeriver.derivePublicKey(protocolID, keyID, counterpartyPublicKey)
+    const derivedPublicKey = anyoneDeriver.derivePublicKey(
+      protocolID,
+      keyID,
+      counterpartyPublicKey
+    )
     expect(derivedPublicKey).toBeInstanceOf(PublicKey)
-    expect(derivedPublicKey.toString()).toEqual(counterpartyPublicKey.deriveChild(new PrivateKey(1), '0-testprotocol-12345').toString())
+    expect(derivedPublicKey.toString()).toEqual(
+      counterpartyPublicKey
+        .deriveChild(new PrivateKey(1), '0-testprotocol-12345')
+        .toString()
+    )
   })
 
   test('should derive the correct public key for counterparty', () => {
-    const derivedPublicKey = keyDeriver.derivePublicKey(protocolID, keyID, counterpartyPublicKey)
+    const derivedPublicKey = keyDeriver.derivePublicKey(
+      protocolID,
+      keyID,
+      counterpartyPublicKey
+    )
     expect(derivedPublicKey).toBeInstanceOf(PublicKey)
-    expect(derivedPublicKey.toString()).toEqual(counterpartyPublicKey.deriveChild(rootPrivateKey, '0-testprotocol-12345').toString())
+    expect(derivedPublicKey.toString()).toEqual(
+      counterpartyPublicKey
+        .deriveChild(rootPrivateKey, '0-testprotocol-12345')
+        .toString()
+    )
   })
 
   test('should derive the correct public key for self', () => {
-    const derivedPublicKey = keyDeriver.derivePublicKey(protocolID, keyID, counterpartyPublicKey, true)
+    const derivedPublicKey = keyDeriver.derivePublicKey(
+      protocolID,
+      keyID,
+      counterpartyPublicKey,
+      true
+    )
     expect(derivedPublicKey).toBeInstanceOf(PublicKey)
-    expect(derivedPublicKey.toString()).toEqual(rootPrivateKey.deriveChild(counterpartyPublicKey, '0-testprotocol-12345').toPublicKey().toString())
+    expect(derivedPublicKey.toString()).toEqual(
+      rootPrivateKey
+        .deriveChild(counterpartyPublicKey, '0-testprotocol-12345')
+        .toPublicKey()
+        .toString()
+    )
   })
 
   test('should derive the correct private key', () => {
-    const derivedPrivateKey = keyDeriver.derivePrivateKey(protocolID, keyID, counterpartyPublicKey)
+    const derivedPrivateKey = keyDeriver.derivePrivateKey(
+      protocolID,
+      keyID,
+      counterpartyPublicKey
+    )
     expect(derivedPrivateKey).toBeInstanceOf(PrivateKey)
-    expect(derivedPrivateKey.toString()).toEqual(rootPrivateKey.deriveChild(counterpartyPublicKey, '0-testprotocol-12345').toString())
+    expect(derivedPrivateKey.toString()).toEqual(
+      rootPrivateKey
+        .deriveChild(counterpartyPublicKey, '0-testprotocol-12345')
+        .toString()
+    )
   })
 
   test('should derive the correct symmetric key', () => {
-    const derivedSymmetricKey = keyDeriver.deriveSymmetricKey(protocolID, keyID, counterpartyPublicKey)
+    const derivedSymmetricKey = keyDeriver.deriveSymmetricKey(
+      protocolID,
+      keyID,
+      counterpartyPublicKey
+    )
     expect(derivedSymmetricKey).toBeInstanceOf(SymmetricKey)
-    const priv = rootPrivateKey.deriveChild(counterpartyPublicKey, '0-testprotocol-12345')
-    const pub = counterpartyPublicKey.deriveChild(rootPrivateKey, '0-testprotocol-12345')
-    expect(derivedSymmetricKey.toHex()).toEqual(new SymmetricKey(priv.deriveSharedSecret(pub).x?.toArray()).toHex())
+    const priv = rootPrivateKey.deriveChild(
+      counterpartyPublicKey,
+      '0-testprotocol-12345'
+    )
+    const pub = counterpartyPublicKey.deriveChild(
+      rootPrivateKey,
+      '0-testprotocol-12345'
+    )
+    expect(derivedSymmetricKey.toHex()).toEqual(
+      new SymmetricKey(priv.deriveSharedSecret(pub).x?.toArray()).toHex()
+    )
   })
 
   test('should be able to derive symmetric key with anyone', () => {
-    expect(() => keyDeriver.deriveSymmetricKey(protocolID, keyID, 'anyone')).not.toThrow()
+    expect(() =>
+      keyDeriver.deriveSymmetricKey(protocolID, keyID, 'anyone')
+    ).not.toThrow()
   })
 
   test('should reveal the correct counterparty shared secret', () => {
-    const sharedSecret = keyDeriver.revealCounterpartySecret(counterpartyPublicKey)
+    const sharedSecret = keyDeriver.revealCounterpartySecret(
+      counterpartyPublicKey
+    )
     expect(sharedSecret).toBeInstanceOf(Array)
     expect(sharedSecret.length).toBeGreaterThan(0)
-    expect(sharedSecret).toEqual(rootPrivateKey.deriveSharedSecret(counterpartyPublicKey).encode(true))
+    expect(sharedSecret).toEqual(
+      rootPrivateKey.deriveSharedSecret(counterpartyPublicKey).encode(true)
+    )
   })
 
   test('should not reveal shared secret for self', () => {
@@ -96,23 +161,61 @@ describe('KeyDeriver', () => {
   })
 
   test('should reveal the specific key association', () => {
-    const specificSecret = keyDeriver.revealSpecificSecret(counterpartyPublicKey, protocolID, keyID)
+    const specificSecret = keyDeriver.revealSpecificSecret(
+      counterpartyPublicKey,
+      protocolID,
+      keyID
+    )
     expect(specificSecret).toBeInstanceOf(Array)
     expect(specificSecret.length).toBeGreaterThan(0)
-    const sharedSecret = rootPrivateKey.deriveSharedSecret(counterpartyPublicKey)
-    const invoiceNumberBin = Utils.toArray((keyDeriver as any).computeInvoiceNumber(protocolID, keyID), 'utf8')
-    expect(specificSecret).toEqual(Hash.sha256hmac(sharedSecret.encode(true), invoiceNumberBin))
+    const sharedSecret = rootPrivateKey.deriveSharedSecret(
+      counterpartyPublicKey
+    )
+    const invoiceNumberBin = Utils.toArray(
+      (keyDeriver as any).computeInvoiceNumber(protocolID, keyID),
+      'utf8'
+    )
+    expect(specificSecret).toEqual(
+      Hash.sha256hmac(sharedSecret.encode(true), invoiceNumberBin)
+    )
   })
 
   test('should throw an error for invalid protocol names', () => {
-    expect(() => (keyDeriver as any).computeInvoiceNumber(protocolID, 'long' + 'a'.repeat(800))).toThrow()
-    expect(() => (keyDeriver as any).computeInvoiceNumber(protocolID, '')).toThrow()
-    expect(() => (keyDeriver as any).computeInvoiceNumber([-3, 'otherwise valid'], keyID)).toThrow()
-    expect(() => (keyDeriver as any).computeInvoiceNumber([2, 'double  space'], keyID)).toThrow()
-    expect(() => (keyDeriver as any).computeInvoiceNumber([0, ''], keyID)).toThrow()
-    expect(() => (keyDeriver as any).computeInvoiceNumber([0, ' a'], keyID)).toThrow()
-    expect(() => (keyDeriver as any).computeInvoiceNumber([0, 'long' + 'a'.repeat(400)], keyID)).toThrow()
-    expect(() => (keyDeriver as any).computeInvoiceNumber([2, 'redundant protocol protocol'], keyID)).toThrow()
-    expect(() => (keyDeriver as any).computeInvoiceNumber([2, 'üñî√é®sål ©0på'], keyID)).toThrow()
+    expect(() =>
+      (keyDeriver as any).computeInvoiceNumber(
+        protocolID,
+        'long' + 'a'.repeat(800)
+      )
+    ).toThrow()
+    expect(() =>
+      (keyDeriver as any).computeInvoiceNumber(protocolID, '')
+    ).toThrow()
+    expect(() =>
+      (keyDeriver as any).computeInvoiceNumber([-3, 'otherwise valid'], keyID)
+    ).toThrow()
+    expect(() =>
+      (keyDeriver as any).computeInvoiceNumber([2, 'double  space'], keyID)
+    ).toThrow()
+    expect(() =>
+      (keyDeriver as any).computeInvoiceNumber([0, ''], keyID)
+    ).toThrow()
+    expect(() =>
+      (keyDeriver as any).computeInvoiceNumber([0, ' a'], keyID)
+    ).toThrow()
+    expect(() =>
+      (keyDeriver as any).computeInvoiceNumber(
+        [0, 'long' + 'a'.repeat(400)],
+        keyID
+      )
+    ).toThrow()
+    expect(() =>
+      (keyDeriver as any).computeInvoiceNumber(
+        [2, 'redundant protocol protocol'],
+        keyID
+      )
+    ).toThrow()
+    expect(() =>
+      (keyDeriver as any).computeInvoiceNumber([2, 'üñî√é®sål ©0på'], keyID)
+    ).toThrow()
   })
 })

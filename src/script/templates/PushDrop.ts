@@ -1,5 +1,11 @@
 import { ScriptTemplate, LockingScript, UnlockingScript, OP } from '../index.js'
-import { Utils, Hash, TransactionSignature, Signature, PublicKey } from '../../primitives/index.js'
+import {
+  Utils,
+  Hash,
+  TransactionSignature,
+  Signature,
+  PublicKey
+} from '../../primitives/index.js'
 import { WalletInterface } from '../../wallet/Wallet.interfaces.js'
 import { Transaction } from '../../transaction/index.js'
 import { SecurityLevel } from '../../wallet/Wallet.interfaces.js'
@@ -10,7 +16,9 @@ import { SecurityLevel } from '../../wallet/Wallet.interfaces.js'
  *
  * TODO: This should be made into a TS-SDK util (distinct from the `minimallyEncode` util)
  */
-const createMinimallyEncodedScriptChunk = (data: number[]): { op: number, data?: number[] } => {
+const createMinimallyEncodedScriptChunk = (
+  data: number[]
+): { op: number; data?: number[] } => {
   if (data.length === 0) {
     // Could have used OP_0.
     return { op: 0 }
@@ -52,8 +60,13 @@ export default class PushDrop implements ScriptTemplate {
    * @param script PushDrop script to decode back into token fields
    * @returns An object containing PushDrop token fields and the locking public key. If a signature was included, it will be the last field.
    */
-  static decode(script: LockingScript): { lockingPublicKey: PublicKey, fields: number[][] } {
-    const lockingPublicKey = PublicKey.fromString(Utils.toHex(script.chunks[0].data))
+  static decode(script: LockingScript): {
+    lockingPublicKey: PublicKey
+    fields: number[][]
+  } {
+    const lockingPublicKey = PublicKey.fromString(
+      Utils.toHex(script.chunks[0].data)
+    )
     const fields = []
     for (let i = 2; i < script.chunks.length; i++) {
       const nextOpcode = script.chunks[i + 1].op
@@ -101,16 +114,27 @@ export default class PushDrop implements ScriptTemplate {
    * @param {boolean} [includeSignature=true] - Flag indicating if a signature should be included in the script (default yes).
    * @returns {Promise<LockingScript>} The generated PushDrop locking script.
    */
-  async lock(fields: number[][], protocolID: [SecurityLevel, string], keyID: string, counterparty: string, forSelf = false, includeSignature = true, lockPosition: 'before' | 'after' = 'before'): Promise<LockingScript> {
+  async lock(
+    fields: number[][],
+    protocolID: [SecurityLevel, string],
+    keyID: string,
+    counterparty: string,
+    forSelf = false,
+    includeSignature = true,
+    lockPosition: 'before' | 'after' = 'before'
+  ): Promise<LockingScript> {
     const { publicKey } = await this.wallet.getPublicKey({
       protocolID,
       keyID,
       counterparty,
       forSelf
     })
-    const lockChunks: Array<{ op: number, data?: number[] }> = []
-    const pushDropChunks: Array<{ op: number, data?: number[] }> = []
-    lockChunks.push({ op: publicKey.length / 2, data: Utils.toArray(publicKey, 'hex') })
+    const lockChunks: Array<{ op: number; data?: number[] }> = []
+    const pushDropChunks: Array<{ op: number; data?: number[] }> = []
+    lockChunks.push({
+      op: publicKey.length / 2,
+      data: Utils.toArray(publicKey, 'hex')
+    })
     lockChunks.push({ op: OP.OP_CHECKSIG })
     if (includeSignature) {
       const dataToSign = fields.reduce((a, e) => [...a, ...e], [])
@@ -134,15 +158,9 @@ export default class PushDrop implements ScriptTemplate {
       pushDropChunks.push({ op: OP.OP_DROP })
     }
     if (lockPosition === 'before') {
-      return new LockingScript([
-        ...lockChunks,
-        ...pushDropChunks
-      ])
+      return new LockingScript([...lockChunks, ...pushDropChunks])
     } else {
-      return new LockingScript([
-        ...pushDropChunks,
-        ...lockChunks
-      ])
+      return new LockingScript([...pushDropChunks, ...lockChunks])
     }
   }
 
@@ -172,7 +190,10 @@ export default class PushDrop implements ScriptTemplate {
     estimateLength: () => Promise<73>
   } {
     return {
-      sign: async (tx: Transaction, inputIndex: number): Promise<UnlockingScript> => {
+      sign: async (
+        tx: Transaction,
+        inputIndex: number
+      ): Promise<UnlockingScript> => {
         let signatureScope = TransactionSignature.SIGHASH_FORKID
         if (signOutputs === 'all') {
           signatureScope |= TransactionSignature.SIGHASH_ALL
@@ -191,19 +212,24 @@ export default class PushDrop implements ScriptTemplate {
 
         const otherInputs = tx.inputs.filter((_, index) => index !== inputIndex)
 
-        const sourceTXID = input.sourceTXID ? input.sourceTXID : input.sourceTransaction?.id('hex')
+        const sourceTXID = input.sourceTXID
+          ? input.sourceTXID
+          : input.sourceTransaction?.id('hex')
         if (!sourceTXID) {
           throw new Error(
             'The input sourceTXID or sourceTransaction is required for transaction signing.'
           )
         }
-        sourceSatoshis ||= input.sourceTransaction?.outputs[input.sourceOutputIndex].satoshis
+        sourceSatoshis ||=
+          input.sourceTransaction?.outputs[input.sourceOutputIndex].satoshis
         if (!sourceSatoshis) {
           throw new Error(
             'The sourceSatoshis or input sourceTransaction is required for transaction signing.'
           )
         }
-        lockingScript ||= input.sourceTransaction?.outputs[input.sourceOutputIndex].lockingScript
+        lockingScript ||=
+          input.sourceTransaction?.outputs[input.sourceOutputIndex]
+            .lockingScript
         if (!lockingScript) {
           throw new Error(
             'The lockingScript or input sourceTransaction is required for transaction signing.'

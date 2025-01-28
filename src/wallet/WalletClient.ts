@@ -68,7 +68,9 @@ export default class WalletClient implements WalletInterface {
     | WalletInterface = 'auto',
     originator?: OriginatorDomainNameStringUnder250Bytes
   ) {
-    if (substrate === 'Cicada') { substrate = new WalletWireTransceiver(new HTTPWalletWire(originator)) }
+    if (substrate === 'Cicada') {
+      substrate = new WalletWireTransceiver(new HTTPWalletWire(originator))
+    }
     if (substrate === 'window.CWI') substrate = new WindowCWISubstrate()
     if (substrate === 'XDM') substrate = new XDMSubstrate()
     if (substrate === 'json-api') substrate = new HTTPWalletJSON(originator)

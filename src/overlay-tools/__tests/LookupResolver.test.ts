@@ -1,4 +1,6 @@
-import LookupResolver, { HTTPSOverlayLookupFacilitator } from '../../../dist/cjs/src/overlay-tools/LookupResolver.js'
+import LookupResolver, {
+  HTTPSOverlayLookupFacilitator
+} from '../../../dist/cjs/src/overlay-tools/LookupResolver.js'
 import OverlayAdminTokenTemplate from '../../../dist/cjs/src//overlay-tools/OverlayAdminTokenTemplate.js'
 import ProtoWallet from '../../../dist/cjs/src/wallet/ProtoWallet.js'
 import { PrivateKey } from '../../../dist/cjs/src/primitives/index.js'
@@ -9,10 +11,30 @@ const mockFacilitator = {
   lookup: jest.fn()
 }
 
-const sampleBeef1 = new Transaction(1, [], [{ lockingScript: LockingScript.fromHex('88'), satoshis: 1 }], 0).toBEEF()
-const sampleBeef2 = new Transaction(1, [], [{ lockingScript: LockingScript.fromHex('88'), satoshis: 2 }], 0).toBEEF()
-const sampleBeef3 = new Transaction(1, [], [{ lockingScript: LockingScript.fromHex('88'), satoshis: 3 }], 0).toBEEF()
-const sampleBeef4 = new Transaction(1, [], [{ lockingScript: LockingScript.fromHex('88'), satoshis: 4 }], 0).toBEEF()
+const sampleBeef1 = new Transaction(
+  1,
+  [],
+  [{ lockingScript: LockingScript.fromHex('88'), satoshis: 1 }],
+  0
+).toBEEF()
+const sampleBeef2 = new Transaction(
+  1,
+  [],
+  [{ lockingScript: LockingScript.fromHex('88'), satoshis: 2 }],
+  0
+).toBEEF()
+const sampleBeef3 = new Transaction(
+  1,
+  [],
+  [{ lockingScript: LockingScript.fromHex('88'), satoshis: 3 }],
+  0
+).toBEEF()
+const sampleBeef4 = new Transaction(
+  1,
+  [],
+  [{ lockingScript: LockingScript.fromHex('88'), satoshis: 4 }],
+  0
+).toBEEF()
 
 describe('LookupResolver', () => {
   beforeEach(() => {
@@ -23,37 +45,59 @@ describe('LookupResolver', () => {
     const slapHostKey = new PrivateKey(42)
     const slapWallet = new ProtoWallet(slapHostKey)
     const slapLib = new OverlayAdminTokenTemplate(slapWallet)
-    const slapScript = await slapLib.lock('SLAP', 'https://slaphost.com', 'ls_foo')
-    const slapTx = new Transaction(1, [], [{
-      lockingScript: slapScript,
-      satoshis: 1
-    }], 0)
+    const slapScript = await slapLib.lock(
+      'SLAP',
+      'https://slaphost.com',
+      'ls_foo'
+    )
+    const slapTx = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: slapScript,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
-    mockFacilitator.lookup.mockReturnValueOnce({
-      type: 'output-list',
-      outputs: [{
-        outputIndex: 0,
-        beef: slapTx.toBEEF()
-      }]
-    }).mockReturnValueOnce({
-      type: 'output-list',
-      outputs: [{
-        beef: sampleBeef1,
-        outputIndex: 0
-      }]
+    mockFacilitator.lookup
+      .mockReturnValueOnce({
+        type: 'output-list',
+        outputs: [
+          {
+            outputIndex: 0,
+            beef: slapTx.toBEEF()
+          }
+        ]
+      })
+      .mockReturnValueOnce({
+        type: 'output-list',
+        outputs: [
+          {
+            beef: sampleBeef1,
+            outputIndex: 0
+          }
+        ]
+      })
+
+    const r = new LookupResolver({
+      facilitator: mockFacilitator,
+      slapTrackers: ['https://mock.slap']
     })
-
-    const r = new LookupResolver({ facilitator: mockFacilitator, slapTrackers: ['https://mock.slap'] })
     const res = await r.query({
       service: 'ls_foo',
       query: { test: 1 }
     })
     expect(res).toEqual({
       type: 'output-list',
-      outputs: [{
-        beef: sampleBeef1,
-        outputIndex: 0
-      }]
+      outputs: [
+        {
+          beef: sampleBeef1,
+          outputIndex: 0
+        }
+      ]
     })
     expect(mockFacilitator.lookup.mock.calls).toEqual([
       [
@@ -72,7 +116,7 @@ describe('LookupResolver', () => {
           service: 'ls_foo',
           query: {
             test: 1
-          },
+          }
         },
         undefined
       ]
@@ -83,34 +127,57 @@ describe('LookupResolver', () => {
     const slapHostKey = new PrivateKey(42)
     const slapWallet = new ProtoWallet(slapHostKey)
     const slapLib = new OverlayAdminTokenTemplate(slapWallet)
-    const slapScript = await slapLib.lock('SLAP', 'https://slaphost.com', 'ls_foo')
-    const slapTx = new Transaction(1, [], [{
-      lockingScript: slapScript,
-      satoshis: 1
-    }], 0)
+    const slapScript = await slapLib.lock(
+      'SLAP',
+      'https://slaphost.com',
+      'ls_foo'
+    )
+    const slapTx = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: slapScript,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
-    mockFacilitator.lookup.mockReturnValueOnce({
-      type: 'output-list',
-      outputs: [{
-        outputIndex: 0,
-        beef: slapTx.toBEEF()
-      }]
-    }).mockReturnValueOnce({
-      type: 'output-list',
-      outputs: [{
-        beef: sampleBeef1,
-        outputIndex: 0
-      }]
-    }).mockReturnValueOnce({
-      type: 'output-list',
-      outputs: [{ // duplicate the output the other host knows about
-        beef: sampleBeef1,
-        outputIndex: 0
-      }, { // the additional host also knows about a second output
-        beef: sampleBeef2,
-        outputIndex: 1033
-      }]
-    })
+    mockFacilitator.lookup
+      .mockReturnValueOnce({
+        type: 'output-list',
+        outputs: [
+          {
+            outputIndex: 0,
+            beef: slapTx.toBEEF()
+          }
+        ]
+      })
+      .mockReturnValueOnce({
+        type: 'output-list',
+        outputs: [
+          {
+            beef: sampleBeef1,
+            outputIndex: 0
+          }
+        ]
+      })
+      .mockReturnValueOnce({
+        type: 'output-list',
+        outputs: [
+          {
+            // duplicate the output the other host knows about
+            beef: sampleBeef1,
+            outputIndex: 0
+          },
+          {
+            // the additional host also knows about a second output
+            beef: sampleBeef2,
+            outputIndex: 1033
+          }
+        ]
+      })
 
     const r = new LookupResolver({
       facilitator: mockFacilitator,
@@ -125,13 +192,18 @@ describe('LookupResolver', () => {
     })
     expect(res).toEqual({
       type: 'output-list',
-      outputs: [{ // expect the first output to appear only once, and be de-duplicated
-        beef: sampleBeef1,
-        outputIndex: 0
-      }, { // also expect the second output from the additional host
-        beef: sampleBeef2,
-        outputIndex: 1033
-      }]
+      outputs: [
+        {
+          // expect the first output to appear only once, and be de-duplicated
+          beef: sampleBeef1,
+          outputIndex: 0
+        },
+        {
+          // also expect the second output from the additional host
+          beef: sampleBeef2,
+          outputIndex: 1033
+        }
+      ]
     })
     expect(mockFacilitator.lookup.mock.calls).toEqual([
       [
@@ -154,7 +226,8 @@ describe('LookupResolver', () => {
         },
         undefined
       ],
-      [ // additional host should also have been queried
+      [
+        // additional host should also have been queried
         'https://additional.host',
         {
           service: 'ls_foo',
@@ -170,10 +243,12 @@ describe('LookupResolver', () => {
   it('should utilize host overrides instead of SLAP', async () => {
     mockFacilitator.lookup.mockReturnValueOnce({
       type: 'output-list',
-      outputs: [{
-        beef: sampleBeef1,
-        outputIndex: 0
-      }]
+      outputs: [
+        {
+          beef: sampleBeef1,
+          outputIndex: 0
+        }
+      ]
     })
 
     const r = new LookupResolver({
@@ -189,10 +264,12 @@ describe('LookupResolver', () => {
     })
     expect(res).toEqual({
       type: 'output-list',
-      outputs: [{
-        beef: sampleBeef1,
-        outputIndex: 0
-      }]
+      outputs: [
+        {
+          beef: sampleBeef1,
+          outputIndex: 0
+        }
+      ]
     })
     expect(mockFacilitator.lookup.mock.calls).toEqual([
       [
@@ -209,22 +286,29 @@ describe('LookupResolver', () => {
   })
 
   it('should allow using host overrides with additional hosts at the same time', async () => {
-    mockFacilitator.lookup.mockReturnValueOnce({
-      type: 'output-list', // from the override host
-      outputs: [{
-        beef: sampleBeef1,
-        outputIndex: 0
-      }]
-    }).mockReturnValueOnce({
-      type: 'output-list', // from the additional host
-      outputs: [{
-        beef: sampleBeef1,
-        outputIndex: 0
-      }, {
-        beef: sampleBeef2,
-        outputIndex: 1033
-      }]
-    })
+    mockFacilitator.lookup
+      .mockReturnValueOnce({
+        type: 'output-list', // from the override host
+        outputs: [
+          {
+            beef: sampleBeef1,
+            outputIndex: 0
+          }
+        ]
+      })
+      .mockReturnValueOnce({
+        type: 'output-list', // from the additional host
+        outputs: [
+          {
+            beef: sampleBeef1,
+            outputIndex: 0
+          },
+          {
+            beef: sampleBeef2,
+            outputIndex: 1033
+          }
+        ]
+      })
 
     const r = new LookupResolver({
       facilitator: mockFacilitator,
@@ -242,13 +326,18 @@ describe('LookupResolver', () => {
     })
     expect(res).toEqual({
       type: 'output-list',
-      outputs: [{ // expect the first output to appear only once, and be de-duplicated
-        beef: sampleBeef1,
-        outputIndex: 0
-      }, { // also expect the second output from the additional host
-        beef: sampleBeef2,
-        outputIndex: 1033
-      }]
+      outputs: [
+        {
+          // expect the first output to appear only once, and be de-duplicated
+          beef: sampleBeef1,
+          outputIndex: 0
+        },
+        {
+          // also expect the second output from the additional host
+          beef: sampleBeef2,
+          outputIndex: 1033
+        }
+      ]
     })
     expect(mockFacilitator.lookup.mock.calls).toEqual([
       [
@@ -261,7 +350,8 @@ describe('LookupResolver', () => {
         },
         undefined
       ],
-      [ // additional host should also have been queried
+      [
+        // additional host should also have been queried
         'https://additional.host',
         {
           service: 'ls_foo',
@@ -278,50 +368,84 @@ describe('LookupResolver', () => {
     const slapHostKey1 = new PrivateKey(42)
     const slapWallet1 = new ProtoWallet(slapHostKey1)
     const slapLib1 = new OverlayAdminTokenTemplate(slapWallet1)
-    const slapScript1 = await slapLib1.lock('SLAP', 'https://slaphost1.com', 'ls_foo')
-    const slapTx1 = new Transaction(1, [], [{
-      lockingScript: slapScript1,
-      satoshis: 1
-    }], 0)
+    const slapScript1 = await slapLib1.lock(
+      'SLAP',
+      'https://slaphost1.com',
+      'ls_foo'
+    )
+    const slapTx1 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: slapScript1,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     const slapHostKey2 = new PrivateKey(43)
     const slapWallet2 = new ProtoWallet(slapHostKey2)
     const slapLib2 = new OverlayAdminTokenTemplate(slapWallet2)
-    const slapScript2 = await slapLib2.lock('SLAP', 'https://slaphost2.com', 'ls_foo')
-    const slapTx2 = new Transaction(1, [], [{
-      lockingScript: slapScript2,
-      satoshis: 1
-    }], 0)
+    const slapScript2 = await slapLib2.lock(
+      'SLAP',
+      'https://slaphost2.com',
+      'ls_foo'
+    )
+    const slapTx2 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: slapScript2,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // SLAP trackers return hosts
-    mockFacilitator.lookup.mockReturnValueOnce({
-      type: 'output-list',
-      outputs: [{
-        outputIndex: 0,
-        beef: slapTx1.toBEEF()
-      }]
-    }).mockReturnValueOnce({
-      type: 'output-list',
-      outputs: [{
-        outputIndex: 0,
-        beef: slapTx2.toBEEF()
-      }]
-    })
+    mockFacilitator.lookup
+      .mockReturnValueOnce({
+        type: 'output-list',
+        outputs: [
+          {
+            outputIndex: 0,
+            beef: slapTx1.toBEEF()
+          }
+        ]
+      })
+      .mockReturnValueOnce({
+        type: 'output-list',
+        outputs: [
+          {
+            outputIndex: 0,
+            beef: slapTx2.toBEEF()
+          }
+        ]
+      })
 
     // Hosts respond to the query
-    mockFacilitator.lookup.mockReturnValueOnce({
-      type: 'output-list',
-      outputs: [{
-        beef: sampleBeef3,
-        outputIndex: 0
-      }]
-    }).mockReturnValueOnce({
-      type: 'output-list',
-      outputs: [{
-        beef: sampleBeef4,
-        outputIndex: 1
-      }]
-    })
+    mockFacilitator.lookup
+      .mockReturnValueOnce({
+        type: 'output-list',
+        outputs: [
+          {
+            beef: sampleBeef3,
+            outputIndex: 0
+          }
+        ]
+      })
+      .mockReturnValueOnce({
+        type: 'output-list',
+        outputs: [
+          {
+            beef: sampleBeef4,
+            outputIndex: 1
+          }
+        ]
+      })
 
     const r = new LookupResolver({
       facilitator: mockFacilitator,
@@ -389,20 +513,42 @@ describe('LookupResolver', () => {
     const slapHostKey1 = new PrivateKey(42)
     const slapWallet1 = new ProtoWallet(slapHostKey1)
     const slapLib1 = new OverlayAdminTokenTemplate(slapWallet1)
-    const slapScript1 = await slapLib1.lock('SLAP', 'https://slaphost1.com', 'ls_foo')
-    const slapTx1 = new Transaction(1, [], [{
-      lockingScript: slapScript1,
-      satoshis: 1
-    }], 0)
+    const slapScript1 = await slapLib1.lock(
+      'SLAP',
+      'https://slaphost1.com',
+      'ls_foo'
+    )
+    const slapTx1 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: slapScript1,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     const slapHostKey2 = new PrivateKey(43)
     const slapWallet2 = new ProtoWallet(slapHostKey2)
     const slapLib2 = new OverlayAdminTokenTemplate(slapWallet2)
-    const slapScript2 = await slapLib2.lock('SLAP', 'https://slaphost2.com', 'ls_foo')
-    const slapTx2 = new Transaction(1, [], [{
-      lockingScript: slapScript2,
-      satoshis: 1
-    }], 0)
+    const slapScript2 = await slapLib2.lock(
+      'SLAP',
+      'https://slaphost2.com',
+      'ls_foo'
+    )
+    const slapTx2 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: slapScript2,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // SLAP tracker returns two hosts
     mockFacilitator.lookup.mockReturnValueOnce({
@@ -415,13 +561,15 @@ describe('LookupResolver', () => {
 
     // Both hosts return the same output
     const duplicateOutput = { beef: sampleBeef3, outputIndex: 0 }
-    mockFacilitator.lookup.mockReturnValueOnce({
-      type: 'output-list',
-      outputs: [duplicateOutput]
-    }).mockReturnValueOnce({
-      type: 'output-list',
-      outputs: [duplicateOutput]
-    })
+    mockFacilitator.lookup
+      .mockReturnValueOnce({
+        type: 'output-list',
+        outputs: [duplicateOutput]
+      })
+      .mockReturnValueOnce({
+        type: 'output-list',
+        outputs: [duplicateOutput]
+      })
 
     const r = new LookupResolver({
       facilitator: mockFacilitator,
@@ -476,20 +624,42 @@ describe('LookupResolver', () => {
     const slapHostKey1 = new PrivateKey(42)
     const slapWallet1 = new ProtoWallet(slapHostKey1)
     const slapLib1 = new OverlayAdminTokenTemplate(slapWallet1)
-    const slapScript1 = await slapLib1.lock('SLAP', 'https://slaphost1.com', 'ls_foo')
-    const slapTx1 = new Transaction(1, [], [{
-      lockingScript: slapScript1,
-      satoshis: 1
-    }], 0)
+    const slapScript1 = await slapLib1.lock(
+      'SLAP',
+      'https://slaphost1.com',
+      'ls_foo'
+    )
+    const slapTx1 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: slapScript1,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     const slapHostKey2 = new PrivateKey(43)
     const slapWallet2 = new ProtoWallet(slapHostKey2)
     const slapLib2 = new OverlayAdminTokenTemplate(slapWallet2)
-    const slapScript2 = await slapLib2.lock('SLAP', 'https://slaphost2.com', 'ls_foo')
-    const slapTx2 = new Transaction(1, [], [{
-      lockingScript: slapScript2,
-      satoshis: 1
-    }], 0)
+    const slapScript2 = await slapLib2.lock(
+      'SLAP',
+      'https://slaphost2.com',
+      'ls_foo'
+    )
+    const slapTx2 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: slapScript2,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // SLAP tracker returns two hosts
     mockFacilitator.lookup.mockReturnValueOnce({
@@ -566,20 +736,42 @@ describe('LookupResolver', () => {
     const slapHostKey1 = new PrivateKey(42)
     const slapWallet1 = new ProtoWallet(slapHostKey1)
     const slapLib1 = new OverlayAdminTokenTemplate(slapWallet1)
-    const slapScript1 = await slapLib1.lock('SLAP', 'https://slaphost1.com', 'ls_foo')
-    const slapTx1 = new Transaction(1, [], [{
-      lockingScript: slapScript1,
-      satoshis: 1
-    }], 0)
+    const slapScript1 = await slapLib1.lock(
+      'SLAP',
+      'https://slaphost1.com',
+      'ls_foo'
+    )
+    const slapTx1 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: slapScript1,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     const slapHostKey2 = new PrivateKey(43)
     const slapWallet2 = new ProtoWallet(slapHostKey2)
     const slapLib2 = new OverlayAdminTokenTemplate(slapWallet2)
-    const slapScript2 = await slapLib2.lock('SLAP', 'https://slaphost2.com', 'ls_foo')
-    const slapTx2 = new Transaction(1, [], [{
-      lockingScript: slapScript2,
-      satoshis: 1
-    }], 0)
+    const slapScript2 = await slapLib2.lock(
+      'SLAP',
+      'https://slaphost2.com',
+      'ls_foo'
+    )
+    const slapTx2 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: slapScript2,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // SLAP tracker returns two hosts
     mockFacilitator.lookup.mockReturnValueOnce({
@@ -663,10 +855,14 @@ describe('LookupResolver', () => {
       slapTrackers: ['https://mock.slap']
     })
 
-    await expect(r.query({
-      service: 'ls_foo',
-      query: { test: 1 }
-    })).rejects.toThrow('No competent hosts found by the SLAP trackers for lookup service: ls_foo')
+    await expect(
+      r.query({
+        service: 'ls_foo',
+        query: { test: 1 }
+      })
+    ).rejects.toThrow(
+      'No competent hosts found by the SLAP trackers for lookup service: ls_foo'
+    )
 
     expect(mockFacilitator.lookup.mock.calls).toEqual([
       [
@@ -686,20 +882,42 @@ describe('LookupResolver', () => {
     const slapHostKey1 = new PrivateKey(42)
     const slapWallet1 = new ProtoWallet(slapHostKey1)
     const slapLib1 = new OverlayAdminTokenTemplate(slapWallet1)
-    const slapScript1 = await slapLib1.lock('SLAP', 'https://slaphost1.com', 'ls_foo')
-    const slapTx1 = new Transaction(1, [], [{
-      lockingScript: slapScript1,
-      satoshis: 1
-    }], 0)
+    const slapScript1 = await slapLib1.lock(
+      'SLAP',
+      'https://slaphost1.com',
+      'ls_foo'
+    )
+    const slapTx1 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: slapScript1,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     const slapHostKey2 = new PrivateKey(43)
     const slapWallet2 = new ProtoWallet(slapHostKey2)
     const slapLib2 = new OverlayAdminTokenTemplate(slapWallet2)
-    const slapScript2 = await slapLib2.lock('SLAP', 'https://slaphost2.com', 'ls_foo')
-    const slapTx2 = new Transaction(1, [], [{
-      lockingScript: slapScript2,
-      satoshis: 1
-    }], 0)
+    const slapScript2 = await slapLib2.lock(
+      'SLAP',
+      'https://slaphost2.com',
+      'ls_foo'
+    )
+    const slapTx2 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: slapScript2,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // SLAP tracker returns two hosts
     mockFacilitator.lookup.mockReturnValueOnce({
@@ -733,10 +951,12 @@ describe('LookupResolver', () => {
 
     expect(res).toEqual({
       type: 'output-list',
-      outputs: [{
-        beef: sampleBeef3,
-        outputIndex: 0
-      }]
+      outputs: [
+        {
+          beef: sampleBeef3,
+          outputIndex: 0
+        }
+      ]
     })
 
     expect(mockFacilitator.lookup.mock.calls).toEqual([
@@ -776,23 +996,30 @@ describe('LookupResolver', () => {
   it('Directly uses SLAP resolvers to facilitate SLAP queries', async () => {
     mockFacilitator.lookup.mockReturnValueOnce({
       type: 'output-list',
-      outputs: [{
-        beef: sampleBeef1,
-        outputIndex: 0
-      }]
+      outputs: [
+        {
+          beef: sampleBeef1,
+          outputIndex: 0
+        }
+      ]
     })
 
-    const r = new LookupResolver({ facilitator: mockFacilitator, slapTrackers: ['https://mock.slap'] })
+    const r = new LookupResolver({
+      facilitator: mockFacilitator,
+      slapTrackers: ['https://mock.slap']
+    })
     const res = await r.query({
       service: 'ls_slap',
       query: { test: 1 }
     })
     expect(res).toEqual({
       type: 'output-list',
-      outputs: [{
-        beef: sampleBeef1,
-        outputIndex: 0
-      }]
+      outputs: [
+        {
+          beef: sampleBeef1,
+          outputIndex: 0
+        }
+      ]
     })
     expect(mockFacilitator.lookup.mock.calls).toEqual([
       [
@@ -821,10 +1048,14 @@ describe('LookupResolver', () => {
     })
 
     // Because a freeform response is not valid, the SLAP trackers have not found any competent hosts.
-    await expect(r.query({
-      service: 'ls_foo',
-      query: { test: 1 }
-    })).rejects.toThrow('No competent hosts found by the SLAP trackers for lookup service: ls_foo')
+    await expect(
+      r.query({
+        service: 'ls_foo',
+        query: { test: 1 }
+      })
+    ).rejects.toThrow(
+      'No competent hosts found by the SLAP trackers for lookup service: ls_foo'
+    )
 
     expect(mockFacilitator.lookup.mock.calls).toEqual([
       [
@@ -842,8 +1073,11 @@ describe('LookupResolver', () => {
 
   it('should throw an error when HTTPSOverlayLookupFacilitator is used with non-HTTPS URL', async () => {
     const facilitator = new HTTPSOverlayLookupFacilitator()
-    await expect(facilitator.lookup('http://insecure.url', { service: 'test', query: {} }))
-      .rejects.toThrow('HTTPS facilitator can only use URLs that start with "https:"')
+    await expect(
+      facilitator.lookup('http://insecure.url', { service: 'test', query: {} })
+    ).rejects.toThrow(
+      'HTTPS facilitator can only use URLs that start with "https:"'
+    )
   })
   describe('LookupResolver Resiliency', () => {
     beforeEach(() => {
@@ -854,11 +1088,22 @@ describe('LookupResolver', () => {
       const slapHostKey = new PrivateKey(42)
       const slapWallet = new ProtoWallet(slapHostKey)
       const slapLib = new OverlayAdminTokenTemplate(slapWallet)
-      const slapScript = await slapLib.lock('SLAP', 'https://slaphost.com', 'ls_foo')
-      const slapTx = new Transaction(1, [], [{
-        lockingScript: slapScript,
-        satoshis: 1
-      }], 0)
+      const slapScript = await slapLib.lock(
+        'SLAP',
+        'https://slaphost.com',
+        'ls_foo'
+      )
+      const slapTx = new Transaction(
+        1,
+        [],
+        [
+          {
+            lockingScript: slapScript,
+            satoshis: 1
+          }
+        ],
+        0
+      )
 
       // First SLAP tracker fails
       mockFacilitator.lookup.mockImplementationOnce(async () => {
@@ -868,19 +1113,23 @@ describe('LookupResolver', () => {
       // Second SLAP tracker succeeds
       mockFacilitator.lookup.mockReturnValueOnce({
         type: 'output-list',
-        outputs: [{
-          outputIndex: 0,
-          beef: slapTx.toBEEF()
-        }]
+        outputs: [
+          {
+            outputIndex: 0,
+            beef: slapTx.toBEEF()
+          }
+        ]
       })
 
       // Host responds successfully
       mockFacilitator.lookup.mockReturnValueOnce({
         type: 'output-list',
-        outputs: [{
-          beef: sampleBeef3,
-          outputIndex: 0
-        }]
+        outputs: [
+          {
+            beef: sampleBeef3,
+            outputIndex: 0
+          }
+        ]
       })
 
       const r = new LookupResolver({
@@ -895,10 +1144,12 @@ describe('LookupResolver', () => {
 
       expect(res).toEqual({
         type: 'output-list',
-        outputs: [{
-          beef: sampleBeef3,
-          outputIndex: 0
-        }]
+        outputs: [
+          {
+            beef: sampleBeef3,
+            outputIndex: 0
+          }
+        ]
       })
 
       expect(mockFacilitator.lookup.mock.calls).toEqual([
@@ -939,29 +1190,62 @@ describe('LookupResolver', () => {
       const slapHostKey1 = new PrivateKey(42)
       const slapWallet1 = new ProtoWallet(slapHostKey1)
       const slapLib1 = new OverlayAdminTokenTemplate(slapWallet1)
-      const slapScript1 = await slapLib1.lock('SLAP', 'https://slaphost1.com', 'ls_foo')
-      const slapTx1 = new Transaction(1, [], [{
-        lockingScript: slapScript1,
-        satoshis: 1
-      }], 0)
+      const slapScript1 = await slapLib1.lock(
+        'SLAP',
+        'https://slaphost1.com',
+        'ls_foo'
+      )
+      const slapTx1 = new Transaction(
+        1,
+        [],
+        [
+          {
+            lockingScript: slapScript1,
+            satoshis: 1
+          }
+        ],
+        0
+      )
 
       const slapHostKey2 = new PrivateKey(43)
       const slapWallet2 = new ProtoWallet(slapHostKey2)
       const slapLib2 = new OverlayAdminTokenTemplate(slapWallet2)
-      const slapScript2 = await slapLib2.lock('SLAP', 'https://slaphost2.com', 'ls_foo')
-      const slapTx2 = new Transaction(1, [], [{
-        lockingScript: slapScript2,
-        satoshis: 1
-      }], 0)
+      const slapScript2 = await slapLib2.lock(
+        'SLAP',
+        'https://slaphost2.com',
+        'ls_foo'
+      )
+      const slapTx2 = new Transaction(
+        1,
+        [],
+        [
+          {
+            lockingScript: slapScript2,
+            satoshis: 1
+          }
+        ],
+        0
+      )
 
       const slapHostKey3 = new PrivateKey(44)
       const slapWallet3 = new ProtoWallet(slapHostKey3)
       const slapLib3 = new OverlayAdminTokenTemplate(slapWallet3)
-      const slapScript3 = await slapLib3.lock('SLAP', 'https://slaphost3.pantsonfire.com', 'ls_not_what_i_asked_you_for')
-      const slapTx3 = new Transaction(1, [], [{
-        lockingScript: slapScript3,
-        satoshis: 1
-      }], 0)
+      const slapScript3 = await slapLib3.lock(
+        'SLAP',
+        'https://slaphost3.pantsonfire.com',
+        'ls_not_what_i_asked_you_for'
+      )
+      const slapTx3 = new Transaction(
+        1,
+        [],
+        [
+          {
+            lockingScript: slapScript3,
+            satoshis: 1
+          }
+        ],
+        0
+      )
 
       // SLAP trackers return hosts
       mockFacilitator.lookup.mockReturnValueOnce({
@@ -1037,20 +1321,42 @@ describe('LookupResolver', () => {
       const slapHostKey1 = new PrivateKey(42)
       const slapWallet1 = new ProtoWallet(slapHostKey1)
       const slapLib1 = new OverlayAdminTokenTemplate(slapWallet1)
-      const slapScript1 = await slapLib1.lock('SLAP', 'https://slaphost1.com', 'ls_foo')
-      const slapTx1 = new Transaction(1, [], [{
-        lockingScript: slapScript1,
-        satoshis: 1
-      }], 0)
+      const slapScript1 = await slapLib1.lock(
+        'SLAP',
+        'https://slaphost1.com',
+        'ls_foo'
+      )
+      const slapTx1 = new Transaction(
+        1,
+        [],
+        [
+          {
+            lockingScript: slapScript1,
+            satoshis: 1
+          }
+        ],
+        0
+      )
 
       const slapHostKey2 = new PrivateKey(43)
       const slapWallet2 = new ProtoWallet(slapHostKey2)
       const slapLib2 = new OverlayAdminTokenTemplate(slapWallet2)
-      const slapScript2 = await slapLib2.lock('SLAP', 'https://slaphost2.com', 'ls_foo')
-      const slapTx2 = new Transaction(1, [], [{
-        lockingScript: slapScript2,
-        satoshis: 1
-      }], 0)
+      const slapScript2 = await slapLib2.lock(
+        'SLAP',
+        'https://slaphost2.com',
+        'ls_foo'
+      )
+      const slapTx2 = new Transaction(
+        1,
+        [],
+        [
+          {
+            lockingScript: slapScript2,
+            satoshis: 1
+          }
+        ],
+        0
+      )
 
       // SLAP trackers return hosts
       mockFacilitator.lookup.mockReturnValueOnce({
@@ -1126,20 +1432,42 @@ describe('LookupResolver', () => {
       const slapHostKey1 = new PrivateKey(42)
       const slapWallet1 = new ProtoWallet(slapHostKey1)
       const slapLib1 = new OverlayAdminTokenTemplate(slapWallet1)
-      const slapScript1 = await slapLib1.lock('SLAP', 'https://slaphost1.com', 'ls_foo')
-      const slapTx1 = new Transaction(1, [], [{
-        lockingScript: slapScript1,
-        satoshis: 1
-      }], 0)
+      const slapScript1 = await slapLib1.lock(
+        'SLAP',
+        'https://slaphost1.com',
+        'ls_foo'
+      )
+      const slapTx1 = new Transaction(
+        1,
+        [],
+        [
+          {
+            lockingScript: slapScript1,
+            satoshis: 1
+          }
+        ],
+        0
+      )
 
       const slapHostKey2 = new PrivateKey(43)
       const slapWallet2 = new ProtoWallet(slapHostKey2)
       const slapLib2 = new OverlayAdminTokenTemplate(slapWallet2)
-      const slapScript2 = await slapLib2.lock('SLAP', 'https://slaphost2.com', 'ls_foo')
-      const slapTx2 = new Transaction(1, [], [{
-        lockingScript: slapScript2,
-        satoshis: 1
-      }], 0)
+      const slapScript2 = await slapLib2.lock(
+        'SLAP',
+        'https://slaphost2.com',
+        'ls_foo'
+      )
+      const slapTx2 = new Transaction(
+        1,
+        [],
+        [
+          {
+            lockingScript: slapScript2,
+            satoshis: 1
+          }
+        ],
+        0
+      )
 
       // SLAP trackers return hosts
       mockFacilitator.lookup.mockReturnValueOnce({
@@ -1214,11 +1542,22 @@ describe('LookupResolver', () => {
       const slapHostKey = new PrivateKey(42)
       const slapWallet = new ProtoWallet(slapHostKey)
       const slapLib = new OverlayAdminTokenTemplate(slapWallet)
-      const slapScript = await slapLib.lock('SLAP', 'https://slaphost.com', 'ls_foo')
-      const slapTx = new Transaction(1, [], [{
-        lockingScript: slapScript,
-        satoshis: 1
-      }], 0)
+      const slapScript = await slapLib.lock(
+        'SLAP',
+        'https://slaphost.com',
+        'ls_foo'
+      )
+      const slapTx = new Transaction(
+        1,
+        [],
+        [
+          {
+            lockingScript: slapScript,
+            satoshis: 1
+          }
+        ],
+        0
+      )
 
       // SLAP tracker returns host
       mockFacilitator.lookup.mockReturnValueOnce({
@@ -1283,10 +1622,14 @@ describe('LookupResolver', () => {
         slapTrackers: ['https://mock.slap1', 'https://mock.slap2']
       })
 
-      await expect(r.query({
-        service: 'ls_foo',
-        query: { test: 1 }
-      })).rejects.toThrow('No competent hosts found by the SLAP trackers for lookup service: ls_foo')
+      await expect(
+        r.query({
+          service: 'ls_foo',
+          query: { test: 1 }
+        })
+      ).rejects.toThrow(
+        'No competent hosts found by the SLAP trackers for lookup service: ls_foo'
+      )
 
       expect(mockFacilitator.lookup.mock.calls.length).toBe(2)
     })
@@ -1295,11 +1638,22 @@ describe('LookupResolver', () => {
       const slapHostKey = new PrivateKey(42)
       const slapWallet = new ProtoWallet(slapHostKey)
       const slapLib = new OverlayAdminTokenTemplate(slapWallet)
-      const slapScript = await slapLib.lock('SLAP', 'https://slaphost.com', 'ls_foo')
-      const slapTx = new Transaction(1, [], [{
-        lockingScript: slapScript,
-        satoshis: 1
-      }], 0)
+      const slapScript = await slapLib.lock(
+        'SLAP',
+        'https://slaphost.com',
+        'ls_foo'
+      )
+      const slapTx = new Transaction(
+        1,
+        [],
+        [
+          {
+            lockingScript: slapScript,
+            satoshis: 1
+          }
+        ],
+        0
+      )
 
       // SLAP tracker returns host
       mockFacilitator.lookup.mockReturnValueOnce({
@@ -1317,10 +1671,12 @@ describe('LookupResolver', () => {
         slapTrackers: ['https://mock.slap']
       })
 
-      await expect(r.query({
-        service: 'ls_foo',
-        query: { test: 1 }
-      })).rejects.toThrow('No successful responses from any hosts')
+      await expect(
+        r.query({
+          service: 'ls_foo',
+          query: { test: 1 }
+        })
+      ).rejects.toThrow('No successful responses from any hosts')
 
       expect(mockFacilitator.lookup.mock.calls.length).toBe(2)
     })
@@ -1329,20 +1685,42 @@ describe('LookupResolver', () => {
       const slapHostKey1 = new PrivateKey(42)
       const slapWallet1 = new ProtoWallet(slapHostKey1)
       const slapLib1 = new OverlayAdminTokenTemplate(slapWallet1)
-      const slapScript1 = await slapLib1.lock('SLAP', 'https://slaphost1.com', 'ls_foo')
-      const slapTx1 = new Transaction(1, [], [{
-        lockingScript: slapScript1,
-        satoshis: 1
-      }], 0)
+      const slapScript1 = await slapLib1.lock(
+        'SLAP',
+        'https://slaphost1.com',
+        'ls_foo'
+      )
+      const slapTx1 = new Transaction(
+        1,
+        [],
+        [
+          {
+            lockingScript: slapScript1,
+            satoshis: 1
+          }
+        ],
+        0
+      )
 
       const slapHostKey2 = new PrivateKey(43)
       const slapWallet2 = new ProtoWallet(slapHostKey2)
       const slapLib2 = new OverlayAdminTokenTemplate(slapWallet2)
-      const slapScript2 = await slapLib2.lock('SLAP', 'https://slaphost2.com', 'ls_foo')
-      const slapTx2 = new Transaction(1, [], [{
-        lockingScript: slapScript2,
-        satoshis: 1
-      }], 0)
+      const slapScript2 = await slapLib2.lock(
+        'SLAP',
+        'https://slaphost2.com',
+        'ls_foo'
+      )
+      const slapTx2 = new Transaction(
+        1,
+        [],
+        [
+          {
+            lockingScript: slapScript2,
+            satoshis: 1
+          }
+        ],
+        0
+      )
 
       // SLAP tracker returns two hosts
       mockFacilitator.lookup.mockReturnValueOnce({
@@ -1387,20 +1765,42 @@ describe('LookupResolver', () => {
       const slapHostKey1 = new PrivateKey(42)
       const slapWallet1 = new ProtoWallet(slapHostKey1)
       const slapLib1 = new OverlayAdminTokenTemplate(slapWallet1)
-      const slapScript1 = await slapLib1.lock('SLAP', 'https://slaphost1.com', 'ls_foo')
-      const slapTx1 = new Transaction(1, [], [{
-        lockingScript: slapScript1,
-        satoshis: 1
-      }], 0)
+      const slapScript1 = await slapLib1.lock(
+        'SLAP',
+        'https://slaphost1.com',
+        'ls_foo'
+      )
+      const slapTx1 = new Transaction(
+        1,
+        [],
+        [
+          {
+            lockingScript: slapScript1,
+            satoshis: 1
+          }
+        ],
+        0
+      )
 
       const slapHostKey2 = new PrivateKey(43)
       const slapWallet2 = new ProtoWallet(slapHostKey2)
       const slapLib2 = new OverlayAdminTokenTemplate(slapWallet2)
-      const slapScript2 = await slapLib2.lock('SLAP', 'https://slaphost2.com', 'ls_foo')
-      const slapTx2 = new Transaction(1, [], [{
-        lockingScript: slapScript2,
-        satoshis: 1
-      }], 0)
+      const slapScript2 = await slapLib2.lock(
+        'SLAP',
+        'https://slaphost2.com',
+        'ls_foo'
+      )
+      const slapTx2 = new Transaction(
+        1,
+        [],
+        [
+          {
+            lockingScript: slapScript2,
+            satoshis: 1
+          }
+        ],
+        0
+      )
 
       // SLAP tracker returns two hosts
       mockFacilitator.lookup.mockReturnValueOnce({

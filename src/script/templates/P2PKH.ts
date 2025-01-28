@@ -25,12 +25,14 @@ export default class P2PKH implements ScriptTemplate {
     let data: number[]
     if (typeof pubkeyhash === 'string') {
       const hash = fromBase58Check(pubkeyhash)
-      if (hash.prefix[0] !== 0x00 && hash.prefix[0] !== 0x6f) throw new Error('only P2PKH is supported')
+      if (hash.prefix[0] !== 0x00 && hash.prefix[0] !== 0x6f)
+        throw new Error('only P2PKH is supported')
       data = hash.data as number[]
     } else {
       data = pubkeyhash
     }
-    if (data.length !== 20) throw new Error('P2PKH hash length must be 20 bytes')
+    if (data.length !== 20)
+      throw new Error('P2PKH hash length must be 20 bytes')
     return new LockingScript([
       { op: OP.OP_DUP },
       { op: OP.OP_HASH160 },
@@ -85,19 +87,24 @@ export default class P2PKH implements ScriptTemplate {
 
         const otherInputs = tx.inputs.filter((_, index) => index !== inputIndex)
 
-        const sourceTXID = input.sourceTXID ? input.sourceTXID : input.sourceTransaction?.id('hex')
+        const sourceTXID = input.sourceTXID
+          ? input.sourceTXID
+          : input.sourceTransaction?.id('hex')
         if (!sourceTXID) {
           throw new Error(
             'The input sourceTXID or sourceTransaction is required for transaction signing.'
           )
         }
-        sourceSatoshis ||= input.sourceTransaction?.outputs[input.sourceOutputIndex].satoshis
+        sourceSatoshis ||=
+          input.sourceTransaction?.outputs[input.sourceOutputIndex].satoshis
         if (!sourceSatoshis) {
           throw new Error(
             'The sourceSatoshis or input sourceTransaction is required for transaction signing.'
           )
         }
-        lockingScript ||= input.sourceTransaction?.outputs[input.sourceOutputIndex].lockingScript
+        lockingScript ||=
+          input.sourceTransaction?.outputs[input.sourceOutputIndex]
+            .lockingScript
         if (!lockingScript) {
           throw new Error(
             'The lockingScript or input sourceTransaction is required for transaction signing.'
@@ -124,7 +131,9 @@ export default class P2PKH implements ScriptTemplate {
           signatureScope
         )
         const sigForScript = sig.toChecksigFormat()
-        const pubkeyForScript = privateKey.toPublicKey().encode(true) as number[]
+        const pubkeyForScript = privateKey
+          .toPublicKey()
+          .encode(true) as number[]
         return new UnlockingScript([
           { op: sigForScript.length, data: sigForScript },
           { op: pubkeyForScript.length, data: pubkeyForScript }

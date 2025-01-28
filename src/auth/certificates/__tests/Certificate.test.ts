@@ -9,8 +9,11 @@ describe('Certificate', () => {
   const sampleSubjectPrivateKey = PrivateKey.fromRandom()
   const sampleSubjectPubKey = sampleSubjectPrivateKey.toPublicKey().toString()
   const sampleCertifierPrivateKey = PrivateKey.fromRandom()
-  const sampleCertifierPubKey = sampleCertifierPrivateKey.toPublicKey().toString()
-  const sampleRevocationOutpoint = 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.1'
+  const sampleCertifierPubKey = sampleCertifierPrivateKey
+    .toPublicKey()
+    .toString()
+  const sampleRevocationOutpoint =
+    'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.1'
   const sampleFields = {
     name: 'Alice',
     email: 'alice@example.com',
@@ -56,7 +59,9 @@ describe('Certificate', () => {
     expect(deserializedCertificate.serialNumber).toEqual(sampleSerialNumber)
     expect(deserializedCertificate.subject).toEqual(sampleSubjectPubKey)
     expect(deserializedCertificate.certifier).toEqual(sampleCertifierPubKey)
-    expect(deserializedCertificate.revocationOutpoint).toEqual(sampleRevocationOutpoint)
+    expect(deserializedCertificate.revocationOutpoint).toEqual(
+      sampleRevocationOutpoint
+    )
     expect(deserializedCertificate.signature).toBeUndefined()
     expect(deserializedCertificate.fields).toEqual(sampleFields)
   })
@@ -83,7 +88,9 @@ describe('Certificate', () => {
     expect(deserializedCertificate.serialNumber).toEqual(sampleSerialNumber)
     expect(deserializedCertificate.subject).toEqual(sampleSubjectPubKey)
     expect(deserializedCertificate.certifier).toEqual(sampleCertifierPubKey)
-    expect(deserializedCertificate.revocationOutpoint).toEqual(sampleRevocationOutpoint)
+    expect(deserializedCertificate.revocationOutpoint).toEqual(
+      sampleRevocationOutpoint
+    )
     expect(deserializedCertificate.signature).toEqual(certificate.signature)
     expect(deserializedCertificate.fields).toEqual(sampleFields)
   })
@@ -157,7 +164,9 @@ describe('Certificate', () => {
     )
 
     // Verify the signature
-    await expect(certificate.verify()).rejects.toThrowErrorMatchingInlineSnapshot(`"Signature is not valid"`)
+    await expect(
+      certificate.verify()
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Signature is not valid"`)
   })
 
   it('should handle certificates with empty fields', async () => {
@@ -194,7 +203,7 @@ describe('Certificate', () => {
       sampleCertifierPubKey,
       sampleRevocationOutpoint,
       sampleFields,
-      'deadbeef1234', // Placeholder signature
+      'deadbeef1234' // Placeholder signature
     )
 
     // Serialize without signature
@@ -251,7 +260,9 @@ describe('Certificate', () => {
     const serialized = certificate.toBinary(false)
     const deserializedCertificate = Certificate.fromBinary(serialized)
 
-    expect(deserializedCertificate.revocationOutpoint).toEqual(sampleRevocationOutpoint)
+    expect(deserializedCertificate.revocationOutpoint).toEqual(
+      sampleRevocationOutpoint
+    )
   })
 
   it('should correctly handle certificates with no fields', async () => {
@@ -280,7 +291,7 @@ describe('Certificate', () => {
     expect(isValid).toBe(true)
   })
 
-  it('should throw if already signed, and should update the certifier field if it differs from the wallet\'s public key', async () => {
+  it("should throw if already signed, and should update the certifier field if it differs from the wallet's public key", async () => {
     // Scenario 1: Certificate already has a signature
     const preSignedCertificate = new Certificate(
       sampleType,
@@ -299,7 +310,9 @@ describe('Certificate', () => {
     )
 
     // Scenario 2: The certifier property is set to something different from the wallet's public key
-    const mismatchedCertifierPubKey = PrivateKey.fromRandom().toPublicKey().toString()
+    const mismatchedCertifierPubKey = PrivateKey.fromRandom()
+      .toPublicKey()
+      .toString()
     const certificateWithMismatch = new Certificate(
       sampleType,
       sampleSerialNumber,
@@ -311,10 +324,11 @@ describe('Certificate', () => {
 
     // Sign the certificate; it should automatically update
     // the certifier field to match the wallet's actual public key
-    const certifierPubKey = ((await certifierWallet.getPublicKey({ identityKey: true })).publicKey)
+    const certifierPubKey = (
+      await certifierWallet.getPublicKey({ identityKey: true })
+    ).publicKey
     await certificateWithMismatch.sign(certifierWallet)
     expect(certificateWithMismatch.certifier).toBe(certifierPubKey)
     expect(await certificateWithMismatch.verify()).toBe(true)
   })
-
 })

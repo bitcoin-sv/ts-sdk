@@ -107,7 +107,9 @@ export default class Script {
         'There is an uneven number of characters in the string which suggests it is not hex encoded.'
       )
     }
-    if (!/^[0-9a-fA-F]+$/.test(hex)) { throw new Error('Some elements in this string are not hex encoded.') }
+    if (!/^[0-9a-fA-F]+$/.test(hex)) {
+      throw new Error('Some elements in this string are not hex encoded.')
+    }
     return Script.fromBinary(toArray(hex, 'hex'))
   }
 

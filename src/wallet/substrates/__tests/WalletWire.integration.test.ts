@@ -1,5 +1,9 @@
 import ProtoWallet from '../../../../dist/cjs/src/wallet/ProtoWallet.js'
-import { Utils, PrivateKey, Hash } from '../../../../dist/cjs/src/primitives/index.js'
+import {
+  Utils,
+  PrivateKey,
+  Hash
+} from '../../../../dist/cjs/src/primitives/index.js'
 import WalletWireTransceiver from '../../../../dist/cjs/src/wallet/substrates/WalletWireTransceiver.js'
 import WalletWireProcessor from '../../../../dist/cjs/src/wallet/substrates/WalletWireProcessor.js'
 
@@ -7,12 +11,14 @@ const sampleData = [3, 1, 4, 1, 5, 9]
 
 describe('WalletWire Integration Tests', () => {
   /**
-     * This is a copy of the test suite for ProtoWallet, but instead of using a ProtoWallet directly, we're using it over the WalletWire.
-     * This serves as an imperfect but still useful way to ensure that the WalletWire doesn't contain serialization or deserialization issues.
-     */
+   * This is a copy of the test suite for ProtoWallet, but instead of using a ProtoWallet directly, we're using it over the WalletWire.
+   * This serves as an imperfect but still useful way to ensure that the WalletWire doesn't contain serialization or deserialization issues.
+   */
   describe('ProtoWallet Over Wallet Wire', () => {
     it('Throws when functions are not supported', async () => {
-      const wallet = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet('anyone')))
+      const wallet = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet('anyone'))
+      )
       await expect(() => {
         return (wallet as any).createAction()
       }).rejects.toThrow()
@@ -61,42 +67,88 @@ describe('WalletWire Integration Tests', () => {
       }).rejects.toThrow()
     })
     it('Validates the BRC-3 compliance vector', async () => {
-      const wallet = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet('anyone')))
+      const wallet = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet('anyone'))
+      )
       const { valid } = await wallet.verifySignature({
         data: Utils.toArray('BRC-3 Compliance Validated!', 'utf8'),
-        signature: [48, 68, 2, 32, 43, 34, 58, 156, 219, 32, 50, 70, 29, 240, 155, 137, 88, 60, 200, 95, 243, 198, 201, 21, 56, 82, 141, 112, 69, 196, 170, 73, 156, 6, 44, 48, 2, 32, 118, 125, 254, 201, 44, 87, 177, 170, 93, 11, 193, 134, 18, 70, 9, 31, 234, 27, 170, 177, 54, 96, 181, 140, 166, 196, 144, 14, 230, 118, 106, 105],
+        signature: [
+          48, 68, 2, 32, 43, 34, 58, 156, 219, 32, 50, 70, 29, 240, 155, 137,
+          88, 60, 200, 95, 243, 198, 201, 21, 56, 82, 141, 112, 69, 196, 170,
+          73, 156, 6, 44, 48, 2, 32, 118, 125, 254, 201, 44, 87, 177, 170, 93,
+          11, 193, 134, 18, 70, 9, 31, 234, 27, 170, 177, 54, 96, 181, 140, 166,
+          196, 144, 14, 230, 118, 106, 105
+        ],
         protocolID: [2, 'BRC3 Test'],
         keyID: '42',
-        counterparty: '0294c479f762f6baa97fbcd4393564c1d7bd8336ebd15928135bbcf575cd1a71a1'
+        counterparty:
+          '0294c479f762f6baa97fbcd4393564c1d7bd8336ebd15928135bbcf575cd1a71a1'
       })
       expect(valid).toBe(true)
     })
     it('Validates the BRC-2 HMAC compliance vector', async () => {
-      const wallet = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(new PrivateKey('6a2991c9de20e38b31d7ea147bf55f5039e4bbc073160f5e0d541d1f17e321b8', 'hex'))))
+      const wallet = new WalletWireTransceiver(
+        new WalletWireProcessor(
+          new ProtoWallet(
+            new PrivateKey(
+              '6a2991c9de20e38b31d7ea147bf55f5039e4bbc073160f5e0d541d1f17e321b8',
+              'hex'
+            )
+          )
+        )
+      )
       const { valid } = await wallet.verifyHmac({
         data: Utils.toArray('BRC-2 HMAC Compliance Validated!', 'utf8'),
-        hmac: [81, 240, 18, 153, 163, 45, 174, 85, 9, 246, 142, 125, 209, 133, 82, 76, 254, 103, 46, 182, 86, 59, 219, 61, 126, 30, 176, 232, 233, 100, 234, 14],
+        hmac: [
+          81, 240, 18, 153, 163, 45, 174, 85, 9, 246, 142, 125, 209, 133, 82,
+          76, 254, 103, 46, 182, 86, 59, 219, 61, 126, 30, 176, 232, 233, 100,
+          234, 14
+        ],
         protocolID: [2, 'BRC2 Test'],
         keyID: '42',
-        counterparty: '0294c479f762f6baa97fbcd4393564c1d7bd8336ebd15928135bbcf575cd1a71a1'
+        counterparty:
+          '0294c479f762f6baa97fbcd4393564c1d7bd8336ebd15928135bbcf575cd1a71a1'
       })
       expect(valid).toBe(true)
     })
     it('Validates the BRC-2 Encryption compliance vector', async () => {
-      const wallet = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(new PrivateKey('6a2991c9de20e38b31d7ea147bf55f5039e4bbc073160f5e0d541d1f17e321b8', 'hex'))))
+      const wallet = new WalletWireTransceiver(
+        new WalletWireProcessor(
+          new ProtoWallet(
+            new PrivateKey(
+              '6a2991c9de20e38b31d7ea147bf55f5039e4bbc073160f5e0d541d1f17e321b8',
+              'hex'
+            )
+          )
+        )
+      )
       const { plaintext } = await wallet.decrypt({
-        ciphertext: [252, 203, 216, 184, 29, 161, 223, 212, 16, 193, 94, 99, 31, 140, 99, 43, 61, 236, 184, 67, 54, 105, 199, 47, 11, 19, 184, 127, 2, 165, 125, 9, 188, 195, 196, 39, 120, 130, 213, 95, 186, 89, 64, 28, 1, 80, 20, 213, 159, 133, 98, 253, 128, 105, 113, 247, 197, 152, 236, 64, 166, 207, 113, 134, 65, 38, 58, 24, 127, 145, 140, 206, 47, 70, 146, 84, 186, 72, 95, 35, 154, 112, 178, 55, 72, 124],
+        ciphertext: [
+          252, 203, 216, 184, 29, 161, 223, 212, 16, 193, 94, 99, 31, 140, 99,
+          43, 61, 236, 184, 67, 54, 105, 199, 47, 11, 19, 184, 127, 2, 165, 125,
+          9, 188, 195, 196, 39, 120, 130, 213, 95, 186, 89, 64, 28, 1, 80, 20,
+          213, 159, 133, 98, 253, 128, 105, 113, 247, 197, 152, 236, 64, 166,
+          207, 113, 134, 65, 38, 58, 24, 127, 145, 140, 206, 47, 70, 146, 84,
+          186, 72, 95, 35, 154, 112, 178, 55, 72, 124
+        ],
         protocolID: [2, 'BRC2 Test'],
         keyID: '42',
-        counterparty: '0294c479f762f6baa97fbcd4393564c1d7bd8336ebd15928135bbcf575cd1a71a1'
+        counterparty:
+          '0294c479f762f6baa97fbcd4393564c1d7bd8336ebd15928135bbcf575cd1a71a1'
       })
-      expect(Utils.toUTF8(plaintext)).toEqual('BRC-2 Encryption Compliance Validated!')
+      expect(Utils.toUTF8(plaintext)).toEqual(
+        'BRC-2 Encryption Compliance Validated!'
+      )
     })
     it('Encrypts messages decryptable by the counterparty', async () => {
       const userKey = PrivateKey.fromRandom()
       const counterpartyKey = PrivateKey.fromRandom()
-      const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
-      const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
+      const user = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(userKey))
+      )
+      const counterparty = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(counterpartyKey))
+      )
       const { ciphertext } = await user.encrypt({
         plaintext: sampleData,
         protocolID: [2, 'tests'],
@@ -115,38 +167,55 @@ describe('WalletWire Integration Tests', () => {
     it('Fails to decryupt messages for the wrong protocol, key, and counterparty', async () => {
       const userKey = PrivateKey.fromRandom()
       const counterpartyKey = PrivateKey.fromRandom()
-      const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
-      const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
+      const user = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(userKey))
+      )
+      const counterparty = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(counterpartyKey))
+      )
       const { ciphertext } = await user.encrypt({
         plaintext: sampleData,
         protocolID: [2, 'tests'],
         keyID: '4',
         counterparty: counterpartyKey.toPublicKey().toString()
       })
-      await expect(async () => await counterparty.decrypt({
-        ciphertext,
-        protocolID: [1, 'tests'],
-        keyID: '4',
-        counterparty: userKey.toPublicKey().toString()
-      })).rejects.toThrow()
-      await expect(async () => await counterparty.decrypt({
-        ciphertext,
-        protocolID: [2, 'tests'],
-        keyID: '5',
-        counterparty: userKey.toPublicKey().toString()
-      })).rejects.toThrow()
-      await expect(async () => await counterparty.decrypt({
-        ciphertext,
-        protocolID: [2, 'tests'],
-        keyID: '4',
-        counterparty: counterpartyKey.toPublicKey().toString()
-      })).rejects.toThrow()
+      await expect(
+        async () =>
+          await counterparty.decrypt({
+            ciphertext,
+            protocolID: [1, 'tests'],
+            keyID: '4',
+            counterparty: userKey.toPublicKey().toString()
+          })
+      ).rejects.toThrow()
+      await expect(
+        async () =>
+          await counterparty.decrypt({
+            ciphertext,
+            protocolID: [2, 'tests'],
+            keyID: '5',
+            counterparty: userKey.toPublicKey().toString()
+          })
+      ).rejects.toThrow()
+      await expect(
+        async () =>
+          await counterparty.decrypt({
+            ciphertext,
+            protocolID: [2, 'tests'],
+            keyID: '4',
+            counterparty: counterpartyKey.toPublicKey().toString()
+          })
+      ).rejects.toThrow()
     })
     it('Correctly derives keys for a counterparty', async () => {
       const userKey = PrivateKey.fromRandom()
       const counterpartyKey = PrivateKey.fromRandom()
-      const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
-      const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
+      const user = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(userKey))
+      )
+      const counterparty = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(counterpartyKey))
+      )
       const { publicKey: identityKey } = await user.getPublicKey({
         identityKey: true
       })
@@ -156,19 +225,24 @@ describe('WalletWire Integration Tests', () => {
         keyID: '4',
         counterparty: counterpartyKey.toPublicKey().toString()
       })
-      const { publicKey: derivedByCounterparty } = await counterparty.getPublicKey({
-        protocolID: [2, 'tests'],
-        keyID: '4',
-        counterparty: userKey.toPublicKey().toString(),
-        forSelf: true
-      })
+      const { publicKey: derivedByCounterparty } =
+        await counterparty.getPublicKey({
+          protocolID: [2, 'tests'],
+          keyID: '4',
+          counterparty: userKey.toPublicKey().toString(),
+          forSelf: true
+        })
       expect(derivedForCounterparty).toEqual(derivedByCounterparty)
     })
     it('Signs messages verifiable by the counterparty', async () => {
       const userKey = PrivateKey.fromRandom()
       const counterpartyKey = PrivateKey.fromRandom()
-      const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
-      const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
+      const user = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(userKey))
+      )
+      const counterparty = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(counterpartyKey))
+      )
       const { signature } = await user.createSignature({
         data: sampleData,
         protocolID: [2, 'tests'],
@@ -188,8 +262,12 @@ describe('WalletWire Integration Tests', () => {
     it('Directly signs hash of message verifiable by the counterparty', async () => {
       const userKey = PrivateKey.fromRandom()
       const counterpartyKey = PrivateKey.fromRandom()
-      const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
-      const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
+      const user = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(userKey))
+      )
+      const counterparty = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(counterpartyKey))
+      )
       const { signature } = await user.createSignature({
         hashToDirectlySign: Hash.sha256(sampleData),
         protocolID: [2, 'tests'],
@@ -217,48 +295,68 @@ describe('WalletWire Integration Tests', () => {
     it('Fails to verify signature for the wrong data, protocol, key, and counterparty', async () => {
       const userKey = PrivateKey.fromRandom()
       const counterpartyKey = PrivateKey.fromRandom()
-      const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
-      const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
+      const user = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(userKey))
+      )
+      const counterparty = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(counterpartyKey))
+      )
       const { signature } = await user.createSignature({
         data: sampleData,
         protocolID: [2, 'tests'],
         keyID: '4',
         counterparty: counterpartyKey.toPublicKey().toString()
       })
-      await expect(async () => await counterparty.verifySignature({
-        signature,
-        data: [0, ...sampleData],
-        protocolID: [2, 'tests'],
-        keyID: '4',
-        counterparty: userKey.toPublicKey().toString()
-      })).rejects.toThrow()
-      await expect(async () => await counterparty.verifySignature({
-        signature,
-        data: sampleData,
-        protocolID: [2, 'wrong'],
-        keyID: '4',
-        counterparty: userKey.toPublicKey().toString()
-      })).rejects.toThrow()
-      await expect(async () => await counterparty.verifySignature({
-        signature,
-        data: sampleData,
-        protocolID: [2, 'tests'],
-        keyID: '2',
-        counterparty: userKey.toPublicKey().toString()
-      })).rejects.toThrow()
-      await expect(async () => await counterparty.verifySignature({
-        signature,
-        data: sampleData,
-        protocolID: [2, 'tests'],
-        keyID: '4',
-        counterparty: counterpartyKey.toPublicKey().toString()
-      })).rejects.toThrow()
+      await expect(
+        async () =>
+          await counterparty.verifySignature({
+            signature,
+            data: [0, ...sampleData],
+            protocolID: [2, 'tests'],
+            keyID: '4',
+            counterparty: userKey.toPublicKey().toString()
+          })
+      ).rejects.toThrow()
+      await expect(
+        async () =>
+          await counterparty.verifySignature({
+            signature,
+            data: sampleData,
+            protocolID: [2, 'wrong'],
+            keyID: '4',
+            counterparty: userKey.toPublicKey().toString()
+          })
+      ).rejects.toThrow()
+      await expect(
+        async () =>
+          await counterparty.verifySignature({
+            signature,
+            data: sampleData,
+            protocolID: [2, 'tests'],
+            keyID: '2',
+            counterparty: userKey.toPublicKey().toString()
+          })
+      ).rejects.toThrow()
+      await expect(
+        async () =>
+          await counterparty.verifySignature({
+            signature,
+            data: sampleData,
+            protocolID: [2, 'tests'],
+            keyID: '4',
+            counterparty: counterpartyKey.toPublicKey().toString()
+          })
+      ).rejects.toThrow()
     })
     it('Computes HMAC over messages verifiable by the counterparty', async () => {
       const userKey = PrivateKey.fromRandom()
       const counterpartyKey = PrivateKey.fromRandom()
-      const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
-      const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
+      const user = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(userKey))
+      )
+      const counterparty = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(counterpartyKey))
+      )
       const { hmac } = await user.createHmac({
         data: sampleData,
         protocolID: [2, 'tests'],
@@ -278,46 +376,64 @@ describe('WalletWire Integration Tests', () => {
     it('Fails to verify HMAC for the wrong data, protocol, key, and counterparty', async () => {
       const userKey = PrivateKey.fromRandom()
       const counterpartyKey = PrivateKey.fromRandom()
-      const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
-      const counterparty = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(counterpartyKey)))
+      const user = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(userKey))
+      )
+      const counterparty = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(counterpartyKey))
+      )
       const { hmac } = await user.createHmac({
         data: sampleData,
         protocolID: [2, 'tests'],
         keyID: '4',
         counterparty: counterpartyKey.toPublicKey().toString()
       })
-      await expect(async () => await counterparty.verifyHmac({
-        hmac,
-        data: [0, ...sampleData],
-        protocolID: [2, 'tests'],
-        keyID: '4',
-        counterparty: userKey.toPublicKey().toString()
-      })).rejects.toThrow()
-      await expect(async () => await counterparty.verifyHmac({
-        hmac,
-        data: sampleData,
-        protocolID: [2, 'wrong'],
-        keyID: '4',
-        counterparty: userKey.toPublicKey().toString()
-      })).rejects.toThrow()
-      await expect(async () => await counterparty.verifyHmac({
-        hmac,
-        data: sampleData,
-        protocolID: [2, 'tests'],
-        keyID: '2',
-        counterparty: userKey.toPublicKey().toString()
-      })).rejects.toThrow()
-      await expect(async () => await counterparty.verifyHmac({
-        hmac,
-        data: sampleData,
-        protocolID: [2, 'tests'],
-        keyID: '4',
-        counterparty: counterpartyKey.toPublicKey().toString()
-      })).rejects.toThrow()
+      await expect(
+        async () =>
+          await counterparty.verifyHmac({
+            hmac,
+            data: [0, ...sampleData],
+            protocolID: [2, 'tests'],
+            keyID: '4',
+            counterparty: userKey.toPublicKey().toString()
+          })
+      ).rejects.toThrow()
+      await expect(
+        async () =>
+          await counterparty.verifyHmac({
+            hmac,
+            data: sampleData,
+            protocolID: [2, 'wrong'],
+            keyID: '4',
+            counterparty: userKey.toPublicKey().toString()
+          })
+      ).rejects.toThrow()
+      await expect(
+        async () =>
+          await counterparty.verifyHmac({
+            hmac,
+            data: sampleData,
+            protocolID: [2, 'tests'],
+            keyID: '2',
+            counterparty: userKey.toPublicKey().toString()
+          })
+      ).rejects.toThrow()
+      await expect(
+        async () =>
+          await counterparty.verifyHmac({
+            hmac,
+            data: sampleData,
+            protocolID: [2, 'tests'],
+            keyID: '4',
+            counterparty: counterpartyKey.toPublicKey().toString()
+          })
+      ).rejects.toThrow()
     })
     it('Uses anyone for creating signatures and self for other operations if no counterparty is provided', async () => {
       const userKey = PrivateKey.fromRandom()
-      const user = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(userKey)))
+      const user = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(userKey))
+      )
       const { hmac } = await user.createHmac({
         data: sampleData,
         protocolID: [2, 'tests'],
@@ -345,7 +461,9 @@ describe('WalletWire Integration Tests', () => {
         keyID: '4'
         // counterparty=anyone is implicit for creating signatures
       })
-      const anyone = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet('anyone')))
+      const anyone = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet('anyone'))
+      )
       const { valid: anyoneSigValid } = await anyone.verifySignature({
         signature: anyoneSig,
         data: sampleData,
@@ -412,8 +530,12 @@ describe('WalletWire Integration Tests', () => {
       const verifierKey = PrivateKey.fromRandom()
 
       // Initialize wallets
-      const proverWallet = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(proverKey)))
-      const verifierWallet = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(verifierKey)))
+      const proverWallet = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(proverKey))
+      )
+      const verifierWallet = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(verifierKey))
+      )
 
       // Prover reveals counterparty key linkage
       const revelation = await proverWallet.revealCounterpartyKeyLinkage({
@@ -430,7 +552,9 @@ describe('WalletWire Integration Tests', () => {
       })
 
       // Compute expected linkage
-      const expectedLinkage = proverKey.deriveSharedSecret(counterpartyKey.toPublicKey()).encode(true)
+      const expectedLinkage = proverKey
+        .deriveSharedSecret(counterpartyKey.toPublicKey())
+        .encode(true)
 
       // Compare linkage and expectedLinkage
       expect(linkage).toEqual(expectedLinkage)
@@ -443,8 +567,12 @@ describe('WalletWire Integration Tests', () => {
       const verifierKey = PrivateKey.fromRandom()
 
       // Initialize wallets
-      const proverWallet = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(proverKey)))
-      const verifierWallet = new WalletWireTransceiver(new WalletWireProcessor(new ProtoWallet(verifierKey)))
+      const proverWallet = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(proverKey))
+      )
+      const verifierWallet = new WalletWireTransceiver(
+        new WalletWireProcessor(new ProtoWallet(verifierKey))
+      )
 
       const protocolID: [0 | 1 | 2, string] = [0, 'tests']
       const keyID = 'test key id'
@@ -462,18 +590,27 @@ describe('WalletWire Integration Tests', () => {
       // Verifier decrypts the encrypted linkage
       const { plaintext: linkage } = await verifierWallet.decrypt({
         ciphertext: revelation.encryptedLinkage,
-        protocolID: [2, `specific linkage revelation ${protocolID[0]} ${protocolID[1]}`],
+        protocolID: [
+          2,
+          `specific linkage revelation ${protocolID[0]} ${protocolID[1]}`
+        ],
         keyID,
         counterparty: proverKey.toPublicKey().toString()
       })
 
       // Compute expected linkage
-      const sharedSecret = proverKey.deriveSharedSecret(counterpartyKey.toPublicKey()).encode(true)
+      const sharedSecret = proverKey
+        .deriveSharedSecret(counterpartyKey.toPublicKey())
+        .encode(true)
 
       // Function to compute the invoice number
       const computeInvoiceNumber = function (protocolID, keyID) {
         const securityLevel = protocolID[0]
-        if (!Number.isInteger(securityLevel) || securityLevel < 0 || securityLevel > 2) {
+        if (
+          !Number.isInteger(securityLevel) ||
+          securityLevel < 0 ||
+          securityLevel > 2
+        ) {
           throw new Error('Protocol security level must be 0, 1, or 2')
         }
         const protocolName = protocolID[1].toLowerCase().trim()
@@ -490,10 +627,14 @@ describe('WalletWire Integration Tests', () => {
           throw new Error('Protocol names must be 5 characters or more')
         }
         if (protocolName.includes('  ')) {
-          throw new Error('Protocol names cannot contain multiple consecutive spaces ("  ")')
+          throw new Error(
+            'Protocol names cannot contain multiple consecutive spaces ("  ")'
+          )
         }
         if (!/^[a-z0-9 ]+$/g.test(protocolName)) {
-          throw new Error('Protocol names can only contain letters, numbers and spaces')
+          throw new Error(
+            'Protocol names can only contain letters, numbers and spaces'
+          )
         }
         if (protocolName.endsWith(' protocol')) {
           throw new Error('No need to end your protocol name with " protocol"')
@@ -518,7 +659,9 @@ describe('WalletWire Integration Tests', () => {
   }
 
   // Mock implementation for methods not supported by ProtoWallet
-  const mockUnsupportedMethods = (methods: Partial<ProtoWallet>): ProtoWallet => {
+  const mockUnsupportedMethods = (
+    methods: Partial<ProtoWallet>
+  ): ProtoWallet => {
     return {
       ...methods
     } as ProtoWallet
@@ -665,11 +808,13 @@ describe('WalletWire Integration Tests', () => {
         description: 'Test action with all options',
         inputs: [],
         inputBEEF: [1, 2, 3, 4],
-        outputs: [{
-          lockingScript: '016a',
-          satoshis: 1,
-          outputDescription: 'This is a test.'
-        }],
+        outputs: [
+          {
+            lockingScript: '016a',
+            satoshis: 1,
+            outputDescription: 'This is a test.'
+          }
+        ],
         lockTime: 0,
         version: 1,
         labels: ['label1', 'label2'],
@@ -702,7 +847,9 @@ describe('WalletWire Integration Tests', () => {
 
     it('should throw an error with invalid inputs', async () => {
       // Mock the createAction method to throw an error
-      const createActionMock = jest.fn().mockRejectedValue(new Error('Invalid inputs'))
+      const createActionMock = jest
+        .fn()
+        .mockRejectedValue(new Error('Invalid inputs'))
       const wallet = createTestWalletWire(
         mockUnsupportedMethods({
           createAction: createActionMock
@@ -745,7 +892,9 @@ describe('WalletWire Integration Tests', () => {
 
     it('should throw an error with invalid inputs', async () => {
       // Mock the signAction method to throw an error
-      const signActionMock = jest.fn().mockRejectedValue(new Error('Invalid inputs'))
+      const signActionMock = jest
+        .fn()
+        .mockRejectedValue(new Error('Invalid inputs'))
       const wallet = createTestWalletWire(
         mockUnsupportedMethods({
           signAction: signActionMock
@@ -778,7 +927,9 @@ describe('WalletWire Integration Tests', () => {
 
     it('should throw an error with invalid reference', async () => {
       // Mock the abortAction method to throw an error
-      const abortActionMock = jest.fn().mockRejectedValue(new Error('Invalid reference'))
+      const abortActionMock = jest
+        .fn()
+        .mockRejectedValue(new Error('Invalid reference'))
       const wallet = createTestWalletWire(
         mockUnsupportedMethods({
           abortAction: abortActionMock
@@ -786,7 +937,9 @@ describe('WalletWire Integration Tests', () => {
       )
       const reference = ''
       const args = { reference }
-      await expect(wallet.abortAction(args)).rejects.toThrow('Invalid reference')
+      await expect(wallet.abortAction(args)).rejects.toThrow(
+        'Invalid reference'
+      )
       expect(abortActionMock).toHaveBeenCalledWith(args, '')
     })
   })
@@ -855,7 +1008,9 @@ describe('WalletWire Integration Tests', () => {
 
     it('should throw an error with invalid inputs', async () => {
       // Mock the listActions method to throw an error
-      const listActionsMock = jest.fn().mockRejectedValue(new Error('Invalid inputs'))
+      const listActionsMock = jest
+        .fn()
+        .mockRejectedValue(new Error('Invalid inputs'))
       const wallet = createTestWalletWire(
         mockUnsupportedMethods({
           listActions: listActionsMock
@@ -872,7 +1027,9 @@ describe('WalletWire Integration Tests', () => {
   describe('internalizeAction', () => {
     it('should internalize an action with valid inputs', async () => {
       // Mock the internalizeAction method
-      const internalizeActionMock = jest.fn().mockResolvedValue({ accepted: true })
+      const internalizeActionMock = jest
+        .fn()
+        .mockResolvedValue({ accepted: true })
       const wallet = createTestWalletWire(
         mockUnsupportedMethods({
           internalizeAction: internalizeActionMock
@@ -902,7 +1059,9 @@ describe('WalletWire Integration Tests', () => {
 
     it('should throw an error with invalid inputs', async () => {
       // Mock the internalizeAction method to throw an error
-      const internalizeActionMock = jest.fn().mockRejectedValue(new Error('Invalid inputs'))
+      const internalizeActionMock = jest
+        .fn()
+        .mockRejectedValue(new Error('Invalid inputs'))
       const wallet = createTestWalletWire(
         mockUnsupportedMethods({
           internalizeAction: internalizeActionMock
@@ -913,12 +1072,16 @@ describe('WalletWire Integration Tests', () => {
         outputs: [],
         description: 'Test internalize action'
       }
-      await expect(wallet.internalizeAction(args)).rejects.toThrow('Invalid inputs')
+      await expect(wallet.internalizeAction(args)).rejects.toThrow(
+        'Invalid inputs'
+      )
       expect(internalizeActionMock).toHaveBeenCalledWith(args, '')
     })
     it('should internalize an action with "basket insertion" protocol', async () => {
       // Mock the internalizeAction method
-      const internalizeActionMock = jest.fn().mockResolvedValue({ accepted: true })
+      const internalizeActionMock = jest
+        .fn()
+        .mockResolvedValue({ accepted: true })
       const wallet = createTestWalletWire(
         mockUnsupportedMethods({
           internalizeAction: internalizeActionMock
@@ -954,7 +1117,8 @@ describe('WalletWire Integration Tests', () => {
         totalOutputs: 1,
         outputs: [
           {
-            outpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
+            outpoint:
+              'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
             satoshis: 1000,
             lockingScript: '00',
             spendable: true,
@@ -985,7 +1149,9 @@ describe('WalletWire Integration Tests', () => {
 
     it('should throw an error with invalid inputs', async () => {
       // Mock the listOutputs method to throw an error
-      const listOutputsMock = jest.fn().mockRejectedValue(new Error('Invalid inputs'))
+      const listOutputsMock = jest
+        .fn()
+        .mockRejectedValue(new Error('Invalid inputs'))
       const wallet = createTestWalletWire(
         mockUnsupportedMethods({
           listOutputs: listOutputsMock
@@ -1004,7 +1170,8 @@ describe('WalletWire Integration Tests', () => {
         BEEF: [1, 2, 3, 4],
         outputs: [
           {
-            outpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
+            outpoint:
+              'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
             satoshis: 1000,
             spendable: true
           }
@@ -1037,7 +1204,9 @@ describe('WalletWire Integration Tests', () => {
 
   describe('getPublicKey', () => {
     it('should get the identity public key', async () => {
-      const wallet = createTestWalletWire(new ProtoWallet(PrivateKey.fromRandom()))
+      const wallet = createTestWalletWire(
+        new ProtoWallet(PrivateKey.fromRandom())
+      )
       const result = await wallet.getPublicKey({ identityKey: true })
       expect(result).toHaveProperty('publicKey')
       expect(typeof result.publicKey).toBe('string')
@@ -1060,7 +1229,9 @@ describe('WalletWire Integration Tests', () => {
     })
 
     it('should get the public key with counterparty "anyone"', async () => {
-      const wallet = createTestWalletWire(new ProtoWallet(PrivateKey.fromRandom()))
+      const wallet = createTestWalletWire(
+        new ProtoWallet(PrivateKey.fromRandom())
+      )
       const args = {
         protocolID: [1, 'testprotocol'] as [0 | 1 | 2, string],
         keyID: 'testkeyid',
@@ -1073,7 +1244,9 @@ describe('WalletWire Integration Tests', () => {
     })
 
     it('should get the public key with missing optional parameters', async () => {
-      const wallet = createTestWalletWire(new ProtoWallet(PrivateKey.fromRandom()))
+      const wallet = createTestWalletWire(
+        new ProtoWallet(PrivateKey.fromRandom())
+      )
       const args = {
         protocolID: [0, 'minimalprotocol'] as [0 | 1 | 2, string],
         keyID: 'minimalkeyid'
@@ -1091,7 +1264,9 @@ describe('WalletWire Integration Tests', () => {
       const userKey = PrivateKey.fromRandom()
       const counterpartyKey = PrivateKey.fromRandom()
       const userWallet = createTestWalletWire(new ProtoWallet(userKey))
-      const counterpartyWallet = createTestWalletWire(new ProtoWallet(counterpartyKey))
+      const counterpartyWallet = createTestWalletWire(
+        new ProtoWallet(counterpartyKey)
+      )
 
       const plaintext = sampleData
       const encryptArgs = {
@@ -1118,7 +1293,9 @@ describe('WalletWire Integration Tests', () => {
     it('should throw an error for invalid decryption inputs', async () => {
       const userKey = PrivateKey.fromRandom()
       const counterpartyKey = PrivateKey.fromRandom()
-      const counterpartyWallet = createTestWalletWire(new ProtoWallet(counterpartyKey))
+      const counterpartyWallet = createTestWalletWire(
+        new ProtoWallet(counterpartyKey)
+      )
 
       const decryptArgs = {
         ciphertext: [0x00],
@@ -1135,7 +1312,9 @@ describe('WalletWire Integration Tests', () => {
       const userKey = PrivateKey.fromRandom()
       const counterpartyKey = PrivateKey.fromRandom()
       const userWallet = createTestWalletWire(new ProtoWallet(userKey))
-      const counterpartyWallet = createTestWalletWire(new ProtoWallet(counterpartyKey))
+      const counterpartyWallet = createTestWalletWire(
+        new ProtoWallet(counterpartyKey)
+      )
 
       const data = sampleData
       const createHmacArgs = {
@@ -1155,13 +1334,16 @@ describe('WalletWire Integration Tests', () => {
         keyID: 'test-key-id',
         counterparty: userKey.toPublicKey().toString()
       }
-      const verifyHmacResult = await counterpartyWallet.verifyHmac(verifyHmacArgs)
+      const verifyHmacResult =
+        await counterpartyWallet.verifyHmac(verifyHmacArgs)
       expect(verifyHmacResult).toEqual({ valid: true })
     })
 
     it('should throw an error for invalid HMAC verification', async () => {
       const userKey = PrivateKey.fromRandom()
-      const counterpartyWallet = createTestWalletWire(new ProtoWallet(PrivateKey.fromRandom()))
+      const counterpartyWallet = createTestWalletWire(
+        new ProtoWallet(PrivateKey.fromRandom())
+      )
 
       const verifyHmacArgs = {
         data: sampleData,
@@ -1170,7 +1352,9 @@ describe('WalletWire Integration Tests', () => {
         keyID: 'test-key-id',
         counterparty: userKey.toPublicKey().toString()
       }
-      await expect(counterpartyWallet.verifyHmac(verifyHmacArgs)).rejects.toThrow()
+      await expect(
+        counterpartyWallet.verifyHmac(verifyHmacArgs)
+      ).rejects.toThrow()
     })
   })
 
@@ -1179,7 +1363,9 @@ describe('WalletWire Integration Tests', () => {
       const userKey = PrivateKey.fromRandom()
       const counterpartyKey = PrivateKey.fromRandom()
       const userWallet = createTestWalletWire(new ProtoWallet(userKey))
-      const counterpartyWallet = createTestWalletWire(new ProtoWallet(counterpartyKey))
+      const counterpartyWallet = createTestWalletWire(
+        new ProtoWallet(counterpartyKey)
+      )
 
       const data = sampleData
       const createSignatureArgs = {
@@ -1188,7 +1374,8 @@ describe('WalletWire Integration Tests', () => {
         keyID: 'test-key-id',
         counterparty: counterpartyKey.toPublicKey().toString()
       }
-      const createSignatureResult = await userWallet.createSignature(createSignatureArgs)
+      const createSignatureResult =
+        await userWallet.createSignature(createSignatureArgs)
       expect(createSignatureResult).toHaveProperty('signature')
       expect(createSignatureResult.signature.length).toBeGreaterThan(0)
 
@@ -1199,13 +1386,16 @@ describe('WalletWire Integration Tests', () => {
         keyID: 'test-key-id',
         counterparty: userKey.toPublicKey().toString()
       }
-      const verifySignatureResult = await counterpartyWallet.verifySignature(verifySignatureArgs)
+      const verifySignatureResult =
+        await counterpartyWallet.verifySignature(verifySignatureArgs)
       expect(verifySignatureResult).toEqual({ valid: true })
     })
 
     it('should throw an error for invalid signature verification', async () => {
       const userKey = PrivateKey.fromRandom()
-      const counterpartyWallet = createTestWalletWire(new ProtoWallet(PrivateKey.fromRandom()))
+      const counterpartyWallet = createTestWalletWire(
+        new ProtoWallet(PrivateKey.fromRandom())
+      )
 
       const verifySignatureArgs = {
         data: sampleData,
@@ -1214,7 +1404,9 @@ describe('WalletWire Integration Tests', () => {
         keyID: 'test-key-id',
         counterparty: userKey.toPublicKey().toString()
       }
-      await expect(counterpartyWallet.verifySignature(verifySignatureArgs)).rejects.toThrow()
+      await expect(
+        counterpartyWallet.verifySignature(verifySignatureArgs)
+      ).rejects.toThrow()
     })
   })
 
@@ -1237,13 +1429,18 @@ describe('WalletWire Integration Tests', () => {
 
       const decryptArgs = {
         ciphertext: revelation.encryptedLinkage,
-        protocolID: [2, 'counterparty linkage revelation'] as [0 | 1 | 2, string],
+        protocolID: [2, 'counterparty linkage revelation'] as [
+          0 | 1 | 2,
+          string
+        ],
         keyID: revelation.revelationTime,
         counterparty: proverKey.toPublicKey().toString()
       }
       const decryptedResult = await verifierWallet.decrypt(decryptArgs)
 
-      const expectedLinkage = proverKey.deriveSharedSecret(counterpartyKey.toPublicKey()).encode(true)
+      const expectedLinkage = proverKey
+        .deriveSharedSecret(counterpartyKey.toPublicKey())
+        .encode(true)
       expect(decryptedResult.plaintext).toEqual(expectedLinkage)
     })
   })
@@ -1256,8 +1453,10 @@ describe('WalletWire Integration Tests', () => {
         subject: '02' + 'a'.repeat(64),
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
         certifier: '02' + 'b'.repeat(64),
-        revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+        revocationOutpoint:
+          'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
+        signature:
+          '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         fields: {
           field1: 'value1',
           field2: 'value2'
@@ -1278,8 +1477,10 @@ describe('WalletWire Integration Tests', () => {
           field2: 'value2'
         },
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
-        revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+        revocationOutpoint:
+          'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
+        signature:
+          '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         keyringRevealer: 'certifier',
         keyringForSubject: {}
       }
@@ -1300,8 +1501,10 @@ describe('WalletWire Integration Tests', () => {
         subject: '02' + 'a'.repeat(64),
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
         certifier: '02' + 'b'.repeat(64),
-        revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+        revocationOutpoint:
+          'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
+        signature:
+          '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         fields: {
           field1: 'value1',
           field2: 'value2'
@@ -1322,8 +1525,10 @@ describe('WalletWire Integration Tests', () => {
           field2: 'value2'
         },
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
-        revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+        revocationOutpoint:
+          'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
+        signature:
+          '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         keyringRevealer: 'certifier' as 'certifier',
         keyringForSubject: {
           field1: Utils.toBase64([0x01, 0x02, 0x03]),
@@ -1348,8 +1553,10 @@ describe('WalletWire Integration Tests', () => {
         subject: '02' + 'a'.repeat(64),
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
         certifier: '02' + 'b'.repeat(64),
-        revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+        revocationOutpoint:
+          'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
+        signature:
+          '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         fields: {
           field1: 'value1',
           field2: 'value2'
@@ -1371,8 +1578,10 @@ describe('WalletWire Integration Tests', () => {
           field2: 'value2'
         },
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
-        revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+        revocationOutpoint:
+          'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
+        signature:
+          '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         keyringRevealer: keyringRevealerPubKey,
         keyringForSubject: {
           field1: Utils.toBase64([0x01, 0x02, 0x03]),
@@ -1397,8 +1606,10 @@ describe('WalletWire Integration Tests', () => {
         subject: '02' + 'd'.repeat(64),
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
         certifier: '02' + 'b'.repeat(64),
-        revocationOutpoint: 'cafebabedeadbeefcafebabedeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.1',
-        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+        revocationOutpoint:
+          'cafebabedeadbeefcafebabedeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.1',
+        signature:
+          '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         fields: {
           field3: 'value3',
           field4: 'value4'
@@ -1438,8 +1649,10 @@ describe('WalletWire Integration Tests', () => {
         subject: '02' + 'e'.repeat(64),
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
         certifier: '02' + 'b'.repeat(64),
-        revocationOutpoint: 'beadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbead.2',
-        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+        revocationOutpoint:
+          'beadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbead.2',
+        signature:
+          '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         fields: {
           field5: 'value5'
         }
@@ -1458,8 +1671,10 @@ describe('WalletWire Integration Tests', () => {
           field5: 'value5'
         },
         serialNumber: Utils.toBase64(new Array(32).fill(2)),
-        revocationOutpoint: 'beadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbead.2',
-        signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+        revocationOutpoint:
+          'beadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbead.2',
+        signature:
+          '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
         keyringRevealer: 'certifier' as 'certifier',
         keyringForSubject: {} // Empty keyring
       }
@@ -1487,8 +1702,10 @@ describe('WalletWire Integration Tests', () => {
             subject: '02' + 'a'.repeat(64),
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'b'.repeat(64),
-            revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+            revocationOutpoint:
+              'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
+            signature:
+              '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {
               field1: 'value1',
               field2: 'value2'
@@ -1524,8 +1741,10 @@ describe('WalletWire Integration Tests', () => {
             subject: '02' + 'a'.repeat(64),
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'b'.repeat(64),
-            revocationOutpoint: 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.0',
-            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+            revocationOutpoint:
+              'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.0',
+            signature:
+              '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {
               field1: 'value1',
               field2: 'value2'
@@ -1536,8 +1755,10 @@ describe('WalletWire Integration Tests', () => {
             subject: '02' + 'c'.repeat(64),
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'b'.repeat(64),
-            revocationOutpoint: 'cafebabecafebabecafebabecafebabecafebabecafebabecafebabecafebabe.1',
-            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+            revocationOutpoint:
+              'cafebabecafebabecafebabecafebabecafebabecafebabecafebabecafebabe.1',
+            signature:
+              '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {
               field3: 'value3',
               field4: 'value4',
@@ -1564,7 +1785,10 @@ describe('WalletWire Integration Tests', () => {
       const result = await wallet.listCertificates(args)
       expect(result).toHaveProperty('totalCertificates', 2)
       expect(result.certificates.length).toBe(2)
-      expect(result.certificates[0].fields).toEqual({ field1: 'value1', field2: 'value2' })
+      expect(result.certificates[0].fields).toEqual({
+        field1: 'value1',
+        field2: 'value2'
+      })
       expect(result.certificates[1].fields).toEqual({
         field3: 'value3',
         field4: 'value4',
@@ -1583,8 +1807,10 @@ describe('WalletWire Integration Tests', () => {
             subject: '02' + 'd'.repeat(64),
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'e'.repeat(64),
-            revocationOutpoint: 'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe.2',
-            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+            revocationOutpoint:
+              'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe.2',
+            signature:
+              '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {
               field6: 'value6'
             }
@@ -1633,8 +1859,10 @@ describe('WalletWire Integration Tests', () => {
           subject: '02' + 'a'.repeat(64),
           serialNumber: Utils.toBase64(new Array(32).fill(2)),
           certifier: '02' + 'b'.repeat(64),
-          revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-          signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+          revocationOutpoint:
+            'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
+          signature:
+            '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
           fields: {
             field1: 'value1',
             field2: 'value2'
@@ -1667,8 +1895,10 @@ describe('WalletWire Integration Tests', () => {
           subject: '02' + 'a'.repeat(64),
           serialNumber: Utils.toBase64(new Array(32).fill(2)),
           certifier: '02' + 'b'.repeat(64),
-          revocationOutpoint: 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.0',
-          signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+          revocationOutpoint:
+            'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.0',
+          signature:
+            '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
           fields: {
             field1: 'value1',
             field2: 'value2',
@@ -1680,7 +1910,10 @@ describe('WalletWire Integration Tests', () => {
       }
       const result = await wallet.proveCertificate(args)
       expect(result).toHaveProperty('keyringForVerifier')
-      expect(Object.keys(result.keyringForVerifier)).toEqual(['field1', 'field2'])
+      expect(Object.keys(result.keyringForVerifier)).toEqual([
+        'field1',
+        'field2'
+      ])
       expect(proveCertificateMock).toHaveBeenCalledWith(args, '')
     })
 
@@ -1701,8 +1934,10 @@ describe('WalletWire Integration Tests', () => {
           subject: '02' + 'a'.repeat(64),
           serialNumber: Utils.toBase64(new Array(32).fill(2)),
           certifier: '02' + 'b'.repeat(64),
-          revocationOutpoint: 'cafebabecafebabecafebabecafebabecafebabecafebabecafebabecafebabe.1',
-          signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+          revocationOutpoint:
+            'cafebabecafebabecafebabecafebabecafebabecafebabecafebabecafebabe.1',
+          signature:
+            '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
           fields: {
             field4: 'value4',
             field5: 'value5'
@@ -1721,7 +1956,9 @@ describe('WalletWire Integration Tests', () => {
   describe('relinquishCertificate', () => {
     it('should relinquish a certificate with valid inputs', async () => {
       // Mock the relinquishCertificate method
-      const relinquishCertificateMock = jest.fn().mockResolvedValue({ relinquished: true })
+      const relinquishCertificateMock = jest
+        .fn()
+        .mockResolvedValue({ relinquished: true })
       const wallet = createTestWalletWire(
         mockUnsupportedMethods({
           relinquishCertificate: relinquishCertificateMock
@@ -1758,7 +1995,9 @@ describe('WalletWire Integration Tests', () => {
 
     it('should throw an error when getHeight fails', async () => {
       // Mock the getHeight method to throw an error
-      const getHeightMock = jest.fn().mockRejectedValue(new Error('Failed to get height'))
+      const getHeightMock = jest
+        .fn()
+        .mockRejectedValue(new Error('Failed to get height'))
       const wallet = createTestWalletWire(
         mockUnsupportedMethods({
           getHeight: getHeightMock
@@ -1789,14 +2028,18 @@ describe('WalletWire Integration Tests', () => {
 
     it('should throw an error when getHeaderForHeight fails', async () => {
       // Mock the getHeaderForHeight method to throw an error
-      const getHeaderForHeightMock = jest.fn().mockRejectedValue(new Error('Failed to get header'))
+      const getHeaderForHeightMock = jest
+        .fn()
+        .mockRejectedValue(new Error('Failed to get header'))
       const wallet = createTestWalletWire(
         mockUnsupportedMethods({
           getHeaderForHeight: getHeaderForHeightMock
         })
       )
       const args = { height: -1 } // Invalid height
-      await expect(wallet.getHeaderForHeight(args)).rejects.toThrow('Failed to get header')
+      await expect(wallet.getHeaderForHeight(args)).rejects.toThrow(
+        'Failed to get header'
+      )
       expect(getHeaderForHeightMock).toHaveBeenCalledWith(args, '')
     })
   })
@@ -1812,8 +2055,10 @@ describe('WalletWire Integration Tests', () => {
             subject: '02' + 'a'.repeat(64),
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'b'.repeat(64),
-            revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+            revocationOutpoint:
+              'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
+            signature:
+              '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {},
             certifierInfo: {
               name: 'Test Certifier',
@@ -1853,8 +2098,10 @@ describe('WalletWire Integration Tests', () => {
             subject: '02' + 'a'.repeat(64),
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'b'.repeat(64),
-            revocationOutpoint: 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.0',
-            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+            revocationOutpoint:
+              'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.0',
+            signature:
+              '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {},
             certifierInfo: {
               name: 'Test Certifier',
@@ -1896,8 +2143,10 @@ describe('WalletWire Integration Tests', () => {
             subject: '02' + 'a'.repeat(64),
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'b'.repeat(64),
-            revocationOutpoint: 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.0',
-            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+            revocationOutpoint:
+              'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef.0',
+            signature:
+              '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {},
             certifierInfo: {
               name: 'Certifier One',
@@ -1917,8 +2166,10 @@ describe('WalletWire Integration Tests', () => {
             subject: '02' + 'a'.repeat(64),
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'c'.repeat(64),
-            revocationOutpoint: 'cafebabecafebabecafebabecafebabecafebabecafebabecafebabecafebabe.1',
-            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+            revocationOutpoint:
+              'cafebabecafebabecafebabecafebabecafebabecafebabecafebabecafebabe.1',
+            signature:
+              '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {},
             certifierInfo: {
               name: 'Certifier Two',
@@ -1965,8 +2216,10 @@ describe('WalletWire Integration Tests', () => {
             subject: '02' + 'a'.repeat(64),
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'b'.repeat(64),
-            revocationOutpoint: 'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
-            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+            revocationOutpoint:
+              'deadbeef20248806deadbeef20248806deadbeef20248806deadbeef20248806.0',
+            signature:
+              '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {},
             certifierInfo: {
               name: 'Test Certifier',
@@ -2001,7 +2254,9 @@ describe('WalletWire Integration Tests', () => {
 
     it('should throw an error with invalid inputs', async () => {
       // Mock the discoverByAttributes method to throw an error
-      const discoverByAttributesMock = jest.fn().mockRejectedValue(new Error('Invalid inputs'))
+      const discoverByAttributesMock = jest
+        .fn()
+        .mockRejectedValue(new Error('Invalid inputs'))
       const wallet = createTestWalletWire(
         mockUnsupportedMethods({
           discoverByAttributes: discoverByAttributesMock
@@ -2010,7 +2265,9 @@ describe('WalletWire Integration Tests', () => {
       const args = {
         attributes: {}
       }
-      await expect(wallet.discoverByAttributes(args)).rejects.toThrow('Invalid inputs')
+      await expect(wallet.discoverByAttributes(args)).rejects.toThrow(
+        'Invalid inputs'
+      )
       expect(discoverByAttributesMock).toHaveBeenCalledWith(args, '')
     })
     it('should discover certificates matching provided attributes', async () => {
@@ -2023,8 +2280,10 @@ describe('WalletWire Integration Tests', () => {
             subject: '02' + 'd'.repeat(64),
             serialNumber: Utils.toBase64(new Array(32).fill(2)),
             certifier: '02' + 'e'.repeat(64),
-            revocationOutpoint: 'beadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbead.2',
-            signature: '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
+            revocationOutpoint:
+              'beadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbeadbead.2',
+            signature:
+              '3045022100e4d03d959697ed191f9ef7ae7deacd3118b8693d18da0fd76e4ad92664ce05cf02200d753951e766cbf2d2b306e08921c06341d2de67ab75389bf84caf954ee40e88',
             fields: {},
             certifierInfo: {
               name: 'Certifier Three',
@@ -2033,7 +2292,7 @@ describe('WalletWire Integration Tests', () => {
               trust: 8
             },
             publiclyRevealedKeyring: {
-              fieldX: Utils.toBase64([0x0A, 0x0B])
+              fieldX: Utils.toBase64([0x0a, 0x0b])
             },
             decryptedFields: {
               fieldY: 'decryptedValueY'
@@ -2058,7 +2317,9 @@ describe('WalletWire Integration Tests', () => {
       expect(result).toHaveProperty('totalCertificates', 1)
       expect(result.certificates.length).toBe(1)
       expect(result.certificates[0].certifierInfo.name).toBe('Certifier Three')
-      expect(result.certificates[0].decryptedFields.fieldY).toBe('decryptedValueY')
+      expect(result.certificates[0].decryptedFields.fieldY).toBe(
+        'decryptedValueY'
+      )
       expect(discoverByAttributesMock).toHaveBeenCalledWith(args, '')
     })
 

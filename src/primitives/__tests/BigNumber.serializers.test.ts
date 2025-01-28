@@ -62,7 +62,9 @@ describe('BigNumber/Serializers', () => {
       expect(BigNumber.fromBits(0x04003456).toHex()).toEqual('345600')
       expect(BigNumber.fromBits(0x05003456).toHex()).toEqual('34560000')
       expect(BigNumber.fromBits(0x05f03456).ltn(0)).toEqual(true) // sign bit set
-      expect(() => BigNumber.fromBits(0x05f03456, true)).toThrow('negative bit set')
+      expect(() => BigNumber.fromBits(0x05f03456, true)).toThrow(
+        'negative bit set'
+      )
       expect(BigNumber.fromBits(0x04923456).ltn(0)).toEqual(true)
     })
   })
@@ -122,24 +124,48 @@ describe('BigNumber/Serializers', () => {
 
   describe('#fromScriptNum', () => {
     it('should parse this normal number', () => {
-      expect(BigNumber.fromScriptNum(toArray('01', 'hex')).toNumber()).toEqual(1)
-      expect(BigNumber.fromScriptNum(toArray('0080', 'hex')).toNumber()).toEqual(0)
-      expect(BigNumber.fromScriptNum(toArray('0180', 'hex')).toNumber()).toEqual(-1)
+      expect(BigNumber.fromScriptNum(toArray('01', 'hex')).toNumber()).toEqual(
+        1
+      )
+      expect(
+        BigNumber.fromScriptNum(toArray('0080', 'hex')).toNumber()
+      ).toEqual(0)
+      expect(
+        BigNumber.fromScriptNum(toArray('0180', 'hex')).toNumber()
+      ).toEqual(-1)
     })
 
     it('should allow a number over 4 bytes', () => {
-      expect(() => BigNumber.fromScriptNum(toArray('8100000000', 'hex'))).not.toThrow('script number overflow')
+      expect(() =>
+        BigNumber.fromScriptNum(toArray('8100000000', 'hex'))
+      ).not.toThrow('script number overflow')
     })
 
     it('should throw an error for number that is not a minimal size representation', () => {
-      expect(() => BigNumber.fromScriptNum(toArray('80000000', 'hex'), true)).toThrow('non-minimally encoded script number')
-      expect(() => BigNumber.fromScriptNum(toArray('800000', 'hex'), true)).toThrow('non-minimally encoded script number')
-      expect(() => BigNumber.fromScriptNum(toArray('00', 'hex'), true)).toThrow('non-minimally encoded script number')
-      expect(BigNumber.fromScriptNum(toArray('8000', 'hex'), true).toString()).toEqual('128')
-      expect(BigNumber.fromScriptNum(toArray('0081', 'hex'), true).toString()).toEqual('-256')
-      expect(BigNumber.fromScriptNum(toArray('', 'hex'), true).toString()).toEqual('0')
-      expect(BigNumber.fromScriptNum(toArray('01', 'hex'), true).toString()).toEqual('1')
-      expect(BigNumber.fromScriptNum(toArray('00000000', 'hex')).toString()).toEqual('0')
+      expect(() =>
+        BigNumber.fromScriptNum(toArray('80000000', 'hex'), true)
+      ).toThrow('non-minimally encoded script number')
+      expect(() =>
+        BigNumber.fromScriptNum(toArray('800000', 'hex'), true)
+      ).toThrow('non-minimally encoded script number')
+      expect(() => BigNumber.fromScriptNum(toArray('00', 'hex'), true)).toThrow(
+        'non-minimally encoded script number'
+      )
+      expect(
+        BigNumber.fromScriptNum(toArray('8000', 'hex'), true).toString()
+      ).toEqual('128')
+      expect(
+        BigNumber.fromScriptNum(toArray('0081', 'hex'), true).toString()
+      ).toEqual('-256')
+      expect(
+        BigNumber.fromScriptNum(toArray('', 'hex'), true).toString()
+      ).toEqual('0')
+      expect(
+        BigNumber.fromScriptNum(toArray('01', 'hex'), true).toString()
+      ).toEqual('1')
+      expect(
+        BigNumber.fromScriptNum(toArray('00000000', 'hex')).toString()
+      ).toEqual('0')
     })
   })
 

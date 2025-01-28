@@ -4,7 +4,10 @@ import Curve from '../../../dist/cjs/src/primitives/Curve'
 import Signature from '../../../dist/cjs/src/primitives/Signature'
 
 const msg = new BigNumber('deadbeef', 16)
-const key = new BigNumber('1e5edd45de6d22deebef4596b80444ffcc29143839c1dce18db470e25b4be7b5', 16)
+const key = new BigNumber(
+  '1e5edd45de6d22deebef4596b80444ffcc29143839c1dce18db470e25b4be7b5',
+  16
+)
 const curve = new Curve()
 const pub = curve.g.mul(key)
 const wrongPub = curve.g.mul(new BigNumber(33))
@@ -45,7 +48,10 @@ describe('ECDSA', () => {
   })
 
   it('should not verify an incorrectly signed message', () => {
-    const wrongMessage = new BigNumber('BA5AABBE1AA9B6EC1E2ADB2DF99699344345678901234567890ABCDEFABCDEF02', 16)
+    const wrongMessage = new BigNumber(
+      'BA5AABBE1AA9B6EC1E2ADB2DF99699344345678901234567890ABCDEFABCDEF02',
+      16
+    )
     const signature = ECDSA.sign(msg, key)
     const result = ECDSA.verify(wrongMessage, signature, pub)
     expect(result).toBe(false)

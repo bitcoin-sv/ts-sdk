@@ -23,7 +23,15 @@ export default class RPuzzle implements ScriptTemplate {
    *
    * @param {'raw'|'SHA1'|'SHA256'|'HASH256'|'RIPEMD160'|'HASH160'} type Denotes the type of puzzle to create
    */
-  constructor(type: 'raw' | 'SHA1' | 'SHA256' | 'HASH256' | 'RIPEMD160' | 'HASH160' = 'raw') {
+  constructor(
+    type:
+      | 'raw'
+      | 'SHA1'
+      | 'SHA256'
+      | 'HASH256'
+      | 'RIPEMD160'
+      | 'HASH160' = 'raw'
+  ) {
     this.type = type
   }
 
@@ -107,24 +115,34 @@ export default class RPuzzle implements ScriptTemplate {
         const preimage = TransactionSignature.format({
           sourceTXID: input.sourceTransaction.id('hex'),
           sourceOutputIndex: input.sourceOutputIndex,
-          sourceSatoshis: input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis,
+          sourceSatoshis:
+            input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis,
           transactionVersion: tx.version,
           otherInputs,
           inputIndex,
           outputs: tx.outputs,
           inputSequence: input.sequence,
-          subscript: input.sourceTransaction.outputs[input.sourceOutputIndex].lockingScript,
+          subscript:
+            input.sourceTransaction.outputs[input.sourceOutputIndex]
+              .lockingScript,
           lockTime: tx.lockTime,
           scope: signatureScope
         })
-        const rawSignature = privateKey.sign(sha256(preimage), undefined, true, k)
+        const rawSignature = privateKey.sign(
+          sha256(preimage),
+          undefined,
+          true,
+          k
+        )
         const sig = new TransactionSignature(
           rawSignature.r,
           rawSignature.s,
           signatureScope
         )
         const sigForScript = sig.toChecksigFormat()
-        const pubkeyForScript = privateKey.toPublicKey().encode(true) as number[]
+        const pubkeyForScript = privateKey
+          .toPublicKey()
+          .encode(true) as number[]
         return new UnlockingScript([
           { op: sigForScript.length, data: sigForScript },
           { op: pubkeyForScript.length, data: pubkeyForScript }

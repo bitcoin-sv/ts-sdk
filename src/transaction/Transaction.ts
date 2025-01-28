@@ -258,7 +258,9 @@ export default class Transaction {
   static fromEF (ef: number[]): Transaction {
     const br = new Reader(ef)
     const version = br.readUInt32LE()
-    if (toHex(br.read(6)) !== '0000000000ef') { throw new Error('Invalid EF marker') }
+    if (toHex(br.read(6)) !== '0000000000ef') {
+      throw new Error('Invalid EF marker')
+    }
     const inputsLength = br.readVarIntNum()
     const inputs: TransactionInput[] = []
     for (let i = 0; i < inputsLength; i++) {
@@ -478,7 +480,9 @@ export default class Transaction {
           'either satoshis must be defined or change must be set to true'
         )
       }
-      if (output.satoshis < 0) { throw new Error('satoshis must be a positive integer or zero') }
+      if (output.satoshis < 0) {
+        throw new Error('satoshis must be a positive integer or zero')
+      }
     }
     if (!output.lockingScript) throw new Error('lockingScript must be defined')
     this.outputs.push(output)

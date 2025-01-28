@@ -1,6 +1,11 @@
 import { MasterCertificate } from '../../../../dist/cjs/src/auth/certificates/MasterCertificate.js'
 import { VerifiableCertificate } from '../../../../dist/cjs/src/auth/certificates/VerifiableCertificate.js'
-import { PrivateKey, SymmetricKey, Utils, Random } from '../../../../dist/cjs/src/primitives/index.js'
+import {
+  PrivateKey,
+  SymmetricKey,
+  Utils,
+  Random
+} from '../../../../dist/cjs/src/primitives/index.js'
 import { CompletedProtoWallet } from '../../../../dist/cjs/src/auth/certificates/__tests/CompletedProtoWallet.js'
 
 describe('MasterCertificate', () => {
@@ -8,7 +13,8 @@ describe('MasterCertificate', () => {
   const certifierPrivateKey = PrivateKey.fromRandom()
 
   // A mock revocation outpoint for testing
-  const mockRevocationOutpoint = 'deadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000.1'
+  const mockRevocationOutpoint =
+    'deadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000.1'
 
   // Arbitrary certificate data (in plaintext)
   const plaintextFields = {
@@ -22,8 +28,11 @@ describe('MasterCertificate', () => {
   let subjectPubKey, certifierPubKey
 
   beforeAll(async () => {
-    subjectPubKey = (await subjectWallet.getPublicKey({ identityKey: true })).publicKey
-    certifierPubKey = (await certifierWallet.getPublicKey({ identityKey: true })).publicKey
+    subjectPubKey = (await subjectWallet.getPublicKey({ identityKey: true }))
+      .publicKey
+    certifierPubKey = (
+      await certifierWallet.getPublicKey({ identityKey: true })
+    ).publicKey
   })
 
   describe('constructor', () => {
@@ -91,15 +100,20 @@ describe('MasterCertificate', () => {
 
     it('should throw if masterKeyring is empty or invalid', async () => {
       // Manually create a MasterCertificate with an empty masterKeyring
-      expect(() => new MasterCertificate(
-        Utils.toBase64(Random(16)),
-        Utils.toBase64(Random(16)),
-        subjectPubKey,
-        certifierPubKey,
-        mockRevocationOutpoint,
-        { name: Utils.toBase64([1, 2, 3]) },
-        {}
-      )).toThrow("Master keyring must contain a value for every field. Missing key for field: \"name\"");
+      expect(
+        () =>
+          new MasterCertificate(
+            Utils.toBase64(Random(16)),
+            Utils.toBase64(Random(16)),
+            subjectPubKey,
+            certifierPubKey,
+            mockRevocationOutpoint,
+            { name: Utils.toBase64([1, 2, 3]) },
+            {}
+          )
+      ).toThrow(
+        'Master keyring must contain a value for every field. Missing key for field: "name"'
+      )
     })
 
     it('should throw if decryption fails for any field', async () => {
@@ -112,14 +126,18 @@ describe('MasterCertificate', () => {
         certifierPubKey,
         mockRevocationOutpoint,
         {
-          name: Utils.toBase64(SymmetricKey.fromRandom().encrypt(Utils.toArray('Alice', 'utf8')) as number[])
+          name: Utils.toBase64(
+            SymmetricKey.fromRandom().encrypt(
+              Utils.toArray('Alice', 'utf8')
+            ) as number[]
+          )
         },
         { name: badKeyMasterKeyring }
       )
 
-      await expect(badKeyCertificate.decryptFields(subjectWallet))
-        .rejects
-        .toThrow('Failed to decrypt all master certificate fields.')
+      await expect(
+        badKeyCertificate.decryptFields(subjectWallet)
+      ).rejects.toThrow('Failed to decrypt all master certificate fields.')
     })
   })
 
@@ -131,7 +149,9 @@ describe('MasterCertificate', () => {
     let issuedCert: MasterCertificate
 
     beforeAll(async () => {
-      verifierPubKey = (await verifierWallet.getPublicKey({ identityKey: true })).publicKey
+      verifierPubKey = (
+        await verifierWallet.getPublicKey({ identityKey: true })
+      ).publicKey
       issuedCert = await MasterCertificate.issueCertificateForSubject(
         certifierWallet,
         subjectPubKey,
@@ -172,7 +192,9 @@ describe('MasterCertificate', () => {
 
     it('should throw if fields to reveal are not subset of the certificate fields', async () => {
       await expect(
-        issuedCert.createKeyringForVerifier(subjectWallet, verifierPubKey, ['nonexistent_field'])
+        issuedCert.createKeyringForVerifier(subjectWallet, verifierPubKey, [
+          'nonexistent_field'
+        ])
       ).rejects.toThrow(
         /Fields to reveal must be a subset of the certificate fields\. Missing the "nonexistent_field" field\./
       )
@@ -197,7 +219,9 @@ describe('MasterCertificate', () => {
       )
 
       await expect(
-        tamperedCert.createKeyringForVerifier(subjectWallet, verifierPubKey, ['name'])
+        tamperedCert.createKeyringForVerifier(subjectWallet, verifierPubKey, [
+          'name'
+        ])
       ).rejects.toThrow('Decryption failed!')
     })
 
@@ -250,7 +274,7 @@ describe('MasterCertificate', () => {
         subjectPubKey,
         newPlaintextFields,
         'TEST_CERT',
-        revocationFn,
+        revocationFn
       )
 
       expect(newCert).toBeInstanceOf(MasterCertificate)

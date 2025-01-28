@@ -7,7 +7,11 @@ export default class HTTPWalletWire implements WalletWire {
   httpClient: typeof fetch
   originator: string | undefined
 
-  constructor(originator: string | undefined, baseUrl: string = 'http://localhost:3301', httpClient = fetch) {
+  constructor(
+    originator: string | undefined,
+    baseUrl: string = 'http://localhost:3301',
+    httpClient = fetch
+  ) {
     this.baseUrl = baseUrl
     this.httpClient = httpClient
     this.originator = originator

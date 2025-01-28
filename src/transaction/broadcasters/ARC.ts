@@ -1,4 +1,8 @@
-import { BroadcastResponse, BroadcastFailure, Broadcaster } from '../Broadcaster.js'
+import {
+  BroadcastResponse,
+  BroadcastFailure,
+  Broadcaster
+} from '../Broadcaster.js'
 import Transaction from '../Transaction.js'
 import { HttpClient, HttpClientRequestOptions } from '../http/HttpClient.js'
 import { defaultHttpClient } from '../http/DefaultHttpClient.js'
@@ -61,7 +65,14 @@ export default class ARC implements Broadcaster {
       this.callbackToken = undefined
       this.callbackUrl = undefined
     } else {
-      const { apiKey, deploymentId, httpClient, callbackToken, callbackUrl, headers } = config ?? {} as ArcConfig
+      const {
+        apiKey,
+        deploymentId,
+        httpClient,
+        callbackToken,
+        callbackUrl,
+        headers
+      } = config ?? ({} as ArcConfig)
       this.apiKey = apiKey
       this.httpClient = httpClient ?? defaultHttpClient()
       this.deploymentId = deploymentId ?? defaultDeploymentId()
@@ -107,12 +118,17 @@ export default class ARC implements Broadcaster {
    * @param {Transaction} tx - The transaction to be broadcasted.
    * @returns {Promise<BroadcastResponse | BroadcastFailure>} A promise that resolves to either a success or failure response.
    */
-  async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> {
+  async broadcast(
+    tx: Transaction
+  ): Promise<BroadcastResponse | BroadcastFailure> {
     let rawTx
     try {
       rawTx = tx.toHexEF()
     } catch (error) {
-      if (error.message === 'All inputs must have source transactions when serializing to EF format') {
+      if (
+        error.message ===
+        'All inputs must have source transactions when serializing to EF format'
+      ) {
         rawTx = tx.toHex()
       } else {
         throw error
@@ -126,7 +142,10 @@ export default class ARC implements Broadcaster {
     }
 
     try {
-      const response = await this.httpClient.request<ArcResponse>(`${this.URL}/v1/tx`, requestOptions)
+      const response = await this.httpClient.request<ArcResponse>(
+        `${this.URL}/v1/tx`,
+        requestOptions
+      )
       if (response.ok) {
         const { txid, extraInfo, txStatus, competingTxs } = response.data
         let broadcastRes: BroadcastResponse = {
@@ -142,14 +161,17 @@ export default class ARC implements Broadcaster {
         const st = typeof response.status
         const r: BroadcastFailure = {
           status: 'error',
-          code: st === 'number' || st === 'string' ? response.status.toString() : 'ERR_UNKNOWN',
+          code:
+            st === 'number' || st === 'string'
+              ? response.status.toString()
+              : 'ERR_UNKNOWN',
           description: 'Unknown error'
         }
         let d = response.data
         if (typeof d === 'string') {
           try {
             d = JSON.parse(response.data)
-          } catch { }
+          } catch {}
         }
         if (typeof d === 'object') {
           r.more = d
@@ -166,9 +188,10 @@ export default class ARC implements Broadcaster {
       return {
         status: 'error',
         code: '500',
-        description: typeof error.message === 'string'
-          ? error.message
-          : 'Internal Server Error'
+        description:
+          typeof error.message === 'string'
+            ? error.message
+            : 'Internal Server Error'
       }
     }
   }
@@ -183,26 +206,29 @@ export default class ARC implements Broadcaster {
   async broadcastMany(txs: Transaction[]): Promise<Array<object>> {
     const rawTxs = txs.map(tx => {
       try {
-        return { rawTx: tx.toHexEF() };
+        return { rawTx: tx.toHexEF() }
       } catch (error) {
-        if (error.message === 'All inputs must have source transactions when serializing to EF format') {
-          return { rawTx: tx.toHex() };
+        if (
+          error.message ===
+          'All inputs must have source transactions when serializing to EF format'
+        ) {
+          return { rawTx: tx.toHex() }
         }
-        throw error;
+        throw error
       }
-    });
+    })
 
     const requestOptions: HttpClientRequestOptions = {
       method: 'POST',
       headers: this.requestHeaders(),
       data: rawTxs
-    };
+    }
 
     try {
       const response = await this.httpClient.request<Array<object>>(
         `${this.URL}/v1/txs`,
         requestOptions
-      );
+      )
 
       return response.data
     } catch (error) {
@@ -210,8 +236,8 @@ export default class ARC implements Broadcaster {
         status: 'error',
         code: '500',
         description: error.message || 'Internal Server Error'
-      };
-      return txs.map(() => errorResponse);
+      }
+      return txs.map(() => errorResponse)
     }
   }
 }

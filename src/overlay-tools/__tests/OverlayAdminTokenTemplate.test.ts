@@ -24,10 +24,24 @@ describe('Overlay Admin Token Template', () => {
       const key = new PrivateKey(1)
       const wallet = new ProtoWallet(key)
       const pushDrop = new PushDrop(wallet)
-      const scriptBadFieldCount = await pushDrop.lock([[1], [2], [3]], [2, 'tests'], '1', 'self')
-      const scriptBadProtocol = await pushDrop.lock([[1], [2], [3], [4]], [2, 'tests'], '1', 'self')
-      expect(() => OverlayAdminTokenTemplate.decode(scriptBadFieldCount)).toThrow()
-      expect(() => OverlayAdminTokenTemplate.decode(scriptBadProtocol)).toThrow()
+      const scriptBadFieldCount = await pushDrop.lock(
+        [[1], [2], [3]],
+        [2, 'tests'],
+        '1',
+        'self'
+      )
+      const scriptBadProtocol = await pushDrop.lock(
+        [[1], [2], [3], [4]],
+        [2, 'tests'],
+        '1',
+        'self'
+      )
+      expect(() =>
+        OverlayAdminTokenTemplate.decode(scriptBadFieldCount)
+      ).toThrow()
+      expect(() =>
+        OverlayAdminTokenTemplate.decode(scriptBadProtocol)
+      ).toThrow()
     })
   })
   describe('Unlock', () => {
@@ -38,15 +52,29 @@ describe('Overlay Admin Token Template', () => {
       const lockingScript = await lib.lock('SLAP', 'test.com', 'ls_tests')
       const satoshis = 1
       const unlockingTemplate = await lib.unlock('SLAP')
-      const sourceTx = new Transaction(1, [], [{
-        lockingScript,
-        satoshis
-      }], 0)
-      const spendTx = new Transaction(1, [{
-        sourceTransaction: sourceTx,
-        sourceOutputIndex: 0,
-        sequence: 0xffffffff
-      }], [], 0)
+      const sourceTx = new Transaction(
+        1,
+        [],
+        [
+          {
+            lockingScript,
+            satoshis
+          }
+        ],
+        0
+      )
+      const spendTx = new Transaction(
+        1,
+        [
+          {
+            sourceTransaction: sourceTx,
+            sourceOutputIndex: 0,
+            sequence: 0xffffffff
+          }
+        ],
+        [],
+        0
+      )
       const unlockingScript = await unlockingTemplate.sign(spendTx, 0)
       expect(await unlockingTemplate.estimateLength(spendTx, 0)).toEqual(73)
       const spend = new Spend({

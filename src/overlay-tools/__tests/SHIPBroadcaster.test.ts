@@ -20,33 +20,49 @@ describe('SHIPCast', () => {
   })
 
   it('Handles constructor errors', () => {
-    expect(() => new SHIPCast([])).toThrow(new Error('At least one topic is required for broadcast.'))
-    expect(() => new SHIPCast(['badprefix_foo'])).toThrow(new Error('Every topic must start with "tm_".'))
+    expect(() => new SHIPCast([])).toThrow(
+      new Error('At least one topic is required for broadcast.')
+    )
+    expect(() => new SHIPCast(['badprefix_foo'])).toThrow(
+      new Error('Every topic must start with "tm_".')
+    )
   })
 
   it('should broadcast to a single SHIP host found via resolver', async () => {
     const shipHostKey = new PrivateKey(42)
     const shipWallet = new ProtoWallet(shipHostKey)
     const shipLib = new OverlayAdminTokenTemplate(shipWallet)
-    const shipScript = await shipLib.lock('SHIP', 'https://shiphost.com', 'tm_foo')
-    const shipTx = new Transaction(1, [], [{
-      lockingScript: shipScript,
-      satoshis: 1
-    }], 0)
+    const shipScript = await shipLib.lock(
+      'SHIP',
+      'https://shiphost.com',
+      'tm_foo'
+    )
+    const shipTx = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // Resolver returns one host interested in 'tm_foo' topic
     mockResolver.query.mockReturnValueOnce({
       type: 'output-list',
-      outputs: [{
-        beef: shipTx.toBEEF(),
-        outputIndex: 0
-      }]
+      outputs: [
+        {
+          beef: shipTx.toBEEF(),
+          outputIndex: 0
+        }
+      ]
     })
 
     // Host responds successfully
     mockFacilitator.send.mockReturnValueOnce({
       tm_foo: {
-
         outputsToAdmit: [0],
         coinsToRetain: []
       }
@@ -65,12 +81,15 @@ describe('SHIPCast', () => {
       message: 'Sent to 1 Overlay Services host.'
     })
 
-    expect(mockResolver.query).toHaveBeenCalledWith({
-      service: 'ls_ship',
-      query: {
-        topics: ['tm_foo']
+    expect(mockResolver.query).toHaveBeenCalledWith(
+      {
+        service: 'ls_ship',
+        query: {
+          topics: ['tm_foo']
+        }
       },
-    }, 1000)
+      1000
+    )
 
     expect(mockFacilitator.send).toHaveBeenCalledWith('https://shiphost.com', {
       beef: testTx.toBEEF(),
@@ -83,31 +102,56 @@ describe('SHIPCast', () => {
     const shipWallet = new ProtoWallet(shipHostKey)
     const shipLib = new OverlayAdminTokenTemplate(shipWallet)
     // First SHIP is for wrong topic
-    const shipScript = await shipLib.lock('SHIP', 'https://shiphost.com', 'tm_wrong')
-    const shipTx = new Transaction(1, [], [{
-      lockingScript: shipScript,
-      satoshis: 1
-    }], 0)
+    const shipScript = await shipLib.lock(
+      'SHIP',
+      'https://shiphost.com',
+      'tm_wrong'
+    )
+    const shipTx = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript,
+          satoshis: 1
+        }
+      ],
+      0
+    )
     const shipHostKey2 = new PrivateKey(43)
     const shipWallet2 = new ProtoWallet(shipHostKey2)
     const shipLib2 = new OverlayAdminTokenTemplate(shipWallet2)
     // Second SHIP is for correct topic
-    const shipScript2 = await shipLib2.lock('SHIP', 'https://shiphost2.com', 'tm_foo')
-    const shipTx2 = new Transaction(1, [], [{
-      lockingScript: shipScript2,
-      satoshis: 1
-    }], 0)
+    const shipScript2 = await shipLib2.lock(
+      'SHIP',
+      'https://shiphost2.com',
+      'tm_foo'
+    )
+    const shipTx2 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript2,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // Resolver returns two hosts, both the correct and the corrupted ones.
     mockResolver.query.mockReturnValueOnce({
       type: 'output-list',
-      outputs: [{
-        beef: shipTx.toBEEF(),
-        outputIndex: 0
-      }, {
-        beef: shipTx2.toBEEF(),
-        outputIndex: 0
-      }]
+      outputs: [
+        {
+          beef: shipTx.toBEEF(),
+          outputIndex: 0
+        },
+        {
+          beef: shipTx2.toBEEF(),
+          outputIndex: 0
+        }
+      ]
     })
 
     // Host responds successfully
@@ -147,7 +191,9 @@ describe('SHIPCast', () => {
         different: 'structure'
       }
     })
-    await expect(async () => await b.broadcast(testTx)).rejects.toThrow('SHIP answer is not an output list.')
+    await expect(async () => await b.broadcast(testTx)).rejects.toThrow(
+      'SHIP answer is not an output list.'
+    )
     expect(mockFacilitator.send).not.toHaveBeenCalled()
 
     // Resolver returns the wrong output structure
@@ -157,25 +203,32 @@ describe('SHIPCast', () => {
         different: 'structure'
       }
     })
-    await expect(async () => await b.broadcast(testTx)).rejects.toThrow('answer.outputs is not iterable')
+    await expect(async () => await b.broadcast(testTx)).rejects.toThrow(
+      'answer.outputs is not iterable'
+    )
     expect(mockFacilitator.send).not.toHaveBeenCalled()
 
     // Resolver returns corrupted BEEF alongside good data
     mockResolver.query.mockReturnValueOnce({
       type: 'output-list',
-      outputs: [{
-        beef: shipTx.toBEEF(), // Wrong topic
-        outputIndex: 0
-      }, {
-        beef: [0], // corrupted "rotten" BEEF
-        outputIndex: 4
-      }, {
-        beef: shipTx2.toBEEF(),
-        outputIndex: 1 // Wrong output index
-      }, {
-        beef: shipTx2.toBEEF(),
-        outputIndex: 0 // correct
-      }]
+      outputs: [
+        {
+          beef: shipTx.toBEEF(), // Wrong topic
+          outputIndex: 0
+        },
+        {
+          beef: [0], // corrupted "rotten" BEEF
+          outputIndex: 4
+        },
+        {
+          beef: shipTx2.toBEEF(),
+          outputIndex: 1 // Wrong output index
+        },
+        {
+          beef: shipTx2.toBEEF(),
+          outputIndex: 0 // correct
+        }
+      ]
     })
     response = await b.broadcast(testTx)
     expect(response).toEqual({
@@ -203,7 +256,9 @@ describe('SHIPCast', () => {
       }
     } as unknown as Transaction
 
-    await expect(b.broadcast(testTx)).rejects.toThrow('Transactions sent via SHIP to Overlay Services must be serializable to BEEF format.')
+    await expect(b.broadcast(testTx)).rejects.toThrow(
+      'Transactions sent via SHIP to Overlay Services must be serializable to BEEF format.'
+    )
   })
 
   it('should fail when no hosts are interested in the topics', async () => {
@@ -227,12 +282,15 @@ describe('SHIPCast', () => {
       description: 'No hosts are interested in receiving this transaction.'
     })
 
-    expect(mockResolver.query).toHaveBeenCalledWith({
-      service: 'ls_ship',
-      query: {
-        topics: ['tm_foo']
+    expect(mockResolver.query).toHaveBeenCalledWith(
+      {
+        service: 'ls_ship',
+        query: {
+          topics: ['tm_foo']
+        }
       },
-    }, 1000)
+      1000
+    )
 
     expect(mockFacilitator.send).not.toHaveBeenCalled()
   })
@@ -241,19 +299,32 @@ describe('SHIPCast', () => {
     const shipHostKey = new PrivateKey(42)
     const shipWallet = new ProtoWallet(shipHostKey)
     const shipLib = new OverlayAdminTokenTemplate(shipWallet)
-    const shipScript = await shipLib.lock('SHIP', 'https://shiphost.com', 'tm_foo')
-    const shipTx = new Transaction(1, [], [{
-      lockingScript: shipScript,
-      satoshis: 1
-    }], 0)
+    const shipScript = await shipLib.lock(
+      'SHIP',
+      'https://shiphost.com',
+      'tm_foo'
+    )
+    const shipTx = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // Resolver returns one host
     mockResolver.query.mockReturnValueOnce({
       type: 'output-list',
-      outputs: [{
-        beef: shipTx.toBEEF(),
-        outputIndex: 0
-      }]
+      outputs: [
+        {
+          beef: shipTx.toBEEF(),
+          outputIndex: 0
+        }
+      ]
     })
 
     // Host fails
@@ -282,32 +353,47 @@ describe('SHIPCast', () => {
     const shipHostKey = new PrivateKey(42)
     const shipWallet = new ProtoWallet(shipHostKey)
     const shipLib = new OverlayAdminTokenTemplate(shipWallet)
-    const shipScript = await shipLib.lock('SHIP', 'https://shiphost.com', 'tm_foo')
-    const shipTx = new Transaction(1, [], [{
-      lockingScript: shipScript,
-      satoshis: 1
-    }], 0)
+    const shipScript = await shipLib.lock(
+      'SHIP',
+      'https://shiphost.com',
+      'tm_foo'
+    )
+    const shipTx = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // Resolver returns one host
     mockResolver.query.mockReturnValueOnce({
       type: 'output-list',
-      outputs: [{
-        beef: shipTx.toBEEF(),
-        outputIndex: 0
-      }]
+      outputs: [
+        {
+          beef: shipTx.toBEEF(),
+          outputIndex: 0
+        }
+      ]
     })
 
     // First host acknowledges 'tm_foo', but it's not the right host.
-    mockFacilitator.send.mockImplementationOnce(async (host, { beef, topics }) => {
-      const steak = {}
-      for (const topic of topics) {
-        steak[topic] = {
-          outputsToAdmit: topic === 'tm_foo' ? [0] : [],
-          coinsToRetain: []
+    mockFacilitator.send.mockImplementationOnce(
+      async (host, { beef, topics }) => {
+        const steak = {}
+        for (const topic of topics) {
+          steak[topic] = {
+            outputsToAdmit: topic === 'tm_foo' ? [0] : [],
+            coinsToRetain: []
+          }
         }
+        return steak
       }
-      return steak
-    })
+    )
 
     const b = new SHIPCast(['tm_foo'], {
       facilitator: mockFacilitator,
@@ -332,28 +418,60 @@ describe('SHIPCast', () => {
     const shipHostKey1 = new PrivateKey(42)
     const shipWallet1 = new ProtoWallet(shipHostKey1)
     const shipLib1 = new OverlayAdminTokenTemplate(shipWallet1)
-    const shipScript1 = await shipLib1.lock('SHIP', 'https://shiphost1.com', 'tm_foo')
-    const shipScript1b = await shipLib1.lock('SHIP', 'https://shiphost1.com', 'tm_bar')
-    const shipTx1 = new Transaction(1, [], [{
-      lockingScript: shipScript1,
-      satoshis: 1
-    }, {
-      lockingScript: shipScript1b,
-      satoshis: 1
-    }], 0)
+    const shipScript1 = await shipLib1.lock(
+      'SHIP',
+      'https://shiphost1.com',
+      'tm_foo'
+    )
+    const shipScript1b = await shipLib1.lock(
+      'SHIP',
+      'https://shiphost1.com',
+      'tm_bar'
+    )
+    const shipTx1 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript1,
+          satoshis: 1
+        },
+        {
+          lockingScript: shipScript1b,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     const shipHostKey2 = new PrivateKey(43)
     const shipWallet2 = new ProtoWallet(shipHostKey2)
     const shipLib2 = new OverlayAdminTokenTemplate(shipWallet2)
-    const shipScript2 = await shipLib2.lock('SHIP', 'https://shiphost2.com', 'tm_bar')
-    const shipScript2b = await shipLib2.lock('SHIP', 'https://shiphost2.com', 'tm_foo')
-    const shipTx2 = new Transaction(1, [], [{
-      lockingScript: shipScript2,
-      satoshis: 1
-    }, {
-      lockingScript: shipScript2b,
-      satoshis: 1
-    }], 0)
+    const shipScript2 = await shipLib2.lock(
+      'SHIP',
+      'https://shiphost2.com',
+      'tm_bar'
+    )
+    const shipScript2b = await shipLib2.lock(
+      'SHIP',
+      'https://shiphost2.com',
+      'tm_foo'
+    )
+    const shipTx2 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript2,
+          satoshis: 1
+        },
+        {
+          lockingScript: shipScript2b,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // Resolver returns two hosts
     mockResolver.query.mockReturnValueOnce({
@@ -391,12 +509,15 @@ describe('SHIPCast', () => {
       message: 'Sent to 2 Overlay Services hosts.'
     })
 
-    expect(mockResolver.query).toHaveBeenCalledWith({
-      service: 'ls_ship',
-      query: {
-        topics: ['tm_foo', 'tm_bar']
-      }
-    }, 1000)
+    expect(mockResolver.query).toHaveBeenCalledWith(
+      {
+        service: 'ls_ship',
+        query: {
+          topics: ['tm_foo', 'tm_bar']
+        }
+      },
+      1000
+    )
 
     expect(mockFacilitator.send).toHaveBeenCalledTimes(2)
   })
@@ -405,20 +526,42 @@ describe('SHIPCast', () => {
     const shipHostKey1 = new PrivateKey(42)
     const shipWallet1 = new ProtoWallet(shipHostKey1)
     const shipLib1 = new OverlayAdminTokenTemplate(shipWallet1)
-    const shipScript1 = await shipLib1.lock('SHIP', 'https://shiphost1.com', 'tm_foo')
-    const shipTx1 = new Transaction(1, [], [{
-      lockingScript: shipScript1,
-      satoshis: 1
-    }], 0)
+    const shipScript1 = await shipLib1.lock(
+      'SHIP',
+      'https://shiphost1.com',
+      'tm_foo'
+    )
+    const shipTx1 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript1,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     const shipHostKey2 = new PrivateKey(43)
     const shipWallet2 = new ProtoWallet(shipHostKey2)
     const shipLib2 = new OverlayAdminTokenTemplate(shipWallet2)
-    const shipScript2 = await shipLib2.lock('SHIP', 'https://shiphost2.com', 'tm_bar')
-    const shipTx2 = new Transaction(1, [], [{
-      lockingScript: shipScript2,
-      satoshis: 1
-    }], 0)
+    const shipScript2 = await shipLib2.lock(
+      'SHIP',
+      'https://shiphost2.com',
+      'tm_bar'
+    )
+    const shipTx2 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript2,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // Resolver returns two hosts
     mockResolver.query.mockReturnValueOnce({
@@ -430,28 +573,32 @@ describe('SHIPCast', () => {
     })
 
     // First host acknowledges 'tm_foo'
-    mockFacilitator.send.mockImplementationOnce(async (host, { beef, topics }) => {
-      const steak = {}
-      for (const topic of topics) {
-        steak[topic] = {
-          outputsToAdmit: [],
-          coinsToRetain: []
+    mockFacilitator.send.mockImplementationOnce(
+      async (host, { beef, topics }) => {
+        const steak = {}
+        for (const topic of topics) {
+          steak[topic] = {
+            outputsToAdmit: [],
+            coinsToRetain: []
+          }
         }
+        return steak
       }
-      return steak
-    })
+    )
 
     // Second host does not acknowledge any topics
-    mockFacilitator.send.mockImplementationOnce(async (host, { beef, topics }) => {
-      const steak = {}
-      for (const topic of topics) {
-        steak[topic] = {
-          outputsToAdmit: [],
-          coinsToRetain: []
+    mockFacilitator.send.mockImplementationOnce(
+      async (host, { beef, topics }) => {
+        const steak = {}
+        for (const topic of topics) {
+          steak[topic] = {
+            outputsToAdmit: [],
+            coinsToRetain: []
+          }
         }
+        return steak
       }
-      return steak
-    })
+    )
 
     const b = new SHIPCast(['tm_foo', 'tm_bar'], {
       facilitator: mockFacilitator,
@@ -471,20 +618,42 @@ describe('SHIPCast', () => {
     const shipHostKey1 = new PrivateKey(42)
     const shipWallet1 = new ProtoWallet(shipHostKey1)
     const shipLib1 = new OverlayAdminTokenTemplate(shipWallet1)
-    const shipScript1 = await shipLib1.lock('SHIP', 'https://shiphost1.com', 'tm_foo')
-    const shipTx1 = new Transaction(1, [], [{
-      lockingScript: shipScript1,
-      satoshis: 1
-    }], 0)
+    const shipScript1 = await shipLib1.lock(
+      'SHIP',
+      'https://shiphost1.com',
+      'tm_foo'
+    )
+    const shipTx1 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript1,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     const shipHostKey2 = new PrivateKey(43)
     const shipWallet2 = new ProtoWallet(shipHostKey2)
     const shipLib2 = new OverlayAdminTokenTemplate(shipWallet2)
-    const shipScript2 = await shipLib2.lock('SHIP', 'https://shiphost2.com', 'tm_bar')
-    const shipTx2 = new Transaction(1, [], [{
-      lockingScript: shipScript2,
-      satoshis: 1
-    }], 0)
+    const shipScript2 = await shipLib2.lock(
+      'SHIP',
+      'https://shiphost2.com',
+      'tm_bar'
+    )
+    const shipTx2 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript2,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // Resolver returns two hosts
     mockResolver.query.mockReturnValueOnce({
@@ -496,28 +665,32 @@ describe('SHIPCast', () => {
     })
 
     // First host acknowledges no topics
-    mockFacilitator.send.mockImplementationOnce(async (host, { beef, topics }) => {
-      const steak = {}
-      for (const topic of topics) {
-        steak[topic] = {
-          outputsToAdmit: [],
-          coinsToRetain: []
+    mockFacilitator.send.mockImplementationOnce(
+      async (host, { beef, topics }) => {
+        const steak = {}
+        for (const topic of topics) {
+          steak[topic] = {
+            outputsToAdmit: [],
+            coinsToRetain: []
+          }
         }
+        return steak
       }
-      return steak
-    })
+    )
 
     // Second host acknowledges 'tm_bar'
-    mockFacilitator.send.mockImplementationOnce(async (host, { beef, topics }) => {
-      const steak = {}
-      for (const topic of topics) {
-        steak[topic] = {
-          outputsToAdmit: topic === 'tm_bar' ? [0] : [],
-          coinsToRetain: []
+    mockFacilitator.send.mockImplementationOnce(
+      async (host, { beef, topics }) => {
+        const steak = {}
+        for (const topic of topics) {
+          steak[topic] = {
+            outputsToAdmit: topic === 'tm_bar' ? [0] : [],
+            coinsToRetain: []
+          }
         }
+        return steak
       }
-      return steak
-    })
+    )
 
     const b = new SHIPCast(['tm_foo', 'tm_bar'], {
       facilitator: mockFacilitator,
@@ -540,11 +713,22 @@ describe('SHIPCast', () => {
     const shipHostKey1 = new PrivateKey(42)
     const shipWallet1 = new ProtoWallet(shipHostKey1)
     const shipLib1 = new OverlayAdminTokenTemplate(shipWallet1)
-    const shipScript1 = await shipLib1.lock('SHIP', 'https://shiphost1.com', 'tm_foo')
-    const shipTx1 = new Transaction(1, [], [{
-      lockingScript: shipScript1,
-      satoshis: 1
-    }], 0)
+    const shipScript1 = await shipLib1.lock(
+      'SHIP',
+      'https://shiphost1.com',
+      'tm_foo'
+    )
+    const shipTx1 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript1,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // Resolver returns one host
     mockResolver.query.mockReturnValueOnce({
@@ -553,16 +737,18 @@ describe('SHIPCast', () => {
     })
 
     // Host acknowledges no topics
-    mockFacilitator.send.mockImplementationOnce(async (host, { beef, topics }) => {
-      const steak = {}
-      for (const topic of topics) {
-        steak[topic] = {
-          outputsToAdmit: [],
-          coinsToRetain: []
+    mockFacilitator.send.mockImplementationOnce(
+      async (host, { beef, topics }) => {
+        const steak = {}
+        for (const topic of topics) {
+          steak[topic] = {
+            outputsToAdmit: [],
+            coinsToRetain: []
+          }
         }
+        return steak
       }
-      return steak
-    })
+    )
 
     const b = new SHIPCast(['tm_foo'], {
       facilitator: mockFacilitator,
@@ -585,20 +771,42 @@ describe('SHIPCast', () => {
     const shipHostKey1 = new PrivateKey(42)
     const shipWallet1 = new ProtoWallet(shipHostKey1)
     const shipLib1 = new OverlayAdminTokenTemplate(shipWallet1)
-    const shipScript1 = await shipLib1.lock('SHIP', 'https://shiphost1.com', 'tm_foo')
-    const shipTx1 = new Transaction(1, [], [{
-      lockingScript: shipScript1,
-      satoshis: 1
-    }], 0)
+    const shipScript1 = await shipLib1.lock(
+      'SHIP',
+      'https://shiphost1.com',
+      'tm_foo'
+    )
+    const shipTx1 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript1,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     const shipHostKey2 = new PrivateKey(43)
     const shipWallet2 = new ProtoWallet(shipHostKey2)
     const shipLib2 = new OverlayAdminTokenTemplate(shipWallet2)
-    const shipScript2 = await shipLib2.lock('SHIP', 'https://shiphost2.com', 'tm_bar')
-    const shipTx2 = new Transaction(1, [], [{
-      lockingScript: shipScript2,
-      satoshis: 1
-    }], 0)
+    const shipScript2 = await shipLib2.lock(
+      'SHIP',
+      'https://shiphost2.com',
+      'tm_bar'
+    )
+    const shipTx2 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript2,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // Resolver returns two hosts
     mockResolver.query.mockReturnValueOnce({
@@ -610,28 +818,32 @@ describe('SHIPCast', () => {
     })
 
     // First host acknowledges 'tm_foo'
-    mockFacilitator.send.mockImplementationOnce(async (host, { beef, topics }) => {
-      const steak = {}
-      for (const topic of topics) {
-        steak[topic] = {
-          outputsToAdmit: topic === 'tm_foo' ? [0] : [],
-          coinsToRetain: []
+    mockFacilitator.send.mockImplementationOnce(
+      async (host, { beef, topics }) => {
+        const steak = {}
+        for (const topic of topics) {
+          steak[topic] = {
+            outputsToAdmit: topic === 'tm_foo' ? [0] : [],
+            coinsToRetain: []
+          }
         }
+        return steak
       }
-      return steak
-    })
+    )
 
     // Second host does not acknowledge 'tm_bar'
-    mockFacilitator.send.mockImplementationOnce(async (host, { beef, topics }) => {
-      const steak = {}
-      for (const topic of topics) {
-        steak[topic] = {
-          outputsToAdmit: [],
-          coinsToRetain: []
+    mockFacilitator.send.mockImplementationOnce(
+      async (host, { beef, topics }) => {
+        const steak = {}
+        for (const topic of topics) {
+          steak[topic] = {
+            outputsToAdmit: [],
+            coinsToRetain: []
+          }
         }
+        return steak
       }
-      return steak
-    })
+    )
 
     const b = new SHIPCast(['tm_foo', 'tm_bar'], {
       facilitator: mockFacilitator,
@@ -656,20 +868,42 @@ describe('SHIPCast', () => {
     const shipHostKey1 = new PrivateKey(42)
     const shipWallet1 = new ProtoWallet(shipHostKey1)
     const shipLib1 = new OverlayAdminTokenTemplate(shipWallet1)
-    const shipScript1 = await shipLib1.lock('SHIP', 'https://shiphost1.com', 'tm_foo')
-    const shipTx1 = new Transaction(1, [], [{
-      lockingScript: shipScript1,
-      satoshis: 1
-    }], 0)
+    const shipScript1 = await shipLib1.lock(
+      'SHIP',
+      'https://shiphost1.com',
+      'tm_foo'
+    )
+    const shipTx1 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript1,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     const shipHostKey2 = new PrivateKey(43)
     const shipWallet2 = new ProtoWallet(shipHostKey2)
     const shipLib2 = new OverlayAdminTokenTemplate(shipWallet2)
-    const shipScript2 = await shipLib2.lock('SHIP', 'https://shiphost2.com', 'tm_bar')
-    const shipTx2 = new Transaction(1, [], [{
-      lockingScript: shipScript2,
-      satoshis: 1
-    }], 0)
+    const shipScript2 = await shipLib2.lock(
+      'SHIP',
+      'https://shiphost2.com',
+      'tm_bar'
+    )
+    const shipTx2 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript2,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // Resolver returns two hosts
     mockResolver.query.mockReturnValueOnce({
@@ -681,30 +915,34 @@ describe('SHIPCast', () => {
     })
 
     // First host acknowledges 'tm_foo' with coinsRemoved
-    mockFacilitator.send.mockImplementationOnce(async (host, { beef, topics }) => {
-      const steak = {}
-      for (const topic of topics) {
-        steak[topic] = {
-          outputsToAdmit: [],
-          coinsToRetain: [],
-          coinsRemoved: topic === 'tm_foo' ? [0] : []
+    mockFacilitator.send.mockImplementationOnce(
+      async (host, { beef, topics }) => {
+        const steak = {}
+        for (const topic of topics) {
+          steak[topic] = {
+            outputsToAdmit: [],
+            coinsToRetain: [],
+            coinsRemoved: topic === 'tm_foo' ? [0] : []
+          }
         }
+        return steak
       }
-      return steak
-    })
+    )
 
     // Second host does not acknowledge 'tm_bar'
-    mockFacilitator.send.mockImplementationOnce(async (host, { beef, topics }) => {
-      const steak = {}
-      for (const topic of topics) {
-        steak[topic] = {
-          outputsToAdmit: [],
-          coinsToRetain: [],
-          coinsRemoved: []
+    mockFacilitator.send.mockImplementationOnce(
+      async (host, { beef, topics }) => {
+        const steak = {}
+        for (const topic of topics) {
+          steak[topic] = {
+            outputsToAdmit: [],
+            coinsToRetain: [],
+            coinsRemoved: []
+          }
         }
+        return steak
       }
-      return steak
-    })
+    )
 
     const b = new SHIPCast(['tm_foo', 'tm_bar'], {
       facilitator: mockFacilitator,
@@ -726,23 +964,37 @@ describe('SHIPCast', () => {
     })
 
     // Verify the resolver was queried correctly
-    expect(mockResolver.query).toHaveBeenCalledWith({
-      service: 'ls_ship',
-      query: {
-        topics: ['tm_foo', 'tm_bar']
-      }
-    }, 1000)
+    expect(mockResolver.query).toHaveBeenCalledWith(
+      {
+        service: 'ls_ship',
+        query: {
+          topics: ['tm_foo', 'tm_bar']
+        }
+      },
+      1000
+    )
   })
 
   it('should fail when specific hosts do not acknowledge required topics', async () => {
     const shipHostKey1 = new PrivateKey(42)
     const shipWallet1 = new ProtoWallet(shipHostKey1)
     const shipLib1 = new OverlayAdminTokenTemplate(shipWallet1)
-    const shipScript1 = await shipLib1.lock('SHIP', 'https://shiphost1.com', 'tm_foo')
-    const shipTx1 = new Transaction(1, [], [{
-      lockingScript: shipScript1,
-      satoshis: 1
-    }], 0)
+    const shipScript1 = await shipLib1.lock(
+      'SHIP',
+      'https://shiphost1.com',
+      'tm_foo'
+    )
+    const shipTx1 = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript1,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // Resolver returns one host
     mockResolver.query.mockReturnValueOnce({
@@ -751,16 +1003,18 @@ describe('SHIPCast', () => {
     })
 
     // Host does not acknowledge 'tm_foo'
-    mockFacilitator.send.mockImplementationOnce(async (host, { beef, topics }) => {
-      const steak = {}
-      for (const topic of topics) {
-        steak[topic] = {
-          outputsToAdmit: [],
-          coinsToRetain: []
+    mockFacilitator.send.mockImplementationOnce(
+      async (host, { beef, topics }) => {
+        const steak = {}
+        for (const topic of topics) {
+          steak[topic] = {
+            outputsToAdmit: [],
+            coinsToRetain: []
+          }
         }
+        return steak
       }
-      return steak
-    })
+    )
 
     const b = new SHIPCast(['tm_foo'], {
       facilitator: mockFacilitator,
@@ -786,19 +1040,32 @@ describe('SHIPCast', () => {
     const shipHostKey = new PrivateKey(42)
     const shipWallet = new ProtoWallet(shipHostKey)
     const shipLib = new OverlayAdminTokenTemplate(shipWallet)
-    const shipScript = await shipLib.lock('SHIP', 'https://shiphost.com', 'tm_foo')
-    const shipTx = new Transaction(1, [], [{
-      lockingScript: shipScript,
-      satoshis: 1
-    }], 0)
+    const shipScript = await shipLib.lock(
+      'SHIP',
+      'https://shiphost.com',
+      'tm_foo'
+    )
+    const shipTx = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript: shipScript,
+          satoshis: 1
+        }
+      ],
+      0
+    )
 
     // Resolver returns one host
     mockResolver.query.mockReturnValueOnce({
       type: 'output-list',
-      outputs: [{
-        beef: shipTx.toBEEF(),
-        outputIndex: 0
-      }]
+      outputs: [
+        {
+          beef: shipTx.toBEEF(),
+          outputIndex: 0
+        }
+      ]
     })
 
     // Host returns invalid acknowledgment
@@ -833,7 +1100,11 @@ describe('SHIPCast', () => {
           'https://host1.com': new Set(['tm_foo', 'tm_bar']),
           'https://host2.com': new Set(['tm_foo', 'tm_bar'])
         }
-        const result = (shipCast as any).checkAcknowledgmentFromAllHosts(hostAcknowledgments, ['tm_foo', 'tm_bar'], 'all')
+        const result = (shipCast as any).checkAcknowledgmentFromAllHosts(
+          hostAcknowledgments,
+          ['tm_foo', 'tm_bar'],
+          'all'
+        )
         expect(result).toBe(true)
       })
 
@@ -842,7 +1113,11 @@ describe('SHIPCast', () => {
           'https://host1.com': new Set(['tm_foo']),
           'https://host2.com': new Set(['tm_foo', 'tm_bar'])
         }
-        const result = (shipCast as any).checkAcknowledgmentFromAllHosts(hostAcknowledgments, ['tm_foo', 'tm_bar'], 'all')
+        const result = (shipCast as any).checkAcknowledgmentFromAllHosts(
+          hostAcknowledgments,
+          ['tm_foo', 'tm_bar'],
+          'all'
+        )
         expect(result).toBe(false)
       })
 
@@ -851,7 +1126,11 @@ describe('SHIPCast', () => {
           'https://host1.com': new Set(['tm_foo']),
           'https://host2.com': new Set(['tm_bar'])
         }
-        const result = (shipCast as any).checkAcknowledgmentFromAllHosts(hostAcknowledgments, ['tm_foo', 'tm_bar'], 'any')
+        const result = (shipCast as any).checkAcknowledgmentFromAllHosts(
+          hostAcknowledgments,
+          ['tm_foo', 'tm_bar'],
+          'any'
+        )
         expect(result).toBe(true)
       })
 
@@ -860,7 +1139,11 @@ describe('SHIPCast', () => {
           'https://host1.com': new Set(),
           'https://host2.com': new Set(['tm_bar'])
         }
-        const result = (shipCast as any).checkAcknowledgmentFromAllHosts(hostAcknowledgments, ['tm_foo', 'tm_bar'], 'any')
+        const result = (shipCast as any).checkAcknowledgmentFromAllHosts(
+          hostAcknowledgments,
+          ['tm_foo', 'tm_bar'],
+          'any'
+        )
         expect(result).toBe(false)
       })
     })
@@ -871,7 +1154,11 @@ describe('SHIPCast', () => {
           'https://host1.com': new Set(['tm_foo', 'tm_bar']),
           'https://host2.com': new Set(['tm_foo'])
         }
-        const result = (shipCast as any).checkAcknowledgmentFromAnyHost(hostAcknowledgments, ['tm_foo', 'tm_bar'], 'all')
+        const result = (shipCast as any).checkAcknowledgmentFromAnyHost(
+          hostAcknowledgments,
+          ['tm_foo', 'tm_bar'],
+          'all'
+        )
         expect(result).toBe(true)
       })
 
@@ -880,7 +1167,11 @@ describe('SHIPCast', () => {
           'https://host1.com': new Set(['tm_foo']),
           'https://host2.com': new Set(['tm_bar'])
         }
-        const result = (shipCast as any).checkAcknowledgmentFromAnyHost(hostAcknowledgments, ['tm_foo', 'tm_bar'], 'all')
+        const result = (shipCast as any).checkAcknowledgmentFromAnyHost(
+          hostAcknowledgments,
+          ['tm_foo', 'tm_bar'],
+          'all'
+        )
         expect(result).toBe(false)
       })
 
@@ -889,7 +1180,11 @@ describe('SHIPCast', () => {
           'https://host1.com': new Set(['tm_foo']),
           'https://host2.com': new Set()
         }
-        const result = (shipCast as any).checkAcknowledgmentFromAnyHost(hostAcknowledgments, ['tm_foo', 'tm_bar'], 'any')
+        const result = (shipCast as any).checkAcknowledgmentFromAnyHost(
+          hostAcknowledgments,
+          ['tm_foo', 'tm_bar'],
+          'any'
+        )
         expect(result).toBe(true)
       })
 
@@ -898,7 +1193,11 @@ describe('SHIPCast', () => {
           'https://host1.com': new Set(),
           'https://host2.com': new Set()
         }
-        const result = (shipCast as any).checkAcknowledgmentFromAnyHost(hostAcknowledgments, ['tm_foo', 'tm_bar'], 'any')
+        const result = (shipCast as any).checkAcknowledgmentFromAnyHost(
+          hostAcknowledgments,
+          ['tm_foo', 'tm_bar'],
+          'any'
+        )
         expect(result).toBe(false)
       })
     })
@@ -912,7 +1211,10 @@ describe('SHIPCast', () => {
         const requirements = {
           'https://host1.com': ['tm_foo', 'tm_bar']
         }
-        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(hostAcknowledgments, requirements)
+        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(
+          hostAcknowledgments,
+          requirements
+        )
         expect(result).toBe(true)
       })
 
@@ -924,7 +1226,10 @@ describe('SHIPCast', () => {
         const requirements = {
           'https://host1.com': ['tm_foo', 'tm_bar']
         }
-        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(hostAcknowledgments, requirements)
+        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(
+          hostAcknowledgments,
+          requirements
+        )
         expect(result).toBe(false)
       })
 
@@ -936,7 +1241,10 @@ describe('SHIPCast', () => {
         const requirements = {
           'https://host1.com': 'any'
         }
-        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(hostAcknowledgments, requirements)
+        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(
+          hostAcknowledgments,
+          requirements
+        )
         expect(result).toBe(true)
       })
 
@@ -948,7 +1256,10 @@ describe('SHIPCast', () => {
         const requirements = {
           'https://host1.com': 'any'
         }
-        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(hostAcknowledgments, requirements)
+        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(
+          hostAcknowledgments,
+          requirements
+        )
         expect(result).toBe(false)
       })
 
@@ -963,7 +1274,10 @@ describe('SHIPCast', () => {
           'https://host2.com': 'any',
           'https://host3.com': 'all'
         }
-        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(hostAcknowledgments, requirements)
+        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(
+          hostAcknowledgments,
+          requirements
+        )
         expect(result).toBe(true)
       })
 
@@ -978,7 +1292,10 @@ describe('SHIPCast', () => {
           'https://host2.com': 'any',
           'https://host3.com': ['tm_foo', 'tm_bar']
         }
-        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(hostAcknowledgments, requirements)
+        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(
+          hostAcknowledgments,
+          requirements
+        )
         expect(result).toBe(false)
       })
     })

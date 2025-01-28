@@ -1,5 +1,9 @@
 import { VerifiableCertificate } from '../../../../dist/cjs/src/auth/certificates/VerifiableCertificate.js'
-import { PrivateKey, SymmetricKey, Utils } from '../../../../dist/cjs/src/primitives/index.js'
+import {
+  PrivateKey,
+  SymmetricKey,
+  Utils
+} from '../../../../dist/cjs/src/primitives/index.js'
 import { CompletedProtoWallet } from '../../../../dist/cjs/src/auth/certificates/__tests/CompletedProtoWallet.js'
 import { Certificate } from '../../../../dist/cjs/src/auth/certificates/index.js'
 
@@ -16,7 +20,8 @@ describe('VerifiableCertificate', () => {
 
   const sampleType = Utils.toBase64(new Array(32).fill(1))
   const sampleSerialNumber = Utils.toBase64(new Array(32).fill(2))
-  const sampleRevocationOutpoint = 'deadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000.1'
+  const sampleRevocationOutpoint =
+    'deadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000.1'
 
   const plaintextFields = {
     name: 'Alice',
@@ -35,15 +40,23 @@ describe('VerifiableCertificate', () => {
       // Generate a random field symmetric key
       const fieldSymKey = SymmetricKey.fromRandom()
       // Encrypt the field's plaintext
-      const encryptedFieldValue = fieldSymKey.encrypt(Utils.toArray(plaintextFields[fieldName], 'utf8'))
-      certificateFields[fieldName] = Utils.toBase64(encryptedFieldValue as number[])
+      const encryptedFieldValue = fieldSymKey.encrypt(
+        Utils.toArray(plaintextFields[fieldName], 'utf8')
+      )
+      certificateFields[fieldName] = Utils.toBase64(
+        encryptedFieldValue as number[]
+      )
 
       // Now encrypt the fieldSymKey for the verifier
-      const { ciphertext: encryptedRevelationKey } = await subjectWallet.encrypt({
-        plaintext: fieldSymKey.toArray(),
-        ...Certificate.getCertificateFieldEncryptionDetails(sampleSerialNumber, fieldName),
-        counterparty: verifierPubKey
-      })
+      const { ciphertext: encryptedRevelationKey } =
+        await subjectWallet.encrypt({
+          plaintext: fieldSymKey.toArray(),
+          ...Certificate.getCertificateFieldEncryptionDetails(
+            sampleSerialNumber,
+            fieldName
+          ),
+          counterparty: verifierPubKey
+        })
       keyring[fieldName] = Utils.toBase64(encryptedRevelationKey)
     }
 
@@ -66,7 +79,9 @@ describe('VerifiableCertificate', () => {
       expect(verifiableCert.serialNumber).toEqual(sampleSerialNumber)
       expect(verifiableCert.subject).toEqual(subjectPubKey)
       expect(verifiableCert.certifier).toEqual(certifierPubKey)
-      expect(verifiableCert.revocationOutpoint).toEqual(sampleRevocationOutpoint)
+      expect(verifiableCert.revocationOutpoint).toEqual(
+        sampleRevocationOutpoint
+      )
       expect(verifiableCert.fields).toBeDefined()
       expect(verifiableCert.keyring).toBeDefined()
     })
@@ -101,7 +116,9 @@ describe('VerifiableCertificate', () => {
         {} // empty
       )
 
-      await expect(emptyKeyringCert.decryptFields(verifierWallet)).rejects.toThrow(
+      await expect(
+        emptyKeyringCert.decryptFields(verifierWallet)
+      ).rejects.toThrow(
         'A keyring is required to decrypt certificate fields for the verifier.'
       )
     })
@@ -109,7 +126,9 @@ describe('VerifiableCertificate', () => {
     it('should fail if the encrypted field or its key is tampered', async () => {
       // Tamper the keyring so it doesn't match the field encryption
       verifiableCert.keyring.name = Utils.toBase64([9, 9, 9, 9])
-      await expect(verifiableCert.decryptFields(verifierWallet)).rejects.toThrow(
+      await expect(
+        verifiableCert.decryptFields(verifierWallet)
+      ).rejects.toThrow(
         /Failed to decrypt selectively revealed certificate fields using keyring/
       )
     })

@@ -19,15 +19,29 @@ describe('Spend', () => {
     const lockingScript = p2pkh.lock(hash)
     const satoshis = 1
     const unlockingTemplate = p2pkh.unlock(privateKey)
-    const sourceTx = new Transaction(1, [], [{
-      lockingScript,
-      satoshis
-    }], 0)
-    const spendTx = new Transaction(1, [{
-      sourceTransaction: sourceTx,
-      sourceOutputIndex: 0,
-      sequence: 0xffffffff
-    }], [], 0)
+    const sourceTx = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript,
+          satoshis
+        }
+      ],
+      0
+    )
+    const spendTx = new Transaction(
+      1,
+      [
+        {
+          sourceTransaction: sourceTx,
+          sourceOutputIndex: 0,
+          sequence: 0xffffffff
+        }
+      ],
+      [],
+      0
+    )
     const unlockingScript = await unlockingTemplate.sign(spendTx, 0)
     const spend = new Spend({
       sourceTXID: sourceTx.id('hex'),
@@ -54,15 +68,29 @@ describe('Spend', () => {
     const lockingScript = p2pkh.lock(hash)
     const satoshis = 1
     const unlockingTemplate = p2pkh.unlock(wrongPrivateKey)
-    const sourceTx = new Transaction(1, [], [{
-      lockingScript,
-      satoshis
-    }], 0)
-    const spendTx = new Transaction(1, [{
-      sourceTransaction: sourceTx,
-      sourceOutputIndex: 0,
-      sequence: 0xffffffff
-    }], [], 0)
+    const sourceTx = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript,
+          satoshis
+        }
+      ],
+      0
+    )
+    const spendTx = new Transaction(
+      1,
+      [
+        {
+          sourceTransaction: sourceTx,
+          sourceOutputIndex: 0,
+          sequence: 0xffffffff
+        }
+      ],
+      [],
+      0
+    )
     const unlockingScript = await unlockingTemplate.sign(spendTx, 0)
     const spend = new Spend({
       sourceTXID: sourceTx.id('hex'),
@@ -88,15 +116,29 @@ describe('Spend', () => {
     const lockingScript = puz.lock(r)
     const satoshis = 1
     const unlockingTemplate = puz.unlock(k)
-    const sourceTx = new Transaction(1, [], [{
-      lockingScript,
-      satoshis
-    }], 0)
-    const spendTx = new Transaction(1, [{
-      sourceTransaction: sourceTx,
-      sourceOutputIndex: 0,
-      sequence: 0xffffffff
-    }], [], 0)
+    const sourceTx = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript,
+          satoshis
+        }
+      ],
+      0
+    )
+    const spendTx = new Transaction(
+      1,
+      [
+        {
+          sourceTransaction: sourceTx,
+          sourceOutputIndex: 0,
+          sequence: 0xffffffff
+        }
+      ],
+      [],
+      0
+    )
     const unlockingScript = await unlockingTemplate.sign(spendTx, 0)
     const spend = new Spend({
       sourceTXID: sourceTx.id('hex'),
@@ -124,15 +166,29 @@ describe('Spend', () => {
     const lockingScript = puz.lock(r)
     const satoshis = 1
     const unlockingTemplate = puz.unlock(k)
-    const sourceTx = new Transaction(1, [], [{
-      lockingScript,
-      satoshis
-    }], 0)
-    const spendTx = new Transaction(1, [{
-      sourceTransaction: sourceTx,
-      sourceOutputIndex: 0,
-      sequence: 0xffffffff
-    }], [], 0)
+    const sourceTx = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript,
+          satoshis
+        }
+      ],
+      0
+    )
+    const spendTx = new Transaction(
+      1,
+      [
+        {
+          sourceTransaction: sourceTx,
+          sourceOutputIndex: 0,
+          sequence: 0xffffffff
+        }
+      ],
+      [],
+      0
+    )
     const unlockingScript = await unlockingTemplate.sign(spendTx, 0)
     const spend = new Spend({
       sourceTXID: sourceTx.id('hex'),
@@ -161,15 +217,29 @@ describe('Spend', () => {
     const lockingScript = puz.lock(r)
     const satoshis = 1
     const unlockingTemplate = puz.unlock(wrongK)
-    const sourceTx = new Transaction(1, [], [{
-      lockingScript,
-      satoshis
-    }], 0)
-    const spendTx = new Transaction(1, [{
-      sourceTransaction: sourceTx,
-      sourceOutputIndex: 0,
-      sequence: 0xffffffff
-    }], [], 0)
+    const sourceTx = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript,
+          satoshis
+        }
+      ],
+      0
+    )
+    const spendTx = new Transaction(
+      1,
+      [
+        {
+          sourceTransaction: sourceTx,
+          sourceOutputIndex: 0,
+          sequence: 0xffffffff
+        }
+      ],
+      [],
+      0
+    )
     const unlockingScript = await unlockingTemplate.sign(spendTx, 0)
     const spend = new Spend({
       sourceTXID: sourceTx.id('hex'),
@@ -196,15 +266,29 @@ describe('Spend', () => {
     const lockingScript = puz.lock(r)
     const satoshis = 1
     const unlockingTemplate = puz.unlock(k)
-    const sourceTx = new Transaction(1, [], [{
-      lockingScript,
-      satoshis
-    }], 0)
-    const spendTx = new Transaction(1, [{
-      sourceTransaction: sourceTx,
-      sourceOutputIndex: 0,
-      sequence: 0xffffffff
-    }], [], 0)
+    const sourceTx = new Transaction(
+      1,
+      [],
+      [
+        {
+          lockingScript,
+          satoshis
+        }
+      ],
+      0
+    )
+    const spendTx = new Transaction(
+      1,
+      [
+        {
+          sourceTransaction: sourceTx,
+          sourceOutputIndex: 0,
+          sequence: 0xffffffff
+        }
+      ],
+      [],
+      0
+    )
     const unlockingScript = await unlockingTemplate.sign(spendTx, 0)
     const spend = new Spend({
       sourceTXID: sourceTx.id('hex'),
@@ -228,7 +312,8 @@ describe('Spend', () => {
     }
     it(a[2], () => {
       const spend = new Spend({
-        sourceTXID: '0000000000000000000000000000000000000000000000000000000000000000',
+        sourceTXID:
+          '0000000000000000000000000000000000000000000000000000000000000000',
         sourceOutputIndex: 0,
         sourceSatoshis: 1,
         lockingScript: LockingScript.fromHex(a[1]),

@@ -29,7 +29,12 @@ describe('PublicKey', () => {
 
   describe('Constructor', () => {
     it('Should throw when accidentally passing in DER', () => {
-      expect(() => new PublicKey('036af279b60aa437d48bb0e2ec0b0c6b5cfaa976663f1f08ad456fd7fff149321d')).toThrow()
+      expect(
+        () =>
+          new PublicKey(
+            '036af279b60aa437d48bb0e2ec0b0c6b5cfaa976663f1f08ad456fd7fff149321d'
+          )
+      ).toThrow()
     })
   })
 
@@ -67,7 +72,9 @@ describe('PublicKey', () => {
     test('fromDER and fromString should result in the same public key', () => {
       const key = PrivateKey.fromRandom()
       const original = key.toPublicKey()
-      const backAndForth = PublicKey.fromString(PublicKey.fromDER(original.toDER()).toString())
+      const backAndForth = PublicKey.fromString(
+        PublicKey.fromDER(original.toDER()).toString()
+      )
       expect(backAndForth.toString()).toEqual(original.toString())
     })
   })

@@ -131,7 +131,9 @@ describe('Reader', () => {
       buf.writeInt32BE(1, 0)
       const br = new Reader(buf)
       expect(br.readInt32BE()).toEqual(1)
-      expect(new Reader(Buffer.from('ffffffff', 'hex')).readInt32BE()).toEqual(-1)
+      expect(new Reader(Buffer.from('ffffffff', 'hex')).readInt32BE()).toEqual(
+        -1
+      )
     })
   })
 
@@ -150,7 +152,9 @@ describe('Reader', () => {
       buf.writeInt32LE(1, 0)
       const br = new Reader([...buf])
       expect(br.readInt32LE()).toEqual(1)
-      expect(new Reader([...Buffer.from('ffffffff', 'hex')]).readInt32LE()).toEqual(-1)
+      expect(
+        new Reader([...Buffer.from('ffffffff', 'hex')]).readInt32LE()
+      ).toEqual(-1)
     })
   })
 
@@ -224,7 +228,9 @@ describe('Reader', () => {
     })
 
     it('should read a 9 byte varInt', () => {
-      const buf = new Writer().writeVarIntBn(new BigNumber(Math.pow(2, 54).toString())).toArray()
+      const buf = new Writer()
+        .writeVarIntBn(new BigNumber(Math.pow(2, 54).toString()))
+        .toArray()
       const br = new Reader(buf)
       expect(br.readVarInt().length).toEqual(9)
     })
@@ -251,7 +257,9 @@ describe('Reader', () => {
     })
 
     it('should throw an error on a 9 byte varInt over the javascript uint precision limit', () => {
-      const buf = new Writer().writeVarIntBn(new BigNumber(Math.pow(2, 54).toString())).toArray()
+      const buf = new Writer()
+        .writeVarIntBn(new BigNumber(Math.pow(2, 54).toString()))
+        .toArray()
       const br = new Reader(buf)
       expect(() => {
         br.readVarIntNum()
@@ -259,7 +267,9 @@ describe('Reader', () => {
     })
 
     it('should not throw an error on a 9 byte varInt not over the javascript uint precision limit', () => {
-      const buf = new Writer().writeVarIntBn(new BigNumber(Math.pow(2, 53).toString())).toArray()
+      const buf = new Writer()
+        .writeVarIntBn(new BigNumber(Math.pow(2, 53).toString()))
+        .toArray()
       const br = new Reader(buf)
       expect(() => {
         br.readVarIntNum()
@@ -288,7 +298,10 @@ describe('Reader', () => {
     })
 
     it('should read a 9 byte varInt', () => {
-      const buf = Buffer.concat([Buffer.from([255]), Buffer.from('ffffffffffffffff', 'hex')])
+      const buf = Buffer.concat([
+        Buffer.from([255]),
+        Buffer.from('ffffffffffffffff', 'hex')
+      ])
       const br = new Reader(buf)
       expect(br.readVarIntBn().toHex()).toEqual('ffffffffffffffff')
     })

@@ -78,7 +78,9 @@ describe('BN.js/Arithmetic', () => {
     })
 
     it('should throw error with num eq 0x4000000', () => {
-      expect(() => new BigNumber(0).iaddn(0x4000000)).toThrow('num is too large')
+      expect(() => new BigNumber(0).iaddn(0x4000000)).toThrow(
+        'num is too large'
+      )
     })
 
     it('should reset sign if value equal to value in instance', () => {
@@ -97,15 +99,18 @@ describe('BN.js/Arithmetic', () => {
 
     const a = new BigNumber(
       '31ff3c61db2db84b9823d320907a573f6ad37c437abe458b1802cda041d6384' +
-      'a7d8daef41395491e2',
-      16)
+        'a7d8daef41395491e2',
+      16
+    )
     const b = new BigNumber(
       '6f0e4d9f1d6071c183677f601af9305721c91d31b0bbbae8fb790000',
-      16)
+      16
+    )
     const r = new BigNumber(
       '31ff3c61db2db84b9823d3208989726578fd75276287cd9516533a9acfb9a67' +
-      '76281f34583ddb91e2',
-      16)
+        '76281f34583ddb91e2',
+      16
+    )
 
     it('should subtract big numbers', () => {
       expect(a.sub(b).cmp(r)).toBe(0)
@@ -129,9 +134,12 @@ describe('BN.js/Arithmetic', () => {
   describe('.isubn()', () => {
     it('should subtract negative number', () => {
       const r = new BigNumber(
-        '7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b', 16)
+        '7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b',
+        16
+      )
       expect(r.isubn(-1).toString(16)).toBe(
-        '7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681c')
+        '7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681c'
+      )
     })
 
     it('should work for positive numbers', () => {
@@ -163,11 +171,13 @@ describe('BN.js/Arithmetic', () => {
     })
 
     it('should throw error with num eq 0x4000000', () => {
-      expect(() => new BigNumber(0).isubn(0x4000000)).toThrow('Assertion failed')
+      expect(() => new BigNumber(0).isubn(0x4000000)).toThrow(
+        'Assertion failed'
+      )
     })
   })
 
-  function testMethod (name, mul): void {
+  function testMethod(name, mul): void {
     describe(name, () => {
       it('should multiply numbers of different signs', () => {
         const offsets = [
@@ -203,27 +213,25 @@ describe('BN.js/Arithmetic', () => {
           '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798',
           16
         )
-        expect(
-          mul(n, n).toString(16)
-        ).toBe(
+        expect(mul(n, n).toString(16)).toBe(
           '39e58a8055b6fb264b75ec8c646509784204ac15a8c24e05babc9729ab9' +
-          'b055c3a9458e4ce3289560a38e08ba8175a9446ce14e608245ab3a9' +
-          '978a8bd8acaa40'
+            'b055c3a9458e4ce3289560a38e08ba8175a9446ce14e608245ab3a9' +
+            '978a8bd8acaa40'
         )
-        expect(
-          mul(mul(n, n), n).toString(16)
-        ).toBe(
+        expect(mul(mul(n, n), n).toString(16)).toBe(
           '1b888e01a06e974017a28a5b4da436169761c9730b7aeedf75fc60f687b' +
-          '46e0cf2cb11667f795d5569482640fe5f628939467a01a612b02350' +
-          '0d0161e9730279a7561043af6197798e41b7432458463e64fa81158' +
-          '907322dc330562697d0d600'
+            '46e0cf2cb11667f795d5569482640fe5f628939467a01a612b02350' +
+            '0d0161e9730279a7561043af6197798e41b7432458463e64fa81158' +
+            '907322dc330562697d0d600'
         )
       })
 
       it('should multiply neg number on 0', () => {
         expect(
-          mul(new BigNumber('-100000000000'), new BigNumber('3').div(new BigNumber('4')))
-            .toString(16)
+          mul(
+            new BigNumber('-100000000000'),
+            new BigNumber('3').div(new BigNumber('4'))
+          ).toString(16)
         ).toBe('0')
       })
 
@@ -279,17 +287,25 @@ describe('BN.js/Arithmetic', () => {
     })
 
     it('should throw error with num eq 0x4000000', () => {
-      expect(() => new BigNumber(0).imuln(0x4000000)).toThrow(/^Assertion failed$/)
+      expect(() => new BigNumber(0).imuln(0x4000000)).toThrow(
+        /^Assertion failed$/
+      )
     })
 
     it('should negate number if number is negative', () => {
       const a = new BigNumber('dead', 16)
-      expect(a.clone().imuln(-1).toString(16)).toBe(a.clone().neg().toString(16))
+      expect(a.clone().imuln(-1).toString(16)).toBe(
+        a.clone().neg().toString(16)
+      )
       expect(a.clone().muln(-1).toString(16)).toBe(a.clone().neg().toString(16))
 
       const b = new BigNumber('dead', 16)
-      expect(b.clone().imuln(-42).toString(16)).toBe(b.clone().neg().muln(42).toString(16))
-      expect(b.clone().muln(-42).toString(16)).toBe(b.clone().neg().muln(42).toString(16))
+      expect(b.clone().imuln(-42).toString(16)).toBe(
+        b.clone().neg().muln(42).toString(16)
+      )
+      expect(b.clone().muln(-42).toString(16)).toBe(
+        b.clone().neg().muln(42).toString(16)
+      )
     })
   })
 
@@ -305,63 +321,129 @@ describe('BN.js/Arithmetic', () => {
 
   describe('.div()', () => {
     it('should divide small numbers (<=26 bits)', () => {
-      expect(new BigNumber('256').div(new BigNumber(10)).toString(10)).toEqual('25')
-      expect(new BigNumber('-256').div(new BigNumber(10)).toString(10)).toEqual('-25')
-      expect(new BigNumber('256').div(new BigNumber(-10)).toString(10)).toEqual('-25')
-      expect(new BigNumber('-256').div(new BigNumber(-10)).toString(10)).toEqual('25')
+      expect(new BigNumber('256').div(new BigNumber(10)).toString(10)).toEqual(
+        '25'
+      )
+      expect(new BigNumber('-256').div(new BigNumber(10)).toString(10)).toEqual(
+        '-25'
+      )
+      expect(new BigNumber('256').div(new BigNumber(-10)).toString(10)).toEqual(
+        '-25'
+      )
+      expect(
+        new BigNumber('-256').div(new BigNumber(-10)).toString(10)
+      ).toEqual('25')
 
-      expect(new BigNumber('10').div(new BigNumber(256)).toString(10)).toEqual('0')
-      expect(new BigNumber('-10').div(new BigNumber(256)).toString(10)).toEqual('0')
-      expect(new BigNumber('10').div(new BigNumber(-256)).toString(10)).toEqual('0')
-      expect(new BigNumber('-10').div(new BigNumber(-256)).toString(10)).toEqual('0')
+      expect(new BigNumber('10').div(new BigNumber(256)).toString(10)).toEqual(
+        '0'
+      )
+      expect(new BigNumber('-10').div(new BigNumber(256)).toString(10)).toEqual(
+        '0'
+      )
+      expect(new BigNumber('10').div(new BigNumber(-256)).toString(10)).toEqual(
+        '0'
+      )
+      expect(
+        new BigNumber('-10').div(new BigNumber(-256)).toString(10)
+      ).toEqual('0')
     })
 
     it('should divide large numbers (>53 bits)', () => {
-      expect(new BigNumber('1222222225255589').div(new BigNumber('611111124969028')).toString(10)).toEqual('1')
-      expect(new BigNumber('-1222222225255589').div(new BigNumber('611111124969028')).toString(10)).toEqual('-1')
-      expect(new BigNumber('1222222225255589').div(new BigNumber('-611111124969028')).toString(10)).toEqual('-1')
-      expect(new BigNumber('-1222222225255589').div(new BigNumber('-611111124969028')).toString(10)).toEqual('1')
+      expect(
+        new BigNumber('1222222225255589')
+          .div(new BigNumber('611111124969028'))
+          .toString(10)
+      ).toEqual('1')
+      expect(
+        new BigNumber('-1222222225255589')
+          .div(new BigNumber('611111124969028'))
+          .toString(10)
+      ).toEqual('-1')
+      expect(
+        new BigNumber('1222222225255589')
+          .div(new BigNumber('-611111124969028'))
+          .toString(10)
+      ).toEqual('-1')
+      expect(
+        new BigNumber('-1222222225255589')
+          .div(new BigNumber('-611111124969028'))
+          .toString(10)
+      ).toEqual('1')
 
-      expect(new BigNumber('611111124969028').div(new BigNumber('1222222225255589')).toString(10)).toEqual('0')
-      expect(new BigNumber('-611111124969028').div(new BigNumber('1222222225255589')).toString(10)).toEqual('0')
-      expect(new BigNumber('611111124969028').div(new BigNumber('-1222222225255589')).toString(10)).toEqual('0')
-      expect(new BigNumber('-611111124969028').div(new BigNumber('-1222222225255589')).toString(10)).toEqual('0')
+      expect(
+        new BigNumber('611111124969028')
+          .div(new BigNumber('1222222225255589'))
+          .toString(10)
+      ).toEqual('0')
+      expect(
+        new BigNumber('-611111124969028')
+          .div(new BigNumber('1222222225255589'))
+          .toString(10)
+      ).toEqual('0')
+      expect(
+        new BigNumber('611111124969028')
+          .div(new BigNumber('-1222222225255589'))
+          .toString(10)
+      ).toEqual('0')
+      expect(
+        new BigNumber('-611111124969028')
+          .div(new BigNumber('-1222222225255589'))
+          .toString(10)
+      ).toEqual('0')
     })
 
     it('should divide numbers', () => {
-      expect(new BigNumber('69527932928').div(new BigNumber('16974594')).toString(16)).toEqual('fff')
-      expect(new BigNumber('-69527932928').div(new BigNumber('16974594')).toString(16)).toEqual('-fff')
+      expect(
+        new BigNumber('69527932928').div(new BigNumber('16974594')).toString(16)
+      ).toEqual('fff')
+      expect(
+        new BigNumber('-69527932928')
+          .div(new BigNumber('16974594'))
+          .toString(16)
+      ).toEqual('-fff')
 
-      const b = new BigNumber('39e58a8055b6fb264b75ec8c646509784204ac15a8c24e05babc9729ab9b055c3a9458e4ce3289560a38e08ba8175a9446ce14e608245ab3a9978a8bd8acaa40', 16)
-      const n = new BigNumber('79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798', 16)
+      const b = new BigNumber(
+        '39e58a8055b6fb264b75ec8c646509784204ac15a8c24e05babc9729ab9b055c3a9458e4ce3289560a38e08ba8175a9446ce14e608245ab3a9978a8bd8acaa40',
+        16
+      )
+      const n = new BigNumber(
+        '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798',
+        16
+      )
       expect(b.div(n).toString(16)).toEqual(n.toString(16))
 
-      expect(new BigNumber('1').div(new BigNumber('-5')).toString(10)).toEqual('0')
+      expect(new BigNumber('1').div(new BigNumber('-5')).toString(10)).toEqual(
+        '0'
+      )
     })
 
     it('should not fail on regression after moving to _wordDiv', function () {
       // Regression after moving to word div
       let p = new BigNumber(
         'fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f',
-        16)
+        16
+      )
       let a = new BigNumber(
         '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798',
-        16)
+        16
+      )
       const as = a.sqr()
-      expect(
-        as.div(p).toString(16)).toEqual(
-        '39e58a8055b6fb264b75ec8c646509784204ac15a8c24e05babc9729e58090b9')
+      expect(as.div(p).toString(16)).toEqual(
+        '39e58a8055b6fb264b75ec8c646509784204ac15a8c24e05babc9729e58090b9'
+      )
 
       p = new BigNumber(
         'ffffffff00000001000000000000000000000000ffffffffffffffffffffffff',
-        16)
+        16
+      )
       a = new BigNumber(
         'fffffffe00000003fffffffd0000000200000001fffffffe00000002ffffffff' +
-        'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-        16)
-      expect(
-        a.div(p).toString(16)).toEqual(
-        'ffffffff00000002000000000000000000000001000000000000000000000001')
+          'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+        16
+      )
+      expect(a.div(p).toString(16)).toEqual(
+        'ffffffff00000002000000000000000000000001000000000000000000000001'
+      )
     })
   })
 
@@ -370,58 +452,134 @@ describe('BN.js/Arithmetic', () => {
       expect(new BigNumber('10', 16).idivn(3).toString(16)).toEqual('5')
       expect(new BigNumber('10', 16).idivn(-3).toString(16)).toEqual('-5')
       expect(new BigNumber('12', 16).idivn(3).toString(16)).toEqual('6')
-      expect(new BigNumber('10000000000000000').idivn(3).toString(10)).toEqual('3333333333333333')
-      expect(new BigNumber('100000000000000000000000000000').idivn(3).toString(10)).toEqual('33333333333333333333333333333')
+      expect(new BigNumber('10000000000000000').idivn(3).toString(10)).toEqual(
+        '3333333333333333'
+      )
+      expect(
+        new BigNumber('100000000000000000000000000000').idivn(3).toString(10)
+      ).toEqual('33333333333333333333333333333')
 
       const t = new BigNumber(3)
-      expect(new BigNumber('12345678901234567890123456', 16).idivn(3).toString(16)).toEqual(new BigNumber('12345678901234567890123456', 16).div(t).toString(16))
+      expect(
+        new BigNumber('12345678901234567890123456', 16).idivn(3).toString(16)
+      ).toEqual(
+        new BigNumber('12345678901234567890123456', 16).div(t).toString(16)
+      )
     })
   })
 
   describe('.divRound()', () => {
     it('should divide numbers with rounding', () => {
-      expect(new BigNumber(9).divRound(new BigNumber(20)).toString(10)).toEqual('0')
-      expect(new BigNumber(10).divRound(new BigNumber(20)).toString(10)).toEqual('1')
-      expect(new BigNumber(150).divRound(new BigNumber(20)).toString(10)).toEqual('8')
-      expect(new BigNumber(149).divRound(new BigNumber(20)).toString(10)).toEqual('7')
-      expect(new BigNumber(149).divRound(new BigNumber(17)).toString(10)).toEqual('9')
-      expect(new BigNumber(144).divRound(new BigNumber(17)).toString(10)).toEqual('8')
-      expect(new BigNumber(-144).divRound(new BigNumber(17)).toString(10)).toEqual('-8')
+      expect(new BigNumber(9).divRound(new BigNumber(20)).toString(10)).toEqual(
+        '0'
+      )
+      expect(
+        new BigNumber(10).divRound(new BigNumber(20)).toString(10)
+      ).toEqual('1')
+      expect(
+        new BigNumber(150).divRound(new BigNumber(20)).toString(10)
+      ).toEqual('8')
+      expect(
+        new BigNumber(149).divRound(new BigNumber(20)).toString(10)
+      ).toEqual('7')
+      expect(
+        new BigNumber(149).divRound(new BigNumber(17)).toString(10)
+      ).toEqual('9')
+      expect(
+        new BigNumber(144).divRound(new BigNumber(17)).toString(10)
+      ).toEqual('8')
+      expect(
+        new BigNumber(-144).divRound(new BigNumber(17)).toString(10)
+      ).toEqual('-8')
     })
 
     it('should return 1 on exact division', () => {
-      expect(new BigNumber(144).divRound(new BigNumber(144)).toString(10)).toEqual('1')
+      expect(
+        new BigNumber(144).divRound(new BigNumber(144)).toString(10)
+      ).toEqual('1')
     })
   })
 
   describe('.mod()', () => {
     it('should modulo small numbers (<=26 bits)', () => {
-      expect(new BigNumber('256').mod(new BigNumber(10)).toString(10)).toEqual('6')
-      expect(new BigNumber('-256').mod(new BigNumber(10)).toString(10)).toEqual('-6')
-      expect(new BigNumber('256').mod(new BigNumber(-10)).toString(10)).toEqual('6')
-      expect(new BigNumber('-256').mod(new BigNumber(-10)).toString(10)).toEqual('-6')
+      expect(new BigNumber('256').mod(new BigNumber(10)).toString(10)).toEqual(
+        '6'
+      )
+      expect(new BigNumber('-256').mod(new BigNumber(10)).toString(10)).toEqual(
+        '-6'
+      )
+      expect(new BigNumber('256').mod(new BigNumber(-10)).toString(10)).toEqual(
+        '6'
+      )
+      expect(
+        new BigNumber('-256').mod(new BigNumber(-10)).toString(10)
+      ).toEqual('-6')
 
-      expect(new BigNumber('10').mod(new BigNumber(256)).toString(10)).toEqual('10')
-      expect(new BigNumber('-10').mod(new BigNumber(256)).toString(10)).toEqual('-10')
-      expect(new BigNumber('10').mod(new BigNumber(-256)).toString(10)).toEqual('10')
-      expect(new BigNumber('-10').mod(new BigNumber(-256)).toString(10)).toEqual('-10')
+      expect(new BigNumber('10').mod(new BigNumber(256)).toString(10)).toEqual(
+        '10'
+      )
+      expect(new BigNumber('-10').mod(new BigNumber(256)).toString(10)).toEqual(
+        '-10'
+      )
+      expect(new BigNumber('10').mod(new BigNumber(-256)).toString(10)).toEqual(
+        '10'
+      )
+      expect(
+        new BigNumber('-10').mod(new BigNumber(-256)).toString(10)
+      ).toEqual('-10')
     })
 
     it('should modulo large numbers (>53 bits)', () => {
-      expect(new BigNumber('1222222225255589').mod(new BigNumber('611111124969028')).toString(10)).toEqual('611111100286561')
-      expect(new BigNumber('-1222222225255589').mod(new BigNumber('611111124969028')).toString(10)).toEqual('-611111100286561')
-      expect(new BigNumber('1222222225255589').mod(new BigNumber('-611111124969028')).toString(10)).toEqual('611111100286561')
-      expect(new BigNumber('-1222222225255589').mod(new BigNumber('-611111124969028')).toString(10)).toEqual('-611111100286561')
+      expect(
+        new BigNumber('1222222225255589')
+          .mod(new BigNumber('611111124969028'))
+          .toString(10)
+      ).toEqual('611111100286561')
+      expect(
+        new BigNumber('-1222222225255589')
+          .mod(new BigNumber('611111124969028'))
+          .toString(10)
+      ).toEqual('-611111100286561')
+      expect(
+        new BigNumber('1222222225255589')
+          .mod(new BigNumber('-611111124969028'))
+          .toString(10)
+      ).toEqual('611111100286561')
+      expect(
+        new BigNumber('-1222222225255589')
+          .mod(new BigNumber('-611111124969028'))
+          .toString(10)
+      ).toEqual('-611111100286561')
 
-      expect(new BigNumber('611111124969028').mod(new BigNumber('1222222225255589')).toString(10)).toEqual('611111124969028')
-      expect(new BigNumber('-611111124969028').mod(new BigNumber('1222222225255589')).toString(10)).toEqual('-611111124969028')
-      expect(new BigNumber('611111124969028').mod(new BigNumber('-1222222225255589')).toString(10)).toEqual('611111124969028')
-      expect(new BigNumber('-611111124969028').mod(new BigNumber('-1222222225255589')).toString(10)).toEqual('-611111124969028')
+      expect(
+        new BigNumber('611111124969028')
+          .mod(new BigNumber('1222222225255589'))
+          .toString(10)
+      ).toEqual('611111124969028')
+      expect(
+        new BigNumber('-611111124969028')
+          .mod(new BigNumber('1222222225255589'))
+          .toString(10)
+      ).toEqual('-611111124969028')
+      expect(
+        new BigNumber('611111124969028')
+          .mod(new BigNumber('-1222222225255589'))
+          .toString(10)
+      ).toEqual('611111124969028')
+      expect(
+        new BigNumber('-611111124969028')
+          .mod(new BigNumber('-1222222225255589'))
+          .toString(10)
+      ).toEqual('-611111124969028')
     })
 
     it('should mod numbers', () => {
-      expect(new BigNumber('10').mod(new BigNumber(256)).toString(16)).toEqual('a')
-      expect(new BigNumber('69527932928').mod(new BigNumber('16974594')).toString(16)).toEqual('102f302')
+      expect(new BigNumber('10').mod(new BigNumber(256)).toString(16)).toEqual(
+        'a'
+      )
+      expect(
+        new BigNumber('69527932928').mod(new BigNumber('16974594')).toString(16)
+      ).toEqual('102f302')
 
       expect(new BigNumber(178).div(new BigNumber(10)).toNumber()).toEqual(17)
       expect(new BigNumber(178).mod(new BigNumber(10)).toNumber()).toEqual(8)
@@ -447,11 +605,13 @@ describe('BN.js/Arithmetic', () => {
 
       const p = new BigNumber(
         'ffffffff00000001000000000000000000000000ffffffffffffffffffffffff',
-        16)
+        16
+      )
       const a = new BigNumber(
         'fffffffe00000003fffffffd0000000200000001fffffffe00000002ffffffff' +
-        'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-        16)
+          'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+        16
+      )
       expect(a.mod(p).toString(16)).toEqual('0')
     })
 
@@ -459,7 +619,8 @@ describe('BN.js/Arithmetic', () => {
       const a = new BigNumber('945304eb96065b2a98b57a48a06ae28d285a71b5', 'hex')
       const b = new BigNumber(
         'fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe',
-        'hex')
+        'hex'
+      )
 
       expect(a.mul(b).mod(a).cmpn(0)).toEqual(0)
     })
@@ -471,11 +632,15 @@ describe('BN.js/Arithmetic', () => {
       expect(new BigNumber('10', 16).modrn(-256).toString(16)).toEqual('-10')
       expect(new BigNumber('100', 16).modrn(256).toString(16)).toEqual('0')
       expect(new BigNumber('1001', 16).modrn(256).toString(16)).toEqual('1')
-      expect(new BigNumber('100000000001', 16).modrn(256).toString(16)).toEqual('1')
+      expect(new BigNumber('100000000001', 16).modrn(256).toString(16)).toEqual(
+        '1'
+      )
       expect(new BigNumber('100000000001', 16).modrn(257).toString(16)).toEqual(
-        new BigNumber('100000000001', 16).mod(new BigNumber(257)).toString(16))
+        new BigNumber('100000000001', 16).mod(new BigNumber(257)).toString(16)
+      )
       expect(new BigNumber('123456789012', 16).modrn(3).toString(16)).toEqual(
-        new BigNumber('123456789012', 16).mod(new BigNumber(3)).toString(16))
+        new BigNumber('123456789012', 16).mod(new BigNumber(3)).toString(16)
+      )
     })
   })
 
@@ -483,7 +648,9 @@ describe('BN.js/Arithmetic', () => {
     it('should return absolute value', () => {
       expect(new BigNumber(0x1001).abs().toString()).toEqual('4097')
       expect(new BigNumber(-0x1001).abs().toString()).toEqual('4097')
-      expect(new BigNumber('ffffffff', 16).abs().toString()).toEqual('4294967295')
+      expect(new BigNumber('ffffffff', 16).abs().toString()).toEqual(
+        '4294967295'
+      )
     })
   })
 
@@ -496,7 +663,8 @@ describe('BN.js/Arithmetic', () => {
 
       const p192 = new BigNumber(
         'fffffffffffffffffffffffffffffffeffffffffffffffff',
-        16)
+        16
+      )
       a = new BigNumber('deadbeef', 16)
       b = a.invm(p192)
       expect(a.mul(b).mod(p192).toString(16)).toEqual('1')
@@ -517,10 +685,18 @@ describe('BN.js/Arithmetic', () => {
     it('should return GCD', () => {
       expect(new BigNumber(3).gcd(new BigNumber(2)).toString(10)).toEqual('1')
       expect(new BigNumber(18).gcd(new BigNumber(12)).toString(10)).toEqual('6')
-      expect(new BigNumber(-18).gcd(new BigNumber(12)).toString(10)).toEqual('6')
-      expect(new BigNumber(-18).gcd(new BigNumber(-12)).toString(10)).toEqual('6')
-      expect(new BigNumber(-18).gcd(new BigNumber(0)).toString(10)).toEqual('18')
-      expect(new BigNumber(0).gcd(new BigNumber(-18)).toString(10)).toEqual('18')
+      expect(new BigNumber(-18).gcd(new BigNumber(12)).toString(10)).toEqual(
+        '6'
+      )
+      expect(new BigNumber(-18).gcd(new BigNumber(-12)).toString(10)).toEqual(
+        '6'
+      )
+      expect(new BigNumber(-18).gcd(new BigNumber(0)).toString(10)).toEqual(
+        '18'
+      )
+      expect(new BigNumber(0).gcd(new BigNumber(-18)).toString(10)).toEqual(
+        '18'
+      )
       expect(new BigNumber(2).gcd(new BigNumber(0)).toString(10)).toEqual('2')
       expect(new BigNumber(0).gcd(new BigNumber(3)).toString(10)).toEqual('3')
       expect(new BigNumber(0).gcd(new BigNumber(0)).toString(10)).toEqual('0')
@@ -529,10 +705,18 @@ describe('BN.js/Arithmetic', () => {
 
   describe('.egcd()', () => {
     it('should return EGCD', () => {
-      expect(new BigNumber(3).egcd(new BigNumber(2)).gcd.toString(10)).toEqual('1')
-      expect(new BigNumber(18).egcd(new BigNumber(12)).gcd.toString(10)).toEqual('6')
-      expect(new BigNumber(-18).egcd(new BigNumber(12)).gcd.toString(10)).toEqual('6')
-      expect(new BigNumber(0).egcd(new BigNumber(12)).gcd.toString(10)).toEqual('12')
+      expect(new BigNumber(3).egcd(new BigNumber(2)).gcd.toString(10)).toEqual(
+        '1'
+      )
+      expect(
+        new BigNumber(18).egcd(new BigNumber(12)).gcd.toString(10)
+      ).toEqual('6')
+      expect(
+        new BigNumber(-18).egcd(new BigNumber(12)).gcd.toString(10)
+      ).toEqual('6')
+      expect(new BigNumber(0).egcd(new BigNumber(12)).gcd.toString(10)).toEqual(
+        '12'
+      )
     })
     it('should not allow 0 input', () => {
       expect(() => {
@@ -548,24 +732,40 @@ describe('BN.js/Arithmetic', () => {
 
   describe('BN.max(a, b)', () => {
     it('should return maximum', () => {
-      expect(BigNumber.max(new BigNumber(3), new BigNumber(2)).toString(16)).toEqual('3')
-      expect(BigNumber.max(new BigNumber(2), new BigNumber(3)).toString(16)).toEqual('3')
-      expect(BigNumber.max(new BigNumber(2), new BigNumber(2)).toString(16)).toEqual('2')
-      expect(BigNumber.max(new BigNumber(2), new BigNumber(-2)).toString(16)).toEqual('2')
+      expect(
+        BigNumber.max(new BigNumber(3), new BigNumber(2)).toString(16)
+      ).toEqual('3')
+      expect(
+        BigNumber.max(new BigNumber(2), new BigNumber(3)).toString(16)
+      ).toEqual('3')
+      expect(
+        BigNumber.max(new BigNumber(2), new BigNumber(2)).toString(16)
+      ).toEqual('2')
+      expect(
+        BigNumber.max(new BigNumber(2), new BigNumber(-2)).toString(16)
+      ).toEqual('2')
     })
   })
 
   describe('BN.min(a, b)', () => {
     it('should return minimum', () => {
-      expect(BigNumber.min(new BigNumber(3), new BigNumber(2)).toString(16)).toEqual('2')
-      expect(BigNumber.min(new BigNumber(2), new BigNumber(3)).toString(16)).toEqual('2')
-      expect(BigNumber.min(new BigNumber(2), new BigNumber(2)).toString(16)).toEqual('2')
-      expect(BigNumber.min(new BigNumber(2), new BigNumber(-2)).toString(16)).toEqual('-2')
+      expect(
+        BigNumber.min(new BigNumber(3), new BigNumber(2)).toString(16)
+      ).toEqual('2')
+      expect(
+        BigNumber.min(new BigNumber(2), new BigNumber(3)).toString(16)
+      ).toEqual('2')
+      expect(
+        BigNumber.min(new BigNumber(2), new BigNumber(2)).toString(16)
+      ).toEqual('2')
+      expect(
+        BigNumber.min(new BigNumber(2), new BigNumber(-2)).toString(16)
+      ).toEqual('-2')
     })
   })
 
   describe('BN.ineg', () => {
-    it('shouldn\'t change sign for zero', () => {
+    it("shouldn't change sign for zero", () => {
       expect(new BigNumber(0).ineg().toString(10)).toEqual('0')
     })
   })

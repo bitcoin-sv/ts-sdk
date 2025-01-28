@@ -21,7 +21,7 @@ describe('PrivateKey', () => {
   describe('PrivateKey Validation and Conversion', () => {
     const curve = new Curve()
 
-    const isValidPrivateKey = (key) => {
+    const isValidPrivateKey = key => {
       try {
         const keyAsNumber = new BigNumber(key, 16)
         return (
@@ -88,7 +88,10 @@ describe('PrivateKey', () => {
 
         // Round-trip conversion checks
         const roundTripHex = PrivateKey.fromHex(privateKeyHex).toHex()
-        const roundTripString = PrivateKey.fromString(privateKeyString, 'hex').toString('hex')
+        const roundTripString = PrivateKey.fromString(
+          privateKeyString,
+          'hex'
+        ).toString('hex')
         expect(roundTripHex).toEqual(privateKeyHex)
         expect(roundTripString).toEqual(privateKeyString)
       }

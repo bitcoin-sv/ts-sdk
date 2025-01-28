@@ -24,8 +24,6 @@ describe('ECDH', function () {
     const mallory = new PublicKey(new BigNumber(14), new BigNumber(16))
     expect(() => {
       bob.deriveSharedSecret(mallory)
-    }).toThrow(new Error(
-      'Public key not valid for ECDH secret derivation'
-    ))
+    }).toThrow(new Error('Public key not valid for ECDH secret derivation'))
   })
 })

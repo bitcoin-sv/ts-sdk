@@ -1,4 +1,8 @@
-import { PrivateKey, PublicKey, SymmetricKey } from '../../../dist/cjs/src/primitives/index.js'
+import {
+  PrivateKey,
+  PublicKey,
+  SymmetricKey
+} from '../../../dist/cjs/src/primitives/index.js'
 import CachedKeyDeriver from '../../../dist/cjs/src/wallet/CachedKeyDeriver.js'
 import KeyDeriver from '../../../dist/cjs/src/wallet/KeyDeriver.js'
 
@@ -33,12 +37,20 @@ describe('CachedKeyDeriver', () => {
       mockKeyDeriver.derivePublicKey.mockReturnValue(publicKey)
 
       // First call - should invoke the underlying method
-      const result1 = cachedKeyDeriver.derivePublicKey(protocolID, keyID, counterparty)
+      const result1 = cachedKeyDeriver.derivePublicKey(
+        protocolID,
+        keyID,
+        counterparty
+      )
       expect(mockKeyDeriver.derivePublicKey).toHaveBeenCalledTimes(1)
       expect(result1).toBe(publicKey)
 
       // Second call with the same parameters - should retrieve from cache
-      const result2 = cachedKeyDeriver.derivePublicKey(protocolID, keyID, counterparty)
+      const result2 = cachedKeyDeriver.derivePublicKey(
+        protocolID,
+        keyID,
+        counterparty
+      )
       expect(mockKeyDeriver.derivePublicKey).toHaveBeenCalledTimes(1) // No additional calls
       expect(result2).toBe(publicKey)
     })
@@ -58,8 +70,16 @@ describe('CachedKeyDeriver', () => {
         .mockReturnValueOnce(publicKey2)
 
       // Different parameters - should not hit cache
-      const result1 = cachedKeyDeriver.derivePublicKey(protocolID1, keyID1, counterparty1)
-      const result2 = cachedKeyDeriver.derivePublicKey(protocolID2, keyID2, counterparty2)
+      const result1 = cachedKeyDeriver.derivePublicKey(
+        protocolID1,
+        keyID1,
+        counterparty1
+      )
+      const result2 = cachedKeyDeriver.derivePublicKey(
+        protocolID2,
+        keyID2,
+        counterparty2
+      )
       expect(mockKeyDeriver.derivePublicKey).toHaveBeenCalledTimes(2)
       expect(result1).toBe(publicKey1)
       expect(result2).toBe(publicKey2)
@@ -76,12 +96,20 @@ describe('CachedKeyDeriver', () => {
       mockKeyDeriver.derivePrivateKey.mockReturnValue(privateKey)
 
       // First call - should invoke the underlying method
-      const result1 = cachedKeyDeriver.derivePrivateKey(protocolID, keyID, counterparty)
+      const result1 = cachedKeyDeriver.derivePrivateKey(
+        protocolID,
+        keyID,
+        counterparty
+      )
       expect(mockKeyDeriver.derivePrivateKey).toHaveBeenCalledTimes(1)
       expect(result1).toBe(privateKey)
 
       // Second call with the same parameters - should retrieve from cache
-      const result2 = cachedKeyDeriver.derivePrivateKey(protocolID, keyID, counterparty)
+      const result2 = cachedKeyDeriver.derivePrivateKey(
+        protocolID,
+        keyID,
+        counterparty
+      )
       expect(mockKeyDeriver.derivePrivateKey).toHaveBeenCalledTimes(1)
       expect(result2).toBe(privateKey)
     })
@@ -98,11 +126,19 @@ describe('CachedKeyDeriver', () => {
         .mockReturnValueOnce(privateKey2)
 
       // First call
-      const result1 = cachedKeyDeriver.derivePrivateKey(protocolID, keyID, counterparty)
+      const result1 = cachedKeyDeriver.derivePrivateKey(
+        protocolID,
+        keyID,
+        counterparty
+      )
       expect(result1).toBe(privateKey1)
 
       // Second call with different keyID
-      const result2 = cachedKeyDeriver.derivePrivateKey(protocolID, 'key2', counterparty)
+      const result2 = cachedKeyDeriver.derivePrivateKey(
+        protocolID,
+        'key2',
+        counterparty
+      )
       expect(result2).toBe(privateKey2)
       expect(mockKeyDeriver.derivePrivateKey).toHaveBeenCalledTimes(2)
     })
@@ -118,12 +154,20 @@ describe('CachedKeyDeriver', () => {
       mockKeyDeriver.deriveSymmetricKey.mockReturnValue(symmetricKey)
 
       // First call
-      const result1 = cachedKeyDeriver.deriveSymmetricKey(protocolID, keyID, counterparty)
+      const result1 = cachedKeyDeriver.deriveSymmetricKey(
+        protocolID,
+        keyID,
+        counterparty
+      )
       expect(mockKeyDeriver.deriveSymmetricKey).toHaveBeenCalledTimes(1)
       expect(result1).toBe(symmetricKey)
 
       // Second call with same parameters
-      const result2 = cachedKeyDeriver.deriveSymmetricKey(protocolID, keyID, counterparty)
+      const result2 = cachedKeyDeriver.deriveSymmetricKey(
+        protocolID,
+        keyID,
+        counterparty
+      )
       expect(mockKeyDeriver.deriveSymmetricKey).toHaveBeenCalledTimes(1)
       expect(result2).toBe(symmetricKey)
     })
@@ -172,12 +216,20 @@ describe('CachedKeyDeriver', () => {
       mockKeyDeriver.revealSpecificSecret.mockReturnValue(secret)
 
       // First call
-      const result1 = cachedKeyDeriver.revealSpecificSecret(counterparty, protocolID, keyID)
+      const result1 = cachedKeyDeriver.revealSpecificSecret(
+        counterparty,
+        protocolID,
+        keyID
+      )
       expect(mockKeyDeriver.revealSpecificSecret).toHaveBeenCalledTimes(1)
       expect(result1).toBe(secret)
 
       // Second call with same parameters
-      const result2 = cachedKeyDeriver.revealSpecificSecret(counterparty, protocolID, keyID)
+      const result2 = cachedKeyDeriver.revealSpecificSecret(
+        counterparty,
+        protocolID,
+        keyID
+      )
       expect(mockKeyDeriver.revealSpecificSecret).toHaveBeenCalledTimes(1)
       expect(result2).toBe(secret)
     })
@@ -196,11 +248,19 @@ describe('CachedKeyDeriver', () => {
         .mockReturnValueOnce(secret2)
 
       // First call
-      const result1 = cachedKeyDeriver.revealSpecificSecret(counterparty, protocolID1, keyID1)
+      const result1 = cachedKeyDeriver.revealSpecificSecret(
+        counterparty,
+        protocolID1,
+        keyID1
+      )
       expect(result1).toBe(secret1)
 
       // Second call with different parameters
-      const result2 = cachedKeyDeriver.revealSpecificSecret(counterparty, protocolID2, keyID2)
+      const result2 = cachedKeyDeriver.revealSpecificSecret(
+        counterparty,
+        protocolID2,
+        keyID2
+      )
       expect(result2).toBe(secret2)
       expect(mockKeyDeriver.revealSpecificSecret).toHaveBeenCalledTimes(2)
     })
@@ -217,7 +277,7 @@ describe('CachedKeyDeriver', () => {
       const counterparty = 'self'
 
       // Mock return values
-      const mockResults = [1, 2, 3, 4, 5, 6].map((n) => new PublicKey(0))
+      const mockResults = [1, 2, 3, 4, 5, 6].map(n => new PublicKey(0))
 
       mockKeyDeriver.derivePublicKey
         .mockReturnValueOnce(mockResults[0])
@@ -271,7 +331,7 @@ describe('CachedKeyDeriver', () => {
         .mockReturnValueOnce(publicKeys[2])
 
       // Fill the cache
-      keys.forEach((keyID) => {
+      keys.forEach(keyID => {
         cachedKeyDeriver.derivePublicKey(protocolID, keyID, counterparty)
       })
 
@@ -303,7 +363,7 @@ describe('CachedKeyDeriver', () => {
       // Simulate an expensive operation
       mockKeyDeriver.derivePublicKey.mockImplementation(() => {
         const start = Date.now()
-        while (Date.now() - start < 50) { } // Busy wait for 50ms
+        while (Date.now() - start < 50) {} // Busy wait for 50ms
         return publicKey
       })
 

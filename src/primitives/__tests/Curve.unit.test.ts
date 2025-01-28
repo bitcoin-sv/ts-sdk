@@ -16,16 +16,18 @@ describe('Curve', () => {
     expect(p.validate()).toBe(true)
     expect(p.dbl().validate()).toBe(true)
     expect(p.toJ().dbl().toP().validate()).toBe(true)
-    expect(p.mul(new BigNumber('79be667e f9dcbbac 55a06295 ce870b07', 16)).validate()).toBe(true)
+    expect(
+      p.mul(new BigNumber('79be667e f9dcbbac 55a06295 ce870b07', 16)).validate()
+    ).toBe(true)
 
     // Endomorphism test
     expect(curve.endo).toBeDefined()
-    expect(
-      curve.endo.beta.fromRed().toString(16)
-    ).toEqual('7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c28719501ee')
-    expect(
-      curve.endo.lambda.toString(16)
-    ).toEqual('5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72')
+    expect(curve.endo.beta.fromRed().toString(16)).toEqual(
+      '7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c28719501ee'
+    )
+    expect(curve.endo.lambda.toString(16)).toEqual(
+      '5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72'
+    )
 
     const k = new BigNumber('1234567890123456789012345678901234', 16)
     const split = curve._endoSplit(k)
@@ -41,7 +43,10 @@ describe('Curve', () => {
     const g2 = new Point(g1.getX(), g1.getY()) // not precomputed g
     expect(g2.precomputed).toBeNull()
 
-    const a = new BigNumber('6d1229a6b24c2e775c062870ad26bc261051e0198c67203167273c7c62538846', 16)
+    const a = new BigNumber(
+      '6d1229a6b24c2e775c062870ad26bc261051e0198c67203167273c7c62538846',
+      16
+    )
     const p1 = g1.mul(a)
     const p2 = g2.mul(a)
 
@@ -57,8 +62,9 @@ describe('Curve', () => {
 
     const a = new BigNumber(
       '6d1229a6b24c2e775c062870ad26bc26' +
-            '1051e0198c67203167273c7c6253884612345678',
-      16)
+        '1051e0198c67203167273c7c6253884612345678',
+      16
+    )
     const p1 = g1.mul(a)
     const p2 = g2.mul(a)
 
@@ -67,8 +73,14 @@ describe('Curve', () => {
 
   it('should not fail on secp256k1 regression', () => {
     const curve = new Curve()
-    const k1 = new BigNumber('32efeba414cd0c830aed727749e816a01c471831536fd2fce28c56b54f5a3bb1', 16)
-    const k2 = new BigNumber('5f2e49b5d64e53f9811545434706cde4de528af97bfd49fde1f6cf792ee37a8c', 16)
+    const k1 = new BigNumber(
+      '32efeba414cd0c830aed727749e816a01c471831536fd2fce28c56b54f5a3bb1',
+      16
+    )
+    const k2 = new BigNumber(
+      '5f2e49b5d64e53f9811545434706cde4de528af97bfd49fde1f6cf792ee37a8c',
+      16
+    )
 
     let p1 = curve.g.mul(k1)
     let p2 = curve.g.mul(k2)
@@ -146,16 +158,15 @@ describe('Point codec', () => {
       y: '483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8'
     },
     compactEncoded:
-        '02' +
-        '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798',
+      '02' + '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798',
     encoded:
-        '04' +
-        '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798' +
-        '483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8',
+      '04' +
+      '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798' +
+      '483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8',
     hybrid:
-        '06' +
-        '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798' +
-        '483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8'
+      '06' +
+      '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798' +
+      '483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8'
   }
 
   const shortPointOddY = {
@@ -164,29 +175,33 @@ describe('Point codec', () => {
       y: 'ae12777aacfbb620f3be96017f45c560de80f0f6518fe4a03c870c36b075f297'
     },
     compactEncoded:
-        '03' +
-        'fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556',
+      '03' + 'fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556',
     encoded:
-        '04' +
-        'fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556' +
-        'ae12777aacfbb620f3be96017f45c560de80f0f6518fe4a03c870c36b075f297',
+      '04' +
+      'fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556' +
+      'ae12777aacfbb620f3be96017f45c560de80f0f6518fe4a03c870c36b075f297',
     hybrid:
-        '07' +
-        'fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556' +
-        'ae12777aacfbb620f3be96017f45c560de80f0f6518fe4a03c870c36b075f297'
+      '07' +
+      'fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556' +
+      'ae12777aacfbb620f3be96017f45c560de80f0f6518fe4a03c870c36b075f297'
   }
 
   it('should throw when trying to decode random bytes', () => {
     expect(() => {
       Point.fromString(
         '05' +
-        '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798')
+          '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798'
+      )
     }).toThrow()
   })
 
-  it('should be able to encode/decode a short curve point with even Y',
-    makeShortTest(shortPointEvenY))
+  it(
+    'should be able to encode/decode a short curve point with even Y',
+    makeShortTest(shortPointEvenY)
+  )
 
-  it('should be able to encode/decode a short curve point with odd Y',
-    makeShortTest(shortPointOddY))
+  it(
+    'should be able to encode/decode a short curve point with odd Y',
+    makeShortTest(shortPointOddY)
+  )
 })

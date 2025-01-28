@@ -40,7 +40,9 @@ describe('WhatsOnChain ChainTracker', () => {
   it('should verify merkleroot successfully using provided window.fetch', async () => {
     const mockFetch = mockedFetch(successResponse)
 
-    const chainTracker = new WhatsOnChain(network, { httpClient: new FetchHttpClient(mockFetch) })
+    const chainTracker = new WhatsOnChain(network, {
+      httpClient: new FetchHttpClient(mockFetch)
+    })
     const response = await chainTracker.isValidRootForHeight(merkleroot, height)
 
     expect(mockFetch).toHaveBeenCalled()
@@ -50,7 +52,9 @@ describe('WhatsOnChain ChainTracker', () => {
   it('should verify merkleroot successfully using provided Node.js https', async () => {
     const mockHttps = mockedHttps(successResponse)
 
-    const chainTracker = new WhatsOnChain(network, { httpClient: new NodejsHttpClient(mockHttps) })
+    const chainTracker = new WhatsOnChain(network, {
+      httpClient: new NodejsHttpClient(mockHttps)
+    })
     const response = await chainTracker.isValidRootForHeight(merkleroot, height)
 
     expect(response).toEqual(true)
@@ -62,7 +66,9 @@ describe('WhatsOnChain ChainTracker', () => {
       data: 'not found'
     })
 
-    const chainTracker = new WhatsOnChain(network, { httpClient: new FetchHttpClient(mockFetch) })
+    const chainTracker = new WhatsOnChain(network, {
+      httpClient: new FetchHttpClient(mockFetch)
+    })
     const response = await chainTracker.isValidRootForHeight(merkleroot, height)
 
     expect(response).toEqual(false)
@@ -71,9 +77,13 @@ describe('WhatsOnChain ChainTracker', () => {
   it('should handle network errors', async () => {
     const mockFetch = jest.fn().mockRejectedValue(new Error('Network error'))
 
-    const chainTracker = new WhatsOnChain(network, { httpClient: new FetchHttpClient(mockFetch) })
+    const chainTracker = new WhatsOnChain(network, {
+      httpClient: new FetchHttpClient(mockFetch)
+    })
 
-    await expect(chainTracker.isValidRootForHeight(merkleroot, height)).rejects.toThrow('Network error')
+    await expect(
+      chainTracker.isValidRootForHeight(merkleroot, height)
+    ).rejects.toThrow('Network error')
   })
 
   it('should throw error when received error response', async () => {
@@ -82,9 +92,15 @@ describe('WhatsOnChain ChainTracker', () => {
       data: { error: 'Unauthorized' }
     })
 
-    const chainTracker = new WhatsOnChain(network, { httpClient: new FetchHttpClient(mockFetch) })
+    const chainTracker = new WhatsOnChain(network, {
+      httpClient: new FetchHttpClient(mockFetch)
+    })
 
-    await expect(chainTracker.isValidRootForHeight(merkleroot, height)).rejects.toThrow(/Failed to verify merkleroot for height \d+ because of an error: .*/)
+    await expect(
+      chainTracker.isValidRootForHeight(merkleroot, height)
+    ).rejects.toThrow(
+      /Failed to verify merkleroot for height \d+ because of an error: .*/
+    )
   })
 
   it('should return the current height', async () => {
@@ -98,14 +114,17 @@ describe('WhatsOnChain ChainTracker', () => {
           height: 875904,
           version: 704643072,
           versionHex: '2a000000',
-          merkleroot: '8af5a2d4325ec30e30103b1f365c303d4b49d11e42d26b0d7e9b6866724392e9',
+          merkleroot:
+            '8af5a2d4325ec30e30103b1f365c303d4b49d11e42d26b0d7e9b6866724392e9',
           time: 1734667612,
           mediantime: 1734663717,
           nonce: 157007350,
           bits: '180f2b74',
           difficulty: 72479484799.59058,
-          chainwork: '00000000000000000000000000000000000000000160c2f41c8793b90f4500dd',
-          previousblockhash: '00000000000000000128f312a7c62ef5f9a91a3f845a4464d10cfbaaecd233a0',
+          chainwork:
+            '00000000000000000000000000000000000000000160c2f41c8793b90f4500dd',
+          previousblockhash:
+            '00000000000000000128f312a7c62ef5f9a91a3f845a4464d10cfbaaecd233a0',
           nextblockhash: '',
           nTx: 0,
           num_tx: 167567
@@ -113,18 +132,20 @@ describe('WhatsOnChain ChainTracker', () => {
       ]
     })
 
-    const chainTracker = new WhatsOnChain(network, { httpClient: new FetchHttpClient(mockFetch) })
+    const chainTracker = new WhatsOnChain(network, {
+      httpClient: new FetchHttpClient(mockFetch)
+    })
 
     await expect(await chainTracker.currentHeight()).toBe(875904)
   })
 
-  function mockedFetch (response) {
+  function mockedFetch(response) {
     return jest.fn().mockResolvedValue({
       ok: response.status === 200,
       status: response.status,
       statusText: response.status === 200 ? 'OK' : 'Bad request',
       headers: {
-        get (key: string) {
+        get(key: string) {
           if (key === 'Content-Type') {
             return 'application/json'
           }
@@ -134,7 +155,7 @@ describe('WhatsOnChain ChainTracker', () => {
     })
   }
 
-  function mockedHttps (response) {
+  function mockedHttps(response) {
     const https = {
       request: (url, options, callback) => {
         // eslint-disable-next-line
