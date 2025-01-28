@@ -2,7 +2,9 @@ class Rand {
   _rand: Function
   constructor () {
     const noRand = () => {
-      throw new Error('No secure random number generator is available in this environment.')
+      throw new Error(
+        'No secure random number generator is available in this environment.'
+      )
     }
     if (typeof self === 'object') {
       /* eslint-disable-next-line */
@@ -13,7 +15,7 @@ class Rand {
           self.crypto.getRandomValues(arr)
           return [...arr]
         }
-      } else /* if (typeof window === 'object') */ {
+      } /* if (typeof window === 'object') */ else {
         this._rand = noRand
       }
     } else {

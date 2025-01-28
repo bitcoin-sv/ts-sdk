@@ -96,15 +96,23 @@ export default class TransactionSignature extends Signature {
       hashPrevouts = getPrevoutHash()
     }
 
-    if ((params.scope & TransactionSignature.SIGHASH_ANYONECANPAY) === 0 &&
+    if (
+      (params.scope & TransactionSignature.SIGHASH_ANYONECANPAY) === 0 &&
       (params.scope & 31) !== TransactionSignature.SIGHASH_SINGLE &&
-      (params.scope & 31) !== TransactionSignature.SIGHASH_NONE) {
+      (params.scope & 31) !== TransactionSignature.SIGHASH_NONE
+    ) {
       hashSequence = getSequenceHash()
     }
 
-    if ((params.scope & 31) !== TransactionSignature.SIGHASH_SINGLE && (params.scope & 31) !== TransactionSignature.SIGHASH_NONE) {
+    if (
+      (params.scope & 31) !== TransactionSignature.SIGHASH_SINGLE &&
+      (params.scope & 31) !== TransactionSignature.SIGHASH_NONE
+    ) {
       hashOutputs = getOutputsHash()
-    } else if ((params.scope & 31) === TransactionSignature.SIGHASH_SINGLE && params.inputIndex < params.outputs.length) {
+    } else if (
+      (params.scope & 31) === TransactionSignature.SIGHASH_SINGLE &&
+      params.inputIndex < params.outputs.length
+    ) {
       hashOutputs = getOutputsHash(params.inputIndex)
     }
 
@@ -167,16 +175,19 @@ export default class TransactionSignature extends Signature {
   }
 
   /**
-     * Compares to bitcoind's IsLowDERSignature
-     * See also Ecdsa signature algorithm which enforces this.
-     * See also Bip 62, "low S values in signatures"
-     */
+   * Compares to bitcoind's IsLowDERSignature
+   * See also Ecdsa signature algorithm which enforces this.
+   * See also Bip 62, "low S values in signatures"
+   */
   public hasLowS (): boolean {
     if (
       this.s.ltn(1) ||
-      this.s.gt(new BigNumber(
-        '7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0', 'hex'
-      ))
+      this.s.gt(
+        new BigNumber(
+          '7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0',
+          'hex'
+        )
+      )
     ) {
       return false
     }

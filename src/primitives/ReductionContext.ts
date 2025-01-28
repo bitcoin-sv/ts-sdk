@@ -89,7 +89,7 @@ export default class ReductionContext {
       'red works only with positives'
     )
     this.assert(
-      (a.red != null) && a.red === b.red,
+      a.red != null && a.red === b.red,
       'red works only with red numbers'
     )
   }

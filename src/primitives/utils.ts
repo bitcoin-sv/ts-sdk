@@ -54,7 +54,7 @@ export const toArray = (msg: any, enc?: 'hex' | 'utf8' | 'base64'): any[] => {
 }
 
 const hexToArray = (msg: string): number[] => {
-  msg = msg.replace(/[^a-z0-9]+/ig, '')
+  msg = msg.replace(/[^a-z0-9]+/gi, '')
   if (msg.length % 2 !== 0) msg = '0' + msg
   const res: number[] = []
   for (let i = 0; i < msg.length; i += 2) {
@@ -64,7 +64,8 @@ const hexToArray = (msg: string): number[] => {
 }
 
 const base64ToArray = (msg: string): number[] => {
-  const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+  const base64Chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
   const result: number[] = []
   let currentBit = 0
   let currentByte = 0
@@ -75,7 +76,7 @@ const base64ToArray = (msg: string): number[] => {
 
     if (currentByte >= 8) {
       currentByte -= 8
-      result.push((currentBit >> currentByte) & 0xFF)
+      result.push((currentBit >> currentByte) & 0xff)
       currentBit &= (1 << currentByte) - 1
     }
   }
@@ -118,35 +119,40 @@ export const toUTF8 = (arr: number[]): string => {
     }
 
     // 1-byte sequence (0xxxxxxx)
-    if (byte <= 0x7F) {
+    if (byte <= 0x7f) {
       result += String.fromCharCode(byte)
     }
     // 2-byte sequence (110xxxxx 10xxxxxx)
-    else if (byte >= 0xC0 && byte <= 0xDF) {
+    else if (byte >= 0xc0 && byte <= 0xdf) {
       const byte2 = arr[i + 1]
       skip = 1
-      const codePoint = ((byte & 0x1F) << 6) | (byte2 & 0x3F)
+      const codePoint = ((byte & 0x1f) << 6) | (byte2 & 0x3f)
       result += String.fromCharCode(codePoint)
     }
     // 3-byte sequence (1110xxxx 10xxxxxx 10xxxxxx)
-    else if (byte >= 0xE0 && byte <= 0xEF) {
+    else if (byte >= 0xe0 && byte <= 0xef) {
       const byte2 = arr[i + 1]
       const byte3 = arr[i + 2]
       skip = 2
-      const codePoint = ((byte & 0x0F) << 12) | ((byte2 & 0x3F) << 6) | (byte3 & 0x3F)
+      const codePoint =
+        ((byte & 0x0f) << 12) | ((byte2 & 0x3f) << 6) | (byte3 & 0x3f)
       result += String.fromCharCode(codePoint)
     }
     // 4-byte sequence (11110xxx 10xxxxxx 10xxxxxx 10xxxxxx)
-    else if (byte >= 0xF0 && byte <= 0xF7) {
+    else if (byte >= 0xf0 && byte <= 0xf7) {
       const byte2 = arr[i + 1]
       const byte3 = arr[i + 2]
       const byte4 = arr[i + 3]
       skip = 3
-      const codePoint = ((byte & 0x07) << 18) | ((byte2 & 0x3F) << 12) | ((byte3 & 0x3F) << 6) | (byte4 & 0x3F)
+      const codePoint =
+        ((byte & 0x07) << 18) |
+        ((byte2 & 0x3f) << 12) |
+        ((byte3 & 0x3f) << 6) |
+        (byte4 & 0x3f)
 
       // Convert to UTF-16 surrogate pair
-      const surrogate1 = 0xD800 + ((codePoint - 0x10000) >> 10)
-      const surrogate2 = 0xDC00 + ((codePoint - 0x10000) & 0x3FF)
+      const surrogate1 = 0xd800 + ((codePoint - 0x10000) >> 10)
+      const surrogate2 = 0xdc00 + ((codePoint - 0x10000) & 0x3ff)
       result += String.fromCharCode(surrogate1, surrogate2)
     }
   }
@@ -160,7 +166,10 @@ export const toUTF8 = (arr: number[]): string => {
  * @param {('hex' | 'utf8')} enc - The desired encoding.
  * @returns {string | number[]} - The encoded message as a string (for 'hex' and 'utf8') or the original array.
  */
-export const encode = (arr: number[], enc?: 'hex' | 'utf8'): string | number[] => {
+export const encode = (
+  arr: number[],
+  enc?: 'hex' | 'utf8'
+): string | number[] => {
   switch (enc) {
     case 'hex':
       return toHex(arr)
@@ -183,7 +192,8 @@ export const encode = (arr: number[], enc?: 'hex' | 'utf8'): string | number[] =
  * console.log(toBase64(bytes)); // Outputs: SGVsbG8=
  */
 export function toBase64 (byteArray: number[]): string {
-  const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+  const base64Chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
   let result = ''
   let i: number
 
@@ -194,8 +204,8 @@ export function toBase64 (byteArray: number[]): string {
 
     const encoded1 = byte1 >> 2
     const encoded2 = ((byte1 & 0x03) << 4) | (byte2 >> 4)
-    const encoded3 = ((byte2 & 0x0F) << 2) | (byte3 >> 6)
-    const encoded4 = byte3 & 0x3F
+    const encoded3 = ((byte2 & 0x0f) << 2) | (byte3 >> 6)
+    const encoded4 = byte3 & 0x3f
 
     result += base64Chars.charAt(encoded1) + base64Chars.charAt(encoded2)
     result += i + 1 < byteArray.length ? base64Chars.charAt(encoded3) : '='
@@ -213,24 +223,23 @@ const base58chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
  * @returns The binary representation
  */
 export const fromBase58 = (str: string): number[] => {
-  if (!str || typeof str !== 'string') { throw new Error(`Expected base58 string but got “${str}”`) }
+  if (!str || typeof str !== 'string') {
+    throw new Error(`Expected base58 string but got “${str}”`)
+  }
   if (str.match(/[IOl0]/gmu)) {
-    throw new Error(
-      `Invalid base58 character “${str.match(/[IOl0]/gmu)}”`
-    )
+    throw new Error(`Invalid base58 character “${str.match(/[IOl0]/gmu)}”`)
   }
   const lz = str.match(/^1+/gmu)
   const psz: number = lz ? lz[0].length : 0
-  const size =
-    ((str.length - psz) * (Math.log(58) / Math.log(256)) + 1) >>> 0
+  const size = ((str.length - psz) * (Math.log(58) / Math.log(256)) + 1) >>> 0
 
   const uint8 = new Uint8Array([
     ...new Uint8Array(psz),
     ...str
       .match(/./gmu)
-      .map((i) => base58chars.indexOf(i))
+      .map(i => base58chars.indexOf(i))
       .reduce((acc, i) => {
-        acc = acc.map((j) => {
+        acc = acc.map(j => {
           const x = j * 58 + i
           i = x >> 8
           return x
@@ -240,7 +249,7 @@ export const fromBase58 = (str: string): number[] => {
       .reverse()
       .filter(
         (
-          (lastValue) => (value) =>
+          lastValue => value =>
             // @ts-expect-error
             (lastValue = lastValue || value)
         )(false)
@@ -256,7 +265,9 @@ export const fromBase58 = (str: string): number[] => {
  */
 export const toBase58 = (bin: number[]): string => {
   const base58Map = Array(256).fill(-1)
-  for (let i = 0; i < base58chars.length; ++i) { base58Map[base58chars.charCodeAt(i)] = i }
+  for (let i = 0; i < base58chars.length; ++i) {
+    base58Map[base58chars.charCodeAt(i)] = i
+  }
 
   const result = []
 
@@ -301,7 +312,11 @@ export const toBase58Check = (bin: number[], prefix: number[] = [0]) => {
  * @param prefixLength - The length of the prefix. Optional, defaults to 1.
  * @returns The binary array representation
  */
-export const fromBase58Check = (str: string, enc?: 'hex', prefixLength: number = 1) => {
+export const fromBase58Check = (
+  str: string,
+  enc?: 'hex',
+  prefixLength: number = 1
+) => {
   const bin = fromBase58(str)
   let prefix: string | number[] = bin.slice(0, prefixLength)
   let data: string | number[] = bin.slice(prefixLength, -4)
@@ -369,41 +384,41 @@ export class Writer {
 
   writeInt8 (n: number): this {
     const buf = new Array(1)
-    buf[0] = n & 0xFF
+    buf[0] = n & 0xff
     this.write(buf)
     return this
   }
 
   writeUInt16BE (n: number): this {
     this.bufs.push([
-      (n >> 8) & 0xFF, // shift right 8 bits to get the high byte
-      n & 0xFF // low byte is just the last 8 bits
+      (n >> 8) & 0xff, // shift right 8 bits to get the high byte
+      n & 0xff // low byte is just the last 8 bits
     ])
     return this
   }
 
   writeInt16BE (n: number): this {
-    return this.writeUInt16BE(n & 0xFFFF) // Mask with 0xFFFF to get the lower 16 bits
+    return this.writeUInt16BE(n & 0xffff) // Mask with 0xFFFF to get the lower 16 bits
   }
 
   writeUInt16LE (n: number): this {
     this.bufs.push([
-      n & 0xFF, // low byte is just the last 8 bits
-      (n >> 8) & 0xFF // shift right 8 bits to get the high byte
+      n & 0xff, // low byte is just the last 8 bits
+      (n >> 8) & 0xff // shift right 8 bits to get the high byte
     ])
     return this
   }
 
   writeInt16LE (n: number): this {
-    return this.writeUInt16LE(n & 0xFFFF) // Mask with 0xFFFF to get the lower 16 bits
+    return this.writeUInt16LE(n & 0xffff) // Mask with 0xFFFF to get the lower 16 bits
   }
 
   writeUInt32BE (n: number): this {
     this.bufs.push([
-      (n >> 24) & 0xFF, // highest byte
-      (n >> 16) & 0xFF,
-      (n >> 8) & 0xFF,
-      n & 0xFF // lowest byte
+      (n >> 24) & 0xff, // highest byte
+      (n >> 16) & 0xff,
+      (n >> 8) & 0xff,
+      n & 0xff // lowest byte
     ])
     return this
   }
@@ -414,10 +429,10 @@ export class Writer {
 
   writeUInt32LE (n: number): this {
     this.bufs.push([
-      n & 0xFF, // lowest byte
-      (n >> 8) & 0xFF,
-      (n >> 16) & 0xFF,
-      (n >> 24) & 0xFF // highest byte
+      n & 0xff, // lowest byte
+      (n >> 8) & 0xff,
+      (n >> 16) & 0xff,
+      (n >> 24) & 0xff // highest byte
     ])
     return this
   }
@@ -464,33 +479,33 @@ export class Writer {
       // 253 followed by the number in little-endian format
       buf = [
         253, // 0xfd
-        n & 0xFF, // low byte
-        (n >> 8) & 0xFF // high byte
+        n & 0xff, // low byte
+        (n >> 8) & 0xff // high byte
       ]
     } else if (n < 0x100000000) {
       // 254 followed by the number in little-endian format
       buf = [
         254, // 0xfe
-        n & 0xFF,
-        (n >> 8) & 0xFF,
-        (n >> 16) & 0xFF,
-        (n >> 24) & 0xFF
+        n & 0xff,
+        (n >> 8) & 0xff,
+        (n >> 16) & 0xff,
+        (n >> 24) & 0xff
       ]
     } else {
       // 255 followed by the number in little-endian format
       // Since JavaScript bitwise operations work on 32 bits, we need to handle 64-bit numbers in two parts
-      const low = n & 0xFFFFFFFF
-      const high = Math.floor(n / 0x100000000) & 0xFFFFFFFF
+      const low = n & 0xffffffff
+      const high = Math.floor(n / 0x100000000) & 0xffffffff
       buf = [
         255, // 0xff
-        low & 0xFF,
-        (low >> 8) & 0xFF,
-        (low >> 16) & 0xFF,
-        (low >> 24) & 0xFF,
-        high & 0xFF,
-        (high >> 8) & 0xFF,
-        (high >> 16) & 0xFF,
-        (high >> 24) & 0xFF
+        low & 0xff,
+        (low >> 8) & 0xff,
+        (low >> 16) & 0xff,
+        (low >> 24) & 0xff,
+        high & 0xff,
+        (high >> 8) & 0xff,
+        (high >> 16) & 0xff,
+        (high >> 24) & 0xff
       ]
     }
     return buf
@@ -505,11 +520,11 @@ export class Writer {
     } else if (bn.ltn(0x10000)) {
       const n = bn.toNumber()
       // Value fits in a uint16
-      buf = [253, n & 0xFF, (n >> 8) & 0xFF]
+      buf = [253, n & 0xff, (n >> 8) & 0xff]
     } else if (bn.lt(new BigNumber(0x100000000))) {
       const n = bn.toNumber()
       // Value fits in a uint32
-      buf = [254, n & 0xFF, (n >> 8) & 0xFF, (n >> 16) & 0xFF, (n >> 24) & 0xFF]
+      buf = [254, n & 0xff, (n >> 8) & 0xff, (n >> 16) & 0xff, (n >> 24) & 0xff]
     } else {
       const bw = new Writer()
       bw.writeUInt8(255)
@@ -589,7 +604,7 @@ export class Reader {
 
   public readUInt32BE (): number {
     const val =
-      (this.bin[this.pos] * 0x1000000) + // Shift the first byte by 24 bits
+      this.bin[this.pos] * 0x1000000 + // Shift the first byte by 24 bits
       ((this.bin[this.pos + 1] << 16) | // Shift the second byte by 16 bits
         (this.bin[this.pos + 2] << 8) | // Shift the third byte by 8 bits
         this.bin[this.pos + 3]) // The fourth byte
@@ -608,7 +623,8 @@ export class Reader {
       (this.bin[this.pos] |
         (this.bin[this.pos + 1] << 8) |
         (this.bin[this.pos + 2] << 16) |
-        (this.bin[this.pos + 3] << 24)) >>> 0
+        (this.bin[this.pos + 3] << 24)) >>>
+      0
     this.pos += 4
     return val
   }
@@ -646,7 +662,9 @@ export class Reader {
         if (bn.lte(new BigNumber(2).pow(new BigNumber(53)))) {
           return bn.toNumber()
         } else {
-          throw new Error('number too large to retain precision - use readVarIntBn')
+          throw new Error(
+            'number too large to retain precision - use readVarIntBn'
+          )
         }
       default:
         return first

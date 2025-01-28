@@ -18,7 +18,9 @@ export class SessionManager {
    */
   addSession (session: PeerSession): void {
     if (!session.sessionNonce && !session.peerIdentityKey) {
-      throw new Error('Invalid session: at least one of sessionNonce or peerIdentityKey is required.')
+      throw new Error(
+        'Invalid session: at least one of sessionNonce or peerIdentityKey is required.'
+      )
     }
 
     if (session.sessionNonce) {
@@ -30,10 +32,10 @@ export class SessionManager {
   }
 
   /**
-  * Updates a session in the manager, ensuring that all identifiers are correctly associated.
-  *
-  * @param {PeerSession} session - The peer session to update.
-  */
+   * Updates a session in the manager, ensuring that all identifiers are correctly associated.
+   *
+   * @param {PeerSession} session - The peer session to update.
+   */
   updateSession (session: PeerSession): void {
     this.removeSession(session)
     this.addSession(session)

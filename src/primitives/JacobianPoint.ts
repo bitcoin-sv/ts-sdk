@@ -62,9 +62,15 @@ export default class JacobianPoint extends BasePoint {
       }
       this.z = z as BigNumber
     }
-    if (this.x.red == null) { this.x = this.x.toRed(this.curve.red) }
-    if (this.y.red == null) { this.y = this.y.toRed(this.curve.red) }
-    if (this.z.red == null) { this.z = this.z.toRed(this.curve.red) }
+    if (this.x.red == null) {
+      this.x = this.x.toRed(this.curve.red)
+    }
+    if (this.y.red == null) {
+      this.y = this.y.toRed(this.curve.red)
+    }
+    if (this.z.red == null) {
+      this.z = this.z.toRed(this.curve.red)
+    }
 
     this.zOne = this.z === this.curve.one
   }
@@ -123,10 +129,14 @@ export default class JacobianPoint extends BasePoint {
    */
   add (p: JacobianPoint): JacobianPoint {
     // O + P = P
-    if (this.isInfinity()) { return p }
+    if (this.isInfinity()) {
+      return p
+    }
 
     // P + O = P
-    if (p.isInfinity()) { return this }
+    if (p.isInfinity()) {
+      return this
+    }
 
     // 12M + 4S + 7A
     const pz2 = p.z.redSqr()
@@ -173,10 +183,14 @@ export default class JacobianPoint extends BasePoint {
    */
   mixedAdd (p: Point): JacobianPoint {
     // O + P = P
-    if (this.isInfinity()) { return p.toJ() }
+    if (this.isInfinity()) {
+      return p.toJ()
+    }
 
     // P + O = P
-    if (p.isInfinity()) { return this }
+    if (p.isInfinity()) {
+      return this
+    }
 
     // 8M + 3S + 7A
     const z2 = this.z.redSqr()
@@ -230,7 +244,9 @@ export default class JacobianPoint extends BasePoint {
 
     /* eslint-disable @typescript-eslint/no-this-alias */
     let r = this as JacobianPoint
-    for (let i = 0; i < pow; i++) { r = r.dbl() }
+    for (let i = 0; i < pow; i++) {
+      r = r.dbl()
+    }
     return r
   }
 
@@ -332,9 +348,13 @@ export default class JacobianPoint extends BasePoint {
    * const areEqual = jp1.eq(jp2)
    */
   eq (p: Point | JacobianPoint): boolean {
-    if (p.type === 'affine') { return this.eq((p as Point).toJ()) }
+    if (p.type === 'affine') {
+      return this.eq((p as Point).toJ())
+    }
 
-    if (this === p) { return true }
+    if (this === p) {
+      return true
+    }
 
     // x1 * z2^2 == x2 * z1^2
     const z2 = this.z.redSqr()
@@ -366,16 +386,22 @@ export default class JacobianPoint extends BasePoint {
   eqXToP (x: BigNumber): boolean {
     const zs = this.z.redSqr()
     const rx = x.toRed(this.curve.red).redMul(zs)
-    if (this.x.cmp(rx) === 0) { return true }
+    if (this.x.cmp(rx) === 0) {
+      return true
+    }
 
     const xc = x.clone()
     const t = this.curve.redN.redMul(zs)
-    for (; ;) {
+    for (;;) {
       xc.iadd(this.curve.n)
-      if (xc.cmp(this.curve.p) >= 0) { return false }
+      if (xc.cmp(this.curve.p) >= 0) {
+        return false
+      }
 
       rx.redIAdd(t)
-      if (this.x.cmp(rx) === 0) { return true }
+      if (this.x.cmp(rx) === 0) {
+        return true
+      }
     }
   }
 
@@ -389,10 +415,18 @@ export default class JacobianPoint extends BasePoint {
    * console.log(point.inspect()); // Output: '<EC JPoint x: 5 y: 6 z: 1>'
    */
   inspect (): string {
-    if (this.isInfinity()) { return '<EC JPoint Infinity>' }
-    return '<EC JPoint x: ' + this.x.toString(16, 2) +
-      ' y: ' + this.y.toString(16, 2) +
-      ' z: ' + this.z.toString(16, 2) + '>'
+    if (this.isInfinity()) {
+      return '<EC JPoint Infinity>'
+    }
+    return (
+      '<EC JPoint x: ' +
+      this.x.toString(16, 2) +
+      ' y: ' +
+      this.y.toString(16, 2) +
+      ' z: ' +
+      this.z.toString(16, 2) +
+      '>'
+    )
   }
 
   /**

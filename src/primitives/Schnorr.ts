@@ -42,14 +42,19 @@ export default class Schnorr {
   }
 
   /**
-     * Generates a proof that demonstrates the link between public key A and shared secret S
-     * @param a Private key corresponding to public key A
-     * @param A Public key
-     * @param B Other party's public key
-     * @param S Shared secret
-     * @returns Proof (R, S', z)
-     */
-  generateProof (aArg: PrivateKey, AArg: PublicKey, BArg: PublicKey, S: Point): { R: Point, SPrime: Point, z: BigNumber } {
+   * Generates a proof that demonstrates the link between public key A and shared secret S
+   * @param a Private key corresponding to public key A
+   * @param A Public key
+   * @param B Other party's public key
+   * @param S Shared secret
+   * @returns Proof (R, S', z)
+   */
+  generateProof (
+    aArg: PrivateKey,
+    AArg: PublicKey,
+    BArg: PublicKey,
+    S: Point
+  ): { R: Point, SPrime: Point, z: BigNumber } {
     const r = PrivateKey.fromRandom()
     const R = r.toPublicKey()
     const SPrime = BArg.mul(r)
@@ -59,14 +64,19 @@ export default class Schnorr {
   }
 
   /**
-     * Verifies the proof of the link between public key A and shared secret S
-     * @param A Public key
-     * @param B Other party's public key
-     * @param S Shared secret
-     * @param proof Proof (R, S', z)
-     * @returns True if the proof is valid, false otherwise
-     */
-  verifyProof (A: Point, B: Point, S: Point, proof: { R: Point, SPrime: Point, z: BigNumber }): boolean {
+   * Verifies the proof of the link between public key A and shared secret S
+   * @param A Public key
+   * @param B Other party's public key
+   * @param S Shared secret
+   * @param proof Proof (R, S', z)
+   * @returns True if the proof is valid, false otherwise
+   */
+  verifyProof (
+    A: Point,
+    B: Point,
+    S: Point,
+    proof: { R: Point, SPrime: Point, z: BigNumber }
+  ): boolean {
     const { R, SPrime, z } = proof
     const e = this.computeChallenge(A, B, S, SPrime, R)
 
@@ -87,8 +97,20 @@ export default class Schnorr {
     return true
   }
 
-  private computeChallenge (A: Point, B: Point, S: Point, SPrime: Point, R: Point): BigNumber {
-    const message = [...A.encode(true), ...B.encode(true), ...S.encode(true), ...SPrime.encode(true), ...R.encode(true)] as number[]
+  private computeChallenge (
+    A: Point,
+    B: Point,
+    S: Point,
+    SPrime: Point,
+    R: Point
+  ): BigNumber {
+    const message = [
+      ...A.encode(true),
+      ...B.encode(true),
+      ...S.encode(true),
+      ...SPrime.encode(true),
+      ...R.encode(true)
+    ] as number[]
     const hash = sha256(message)
     return new BigNumber(hash).umod(this.curve.n)
   }

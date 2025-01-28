@@ -27,19 +27,19 @@ export default class SymmetricKey extends BigNumber {
   }
 
   /**
-  * Encrypts a given message using AES-GCM encryption.
-  * The generated Initialization Vector (IV) is attached to the encrypted message for decryption purposes.
-  * The OpenSSL format of |IV|encryptedContent|authTag| is used.
-  *
-  * @method encrypt
-  * @param msg - The message to be encrypted. It can be a string or an array of numbers.
-  * @param enc - optional. The encoding of the message. If hex, the string is assumed to be hex, UTF-8 otherwise.
-  * @returns Returns the encrypted message as a string or an array of numbers, depending on `enc` argument.
-  *
-  * @example
-  * const key = new SymmetricKey(1234);
-  * const encryptedMessage = key.encrypt('plainText', 'utf8');
-  */
+   * Encrypts a given message using AES-GCM encryption.
+   * The generated Initialization Vector (IV) is attached to the encrypted message for decryption purposes.
+   * The OpenSSL format of |IV|encryptedContent|authTag| is used.
+   *
+   * @method encrypt
+   * @param msg - The message to be encrypted. It can be a string or an array of numbers.
+   * @param enc - optional. The encoding of the message. If hex, the string is assumed to be hex, UTF-8 otherwise.
+   * @returns Returns the encrypted message as a string or an array of numbers, depending on `enc` argument.
+   *
+   * @example
+   * const key = new SymmetricKey(1234);
+   * const encryptedMessage = key.encrypt('plainText', 'utf8');
+   */
   encrypt (msg: number[] | string, enc?: 'hex'): string | number[] {
     const iv = Random(32)
     msg = toArray(msg, enc)
@@ -74,13 +74,7 @@ export default class SymmetricKey extends BigNumber {
     const ciphertextWithTag = msg.slice(32)
     const messageTag = ciphertextWithTag.slice(-16)
     const ciphertext = ciphertextWithTag.slice(0, -16)
-    const result = AESGCMDecrypt(
-      ciphertext,
-      [],
-      iv,
-      messageTag,
-      this.toArray()
-    )
+    const result = AESGCMDecrypt(ciphertext, [], iv, messageTag, this.toArray())
     if (result === null) {
       throw new Error('Decryption failed!')
     }

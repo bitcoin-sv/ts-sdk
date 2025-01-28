@@ -29,7 +29,11 @@ export class KeyShares {
   threshold: number
   integrity: string
 
-  constructor (points: PointInFiniteField[], threshold: number, integrity: string) {
+  constructor (
+    points: PointInFiniteField[],
+    threshold: number,
+    integrity: string
+  ) {
     this.points = points
     this.threshold = threshold
     this.integrity = integrity
@@ -40,13 +44,20 @@ export class KeyShares {
     let integrity = ''
     const points = shares.map((share, idx) => {
       const shareParts = share.split('.')
-      if (shareParts.length !== 4) throw Error('Invalid share format in share ' + idx + '. Expected format: "x.y.t.i" - received ' + share)
+      if (shareParts.length !== 4) {
+        throw Error(
+          'Invalid share format in share ' +
+            idx +
+            '. Expected format: "x.y.t.i" - received ' +
+            share
+        )
+      }
       const [x, y, t, i] = shareParts
       if (!t) throw Error('Threshold not found in share ' + idx)
       if (!i) throw Error('Integrity not found in share ' + idx)
       const tInt = parseInt(t)
-      if (idx !== 0 && threshold !== tInt) throw Error('Threshold mismatch in share ' + idx)
-      if (idx !== 0 && integrity !== i) throw Error('Integrity mismatch in share ' + idx)
+      if (idx !== 0 && threshold !== tInt) { throw Error('Threshold mismatch in share ' + idx) }
+      if (idx !== 0 && integrity !== i) { throw Error('Integrity mismatch in share ' + idx) }
       threshold = tInt
       integrity = i
       return PointInFiniteField.fromString([x, y].join('.'))
@@ -55,7 +66,9 @@ export class KeyShares {
   }
 
   toBackupFormat () {
-    return this.points.map(share => share.toString() + '.' + this.threshold + '.' + this.integrity)
+    return this.points.map(
+      share => share.toString() + '.' + this.threshold + '.' + this.integrity
+    )
   }
 }
 
@@ -204,7 +217,12 @@ export default class PrivateKey extends BigNumber {
    * const privateKey = PrivateKey.fromRandom();
    * const signature = privateKey.sign('Hello, World!');
    */
-  sign (msg: number[] | string, enc?: 'hex' | 'utf8', forceLowS: boolean = true, customK?: Function | BigNumber): Signature {
+  sign (
+    msg: number[] | string,
+    enc?: 'hex' | 'utf8',
+    forceLowS: boolean = true,
+    customK?: Function | BigNumber
+  ): Signature {
     const msgHash = new BigNumber(sha256(msg, enc), 16)
     return sign(msgHash, this, forceLowS, customK)
   }
@@ -265,7 +283,9 @@ export default class PrivateKey extends BigNumber {
    * const testnetWif = privateKey.toWif([0xef]);
    */
   toWif (prefix: number[] = [0x80]): string {
-    if (!this.isValid()) { throw new Error('Value is out of field') }
+    if (!this.isValid()) {
+      throw new Error('Value is out of field')
+    }
     return toBase58Check([...this.toArray('be', 32), 1], prefix)
   }
 
@@ -362,10 +382,10 @@ export default class PrivateKey extends BigNumber {
    * const shares = key.toKeyShares(2, 5)
    */
   toKeyShares (threshold: number, totalShares: number): KeyShares {
-    if (typeof threshold !== 'number' || typeof totalShares !== 'number') throw new Error('threshold and totalShares must be numbers')
+    if (typeof threshold !== 'number' || typeof totalShares !== 'number') { throw new Error('threshold and totalShares must be numbers') }
     if (threshold < 2) throw new Error('threshold must be at least 2')
     if (totalShares < 2) throw new Error('totalShares must be at least 2')
-    if (threshold > totalShares) throw new Error('threshold should be less than or equal to totalShares')
+    if (threshold > totalShares) { throw new Error('threshold should be less than or equal to totalShares') }
 
     const poly = Polynomial.fromPrivateKey(this, threshold)
 
@@ -427,7 +447,11 @@ export default class PrivateKey extends BigNumber {
   static fromKeyShares (keyShares: KeyShares): PrivateKey {
     const { points, threshold, integrity } = keyShares
     if (threshold < 2) throw new Error('threshold must be at least 2')
-    if (points.length < threshold) throw new Error(`At least ${threshold} shares are required to reconstruct the private key`)
+    if (points.length < threshold) {
+      throw new Error(
+        `At least ${threshold} shares are required to reconstruct the private key`
+      )
+    }
     // check to see if two points have the same x value
     for (let i = 0; i < threshold; i++) {
       for (let j = i + 1; j < threshold; j++) {

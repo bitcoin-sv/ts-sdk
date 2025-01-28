@@ -6,7 +6,11 @@ import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
 import { hash256 } from '../primitives/Hash.js'
 import FeeModel from './FeeModel.js'
 import SatoshisPerKilobyte from './fee-models/SatoshisPerKilobyte.js'
-import { Broadcaster, BroadcastResponse, BroadcastFailure } from './Broadcaster.js'
+import {
+  Broadcaster,
+  BroadcastResponse,
+  BroadcastFailure
+} from './Broadcaster.js'
 import MerklePath from './MerklePath.js'
 import Spend from '../script/Spend.js'
 import ChainTracker from './ChainTracker.js'
@@ -60,10 +64,17 @@ export default class Transaction {
   private cachedHash?: number[]
 
   // Recursive function for adding merkle proofs or input transactions
-  private static addPathOrInputs (obj: { pathIndex?: number, tx: Transaction }, transactions: Record<string, {
-    pathIndex?: number
-    tx: Transaction
-  }>, BUMPs: MerklePath[]): void {
+  private static addPathOrInputs (
+    obj: { pathIndex?: number, tx: Transaction },
+    transactions: Record<
+    string,
+    {
+      pathIndex?: number
+      tx: Transaction
+    }
+    >,
+    BUMPs: MerklePath[]
+  ): void {
     if (typeof obj.pathIndex === 'number') {
       const path = BUMPs[obj.pathIndex]
       if (typeof path !== 'object') {
@@ -74,7 +85,9 @@ export default class Transaction {
       for (const input of obj.tx.inputs) {
         const sourceObj = transactions[input.sourceTXID]
         if (typeof sourceObj !== 'object') {
-          throw new Error(`Reference to unknown TXID in BEEF: ${input.sourceTXID}`)
+          throw new Error(
+            `Reference to unknown TXID in BEEF: ${input.sourceTXID}`
+          )
         }
         input.sourceTransaction = sourceObj.tx
         this.addPathOrInputs(sourceObj, transactions, BUMPs)
@@ -101,7 +114,9 @@ export default class Transaction {
     const targetTXID = txid || lastTXID
 
     if (!transactions[targetTXID]) {
-      throw new Error(`Transaction with TXID ${targetTXID} not found in BEEF data.`)
+      throw new Error(
+        `Transaction with TXID ${targetTXID} not found in BEEF data.`
+      )
     }
 
     this.addPathOrInputs(transactions[targetTXID], transactions, BUMPs)
@@ -123,7 +138,9 @@ export default class Transaction {
     // Read the Atomic BEEF prefix
     const prefix = reader.readUInt32LE()
     if (prefix !== ATOMIC_BEEF) {
-      throw new Error(`Invalid Atomic BEEF prefix. Expected 0x01010101, received 0x${prefix.toString(16)}.`)
+      throw new Error(
+        `Invalid Atomic BEEF prefix. Expected 0x01010101, received 0x${prefix.toString(16)}.`
+      )
     }
 
     // Read the subject TXID
@@ -136,7 +153,9 @@ export default class Transaction {
 
     // Ensure that the subject transaction exists
     if (!transactions[subjectTXID]) {
-      throw new Error(`Subject transaction with TXID ${subjectTXID} not found in Atomic BEEF data.`)
+      throw new Error(
+        `Subject transaction with TXID ${subjectTXID} not found in Atomic BEEF data.`
+      )
     }
 
     // Ensure that all transactions are part of the dependency graph of the subject transaction
@@ -144,7 +163,9 @@ export default class Transaction {
     // All BUMP level 0 hashes are valid.
     for (const bump of BUMPs) {
       for (const n of bump.path[0]) {
-        if (n.hash) { validTxids.add(n.hash) }
+        if (n.hash) {
+          validTxids.add(n.hash)
+        }
       }
     }
     // To keep track of which transactions were used.
@@ -161,7 +182,9 @@ export default class Transaction {
       for (const input of tx.inputs) {
         const inputTxid = input.sourceTXID
         if (!transactions[inputTxid]) {
-          throw new Error(`Input transaction with TXID ${inputTxid} is missing in Atomic BEEF data.`)
+          throw new Error(
+            `Input transaction with TXID ${inputTxid} is missing in Atomic BEEF data.`
+          )
         }
         traverseDependencies(inputTxid)
       }
@@ -171,7 +194,9 @@ export default class Transaction {
 
     // Check for any unrelated transactions
     for (const txid of unusedTxTxids) {
-      throw new Error(`Unrelated transaction with TXID ${txid} found in Atomic BEEF data.`)
+      throw new Error(
+        `Unrelated transaction with TXID ${txid} found in Atomic BEEF data.`
+      )
     }
 
     this.addPathOrInputs(transactions[subjectTXID], transactions, BUMPs)
@@ -185,11 +210,16 @@ export default class Transaction {
    * @param reader The Reader positioned at the start of BEEF data.
    * @returns An object containing the transactions and BUMPs.
    */
-  private static parseBEEFData (reader: Reader): { transactions: Record<string, { pathIndex?: number, tx: Transaction }>, BUMPs: MerklePath[] } {
+  private static parseBEEFData (reader: Reader): {
+    transactions: Record<string, { pathIndex?: number, tx: Transaction }>
+    BUMPs: MerklePath[]
+  } {
     // Read the version
     const version = reader.readUInt32LE()
     if (version !== BEEF_V1) {
-      throw new Error(`Invalid BEEF version. Expected ${BEEF_V1}, received ${version}.`)
+      throw new Error(
+        `Invalid BEEF version. Expected ${BEEF_V1}, received ${version}.`
+      )
     }
 
     // Read the BUMPs
@@ -202,7 +232,10 @@ export default class Transaction {
     // Read all transactions into an object
     // The object has keys of TXIDs and values of objects with transactions and BUMP indexes
     const numberOfTransactions = reader.readVarIntNum()
-    const transactions: Record<string, { pathIndex?: number, tx: Transaction }> = {}
+    const transactions: Record<
+    string,
+    { pathIndex?: number, tx: Transaction }
+    > = {}
     for (let i = 0; i < numberOfTransactions; i++) {
       const tx = Transaction.fromReader(reader)
       const obj: { pathIndex?: number, tx: Transaction } = { tx }
@@ -225,7 +258,7 @@ export default class Transaction {
   static fromEF (ef: number[]): Transaction {
     const br = new Reader(ef)
     const version = br.readUInt32LE()
-    if (toHex(br.read(6)) !== '0000000000ef') throw new Error('Invalid EF marker')
+    if (toHex(br.read(6)) !== '0000000000ef') { throw new Error('Invalid EF marker') }
     const inputsLength = br.readVarIntNum()
     const inputs: TransactionInput[] = []
     for (let i = 0; i < inputsLength; i++) {
@@ -420,11 +453,13 @@ export default class Transaction {
       typeof input.sourceTXID === 'undefined' &&
       typeof input.sourceTransaction === 'undefined'
     ) {
-      throw new Error('A reference to an an input transaction is required. If the input transaction itself cannot be referenced, its TXID must still be provided.')
+      throw new Error(
+        'A reference to an an input transaction is required. If the input transaction itself cannot be referenced, its TXID must still be provided.'
+      )
     }
     // If the input sequence number hasn't been set, the expectation is that it is final.
     if (typeof input.sequence === 'undefined') {
-      input.sequence = 0xFFFFFFFF
+      input.sequence = 0xffffffff
     }
     this.cachedHash = undefined
     this.inputs.push(input)
@@ -438,8 +473,12 @@ export default class Transaction {
   addOutput (output: TransactionOutput): void {
     this.cachedHash = undefined
     if (!output.change) {
-      if (typeof output.satoshis === 'undefined') throw new Error('either satoshis must be defined or change must be set to true')
-      if (output.satoshis < 0) throw new Error('satoshis must be a positive integer or zero')
+      if (typeof output.satoshis === 'undefined') {
+        throw new Error(
+          'either satoshis must be defined or change must be set to true'
+        )
+      }
+      if (output.satoshis < 0) { throw new Error('satoshis must be a positive integer or zero') }
     }
     if (!output.lockingScript) throw new Error('lockingScript must be defined')
     this.outputs.push(output)
@@ -454,7 +493,9 @@ export default class Transaction {
    */
   addP2PKHOutput (address: number[] | string, satoshis?: number): void {
     const lockingScript = new P2PKH().lock(address)
-    if (typeof satoshis === 'undefined') { return this.addOutput({ lockingScript, change: true }) }
+    if (typeof satoshis === 'undefined') {
+      return this.addOutput({ lockingScript, change: true })
+    }
     this.addOutput({
       lockingScript,
       satoshis
@@ -483,7 +524,10 @@ export default class Transaction {
    * amongst the change outputs
    *
    */
-  async fee (modelOrFee: FeeModel | number = new SatoshisPerKilobyte(10), changeDistribution: 'equal' | 'random' = 'equal'): Promise<void> {
+  async fee (
+    modelOrFee: FeeModel | number = new SatoshisPerKilobyte(10),
+    changeDistribution: 'equal' | 'random' = 'equal'
+  ): Promise<void> {
     this.cachedHash = undefined
     if (typeof modelOrFee === 'number') {
       const sats = modelOrFee
@@ -504,9 +548,12 @@ export default class Transaction {
     let change = 0
     for (const input of this.inputs) {
       if (typeof input.sourceTransaction !== 'object') {
-        throw new Error('Source transactions are required for all inputs during fee computation')
+        throw new Error(
+          'Source transactions are required for all inputs during fee computation'
+        )
       }
-      change += input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
+      change +=
+        input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
     }
     change -= fee
     for (const out of this.outputs) {
@@ -517,7 +564,10 @@ export default class Transaction {
     return change
   }
 
-  private distributeChange (change: number, changeDistribution: 'equal' | 'random'): void {
+  private distributeChange (
+    change: number,
+    changeDistribution: 'equal' | 'random'
+  ): void {
     let distributedChange = 0
     const changeOutputs = this.outputs.filter(out => out.change)
     if (changeDistribution === 'random') {
@@ -526,11 +576,15 @@ export default class Transaction {
       distributedChange = this.distributeEqualChange(change, changeOutputs)
     }
     if (distributedChange < change) {
-      this.outputs[this.outputs.length - 1].satoshis += (change - distributedChange)
+      this.outputs[this.outputs.length - 1].satoshis +=
+        change - distributedChange
     }
   }
 
-  private distributeRandomChange (change: number, changeOutputs: TransactionOutput[]): number {
+  private distributeRandomChange (
+    change: number,
+    changeOutputs: TransactionOutput[]
+  ): number {
     let distributedChange = 0
     let changeToUse = change
     const benfordNumbers = Array(changeOutputs.length).fill(1)
@@ -548,7 +602,10 @@ export default class Transaction {
     return distributedChange
   }
 
-  private distributeEqualChange (change: number, changeOutputs: TransactionOutput[]): number {
+  private distributeEqualChange (
+    change: number,
+    changeOutputs: TransactionOutput[]
+  ): number {
     let distributedChange = 0
     const perOutput = Math.floor(change / changeOutputs.length)
     for (const out of changeOutputs) {
@@ -560,7 +617,9 @@ export default class Transaction {
 
   private benfordNumber (min: number, max: number): number {
     const d = Math.floor(Math.random() * 9) + 1
-    return Math.floor(min + (max - min) * Math.log10(1 + 1 / d) / Math.log10(10))
+    return Math.floor(
+      min + ((max - min) * Math.log10(1 + 1 / d)) / Math.log10(10)
+    )
   }
 
   /**
@@ -572,9 +631,12 @@ export default class Transaction {
     let totalIn = 0
     for (const input of this.inputs) {
       if (typeof input.sourceTransaction !== 'object') {
-        throw new Error('Source transactions or sourceSatoshis are required for all inputs to calculate fee')
+        throw new Error(
+          'Source transactions or sourceSatoshis are required for all inputs to calculate fee'
+        )
       }
-      totalIn += input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
+      totalIn +=
+        input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
     }
     let totalOut = 0
     for (const output of this.outputs) {
@@ -591,19 +653,25 @@ export default class Transaction {
     for (const out of this.outputs) {
       if (typeof out.satoshis === 'undefined') {
         if (out.change) {
-          throw new Error('There are still change outputs with uncomputed amounts. Use the fee() method to compute the change amounts and transaction fees prior to signing.')
+          throw new Error(
+            'There are still change outputs with uncomputed amounts. Use the fee() method to compute the change amounts and transaction fees prior to signing.'
+          )
         } else {
-          throw new Error('One or more transaction outputs is missing an amount. Ensure all output amounts are provided before signing.')
+          throw new Error(
+            'One or more transaction outputs is missing an amount. Ensure all output amounts are provided before signing.'
+          )
         }
       }
     }
-    const unlockingScripts = await Promise.all(this.inputs.map(async (x, i): Promise<UnlockingScript | undefined> => {
-      if (typeof this.inputs[i].unlockingScriptTemplate === 'object') {
-        return await this.inputs[i].unlockingScriptTemplate.sign(this, i)
-      } else {
-        return await Promise.resolve(undefined)
-      }
-    }))
+    const unlockingScripts = await Promise.all(
+      this.inputs.map(async (x, i): Promise<UnlockingScript | undefined> => {
+        if (typeof this.inputs[i].unlockingScriptTemplate === 'object') {
+          return await this.inputs[i].unlockingScriptTemplate.sign(this, i)
+        } else {
+          return await Promise.resolve(undefined)
+        }
+      })
+    )
     for (let i = 0, l = this.inputs.length; i < l; i++) {
       if (typeof this.inputs[i].unlockingScriptTemplate === 'object') {
         this.inputs[i].unlockingScript = unlockingScripts[i]
@@ -617,7 +685,9 @@ export default class Transaction {
    * @param broadcaster The Broadcaster instance wwhere the transaction will be sent
    * @returns A BroadcastResponse or BroadcastFailure from the Broadcaster
    */
-  async broadcast (broadcaster: Broadcaster = defaultBroadcaster()): Promise<BroadcastResponse | BroadcastFailure> {
+  async broadcast (
+    broadcaster: Broadcaster = defaultBroadcaster()
+  ): Promise<BroadcastResponse | BroadcastFailure> {
     return await broadcaster.broadcast(this)
   }
 
@@ -665,7 +735,9 @@ export default class Transaction {
     writer.writeVarIntNum(this.inputs.length)
     for (const i of this.inputs) {
       if (typeof i.sourceTransaction === 'undefined') {
-        throw new Error('All inputs must have source transactions when serializing to EF format')
+        throw new Error(
+          'All inputs must have source transactions when serializing to EF format'
+        )
       }
       if (typeof i.sourceTXID === 'undefined') {
         writer.write(i.sourceTransaction.hash() as number[])
@@ -677,8 +749,13 @@ export default class Transaction {
       writer.writeVarIntNum(scriptBin.length)
       writer.write(scriptBin)
       writer.writeUInt32LE(i.sequence)
-      writer.writeUInt64LE(i.sourceTransaction.outputs[i.sourceOutputIndex].satoshis)
-      const lockingScriptBin = i.sourceTransaction.outputs[i.sourceOutputIndex].lockingScript.toBinary()
+      writer.writeUInt64LE(
+        i.sourceTransaction.outputs[i.sourceOutputIndex].satoshis
+      )
+      const lockingScriptBin =
+        i.sourceTransaction.outputs[
+          i.sourceOutputIndex
+        ].lockingScript.toBinary()
       writer.writeVarIntNum(lockingScriptBin.length)
       writer.write(lockingScriptBin)
     }
@@ -769,7 +846,7 @@ export default class Transaction {
    * @returns {string | number[]} - The ID of the transaction in the specified format.
    */
   id (enc?: 'hex'): number[] | string {
-    const id = [...this.hash() as number[]]
+    const id = [...(this.hash() as number[])]
     id.reverse()
     if (enc === 'hex') {
       return toHex(id)
@@ -806,10 +883,7 @@ export default class Transaction {
           verifiedTxids.add(txid)
           continue
         } else {
-          const proofValid = await tx.merklePath.verify(
-            txid,
-            chainTracker
-          )
+          const proofValid = await tx.merklePath.verify(txid, chainTracker)
           // If the proof is valid, no need to verify inputs.
           if (proofValid) {
             verifiedTxids.add(txid)
@@ -825,7 +899,9 @@ export default class Transaction {
         cpTx.outputs[0].change = true
         await cpTx.fee(feeModel)
         if (tx.getFee() < cpTx.getFee()) {
-          throw new Error(`Verification failed because the transaction ${txid} has an insufficient fee and has not been mined.`)
+          throw new Error(
+            `Verification failed because the transaction ${txid} has an insufficient fee and has not been mined.`
+          )
         }
       }
 
@@ -835,12 +911,17 @@ export default class Transaction {
       for (let i = 0; i < tx.inputs.length; i++) {
         const input = tx.inputs[i]
         if (typeof input.sourceTransaction !== 'object') {
-          throw new Error(`Verification failed because the input at index ${i} of transaction ${txid} is missing an associated source transaction. This source transaction is required for transaction verification because there is no merkle proof for the transaction spending a UTXO it contains.`)
+          throw new Error(
+            `Verification failed because the input at index ${i} of transaction ${txid} is missing an associated source transaction. This source transaction is required for transaction verification because there is no merkle proof for the transaction spending a UTXO it contains.`
+          )
         }
         if (typeof input.unlockingScript !== 'object') {
-          throw new Error(`Verification failed because the input at index ${i} of transaction ${txid} is missing an associated unlocking script. This script is required for transaction verification because there is no merkle proof for the transaction spending the UTXO.`)
+          throw new Error(
+            `Verification failed because the input at index ${i} of transaction ${txid} is missing an associated unlocking script. This script is required for transaction verification because there is no merkle proof for the transaction spending the UTXO.`
+          )
         }
-        const sourceOutput = input.sourceTransaction.outputs[input.sourceOutputIndex]
+        const sourceOutput =
+          input.sourceTransaction.outputs[input.sourceOutputIndex]
         inputTotal += sourceOutput.satoshis
 
         const sourceTxid = input.sourceTransaction.id('hex')
@@ -877,7 +958,9 @@ export default class Transaction {
       let outputTotal = 0
       for (const out of tx.outputs) {
         if (typeof out.satoshis !== 'number') {
-          throw new Error('Every output must have a defined amount during transaction verification.')
+          throw new Error(
+            'Every output must have a defined amount during transaction verification.'
+          )
         }
         outputTotal += out.satoshis
       }
@@ -914,7 +997,8 @@ export default class Transaction {
         let added = false
         // If this proof is identical to another one previously added, we use that first. Otherwise, we try to merge it with proofs from the same block.
         for (let i = 0; i < BUMPs.length; i++) {
-          if (BUMPs[i] === tx.merklePath) { // Literally the same
+          if (BUMPs[i] === tx.merklePath) {
+            // Literally the same
             obj.pathIndex = i
             added = true
             break
@@ -945,7 +1029,11 @@ export default class Transaction {
       if (!hasProof) {
         for (let i = 0; i < tx.inputs.length; i++) {
           const input = tx.inputs[i]
-          if (typeof input.sourceTransaction === 'object') { addPathsAndInputs(input.sourceTransaction) } else if (!allowPartial) { throw new Error('A required source transaction is missing!') }
+          if (typeof input.sourceTransaction === 'object') {
+            addPathsAndInputs(input.sourceTransaction)
+          } else if (!allowPartial) {
+            throw new Error('A required source transaction is missing!')
+          }
         }
       }
     }

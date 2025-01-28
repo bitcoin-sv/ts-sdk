@@ -61,19 +61,17 @@ export default class DRBG {
    * drbg.update('e13af...');
    */
   update (seed?): void {
-    let kmac = this.hmac()
-      .update(this.V)
-      .update([0x00])
-    if (seed !== undefined) { kmac = kmac.update(seed) }
+    let kmac = this.hmac().update(this.V).update([0x00])
+    if (seed !== undefined) {
+      kmac = kmac.update(seed)
+    }
     this.K = kmac.digest()
     this.V = this.hmac().update(this.V).digest()
-    if (seed === undefined) { return }
+    if (seed === undefined) {
+      return
+    }
 
-    this.K = this.hmac()
-      .update(this.V)
-      .update([0x01])
-      .update(seed)
-      .digest()
+    this.K = this.hmac().update(this.V).update([0x01]).update(seed).digest()
     this.V = this.hmac().update(this.V).digest()
   }
 

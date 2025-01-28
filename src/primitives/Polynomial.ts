@@ -20,7 +20,10 @@ export class PointInFiniteField {
 
   static fromString (str: string): PointInFiniteField {
     const [x, y] = str.split('.')
-    return new PointInFiniteField(new BigNumber(fromBase58(x)), new BigNumber(fromBase58(y)))
+    return new PointInFiniteField(
+      new BigNumber(fromBase58(x)),
+      new BigNumber(fromBase58(y))
+    )
   }
 }
 
@@ -51,7 +54,9 @@ export default class Polynomial {
   static fromPrivateKey (key: PrivateKey, threshold: number): Polynomial {
     const P = new Curve().p // arithmetic is mod P
     // The key is the y-intercept of the polynomial where x=0.
-    const points = [new PointInFiniteField(new BigNumber(0), new BigNumber(key.toArray()))]
+    const points = [
+      new PointInFiniteField(new BigNumber(0), new BigNumber(key.toArray()))
+    ]
 
     // The other values are random
     for (let i = 1; i < threshold; i++) {

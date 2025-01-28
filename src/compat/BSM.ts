@@ -33,7 +33,11 @@ export const magicHash = (messageBuf: number[]): number[] => {
  * @param mode The mode of operation. When "base64", the BSM format signature is returned. When "raw", a Signature object is returned. Default: "base64".
  * @returns The signature object when in raw mode, or the BSM base64 string when in base64 mode.
  */
-export const sign = (message: number[], privateKey: PrivateKey, mode: 'raw' | 'base64' = 'base64'): Signature | string => {
+export const sign = (
+  message: number[],
+  privateKey: PrivateKey,
+  mode: 'raw' | 'base64' = 'base64'
+): Signature | string => {
   const hashBuf = magicHash(message)
   const sig = ECDSA.sign(new BigNumber(hashBuf), privateKey, true)
   if (mode === 'raw') {
@@ -52,7 +56,11 @@ export const sign = (message: number[], privateKey: PrivateKey, mode: 'raw' | 'b
  * @param pubKey The public key for verification.
  * @returns True if the signature is valid, false otherwise.
  */
-export const verify = (message: number[], sig: Signature, pubKey: PublicKey): boolean => {
+export const verify = (
+  message: number[],
+  sig: Signature,
+  pubKey: PublicKey
+): boolean => {
   const hashBuf = magicHash(message)
   return ECDSA.verify(new BigNumber(hashBuf), sig, pubKey)
 }

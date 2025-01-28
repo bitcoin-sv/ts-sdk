@@ -1,6 +1,10 @@
 import PushDrop from '../script/templates/PushDrop.js'
 import { WalletInterface } from '../wallet/Wallet.interfaces.js'
-import { LockingScript, ScriptTemplate, UnlockingScript } from '../script/index.js'
+import {
+  LockingScript,
+  ScriptTemplate,
+  UnlockingScript
+} from '../script/index.js'
 import { Transaction } from '../transaction/index.js'
 import { Utils } from '../primitives/index.js'
 
@@ -11,11 +15,16 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
   pushDrop: PushDrop
 
   /**
-     * Decodes a SHIP or SLAP advertisement from a given locking script.
-     * @param script Locking script comprising a SHIP or SLAP token to decode
-     * @returns Decoded SHIP or SLAP advertisement
-     */
-  static decode (script: LockingScript): { protocol: 'SHIP' | 'SLAP', identityKey: string, domain: string, topicOrService: string } {
+   * Decodes a SHIP or SLAP advertisement from a given locking script.
+   * @param script Locking script comprising a SHIP or SLAP token to decode
+   * @returns Decoded SHIP or SLAP advertisement
+   */
+  static decode (script: LockingScript): {
+    protocol: 'SHIP' | 'SLAP'
+    identityKey: string
+    domain: string
+    topicOrService: string
+  } {
     const result = PushDrop.decode(script)
     if (result.fields.length < 4) {
       throw new Error('Invalid SHIP/SLAP advertisement!')
@@ -36,22 +45,28 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
   }
 
   /**
-     * Constructs a new Overlay Admin template instance
-     * @param wallet Wallet to use for locking and unlocking
-     */
+   * Constructs a new Overlay Admin template instance
+   * @param wallet Wallet to use for locking and unlocking
+   */
   constructor (wallet: WalletInterface) {
     this.pushDrop = new PushDrop(wallet)
   }
 
   /**
-     * Creates a new advertisement locking script
-     * @param protocol SHIP or SLAP
-     * @param domain Domain where the topic or service is available
-     * @param topicOrService Topic or service to advertise
-     * @returns Locking script comprising the advertisement token
-     */
-  async lock (protocol: 'SHIP' | 'SLAP', domain: string, topicOrService: string): Promise<LockingScript> {
-    const { publicKey: identityKey } = await this.pushDrop.wallet.getPublicKey({ identityKey: true })
+   * Creates a new advertisement locking script
+   * @param protocol SHIP or SLAP
+   * @param domain Domain where the topic or service is available
+   * @param topicOrService Topic or service to advertise
+   * @returns Locking script comprising the advertisement token
+   */
+  async lock (
+    protocol: 'SHIP' | 'SLAP',
+    domain: string,
+    topicOrService: string
+  ): Promise<LockingScript> {
+    const { publicKey: identityKey } = await this.pushDrop.wallet.getPublicKey({
+      identityKey: true
+    })
     return await this.pushDrop.lock(
       [
         Utils.toArray(protocol, 'utf8'),
@@ -59,21 +74,35 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
         Utils.toArray(domain, 'utf8'),
         Utils.toArray(topicOrService, 'utf8')
       ],
-      [2, protocol === 'SHIP' ? 'Service Host Interconnect' : 'Service Lookup Availability'],
+      [
+        2,
+        protocol === 'SHIP'
+          ? 'Service Host Interconnect'
+          : 'Service Lookup Availability'
+      ],
       '1',
       'self'
     )
   }
 
   /**
-     * Unlocks an advertisement token as part of a transaction.
-     * @param protocol SHIP or SLAP, depending on the token to unlock
-     * @returns Script unlocker capable of unlocking the advertisement token
-     */
+   * Unlocks an advertisement token as part of a transaction.
+   * @param protocol SHIP or SLAP, depending on the token to unlock
+   * @returns Script unlocker capable of unlocking the advertisement token
+   */
   unlock (protocol: 'SHIP' | 'SLAP'): {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
     estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>
   } {
-    return this.pushDrop.unlock([2, protocol === 'SHIP' ? 'Service Host Interconnect' : 'Service Lookup Availability'], '1', 'self')
+    return this.pushDrop.unlock(
+      [
+        2,
+        protocol === 'SHIP'
+          ? 'Service Host Interconnect'
+          : 'Service Lookup Availability'
+      ],
+      '1',
+      'self'
+    )
   }
 }

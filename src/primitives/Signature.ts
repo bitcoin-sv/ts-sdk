@@ -64,7 +64,7 @@ export default class Signature {
       throw new Error('Signature DER must start with 0x30')
     }
     const len = getLength(data, p)
-    if ((len + p.place) !== data.length) {
+    if (len + p.place !== data.length) {
       throw new Error('Signature DER invalid')
     }
     if (data[p.place++] !== 0x02) {
@@ -96,10 +96,7 @@ export default class Signature {
       }
     }
 
-    return new Signature(
-      new BigNumber(r),
-      new BigNumber(s)
-    )
+    return new Signature(new BigNumber(r), new BigNumber(s))
   }
 
   /**
@@ -120,7 +117,10 @@ export default class Signature {
    * @example
    * const signature = Signature.fromCompact('1b18c1f5502f8...', 'hex');
    */
-  static fromCompact (data: number[] | string, enc?: 'hex' | 'base64'): Signature {
+  static fromCompact (
+    data: number[] | string,
+    enc?: 'hex' | 'base64'
+  ): Signature {
     data = toArray(data, enc)
     if (data.length !== 65) {
       throw new Error('Invalid Compact Signature')
@@ -219,7 +219,7 @@ export default class Signature {
     const rmPadding = (buf: number[]): number[] => {
       let i = 0
       const len = buf.length - 1
-      while ((buf[i] === 0) && ((buf[i + 1] & 0x80) === 0) && i < len) {
+      while (buf[i] === 0 && (buf[i + 1] & 0x80) === 0 && i < len) {
         i++
       }
       if (i === 0) {
@@ -232,14 +232,18 @@ export default class Signature {
     let s = this.s.toArray()
 
     // Pad values
-    if ((r[0] & 0x80) !== 0) { r = [0].concat(r) }
+    if ((r[0] & 0x80) !== 0) {
+      r = [0].concat(r)
+    }
     // Pad values
-    if ((s[0] & 0x80) !== 0) { s = [0].concat(s) }
+    if ((s[0] & 0x80) !== 0) {
+      s = [0].concat(s)
+    }
 
     r = rmPadding(r)
     s = rmPadding(s)
 
-    while ((s[0] === 0) && (s[1] & 0x80) === 0) {
+    while (s[0] === 0 && (s[1] & 0x80) === 0) {
       s = s.slice(1)
     }
     let arr = [0x02]
@@ -274,9 +278,13 @@ export default class Signature {
    * @example
    * const compact = signature.toCompact(3, true, 'base64');
    */
-  toCompact (recovery: number, compressed: boolean, enc?: 'hex' | 'base64'): number[] | string {
+  toCompact (
+    recovery: number,
+    compressed: boolean,
+    enc?: 'hex' | 'base64'
+  ): number[] | string {
     if (recovery < 0 || recovery > 3) throw new Error('Invalid recovery param')
-    if (typeof compressed !== 'boolean') throw new Error('Invalid compressed param')
+    if (typeof compressed !== 'boolean') { throw new Error('Invalid compressed param') }
     let compactByte = 27 + recovery
     if (compressed) {
       compactByte += 4
