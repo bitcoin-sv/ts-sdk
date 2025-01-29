@@ -88,8 +88,7 @@ export class MasterCertificate extends Certificate {
 
       const { ciphertext: encryptedFieldRevelationKey } = await creatorWallet.encrypt({
         plaintext: fieldSymmetricKey.toArray(),
-        protocolID: [2, 'certificate field encryption'],
-        keyID: fieldName,
+        ...Certificate.getCertificateFieldEncryptionDetails(fieldName), // Only fieldName used on MasterCertificate
         counterparty: certifierOrSubject
       })
       masterKeyring[fieldName] = Utils.toBase64(encryptedFieldRevelationKey)
@@ -136,27 +135,13 @@ export class MasterCertificate extends Certificate {
         throw new Error(`Fields to reveal must be a subset of the certificate fields. Missing the "${fieldName}" field.`)
       }
 
-      const encryptedMasterFieldKey = masterKeyring[fieldName]
-
-      // Decrypt the master field key
-      const { plaintext: masterFieldKey } = await subjectWallet.decrypt({
-        ciphertext: Utils.toArray(encryptedMasterFieldKey, 'base64'),
-        protocolID: [2, 'certificate field encryption'],
-        keyID: fieldName,
-        counterparty: certifier
-      }, originator)
-
-      // Verify that derived key actually decrypts requested field
-      try {
-        new SymmetricKey(masterFieldKey).decrypt(Utils.toArray(fields[fieldName], 'base64'))
-      } catch (_) {
-        throw new Error(`Decryption of the "${fieldName}" field with its revelation key failed.`)
-      }
+      // Decrypt the master field key and verify that derived key actually decrypts requested field
+      const masterFieldKey = (await this.decryptField(subjectWallet, masterKeyring, fieldName, fields[fieldName], certifier)).fieldRevelationKey
 
       // Encrypt derived fieldRevelationKey for verifier
       const { ciphertext: encryptedFieldRevelationKey } = await subjectWallet.encrypt({
         plaintext: masterFieldKey,
-        ...Certificate.getCertificateFieldEncryptionDetails(serialNumber, fieldName),
+        ...Certificate.getCertificateFieldEncryptionDetails(fieldName, serialNumber),
         counterparty: verifier
       }, originator)
 
@@ -260,19 +245,38 @@ export class MasterCertificate extends Certificate {
       const decryptedFields: Record<CertificateFieldNameUnder50Bytes, string> = {}
       // Note: we want to iterate through all fields, not just masterKeyring keys/value pairs.
       for (const fieldName of Object.keys(fields)) {
-        const { plaintext: fieldRevelationKey } = await subjectOrCertifierWallet.decrypt({
-          ciphertext: Utils.toArray(masterKeyring[fieldName], 'base64'),
-          protocolID: [2, 'certificate field encryption'],
-          keyID: fieldName, // fieldName used as keyID only for master certificate fields!
-          counterparty
-        })
-
-        const fieldValue = new SymmetricKey(fieldRevelationKey).decrypt(Utils.toArray(fields[fieldName], 'base64'))
-        decryptedFields[fieldName] = Utils.toUTF8(fieldValue as number[])
+        decryptedFields[fieldName] = (await this.decryptField(subjectOrCertifierWallet, masterKeyring, fieldName, fields[fieldName], counterparty)).decryptedFieldValue
       }
       return decryptedFields
     } catch (e) {
       throw new Error('Failed to decrypt all master certificate fields.')
+    }
+  }
+
+  static async decryptField(
+    subjectOrCertifierWallet: WalletInterface,
+    masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>,
+    fieldName: Base64String,
+    fieldValue: Base64String,
+    counterparty: WalletCounterparty
+  ): Promise<{ fieldRevelationKey: number[], decryptedFieldValue: string }> {
+    if (!masterKeyring || Object.keys(masterKeyring).length === 0) {
+      throw new Error('A MasterCertificate must have a valid masterKeyring!')
+    }
+    try {
+      const { plaintext: fieldRevelationKey } = await subjectOrCertifierWallet.decrypt({
+        ciphertext: Utils.toArray(masterKeyring[fieldName], 'base64'),
+        ...Certificate.getCertificateFieldEncryptionDetails(fieldName), // Only fieldName used on MasterCertificate
+        counterparty
+      })
+
+      const decryptedFieldValue = new SymmetricKey(fieldRevelationKey).decrypt(Utils.toArray(fieldValue, 'base64'))
+      return {
+        fieldRevelationKey,
+        decryptedFieldValue: Utils.toUTF8(decryptedFieldValue as number[])
+      }
+    } catch (e) {
+      throw new Error('Failed to decrypt certificate field!')
     }
   }
 }

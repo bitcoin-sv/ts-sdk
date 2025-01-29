@@ -258,7 +258,7 @@ export default class Certificate {
    *   - `protocolID` (WalletProtocol): The protocol ID for certificate field encryption.
    *   - `keyID` (string): A unique key identifier derived from the serial number and field name.
    */
-  static getCertificateFieldEncryptionDetails(serialNumber: string, fieldName: string): { protocolID: WalletProtocol, keyID: string } {
+  static getCertificateFieldEncryptionDetails(fieldName: string, serialNumber?: string): { protocolID: WalletProtocol, keyID: string } {
     return { protocolID: [2, 'certificate field encryption'], keyID: `${serialNumber} ${fieldName}` }
   }
 }

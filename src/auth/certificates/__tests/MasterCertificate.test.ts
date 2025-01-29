@@ -230,7 +230,7 @@ describe('MasterCertificate', () => {
           tamperedCert.masterKeyring,
           tamperedCert.serialNumber
         )
-      ).rejects.toThrow('Decryption failed!')
+      ).rejects.toThrow('Failed to decrypt certificate field!')
     })
 
     it('should support optional originator parameter', async () => {
