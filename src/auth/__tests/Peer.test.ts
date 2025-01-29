@@ -97,8 +97,8 @@ describe('Peer class mutual authentication and certificate exchange', () => {
       masterCertificate.certifier,
       masterCertificate.revocationOutpoint,
       masterCertificate.fields,
-      masterCertificate.signature,
-      keyringForVerifier
+      keyringForVerifier,
+      masterCertificate.signature
     )
   }
 

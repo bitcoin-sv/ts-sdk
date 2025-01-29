@@ -92,8 +92,8 @@ describe('VerifiableCertificate', () => {
         verifiableCert.certifier,
         verifiableCert.revocationOutpoint,
         fields,
-        verifiableCert.signature,
-        {} // empty
+        {}, // empty
+        verifiableCert.signature
       )
 
       await expect(emptyKeyringCert.decryptFields(verifierWallet)).rejects.toThrow(

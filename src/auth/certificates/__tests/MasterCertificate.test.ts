@@ -178,8 +178,8 @@ describe('MasterCertificate', () => {
         issuedCert.certifier,
         issuedCert.revocationOutpoint,
         issuedCert.fields,
-        issuedCert.signature,
-        keyringForVerifier
+        keyringForVerifier,
+        issuedCert.signature
       )
 
       // The verifier should successfully decrypt the "name" field
