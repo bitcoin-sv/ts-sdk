@@ -6,8 +6,7 @@ import {
   HexString,
   OutpointString,
   PubKeyHex,
-  WalletInterface,
-  WalletError
+  WalletInterface
 } from '../../../mod.js'
 import Certificate from './Certificate.js'
 
@@ -34,8 +33,8 @@ export class VerifiableCertificate extends Certificate {
     certifier: PubKeyHex,
     revocationOutpoint: OutpointString,
     fields: Record<CertificateFieldNameUnder50Bytes, string>,
+    keyring: Record<CertificateFieldNameUnder50Bytes, string>,
     signature?: HexString,
-    keyring?: Record<CertificateFieldNameUnder50Bytes, string>,
     decryptedFields?: Record<CertificateFieldNameUnder50Bytes, Base64String>
   ) {
     super(type, serialNumber, subject, certifier, revocationOutpoint, fields, signature)

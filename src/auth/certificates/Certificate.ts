@@ -43,9 +43,9 @@ export default class Certificate {
   revocationOutpoint: OutpointString
 
   /**
-   * All the fields present in the certificate, with field names as keys and field values as strings.
+   * All the fields present in the certificate, with field names as keys and encrypted field values as Base64 strings.
    */
-  fields: Record<CertificateFieldNameUnder50Bytes, string>
+  fields: Record<CertificateFieldNameUnder50Bytes, Base64String>
 
   /**
    * Certificate signature by the certifier's private key, DER encoded hex string.
