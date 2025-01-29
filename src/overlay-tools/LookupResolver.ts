@@ -1,5 +1,5 @@
-import { Transaction } from "../transaction/index";
-import OverlayAdminTokenTemplate from "./OverlayAdminTokenTemplate";
+import { Transaction } from '../transaction/index'
+import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate'
 
 /**
  * The question asked to the Overlay Services Engine when a consumer of state wishes to look up information.
@@ -8,13 +8,13 @@ export interface LookupQuestion {
   /**
    * The identifier for a Lookup Service which the person asking the question wishes to use.
    */
-  service: string;
+  service: string
 
   /**
    * The query which will be forwarded to the Lookup Service.
    * Its type depends on that prescribed by the Lookup Service employed.
    */
-  query: unknown;
+  query: unknown
 }
 
 /**
@@ -23,25 +23,25 @@ export interface LookupQuestion {
  */
 export type LookupAnswer =
   | {
-      type: "output-list";
+      type: 'output-list'
       outputs: Array<{
-        beef: number[];
-        outputIndex: number;
-      }>;
+        beef: number[]
+        outputIndex: number
+      }>
     }
   | {
-      type: "freeform";
-      result: unknown;
-    };
+      type: 'freeform'
+      result: unknown
+    }
 
 /** Default SLAP trackers */
 export const DEFAULT_SLAP_TRACKERS: string[] = [
   // Babbage primary overlay service
-  "https://overlay.babbage.systems",
+  'https://overlay.babbage.systems',
   // Babbage example overlay
-  "https://overlay-example.babbage.systems",
+  'https://overlay-example.babbage.systems',
   // The Babbage office building
-  "https://office.babbage.systems",
+  'https://office.babbage.systems'
 
   // NOTE: Other entities may submit pull requests to the library if they maintain SLAP overlay services.
   // Additional trackers run by different entities contribute to greater network resiliency.
@@ -49,20 +49,20 @@ export const DEFAULT_SLAP_TRACKERS: string[] = [
 
   // DISCLAIMER:
   // Trackers known to host invalid or illegal records will be removed at the discretion of the BSV Association.
-];
+]
 
-const MAX_TRACKER_WAIT_TIME = 1000;
+const MAX_TRACKER_WAIT_TIME = 1000
 
 /** Configuration options for the Lookup resolver. */
 export interface LookupResolverConfig {
   /** The facilitator used to make requests to Overlay Services hosts. */
-  facilitator?: OverlayLookupFacilitator;
+  facilitator?: OverlayLookupFacilitator
   /** The list of SLAP trackers queried to resolve Overlay Services hosts for a given lookup service. */
-  slapTrackers?: string[];
+  slapTrackers?: string[]
   /** Map of lookup service names to arrays of hosts to use in place of resolving via SLAP. */
-  hostOverrides?: Record<string, string[]>;
+  hostOverrides?: Record<string, string[]>
   /** Map of lookup service names to arrays of hosts to use in addition to resolving via SLAP. */
-  additionalHosts?: Record<string, string[]>;
+  additionalHosts?: Record<string, string[]>
 }
 
 /** Facilitates lookups to URLs that return answers. */
@@ -78,14 +78,14 @@ export interface OverlayLookupFacilitator {
     url: string,
     question: LookupQuestion,
     timeout?: number
-  ) => Promise<LookupAnswer>;
+  ) => Promise<LookupAnswer>
 }
 
 export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
-  fetchClient: typeof fetch;
+  fetchClient: typeof fetch
 
   constructor(httpClient = fetch) {
-    this.fetchClient = httpClient;
+    this.fetchClient = httpClient
   }
 
   async lookup(
@@ -93,35 +93,35 @@ export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
     question: LookupQuestion,
     timeout: number = 5000
   ): Promise<LookupAnswer> {
-    if (!url.startsWith("https:")) {
+    if (!url.startsWith('https:')) {
       throw new Error(
         'HTTPS facilitator can only use URLs that start with "https:"'
-      );
+      )
     }
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Request timed out")), timeout)
-    );
+      setTimeout(() => reject(new Error('Request timed out')), timeout)
+    )
 
     const fetchPromise = fetch(`${url}/lookup`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         service: question.service,
-        query: question.query,
-      }),
-    });
+        query: question.query
+      })
+    })
 
     const response: Response = (await Promise.race([
       fetchPromise,
-      timeoutPromise,
-    ])) as Response;
+      timeoutPromise
+    ])) as Response
 
     if (response.ok) {
-      return await responseon();
+      return await response.json()
     } else {
-      throw new Error("Failed to facilitate lookup");
+      throw new Error('Failed to facilitate lookup')
     }
   }
 }
@@ -130,18 +130,18 @@ export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
  * Represents an SHIP transaction broadcaster.
  */
 export default class LookupResolver {
-  private readonly facilitator: OverlayLookupFacilitator;
-  private readonly slapTrackers: string[];
-  private readonly hostOverrides: Record<string, string[]>;
-  private readonly additionalHosts: Record<string, string[]>;
+  private readonly facilitator: OverlayLookupFacilitator
+  private readonly slapTrackers: string[]
+  private readonly hostOverrides: Record<string, string[]>
+  private readonly additionalHosts: Record<string, string[]>
 
   constructor(config?: LookupResolverConfig) {
     const { facilitator, slapTrackers, hostOverrides, additionalHosts } =
-      config ?? ({} as LookupResolverConfig);
-    this.facilitator = facilitator ?? new HTTPSOverlayLookupFacilitator();
-    this.slapTrackers = slapTrackers ?? DEFAULT_SLAP_TRACKERS;
-    this.hostOverrides = hostOverrides ?? {};
-    this.additionalHosts = additionalHosts ?? {};
+      config ?? ({} as LookupResolverConfig)
+    this.facilitator = facilitator ?? new HTTPSOverlayLookupFacilitator()
+    this.slapTrackers = slapTrackers ?? DEFAULT_SLAP_TRACKERS
+    this.hostOverrides = hostOverrides ?? {}
+    this.additionalHosts = additionalHosts ?? {}
   }
 
   /**
@@ -151,72 +151,69 @@ export default class LookupResolver {
     question: LookupQuestion,
     timeout?: number
   ): Promise<LookupAnswer> {
-    let competentHosts: string[] = [];
-    if (question.service === "ls_slap") {
-      competentHosts = this.slapTrackers;
+    let competentHosts: string[] = []
+    if (question.service === 'ls_slap') {
+      competentHosts = this.slapTrackers
     } else if (this.hostOverrides[question.service]) {
-      competentHosts = this.hostOverrides[question.service];
+      competentHosts = this.hostOverrides[question.service]
     } else {
-      competentHosts = await this.findCompetentHosts(question.service);
+      competentHosts = await this.findCompetentHosts(question.service)
     }
     if (this.additionalHosts[question.service]) {
       competentHosts = [
         ...competentHosts,
-        ...this.additionalHosts[question.service],
-      ];
+        ...this.additionalHosts[question.service]
+      ]
     }
     if (competentHosts.length < 1) {
       throw new Error(
         `No competent hosts found by the SLAP trackers for lookup service: ${question.service}`
-      );
+      )
     }
 
     // Use Promise.allSettled to handle individual host failures
     const hostResponses = await Promise.allSettled(
       competentHosts.map(
-        async (host) => await this.facilitator.lookup(host, question, timeout)
+        async host => await this.facilitator.lookup(host, question, timeout)
       )
-    );
+    )
 
     const successfulResponses = hostResponses
-      .filter((result) => result.status === "fulfilled")
-      .map((result) => result.value);
+      .filter(result => result.status === 'fulfilled')
+      .map(result => result.value)
 
     if (successfulResponses.length === 0) {
-      throw new Error("No successful responses from any hosts");
+      throw new Error('No successful responses from any hosts')
     }
 
     // Process the successful responses
-    if (successfulResponses[0].type === "freeform") {
+    if (successfulResponses[0].type === 'freeform') {
       // Return the first freeform response
-      return successfulResponses[0];
+      return successfulResponses[0]
     } else {
       // Aggregate outputs from all successful responses
-      const outputs = new Map<
-        string,
-        { beef: number[]; outputIndex: number }
-      >();
+      const outputs = new Map<string, { beef: number[]; outputIndex: number }>()
       for (const response of successfulResponses) {
-        if (response.type !== "output-list") {
-          continue;
+        if (response.type !== 'output-list') {
+          continue
         }
         try {
           for (const output of response.outputs) {
             try {
-              const key = `${Transaction.fromBEEF(output.beef).id("hex")}.${output.outputIndex}`;
-              outputs.set(key, output);
+              const key = `${Transaction.fromBEEF(output.beef).id('hex')}.${output.outputIndex}`
+              outputs.set(key, output)
             } catch (e) {
-              continue;
+              continue
             }
           }
         } catch (e) {
-          continue;
+          continue
         }
       }
       return {
-        type: "output-list",
-        outputs: Array.from(outputs.values()),
-      };
+        type: 'output-list',
+        outputs: Array.from(outputs.values())
+      }
     }
   }
 
@@ -227,53 +224,53 @@ export default class LookupResolver {
    */
   private async findCompetentHosts(service: string): Promise<string[]> {
     const query: LookupQuestion = {
-      service: "ls_slap",
+      service: 'ls_slap',
       query: {
-        service,
-      },
-    };
+        service
+      }
+    }
 
     // Use Promise.allSettled to handle individual SLAP tracker failures
     const trackerResponses = await Promise.allSettled(
       this.slapTrackers.map(
-        async (tracker) =>
+        async tracker =>
           await this.facilitator.lookup(tracker, query, MAX_TRACKER_WAIT_TIME)
       )
-    );
+    )
 
-    const hosts = new Set<string>();
+    const hosts = new Set<string>()
 
     for (const result of trackerResponses) {
-      if (result.status === "fulfilled") {
-        const answer = result.value;
-        if (answer.type !== "output-list") {
+      if (result.status === 'fulfilled') {
+        const answer = result.value
+        if (answer.type !== 'output-list') {
           // Log invalid response and continue
-          continue;
+          continue
         }
         for (const output of answer.outputs) {
           try {
-            const tx = Transaction.fromBEEF(output.beef);
-            const script = tx.outputs[output.outputIndex].lockingScript;
-            const parsed = OverlayAdminTokenTemplate.decode(script);
+            const tx = Transaction.fromBEEF(output.beef)
+            const script = tx.outputs[output.outputIndex].lockingScript
+            const parsed = OverlayAdminTokenTemplate.decode(script)
             if (
               parsed.topicOrService !== service ||
-              parsed.protocol !== "SLAP"
+              parsed.protocol !== 'SLAP'
             ) {
               // Invalid advertisement, skip
-              continue;
+              continue
             }
-            hosts.add(parsed.domain);
+            hosts.add(parsed.domain)
           } catch (e) {
             // Invalid output, skip
-            continue;
+            continue
           }
         }
       } else {
         // Log tracker failure and continue
-        continue;
+        continue
       }
     }
 
-    return [...hosts];
+    return [...hosts]
   }
 }

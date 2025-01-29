@@ -1,4 +1,4 @@
-import { Utils, WalletInterface } from '../../../mod'
+import { Utils, WalletInterface, WalletCounterparty } from '../../../mod'
 
 /**
  * Verifies a nonce derived from a wallet

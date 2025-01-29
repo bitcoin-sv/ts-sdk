@@ -1,4 +1,9 @@
-import { Utils, Random, WalletInterface } from '../../../mod'
+import {
+  Utils,
+  Random,
+  WalletInterface,
+  WalletCounterparty
+} from '../../../mod'
 
 /**
  * Creates a nonce derived from a wallet

@@ -1,8 +1,8 @@
-import { PrivateKey } from '../../../primitives/index'
-import { ProtoWallet } from '../../../wallet/index'
-import { Wallet } from '../../../wallet/Wallet.interfaces'
+import { PrivateKey, Utils } from '../../../primitives/index'
+import { WalletInterface } from '../../../wallet/Wallet.interfaces'
 import { createNonce } from '../../../auth/utils/createNonce'
 import { verifyNonce } from '../../../auth/utils/verifyNonce'
+import { CompletedProtoWallet } from '../../../auth/certificates/__tests/CompletedProtoWallet'
 
 describe('createNonce', () => {
   let mockWallet: WalletInterface
@@ -86,7 +86,7 @@ describe('verifyNonce', () => {
   })
 
   it('verifies nonce using real createHmac and verifyHmac', async () => {
-    const realWallet = new ProtoWallet(PrivateKey.fromRandom())
+    const realWallet = new CompletedProtoWallet(PrivateKey.fromRandom())
 
     const nonce = await createNonce(realWallet)
     const isValid = await verifyNonce(nonce, realWallet)
@@ -95,8 +95,8 @@ describe('verifyNonce', () => {
   })
 
   it('SerialNumber use-case', async () => {
-    const clientWallet = new ProtoWallet(PrivateKey.fromRandom())
-    const serverWallet = new ProtoWallet(PrivateKey.fromRandom())
+    const clientWallet = new CompletedProtoWallet(PrivateKey.fromRandom())
+    const serverWallet = new CompletedProtoWallet(PrivateKey.fromRandom())
 
     // Client creates a random nonce that the server can verify
     const clientNonce = await createNonce(
@@ -116,7 +116,7 @@ describe('verifyNonce', () => {
     )
     // The server compute a serial number from the client and server nonce
     const { hmac: serialNumber } = await serverWallet.createHmac({
-      data: clientNonce + serverNonce,
+      data: Utils.toArray(clientNonce + serverNonce, 'utf8'),
       protocolID: [2, 'certificate creation'],
       keyID: serverNonce + clientNonce,
       counterparty: (await clientWallet.getPublicKey({ identityKey: true }))
@@ -133,7 +133,7 @@ describe('verifyNonce', () => {
     // Client verifies the server included their nonce
     const { valid } = await clientWallet.verifyHmac({
       hmac: serialNumber,
-      data: clientNonce + serverNonce,
+      data: Utils.toArray(clientNonce + serverNonce, 'utf8'),
       protocolID: [2, 'certificate creation'],
       keyID: serverNonce + clientNonce,
       counterparty: (await serverWallet.getPublicKey({ identityKey: true }))
