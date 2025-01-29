@@ -237,7 +237,7 @@ export class MasterCertificate extends Certificate {
    * the encryption keys for each field, which are then used to decrypt the corresponding field values.
    * The counterparty used for decryption depends on how the certificate fields were created:
    * - If the certificate is self-signed, the counterparty should be set to 'self'.
-   * - Otherwise, the counterparty should always be the party involved in the certificate issuance process.
+   * - Otherwise, the counterparty should always be the other party involved in the certificate issuance process (the subject or certifier).
    *
    * @param {WalletInterface} subjectOrCertifierWallet - The wallet of the subject or certifier, used to decrypt the master keyring and field values.
    * @param {Record<CertificateFieldNameUnder50Bytes, Base64String>} masterKeyring - A record containing encrypted keys for each field.
