@@ -2,14 +2,15 @@ import { VerifiableCertificate } from '../../../../dist/cjs/src/auth/certificate
 import { PrivateKey, SymmetricKey, Utils } from '../../../../dist/cjs/src/primitives/index.js'
 import { CompletedProtoWallet } from '../../../../dist/cjs/src/auth/certificates/__tests/CompletedProtoWallet.js'
 import { Certificate } from '../../../../dist/cjs/src/auth/certificates/index.js'
+import { MasterCertificate } from '../../../../dist/cjs/src/auth/certificates/MasterCertificate.js'
 
 describe('VerifiableCertificate', () => {
   const subjectPrivateKey = PrivateKey.fromRandom()
-  const subjectPubKey = subjectPrivateKey.toPublicKey().toString()
+  const subjectIdentityKey = subjectPrivateKey.toPublicKey().toString()
   const certifierPrivateKey = PrivateKey.fromRandom()
-  const certifierPubKey = certifierPrivateKey.toPublicKey().toString()
+  const certifierIdentityKey = certifierPrivateKey.toPublicKey().toString()
   const verifierPrivateKey = PrivateKey.fromRandom()
-  const verifierPubKey = verifierPrivateKey.toPublicKey().toString()
+  const verifierIdentityKey = verifierPrivateKey.toPublicKey().toString()
 
   const subjectWallet = new CompletedProtoWallet(subjectPrivateKey)
   const verifierWallet = new CompletedProtoWallet(verifierPrivateKey)
@@ -28,34 +29,28 @@ describe('VerifiableCertificate', () => {
 
   beforeEach(async () => {
     // For each test, we'll build a fresh VerifiableCertificate with valid encryption
-    const certificateFields = {}
-    const keyring = {}
-
-    for (const fieldName in plaintextFields) {
-      // Generate a random field symmetric key
-      const fieldSymKey = SymmetricKey.fromRandom()
-      // Encrypt the field's plaintext
-      const encryptedFieldValue = fieldSymKey.encrypt(Utils.toArray(plaintextFields[fieldName], 'utf8'))
-      certificateFields[fieldName] = Utils.toBase64(encryptedFieldValue as number[])
-
-      // Now encrypt the fieldSymKey for the verifier
-      const { ciphertext: encryptedRevelationKey } = await subjectWallet.encrypt({
-        plaintext: fieldSymKey.toArray(),
-        ...Certificate.getCertificateFieldEncryptionDetails(sampleSerialNumber, fieldName),
-        counterparty: verifierPubKey
-      })
-      keyring[fieldName] = Utils.toBase64(encryptedRevelationKey)
-    }
-
+    const { certificateFields, masterKeyring } = await MasterCertificate.createCertificateFields(
+      subjectWallet,
+      certifierIdentityKey,
+      plaintextFields
+    )
+    const keyringForVerifier = await MasterCertificate.createKeyringForVerifier(
+      subjectWallet,
+      certifierIdentityKey,
+      verifierIdentityKey,
+      certificateFields,
+      Object.keys(certificateFields),
+      masterKeyring,
+      sampleSerialNumber
+    )
     verifiableCert = new VerifiableCertificate(
       sampleType,
       sampleSerialNumber,
-      subjectPubKey,
-      certifierPubKey,
+      subjectIdentityKey,
+      certifierIdentityKey,
       sampleRevocationOutpoint,
       certificateFields,
-      undefined, // signature
-      keyring
+      keyringForVerifier
     )
   })
 
@@ -64,8 +59,8 @@ describe('VerifiableCertificate', () => {
       expect(verifiableCert).toBeInstanceOf(VerifiableCertificate)
       expect(verifiableCert.type).toEqual(sampleType)
       expect(verifiableCert.serialNumber).toEqual(sampleSerialNumber)
-      expect(verifiableCert.subject).toEqual(subjectPubKey)
-      expect(verifiableCert.certifier).toEqual(certifierPubKey)
+      expect(verifiableCert.subject).toEqual(subjectIdentityKey)
+      expect(verifiableCert.certifier).toEqual(certifierIdentityKey)
       expect(verifiableCert.revocationOutpoint).toEqual(sampleRevocationOutpoint)
       expect(verifiableCert.fields).toBeDefined()
       expect(verifiableCert.keyring).toBeDefined()
@@ -97,8 +92,8 @@ describe('VerifiableCertificate', () => {
         verifiableCert.certifier,
         verifiableCert.revocationOutpoint,
         fields,
-        verifiableCert.signature,
-        {} // empty
+        {}, // empty
+        verifiableCert.signature
       )
 
       await expect(emptyKeyringCert.decryptFields(verifierWallet)).rejects.toThrow(

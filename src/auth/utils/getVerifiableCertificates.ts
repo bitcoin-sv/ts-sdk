@@ -33,8 +33,8 @@ export const getVerifiableCertificates = async (wallet: WalletInterface, request
         certificate.certifier,
         certificate.revocationOutpoint,
         certificate.fields,
-        certificate.signature,
-        keyringForVerifier
+        keyringForVerifier,
+        certificate.signature
       )
     }))
 }

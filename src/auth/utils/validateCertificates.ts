@@ -24,8 +24,8 @@ export const validateCertificates = async (verifierWallet: WalletInterface, mess
       incomingCert.certifier,
       incomingCert.revocationOutpoint,
       incomingCert.fields,
-      incomingCert.signature,
-      incomingCert.keyring
+      incomingCert.keyring,
+      incomingCert.signature
     )
     const isValidCert = await certToVerify.verify()
     if (!isValidCert) {

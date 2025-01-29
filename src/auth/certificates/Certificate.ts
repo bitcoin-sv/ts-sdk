@@ -43,9 +43,9 @@ export default class Certificate {
   revocationOutpoint: OutpointString
 
   /**
-   * All the fields present in the certificate, with field names as keys and field values as strings.
+   * All the fields present in the certificate, with field names as keys and encrypted field values as Base64 strings.
    */
-  fields: Record<CertificateFieldNameUnder50Bytes, string>
+  fields: Record<CertificateFieldNameUnder50Bytes, Base64String>
 
   /**
    * Certificate signature by the certifier's private key, DER encoded hex string.
@@ -258,7 +258,7 @@ export default class Certificate {
    *   - `protocolID` (WalletProtocol): The protocol ID for certificate field encryption.
    *   - `keyID` (string): A unique key identifier derived from the serial number and field name.
    */
-  static getCertificateFieldEncryptionDetails(serialNumber: string, fieldName: string): { protocolID: WalletProtocol, keyID: string } {
+  static getCertificateFieldEncryptionDetails(fieldName: string, serialNumber?: string): { protocolID: WalletProtocol, keyID: string } {
     return { protocolID: [2, 'certificate field encryption'], keyID: `${serialNumber} ${fieldName}` }
   }
 }
