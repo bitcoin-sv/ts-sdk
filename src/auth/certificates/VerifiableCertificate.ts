@@ -6,7 +6,7 @@ import {
   HexString,
   OutpointString,
   PubKeyHex,
-  WalletInterface
+  ProtoWallet
 } from '../../../mod.js'
 import Certificate from './Certificate.js'
 
@@ -44,11 +44,11 @@ export class VerifiableCertificate extends Certificate {
 
   /**
    * Decrypts selectively revealed certificate fields using the provided keyring and verifier wallet
-   * @param {WalletInterface} verifierWallet - The wallet instance of the certificate's verifier, used to decrypt field keys.
+   * @param {ProtoWallet} verifierWallet - The wallet instance of the certificate's verifier, used to decrypt field keys.
    * @returns {Promise<Record<CertificateFieldNameUnder50Bytes, string>>} - A promise that resolves to an object where each key is a field name and each value is the decrypted field value as a string.
    * @throws {Error} Throws an error if any of the decryption operations fail, with a message indicating the failure context.
    */
-  async decryptFields(verifierWallet: WalletInterface): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
+  async decryptFields(verifierWallet: ProtoWallet): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
     if (!this.keyring || Object.keys(this.keyring).length === 0) {
       throw new Error('A keyring is required to decrypt certificate fields for the verifier.')
     }

@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.3.12 - 2025-01-29](#139---2025-01-29)
 - [1.3.11 - 2025-01-28](#139---2025-01-28)
 - [1.3.10 - 2025-01-27](#139---2025-01-27)
 - [1.3.9 - 2025-01-23](#139---2025-01-23)
@@ -76,6 +77,17 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.3.12] - 2025-01-29
+
+### Changed
+
+- Modified ProtoWallet to make the KeyDeriver optional, and to allow an optional originator argument on each supported method.
+- This allows any Wallet that implements WalletInterface to be a ProtoWallet.
+
+---
 
 ## [1.3.11] - 2025-01-28
 

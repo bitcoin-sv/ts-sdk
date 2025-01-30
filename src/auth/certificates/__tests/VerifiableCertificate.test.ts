@@ -3,6 +3,7 @@ import { PrivateKey, SymmetricKey, Utils } from '../../../../dist/cjs/src/primit
 import { CompletedProtoWallet } from '../../../../dist/cjs/src/auth/certificates/__tests/CompletedProtoWallet.js'
 import { Certificate } from '../../../../dist/cjs/src/auth/certificates/index.js'
 import { MasterCertificate } from '../../../../dist/cjs/src/auth/certificates/MasterCertificate.js'
+import { ProtoWallet } from '../../../../dist/cjs/src/wallet/index.js'
 
 describe('VerifiableCertificate', () => {
   const subjectPrivateKey = PrivateKey.fromRandom()
@@ -107,6 +108,34 @@ describe('VerifiableCertificate', () => {
       await expect(verifiableCert.decryptFields(verifierWallet)).rejects.toThrow(
         /Failed to decrypt selectively revealed certificate fields using keyring/
       )
+    })
+
+    it('should be able to decrypt fields using the anyone wallet', async () => {
+      const { certificateFields, masterKeyring } = await MasterCertificate.createCertificateFields(
+        subjectWallet,
+        certifierIdentityKey,
+        plaintextFields
+      )
+      const keyringForVerifier = await MasterCertificate.createKeyringForVerifier(
+        subjectWallet,
+        certifierIdentityKey,
+        'anyone',
+        certificateFields,
+        Object.keys(certificateFields),
+        masterKeyring,
+        sampleSerialNumber
+      )
+      verifiableCert = new VerifiableCertificate(
+        sampleType,
+        sampleSerialNumber,
+        subjectIdentityKey,
+        'anyone',
+        sampleRevocationOutpoint,
+        certificateFields,
+        keyringForVerifier
+      )
+      const decrypted = await verifiableCert.decryptFields(new ProtoWallet('anyone'))
+      expect(decrypted).toEqual(plaintextFields)
     })
   })
 })
