@@ -5,7 +5,6 @@ import {
   HexString,
   OutpointString,
   CertificateFieldNameUnder50Bytes,
-  WalletInterface,
   Signature,
   WalletProtocol,
   ProtoWallet
@@ -232,7 +231,7 @@ export default class Certificate {
    * @param {Wallet} certifierWallet - The wallet representing the certifier.
    * @returns {Promise<void>}
    */
-  async sign(certifierWallet: WalletInterface): Promise<void> {
+  async sign(certifierWallet: ProtoWallet): Promise<void> {
     if (this.signature) {
       throw new Error(`Certificate has already been signed! Signature present: ${this.signature}`)
     }
