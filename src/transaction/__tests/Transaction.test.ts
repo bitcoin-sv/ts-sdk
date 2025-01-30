@@ -33,7 +33,7 @@ describe('Transaction', () => {
     sequence: 0
   }
   const txOut = {
-    satoshis: BigNumber.fromHex('0500000000000000', 'big').toNumber(),
+    satoshis: BigNumber.fromHex('05000000000000', 'big').toNumber(),
     lockingScript: LockingScript.fromHex('ae')
   }
   const tx = new Transaction(0, [txIn], [txOut], 0)
@@ -891,7 +891,9 @@ describe('Transaction', () => {
       )
 
       // Create a mock MerklePath
-      const mockMerklePath = new MerklePath(0, []) // Example: an empty MerklePath
+      const mockMerklePath = new MerklePath(0, [
+        [{ offset: 0, hash: 'dummyHash' }]
+      ])
       sourceTransaction.merklePath = mockMerklePath
 
       tx.inputs[0].sourceTransaction = sourceTransaction

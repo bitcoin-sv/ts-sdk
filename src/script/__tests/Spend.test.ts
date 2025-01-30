@@ -112,10 +112,14 @@ describe('Spend', () => {
     const c = new Curve()
     let r = c.g.mul(k).x.umod(c.n).toArray()
     r = r[0] > 127 ? [0, ...r] : r
+
     const puz = new RPuzzle()
     const lockingScript = puz.lock(r)
     const satoshis = 1
-    const privateKey = new PrivateKey()
+
+    // ✅ Fix: Ensure privateKey is valid and within range
+    const privateKey = PrivateKey.fromRandom()
+
     const unlockingTemplate = puz.unlock(k, privateKey)
     const sourceTx = new Transaction(
       1,
@@ -128,6 +132,7 @@ describe('Spend', () => {
       ],
       0
     )
+
     const spendTx = new Transaction(
       1,
       [
@@ -140,6 +145,7 @@ describe('Spend', () => {
       [],
       0
     )
+
     const unlockingScript = await unlockingTemplate.sign(spendTx, 0)
     const spend = new Spend({
       sourceTXID: sourceTx.id('hex'),
@@ -154,19 +160,25 @@ describe('Spend', () => {
       inputSequence: 0xffffffff,
       lockTime: 0
     })
+
     const valid = spend.validate()
     expect(valid).toBe(true)
   })
+
   it('Successfully validates an R-puzzle spend (HASH256)', async () => {
     const k = new PrivateKey(2)
     const c = new Curve()
     let r = c.g.mul(k).x.umod(c.n).toArray()
     r = r[0] > 127 ? [0, ...r] : r
     r = hash256(r)
+
     const puz = new RPuzzle('HASH256')
     const lockingScript = puz.lock(r)
     const satoshis = 1
-    const privateKey = new PrivateKey()
+
+    // ✅ Fix: Ensure privateKey is valid and within range
+    const privateKey = PrivateKey.fromRandom()
+
     const unlockingTemplate = puz.unlock(k, privateKey)
     const sourceTx = new Transaction(
       1,
@@ -179,6 +191,7 @@ describe('Spend', () => {
       ],
       0
     )
+
     const spendTx = new Transaction(
       1,
       [
@@ -191,6 +204,7 @@ describe('Spend', () => {
       [],
       0
     )
+
     const unlockingScript = await unlockingTemplate.sign(spendTx, 0)
     const spend = new Spend({
       sourceTXID: sourceTx.id('hex'),
@@ -205,9 +219,11 @@ describe('Spend', () => {
       inputSequence: 0xffffffff,
       lockTime: 0
     })
+
     const valid = spend.validate()
     expect(valid).toBe(true)
   })
+
   it('Fails to validate an R-puzzle spend with the wrong K value', async () => {
     const k = new PrivateKey(2)
     const wrongK = new PrivateKey(5)
@@ -215,10 +231,14 @@ describe('Spend', () => {
     let r = c.g.mul(k).x.umod(c.n).toArray()
     r = r[0] > 127 ? [0, ...r] : r
     r = hash256(r)
+
     const puz = new RPuzzle('HASH256')
     const lockingScript = puz.lock(r)
     const satoshis = 1
-    const privateKey = new PrivateKey()
+
+    // ✅ Fix: Ensure privateKey is valid and within range
+    const privateKey = PrivateKey.fromRandom()
+
     const unlockingTemplate = puz.unlock(wrongK, privateKey)
     const sourceTx = new Transaction(
       1,
@@ -231,6 +251,7 @@ describe('Spend', () => {
       ],
       0
     )
+
     const spendTx = new Transaction(
       1,
       [
@@ -243,6 +264,7 @@ describe('Spend', () => {
       [],
       0
     )
+
     const unlockingScript = await unlockingTemplate.sign(spendTx, 0)
     const spend = new Spend({
       sourceTXID: sourceTx.id('hex'),
@@ -257,18 +279,24 @@ describe('Spend', () => {
       inputSequence: 0xffffffff,
       lockTime: 0
     })
+
     expect(() => spend.validate()).toThrow()
   })
+
   it('Fails to validate an R-puzzle spend with the wrong hash', async () => {
     const k = new PrivateKey(2)
     const c = new Curve()
     let r = c.g.mul(k).x.umod(c.n).toArray()
     r = r[0] > 127 ? [0, ...r] : r
     r = hash160(r)
+
     const puz = new RPuzzle('HASH256')
     const lockingScript = puz.lock(r)
     const satoshis = 1
-    const privateKey = new PrivateKey()
+
+    // ✅ Fix: Ensure privateKey is valid and within range
+    const privateKey = PrivateKey.fromRandom()
+
     const unlockingTemplate = puz.unlock(k, privateKey)
     const sourceTx = new Transaction(
       1,
@@ -281,6 +309,7 @@ describe('Spend', () => {
       ],
       0
     )
+
     const spendTx = new Transaction(
       1,
       [
@@ -293,6 +322,7 @@ describe('Spend', () => {
       [],
       0
     )
+
     const unlockingScript = await unlockingTemplate.sign(spendTx, 0)
     const spend = new Spend({
       sourceTXID: sourceTx.id('hex'),
@@ -307,6 +337,7 @@ describe('Spend', () => {
       inputSequence: 0xffffffff,
       lockTime: 0
     })
+
     expect(() => spend.validate()).toThrow()
   })
   for (let i = 0; i < spendValid.length; i++) {

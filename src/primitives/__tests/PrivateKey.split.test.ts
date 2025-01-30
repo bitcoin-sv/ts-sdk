@@ -36,10 +36,12 @@ describe('PrivateKey', () => {
 
   it('should throw an error for invalid threshold or totalShares', () => {
     const k = PrivateKey.fromRandom()
-    expect(() => k.toKeyShares(12, 14)).toThrow(
+
+    expect(() => k.toKeyShares('invalid' as any, 14)).toThrow(
       'threshold and totalShares must be numbers'
     )
-    expect(() => k.toKeyShares(4, 5)).toThrow(
+
+    expect(() => k.toKeyShares(4, undefined as any)).toThrow(
       'threshold and totalShares must be numbers'
     )
   })

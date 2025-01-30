@@ -196,7 +196,10 @@ describe('BN.js/Constructor', () => {
 
     it('should import/export big endian', () => {
       expect(
-        new BigNumber(Buffer.from('010203', 'hex').toString('hex')).toString(16)
+        new BigNumber(
+          Buffer.from('010203', 'hex').toString('hex'),
+          16
+        ).toString(16)
       ).toEqual('10203')
     })
 

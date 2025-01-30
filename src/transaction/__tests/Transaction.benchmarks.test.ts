@@ -33,12 +33,13 @@ describe('Transaction Verification Benchmark', () => {
     })
     const blockHeight = 1631619
     const txid = tx.hash('hex') as string
+
     const path = [
       [
         { offset: 0, hash: txid, txid: true, duplicate: false },
         { offset: 1, hash: 'otherHash1', txid: false, duplicate: false }
       ],
-      [{ offset: 0, hash: 'mergedHash1', txid: false, duplicate: false }]
+      [{ offset: 1, hash: 'mergedHash1', txid: false, duplicate: false }]
     ]
 
     const merklePath = new MerklePath(blockHeight, path)
@@ -46,7 +47,6 @@ describe('Transaction Verification Benchmark', () => {
     // Assign the MerklePath to the transaction
     tx.merklePath = merklePath
 
-    // Build the chain
     for (let i = 1; i < depth + 1; i++) {
       const newTx = new Transaction()
       newTx.addInput({
@@ -63,16 +63,10 @@ describe('Transaction Verification Benchmark', () => {
       tx = newTx
     }
 
-    // Measure verification time
     const timeTaken = await measureTime(async () => {
       const verified = await tx.verify('scripts only')
       expect(verified).toBe(true)
     })
-    console.log(
-      `Verification time for deep chain of depth ${depth}: ${timeTaken.toFixed(
-        2
-      )} ms`
-    )
   })
 
   it('verifies a transaction with a wide input set', async () => {
@@ -94,7 +88,7 @@ describe('Transaction Verification Benchmark', () => {
           { offset: 0, hash: txid, txid: true, duplicate: false },
           { offset: 1, hash: 'otherHash1', txid: false, duplicate: false }
         ],
-        [{ offset: 0, hash: 'mergedHash1', txid: false, duplicate: false }]
+        [{ offset: 1, hash: 'mergedHash1', txid: false, duplicate: false }]
       ]
 
       const merklePath = new MerklePath(blockHeight, path)
@@ -151,7 +145,7 @@ describe('Transaction Verification Benchmark', () => {
           { offset: 0, hash: txid, txid: true, duplicate: false },
           { offset: 1, hash: 'otherHash1', txid: false, duplicate: false }
         ],
-        [{ offset: 0, hash: 'mergedHash1', txid: false, duplicate: false }]
+        [{ offset: 1, hash: 'mergedHash1', txid: false, duplicate: false }]
       ]
 
       const merklePath = new MerklePath(blockHeight, path)
@@ -211,7 +205,7 @@ describe('Transaction Verification Benchmark', () => {
           { offset: 0, hash: txid, txid: true, duplicate: false },
           { offset: 1, hash: 'otherHash1', txid: false, duplicate: false }
         ],
-        [{ offset: 0, hash: 'mergedHash1', txid: false, duplicate: false }]
+        [{ offset: 1, hash: 'mergedHash1', txid: false, duplicate: false }]
       ]
 
       const merklePath = new MerklePath(blockHeight, path)

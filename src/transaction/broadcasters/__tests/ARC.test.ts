@@ -5,14 +5,16 @@ import { FetchHttpClient } from '../../../transaction/http/FetchHttpClient'
 import { HttpClientRequestOptions } from '../../http'
 
 // Mock Transaction
-jest.mock('../../Transaction', () => {
-  return {
-    default: jest.fn().mockImplementation(() => {
-      return {
-        toHex: () => 'mocked_transaction_hex'
-      }
-    })
+jest.mock('../../../transaction/Transaction', () => {
+  class MockTransaction {
+    toHex() {
+      return 'mocked_transaction_hex'
+    }
+    toHexEF() {
+      return 'mocked_transaction_hexEF'
+    }
   }
+  return { __esModule: true, default: MockTransaction }
 })
 
 describe('ARC Broadcaster', () => {
