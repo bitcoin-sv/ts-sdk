@@ -5,7 +5,7 @@ import {
   SymmetricKey,
   Utils,
   Random
-} from '../../../../dist/cjs/src/primitives/index'
+} from '../../../../mod'
 import { CompletedProtoWallet } from '../../../auth/certificates/__tests/CompletedProtoWallet'
 
 describe('MasterCertificate', () => {
