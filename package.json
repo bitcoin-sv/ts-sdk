@@ -192,6 +192,7 @@
     "test": "npm run build && jest",
     "test:watch": "npm run build && jest --watch",
     "test:coverage": "npm run build && jest --coverage",
+    "lint:ci": "ts-standard src/**/*.ts",
     "lint": "ts-standard --fix src/**/*.ts",
     "build": "npm run build:ts && npm run build:umd",
     "build:ts": "tsc -b && tsconfig-to-dual-package tsconfig.cjs.json",

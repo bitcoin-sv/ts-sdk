@@ -23,7 +23,7 @@ jobs:
       if: steps.cache-modules.outputs.cache-hit != 'true'
       run: npm install
     - name: Lint
-      run: npm run lint
+      run: npm run lint:ci
     - name: Test
       run: npm run test
   publish:
