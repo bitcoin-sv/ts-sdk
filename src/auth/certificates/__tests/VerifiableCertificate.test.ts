@@ -1,9 +1,13 @@
-import { VerifiableCertificate } from '../../../../dist/cjs/src/auth/certificates/VerifiableCertificate.js'
-import { PrivateKey, SymmetricKey, Utils } from '../../../../dist/cjs/src/primitives/index.js'
-import { CompletedProtoWallet } from '../../../../dist/cjs/src/auth/certificates/__tests/CompletedProtoWallet.js'
-import { Certificate } from '../../../../dist/cjs/src/auth/certificates/index.js'
-import { MasterCertificate } from '../../../../dist/cjs/src/auth/certificates/MasterCertificate.js'
-import { ProtoWallet } from '../../../../dist/cjs/src/wallet/index.js'
+import { VerifiableCertificate } from '../../../auth/certificates/VerifiableCertificate'
+import {
+  PrivateKey,
+  SymmetricKey,
+  Utils
+} from '../../../../dist/cjs/src/primitives/index'
+import { CompletedProtoWallet } from '../../../auth/certificates/__tests/CompletedProtoWallet'
+import { Certificate } from '../../../auth/certificates/index'
+import { MasterCertificate } from '../../../auth/certificates/MasterCertificate'
+import { ProtoWallet } from '../../../wallet/index'
 
 describe('VerifiableCertificate', () => {
   const subjectPrivateKey = PrivateKey.fromRandom()
@@ -18,7 +22,8 @@ describe('VerifiableCertificate', () => {
 
   const sampleType = Utils.toBase64(new Array(32).fill(1))
   const sampleSerialNumber = Utils.toBase64(new Array(32).fill(2))
-  const sampleRevocationOutpoint = 'deadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000.1'
+  const sampleRevocationOutpoint =
+    'deadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000.1'
 
   const plaintextFields = {
     name: 'Alice',
@@ -30,11 +35,12 @@ describe('VerifiableCertificate', () => {
 
   beforeEach(async () => {
     // For each test, we'll build a fresh VerifiableCertificate with valid encryption
-    const { certificateFields, masterKeyring } = await MasterCertificate.createCertificateFields(
-      subjectWallet,
-      certifierIdentityKey,
-      plaintextFields
-    )
+    const { certificateFields, masterKeyring } =
+      await MasterCertificate.createCertificateFields(
+        subjectWallet,
+        certifierIdentityKey,
+        plaintextFields
+      )
     const keyringForVerifier = await MasterCertificate.createKeyringForVerifier(
       subjectWallet,
       certifierIdentityKey,
@@ -62,7 +68,9 @@ describe('VerifiableCertificate', () => {
       expect(verifiableCert.serialNumber).toEqual(sampleSerialNumber)
       expect(verifiableCert.subject).toEqual(subjectIdentityKey)
       expect(verifiableCert.certifier).toEqual(certifierIdentityKey)
-      expect(verifiableCert.revocationOutpoint).toEqual(sampleRevocationOutpoint)
+      expect(verifiableCert.revocationOutpoint).toEqual(
+        sampleRevocationOutpoint
+      )
       expect(verifiableCert.fields).toBeDefined()
       expect(verifiableCert.keyring).toBeDefined()
     })
@@ -97,7 +105,9 @@ describe('VerifiableCertificate', () => {
         verifiableCert.signature
       )
 
-      await expect(emptyKeyringCert.decryptFields(verifierWallet)).rejects.toThrow(
+      await expect(
+        emptyKeyringCert.decryptFields(verifierWallet)
+      ).rejects.toThrow(
         'A keyring is required to decrypt certificate fields for the verifier.'
       )
     })
@@ -105,26 +115,30 @@ describe('VerifiableCertificate', () => {
     it('should fail if the encrypted field or its key is tampered', async () => {
       // Tamper the keyring so it doesn't match the field encryption
       verifiableCert.keyring.name = Utils.toBase64([9, 9, 9, 9])
-      await expect(verifiableCert.decryptFields(verifierWallet)).rejects.toThrow(
+      await expect(
+        verifiableCert.decryptFields(verifierWallet)
+      ).rejects.toThrow(
         /Failed to decrypt selectively revealed certificate fields using keyring/
       )
     })
 
     it('should be able to decrypt fields using the anyone wallet', async () => {
-      const { certificateFields, masterKeyring } = await MasterCertificate.createCertificateFields(
-        subjectWallet,
-        certifierIdentityKey,
-        plaintextFields
-      )
-      const keyringForVerifier = await MasterCertificate.createKeyringForVerifier(
-        subjectWallet,
-        certifierIdentityKey,
-        'anyone',
-        certificateFields,
-        Object.keys(certificateFields),
-        masterKeyring,
-        sampleSerialNumber
-      )
+      const { certificateFields, masterKeyring } =
+        await MasterCertificate.createCertificateFields(
+          subjectWallet,
+          certifierIdentityKey,
+          plaintextFields
+        )
+      const keyringForVerifier =
+        await MasterCertificate.createKeyringForVerifier(
+          subjectWallet,
+          certifierIdentityKey,
+          'anyone',
+          certificateFields,
+          Object.keys(certificateFields),
+          masterKeyring,
+          sampleSerialNumber
+        )
       verifiableCert = new VerifiableCertificate(
         sampleType,
         sampleSerialNumber,
@@ -134,7 +148,9 @@ describe('VerifiableCertificate', () => {
         certificateFields,
         keyringForVerifier
       )
-      const decrypted = await verifiableCert.decryptFields(new ProtoWallet('anyone'))
+      const decrypted = await verifiableCert.decryptFields(
+        new ProtoWallet('anyone')
+      )
       expect(decrypted).toEqual(plaintextFields)
     })
   })

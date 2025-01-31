@@ -1,5 +1,14 @@
-import { KeyDeriver, KeyDeriverApi } from './KeyDeriver.js'
-import { Hash, ECDSA, BigNumber, Signature, Schnorr, PublicKey, Point, PrivateKey } from '../primitives/index.js'
+import { KeyDeriver, KeyDeriverApi } from './KeyDeriver'
+import {
+  Hash,
+  ECDSA,
+  BigNumber,
+  Signature,
+  Schnorr,
+  PublicKey,
+  Point,
+  PrivateKey
+} from '../primitives/index'
 import {
   AuthenticatedResult,
   CreateHmacArgs,
@@ -23,7 +32,7 @@ import {
   WalletDecryptResult,
   WalletEncryptArgs,
   WalletEncryptResult
-} from './Wallet.interfaces.js'
+} from './Wallet.interfaces'
 
 /**
  * A ProtoWallet is precursor to a full wallet, capable of performing all foundational cryptographic operations.
@@ -35,14 +44,16 @@ import {
 export class ProtoWallet {
   keyDeriver?: KeyDeriverApi
 
-  constructor (rootKeyOrKeyDeriver?: PrivateKey | 'anyone' | KeyDeriverApi) {
+  constructor(rootKeyOrKeyDeriver?: PrivateKey | 'anyone' | KeyDeriverApi) {
     if (typeof (rootKeyOrKeyDeriver as KeyDeriver).identityKey !== 'string') {
-      rootKeyOrKeyDeriver = new KeyDeriver(rootKeyOrKeyDeriver as PrivateKey | 'anyone')
+      rootKeyOrKeyDeriver = new KeyDeriver(
+        rootKeyOrKeyDeriver as PrivateKey | 'anyone'
+      )
     }
     this.keyDeriver = rootKeyOrKeyDeriver as KeyDeriver
   }
 
-  async getPublicKey (
+  async getPublicKey(
     args: GetPublicKeyArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ publicKey: PubKeyHex }> {
@@ -50,7 +61,9 @@ export class ProtoWallet {
       return { publicKey: this.keyDeriver.rootKey.toPublicKey().toString() }
     } else {
       if (!args.protocolID || !args.keyID) {
-        throw new Error('protocolID and keyID are required if identityKey is false or undefined.')
+        throw new Error(
+          'protocolID and keyID are required if identityKey is false or undefined.'
+        )
       }
       return {
         publicKey: this.keyDeriver
@@ -65,13 +78,20 @@ export class ProtoWallet {
     }
   }
 
-  async revealCounterpartyKeyLinkage (
+  async revealCounterpartyKeyLinkage(
     args: RevealCounterpartyKeyLinkageArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<RevealCounterpartyKeyLinkageResult> {
-    const { publicKey: identityKey } = await this.getPublicKey({ identityKey: true })
+    const { publicKey: identityKey } = await this.getPublicKey({
+      identityKey: true
+    })
     const linkage = this.keyDeriver.revealCounterpartySecret(args.counterparty)
-    const linkageProof = new Schnorr().generateProof(this.keyDeriver.rootKey, this.keyDeriver.rootKey.toPublicKey(), PublicKey.fromString(args.counterparty), Point.fromDER(linkage))
+    const linkageProof = new Schnorr().generateProof(
+      this.keyDeriver.rootKey,
+      this.keyDeriver.rootKey.toPublicKey(),
+      PublicKey.fromString(args.counterparty),
+      Point.fromDER(linkage)
+    )
     const linkageProofBin = [
       ...linkageProof.R.encode(true),
       ...linkageProof.SPrime.encode(true),
@@ -100,11 +120,13 @@ export class ProtoWallet {
     }
   }
 
-  async revealSpecificKeyLinkage (
+  async revealSpecificKeyLinkage(
     args: RevealSpecificKeyLinkageArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<RevealSpecificKeyLinkageResult> {
-    const { publicKey: identityKey } = await this.getPublicKey({ identityKey: true })
+    const { publicKey: identityKey } = await this.getPublicKey({
+      identityKey: true
+    })
     const linkage = this.keyDeriver.revealSpecificSecret(
       args.counterparty,
       args.protocolID,
@@ -112,13 +134,19 @@ export class ProtoWallet {
     )
     const { ciphertext: encryptedLinkage } = await this.encrypt({
       plaintext: linkage,
-      protocolID: [2, `specific linkage revelation ${args.protocolID[0]} ${args.protocolID[1]}`],
+      protocolID: [
+        2,
+        `specific linkage revelation ${args.protocolID[0]} ${args.protocolID[1]}`
+      ],
       keyID: args.keyID,
       counterparty: args.verifier
     })
     const { ciphertext: encryptedLinkageProof } = await this.encrypt({
       plaintext: [0], // Proof type 0, no proof provided
-      protocolID: [2, `specific linkage revelation ${args.protocolID[0]} ${args.protocolID[1]}`],
+      protocolID: [
+        2,
+        `specific linkage revelation ${args.protocolID[0]} ${args.protocolID[1]}`
+      ],
       keyID: args.keyID,
       counterparty: args.verifier
     })
@@ -134,7 +162,7 @@ export class ProtoWallet {
     }
   }
 
-  async encrypt (
+  async encrypt(
     args: WalletEncryptArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<WalletEncryptResult> {
@@ -146,7 +174,7 @@ export class ProtoWallet {
     return { ciphertext: key.encrypt(args.plaintext) as number[] }
   }
 
-  async decrypt (
+  async decrypt(
     args: WalletDecryptArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<WalletDecryptResult> {
@@ -158,7 +186,7 @@ export class ProtoWallet {
     return { plaintext: key.decrypt(args.ciphertext) as number[] }
   }
 
-  async createHmac (
+  async createHmac(
     args: CreateHmacArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<CreateHmacResult> {
@@ -170,7 +198,7 @@ export class ProtoWallet {
     return { hmac: Hash.sha256hmac(key.toArray(), args.data) }
   }
 
-  async verifyHmac (
+  async verifyHmac(
     args: VerifyHmacArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<VerifyHmacResult> {
@@ -179,16 +207,18 @@ export class ProtoWallet {
       args.keyID,
       args.counterparty || 'self'
     )
-    const valid = Hash.sha256hmac(key.toArray(), args.data).toString() === args.hmac.toString()
+    const valid =
+      Hash.sha256hmac(key.toArray(), args.data).toString() ===
+      args.hmac.toString()
     if (!valid) {
-      const e = new Error('HMAC is not valid');
-      (e as any).code = 'ERR_INVALID_HMAC'
+      const e = new Error('HMAC is not valid')
+      ;(e as any).code = 'ERR_INVALID_HMAC'
       throw e
     }
     return { valid }
   }
 
-  async createSignature (
+  async createSignature(
     args: CreateSignatureArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<CreateSignatureResult> {
@@ -201,10 +231,12 @@ export class ProtoWallet {
       args.keyID,
       args.counterparty || 'anyone'
     )
-    return { signature: ECDSA.sign(new BigNumber(hash), key, true).toDER() as number[] }
+    return {
+      signature: ECDSA.sign(new BigNumber(hash), key, true).toDER() as number[]
+    }
   }
 
-  async verifySignature (
+  async verifySignature(
     args: VerifySignatureArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<VerifySignatureResult> {
@@ -218,10 +250,14 @@ export class ProtoWallet {
       args.counterparty || 'self',
       args.forSelf
     )
-    const valid = ECDSA.verify(new BigNumber(hash), Signature.fromDER(args.signature), key)
+    const valid = ECDSA.verify(
+      new BigNumber(hash),
+      Signature.fromDER(args.signature),
+      key
+    )
     if (!valid) {
-      const e = new Error('Signature is not valid');
-      (e as any).code = 'ERR_INVALID_SIGNATURE'
+      const e = new Error('Signature is not valid')
+      ;(e as any).code = 'ERR_INVALID_SIGNATURE'
       throw e
     }
     return { valid }

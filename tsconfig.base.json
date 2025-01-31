@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "lib": ["dom", "ESNext"],
-    "module": "NodeNext",
+    "module": "CommonJS",
     "target": "esnext",
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "node",
     "moduleDetection": "force",
     "rootDir": "./",
     "baseUrl": "./",
@@ -21,6 +21,6 @@
     "esModuleInterop": true
   },
   "files": ["mod.ts"],
-  "include": ["src"],
-  "exclude": ["dist", "*/**/__tests"]
+  "include": ["src", "src/__tests__"],
+  "exclude": ["dist"]
 }

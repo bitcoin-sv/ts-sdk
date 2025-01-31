@@ -1,4 +1,4 @@
-import Transaction from './Transaction.js'
+import Transaction from "./Transaction";
 
 /**
  * Defines the structure of a successful broadcast response.
@@ -9,10 +9,10 @@ import Transaction from './Transaction.js'
  * @property {string} message - A human-readable success message.
  */
 export interface BroadcastResponse {
-  status: 'success'
-  txid: string
-  message: string
-  competingTxs?: string[]
+  status: "success";
+  txid: string;
+  message: string;
+  competingTxs?: string[];
 }
 
 /**
@@ -26,11 +26,11 @@ export interface BroadcastResponse {
  * @property {object} more - The unparsed response data from the underlying broadcast service.
  */
 export interface BroadcastFailure {
-  status: 'error'
-  code: string
-  txid?: string
-  description: string
-  more?: object
+  status: "error";
+  code: string;
+  txid?: string;
+  description: string;
+  more?: object;
 }
 
 /**
@@ -44,22 +44,26 @@ export interface BroadcastFailure {
  *                                  The promise resolves to an array of broadcast result response objects.
  */
 export interface Broadcaster {
-  broadcast: (transaction: Transaction) =>
-  Promise<BroadcastResponse | BroadcastFailure>
-  broadcastMany?: (txs: Transaction[]) =>
-  Promise<object[]>
+  broadcast: (
+    transaction: Transaction
+  ) => Promise<BroadcastResponse | BroadcastFailure>;
+  broadcastMany?: (txs: Transaction[]) => Promise<object[]>;
 }
 
 /**
  * Convenience type guard for response from `Broadcaster.broadcast`
  */
-export function isBroadcastResponse (r: BroadcastResponse | BroadcastFailure): r is BroadcastResponse {
-  return r.status === 'success'
+export function isBroadcastResponse(
+  r: BroadcastResponse | BroadcastFailure
+): r is BroadcastResponse {
+  return r.status === "success";
 }
 
 /**
  * Convenience type guard for response from `Broadcaster.broadcast`
  */
-export function isBroadcastFailure (r: BroadcastResponse | BroadcastFailure): r is BroadcastFailure {
-  return r.status === 'error'
+export function isBroadcastFailure(
+  r: BroadcastResponse | BroadcastFailure
+): r is BroadcastFailure {
+  return r.status === "error";
 }

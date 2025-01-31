@@ -1,8 +1,8 @@
-import Script from '../../../dist/cjs/src/script/Script'
-import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
-import P2PKH from '../../../dist/cjs/src/script/templates/P2PKH'
-import OP from '../../../dist/cjs/src/script/OP'
-import { toHex } from '../../../dist/cjs/src/primitives/utils'
+import Script from '../../script/Script'
+import PrivateKey from '../../primitives/PrivateKey'
+import P2PKH from '../../script/templates/P2PKH'
+import OP from '../../script/OP'
+import { toHex } from '../../primitives/utils'
 
 import scriptInvalid from './script.invalid.vectors'
 import scriptValid from './script.valid.vectors'
@@ -48,7 +48,7 @@ describe('Script', () => {
     it('should error when attempting to parse this strange Base58Check encoded string', () => {
       const priv = PrivateKey.fromRandom()
       const address = priv.toAddress([0x88])
-      function attemptToDeriveAddress () {
+      function attemptToDeriveAddress() {
         const script = new P2PKH().lock(address).toASM()
         return script
       }
@@ -60,7 +60,7 @@ describe('Script', () => {
     it('should parse this buffer containing an OP code', () => {
       const buf = Buffer.alloc(1)
       buf[0] = OP.OP_0
-      const script = Script.fromBinary(buf)
+      const script = Script.fromBinary([...buf])
       expect(script.chunks).toHaveLength(1)
       expect(script.chunks[0].op).toBe(buf[0])
     })
@@ -68,59 +68,59 @@ describe('Script', () => {
     it('should parse this buffer containing another OP code', () => {
       const buf = Buffer.alloc(1)
       buf[0] = OP.OP_CHECKMULTISIG
-      const script = Script.fromBinary(buf)
+      const script = Script.fromBinary([...buf])
       expect(script.chunks).toHaveLength(1)
       expect(script.chunks[0].op).toBe(buf[0])
     })
 
     it('should parse this buffer containing three bytes of data', () => {
-      const buf = ([3, 1, 2, 3])
-      const script = Script.fromBinary(buf)
+      const buf = [3, 1, 2, 3]
+      const script = Script.fromBinary([...buf])
       expect(script.chunks).toHaveLength(1)
       expect(script.chunks[0].data).toEqual([1, 2, 3])
     })
 
     it('should parse this buffer containing OP_PUSHDATA1 and zero bytes of data', () => {
-      const buf = ([0])
+      const buf = [0]
       buf[0] = OP.OP_PUSHDATA1
-      const script = Script.fromBinary(buf)
+      const script = Script.fromBinary([...buf])
       expect(script.chunks.length).toEqual(1)
       expect(script.chunks[0].data).toEqual([])
     })
 
     it('should parse this buffer containing OP_PUSHDATA2 and zero bytes of data', () => {
-      const buf = ([0])
+      const buf = [0]
       buf[0] = OP.OP_PUSHDATA2
-      const script = Script.fromBinary(buf)
+      const script = Script.fromBinary([...buf])
       expect(script.chunks.length).toEqual(1)
       expect(script.chunks[0].data).toEqual([])
     })
 
     it('should parse this buffer containing OP_PUSHDATA2 and three bytes of data', () => {
-      const buf = ([OP.OP_PUSHDATA2, 3, 0, 1, 2, 3])
-      const script = Script.fromBinary(buf)
+      const buf = [OP.OP_PUSHDATA2, 3, 0, 1, 2, 3]
+      const script = Script.fromBinary([...buf])
       expect(script.chunks.length).toEqual(1)
       expect(script.chunks[0].data).toEqual([1, 2, 3])
     })
 
     it('should parse this buffer containing OP_PUSHDATA4 and zero bytes of data', () => {
-      const buf = ([0, 0])
+      const buf = [0, 0]
       buf[0] = OP.OP_PUSHDATA4
-      const script = Script.fromBinary(buf)
+      const script = Script.fromBinary([...buf])
       expect(script.chunks.length).toEqual(1)
       expect(script.chunks[0].data).toEqual([])
     })
 
     it('should parse this buffer containing OP_PUSHDATA4 and three bytes of data', () => {
       const buf = [OP.OP_PUSHDATA4, 3, 0, 0, 0, 1, 2, 3]
-      const script = Script.fromBinary(buf)
+      const script = Script.fromBinary([...buf])
       expect(script.chunks.length).toEqual(1)
       expect(script.chunks[0].data).toEqual([1, 2, 3])
     })
 
     it('should parse this buffer an OP code, data, and another OP code', () => {
       const buf = [OP.OP_0, OP.OP_PUSHDATA4, 3, 0, 0, 0, 1, 2, 3, OP.OP_0]
-      const script = Script.fromBinary(buf)
+      const script = Script.fromBinary([...buf])
       expect(script.chunks.length).toEqual(3)
       expect(script.chunks[0].op).toEqual(buf[0])
       expect(script.chunks[1].data).toEqual([1, 2, 3])
@@ -139,7 +139,7 @@ describe('Script', () => {
     it('should output this buffer containing an OP code', () => {
       const buf = Buffer.alloc(1)
       buf[0] = OP.OP_0
-      const script = Script.fromBinary(buf)
+      const script = Script.fromBinary([...buf])
       expect(script.chunks.length).toEqual(1)
       expect(script.chunks[0].op).toEqual(buf[0])
       expect(script.toHex()).toEqual(buf.toString('hex'))
@@ -148,7 +148,7 @@ describe('Script', () => {
     it('should output this buffer containing another OP code', () => {
       const buf = Buffer.alloc(1)
       buf[0] = OP.OP_CHECKMULTISIG
-      const script = Script.fromBinary(buf)
+      const script = Script.fromBinary([...buf])
       expect(script.chunks.length).toEqual(1)
       expect(script.chunks[0].op).toEqual(buf[0])
       expect(script.toHex()).toEqual(buf.toString('hex'))
@@ -156,7 +156,7 @@ describe('Script', () => {
 
     it('should output this buffer containing three bytes of data', () => {
       const buf = Buffer.from([3, 1, 2, 3])
-      const script = Script.fromBinary(buf)
+      const script = Script.fromBinary([...buf])
       expect(script.chunks.length).toEqual(1)
       expect(script.chunks[0].data).toEqual([1, 2, 3])
       expect(script.toHex()).toEqual(buf.toString('hex'))
@@ -166,7 +166,7 @@ describe('Script', () => {
       const buf = Buffer.from([0, 0, 1, 2, 3])
       buf[0] = OP.OP_PUSHDATA1
       buf.writeUInt8(3, 1)
-      const script = Script.fromBinary(buf)
+      const script = Script.fromBinary([...buf])
       expect(script.chunks.length).toEqual(1)
       expect(script.chunks[0].data).toEqual([1, 2, 3])
       expect(script.toHex()).toEqual(buf.toString('hex'))
@@ -176,7 +176,7 @@ describe('Script', () => {
       const buf = Buffer.from([0, 0, 0, 1, 2, 3])
       buf[0] = OP.OP_PUSHDATA2
       buf.writeUInt16LE(3, 1)
-      const script = Script.fromBinary(buf)
+      const script = Script.fromBinary([...buf])
       expect(script.chunks.length).toEqual(1)
       expect(script.chunks[0].data).toEqual([1, 2, 3])
       expect(script.toHex()).toEqual(buf.toString('hex'))
@@ -186,7 +186,7 @@ describe('Script', () => {
       const buf = Buffer.from([0, 0, 0, 0, 0, 1, 2, 3])
       buf[0] = OP.OP_PUSHDATA4
       buf.writeUInt16LE(3, 1)
-      const script = Script.fromBinary(buf)
+      const script = Script.fromBinary([...buf])
       expect(script.chunks.length).toEqual(1)
       expect(script.chunks[0].data).toEqual([1, 2, 3])
       expect(script.toHex()).toEqual(buf.toString('hex'))
@@ -198,7 +198,7 @@ describe('Script', () => {
       buf[1] = OP.OP_PUSHDATA4
       buf.writeUInt16LE(3, 2)
       buf[buf.length - 1] = OP.OP_0
-      const script = Script.fromBinary(buf)
+      const script = Script.fromBinary([...buf])
       expect(script.chunks.length).toEqual(3)
       expect(script.chunks[0].op).toEqual(buf[0])
       expect(script.chunks[1].data).toEqual([1, 2, 3])
@@ -214,7 +214,7 @@ describe('Script', () => {
       buf[1] = OP.OP_PUSHDATA4
       buf.writeUInt16LE(3, 2)
       buf[buf.length - 1] = OP.OP_0
-      const script = Script.fromBinary(buf)
+      const script = Script.fromBinary([...buf])
       expect(script.chunks.length).toEqual(3)
       expect(script.chunks[0].op).toEqual(buf[0])
       expect(script.chunks[1].data).toEqual([1, 2, 3])
@@ -225,35 +225,44 @@ describe('Script', () => {
 
   describe('fromASM', () => {
     it('should parse these known scripts', () => {
-      expect(Script.fromASM('OP_0 010203 OP_0')
-        .toASM()
-      ).toEqual('OP_0 010203 OP_0')
-      expect(Script.fromASM(
-        'OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIG'
-      ).toASM()).toEqual(
+      expect(Script.fromASM('OP_0 010203 OP_0').toASM()).toEqual(
+        'OP_0 010203 OP_0'
+      )
+      expect(
+        Script.fromASM(
+          'OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIG'
+        ).toASM()
+      ).toEqual(
         'OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIG'
       )
-      expect(Script.fromASM(
-        'OP_SHA256 8cc17e2a2b10e1da145488458a6edec4a1fdb1921c2d5ccbc96aa0ed31b4d5f8 OP_EQUALVERIFY OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIGVERIFY OP_EQUALVERIFY OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIG'
-      ).toASM()).toEqual(
+      expect(
+        Script.fromASM(
+          'OP_SHA256 8cc17e2a2b10e1da145488458a6edec4a1fdb1921c2d5ccbc96aa0ed31b4d5f8 OP_EQUALVERIFY OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIGVERIFY OP_EQUALVERIFY OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIG'
+        ).toASM()
+      ).toEqual(
         'OP_SHA256 8cc17e2a2b10e1da145488458a6edec4a1fdb1921c2d5ccbc96aa0ed31b4d5f8 OP_EQUALVERIFY OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIGVERIFY OP_EQUALVERIFY OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIG'
       )
-      expect(Script.fromASM('OP_0 010203 OP_0')
-        .toASM()
-      ).toEqual('OP_0 010203 OP_0')
-      expect(Script.fromASM('OP_0 010203 OP_0')
-        .toASM()
-      ).toEqual('OP_0 010203 OP_0')
-      expect(Script.fromASM('OP_0 3 010203 OP_0').toASM()).toEqual('OP_0 03 010203 OP_0')
+      expect(Script.fromASM('OP_0 010203 OP_0').toASM()).toEqual(
+        'OP_0 010203 OP_0'
+      )
+      expect(Script.fromASM('OP_0 010203 OP_0').toASM()).toEqual(
+        'OP_0 010203 OP_0'
+      )
+      expect(Script.fromASM('OP_0 3 010203 OP_0').toASM()).toEqual(
+        'OP_0 03 010203 OP_0'
+      )
       expect(Script.fromASM('').toASM()).toEqual('')
     })
     it('should parse this known script in ASM', () => {
-      const asm = 'OP_DUP OP_HASH160 f4c03610e60ad15100929cc23da2f3a799af1725 OP_EQUALVERIFY OP_CHECKSIG'
+      const asm =
+        'OP_DUP OP_HASH160 f4c03610e60ad15100929cc23da2f3a799af1725 OP_EQUALVERIFY OP_CHECKSIG'
       const script = Script.fromASM(asm)
       expect(script.chunks[0].op).toEqual(OP.OP_DUP)
       expect(script.chunks[1].op).toEqual(OP.OP_HASH160)
       expect(script.chunks[2].op).toEqual(20)
-      expect(toHex(script.chunks[2].data)).toEqual('f4c03610e60ad15100929cc23da2f3a799af1725')
+      expect(toHex(script.chunks[2].data)).toEqual(
+        'f4c03610e60ad15100929cc23da2f3a799af1725'
+      )
       expect(script.chunks[3].op).toEqual(OP.OP_EQUALVERIFY)
       expect(script.chunks[4].op).toEqual(OP.OP_CHECKSIG)
     })
@@ -319,9 +328,11 @@ describe('Script', () => {
 
   describe('#removeCodeseparators', () => {
     it('should remove any OP_CODESEPARATORs', () => {
-      expect(Script.fromASM('OP_CODESEPARATOR OP_0 OP_CODESEPARATOR')
-        .removeCodeseparators()
-        .toASM()).toEqual('OP_0')
+      expect(
+        Script.fromASM('OP_CODESEPARATOR OP_0 OP_CODESEPARATOR')
+          .removeCodeseparators()
+          .toASM()
+      ).toEqual('OP_0')
     })
   })
 
@@ -329,7 +340,9 @@ describe('Script', () => {
     it("should know these scripts are or aren't push only", () => {
       expect(Script.fromASM('OP_0').isPushOnly()).toEqual(true)
       expect(Script.fromASM('OP_0 OP_RETURN').isPushOnly()).toEqual(false)
-      expect(Script.fromASM('OP_PUSHDATA1 5 1010101010').isPushOnly()).toEqual(true)
+      expect(Script.fromASM('OP_PUSHDATA1 5 1010101010').isPushOnly()).toEqual(
+        true
+      )
 
       // like bitcoind, we regard OP_RESERVED as being "push only"
       expect(Script.fromASM('OP_RESERVED').isPushOnly()).toEqual(true)
@@ -338,10 +351,11 @@ describe('Script', () => {
 
   describe('#findAndDelete', () => {
     it('should find and delete this buffer', () => {
-      expect(Script
-        .fromASM('OP_RETURN f0f0')
-        .findAndDelete(Script.fromASM('f0f0'))
-        .toASM()).toEqual('OP_RETURN')
+      expect(
+        Script.fromASM('OP_RETURN f0f0')
+          .findAndDelete(Script.fromASM('f0f0'))
+          .toASM()
+      ).toEqual('OP_RETURN')
     })
   })
 

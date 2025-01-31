@@ -1,19 +1,19 @@
-import { Transaction } from '../transaction/index.js'
-import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate.js'
+import { Transaction } from '../transaction/index'
+import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate'
 
 /**
  * The question asked to the Overlay Services Engine when a consumer of state wishes to look up information.
  */
 export interface LookupQuestion {
   /**
-     * The identifier for a Lookup Service which the person asking the question wishes to use.
-     */
+   * The identifier for a Lookup Service which the person asking the question wishes to use.
+   */
   service: string
 
   /**
-     * The query which will be forwarded to the Lookup Service.
-     * Its type depends on that prescribed by the Lookup Service employed.
-     */
+   * The query which will be forwarded to the Lookup Service.
+   * Its type depends on that prescribed by the Lookup Service employed.
+   */
   query: unknown
 }
 
@@ -21,16 +21,18 @@ export interface LookupQuestion {
  * How the Overlay Services Engine responds to a Lookup Question.
  * It may comprise either an output list or a freeform response from the Lookup Service.
  */
-export type LookupAnswer = {
-  type: 'output-list'
-  outputs: Array<{
-    beef: number[]
-    outputIndex: number
-  }>
-} | {
-  type: 'freeform'
-  result: unknown
-}
+export type LookupAnswer =
+  | {
+      type: 'output-list'
+      outputs: Array<{
+        beef: number[]
+        outputIndex: number
+      }>
+    }
+  | {
+      type: 'freeform'
+      result: unknown
+    }
 
 /** Default SLAP trackers */
 export const DEFAULT_SLAP_TRACKERS: string[] = [
@@ -72,19 +74,29 @@ export interface OverlayLookupFacilitator {
    * @param timeout - Specifics how long to wait for a lookup answer in milliseconds.
    * @returns
    */
-  lookup: (url: string, question: LookupQuestion, timeout?: number) => Promise<LookupAnswer>
+  lookup: (
+    url: string,
+    question: LookupQuestion,
+    timeout?: number
+  ) => Promise<LookupAnswer>
 }
 
 export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
   fetchClient: typeof fetch
 
-  constructor (httpClient = fetch) {
+  constructor(httpClient = fetch) {
     this.fetchClient = httpClient
   }
 
-  async lookup (url: string, question: LookupQuestion, timeout: number = 5000): Promise<LookupAnswer> {
+  async lookup(
+    url: string,
+    question: LookupQuestion,
+    timeout: number = 5000
+  ): Promise<LookupAnswer> {
     if (!url.startsWith('https:')) {
-      throw new Error('HTTPS facilitator can only use URLs that start with "https:"')
+      throw new Error(
+        'HTTPS facilitator can only use URLs that start with "https:"'
+      )
     }
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Request timed out')), timeout)
@@ -95,10 +107,16 @@ export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ service: question.service, query: question.query })
+      body: JSON.stringify({
+        service: question.service,
+        query: question.query
+      })
     })
 
-    const response: Response = await Promise.race([fetchPromise, timeoutPromise]) as Response
+    const response: Response = (await Promise.race([
+      fetchPromise,
+      timeoutPromise
+    ])) as Response
 
     if (response.ok) {
       return await response.json()
@@ -117,8 +135,9 @@ export default class LookupResolver {
   private readonly hostOverrides: Record<string, string[]>
   private readonly additionalHosts: Record<string, string[]>
 
-  constructor (config?: LookupResolverConfig) {
-    const { facilitator, slapTrackers, hostOverrides, additionalHosts } = config ?? {} as LookupResolverConfig
+  constructor(config?: LookupResolverConfig) {
+    const { facilitator, slapTrackers, hostOverrides, additionalHosts } =
+      config ?? ({} as LookupResolverConfig)
     this.facilitator = facilitator ?? new HTTPSOverlayLookupFacilitator()
     this.slapTrackers = slapTrackers ?? DEFAULT_SLAP_TRACKERS
     this.hostOverrides = hostOverrides ?? {}
@@ -128,7 +147,10 @@ export default class LookupResolver {
   /**
    * Given a LookupQuestion, returns a LookupAnswer. Aggregates across multiple services and supports resiliency.
    */
-  async query (question: LookupQuestion, timeout?: number): Promise<LookupAnswer> {
+  async query(
+    question: LookupQuestion,
+    timeout?: number
+  ): Promise<LookupAnswer> {
     let competentHosts: string[] = []
     if (question.service === 'ls_slap') {
       competentHosts = this.slapTrackers
@@ -144,17 +166,21 @@ export default class LookupResolver {
       ]
     }
     if (competentHosts.length < 1) {
-      throw new Error(`No competent hosts found by the SLAP trackers for lookup service: ${question.service}`)
+      throw new Error(
+        `No competent hosts found by the SLAP trackers for lookup service: ${question.service}`
+      )
     }
 
     // Use Promise.allSettled to handle individual host failures
     const hostResponses = await Promise.allSettled(
-      competentHosts.map(async host => await this.facilitator.lookup(host, question, timeout))
+      competentHosts.map(
+        async host => await this.facilitator.lookup(host, question, timeout)
+      )
     )
 
     const successfulResponses = hostResponses
       .filter(result => result.status === 'fulfilled')
-      .map(result => (result).value)
+      .map(result => result.value)
 
     if (successfulResponses.length === 0) {
       throw new Error('No successful responses from any hosts')
@@ -166,7 +192,7 @@ export default class LookupResolver {
       return successfulResponses[0]
     } else {
       // Aggregate outputs from all successful responses
-      const outputs = new Map<string, { beef: number[], outputIndex: number }>()
+      const outputs = new Map<string, { beef: number[]; outputIndex: number }>()
       for (const response of successfulResponses) {
         if (response.type !== 'output-list') {
           continue
@@ -192,11 +218,11 @@ export default class LookupResolver {
   }
 
   /**
-     * Returns a list of competent hosts for a given lookup service.
-     * @param service Service for which competent hosts are to be returned
-     * @returns Array of hosts competent for resolving queries
-     */
-  private async findCompetentHosts (service: string): Promise<string[]> {
+   * Returns a list of competent hosts for a given lookup service.
+   * @param service Service for which competent hosts are to be returned
+   * @returns Array of hosts competent for resolving queries
+   */
+  private async findCompetentHosts(service: string): Promise<string[]> {
     const query: LookupQuestion = {
       service: 'ls_slap',
       query: {
@@ -206,7 +232,10 @@ export default class LookupResolver {
 
     // Use Promise.allSettled to handle individual SLAP tracker failures
     const trackerResponses = await Promise.allSettled(
-      this.slapTrackers.map(async tracker => await this.facilitator.lookup(tracker, query, MAX_TRACKER_WAIT_TIME))
+      this.slapTrackers.map(
+        async tracker =>
+          await this.facilitator.lookup(tracker, query, MAX_TRACKER_WAIT_TIME)
+      )
     )
 
     const hosts = new Set<string>()
@@ -223,7 +252,10 @@ export default class LookupResolver {
             const tx = Transaction.fromBEEF(output.beef)
             const script = tx.outputs[output.outputIndex].lockingScript
             const parsed = OverlayAdminTokenTemplate.decode(script)
-            if (parsed.topicOrService !== service || parsed.protocol !== 'SLAP') {
+            if (
+              parsed.topicOrService !== service ||
+              parsed.protocol !== 'SLAP'
+            ) {
               // Invalid advertisement, skip
               continue
             }

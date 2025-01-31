@@ -1,6 +1,6 @@
-import { PrivateKey, PublicKey, SymmetricKey } from '../../../dist/cjs/src/primitives/index.js'
-import CachedKeyDeriver from '../../../dist/cjs/src/wallet/CachedKeyDeriver.js'
-import KeyDeriver from '../../../dist/cjs/src/wallet/KeyDeriver.js'
+import { PrivateKey, PublicKey, SymmetricKey } from '../../primitives/index'
+import CachedKeyDeriver from '../../wallet/CachedKeyDeriver'
+import KeyDeriver from '../../wallet/KeyDeriver'
 
 describe('CachedKeyDeriver', () => {
   let mockKeyDeriver: jest.Mocked<KeyDeriver>
@@ -20,7 +20,7 @@ describe('CachedKeyDeriver', () => {
 
     // Replace the internal keyDeriver instance with the mocked one
     cachedKeyDeriver = new CachedKeyDeriver(rootKey)
-    cachedKeyDeriver.keyDeriver = mockKeyDeriver
+    ;(cachedKeyDeriver as any).keyDeriver = mockKeyDeriver
   })
 
   describe('derivePublicKey', () => {
@@ -33,12 +33,20 @@ describe('CachedKeyDeriver', () => {
       mockKeyDeriver.derivePublicKey.mockReturnValue(publicKey)
 
       // First call - should invoke the underlying method
-      const result1 = cachedKeyDeriver.derivePublicKey(protocolID, keyID, counterparty)
+      const result1 = cachedKeyDeriver.derivePublicKey(
+        protocolID,
+        keyID,
+        counterparty
+      )
       expect(mockKeyDeriver.derivePublicKey).toHaveBeenCalledTimes(1)
       expect(result1).toBe(publicKey)
 
       // Second call with the same parameters - should retrieve from cache
-      const result2 = cachedKeyDeriver.derivePublicKey(protocolID, keyID, counterparty)
+      const result2 = cachedKeyDeriver.derivePublicKey(
+        protocolID,
+        keyID,
+        counterparty
+      )
       expect(mockKeyDeriver.derivePublicKey).toHaveBeenCalledTimes(1) // No additional calls
       expect(result2).toBe(publicKey)
     })
@@ -58,8 +66,16 @@ describe('CachedKeyDeriver', () => {
         .mockReturnValueOnce(publicKey2)
 
       // Different parameters - should not hit cache
-      const result1 = cachedKeyDeriver.derivePublicKey(protocolID1, keyID1, counterparty1)
-      const result2 = cachedKeyDeriver.derivePublicKey(protocolID2, keyID2, counterparty2)
+      const result1 = cachedKeyDeriver.derivePublicKey(
+        protocolID1,
+        keyID1,
+        counterparty1
+      )
+      const result2 = cachedKeyDeriver.derivePublicKey(
+        protocolID2,
+        keyID2,
+        counterparty2
+      )
       expect(mockKeyDeriver.derivePublicKey).toHaveBeenCalledTimes(2)
       expect(result1).toBe(publicKey1)
       expect(result2).toBe(publicKey2)
@@ -76,12 +92,20 @@ describe('CachedKeyDeriver', () => {
       mockKeyDeriver.derivePrivateKey.mockReturnValue(privateKey)
 
       // First call - should invoke the underlying method
-      const result1 = cachedKeyDeriver.derivePrivateKey(protocolID, keyID, counterparty)
+      const result1 = cachedKeyDeriver.derivePrivateKey(
+        protocolID,
+        keyID,
+        counterparty
+      )
       expect(mockKeyDeriver.derivePrivateKey).toHaveBeenCalledTimes(1)
       expect(result1).toBe(privateKey)
 
       // Second call with the same parameters - should retrieve from cache
-      const result2 = cachedKeyDeriver.derivePrivateKey(protocolID, keyID, counterparty)
+      const result2 = cachedKeyDeriver.derivePrivateKey(
+        protocolID,
+        keyID,
+        counterparty
+      )
       expect(mockKeyDeriver.derivePrivateKey).toHaveBeenCalledTimes(1)
       expect(result2).toBe(privateKey)
     })
@@ -98,11 +122,19 @@ describe('CachedKeyDeriver', () => {
         .mockReturnValueOnce(privateKey2)
 
       // First call
-      const result1 = cachedKeyDeriver.derivePrivateKey(protocolID, keyID, counterparty)
+      const result1 = cachedKeyDeriver.derivePrivateKey(
+        protocolID,
+        keyID,
+        counterparty
+      )
       expect(result1).toBe(privateKey1)
 
       // Second call with different keyID
-      const result2 = cachedKeyDeriver.derivePrivateKey(protocolID, 'key2', counterparty)
+      const result2 = cachedKeyDeriver.derivePrivateKey(
+        protocolID,
+        'key2',
+        counterparty
+      )
       expect(result2).toBe(privateKey2)
       expect(mockKeyDeriver.derivePrivateKey).toHaveBeenCalledTimes(2)
     })
@@ -118,12 +150,20 @@ describe('CachedKeyDeriver', () => {
       mockKeyDeriver.deriveSymmetricKey.mockReturnValue(symmetricKey)
 
       // First call
-      const result1 = cachedKeyDeriver.deriveSymmetricKey(protocolID, keyID, counterparty)
+      const result1 = cachedKeyDeriver.deriveSymmetricKey(
+        protocolID,
+        keyID,
+        counterparty
+      )
       expect(mockKeyDeriver.deriveSymmetricKey).toHaveBeenCalledTimes(1)
       expect(result1).toBe(symmetricKey)
 
       // Second call with same parameters
-      const result2 = cachedKeyDeriver.deriveSymmetricKey(protocolID, keyID, counterparty)
+      const result2 = cachedKeyDeriver.deriveSymmetricKey(
+        protocolID,
+        keyID,
+        counterparty
+      )
       expect(mockKeyDeriver.deriveSymmetricKey).toHaveBeenCalledTimes(1)
       expect(result2).toBe(symmetricKey)
     })
@@ -172,12 +212,20 @@ describe('CachedKeyDeriver', () => {
       mockKeyDeriver.revealSpecificSecret.mockReturnValue(secret)
 
       // First call
-      const result1 = cachedKeyDeriver.revealSpecificSecret(counterparty, protocolID, keyID)
+      const result1 = cachedKeyDeriver.revealSpecificSecret(
+        counterparty,
+        protocolID,
+        keyID
+      )
       expect(mockKeyDeriver.revealSpecificSecret).toHaveBeenCalledTimes(1)
       expect(result1).toBe(secret)
 
       // Second call with same parameters
-      const result2 = cachedKeyDeriver.revealSpecificSecret(counterparty, protocolID, keyID)
+      const result2 = cachedKeyDeriver.revealSpecificSecret(
+        counterparty,
+        protocolID,
+        keyID
+      )
       expect(mockKeyDeriver.revealSpecificSecret).toHaveBeenCalledTimes(1)
       expect(result2).toBe(secret)
     })
@@ -196,11 +244,19 @@ describe('CachedKeyDeriver', () => {
         .mockReturnValueOnce(secret2)
 
       // First call
-      const result1 = cachedKeyDeriver.revealSpecificSecret(counterparty, protocolID1, keyID1)
+      const result1 = cachedKeyDeriver.revealSpecificSecret(
+        counterparty,
+        protocolID1,
+        keyID1
+      )
       expect(result1).toBe(secret1)
 
       // Second call with different parameters
-      const result2 = cachedKeyDeriver.revealSpecificSecret(counterparty, protocolID2, keyID2)
+      const result2 = cachedKeyDeriver.revealSpecificSecret(
+        counterparty,
+        protocolID2,
+        keyID2
+      )
       expect(result2).toBe(secret2)
       expect(mockKeyDeriver.revealSpecificSecret).toHaveBeenCalledTimes(2)
     })
@@ -211,13 +267,13 @@ describe('CachedKeyDeriver', () => {
       const maxCacheSize = 5
       // Create a new CachedKeyDeriver with a small cache size
       cachedKeyDeriver = new CachedKeyDeriver(rootKey, { maxCacheSize })
-      cachedKeyDeriver.keyDeriver = mockKeyDeriver
+      ;(cachedKeyDeriver as any).keyDeriver = mockKeyDeriver
 
       const protocolID: [0, string] = [0, 'testprotocol']
       const counterparty = 'self'
 
       // Mock return values
-      const mockResults = [1, 2, 3, 4, 5, 6].map((n) => new PublicKey(0))
+      const mockResults = [1, 2, 3, 4, 5, 6].map(n => new PublicKey(0))
 
       mockKeyDeriver.derivePublicKey
         .mockReturnValueOnce(mockResults[0])
@@ -233,7 +289,7 @@ describe('CachedKeyDeriver', () => {
       }
 
       // Cache should be full now
-      expect(cachedKeyDeriver.cache.size).toBe(maxCacheSize)
+      expect((cachedKeyDeriver as any).cache.size).toBe(maxCacheSize)
 
       // Access one of the earlier keys to make it recently used
       cachedKeyDeriver.derivePublicKey(protocolID, 'key0', counterparty)
@@ -242,11 +298,11 @@ describe('CachedKeyDeriver', () => {
       cachedKeyDeriver.derivePublicKey(protocolID, 'key5', counterparty)
 
       // Cache size should still be maxCacheSize
-      expect(cachedKeyDeriver.cache.size).toBe(maxCacheSize)
+      expect((cachedKeyDeriver as any).cache.size).toBe(maxCacheSize)
 
       // The least recently used item (key1) should have been evicted
       // The cache should contain keys: key0, key2, key3, key4, key5
-      expect(Array.from(cachedKeyDeriver.cache.keys())).toEqual([
+      expect(Array.from((cachedKeyDeriver as any).cache.keys())).toEqual([
         expect.stringContaining('key2'),
         expect.stringContaining('key3'),
         expect.stringContaining('key4'),
@@ -258,7 +314,7 @@ describe('CachedKeyDeriver', () => {
     it('should update the recentness of cache entries on access', () => {
       const maxCacheSize = 3
       cachedKeyDeriver = new CachedKeyDeriver(rootKey, { maxCacheSize })
-      cachedKeyDeriver.keyDeriver = mockKeyDeriver
+      ;(cachedKeyDeriver as any).keyDeriver = mockKeyDeriver
 
       const protocolID: [0, string] = [0, 'testprotocol']
       const counterparty = 'self'
@@ -271,7 +327,7 @@ describe('CachedKeyDeriver', () => {
         .mockReturnValueOnce(publicKeys[2])
 
       // Fill the cache
-      keys.forEach((keyID) => {
+      keys.forEach(keyID => {
         cachedKeyDeriver.derivePublicKey(protocolID, keyID, counterparty)
       })
 
@@ -285,7 +341,7 @@ describe('CachedKeyDeriver', () => {
       cachedKeyDeriver.derivePublicKey(protocolID, newKeyID, counterparty)
 
       // 'key2' should be evicted as it is the least recently used
-      expect(Array.from(cachedKeyDeriver.cache.keys())).toEqual([
+      expect(Array.from((cachedKeyDeriver as any).cache.keys())).toEqual([
         expect.stringContaining('key3'),
         expect.stringContaining('key1'),
         expect.stringContaining('key4')
@@ -303,7 +359,7 @@ describe('CachedKeyDeriver', () => {
       // Simulate an expensive operation
       mockKeyDeriver.derivePublicKey.mockImplementation(() => {
         const start = Date.now()
-        while (Date.now() - start < 50) { } // Busy wait for 50ms
+        while (Date.now() - start < 50) {} // Busy wait for 50ms
         return publicKey
       })
 

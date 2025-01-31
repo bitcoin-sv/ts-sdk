@@ -8,7 +8,7 @@ import {
   Signature,
   WalletProtocol,
   ProtoWallet
-} from '../../../mod.js'
+} from '../../../mod'
 
 /**
  * Represents an Identity Certificate as per the Wallet interface specifications.
@@ -48,7 +48,7 @@ export default class Certificate {
 
   /**
    * Certificate signature by the certifier's private key, DER encoded hex string.
-  */
+   */
   signature?: HexString
 
   /**
@@ -233,11 +233,15 @@ export default class Certificate {
    */
   async sign(certifierWallet: ProtoWallet): Promise<void> {
     if (this.signature) {
-      throw new Error(`Certificate has already been signed! Signature present: ${this.signature}`)
+      throw new Error(
+        `Certificate has already been signed! Signature present: ${this.signature}`
+      )
     }
 
     // Ensure the certifier declared is the one actually signing
-    this.certifier = (await certifierWallet.getPublicKey({ identityKey: true })).publicKey
+    this.certifier = (
+      await certifierWallet.getPublicKey({ identityKey: true })
+    ).publicKey
 
     const preimage = this.toBinary(false) // Exclude the signature when signing
     const { signature } = await certifierWallet.createSignature({
@@ -257,7 +261,13 @@ export default class Certificate {
    *   - `protocolID` (WalletProtocol): The protocol ID for certificate field encryption.
    *   - `keyID` (string): A unique key identifier derived from the serial number and field name.
    */
-  static getCertificateFieldEncryptionDetails(fieldName: string, serialNumber?: string): { protocolID: WalletProtocol, keyID: string } {
-    return { protocolID: [2, 'certificate field encryption'], keyID: `${serialNumber} ${fieldName}` }
+  static getCertificateFieldEncryptionDetails(
+    fieldName: string,
+    serialNumber?: string
+  ): { protocolID: WalletProtocol; keyID: string } {
+    return {
+      protocolID: [2, 'certificate field encryption'],
+      keyID: `${serialNumber} ${fieldName}`
+    }
   }
 }
