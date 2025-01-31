@@ -23,16 +23,16 @@ export interface LookupQuestion {
  */
 export type LookupAnswer =
   | {
-      type: 'output-list'
-      outputs: Array<{
-        beef: number[]
-        outputIndex: number
-      }>
-    }
+    type: 'output-list'
+    outputs: Array<{
+      beef: number[]
+      outputIndex: number
+    }>
+  }
   | {
-      type: 'freeform'
-      result: unknown
-    }
+    type: 'freeform'
+    result: unknown
+  }
 
 /** Default SLAP trackers */
 export const DEFAULT_SLAP_TRACKERS: string[] = [
@@ -84,11 +84,11 @@ export interface OverlayLookupFacilitator {
 export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
   fetchClient: typeof fetch
 
-  constructor(httpClient = fetch) {
+  constructor (httpClient = fetch) {
     this.fetchClient = httpClient
   }
 
-  async lookup(
+  async lookup (
     url: string,
     question: LookupQuestion,
     timeout: number = 5000
@@ -135,7 +135,7 @@ export default class LookupResolver {
   private readonly hostOverrides: Record<string, string[]>
   private readonly additionalHosts: Record<string, string[]>
 
-  constructor(config?: LookupResolverConfig) {
+  constructor (config?: LookupResolverConfig) {
     const { facilitator, slapTrackers, hostOverrides, additionalHosts } =
       config ?? ({} as LookupResolverConfig)
     this.facilitator = facilitator ?? new HTTPSOverlayLookupFacilitator()
@@ -147,7 +147,7 @@ export default class LookupResolver {
   /**
    * Given a LookupQuestion, returns a LookupAnswer. Aggregates across multiple services and supports resiliency.
    */
-  async query(
+  async query (
     question: LookupQuestion,
     timeout?: number
   ): Promise<LookupAnswer> {
@@ -192,7 +192,7 @@ export default class LookupResolver {
       return successfulResponses[0]
     } else {
       // Aggregate outputs from all successful responses
-      const outputs = new Map<string, { beef: number[]; outputIndex: number }>()
+      const outputs = new Map<string, { beef: number[], outputIndex: number }>()
       for (const response of successfulResponses) {
         if (response.type !== 'output-list') {
           continue
@@ -222,7 +222,7 @@ export default class LookupResolver {
    * @param service Service for which competent hosts are to be returned
    * @returns Array of hosts competent for resolving queries
    */
-  private async findCompetentHosts(service: string): Promise<string[]> {
+  private async findCompetentHosts (service: string): Promise<string[]> {
     const query: LookupQuestion = {
       service: 'ls_slap',
       query: {

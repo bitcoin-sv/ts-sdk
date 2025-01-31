@@ -1,12 +1,12 @@
-import BigNumber from "../primitives/BigNumber";
-import { Writer, toArray } from "../primitives/utils";
-import * as ECDSA from "../primitives/ECDSA";
-import * as Hash from "../primitives/Hash";
-import PrivateKey from "../primitives/PrivateKey";
-import PublicKey from "../primitives/PublicKey";
-import Signature from "../primitives/Signature";
+import BigNumber from '../primitives/BigNumber'
+import { Writer, toArray } from '../primitives/utils'
+import * as ECDSA from '../primitives/ECDSA'
+import * as Hash from '../primitives/Hash'
+import PrivateKey from '../primitives/PrivateKey'
+import PublicKey from '../primitives/PublicKey'
+import Signature from '../primitives/Signature'
 
-const prefix = "Bitcoin Signed Message:\n";
+const prefix = 'Bitcoin Signed Message:\n'
 
 /**
  * Generates a SHA256 double-hash of the prefixed message.
@@ -15,15 +15,15 @@ const prefix = "Bitcoin Signed Message:\n";
  * @returns The double-hash of the prefixed message as a number array.
  */
 export const magicHash = (messageBuf: number[]): number[] => {
-  const bw = new Writer();
-  bw.writeVarIntNum(prefix.length);
-  bw.write(toArray(prefix, "utf8"));
-  bw.writeVarIntNum(messageBuf.length);
-  bw.write(messageBuf);
-  const buf = bw.toArray();
-  const hashBuf = Hash.hash256(buf);
-  return hashBuf;
-};
+  const bw = new Writer()
+  bw.writeVarIntNum(prefix.length)
+  bw.write(toArray(prefix, 'utf8'))
+  bw.writeVarIntNum(messageBuf.length)
+  bw.write(messageBuf)
+  const buf = bw.toArray()
+  const hashBuf = Hash.hash256(buf)
+  return hashBuf
+}
 
 /**
  * Signs a BSM message using the given private key.
@@ -36,17 +36,17 @@ export const magicHash = (messageBuf: number[]): number[] => {
 export const sign = (
   message: number[],
   privateKey: PrivateKey,
-  mode: "raw" | "base64" = "base64"
+  mode: 'raw' | 'base64' = 'base64'
 ): Signature | string => {
-  const hashBuf = magicHash(message);
-  const sig = ECDSA.sign(new BigNumber(hashBuf), privateKey, true);
-  if (mode === "raw") {
-    return sig;
+  const hashBuf = magicHash(message)
+  const sig = ECDSA.sign(new BigNumber(hashBuf), privateKey, true)
+  if (mode === 'raw') {
+    return sig
   }
-  const h = new BigNumber(hashBuf);
-  const r = sig.CalculateRecoveryFactor(privateKey.toPublicKey(), h);
-  return sig.toCompact(r, true, "base64") as string;
-};
+  const h = new BigNumber(hashBuf)
+  const r = sig.CalculateRecoveryFactor(privateKey.toPublicKey(), h)
+  return sig.toCompact(r, true, 'base64') as string
+}
 
 /**
  * Verifies a BSM signed message using the given public key.
@@ -61,6 +61,6 @@ export const verify = (
   sig: Signature,
   pubKey: PublicKey
 ): boolean => {
-  const hashBuf = magicHash(message);
-  return ECDSA.verify(new BigNumber(hashBuf), sig, pubKey);
-};
+  const hashBuf = magicHash(message)
+  return ECDSA.verify(new BigNumber(hashBuf), sig, pubKey)
+}
