@@ -192,7 +192,7 @@
     "test": "npm run build && jest",
     "test:watch": "npm run build && jest --watch",
     "test:coverage": "npm run build && jest --coverage",
-    "lint": "ts-standard --fix src/**/*.ts && prettier --write src/**/*.ts --log-level error",
+    "lint": "ts-standard --fix src/**/*.ts && prettier --write 'src/**/*.ts' --log-level error",
     "build": "npm run build:ts && npm run build:umd",
     "build:ts": "tsc -b && tsconfig-to-dual-package tsconfig.cjs.json",
     "build:umd": "webpack --config webpack.config.js",
