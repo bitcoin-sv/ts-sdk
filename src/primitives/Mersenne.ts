@@ -1,4 +1,4 @@
-import BigNumber from "./BigNumber";
+import BigNumber from './BigNumber'
 
 /**
  * A representation of a pseudo-Mersenne prime.
@@ -12,11 +12,11 @@ import BigNumber from "./BigNumber";
  * @property n - The exponent which determines the magnitude of the prime.
  */
 export default class Mersenne {
-  name: string;
-  p: BigNumber;
-  k: BigNumber;
-  n: number;
-  private readonly tmp: BigNumber;
+  name: string
+  p: BigNumber
+  k: BigNumber
+  n: number
+  private readonly tmp: BigNumber
 
   /**
    * @constructor
@@ -26,14 +26,14 @@ export default class Mersenne {
    * @example
    * const mersenne = new Mersenne('M31', '7FFFFFFF');
    */
-  constructor(name: string, p: string) {
+  constructor (name: string, p: string) {
     // P = 2 ^ N - K
-    this.name = name;
-    this.p = new BigNumber(p, 16);
-    this.n = this.p.bitLength();
-    this.k = new BigNumber(1).iushln(this.n).isub(this.p);
+    this.name = name
+    this.p = new BigNumber(p, 16)
+    this.n = this.p.bitLength()
+    this.k = new BigNumber(1).iushln(this.n).isub(this.p)
 
-    this.tmp = this._tmp();
+    this.tmp = this._tmp()
   }
 
   /**
@@ -43,10 +43,10 @@ export default class Mersenne {
    * @method _tmp
    * @returns A BigNumber with scaled size depending on prime magnitude.
    */
-  private _tmp(): BigNumber {
-    const tmp = new BigNumber();
-    tmp.words = new Array(Math.ceil(this.n / 13));
-    return tmp;
+  private _tmp (): BigNumber {
+    const tmp = new BigNumber()
+    tmp.words = new Array(Math.ceil(this.n / 13))
+    return tmp
   }
 
   /**
@@ -60,36 +60,36 @@ export default class Mersenne {
    * @example
    * const reduced = mersenne.ireduce(new BigNumber('2345', 16));
    */
-  ireduce(num: BigNumber): BigNumber {
+  ireduce (num: BigNumber): BigNumber {
     // Assumes that `num` is less than `P^2`
     // num = HI * (2 ^ N - K) + HI * K + LO = HI * K + LO (mod P)
-    let r = num;
-    let rlen;
+    let r = num
+    let rlen
 
     do {
-      this.split(r, this.tmp);
-      r = this.imulK(r);
-      r = r.iadd(this.tmp);
-      rlen = r.bitLength();
-    } while (rlen > this.n);
+      this.split(r, this.tmp)
+      r = this.imulK(r)
+      r = r.iadd(this.tmp)
+      rlen = r.bitLength()
+    } while (rlen > this.n)
 
-    const cmp = rlen < this.n ? -1 : r.ucmp(this.p);
+    const cmp = rlen < this.n ? -1 : r.ucmp(this.p)
     if (cmp === 0) {
-      r.words[0] = 0;
-      r.length = 1;
+      r.words[0] = 0
+      r.length = 1
     } else if (cmp > 0) {
-      r.isub(this.p);
+      r.isub(this.p)
     } else {
       if (r.strip !== undefined) {
         // r is a BN v4 instance
-        r.strip();
+        r.strip()
       } else {
         // r is a BN v5 instance
-        r.strip();
+        r.strip()
       }
     }
 
-    return r;
+    return r
   }
 
   /**
@@ -103,8 +103,8 @@ export default class Mersenne {
    * @example
    * mersenne.split(new BigNumber('2345', 16), new BigNumber());
    */
-  split(input: BigNumber, out: BigNumber): void {
-    input.iushrn(this.n, 0, out);
+  split (input: BigNumber, out: BigNumber): void {
+    input.iushrn(this.n, 0, out)
   }
 
   /**
@@ -117,7 +117,7 @@ export default class Mersenne {
    * @example
    * const multiplied = mersenne.imulK(new BigNumber('2345', 16));
    */
-  imulK(num: BigNumber): BigNumber {
-    return num.imul(this.k);
+  imulK (num: BigNumber): BigNumber {
+    return num.imul(this.k)
   }
 }

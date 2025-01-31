@@ -1,5 +1,5 @@
-import { SHA256HMAC } from "./Hash";
-import { toHex, toArray } from "./utils";
+import { SHA256HMAC } from './Hash'
+import { toHex, toArray } from './utils'
 
 /**
  * This class behaves as a HMAC-based deterministic random bit generator (DRBG). It implements a deterministic random number generator using SHA256HMAC HASH function. It takes an initial entropy and nonce when instantiated for seeding purpose.
@@ -15,25 +15,25 @@ import { toHex, toArray } from "./utils";
  * const drbg = new DRBG('af12de...', '123ef...');
  */
 export default class DRBG {
-  K: number[];
-  V: number[];
+  K: number[]
+  V: number[]
 
-  constructor(entropy: number[] | string, nonce: number[] | string) {
-    entropy = toArray(entropy, "hex");
-    nonce = toArray(nonce, "hex");
+  constructor (entropy: number[] | string, nonce: number[] | string) {
+    entropy = toArray(entropy, 'hex')
+    nonce = toArray(nonce, 'hex')
 
     if (entropy.length < 32) {
-      throw new Error("Not enough entropy. Minimum is 256 bits");
+      throw new Error('Not enough entropy. Minimum is 256 bits')
     }
-    const seed = entropy.concat(nonce);
+    const seed = entropy.concat(nonce)
 
-    this.K = new Array(32);
-    this.V = new Array(32);
+    this.K = new Array(32)
+    this.V = new Array(32)
     for (let i = 0; i < 32; i++) {
-      this.K[i] = 0x00;
-      this.V[i] = 0x01;
+      this.K[i] = 0x00
+      this.V[i] = 0x01
     }
-    this.update(seed);
+    this.update(seed)
   }
 
   /**
@@ -45,8 +45,8 @@ export default class DRBG {
    * @example
    * const hmac = drbg.hmac();
    */
-  hmac(): SHA256HMAC {
-    return new SHA256HMAC(this.K);
+  hmac (): SHA256HMAC {
+    return new SHA256HMAC(this.K)
   }
 
   /**
@@ -60,19 +60,19 @@ export default class DRBG {
    * @example
    * drbg.update('e13af...');
    */
-  update(seed?): void {
-    let kmac = this.hmac().update(this.V).update([0x00]);
+  update (seed?): void {
+    let kmac = this.hmac().update(this.V).update([0x00])
     if (seed !== undefined) {
-      kmac = kmac.update(seed);
+      kmac = kmac.update(seed)
     }
-    this.K = kmac.digest();
-    this.V = this.hmac().update(this.V).digest();
+    this.K = kmac.digest()
+    this.V = this.hmac().update(this.V).digest()
     if (seed === undefined) {
-      return;
+      return
     }
 
-    this.K = this.hmac().update(this.V).update([0x01]).update(seed).digest();
-    this.V = this.hmac().update(this.V).digest();
+    this.K = this.hmac().update(this.V).update([0x01]).update(seed).digest()
+    this.V = this.hmac().update(this.V).digest()
   }
 
   /**
@@ -86,15 +86,15 @@ export default class DRBG {
    * @example
    * const randomHex = drbg.generate(256);
    */
-  generate(len: number): string {
-    let temp = [];
+  generate (len: number): string {
+    let temp = []
     while (temp.length < len) {
-      this.V = this.hmac().update(this.V).digest();
-      temp = temp.concat(this.V);
+      this.V = this.hmac().update(this.V).digest()
+      temp = temp.concat(this.V)
     }
 
-    const res = temp.slice(0, len);
-    this.update();
-    return toHex(res);
+    const res = temp.slice(0, len)
+    this.update()
+    return toHex(res)
   }
 }

@@ -23,6 +23,6 @@
  * };
  */
 export default interface ChainTracker {
-  isValidRootForHeight: (root: string, height: number) => Promise<boolean>;
-  currentHeight: () => Promise<number>;
+  isValidRootForHeight: (root: string, height: number) => Promise<boolean>
+  currentHeight: () => Promise<number>
 }
