@@ -131,44 +131,6 @@ export default class Transaction {
   }
 
   /**
-   * Parses BEEF data from a Reader and returns the transactions and BUMPs.
-   *
-   * @param reader The Reader positioned at the start of BEEF data.
-   * @returns An object containing the transactions and BUMPs.
-   */
-  private static parseBEEFData (reader: Reader): { transactions: Record<string, { pathIndex?: number, tx: Transaction }>, BUMPs: MerklePath[] } {
-    // Read the version
-    const version = reader.readUInt32LE()
-    if (version !== BEEF_V1) {
-      throw new Error(`Invalid BEEF version. Expected ${BEEF_V1}, received ${version}.`)
-    }
-
-    // Read the BUMPs
-    const numberOfBUMPs = reader.readVarIntNum()
-    const BUMPs = []
-    for (let i = 0; i < numberOfBUMPs; i++) {
-      BUMPs.push(MerklePath.fromReader(reader))
-    }
-
-    // Read all transactions into an object
-    // The object has keys of TXIDs and values of objects with transactions and BUMP indexes
-    const numberOfTransactions = reader.readVarIntNum()
-    const transactions: Record<string, { pathIndex?: number, tx: Transaction }> = {}
-    for (let i = 0; i < numberOfTransactions; i++) {
-      const tx = Transaction.fromReader(reader)
-      const obj: { pathIndex?: number, tx: Transaction } = { tx }
-      const txid = tx.id('hex')
-      const hasBump = Boolean(reader.readUInt8())
-      if (hasBump) {
-        obj.pathIndex = reader.readVarIntNum()
-      }
-      transactions[txid] = obj
-    }
-
-    return { transactions, BUMPs }
-  }
-
-  /**
    * Creates a new transaction, linked to its inputs and their associated merkle paths, from a EF (BRC-30) structure.
    * @param ef A binary representation of a transaction in EF format.
    * @returns An extended transaction, linked to its associated inputs by locking script and satoshis amounts only.
