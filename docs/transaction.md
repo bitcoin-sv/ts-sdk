@@ -161,8 +161,8 @@ const chainTracker = {
     // Implementation to check if the Merkle root is valid for the specified block height.
   }
  currentHeight: async () => {
-   // Implementation to get the current block height.
- }
+    // Implementation to get the current block height.
+  }
 };
 ```
 
@@ -315,7 +315,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ### Interface: HttpsNodejs
 
-Node.js Https module interface limited to options needed by ts-sdk
+Node Https module interface limited to options needed by ts-sdk
 
 ```ts
 export interface HttpsNodejs {
@@ -344,7 +344,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ### Interface: NodejsHttpClientRequest
 
-Nodejs result of the Node.js https.request call limited to options needed by ts-sdk
+Nodejs result of the Node https.request call limited to options needed by ts-sdk
 
 ```ts
 export interface NodejsHttpClientRequest {
@@ -1196,7 +1196,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ### Class: FetchHttpClient
 
-Adapter for Node.js Https module to be used as HttpClient
+Adapter for Node Https module to be used as HttpClient
 
 ```ts
 export class FetchHttpClient implements HttpClient {
@@ -1424,7 +1424,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ### Class: NodejsHttpClient
 
-Adapter for Node.js Https module to be used as HttpClient
+Adapter for Node Https module to be used as HttpClient
 
 ```ts
 export class NodejsHttpClient implements HttpClient {
@@ -2151,7 +2151,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 Returns a default HttpClient implementation based on the environment that it is run on.
 This method will attempt to use `window.fetch` if available (in browser environments).
-If running in a Node.js environment, it falls back to using the Node.js `https` module
+If running in a Node environment, it falls back to using the Node `https` module
 
 ```ts
 export function defaultHttpClient(): HttpClient 
