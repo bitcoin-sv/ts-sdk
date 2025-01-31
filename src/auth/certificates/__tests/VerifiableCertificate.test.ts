@@ -3,7 +3,7 @@ import {
   PrivateKey,
   SymmetricKey,
   Utils
-} from '../../../../dist/cjs/src/primitives/index'
+} from '../../../../mod'
 import { CompletedProtoWallet } from '../../../auth/certificates/__tests/CompletedProtoWallet'
 import { Certificate } from '../../../auth/certificates/index'
 import { MasterCertificate } from '../../../auth/certificates/MasterCertificate'

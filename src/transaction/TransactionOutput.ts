@@ -1,5 +1,5 @@
-import BigNumber from "../primitives/BigNumber";
-import LockingScript from "../script/LockingScript";
+import BigNumber from '../primitives/BigNumber'
+import LockingScript from '../script/LockingScript'
 
 /**
  * Represents an output in a Bitcoin transaction.
@@ -31,7 +31,7 @@ import LockingScript from "../script/LockingScript";
  * intended recipient's public key.
  */
 export default interface TransactionOutput {
-  satoshis?: number;
-  lockingScript: LockingScript;
-  change?: boolean;
+  satoshis?: number
+  lockingScript: LockingScript
+  change?: boolean
 }
