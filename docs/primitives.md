@@ -3570,12 +3570,10 @@ export default class Curve {
             b: BigNumber;
         }>;
     } | undefined 
-    ;
     _getEndoRoots(num: BigNumber): [
         BigNumber,
         BigNumber
     ] 
-    ;
     _getEndoBasis(lambda: BigNumber): [
         {
             a: BigNumber;
@@ -3591,7 +3589,6 @@ export default class Curve {
         k2: BigNumber;
     } 
     validate(point: Point): boolean 
-    ;
 }
 ```
 
@@ -4585,8 +4582,6 @@ export default class Point extends BasePoint {
     neg(_precompute?: boolean): Point 
     dblp(k: number): Point 
     toJ(): JPoint 
-    ;
-    ;
 }
 ```
 
@@ -6776,7 +6771,6 @@ export class SHA256 extends BaseHash {
     k: number[];
     constructor() 
     _update(msg: number[], start?: number): void 
-    ;
     _digest(): number[] 
     _digestHex(): string 
 }
@@ -8657,7 +8651,10 @@ toUTF8 = (arr: number[]): string => {
             const byte3 = arr[i + 2];
             const byte4 = arr[i + 3];
             skip = 3;
-            const codePoint = ((byte & 7) << 18) | ((byte2 & 63) << 12) | ((byte3 & 63) << 6) | (byte4 & 63);
+            const codePoint = ((byte & 7) << 18) |
+                ((byte2 & 63) << 12) |
+                ((byte3 & 63) << 6) |
+                (byte4 & 63);
             const surrogate1 = 55296 + ((codePoint - 65536) >> 10);
             const surrogate2 = 56320 + ((codePoint - 65536) & 1023);
             result += String.fromCharCode(surrogate1, surrogate2);
