@@ -2,63 +2,12 @@ import { Peer } from '../../auth/Peer'
 import { AuthMessage, Transport } from '../../auth/types'
 import { jest } from '@jest/globals'
 import { WalletInterface } from '../../wallet/Wallet.interfaces'
-import { Utils } from '../../primitives/index'
-import PrivateKey from '../../primitives/PrivateKey'
-import SymmetricKey from '../../primitives/SymmetricKey'
+import { CompletedProtoWallet } from '../../auth/certificates/__tests/CompletedProtoWallet'
+import { Utils, PrivateKey, SymmetricKey } from '../../primitives/index'
 import { VerifiableCertificate } from '../../auth/certificates/VerifiableCertificate'
 import { MasterCertificate } from '../../auth/certificates/MasterCertificate'
 import { getVerifiableCertificates } from '../../auth/utils/getVerifiableCertificates'
-import { Certificate } from '../../auth/certificates/index'
-import { CompletedProtoWallet } from '../../auth/certificates/__tests/CompletedProtoWallet'
 jest.mock('../../auth/utils/getVerifiableCertificates')
-
-/**
- * A helper function to decrypt a VerifiableCertificate's fields using the provided wallets.
- */
-async function decryptCertificateFields(
-  cert: VerifiableCertificate,
-  localWallet: WalletInterface,
-  counterpartyWallet: WalletInterface
-): Promise<Record<string, string>> {
-  const entries = await Promise.all(
-    Object.entries(cert.keyring).map(async ([fieldName, encryptedKey]) => {
-      // Decrypt the per-field symmetric key
-      const { plaintext: masterFieldKey } = await localWallet.decrypt({
-        ciphertext: Utils.toArray(encryptedKey, 'base64'),
-        ...Certificate.getCertificateFieldEncryptionDetails(
-          cert.serialNumber,
-          fieldName
-        ),
-        counterparty: (
-          await counterpartyWallet.getPublicKey({ identityKey: true })
-        ).publicKey
-      })
-
-      // Decrypt the actual field contents using the decrypted symmetric key
-      try {
-        const decryptedData = new SymmetricKey(masterFieldKey).decrypt(
-          Utils.toArray(cert.fields[fieldName], 'base64')
-        )
-        return {
-          key: fieldName,
-          value: Utils.toUTF8(decryptedData as number[])
-        }
-      } catch (_) {
-        throw new Error(
-          `Decryption of the "${fieldName}" field with its revelation key failed.`
-        )
-      }
-    })
-  )
-
-  return entries.reduce(
-    (acc, { key, value }) => {
-      acc[key] = value
-      return acc
-    },
-    {} as Record<string, string>
-  )
-}
 
 class LocalTransport implements Transport {
   private peerTransport?: LocalTransport
@@ -150,10 +99,14 @@ describe('Peer class mutual authentication and certificate exchange', () => {
   ): Promise<VerifiableCertificate> {
     const certifierWallet = new CompletedProtoWallet(certifierPrivateKey)
 
-    const keyringForVerifier = await masterCertificate.createKeyringForVerifier(
+    const keyringForVerifier = await MasterCertificate.createKeyringForVerifier(
       wallet,
+      certifierWallet.keyDeriver.identityKey,
       verifierIdentityKey,
-      fieldsToReveal
+      masterCertificate.fields,
+      fieldsToReveal,
+      masterCertificate.masterKeyring,
+      masterCertificate.serialNumber
     )
     return new VerifiableCertificate(
       masterCertificate.type,
@@ -162,8 +115,8 @@ describe('Peer class mutual authentication and certificate exchange', () => {
       masterCertificate.certifier,
       masterCertificate.revocationOutpoint,
       masterCertificate.fields,
-      masterCertificate.signature,
-      keyringForVerifier
+      keyringForVerifier,
+      masterCertificate.signature
     )
   }
 
@@ -301,11 +254,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
         if (certificatesReceivedByBob?.length !== 0) {
           certificatesReceivedByBob?.forEach(async cert => {
             // Decrypt to ensure it has the correct fields
-            const decryptedFields = await decryptCertificateFields(
-              cert,
-              walletB,
-              walletA
-            )
+            const decryptedFields = await cert.decryptFields(walletB)
             if (cert.certifier !== 'bob') {
               console.log('Bob accepted the message:', Utils.toUTF8(payload))
               console.log('Decrypted fields:', decryptedFields)
@@ -363,11 +312,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
       async (senderPublicKey, certificates) => {
         for (const cert of certificates) {
           // Decrypt Bob's certificate fields
-          const decryptedFields = await decryptCertificateFields(
-            cert,
-            walletA,
-            walletB
-          )
+          const decryptedFields = await cert.decryptFields(walletA)
 
           // Check and use the decrypted fields
           if (
@@ -448,11 +393,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
           if (certificates.length > 0) {
             // Decrypt to confirm
             for (const cert of certificates) {
-              const decrypted = await decryptCertificateFields(
-                cert,
-                walletB,
-                walletA
-              )
+              const decrypted = await cert.decryptFields(walletB)
               console.log(
                 'Bob received additional certificates from Alice:',
                 cert
@@ -511,11 +452,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
         async (senderPublicKey, certificates) => {
           for (const cert of certificates) {
             // Decrypt Alice's certificate fields
-            const decryptedFields = await decryptCertificateFields(
-              cert,
-              walletB,
-              walletA
-            )
+            const decryptedFields = await cert.decryptFields(walletB)
             if (decryptedFields.membershipStatus) {
               console.log(
                 `Bob received Alice's membership status: ${decryptedFields.membershipStatus}`
@@ -605,11 +542,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
       alice.listenForCertificatesReceived(
         async (senderPublicKey, certificates) => {
           for (const cert of certificates) {
-            const decryptedFields = await decryptCertificateFields(
-              cert,
-              walletA,
-              walletB
-            )
+            const decryptedFields = await cert.decryptFields(walletA)
             if (decryptedFields.driversLicenseNumber) {
               console.log(
                 `Alice received Bob's driver's license number: ${decryptedFields.driversLicenseNumber}`
@@ -626,11 +559,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
       bob.listenForCertificatesReceived(
         async (senderPublicKey, certificates) => {
           for (const cert of certificates) {
-            const decryptedFields = await decryptCertificateFields(
-              cert,
-              walletB,
-              walletA
-            )
+            const decryptedFields = await cert.decryptFields(walletB)
             if (decryptedFields.driversLicenseNumber) {
               console.log(
                 `Bob received Alice's driver's license number: ${decryptedFields.driversLicenseNumber}`
@@ -735,16 +664,10 @@ describe('Peer class mutual authentication and certificate exchange', () => {
       alice.listenForCertificatesReceived(
         async (senderPublicKey, certificates) => {
           for (const cert of certificates) {
-            const decryptedFields = await decryptCertificateFields(
-              cert,
-              walletA,
-              walletB
-            )
+            const decryptedFields = await cert.decryptFields(walletA)
             if (decryptedFields.email || decryptedFields.name) {
               console.log(
-                `Alice received Bob's certificate with fields: ${Object.keys(
-                  decryptedFields
-                ).join(', ')}`
+                `Alice received Bob's certificate with fields: ${Object.keys(decryptedFields).join(', ')}`
               )
               aliceAcceptedPartialCert()
               resolve()
@@ -758,16 +681,10 @@ describe('Peer class mutual authentication and certificate exchange', () => {
       bob.listenForCertificatesReceived(
         async (senderPublicKey, certificates) => {
           for (const cert of certificates) {
-            const decryptedFields = await decryptCertificateFields(
-              cert,
-              walletB,
-              walletA
-            )
+            const decryptedFields = await cert.decryptFields(walletB)
             if (decryptedFields.email || decryptedFields.name) {
               console.log(
-                `Bob received Alice's certificate with fields: ${Object.keys(
-                  decryptedFields
-                ).join(', ')}`
+                `Bob received Alice's certificate with fields: ${Object.keys(decryptedFields).join(', ')}`
               )
               bobAcceptedPartialCert()
               resolve()

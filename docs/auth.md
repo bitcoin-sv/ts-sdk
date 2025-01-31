@@ -212,21 +212,21 @@ export default class Certificate {
     subject: PubKeyHex;
     certifier: PubKeyHex;
     revocationOutpoint: OutpointString;
-    fields: Record<CertificateFieldNameUnder50Bytes, string>;
+    fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
     signature?: HexString;
     constructor(type: Base64String, serialNumber: Base64String, subject: PubKeyHex, certifier: PubKeyHex, revocationOutpoint: OutpointString, fields: Record<CertificateFieldNameUnder50Bytes, string>, signature?: HexString) 
     toBinary(includeSignature: boolean = true): number[] 
     static fromBinary(bin: number[]): Certificate 
     async verify(): Promise<boolean> 
-    async sign(certifierWallet: WalletInterface): Promise<void> 
-    static getCertificateFieldEncryptionDetails(serialNumber: string, fieldName: string): {
+    async sign(certifierWallet: ProtoWallet): Promise<void> 
+    static getCertificateFieldEncryptionDetails(fieldName: string, serialNumber?: string): {
         protocolID: WalletProtocol;
         keyID: string;
     } 
 }
 ```
 
-See also: [Base64String](#type-base64string), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [PubKeyHex](#type-pubkeyhex), [WalletInterface](#interface-walletinterface), [WalletProtocol](#type-walletprotocol), [sign](#variable-sign), [verify](#variable-verify)
+See also: [Base64String](#type-base64string), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [ProtoWallet](#class-protowallet), [PubKeyHex](#type-pubkeyhex), [WalletProtocol](#type-walletprotocol), [sign](#variable-sign), [verify](#variable-verify)
 
 <details>
 
@@ -269,12 +269,12 @@ See also: [PubKeyHex](#type-pubkeyhex)
 
 #### Property fields
 
-All the fields present in the certificate, with field names as keys and field values as strings.
+All the fields present in the certificate, with field names as keys and encrypted field values as Base64 strings.
 
 ```ts
-fields: Record<CertificateFieldNameUnder50Bytes, string>
+fields: Record<CertificateFieldNameUnder50Bytes, Base64String>
 ```
-See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes)
+See also: [Base64String](#type-base64string), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes)
 
 #### Property revocationOutpoint
 
@@ -344,7 +344,7 @@ Argument Details
 Helper function which retrieves the protocol ID and key ID for certificate field encryption.
 
 ```ts
-static getCertificateFieldEncryptionDetails(serialNumber: string, fieldName: string): {
+static getCertificateFieldEncryptionDetails(fieldName: string, serialNumber?: string): {
     protocolID: WalletProtocol;
     keyID: string;
 } 
@@ -369,9 +369,9 @@ Argument Details
 Signs the certificate using the provided certifier wallet.
 
 ```ts
-async sign(certifierWallet: WalletInterface): Promise<void> 
+async sign(certifierWallet: ProtoWallet): Promise<void> 
 ```
-See also: [WalletInterface](#interface-walletinterface)
+See also: [ProtoWallet](#class-protowallet)
 
 Argument Details
 
@@ -466,17 +466,50 @@ export class MasterCertificate extends Certificate {
     declare signature?: HexString;
     masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
     constructor(type: Base64String, serialNumber: Base64String, subject: PubKeyHex, certifier: PubKeyHex, revocationOutpoint: OutpointString, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, signature?: HexString) 
-    async decryptFields(subjectWallet: WalletInterface): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
-    async createKeyringForVerifier(subjectWallet: WalletInterface, verifier: WalletCounterparty, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
-    static async issueCertificateForSubject(certifierWallet: WalletInterface, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => { return "Certificate revocation not tracked."; }): Promise<MasterCertificate> 
+    static async createCertificateFields(creatorWallet: ProtoWallet, certifierOrSubject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<CreateCertificateFieldsResult> 
+    static async createKeyringForVerifier(subjectWallet: ProtoWallet, certifier: WalletCounterparty, verifier: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldsToReveal: string[], masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, serialNumber: Base64String, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+    static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => { return "Certificate revocation not tracked."; }, serialNumber?: string): Promise<MasterCertificate> 
+    static async decryptFields(subjectOrCertifierWallet: ProtoWallet, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, counterparty: WalletCounterparty): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+    static async decryptField(subjectOrCertifierWallet: ProtoWallet, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldName: Base64String, fieldValue: Base64String, counterparty: WalletCounterparty, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+        fieldRevelationKey: number[];
+        decryptedFieldValue: string;
+    }> 
 }
 ```
 
-See also: [Base64String](#type-base64string), [Certificate](#class-certificate), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [PubKeyHex](#type-pubkeyhex), [WalletCounterparty](#type-walletcounterparty), [WalletInterface](#interface-walletinterface)
+See also: [Base64String](#type-base64string), [Certificate](#class-certificate), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [OutpointString](#type-outpointstring), [ProtoWallet](#class-protowallet), [PubKeyHex](#type-pubkeyhex), [WalletCounterparty](#type-walletcounterparty)
 
 <details>
 
 <summary>Class MasterCertificate Details</summary>
+
+#### Method createCertificateFields
+
+Encrypts certificate fields for a subject and generates a master keyring.
+This method returns a master keyring tied to a specific certifier or subject who will validate
+and sign off on the fields, along with the encrypted certificate fields.
+
+```ts
+static async createCertificateFields(creatorWallet: ProtoWallet, certifierOrSubject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<CreateCertificateFieldsResult> 
+```
+See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [ProtoWallet](#class-protowallet), [WalletCounterparty](#type-walletcounterparty)
+
+Returns
+
+A promise resolving to an object containing:
+- `certificateFields` {Record<CertificateFieldNameUnder50Bytes, Base64String>}:
+The encrypted certificate fields.
+- `masterKeyring` {Record<CertificateFieldNameUnder50Bytes, Base64String>}:
+The master keyring containing encrypted revelation keys for each field.
+
+Argument Details
+
++ **creatorWallet**
+  + The wallet of the creator responsible for encrypting the fields.
++ **certifierOrSubject**
+  + The certifier or subject who will validate the certificate fields.
++ **fields**
+  + A record of certificate field names (under 50 bytes) mapped to their values.
 
 #### Method createKeyringForVerifier
 
@@ -486,9 +519,9 @@ for the verifier's identity key. The result is a keyring containing the keys nec
 for the verifier to access the designated fields.
 
 ```ts
-async createKeyringForVerifier(subjectWallet: WalletInterface, verifier: WalletCounterparty, fieldsToReveal: string[], originator?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+static async createKeyringForVerifier(subjectWallet: ProtoWallet, certifier: WalletCounterparty, verifier: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldsToReveal: string[], masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, serialNumber: Base64String, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 ```
-See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [WalletCounterparty](#type-walletcounterparty), [WalletInterface](#interface-walletinterface)
+See also: [Base64String](#type-base64string), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [ProtoWallet](#class-protowallet), [WalletCounterparty](#type-walletcounterparty)
 
 Returns
 
@@ -514,24 +547,33 @@ Throws an error if:
 
 #### Method decryptFields
 
-Decrypts all fields in the MasterCertificate using the subject's wallet.
+Decrypts all fields in the MasterCertificate using the subject's or certifier's wallet.
 
-This method uses the `masterKeyring` to decrypt each field's encryption key and then
-decrypts the field values. The result is a record of plaintext field names and values.
+This method allows the subject or certifier to decrypt the `masterKeyring` and retrieve
+the encryption keys for each field, which are then used to decrypt the corresponding field values.
+The counterparty used for decryption depends on how the certificate fields were created:
+- If the certificate is self-signed, the counterparty should be set to 'self'.
+- Otherwise, the counterparty should always be the other party involved in the certificate issuance process (the subject or certifier).
 
 ```ts
-async decryptFields(subjectWallet: WalletInterface): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+static async decryptFields(subjectOrCertifierWallet: ProtoWallet, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, counterparty: WalletCounterparty): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 ```
-See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [WalletInterface](#interface-walletinterface)
+See also: [Base64String](#type-base64string), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [ProtoWallet](#class-protowallet), [WalletCounterparty](#type-walletcounterparty)
 
 Returns
 
-- A record of field names and their decrypted values in plaintext.
+A promise resolving to a record of field names and their decrypted values in plaintext.
 
 Argument Details
 
-+ **subjectWallet**
-  + The wallet of the subject, used to decrypt the master keyring and field values.
++ **subjectOrCertifierWallet**
+  + The wallet of the subject or certifier, used to decrypt the master keyring and field values.
++ **masterKeyring**
+  + A record containing encrypted keys for each field.
++ **fields**
+  + A record of encrypted field names and their values.
++ **counterparty**
+  + The counterparty responsible for creating or signing the certificate. For self-signed certificates, use 'self'.
 
 Throws
 
@@ -547,9 +589,9 @@ generated symmetric key, which is then encrypted for the subject. The certificat
 can also includes a revocation outpoint to manage potential revocation.
 
 ```ts
-static async issueCertificateForSubject(certifierWallet: WalletInterface, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => { return "Certificate revocation not tracked."; }): Promise<MasterCertificate> 
+static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => { return "Certificate revocation not tracked."; }, serialNumber?: string): Promise<MasterCertificate> 
 ```
-See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [MasterCertificate](#class-mastercertificate), [WalletCounterparty](#type-walletcounterparty), [WalletInterface](#interface-walletinterface)
+See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [MasterCertificate](#class-mastercertificate), [ProtoWallet](#class-protowallet), [WalletCounterparty](#type-walletcounterparty)
 
 Returns
 
@@ -1078,12 +1120,12 @@ export class VerifiableCertificate extends Certificate {
     declare signature?: HexString;
     keyring: Record<CertificateFieldNameUnder50Bytes, string>;
     decryptedFields?: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-    constructor(type: Base64String, serialNumber: Base64String, subject: PubKeyHex, certifier: PubKeyHex, revocationOutpoint: OutpointString, fields: Record<CertificateFieldNameUnder50Bytes, string>, signature?: HexString, keyring?: Record<CertificateFieldNameUnder50Bytes, string>, decryptedFields?: Record<CertificateFieldNameUnder50Bytes, Base64String>) 
-    async decryptFields(verifierWallet: WalletInterface): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+    constructor(type: Base64String, serialNumber: Base64String, subject: PubKeyHex, certifier: PubKeyHex, revocationOutpoint: OutpointString, fields: Record<CertificateFieldNameUnder50Bytes, string>, keyring: Record<CertificateFieldNameUnder50Bytes, string>, signature?: HexString, decryptedFields?: Record<CertificateFieldNameUnder50Bytes, Base64String>) 
+    async decryptFields(verifierWallet: ProtoWallet): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 }
 ```
 
-See also: [Base64String](#type-base64string), [Certificate](#class-certificate), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [PubKeyHex](#type-pubkeyhex), [WalletInterface](#interface-walletinterface)
+See also: [Base64String](#type-base64string), [Certificate](#class-certificate), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [ProtoWallet](#class-protowallet), [PubKeyHex](#type-pubkeyhex)
 
 <details>
 
@@ -1094,9 +1136,9 @@ See also: [Base64String](#type-base64string), [Certificate](#class-certificate),
 Decrypts selectively revealed certificate fields using the provided keyring and verifier wallet
 
 ```ts
-async decryptFields(verifierWallet: WalletInterface): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+async decryptFields(verifierWallet: ProtoWallet): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 ```
-See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [WalletInterface](#interface-walletinterface)
+See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [ProtoWallet](#class-protowallet)
 
 Returns
 
@@ -1214,7 +1256,7 @@ getVerifiableCertificates = async (wallet: WalletInterface, requestedCertificate
             fieldsToReveal: requestedCertificates.types[certificate.type],
             verifier: verifierIdentityKey
         });
-        return new VerifiableCertificate(certificate.type, certificate.serialNumber, certificate.subject, certificate.certifier, certificate.revocationOutpoint, certificate.fields, certificate.signature, keyringForVerifier);
+        return new VerifiableCertificate(certificate.type, certificate.serialNumber, certificate.subject, certificate.certifier, certificate.revocationOutpoint, certificate.fields, keyringForVerifier, certificate.signature);
     }));
 }
 ```
@@ -1232,7 +1274,7 @@ validateCertificates = async (verifierWallet: WalletInterface, message: AuthMess
         if (incomingCert.subject !== message.identityKey) {
             throw new Error(`The subject of one of your certificates ("${incomingCert.subject}") is not the same as the request sender ("${message.identityKey}").`);
         }
-        const certToVerify = new VerifiableCertificate(incomingCert.type, incomingCert.serialNumber, incomingCert.subject, incomingCert.certifier, incomingCert.revocationOutpoint, incomingCert.fields, incomingCert.signature, incomingCert.keyring);
+        const certToVerify = new VerifiableCertificate(incomingCert.type, incomingCert.serialNumber, incomingCert.subject, incomingCert.certifier, incomingCert.revocationOutpoint, incomingCert.fields, incomingCert.keyring, incomingCert.signature);
         const isValidCert = await certToVerify.verify();
         if (!isValidCert) {
             throw new Error(`The signature for the certificate with serial number ${certToVerify.serialNumber} is invalid!`);

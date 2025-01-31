@@ -42,9 +42,9 @@ import {
  * enable the management of identity certificates, or store any data. It is also not concerned with privileged keys.
  */
 export class ProtoWallet {
-  keyDeriver: KeyDeriverApi
+  keyDeriver?: KeyDeriverApi
 
-  constructor(rootKeyOrKeyDeriver: PrivateKey | 'anyone' | KeyDeriverApi) {
+  constructor(rootKeyOrKeyDeriver?: PrivateKey | 'anyone' | KeyDeriverApi) {
     if (typeof (rootKeyOrKeyDeriver as KeyDeriver).identityKey !== 'string') {
       rootKeyOrKeyDeriver = new KeyDeriver(
         rootKeyOrKeyDeriver as PrivateKey | 'anyone'
@@ -54,7 +54,8 @@ export class ProtoWallet {
   }
 
   async getPublicKey(
-    args: GetPublicKeyArgs
+    args: GetPublicKeyArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ publicKey: PubKeyHex }> {
     if (args.identityKey) {
       return { publicKey: this.keyDeriver.rootKey.toPublicKey().toString() }
@@ -78,7 +79,8 @@ export class ProtoWallet {
   }
 
   async revealCounterpartyKeyLinkage(
-    args: RevealCounterpartyKeyLinkageArgs
+    args: RevealCounterpartyKeyLinkageArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<RevealCounterpartyKeyLinkageResult> {
     const { publicKey: identityKey } = await this.getPublicKey({
       identityKey: true
@@ -119,7 +121,8 @@ export class ProtoWallet {
   }
 
   async revealSpecificKeyLinkage(
-    args: RevealSpecificKeyLinkageArgs
+    args: RevealSpecificKeyLinkageArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<RevealSpecificKeyLinkageResult> {
     const { publicKey: identityKey } = await this.getPublicKey({
       identityKey: true
@@ -159,7 +162,10 @@ export class ProtoWallet {
     }
   }
 
-  async encrypt(args: WalletEncryptArgs): Promise<WalletEncryptResult> {
+  async encrypt(
+    args: WalletEncryptArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<WalletEncryptResult> {
     const key = this.keyDeriver.deriveSymmetricKey(
       args.protocolID,
       args.keyID,
@@ -168,7 +174,10 @@ export class ProtoWallet {
     return { ciphertext: key.encrypt(args.plaintext) as number[] }
   }
 
-  async decrypt(args: WalletDecryptArgs): Promise<WalletDecryptResult> {
+  async decrypt(
+    args: WalletDecryptArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<WalletDecryptResult> {
     const key = this.keyDeriver.deriveSymmetricKey(
       args.protocolID,
       args.keyID,
@@ -177,7 +186,10 @@ export class ProtoWallet {
     return { plaintext: key.decrypt(args.ciphertext) as number[] }
   }
 
-  async createHmac(args: CreateHmacArgs): Promise<CreateHmacResult> {
+  async createHmac(
+    args: CreateHmacArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<CreateHmacResult> {
     const key = this.keyDeriver.deriveSymmetricKey(
       args.protocolID,
       args.keyID,
@@ -186,7 +198,10 @@ export class ProtoWallet {
     return { hmac: Hash.sha256hmac(key.toArray(), args.data) }
   }
 
-  async verifyHmac(args: VerifyHmacArgs): Promise<VerifyHmacResult> {
+  async verifyHmac(
+    args: VerifyHmacArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
+  ): Promise<VerifyHmacResult> {
     const key = this.keyDeriver.deriveSymmetricKey(
       args.protocolID,
       args.keyID,
@@ -204,7 +219,8 @@ export class ProtoWallet {
   }
 
   async createSignature(
-    args: CreateSignatureArgs
+    args: CreateSignatureArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<CreateSignatureResult> {
     if (!args.hashToDirectlySign && !args.data) {
       throw new Error('args.data or args.hashToDirectlySign must be valid')
@@ -221,7 +237,8 @@ export class ProtoWallet {
   }
 
   async verifySignature(
-    args: VerifySignatureArgs
+    args: VerifySignatureArgs,
+    originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<VerifySignatureResult> {
     if (!args.hashToDirectlyVerify && !args.data) {
       throw new Error('args.data or args.hashToDirectlyVerify must be valid')
