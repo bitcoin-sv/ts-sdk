@@ -39,34 +39,34 @@ export default class BeefTx {
   }
 
   get isTxidOnly (): boolean {
-    return !!this._txid && !this._rawTx && !this._tx
+    return !!isS(this._txid) && (this._rawTx == null) && (this._tx == null)
   }
 
-  get txid () {
-    if (this._txid) return this._txid
-    if (this._tx) {
+  get txid (): string {
+    if (isS(this._txid)) return this._txid === undefined ? '' : this._txid
+    if (this._tx != null) {
       this._txid = this._tx.id('hex')
       return this._txid
     }
-    if (this._rawTx) {
-      this._txid = toHex(hash256(this._rawTx))
+    if (isA(this._rawTx)) {
+      this._txid = toHex(hash256((this._rawTx === undefined ? [] : this._rawTx)))
       return this._txid
     }
     throw new Error('Internal')
   }
 
-  get tx () {
-    if (this._tx) return this._tx
-    if (this._rawTx) {
+  get tx (): Transaction | undefined {
+    if (this._tx != null) return this._tx
+    if (this._rawTx != null) {
       this._tx = Transaction.fromBinary(this._rawTx)
       return this._tx
     }
     return undefined
   }
 
-  get rawTx () {
-    if (this._rawTx) return this._rawTx
-    if (this._tx) {
+  get rawTx (): number[] | undefined {
+    if (this._rawTx != null) return this._rawTx
+    if (this._tx != null) {
       this._rawTx = this._tx.toBinary()
       return this._rawTx
     }
@@ -101,13 +101,14 @@ export default class BeefTx {
     return new BeefTx(txid, bumpIndex)
   }
 
-  private updateInputTxids () {
-    if (this.hasProof || !this.tx) {
+  private updateInputTxids (): void {
+    if (this.hasProof || (this.tx == null)) {
       // If we have a proof, or don't have a parsed transaction
       this.inputTxids = []
     } else {
       const inputTxids = {}
       for (const input of this.tx.inputs) {
+        if (input.sourceTXID === undefined) throw new Error('sourceTXID must be valid')
         inputTxids[input.sourceTXID] = true
       }
       this.inputTxids = Object.keys(inputTxids)
@@ -115,25 +116,25 @@ export default class BeefTx {
   }
 
   toWriter (writer: Writer, version: number): void {
-    const writeByte = (bb: number) => {
+    const writeByte = (bb: number): void => {
       writer.writeUInt8(bb)
     }
 
-    const writeTxid = () => {
+    const writeTxid = (): void => {
       writer.writeReverse(toArray(this._txid, 'hex'))
     }
 
-    const writeTx = () => {
-      if (this._rawTx) {
+    const writeTx = (): void => {
+      if (this._rawTx != null) {
         writer.write(this._rawTx)
-      } else if (this._tx) {
+      } else if (this._tx != null) {
         writer.write(this._tx.toBinary())
       } else {
         throw new Error('a valid serialized Transaction is expected')
       }
     }
 
-    const writeBumpIndex = () => {
+    const writeBumpIndex = (): void => {
       if (this.bumpIndex === undefined) {
         writeByte(TX_DATA_FORMAT.RAWTX) // 0
       } else {
@@ -179,10 +180,18 @@ export default class BeefTx {
     } else {
       // V1
       data = Transaction.fromReader(br)
-      bumpIndex = br.readUInt8() ? br.readVarIntNum() : undefined
+      bumpIndex = br.readUInt8() !== 0 ? br.readVarIntNum() : undefined
       beefTx = BeefTx.fromTx(data, bumpIndex)
     }
 
     return beefTx
   }
+}
+
+function isA<T> (o?: T[]): boolean {
+  return o !== undefined && o !== null && Array.isArray(o)
+}
+
+function isS (o?: string): boolean {
+  return o !== undefined && o !== null && typeof o === 'string'
 }
