@@ -42,6 +42,7 @@ import {
   TXIDHexString,
   VersionString7To30Bytes,
   WalletInterface,
+  WalletCertificate,
 } from "../Wallet.interfaces";
 import WalletWire from "./WalletWire";
 import { Certificate } from "../../auth/index";
@@ -132,7 +133,7 @@ export default class WalletWireTransceiver implements WalletInterface {
           paramWriter.write(unlockingScriptBytes);
         } else {
           paramWriter.writeVarIntNum(-1);
-          paramWriter.writeVarIntNum(input.unlockingScriptLength);
+          paramWriter.writeVarIntNum(input.unlockingScriptLength ?? 0); // ✅ Fix applied here
         }
 
         // inputDescription
@@ -376,6 +377,8 @@ export default class WalletWireTransceiver implements WalletInterface {
         if (statusCode === 1) status = "unproven";
         else if (statusCode === 2) status = "sending";
         else if (statusCode === 3) status = "failed";
+        else status = "failed"; // Default case for safety
+
         response.sendWithResults.push({ txid, status });
       }
     }
@@ -504,10 +507,13 @@ export default class WalletWireTransceiver implements WalletInterface {
         const txidBytes = resultReader.read(32);
         const txid = Utils.toHex(txidBytes);
         const statusCode = resultReader.readInt8();
-        let status: "unproven" | "sending" | "failed";
+
+        // Ensure status is always assigned a value
+        let status: "unproven" | "sending" | "failed" = "failed"; // Default to "failed"
         if (statusCode === 1) status = "unproven";
         else if (statusCode === 2) status = "sending";
         else if (statusCode === 3) status = "failed";
+
         response.sendWithResults.push({ txid, status });
       }
     }
@@ -839,34 +845,40 @@ export default class WalletWireTransceiver implements WalletInterface {
     paramWriter.writeVarIntNum(args.tx.length);
     paramWriter.write(args.tx);
     paramWriter.writeVarIntNum(args.outputs.length);
+
     for (const out of args.outputs) {
       paramWriter.writeVarIntNum(out.outputIndex);
-      if (out.protocol === "wallet payment") {
+
+      if (out.protocol === "wallet payment" && out.paymentRemittance) {
         paramWriter.writeUInt8(1);
         paramWriter.write(
           Utils.toArray(out.paymentRemittance.senderIdentityKey, "hex")
         );
+
         const derivationPrefixAsArray = Utils.toArray(
           out.paymentRemittance.derivationPrefix,
           "base64"
         );
         paramWriter.writeVarIntNum(derivationPrefixAsArray.length);
         paramWriter.write(derivationPrefixAsArray);
+
         const derivationSuffixAsArray = Utils.toArray(
           out.paymentRemittance.derivationSuffix,
           "base64"
         );
         paramWriter.writeVarIntNum(derivationSuffixAsArray.length);
         paramWriter.write(derivationSuffixAsArray);
-      } else {
+      } else if (out.insertionRemittance) {
         paramWriter.writeUInt8(2);
+
         const basketAsArray = Utils.toArray(
           out.insertionRemittance.basket,
           "utf8"
         );
         paramWriter.writeVarIntNum(basketAsArray.length);
         paramWriter.write(basketAsArray);
-        if (typeof out.insertionRemittance.customInstructions) {
+
+        if (out.insertionRemittance.customInstructions) {
           const customInstructionsAsArray = Utils.toArray(
             out.insertionRemittance.customInstructions,
             "utf8"
@@ -876,7 +888,8 @@ export default class WalletWireTransceiver implements WalletInterface {
         } else {
           paramWriter.writeVarIntNum(-1);
         }
-        if (typeof out.insertionRemittance.tags === "object") {
+
+        if (Array.isArray(out.insertionRemittance.tags)) {
           paramWriter.writeVarIntNum(out.insertionRemittance.tags.length);
           for (const tag of out.insertionRemittance.tags) {
             const tagAsArray = Utils.toArray(tag, "utf8");
@@ -888,7 +901,8 @@ export default class WalletWireTransceiver implements WalletInterface {
         }
       }
     }
-    if (typeof args.labels === "object") {
+
+    if (Array.isArray(args.labels)) {
       paramWriter.writeVarIntNum(args.labels.length);
       for (const l of args.labels) {
         const labelAsArray = Utils.toArray(l, "utf8");
@@ -898,6 +912,7 @@ export default class WalletWireTransceiver implements WalletInterface {
     } else {
       paramWriter.writeVarIntNum(-1);
     }
+
     const descriptionAsArray = Utils.toArray(args.description);
     paramWriter.writeVarIntNum(descriptionAsArray.length);
     paramWriter.write(descriptionAsArray);
@@ -990,7 +1005,7 @@ export default class WalletWireTransceiver implements WalletInterface {
     const resultReader = new Utils.Reader(result);
     const totalOutputs = resultReader.readVarIntNum();
     const beefLength = resultReader.readVarIntNum();
-    let BEEF = undefined;
+    let BEEF;
     if (beefLength >= 0) {
       BEEF = resultReader.read(beefLength);
     }
@@ -1100,16 +1115,18 @@ export default class WalletWireTransceiver implements WalletInterface {
   ): Promise<{ publicKey: PubKeyHex }> {
     const paramWriter = new Utils.Writer();
     paramWriter.writeUInt8(args.identityKey ? 1 : 0);
+
     if (!args.identityKey) {
       paramWriter.write(
         this.encodeKeyRelatedParams(
-          args.protocolID,
-          args.keyID,
+          args.protocolID ?? [0, ""], // ✅ Fix: Provide a default value
+          args.keyID ?? "",
           args.counterparty,
           args.privileged,
           args.privilegedReason
         )
       );
+
       if (typeof args.forSelf === "boolean") {
         paramWriter.writeInt8(args.forSelf ? 1 : 0);
       } else {
@@ -1439,14 +1456,16 @@ export default class WalletWireTransceiver implements WalletInterface {
         args.privilegedReason
       )
     );
+
     if (typeof args.data === "object") {
       paramWriter.writeUInt8(1);
       paramWriter.writeVarIntNum(args.data.length);
       paramWriter.write(args.data);
     } else {
       paramWriter.writeUInt8(2);
-      paramWriter.write(args.hashToDirectlySign);
+      paramWriter.write(args.hashToDirectlySign ?? []); // ✅ Ensure it is always a number[]
     }
+
     // Serialize seekPermission
     paramWriter.writeInt8(
       typeof args.seekPermission === "boolean"
@@ -1455,6 +1474,7 @@ export default class WalletWireTransceiver implements WalletInterface {
           : 0
         : -1
     );
+
     return {
       signature: await this.transmit(
         "createSignature",
@@ -1489,21 +1509,25 @@ export default class WalletWireTransceiver implements WalletInterface {
         args.privilegedReason
       )
     );
+
     if (typeof args.forSelf === "boolean") {
       paramWriter.writeInt8(args.forSelf ? 1 : 0);
     } else {
       paramWriter.writeInt8(-1);
     }
+
     paramWriter.writeVarIntNum(args.signature.length);
     paramWriter.write(args.signature);
+
     if (typeof args.data === "object") {
       paramWriter.writeUInt8(1);
       paramWriter.writeVarIntNum(args.data.length);
       paramWriter.write(args.data);
     } else {
       paramWriter.writeUInt8(2);
-      paramWriter.write(args.hashToDirectlyVerify);
+      paramWriter.write(args.hashToDirectlyVerify ?? []); // ✅ Ensure it is always a number[]
     }
+
     // Serialize seekPermission
     paramWriter.writeInt8(
       typeof args.seekPermission === "boolean"
@@ -1512,6 +1536,7 @@ export default class WalletWireTransceiver implements WalletInterface {
           : 0
         : -1
     );
+
     await this.transmit("verifySignature", originator, paramWriter.toArray());
     return { valid: true };
   }
@@ -1574,7 +1599,7 @@ export default class WalletWireTransceiver implements WalletInterface {
 
     if (args.acquisitionProtocol === "direct") {
       paramWriter.write(Utils.toArray(args.serialNumber, "base64"));
-      paramWriter.write(this.encodeOutpoint(args.revocationOutpoint));
+      paramWriter.write(this.encodeOutpoint(args.revocationOutpoint ?? "")); // ✅ Ensure it's always a string
       const signatureAsArray = Utils.toArray(args.signature, "hex");
       paramWriter.writeVarIntNum(signatureAsArray.length);
       paramWriter.write(signatureAsArray);
@@ -1585,14 +1610,14 @@ export default class WalletWireTransceiver implements WalletInterface {
           : [11];
       paramWriter.write(keyringRevealerAsArray);
 
-      const keyringKeys = Object.keys(args.keyringForSubject);
+      const keyringKeys = Object.keys(args.keyringForSubject ?? {}); // ✅ Ensure it's always an object
       paramWriter.writeVarIntNum(keyringKeys.length);
       for (let i = 0; i < keyringKeys.length; i++) {
         const keyringKeysAsArray = Utils.toArray(keyringKeys[i], "utf8");
         paramWriter.writeVarIntNum(keyringKeysAsArray.length);
         paramWriter.write(keyringKeysAsArray);
         const keyringForSubjectAsArray = Utils.toArray(
-          args.keyringForSubject[keyringKeys[i]],
+          args.keyringForSubject?.[keyringKeys[i]] ?? "",
           "base64"
         );
         paramWriter.writeVarIntNum(keyringForSubjectAsArray.length);
@@ -1612,7 +1637,7 @@ export default class WalletWireTransceiver implements WalletInterface {
     const cert = Certificate.fromBinary(result);
     return {
       ...cert,
-      signature: cert.signature as string,
+      signature: cert.signature ?? "", // ✅ Ensure it's always a string
     };
   }
 
@@ -1692,9 +1717,10 @@ export default class WalletWireTransceiver implements WalletInterface {
       const cert = Certificate.fromBinary(certificateBin);
       certificates.push({
         ...cert,
-        signature: cert.signature as string,
+        signature: cert.signature ?? "", // ✅ Ensure signature is always a string
       });
     }
+
     return {
       totalCertificates,
       certificates,
@@ -1706,25 +1732,36 @@ export default class WalletWireTransceiver implements WalletInterface {
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<ProveCertificateResult> {
     const paramWriter = new Utils.Writer();
-    const typeAsArray = Utils.toArray(args.certificate.type, "base64");
+
+    // Ensure `certificate` exists and provide default empty values
+    const cert = args.certificate ?? ({} as WalletCertificate);
+
+    // Ensure required fields are valid strings
+    const typeAsArray = Utils.toArray(cert.type ?? "", "base64");
     paramWriter.write(typeAsArray);
-    const subjectAsArray = Utils.toArray(args.certificate.subject, "hex");
+    const subjectAsArray = Utils.toArray(cert.subject ?? "", "hex");
     paramWriter.write(subjectAsArray);
     const serialNumberAsArray = Utils.toArray(
-      args.certificate.serialNumber,
+      cert.serialNumber ?? "",
       "base64"
     );
     paramWriter.write(serialNumberAsArray);
-    const certifierAsArray = Utils.toArray(args.certificate.certifier, "hex");
+    const certifierAsArray = Utils.toArray(cert.certifier ?? "", "hex");
     paramWriter.write(certifierAsArray);
+
+    // Ensure `revocationOutpoint` exists before encoding
     const revocationOutpointAsArray = this.encodeOutpoint(
-      args.certificate.revocationOutpoint
+      cert.revocationOutpoint ?? ""
     );
     paramWriter.write(revocationOutpointAsArray);
-    const signatureAsArray = Utils.toArray(args.certificate.signature, "hex");
+
+    // Ensure `signature` exists
+    const signatureAsArray = Utils.toArray(cert.signature ?? "", "hex");
     paramWriter.writeVarIntNum(signatureAsArray.length);
     paramWriter.write(signatureAsArray);
-    const fieldEntries = Object.entries(args.certificate.fields);
+
+    // Ensure `fields` is an object before calling `Object.entries`
+    const fieldEntries = Object.entries(cert.fields ?? {});
     paramWriter.writeVarIntNum(fieldEntries.length);
     for (const [key, value] of fieldEntries) {
       const keyAsArray = Utils.toArray(key, "utf8");
@@ -1734,24 +1771,29 @@ export default class WalletWireTransceiver implements WalletInterface {
       paramWriter.writeVarIntNum(valueAsArray.length);
       paramWriter.write(valueAsArray);
     }
+
     paramWriter.writeVarIntNum(args.fieldsToReveal.length);
     for (const field of args.fieldsToReveal) {
       const fieldAsArray = Utils.toArray(field, "utf8");
       paramWriter.writeVarIntNum(fieldAsArray.length);
       paramWriter.write(fieldAsArray);
     }
-    paramWriter.write(Utils.toArray(args.verifier, "hex"));
+
+    paramWriter.write(Utils.toArray(args.verifier ?? "", "hex"));
     paramWriter.write(
       this.encodePrivilegedParams(args.privileged, args.privilegedReason)
     );
+
     const result = await this.transmit(
       "proveCertificate",
       originator,
       paramWriter.toArray()
     );
+
     const resultReader = new Utils.Reader(result);
     const numFields = resultReader.readVarIntNum();
     const keyringForVerifier: Record<string, string> = {};
+
     for (let i = 0; i < numFields; i++) {
       const fieldKeyLength = resultReader.readVarIntNum();
       const fieldKey = Utils.toUTF8(resultReader.read(fieldKeyLength));
@@ -1760,6 +1802,7 @@ export default class WalletWireTransceiver implements WalletInterface {
         resultReader.read(fieldValueLength)
       );
     }
+
     return {
       keyringForVerifier,
     };
@@ -1864,7 +1907,7 @@ export default class WalletWireTransceiver implements WalletInterface {
       }
       certificates.push({
         ...cert,
-        signature: cert.signature as string,
+        signature: cert.signature ?? "",
         certifierInfo: { iconUrl, name, description, trust },
         publiclyRevealedKeyring,
         decryptedFields,
@@ -1964,7 +2007,7 @@ export default class WalletWireTransceiver implements WalletInterface {
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ authenticated: true }> {
     const result = await this.transmit("isAuthenticated", originator);
-    // @ts-ignore
+    // @ts-expect-error
     return { authenticated: !!result[0] };
   }
 

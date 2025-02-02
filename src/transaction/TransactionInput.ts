@@ -1,5 +1,5 @@
-import UnlockingScript from '../script/UnlockingScript'
-import Transaction from './Transaction'
+import UnlockingScript from "../script/UnlockingScript";
+import Transaction from "./Transaction";
 
 /**
  * Represents an input to a Bitcoin transaction.
@@ -51,13 +51,13 @@ import Transaction from './Transaction'
  * spending of that output.
  */
 export default interface TransactionInput {
-  sourceTransaction?: Transaction
-  sourceTXID?: string
-  sourceOutputIndex: number
-  unlockingScript?: UnlockingScript
+  sourceTransaction?: Transaction;
+  sourceTXID?: string;
+  sourceOutputIndex: number;
+  unlockingScript?: UnlockingScript;
   unlockingScriptTemplate?: {
-    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
-    estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>
-  }
-  sequence?: number
+    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
+    estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
+  };
+  sequence?: number;
 }

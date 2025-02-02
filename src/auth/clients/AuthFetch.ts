@@ -6,17 +6,17 @@ import { RequestedCertificateSet } from "../types";
 import { VerifiableCertificate } from "../certificates/VerifiableCertificate";
 import { Writer } from "../../primitives/utils";
 
-type SimplifiedFetchRequestOptions = {
+interface SimplifiedFetchRequestOptions {
   method?: string;
   headers?: Record<string, string>;
   body?: any;
   retryCounter?: number;
-};
-type AuthPeer = {
+}
+interface AuthPeer {
   peer: Peer;
   identityKey?: string;
   supportsMutualAuth?: boolean;
-};
+}
 
 const PAYMENT_VERSION = "1.0";
 
@@ -29,12 +29,13 @@ const PAYMENT_VERSION = "1.0";
  * and sending BSV payment transactions when necessary.
  */
 export class AuthFetch {
-  private sessionManager: SessionManager;
-  private wallet: WalletInterface;
+  private readonly sessionManager: SessionManager;
+  private readonly wallet: WalletInterface;
   private callbacks: Record<string, { resolve: Function; reject: Function }> =
     {};
-  private certificatesReceived: VerifiableCertificate[] = [];
-  private requestedCertificates?: RequestedCertificateSet;
+
+  private readonly certificatesReceived: VerifiableCertificate[] = [];
+  private readonly requestedCertificates?: RequestedCertificateSet;
   peers: Record<string, AuthPeer> = {};
 
   /**
@@ -108,7 +109,7 @@ export class AuthFetch {
           );
         } else {
           // Check if there's a session associated with this baseURL
-          if (this.peers[baseURL].supportsMutualAuth === false) {
+          if (!this.peers[baseURL].supportsMutualAuth) {
             // Use standard fetch if mutual authentication is not supported
             try {
               const response = await this.handleFetchAndValidate(
@@ -184,7 +185,9 @@ export class AuthFetch {
 
               // Create the Response object
               const responseValue = new Response(
-                responseBody ? new Uint8Array(responseBody) : null,
+                responseBody
+                  ? new Uint8Array(responseBody)
+                  : new Uint8Array([]),
                 {
                   status: statusCode,
                   statusText: `${statusCode}`,
@@ -225,9 +228,7 @@ export class AuthFetch {
       }
     });
 
-    // Check if server requires payment to access the requested route
     if (response.status === 402) {
-      // Create and attach a payment, then retry
       return await this.handlePaymentAndRetry(url, config, response);
     }
 
@@ -263,27 +264,29 @@ export class AuthFetch {
     }
 
     // Return a promise that resolves when certificates are received
-    return new Promise<VerifiableCertificate[]>(async (resolve, reject) => {
-      // Set up the listener before making the request
-      const callbackId = peerToUse.peer.listenForCertificatesReceived(
-        (_senderPublicKey: string, certs: VerifiableCertificate[]) => {
-          peerToUse.peer.stopListeningForCertificatesReceived(callbackId);
-          this.certificatesReceived.push(...certs);
-          resolve(certs);
-        }
-      );
-
-      try {
-        // Initiate the certificate request
-        await peerToUse.peer.requestCertificates(
-          certificatesToRequest,
-          peerToUse.identityKey
+    return await new Promise<VerifiableCertificate[]>(
+      async (resolve, reject) => {
+        // Set up the listener before making the request
+        const callbackId = peerToUse.peer.listenForCertificatesReceived(
+          (_senderPublicKey: string, certs: VerifiableCertificate[]) => {
+            peerToUse.peer.stopListeningForCertificatesReceived(callbackId);
+            this.certificatesReceived.push(...certs);
+            resolve(certs);
+          }
         );
-      } catch (err) {
-        peerToUse.peer.stopListeningForCertificatesReceived(callbackId);
-        reject(err);
+
+        try {
+          // Initiate the certificate request
+          await peerToUse.peer.requestCertificates(
+            certificatesToRequest,
+            peerToUse.identityKey
+          );
+        } catch (err) {
+          peerToUse.peer.stopListeningForCertificatesReceived(callbackId);
+          reject(err);
+        }
       }
-    });
+    );
   }
 
   /**
@@ -346,7 +349,7 @@ export class AuthFetch {
     // - Custom headers prefixed with x-bsv are included
     // - x-bsv-auth headers are not allowed
     // - content-type and authorization are signed by client
-    const includedHeaders: [string, string][] = [];
+    const includedHeaders: Array<[string, string]> = [];
     for (let [k, v] of Object.entries(headers)) {
       k = k.toLowerCase(); // We will always sign lower-case header keys
       if (
@@ -424,7 +427,7 @@ export class AuthFetch {
     url: string,
     config: SimplifiedFetchRequestOptions = {},
     originalResponse: Response
-  ): Promise<Response | null> {
+  ): Promise<Response> {
     // Make sure the server is using the correct payment version
     const paymentVersion = originalResponse.headers.get(
       "x-bsv-payment-version"
@@ -493,6 +496,10 @@ export class AuthFetch {
     });
 
     // Attach the payment to the request headers
+    if (!tx) {
+      throw new Error("Transaction object is undefined.");
+    }
+
     config.headers = config.headers || {};
     config.headers["x-bsv-payment"] = JSON.stringify({
       derivationPrefix,
@@ -501,7 +508,7 @@ export class AuthFetch {
     config.retryCounter ??= 3;
 
     // Re-attempt request with payment attached
-    return this.fetch(url, config);
+    return await this.fetch(url, config);
   }
 
   private async normalizeBodyToNumberArray(
@@ -539,7 +546,7 @@ export class AuthFetch {
 
     // 6. FormData
     if (body instanceof FormData) {
-      const entries: [string, string][] = [];
+      const entries: Array<[string, string]> = [];
       body.forEach((value, key) => {
         entries.push([key, value.toString()]);
       });

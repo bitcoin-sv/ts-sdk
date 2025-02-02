@@ -3,11 +3,21 @@ import { VerifiableCertificate } from "../../../auth/certificates/VerifiableCert
 import { ProtoWallet } from "../../../wallet/index";
 import { PrivateKey } from "../../../primitives/index";
 
-let mockVerify = jest.fn(() => Promise.resolve(true));
-let mockDecryptFields = jest.fn(() =>
-  Promise.resolve({ field1: "decryptedValue1" })
+let mockVerify = jest.fn(async () => await Promise.resolve(true));
+let mockDecryptFields = jest.fn(
+  async () => await Promise.resolve({ field1: "decryptedValue1" })
 );
-const mockInstances = [];
+const mockInstances: Array<{
+  type: string;
+  serialNumber: string;
+  subject: string;
+  certifier: string;
+  revocationOutpoint: string;
+  fields: Record<string, string>;
+  decryptedFields: Record<string, unknown>;
+  verify: jest.Mock<Promise<boolean>>;
+  decryptFields: jest.Mock<any>;
+}> = [];
 
 jest.mock("../../../auth/certificates/VerifiableCertificate", () => {
   return {
@@ -38,9 +48,9 @@ describe("validateCertificates", () => {
     mockInstances.length = 0; // Clear tracked instances
 
     // Reset state
-    mockVerify = jest.fn(() => Promise.resolve(true));
-    mockDecryptFields = jest.fn(() =>
-      Promise.resolve({ field1: "decryptedValue1" })
+    mockVerify = jest.fn(async () => await Promise.resolve(true));
+    mockDecryptFields = jest.fn(
+      async () => await Promise.resolve({ field1: "decryptedValue1" })
     );
 
     verifierWallet = new ProtoWallet(new PrivateKey(1));
@@ -76,7 +86,7 @@ describe("validateCertificates", () => {
     message.identityKey = "different_subject";
 
     await expect(validateCertificates(verifierWallet, message)).rejects.toThrow(
-      `The subject of one of your certificates ("valid_subject") is not the same as the request sender ("different_subject").`
+      'The subject of one of your certificates ("valid_subject") is not the same as the request sender ("different_subject").'
     );
   });
 
@@ -84,7 +94,7 @@ describe("validateCertificates", () => {
     mockVerify.mockResolvedValueOnce(false);
 
     await expect(validateCertificates(verifierWallet, message)).rejects.toThrow(
-      `The signature for the certificate with serial number valid_serial is invalid!`
+      "The signature for the certificate with serial number valid_serial is invalid!"
     );
   });
 
@@ -97,7 +107,7 @@ describe("validateCertificates", () => {
     await expect(
       validateCertificates(verifierWallet, message, certificatesRequested)
     ).rejects.toThrow(
-      `Certificate with serial number valid_serial has an unrequested certifier: valid_certifier`
+      "Certificate with serial number valid_serial has an unrequested certifier: valid_certifier"
     );
   });
 
@@ -109,7 +119,7 @@ describe("validateCertificates", () => {
 
     await expect(
       validateCertificates(verifierWallet, message, certificatesRequested)
-    ).rejects.toThrow(`Certificate with type requested_type was not requested`);
+    ).rejects.toThrow("Certificate with type requested_type was not requested");
   });
 
   it("decrypts fields without throwing errors", async () => {

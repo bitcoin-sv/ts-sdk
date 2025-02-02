@@ -1,11 +1,11 @@
-import Point from './Point'
-import PrivateKey from './PrivateKey'
-import Curve from './Curve'
-import { verify } from './ECDSA'
-import BigNumber from './BigNumber'
-import { sha256, sha256hmac, hash160 } from './Hash'
-import Signature from './Signature'
-import { toArray, toBase58Check, toHex } from './utils'
+import Point from "./Point";
+import PrivateKey from "./PrivateKey";
+import Curve from "./Curve";
+import { verify } from "./ECDSA";
+import BigNumber from "./BigNumber";
+import { sha256, sha256hmac, hash160 } from "./Hash";
+import Signature from "./Signature";
+import { toArray, toBase58Check, toHex } from "./utils";
 
 /**
  * The PublicKey class extends the Point class. It is used in public-key cryptography to derive shared secret, verify message signatures, and encode the public key in the DER format.
@@ -30,10 +30,10 @@ export default class PublicKey extends Point {
    * const myPrivKey = new PrivateKey(...)
    * const myPubKey = PublicKey.fromPrivateKey(myPrivKey)
    */
-  static fromPrivateKey (key: PrivateKey): PublicKey {
-    const c = new Curve()
-    const p = c.g.mul(key)
-    return new PublicKey(p.x, p.y)
+  static fromPrivateKey(key: PrivateKey): PublicKey {
+    const c = new Curve();
+    const p = c.g.mul(key);
+    return new PublicKey(p.x, p.y);
   }
 
   /**
@@ -46,9 +46,9 @@ export default class PublicKey extends Point {
    * @example
    * const myPubKey = PublicKey.fromString("03....")
    */
-  static fromString (str: string): PublicKey {
-    const p = Point.fromString(str)
-    return new PublicKey(p.x, p.y)
+  static fromString(str: string): PublicKey {
+    const p = Point.fromString(str);
+    return new PublicKey(p.x, p.y);
   }
 
   /**
@@ -61,9 +61,9 @@ export default class PublicKey extends Point {
    * @example
    * const myPubKey = PublicKey.fromString("03....")
    */
-  static fromDER (bytes: number[]): PublicKey {
-    const p = Point.fromDER(bytes)
-    return new PublicKey(p.x, p.y)
+  static fromDER(bytes: number[]): PublicKey {
+    const p = Point.fromDER(bytes);
+    return new PublicKey(p.x, p.y);
   }
 
   /**
@@ -76,23 +76,23 @@ export default class PublicKey extends Point {
    * new PublicKey(point1);
    * new PublicKey('abc123', 'def456');
    */
-  constructor (
+  constructor(
     x: Point | BigNumber | number | number[] | string | null,
     y: BigNumber | number | number[] | string | null = null,
     isRed: boolean = true
   ) {
     if (x instanceof Point) {
-      super(x.getX(), x.getY())
+      super(x.getX(), x.getY());
     } else {
       // Common gotcha: constructing PublicKey with a DER value when you should use .fromString()
-      if (y === null && isRed && typeof x === 'string') {
+      if (y === null && isRed && typeof x === "string") {
         if (x.length === 66 || x.length === 130) {
           throw new Error(
             'You are using the "new PublicKey()" constructor with a DER hex string. You need to use "PublicKey.fromString()" instead.'
-          )
+          );
         }
       }
-      super(x, y, isRed)
+      super(x, y, isRed);
     }
   }
 
@@ -110,11 +110,11 @@ export default class PublicKey extends Point {
    * const myPrivKey = new PrivateKey(...)
    * const sharedSecret = myPubKey.deriveSharedSecret(myPrivKey)
    */
-  deriveSharedSecret (priv: PrivateKey): Point {
+  deriveSharedSecret(priv: PrivateKey): Point {
     if (!this.validate()) {
-      throw new Error('Public key not valid for ECDH secret derivation')
+      throw new Error("Public key not valid for ECDH secret derivation");
     }
-    return this.mul(priv)
+    return this.mul(priv);
   }
 
   /**
@@ -131,13 +131,13 @@ export default class PublicKey extends Point {
    * const mySignature = new Signature(...)
    * const isVerified = myPubKey.verify(myMessage, mySignature)
    */
-  verify (
+  verify(
     msg: number[] | string,
     sig: Signature,
-    enc?: 'hex' | 'utf8'
+    enc?: "hex" | "utf8"
   ): boolean {
-    const msgHash = new BigNumber(sha256(msg, enc), 16)
-    return verify(msgHash, sig, this)
+    const msgHash = new BigNumber(sha256(msg, enc), 16);
+    return verify(msgHash, sig, this);
   }
 
   /**
@@ -150,9 +150,9 @@ export default class PublicKey extends Point {
    * @example
    * const derPublicKey = myPubKey.toDER()
    */
-  toDER (enc?: 'hex' | undefined): number[] | string {
-    if (enc === 'hex') return this.encode(true, enc) as string
-    return this.encode(true) as number[]
+  toDER(enc?: "hex" | undefined): number[] | string {
+    if (enc === "hex") return this.encode(true, enc) as string;
+    return this.encode(true) as number[];
   }
 
   /**
@@ -163,12 +163,12 @@ export default class PublicKey extends Point {
    * @example
    * const publicKeyHash = pubkey.toHash()
    */
-  toHash (enc?: 'hex'): number[] | string {
-    const pkh = hash160(this.encode(true))
-    if (enc === 'hex') {
-      return toHex(pkh)
+  toHash(enc?: "hex"): number[] | string {
+    const pkh = hash160(this.encode(true));
+    if (enc === "hex") {
+      return toHex(pkh);
     }
-    return pkh
+    return pkh;
   }
 
   /**
@@ -185,17 +185,17 @@ export default class PublicKey extends Point {
    * const testnetAddress = pubkey.toAddress([0x6f])
    * const testnetAddress = pubkey.toAddress('testnet')
    */
-  toAddress (prefix: number[] | string = [0x00]): string {
-    if (typeof prefix === 'string') {
-      if (prefix === 'testnet' || prefix === 'test') {
-        prefix = [0x6f]
-      } else if (prefix === 'mainnet' || prefix === 'main') {
-        prefix = [0x00]
+  toAddress(prefix: number[] | string = [0x00]): string {
+    if (typeof prefix === "string") {
+      if (prefix === "testnet" || prefix === "test") {
+        prefix = [0x6f];
+      } else if (prefix === "mainnet" || prefix === "main") {
+        prefix = [0x00];
       } else {
-        throw new Error(`Invalid prefix ${prefix}`)
+        throw new Error(`Invalid prefix ${prefix}`);
       }
     }
-    return toBase58Check(this.toHash() as number[], prefix)
+    return toBase58Check(this.toHash() as number[], prefix);
   }
 
   /**
@@ -204,14 +204,14 @@ export default class PublicKey extends Point {
    * @param invoiceNumber The invoice number used to derive the child key
    * @returns The derived child key.
    */
-  deriveChild (privateKey: PrivateKey, invoiceNumber: string): PublicKey {
-    const sharedSecret = this.deriveSharedSecret(privateKey)
-    const invoiceNumberBin = toArray(invoiceNumber, 'utf8')
-    const hmac = sha256hmac(sharedSecret.encode(true), invoiceNumberBin)
-    const curve = new Curve()
-    const point = curve.g.mul(new BigNumber(hmac))
-    const finalPoint = this.add(point)
-    return new PublicKey(finalPoint.x, finalPoint.y)
+  deriveChild(privateKey: PrivateKey, invoiceNumber: string): PublicKey {
+    const sharedSecret = this.deriveSharedSecret(privateKey);
+    const invoiceNumberBin = toArray(invoiceNumber, "utf8");
+    const hmac = sha256hmac(sharedSecret.encode(true), invoiceNumberBin);
+    const curve = new Curve();
+    const point = curve.g.mul(new BigNumber(hmac));
+    const finalPoint = this.add(point);
+    return new PublicKey(finalPoint.x, finalPoint.y);
   }
 
   /**
@@ -231,32 +231,32 @@ export default class PublicKey extends Point {
    * @example
    * const publicKey = Signature.fromMsgHashAndCompactSignature(msgHash, 'IMOl2mVKfDgsSsHT4uIYBNN4e...', 'base64');
    */
-  static fromMsgHashAndCompactSignature (
+  static fromMsgHashAndCompactSignature(
     msgHash: BigNumber,
     signature: number[] | string,
-    enc?: 'hex' | 'base64'
+    enc?: "hex" | "base64"
   ): PublicKey {
-    const data = toArray(signature, enc)
+    const data = toArray(signature, enc);
     if (data.length !== 65) {
-      throw new Error('Invalid Compact Signature')
+      throw new Error("Invalid Compact Signature");
     }
-    const compactByte = data[0]
+    const compactByte = data[0];
     if (compactByte < 27 || compactByte >= 35) {
-      throw new Error('Invalid Compact Byte')
+      throw new Error("Invalid Compact Byte");
     }
-    let r = data[0] - 27
+    let r = data[0] - 27;
     // NOTE: We don't use uncompressed pubkeys in this library,
     // but whether the key is compressed is captured in the recovery param.
     // Code below is commented out for reference of how you could capture this.
     // let compressed = false
     if (r > 3) {
       // compressed = true
-      r -= 4
+      r -= 4;
     }
     const s = new Signature(
       new BigNumber(data.slice(1, 33)),
       new BigNumber(data.slice(33, 65))
-    )
-    return s.RecoverPublicKey(r, msgHash)
+    );
+    return s.RecoverPublicKey(r, msgHash);
   }
 }

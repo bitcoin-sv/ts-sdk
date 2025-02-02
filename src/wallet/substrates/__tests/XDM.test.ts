@@ -9,14 +9,16 @@ import { Utils } from "../../../primitives/index";
 describe("XDMSubstrate", () => {
   let xdmSubstrate;
   let originalWindow;
-  let eventHandlers = {};
+  let eventHandlers: { message: (event: any) => void } = {
+    message: () => {}, // Placeholder function
+  };
 
   beforeEach(() => {
     // Save the original window object
     originalWindow = global.window;
 
     // Reset event handlers
-    eventHandlers = {};
+    eventHandlers = { message: () => {} }; // Ensure `message` exists
 
     // Mock window object
     global.window = {
@@ -109,7 +111,7 @@ describe("XDMSubstrate", () => {
         isTrusted: true,
       };
 
-      eventHandlers["message"](event);
+      eventHandlers.message(event);
 
       const res = await invokePromise;
 
@@ -140,7 +142,7 @@ describe("XDMSubstrate", () => {
         isTrusted: true,
       };
 
-      eventHandlers["message"](event);
+      eventHandlers.message(event);
 
       await expect(invokePromise).rejects.toThrow(WalletError);
       await expect(invokePromise).rejects.toThrow(errorDescription);
@@ -173,7 +175,7 @@ describe("XDMSubstrate", () => {
         isTrusted: true,
       };
 
-      eventHandlers["message"](event);
+      eventHandlers.message(event);
 
       // The promise should still be pending
       let isResolved = false;
@@ -208,7 +210,7 @@ describe("XDMSubstrate", () => {
         isTrusted: true,
       };
 
-      eventHandlers["message"](event);
+      eventHandlers.message(event);
 
       // The promise should still be pending
       let isResolved = false;
@@ -243,7 +245,7 @@ describe("XDMSubstrate", () => {
         isTrusted: false,
       };
 
-      eventHandlers["message"](event);
+      eventHandlers.message(event);
 
       // The promise should still be pending
       let isResolved = false;
@@ -278,7 +280,7 @@ describe("XDMSubstrate", () => {
         isTrusted: true,
       };
 
-      eventHandlers["message"](event);
+      eventHandlers.message(event);
 
       // The promise should still be pending
       let isResolved = false;
@@ -299,7 +301,7 @@ describe("XDMSubstrate", () => {
         xdmSubstrate = new XDMSubstrate();
       });
 
-      it(`should call invoke with correct arguments and return the result`, async () => {
+      it("should call invoke with correct arguments and return the result", async () => {
         const call = methodName;
         const mockId = "mockedId";
 
@@ -329,7 +331,7 @@ describe("XDMSubstrate", () => {
           isTrusted: true,
         };
 
-        eventHandlers["message"](event);
+        eventHandlers.message(event);
 
         const res = await invokePromise;
         expect(res).toEqual(result);
@@ -369,7 +371,7 @@ describe("XDMSubstrate", () => {
           isTrusted: true,
         };
 
-        eventHandlers["message"](event);
+        eventHandlers.message(event);
 
         await expect(invokePromise).rejects.toThrow(WalletError);
         await expect(invokePromise).rejects.toThrow(errorDescription);

@@ -41,7 +41,7 @@ export default class HTTPWalletWire implements WalletWire {
       method: "POST",
       headers: {
         "Content-Type": "application/octet-stream",
-        Origin: originator,
+        Origin: originator || "", // ✅ Fix applied here
       },
       body: new Uint8Array(payload),
     });

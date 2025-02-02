@@ -1,7 +1,7 @@
-import BigNumber from './BigNumber'
-import { AESGCM, AESGCMDecrypt } from './AESGCM'
-import Random from './Random'
-import { toArray, encode } from './utils'
+import BigNumber from "./BigNumber";
+import { AESGCM, AESGCMDecrypt } from "./AESGCM";
+import Random from "./Random";
+import { toArray, encode } from "./utils";
 
 /**
  * `SymmetricKey` is a class that extends the `BigNumber` class and implements symmetric encryption and decryption methods.
@@ -22,8 +22,8 @@ export default class SymmetricKey extends BigNumber {
    * @example
    * const symmetricKey = SymmetricKey.fromRandom();
    */
-  static fromRandom (): SymmetricKey {
-    return new SymmetricKey(Random(32))
+  static fromRandom(): SymmetricKey {
+    return new SymmetricKey(Random(32));
   }
 
   /**
@@ -40,16 +40,16 @@ export default class SymmetricKey extends BigNumber {
    * const key = new SymmetricKey(1234);
    * const encryptedMessage = key.encrypt('plainText', 'utf8');
    */
-  encrypt (msg: number[] | string, enc?: 'hex'): string | number[] {
-    const iv = Random(32)
-    msg = toArray(msg, enc)
+  encrypt(msg: number[] | string, enc?: "hex"): string | number[] {
+    const iv = Random(32);
+    msg = toArray(msg, enc);
     const { result, authenticationTag } = AESGCM(
       msg,
       [],
       iv,
-      this.toArray('be', 32)
-    )
-    return encode([...iv, ...result, ...authenticationTag], enc)
+      this.toArray("be", 32)
+    );
+    return encode([...iv, ...result, ...authenticationTag], enc);
   }
 
   /**
@@ -68,22 +68,22 @@ export default class SymmetricKey extends BigNumber {
    *
    * @throws {Error} Will throw an error if the decryption fails, likely due to message tampering or incorrect decryption key.
    */
-  decrypt (msg: number[] | string, enc?: 'hex' | 'utf8'): string | number[] {
-    msg = toArray(msg, enc) as number[]
-    const iv = msg.slice(0, 32)
-    const ciphertextWithTag = msg.slice(32)
-    const messageTag = ciphertextWithTag.slice(-16)
-    const ciphertext = ciphertextWithTag.slice(0, -16)
+  decrypt(msg: number[] | string, enc?: "hex" | "utf8"): string | number[] {
+    msg = toArray(msg, enc) as number[];
+    const iv = msg.slice(0, 32);
+    const ciphertextWithTag = msg.slice(32);
+    const messageTag = ciphertextWithTag.slice(-16);
+    const ciphertext = ciphertextWithTag.slice(0, -16);
     const result = AESGCMDecrypt(
       ciphertext,
       [],
       iv,
       messageTag,
       this.toArray()
-    )
+    );
     if (result === null) {
-      throw new Error('Decryption failed!')
+      throw new Error("Decryption failed!");
     }
-    return encode(result, enc)
+    return encode(result, enc);
   }
 }

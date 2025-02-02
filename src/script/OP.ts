@@ -208,11 +208,11 @@ const OP = {
   OP_PUBKEYHASH: 0xfd,
   OP_PUBKEY: 0xfe,
 
-  OP_INVALIDOPCODE: 0xff
-}
+  OP_INVALIDOPCODE: 0xff,
+};
 
 for (const name in OP) {
-  OP[OP[name]] = name
+  OP[OP[name]] = name;
 }
 
-export default OP
+export default OP;

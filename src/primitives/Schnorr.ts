@@ -1,8 +1,8 @@
-import BigNumber from './BigNumber'
-import Curve from './Curve'
-import Point from './Point'
-import { sha256 } from './Hash'
-import { PrivateKey, PublicKey } from './index'
+import BigNumber from "./BigNumber";
+import Curve from "./Curve";
+import Point from "./Point";
+import { sha256 } from "./Hash";
+import { PrivateKey, PublicKey } from "./index";
 
 /**
  * Class representing the Schnorr Zero-Knowledge Proof (ZKP) protocol.
@@ -35,10 +35,10 @@ import { PrivateKey, PublicKey } from './index'
  * ```
  */
 export default class Schnorr {
-  private readonly curve: Curve
+  private readonly curve: Curve;
 
-  constructor () {
-    this.curve = new Curve()
+  constructor() {
+    this.curve = new Curve();
   }
 
   /**
@@ -49,18 +49,18 @@ export default class Schnorr {
    * @param S Shared secret
    * @returns Proof (R, S', z)
    */
-  generateProof (
+  generateProof(
     aArg: PrivateKey,
     AArg: PublicKey,
     BArg: PublicKey,
     S: Point
-  ): { R: Point, SPrime: Point, z: BigNumber } {
-    const r = PrivateKey.fromRandom()
-    const R = r.toPublicKey()
-    const SPrime = BArg.mul(r)
-    const e = this.computeChallenge(AArg, BArg, S, SPrime, R)
-    const z = r.add(e.mul(aArg)).umod(this.curve.n)
-    return { R, SPrime, z }
+  ): { R: Point; SPrime: Point; z: BigNumber } {
+    const r = PrivateKey.fromRandom();
+    const R = r.toPublicKey();
+    const SPrime = BArg.mul(r);
+    const e = this.computeChallenge(AArg, BArg, S, SPrime, R);
+    const z = r.add(e.mul(aArg)).umod(this.curve.n);
+    return { R, SPrime, z };
   }
 
   /**
@@ -71,33 +71,33 @@ export default class Schnorr {
    * @param proof Proof (R, S', z)
    * @returns True if the proof is valid, false otherwise
    */
-  verifyProof (
+  verifyProof(
     A: Point,
     B: Point,
     S: Point,
-    proof: { R: Point, SPrime: Point, z: BigNumber }
+    proof: { R: Point; SPrime: Point; z: BigNumber }
   ): boolean {
-    const { R, SPrime, z } = proof
-    const e = this.computeChallenge(A, B, S, SPrime, R)
+    const { R, SPrime, z } = proof;
+    const e = this.computeChallenge(A, B, S, SPrime, R);
 
     // Check zG = R + eA
-    const zG = this.curve.g.mul(z)
-    const RpluseA = R.add(A.mul(e))
+    const zG = this.curve.g.mul(z);
+    const RpluseA = R.add(A.mul(e));
     if (!zG.eq(RpluseA)) {
-      return false
+      return false;
     }
 
     // Check zB = S' + eS
-    const zB = B.mul(z)
-    const SprimeeS = SPrime.add(S.mul(e))
+    const zB = B.mul(z);
+    const SprimeeS = SPrime.add(S.mul(e));
     if (!zB.eq(SprimeeS)) {
-      return false
+      return false;
     }
 
-    return true
+    return true;
   }
 
-  private computeChallenge (
+  private computeChallenge(
     A: Point,
     B: Point,
     S: Point,
@@ -109,9 +109,9 @@ export default class Schnorr {
       ...B.encode(true),
       ...S.encode(true),
       ...SPrime.encode(true),
-      ...R.encode(true)
-    ] as number[]
-    const hash = sha256(message)
-    return new BigNumber(hash).umod(this.curve.n)
+      ...R.encode(true),
+    ] as number[];
+    const hash = sha256(message);
+    return new BigNumber(hash).umod(this.curve.n);
   }
 }

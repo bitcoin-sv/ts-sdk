@@ -1,1 +1,1 @@
-export * from './totp'
+export * from "./totp";

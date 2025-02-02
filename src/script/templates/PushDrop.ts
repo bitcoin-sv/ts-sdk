@@ -6,9 +6,13 @@ import {
   Signature,
   PublicKey,
 } from "../../primitives/index";
-import { WalletInterface } from "../../wallet/Wallet.interfaces";
+import { WalletInterface, SecurityLevel } from "../../wallet/Wallet.interfaces";
 import { Transaction } from "../../transaction/index";
-import { SecurityLevel } from "../../wallet/Wallet.interfaces";
+
+function verifyTruthy<T>(v: T | undefined): T {
+  if (v == null) throw new Error("must have value");
+  return v;
+}
 
 /**
  * For a given piece of data to push onto the stack in script, creates the correct minimally-encoded script chunk,
@@ -65,13 +69,16 @@ export default class PushDrop implements ScriptTemplate {
     fields: number[][];
   } {
     const lockingPublicKey = PublicKey.fromString(
-      Utils.toHex(script.chunks[0].data)
+      Utils.toHex(verifyTruthy(script.chunks[0].data)) // ✅ Ensure not undefined
     );
-    const fields = [];
+
+    const fields: number[][] = [];
     for (let i = 2; i < script.chunks.length; i++) {
-      const nextOpcode = script.chunks[i + 1].op;
-      let chunk = script.chunks[i].data;
-      if (!chunk) {
+      const nextOpcode = script.chunks[i + 1]?.op; // ✅ Prevent accessing `op` from `undefined`
+      let chunk: number[] = script.chunks[i].data ?? []; // ✅ Ensure `chunk` is always `number[]`
+
+      if (chunk.length === 0) {
+        // ✅ Only modify `chunk` if it was empty
         if (script.chunks[i].op >= 80 && script.chunks[i].op <= 95) {
           chunk = [script.chunks[i].op - 80];
         } else if (script.chunks[i].op === 0) {
@@ -240,17 +247,18 @@ export default class PushDrop implements ScriptTemplate {
 
         const preimage = TransactionSignature.format({
           sourceTXID,
-          sourceOutputIndex: input.sourceOutputIndex,
+          sourceOutputIndex: verifyTruthy(input.sourceOutputIndex),
           sourceSatoshis,
           transactionVersion: tx.version,
           otherInputs,
           inputIndex,
           outputs: tx.outputs,
-          inputSequence: input.sequence,
+          inputSequence: input.sequence ?? 0xffffffff,
           subscript: lockingScript,
           lockTime: tx.lockTime,
           scope: signatureScope,
         });
+
         const preimageHash = Hash.sha256(preimage);
         const { signature: bareSignature } = await this.wallet.createSignature({
           data: preimageHash,

@@ -9,6 +9,11 @@ import TransactionSignature from "../../primitives/TransactionSignature";
 import { sha256 } from "../../primitives/Hash";
 import Script from "../Script";
 
+function verifyTruthy<T>(v: T | undefined): T {
+  if (v == null) throw new Error("must have value");
+  return v;
+}
+
 /**
  * P2PKH (Pay To Public Key Hash) class implementing ScriptTemplate.
  *
@@ -25,14 +30,16 @@ export default class P2PKH implements ScriptTemplate {
     let data: number[];
     if (typeof pubkeyhash === "string") {
       const hash = fromBase58Check(pubkeyhash);
-      if (hash.prefix[0] !== 0x00 && hash.prefix[0] !== 0x6f)
+      if (hash.prefix[0] !== 0x00 && hash.prefix[0] !== 0x6f) {
         throw new Error("only P2PKH is supported");
+      }
       data = hash.data as number[];
     } else {
       data = pubkeyhash;
     }
-    if (data.length !== 20)
+    if (data.length !== 20) {
       throw new Error("P2PKH hash length must be 20 bytes");
+    }
     return new LockingScript([
       { op: OP.OP_DUP },
       { op: OP.OP_HASH160 },
@@ -115,17 +122,18 @@ export default class P2PKH implements ScriptTemplate {
 
         const preimage = TransactionSignature.format({
           sourceTXID,
-          sourceOutputIndex: input.sourceOutputIndex,
+          sourceOutputIndex: verifyTruthy(input.sourceOutputIndex),
           sourceSatoshis,
           transactionVersion: tx.version,
           otherInputs,
           inputIndex,
           outputs: tx.outputs,
-          inputSequence: input.sequence,
+          inputSequence: verifyTruthy(input.sequence),
           subscript: lockingScript,
           lockTime: tx.lockTime,
           scope: signatureScope,
         });
+
         const rawSignature = privateKey.sign(sha256(preimage));
         const sig = new TransactionSignature(
           rawSignature.r,

@@ -39,7 +39,7 @@ export function validateUnlockScript(
 
   const spend = new Spend({
     sourceTXID: verifyTruthy(spendingTx.inputs[vin].sourceTXID),
-    sourceOutputIndex: spendingTx.inputs[vin].sourceOutputIndex,
+    sourceOutputIndex: verifyTruthy(spendingTx.inputs[vin].sourceOutputIndex),
     sourceSatoshis: amount,
     lockingScript: ls,
     transactionVersion: spendingTx.version,
@@ -47,7 +47,7 @@ export function validateUnlockScript(
     inputIndex: vin,
     unlockingScript: verifyTruthy(spendingTx.inputs[vin].unlockingScript),
     outputs: spendingTx.outputs,
-    inputSequence: spendingTx.inputs[vin].sequence,
+    inputSequence: verifyTruthy(spendingTx.inputs[vin].sequence),
     lockTime: spendingTx.lockTime,
   });
 

@@ -1,13 +1,18 @@
-import MerklePath from './MerklePath'
-import Transaction from './Transaction'
-import ChainTracker from './ChainTracker'
-import BeefTx from './BeefTx'
-import { Reader, Writer, toHex, toArray } from '../primitives/utils'
-import { hash256 } from '../primitives/Hash'
+import MerklePath from "./MerklePath";
+import Transaction from "./Transaction";
+import ChainTracker from "./ChainTracker";
+import BeefTx from "./BeefTx";
+import { Reader, Writer, toHex, toArray } from "../primitives/utils";
+import { hash256 } from "../primitives/Hash";
 
-export const BEEF_V1 = 4022206465 // 0100BEEF in LE order
-export const BEEF_V2 = 4022206466 // 0200BEEF in LE order
-export const ATOMIC_BEEF = 0x01010101 // 01010101
+function verifyTruthy<T>(v: T | undefined): T {
+  if (v == null) throw new Error("Expected a valid value, but got undefined.");
+  return v;
+}
+
+export const BEEF_V1 = 4022206465; // 0100BEEF in LE order
+export const BEEF_V2 = 4022206466; // 0200BEEF in LE order
+export const ATOMIC_BEEF = 0x01010101; // 01010101
 export enum TX_DATA_FORMAT {
   RAWTX = 0, // rawtx without BUMP
   RAWTX_AND_BUMP_INDEX = 1, // rawtx with bump index
@@ -68,21 +73,21 @@ export enum TX_DATA_FORMAT {
  * must be discarded.
  */
 export class Beef {
-  bumps: MerklePath[] = []
-  txs: BeefTx[] = []
-  version: number = BEEF_V2
-  atomicTxid: string | undefined = undefined
+  bumps: MerklePath[] = [];
+  txs: BeefTx[] = [];
+  version: number = BEEF_V2;
+  atomicTxid: string | undefined = undefined;
 
-  constructor (version: number = BEEF_V2) {
-    this.version = version
+  constructor(version: number = BEEF_V2) {
+    this.version = version;
   }
 
   /**
    * @param txid of `beefTx` to find
    * @returns `BeefTx` in `txs` with `txid`.
    */
-  findTxid (txid: string): BeefTx | undefined {
-    return this.txs.find((tx) => tx.txid === txid)
+  findTxid(txid: string): BeefTx | undefined {
+    return this.txs.find((tx) => tx.txid === txid);
   }
 
   /**
@@ -95,23 +100,23 @@ export class Beef {
    * @param txid
    * @returns undefined if txid is unknown.
    */
-  makeTxidOnly (txid: string): BeefTx | undefined {
-    const i = this.txs.findIndex((tx) => tx.txid === txid)
-    if (i === -1) return undefined
-    let btx = this.txs[i]
+  makeTxidOnly(txid: string): BeefTx | undefined {
+    const i = this.txs.findIndex((tx) => tx.txid === txid);
+    if (i === -1) return undefined;
+    let btx = this.txs[i];
     if (btx.isTxidOnly) {
-      return btx
+      return btx;
     }
-    this.txs.splice(i, 1)
-    btx = this.mergeTxidOnly(txid)
-    return btx
+    this.txs.splice(i, 1);
+    btx = this.mergeTxidOnly(txid);
+    return btx;
   }
 
   /**
    * @returns `MerklePath` with level zero hash equal to txid or undefined.
    */
-  findBump (txid: string): MerklePath | undefined {
-    return this.bumps.find((b) => b.path[0].find((leaf) => leaf.hash === txid))
+  findBump(txid: string): MerklePath | undefined {
+    return this.bumps.find((b) => b.path[0].find((leaf) => leaf.hash === txid));
   }
 
   /**
@@ -123,20 +128,20 @@ export class Beef {
    * @param txid The id of the target transaction.
    * @returns Transaction with all available input `SourceTransaction`s from this Beef.
    */
-  findTransactionForSigning (txid: string): Transaction | undefined {
-    const beefTx = this.findTxid(txid)
-    if (!beefTx) return undefined
+  findTransactionForSigning(txid: string): Transaction | undefined {
+    const beefTx = this.findTxid(txid);
+    if (!beefTx || !beefTx.tx) return undefined; // Ensure beefTx.tx exists before using it
 
     for (const i of beefTx.tx.inputs) {
       if (!i.sourceTransaction) {
-        const itx = this.findTxid(i.sourceTXID)
+        const itx = this.findTxid(verifyTruthy(i.sourceTXID)); // Ensure sourceTXID is valid
         if (itx) {
-          i.sourceTransaction = itx.tx
+          i.sourceTransaction = itx.tx;
         }
       }
     }
 
-    return beefTx.tx
+    return beefTx.tx;
   }
 
   /**
@@ -147,37 +152,37 @@ export class Beef {
    * @param txid The id of the target transaction.
    * @returns Transaction with input `SourceTransaction` and `MerklePath` populated from this Beef.
    */
-  findAtomicTransaction (txid: string): Transaction | undefined {
-    const beefTx = this.findTxid(txid)
-    if (!beefTx) return undefined
+  findAtomicTransaction(txid: string): Transaction | undefined {
+    const beefTx = this.findTxid(txid);
+    if (!beefTx || !beefTx.tx) return undefined; // Ensure beefTx.tx exists before using it
 
     const addInputProof = (beef: Beef, tx: Transaction) => {
-      const mp = beef.findBump(tx.id('hex'))
+      const mp = beef.findBump(tx.id("hex"));
       if (mp) {
-        tx.merklePath = mp
+        tx.merklePath = mp;
       } else {
         for (const i of tx.inputs) {
           if (!i.sourceTransaction) {
-            const itx = beef.findTxid(i.sourceTXID)
+            const itx = beef.findTxid(verifyTruthy(i.sourceTXID)); // Ensure sourceTXID is valid
             if (itx) {
-              i.sourceTransaction = itx.tx
+              i.sourceTransaction = itx.tx;
             }
           }
           if (i.sourceTransaction) {
-            const mp = beef.findBump(i.sourceTransaction.id('hex'))
+            const mp = beef.findBump(i.sourceTransaction.id("hex"));
             if (mp) {
-              i.sourceTransaction.merklePath = mp
+              i.sourceTransaction.merklePath = mp;
             } else {
-              addInputProof(beef, i.sourceTransaction)
+              addInputProof(beef, i.sourceTransaction);
             }
           }
         }
       }
-    }
+    };
 
-    addInputProof(this, beefTx.tx)
+    addInputProof(this, beefTx.tx); // Safe because we checked that beefTx.tx exists
 
-    return beefTx.tx
+    return beefTx.tx;
   }
 
   /**
@@ -185,50 +190,50 @@ export class Beef {
    * @param bump
    * @returns index of merged bump
    */
-  mergeBump (bump: MerklePath): number {
-    let bumpIndex: number | undefined
+  mergeBump(bump: MerklePath): number {
+    let bumpIndex: number | undefined;
     // If this proof is identical to another one previously added, we use that first. Otherwise, we try to merge it with proofs from the same block.
     for (let i = 0; i < this.bumps.length; i++) {
-      const b = this.bumps[i]
+      const b = this.bumps[i];
       if (b === bump) {
         // Literally the same
-        return i
+        return i;
       }
       if (b.blockHeight === bump.blockHeight) {
         // Probably the same...
-        const rootA = b.computeRoot()
-        const rootB = bump.computeRoot()
+        const rootA = b.computeRoot();
+        const rootB = bump.computeRoot();
         if (rootA === rootB) {
           // Definitely the same... combine them to save space
-          b.combine(bump)
-          bumpIndex = i
-          break
+          b.combine(bump);
+          bumpIndex = i;
+          break;
         }
       }
     }
 
     // if the proof is not yet added, add a new path.
     if (bumpIndex === undefined) {
-      bumpIndex = this.bumps.length
-      this.bumps.push(bump)
+      bumpIndex = this.bumps.length;
+      this.bumps.push(bump);
     }
 
     // review if any transactions are proven by this bump
-    const b = this.bumps[bumpIndex]
+    const b = this.bumps[bumpIndex];
     for (const tx of this.txs) {
-      const txid = tx.txid
+      const txid = tx.txid;
       if (!tx.bumpIndex) {
         for (const n of b.path[0]) {
           if (n.hash === txid) {
-            tx.bumpIndex = bumpIndex
-            n.txid = true
-            break
+            tx.bumpIndex = bumpIndex;
+            n.txid = true;
+            break;
           }
         }
       }
     }
 
-    return bumpIndex
+    return bumpIndex;
   }
 
   /**
@@ -242,12 +247,12 @@ export class Beef {
    * @param bumpIndex Optional. If a number, must be valid index into bumps array.
    * @returns txid of rawTx
    */
-  mergeRawTx (rawTx: number[], bumpIndex?: number): BeefTx {
-    const newTx: BeefTx = new BeefTx(rawTx, bumpIndex)
-    this.removeExistingTxid(newTx.txid)
-    this.txs.push(newTx)
-    this.tryToValidateBumpIndex(newTx)
-    return newTx
+  mergeRawTx(rawTx: number[], bumpIndex?: number): BeefTx {
+    const newTx: BeefTx = new BeefTx(rawTx, bumpIndex);
+    this.removeExistingTxid(newTx.txid);
+    this.txs.push(newTx);
+    this.tryToValidateBumpIndex(newTx);
+    return newTx;
   }
 
   /**
@@ -260,69 +265,75 @@ export class Beef {
    * @param tx
    * @returns txid of tx
    */
-  mergeTransaction (tx: Transaction): BeefTx {
-    const txid = tx.id('hex')
-    this.removeExistingTxid(txid)
-    let bumpIndex: number | undefined
+  mergeTransaction(tx: Transaction): BeefTx {
+    const txid = tx.id("hex");
+    this.removeExistingTxid(txid);
+    let bumpIndex: number | undefined;
     if (tx.merklePath) {
-      bumpIndex = this.mergeBump(tx.merklePath)
+      bumpIndex = this.mergeBump(tx.merklePath);
     }
-    const newTx = new BeefTx(tx, bumpIndex)
-    this.txs.push(newTx)
-    this.tryToValidateBumpIndex(newTx)
-    bumpIndex = newTx.bumpIndex
+    const newTx = new BeefTx(tx, bumpIndex);
+    this.txs.push(newTx);
+    this.tryToValidateBumpIndex(newTx);
+    bumpIndex = newTx.bumpIndex;
     if (bumpIndex === undefined) {
       for (const input of tx.inputs) {
         if (input.sourceTransaction) {
-          this.mergeTransaction(input.sourceTransaction)
+          this.mergeTransaction(input.sourceTransaction);
         }
       }
     }
-    return newTx
+    return newTx;
   }
 
   /**
    * Removes an existing transaction from the BEEF, given its TXID
    * @param txid TXID of the transaction to remove
    */
-  removeExistingTxid (txid: string) {
-    const existingTxIndex = this.txs.findIndex((t) => t.txid === txid)
+  removeExistingTxid(txid: string) {
+    const existingTxIndex = this.txs.findIndex((t) => t.txid === txid);
     if (existingTxIndex >= 0) {
-      this.txs.splice(existingTxIndex, 1)
+      this.txs.splice(existingTxIndex, 1);
     }
   }
 
-  mergeTxidOnly (txid: string): BeefTx {
-    let tx = this.txs.find((t) => t.txid === txid)
+  mergeTxidOnly(txid: string): BeefTx {
+    let tx = this.txs.find((t) => t.txid === txid);
     if (!tx) {
-      tx = new BeefTx(txid)
-      this.txs.push(tx)
-      this.tryToValidateBumpIndex(tx)
+      tx = new BeefTx(txid);
+      this.txs.push(tx);
+      this.tryToValidateBumpIndex(tx);
     }
-    return tx
+    return tx;
   }
 
-  mergeBeefTx (btx: BeefTx): BeefTx {
-    let beefTx = this.findTxid(btx.txid)
+  mergeBeefTx(btx: BeefTx): BeefTx {
+    let beefTx = this.findTxid(btx.txid);
+
     if (btx.isTxidOnly && !beefTx) {
-      beefTx = this.mergeTxidOnly(btx.txid)
+      beefTx = this.mergeTxidOnly(btx.txid);
     } else if (btx._tx && (!beefTx || beefTx.isTxidOnly)) {
-      beefTx = this.mergeTransaction(btx._tx)
+      beefTx = this.mergeTransaction(btx._tx);
     } else if (btx._rawTx && (!beefTx || beefTx.isTxidOnly)) {
-      beefTx = this.mergeRawTx(btx._rawTx)
+      beefTx = this.mergeRawTx(btx._rawTx);
     }
-    return beefTx
+
+    if (!beefTx) {
+      throw new Error(`Failed to merge BeefTx for txid: ${btx.txid}`);
+    }
+
+    return beefTx;
   }
 
-  mergeBeef (beef: number[] | Beef) {
-    const b: Beef = Array.isArray(beef) ? Beef.fromBinary(beef) : beef
+  mergeBeef(beef: number[] | Beef) {
+    const b: Beef = Array.isArray(beef) ? Beef.fromBinary(beef) : beef;
 
     for (const bump of b.bumps) {
-      this.mergeBump(bump)
+      this.mergeBump(bump);
     }
 
     for (const tx of b.txs) {
-      this.mergeBeefTx(tx)
+      this.mergeBeefTx(tx);
     }
   }
 
@@ -339,8 +350,8 @@ export class Beef {
    *
    * @param allowTxidOnly optional. If true, transaction txid only is assumed valid
    */
-  isValid (allowTxidOnly?: boolean): boolean {
-    return this.verifyValid(allowTxidOnly).valid
+  isValid(allowTxidOnly?: boolean): boolean {
+    return this.verifyValid(allowTxidOnly).valid;
   }
 
   /**
@@ -357,66 +368,66 @@ export class Beef {
    * @param chainTracker Used to verify computed merkle path roots for all bump txids.
    * @param allowTxidOnly optional. If true, transaction txid is assumed valid
    */
-  async verify (
+  async verify(
     chainTracker: ChainTracker,
     allowTxidOnly?: boolean
   ): Promise<boolean> {
-    const r = this.verifyValid(allowTxidOnly)
-    if (!r.valid) return false
+    const r = this.verifyValid(allowTxidOnly);
+    if (!r.valid) return false;
 
     for (const height of Object.keys(r.roots)) {
       const isValid = await chainTracker.isValidRootForHeight(
         r.roots[height],
         Number(height)
-      )
+      );
       if (!isValid) {
-        return false
+        return false;
       }
     }
 
-    return true
+    return true;
   }
 
-  private verifyValid (allowTxidOnly?: boolean): {
-    valid: boolean
-    roots: Record<number, string>
+  private verifyValid(allowTxidOnly?: boolean): {
+    valid: boolean;
+    roots: Record<number, string>;
   } {
-    const r: { valid: boolean, roots: Record<number, string> } = {
+    const r: { valid: boolean; roots: Record<number, string> } = {
       valid: false,
-      roots: {}
-    }
+      roots: {},
+    };
 
-    this.sortTxs()
+    this.sortTxs();
 
     // valid txids: only txids if allowed, bump txids, then txids with input's in txids
-    const txids: Record<string, boolean> = {}
+    const txids: Record<string, boolean> = {};
 
     for (const tx of this.txs) {
       if (tx.isTxidOnly) {
-        if (!allowTxidOnly) return r
-        txids[tx.txid] = true
+        if (!allowTxidOnly) return r;
+        txids[tx.txid] = true;
       }
     }
 
     const confirmComputedRoot = (b: MerklePath, txid: string): boolean => {
-      const root = b.computeRoot(txid)
+      const root = b.computeRoot(txid);
       if (!r.roots[b.blockHeight]) {
         // accept the root as valid for this block and reuse for subsequent txids
-        r.roots[b.blockHeight] = root
+        r.roots[b.blockHeight] = root;
       }
       if (r.roots[b.blockHeight] !== root) {
-        return false
+        return false;
       }
-      return true
-    }
+      return true;
+    };
 
     for (const b of this.bumps) {
       for (const n of b.path[0]) {
         if (n.txid && n.hash) {
-          txids[n.hash] = true
+          txids[n.hash] = true;
           // all txid hashes in all bumps must have agree on computed merkle path roots
           if (!confirmComputedRoot(b, n.hash)) {
-            return r
+            return r;
           }
         }
       }
@@ -425,30 +436,30 @@ export class Beef {
     for (const t of this.txs) {
       // all input txids must be included before they are referenced
       for (const i of t.inputTxids) {
-        if (!txids[i]) return r
+        if (!txids[i]) return r;
       }
-      txids[t.txid] = true
+      txids[t.txid] = true;
     }
 
-    r.valid = true
-    return r
+    r.valid = true;
+    return r;
   }
 
   /**
    * Serializes this data to `writer`
    * @param writer
    */
-  toWriter (writer: Writer) {
-    writer.writeUInt32LE(this.version)
+  toWriter(writer: Writer) {
+    writer.writeUInt32LE(this.version);
 
-    writer.writeVarIntNum(this.bumps.length)
+    writer.writeVarIntNum(this.bumps.length);
     for (const b of this.bumps) {
-      writer.write(b.toBinary())
+      writer.write(b.toBinary());
     }
 
-    writer.writeVarIntNum(this.txs.length)
+    writer.writeVarIntNum(this.txs.length);
     for (const tx of this.txs) {
-      tx.toWriter(writer, this.version)
+      tx.toWriter(writer, this.version);
     }
   }
 
@@ -456,10 +467,10 @@ export class Beef {
    * Returns a binary array representing the serialized BEEF
    * @returns A binary array representing the BEEF
    */
-  toBinary (): number[] {
-    const writer = new Writer()
-    this.toWriter(writer)
-    return writer.toArray()
+  toBinary(): number[] {
+    const writer = new Writer();
+    this.toWriter(writer);
+    return writer.toArray();
   }
 
   /**
@@ -472,59 +483,59 @@ export class Beef {
    * @param txid
    * @returns serialized contents of this Beef with AtomicBEEF prefix.
    */
-  toBinaryAtomic (txid: string) {
-    this.sortTxs()
-    const tx = this.findTxid(txid)
+  toBinaryAtomic(txid: string) {
+    this.sortTxs();
+    const tx = this.findTxid(txid);
     if (!tx) {
-      throw new Error(`${txid} does not exist in this Beef`)
+      throw new Error(`${txid} does not exist in this Beef`);
     }
-    let beef: Beef = this
+    let beef: Beef = this;
     if (this.txs[this.txs.length - 1] !== tx) {
-      beef = this.clone()
-      const i = this.txs.findIndex((t) => t.txid === txid)
-      beef.txs.splice(i + 1)
+      beef = this.clone();
+      const i = this.txs.findIndex((t) => t.txid === txid);
+      beef.txs.splice(i + 1);
     }
-    const writer = new Writer()
-    writer.writeUInt32LE(ATOMIC_BEEF)
-    writer.write(toArray(txid, 'hex'))
-    beef.toWriter(writer)
-    return writer.toArray()
+    const writer = new Writer();
+    writer.writeUInt32LE(ATOMIC_BEEF);
+    writer.write(toArray(txid, "hex"));
+    beef.toWriter(writer);
+    return writer.toArray();
   }
 
   /**
    * Returns a hex string representing the serialized BEEF
    * @returns A hex string representing the BEEF
    */
-  toHex (): string {
-    return toHex(this.toBinary())
+  toHex(): string {
+    return toHex(this.toBinary());
   }
 
-  static fromReader (br: Reader): Beef {
-    let version = br.readUInt32LE()
-    let atomicTxid: string | undefined
+  static fromReader(br: Reader): Beef {
+    let version = br.readUInt32LE();
+    let atomicTxid: string | undefined;
     if (version === ATOMIC_BEEF) {
       // Skip the txid and re-read the BEEF version
-      atomicTxid = toHex(br.read(32))
-      version = br.readUInt32LE()
+      atomicTxid = toHex(br.read(32));
+      version = br.readUInt32LE();
     }
     if (version !== BEEF_V1 && version !== BEEF_V2) {
       throw new Error(
         `Serialized BEEF must start with ${BEEF_V1} or ${BEEF_V2} but starts with ${version}`
-      )
+      );
     }
-    const beef = new Beef(version)
-    const bumpsLength = br.readVarIntNum()
+    const beef = new Beef(version);
+    const bumpsLength = br.readVarIntNum();
     for (let i = 0; i < bumpsLength; i++) {
-      const bump = MerklePath.fromReader(br, false)
-      beef.bumps.push(bump)
+      const bump = MerklePath.fromReader(br, false);
+      beef.bumps.push(bump);
     }
-    const txsLength = br.readVarIntNum()
+    const txsLength = br.readVarIntNum();
     for (let i = 0; i < txsLength; i++) {
-      const beefTx = BeefTx.fromReader(br, version)
-      beef.txs.push(beefTx)
+      const beefTx = BeefTx.fromReader(br, version);
+      beef.txs.push(beefTx);
     }
-    beef.atomicTxid = atomicTxid
-    return beef
+    beef.atomicTxid = atomicTxid;
+    return beef;
   }
 
   /**
@@ -532,9 +543,9 @@ export class Beef {
    * @param bin The binary array from which to construct BEEF
    * @returns An instance of the Beef class constructed from the binary data
    */
-  static fromBinary (bin: number[]): Beef {
-    const br = new Reader(bin)
-    return Beef.fromReader(br)
+  static fromBinary(bin: number[]): Beef {
+    const br = new Reader(bin);
+    return Beef.fromReader(br);
   }
 
   /**
@@ -543,10 +554,10 @@ export class Beef {
    * @param enc The encoding of the string value from which BEEF should be constructed
    * @returns An instance of the Beef class constructed from the string
    */
-  static fromString (s: string, enc: 'hex' | 'utf8' | 'base64' = 'hex'): Beef {
-    const bin = toArray(s, enc)
-    const br = new Reader(bin)
-    return Beef.fromReader(br)
+  static fromString(s: string, enc: "hex" | "utf8" | "base64" = "hex"): Beef {
+    const bin = toArray(s, enc);
+    const br = new Reader(bin);
+    return Beef.fromReader(br);
   }
 
   /**
@@ -556,20 +567,20 @@ export class Beef {
    * @param newTx A new `BeefTx` that has been added to this.txs
    * @returns true if a bump was found, false otherwise
    */
-  private tryToValidateBumpIndex (newTx: BeefTx): boolean {
+  private tryToValidateBumpIndex(newTx: BeefTx): boolean {
     if (newTx.bumpIndex !== undefined) {
-      return true
+      return true;
     }
-    const txid = newTx.txid
+    const txid = newTx.txid;
     for (let i = 0; i < this.bumps.length; i++) {
-      const j = this.bumps[i].path[0].findIndex((b) => b.hash === txid)
+      const j = this.bumps[i].path[0].findIndex((b) => b.hash === txid);
       if (j >= 0) {
-        newTx.bumpIndex = i
-        this.bumps[i].path[0][j].txid = true
-        return true
+        newTx.bumpIndex = i;
+        this.bumps[i].path[0][j].txid = true;
+        return true;
       }
     }
-    return false
+    return false;
   }
 
   /**
@@ -582,128 +593,128 @@ export class Beef {
    *
    * @returns `{ missingInputs, notValid, valid, withMissingInputs }`
    */
-  sortTxs (): {
-    missingInputs: string[]
-    notValid: string[]
-    valid: string[]
-    withMissingInputs: string[]
-    txidOnly: string[]
+  sortTxs(): {
+    missingInputs: string[];
+    notValid: string[];
+    valid: string[];
+    withMissingInputs: string[];
+    txidOnly: string[];
   } {
     // Hashtable of valid txids (with proof or all inputs chain to proof)
-    const validTxids: Record<string, boolean> = {}
+    const validTxids: Record<string, boolean> = {};
 
     // Hashtable of all transaction txids to transaction
-    const txidToTx: Record<string, BeefTx> = {}
+    const txidToTx: Record<string, BeefTx> = {};
 
     // queue of unsorted transactions ...
-    let queue: BeefTx[] = []
+    let queue: BeefTx[] = [];
 
     // sorted transactions: hasProof to with longest dependency chain
-    const result: BeefTx[] = []
+    const result: BeefTx[] = [];
 
-    const txidOnly: BeefTx[] = []
+    const txidOnly: BeefTx[] = [];
 
     for (const tx of this.txs) {
-      txidToTx[tx.txid] = tx
-      tx.isValid = tx.hasProof
+      txidToTx[tx.txid] = tx;
+      tx.isValid = tx.hasProof;
       if (tx.isValid) {
-        validTxids[tx.txid] = true
-        result.push(tx)
+        validTxids[tx.txid] = true;
+        result.push(tx);
       } else if (tx.isTxidOnly && tx.inputTxids.length === 0) {
-        validTxids[tx.txid] = true
-        txidOnly.push(tx)
+        validTxids[tx.txid] = true;
+        txidOnly.push(tx);
       } else {
-        queue.push(tx)
+        queue.push(tx);
       }
     }
 
     // Hashtable of unknown input txids used to fund transactions without their own proof.
-    const missingInputs: Record<string, boolean> = {}
+    const missingInputs: Record<string, boolean> = {};
     // transactions with one or more missing inputs
-    const txsMissingInputs: BeefTx[] = []
+    const txsMissingInputs: BeefTx[] = [];
 
-    const possiblyMissingInputs = queue
-    queue = []
+    const possiblyMissingInputs = queue;
+    queue = [];
 
     // all tx are isValid false, hasProof false.
     // if isTxidOnly then has inputTxids
     for (const tx of possiblyMissingInputs) {
-      let hasMissingInput = false
+      let hasMissingInput = false;
 
       // For all the unproven transactions,
       // link their inputs that exist in this beef,
       // make a note of missing inputs.
       for (const inputTxid of tx.inputTxids) {
         if (!txidToTx[inputTxid]) {
-          missingInputs[inputTxid] = true
-          hasMissingInput = true
+          missingInputs[inputTxid] = true;
+          hasMissingInput = true;
         }
       }
       if (hasMissingInput) {
-        txsMissingInputs.push(tx)
+        txsMissingInputs.push(tx);
       } else {
-        queue.push(tx)
+        queue.push(tx);
       }
     }
 
     // As long as we have unsorted transactions...
     while (queue.length > 0) {
-      const oldQueue = queue
-      queue = []
+      const oldQueue = queue;
+      queue = [];
       // all tx are isValid false, hasProof false.
       // if isTxidOnly then has inputTxids
       for (const tx of oldQueue) {
         if (tx.inputTxids.every((txid) => validTxids[txid])) {
-          validTxids[tx.txid] = true
-          result.push(tx)
+          validTxids[tx.txid] = true;
+          result.push(tx);
         } else {
-          queue.push(tx)
+          queue.push(tx);
         }
       }
       if (oldQueue.length === queue.length) {
-        break
+        break;
       }
     }
 
     // transactions that don't have proofs and don't chain to proofs
-    const txsNotValid = queue
+    const txsNotValid = queue;
 
     // New order of txs is unsortable (missing inputs or depends on missing inputs), txidOnly, sorted (so newest sorted is last)
     this.txs = txsMissingInputs
       .concat(txsNotValid)
       .concat(txidOnly)
-      .concat(result)
+      .concat(result);
 
     return {
       missingInputs: Object.keys(missingInputs),
       notValid: txsNotValid.map((tx) => tx.txid),
       valid: Object.keys(validTxids),
       withMissingInputs: txsMissingInputs.map((tx) => tx.txid),
-      txidOnly: txidOnly.map((tx) => tx.txid)
-    }
+      txidOnly: txidOnly.map((tx) => tx.txid),
+    };
   }
 
   /**
    * @returns a shallow copy of this beef
    */
-  clone (): Beef {
-    const c = new Beef()
-    c.bumps = Array.from(this.bumps)
-    c.txs = Array.from(this.txs)
-    return c
+  clone(): Beef {
+    const c = new Beef();
+    c.bumps = Array.from(this.bumps);
+    c.txs = Array.from(this.txs);
+    return c;
   }
 
   /**
    * Ensure that all the txids in `knownTxids` are txidOnly
    * @param knownTxids
    */
-  trimKnownTxids (knownTxids: string[]) {
-    for (let i = 0; i < this.txs.length;) {
-      const tx = this.txs[i]
+  trimKnownTxids(knownTxids: string[]) {
+    for (let i = 0; i < this.txs.length; ) {
+      const tx = this.txs[i];
       if (tx.isTxidOnly && knownTxids.includes(tx.txid)) {
-        this.txs.splice(i, 1)
+        this.txs.splice(i, 1);
       } else {
-        i++
+        i++;
       }
     }
     // TODO: bumps could be trimmed to eliminate unreferenced proofs.
@@ -712,52 +723,57 @@ export class Beef {
   /**
    * @returns array of transaction txids that either have a proof or whose inputs chain back to a proven transaction.
    */
-  getValidTxids (): string[] {
-    const r = this.sortTxs()
-    return r.valid
+  getValidTxids(): string[] {
+    const r = this.sortTxs();
+    return r.valid;
   }
 
   /**
    * @returns Summary of `Beef` contents as multi-line string.
    */
-  toLogString (): string {
-    let log = ''
-    log += `BEEF with ${this.bumps.length} BUMPS and ${this.txs.length} Transactions, isValid ${this.isValid()}\n`
-    let i = -1
+  toLogString(): string {
+    let log = "";
+    log += `BEEF with ${this.bumps.length} BUMPS and ${this.txs.length} Transactions, isValid ${this.isValid()}\n`;
+    let i = -1;
+
     for (const b of this.bumps) {
-      i++
+      i++;
       log += `  BUMP ${i}\n    block: ${b.blockHeight}\n    txids: [\n${b.path[0]
         .filter((n) => !!n.txid)
         .map((n) => `      '${n.hash}'`)
-        .join(',\n')}\n    ]\n`
+        .join(",\n")}\n    ]\n`;
     }
-    i = -1
+
+    i = -1;
     for (const t of this.txs) {
-      i++
-      log += `  TX ${i}\n    txid: ${t.txid}\n`
+      i++;
+      log += `  TX ${i}\n    txid: ${t.txid}\n`;
       if (t.bumpIndex !== undefined) {
-        log += `    bumpIndex: ${t.bumpIndex}\n`
+        log += `    bumpIndex: ${t.bumpIndex}\n`;
       }
       if (t.isTxidOnly) {
-        log += '    txidOnly\n'
+        log += "    txidOnly\n";
       } else {
-        log += `    rawTx length=${t.rawTx.length}\n`
+        log += `    rawTx length=${t.rawTx?.length ?? 0}\n`; // ✅ Fix applied here
       }
       if (t.inputTxids.length > 0) {
-        log += `    inputs: [\n${t.inputTxids.map((it) => `      '${it}'`).join(',\n')}\n    ]\n`
+        log += `    inputs: [\n${t.inputTxids
+          .map((it) => `      '${it}'`)
+          .join(",\n")}\n    ]\n`;
       }
     }
-    return log
+
+    return log;
   }
 
   /**
    * In some circumstances it may be helpful for the BUMP MerkePaths to include
    * leaves that can be computed from row zero.
    */
-  addComputedLeaves () {
-    const beef = this
+  addComputedLeaves() {
+    const beef = this;
     const hash = (m: string): string =>
-      toHex(hash256(toArray(m, 'hex').reverse()).reverse())
+      toHex(hash256(toArray(m, "hex").reverse()).reverse());
 
     for (const bump of beef.bumps) {
       for (let row = 1; row < bump.path.length; row++) {
@@ -765,8 +781,8 @@ export class Beef {
           if (leafL.hash && (leafL.offset & 1) === 0) {
             const leafR = bump.path[row - 1].find(
               (l) => l.offset === leafL.offset + 1
-            )
-            const offsetOnRow = leafL.offset >> 1
+            );
+            const offsetOnRow = leafL.offset >> 1;
             if (
               leafR &&
               leafR.hash &&
@@ -776,8 +792,8 @@ export class Beef {
               bump.path[row].push({
                 offset: offsetOnRow,
                 // string concatenation puts the right leaf on the left of the left leaf hash :-)
-                hash: hash(leafR.hash + leafL.hash)
-              })
+                hash: hash(leafR.hash + leafL.hash),
+              });
             }
           }
         }

@@ -148,7 +148,7 @@ export default class ARC implements Broadcaster {
       );
       if (response.ok) {
         const { txid, extraInfo, txStatus, competingTxs } = response.data;
-        let broadcastRes: BroadcastResponse = {
+        const broadcastRes: BroadcastResponse = {
           status: "success",
           txid,
           message: `${txStatus} ${extraInfo}`,
@@ -203,7 +203,7 @@ export default class ARC implements Broadcaster {
    * @param {Transaction[]} txs - Array of transactions to be broadcasted.
    * @returns {Promise<Array<object>>} A promise that resolves to an array of objects.
    */
-  async broadcastMany(txs: Transaction[]): Promise<Array<object>> {
+  async broadcastMany(txs: Transaction[]): Promise<object[]> {
     const rawTxs = txs.map((tx) => {
       try {
         return { rawTx: tx.toHexEF() };
@@ -225,7 +225,7 @@ export default class ARC implements Broadcaster {
     };
 
     try {
-      const response = await this.httpClient.request<Array<object>>(
+      const response = await this.httpClient.request<object[]>(
         `${this.URL}/v1/txs`,
         requestOptions
       );

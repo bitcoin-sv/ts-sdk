@@ -219,7 +219,11 @@
   },
   "homepage": "https://github.com/bitcoin-sv/ts-sdk#readme",
   "devDependencies": {
+    "@eslint/js": "^9.19.0",
     "@types/jest": "^29.5.14",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.4",
+    "globals": "^15.14.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "ts-jest": "^29.1.1",
@@ -228,6 +232,7 @@
     "ts2md": "^0.2.5",
     "tsconfig-to-dual-package": "^1.2.0",
     "typescript": "^5.2.2",
+    "typescript-eslint": "^8.22.0",
     "webpack": "^5.95.0",
     "webpack-cli": "^5.1.4"
   }

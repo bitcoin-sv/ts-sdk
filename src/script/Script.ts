@@ -1,7 +1,7 @@
-import ScriptChunk from './ScriptChunk'
-import OP from './OP'
-import { encode, toHex, Reader, Writer, toArray } from '../primitives/utils'
-import BigNumber from '../primitives/BigNumber'
+import ScriptChunk from "./ScriptChunk";
+import OP from "./OP";
+import { encode, toHex, Reader, Writer, toArray } from "../primitives/utils";
+import BigNumber from "../primitives/BigNumber";
 
 /**
  * The Script class represents a script in a Bitcoin SV transaction,
@@ -11,7 +11,7 @@ import BigNumber from '../primitives/BigNumber'
  * @property {ScriptChunk[]} chunks - An array of script chunks that make up the script.
  */
 export default class Script {
-  chunks: ScriptChunk[]
+  chunks: ScriptChunk[];
 
   /**
    * @method fromASM
@@ -21,75 +21,75 @@ export default class Script {
    * @example
    * const script = Script.fromASM("OP_DUP OP_HASH160 abcd... OP_EQUALVERIFY OP_CHECKSIG")
    */
-  static fromASM (asm: string): Script {
-    const chunks: ScriptChunk[] = []
-    const tokens = asm.split(' ')
-    let i = 0
+  static fromASM(asm: string): Script {
+    const chunks: ScriptChunk[] = [];
+    const tokens = asm.split(" ");
+    let i = 0;
     while (i < tokens.length) {
-      const token = tokens[i]
-      let opCode
-      let opCodeNum: number
-      if (token.startsWith('OP_') && typeof OP[token] !== 'undefined') {
-        opCode = token
-        opCodeNum = OP[token]
+      const token = tokens[i];
+      let opCode;
+      let opCodeNum: number = 0;
+      if (token.startsWith("OP_") && typeof OP[token] !== "undefined") {
+        opCode = token;
+        opCodeNum = OP[token];
       }
 
       // we start with two special cases, 0 and -1, which are handled specially in
       // toASM. see _chunkToString.
-      if (token === '0') {
-        opCodeNum = 0
+      if (token === "0") {
+        opCodeNum = 0;
         chunks.push({
-          op: opCodeNum
-        })
-        i = i + 1
-      } else if (token === '-1') {
-        opCodeNum = OP.OP_1NEGATE
+          op: opCodeNum,
+        });
+        i = i + 1;
+      } else if (token === "-1") {
+        opCodeNum = OP.OP_1NEGATE;
         chunks.push({
-          op: opCodeNum
-        })
-        i = i + 1
+          op: opCodeNum,
+        });
+        i = i + 1;
       } else if (opCode === undefined) {
-        let hex = tokens[i]
+        let hex = tokens[i];
         if (hex.length % 2 !== 0) {
-          hex = '0' + hex
+          hex = "0" + hex;
         }
-        const arr = toArray(hex, 'hex')
-        if (encode(arr, 'hex') !== hex) {
-          throw new Error('invalid hex string in script')
+        const arr = toArray(hex, "hex");
+        if (encode(arr, "hex") !== hex) {
+          throw new Error("invalid hex string in script");
         }
-        const len = arr.length
+        const len = arr.length;
         if (len >= 0 && len < OP.OP_PUSHDATA1) {
-          opCodeNum = len
+          opCodeNum = len;
         } else if (len < Math.pow(2, 8)) {
-          opCodeNum = OP.OP_PUSHDATA1
+          opCodeNum = OP.OP_PUSHDATA1;
         } else if (len < Math.pow(2, 16)) {
-          opCodeNum = OP.OP_PUSHDATA2
+          opCodeNum = OP.OP_PUSHDATA2;
         } else if (len < Math.pow(2, 32)) {
-          opCodeNum = OP.OP_PUSHDATA4
+          opCodeNum = OP.OP_PUSHDATA4;
         }
         chunks.push({
           data: arr,
-          op: opCodeNum
-        })
-        i = i + 1
+          op: opCodeNum,
+        });
+        i = i + 1;
       } else if (
         opCodeNum === OP.OP_PUSHDATA1 ||
         opCodeNum === OP.OP_PUSHDATA2 ||
         opCodeNum === OP.OP_PUSHDATA4
       ) {
         chunks.push({
-          data: toArray(tokens[i + 2], 'hex'),
-          op: opCodeNum
-        })
-        i = i + 3
+          data: toArray(tokens[i + 2], "hex"),
+          op: opCodeNum,
+        });
+        i = i + 3;
       } else {
         chunks.push({
-          op: opCodeNum
-        })
-        i = i + 1
+          op: opCodeNum,
+        });
+        i = i + 1;
       }
     }
-    return new Script(chunks)
+    return new Script(chunks);
   }
 
   /**
@@ -100,15 +100,17 @@ export default class Script {
    * @example
    * const script = Script.fromHex("76a9...");
    */
-  static fromHex (hex: string): Script {
-    if (hex.length === 0) return Script.fromBinary([])
+  static fromHex(hex: string): Script {
+    if (hex.length === 0) return Script.fromBinary([]);
     if (hex.length % 2 !== 0) {
       throw new Error(
-        'There is an uneven number of characters in the string which suggests it is not hex encoded.'
-      )
+        "There is an uneven number of characters in the string which suggests it is not hex encoded."
+      );
     }
-    if (!/^[0-9a-fA-F]+$/.test(hex)) { throw new Error('Some elements in this string are not hex encoded.') }
-    return Script.fromBinary(toArray(hex, 'hex'))
+    if (!/^[0-9a-fA-F]+$/.test(hex)) {
+      throw new Error("Some elements in this string are not hex encoded.");
+    }
+    return Script.fromBinary(toArray(hex, "hex"));
   }
 
   /**
@@ -119,63 +121,63 @@ export default class Script {
    * @example
    * const script = Script.fromBinary([0x76, 0xa9, ...])
    */
-  static fromBinary (bin: number[]): Script {
-    bin = [...bin]
-    const chunks: ScriptChunk[] = []
+  static fromBinary(bin: number[]): Script {
+    bin = [...bin];
+    const chunks: ScriptChunk[] = [];
 
-    const br = new Reader(bin)
+    const br = new Reader(bin);
     while (!br.eof()) {
-      const op = br.readUInt8()
+      const op = br.readUInt8();
 
-      let len = 0
+      let len = 0;
       // eslint-disable-next-line @typescript-eslint/no-shadow
-      let data: number[] = []
+      let data: number[] = [];
       if (op > 0 && op < OP.OP_PUSHDATA1) {
-        len = op
+        len = op;
         chunks.push({
           data: br.read(len),
-          op
-        })
+          op,
+        });
       } else if (op === OP.OP_PUSHDATA1) {
         try {
-          len = br.readUInt8()
-          data = br.read(len)
+          len = br.readUInt8();
+          data = br.read(len);
         } catch (err) {
-          br.read()
+          br.read();
         }
         chunks.push({
           data,
-          op
-        })
+          op,
+        });
       } else if (op === OP.OP_PUSHDATA2) {
         try {
-          len = br.readUInt16LE()
-          data = br.read(len)
+          len = br.readUInt16LE();
+          data = br.read(len);
         } catch (err) {
-          br.read()
+          br.read();
         }
         chunks.push({
           data,
-          op
-        })
+          op,
+        });
       } else if (op === OP.OP_PUSHDATA4) {
         try {
-          len = br.readUInt32LE()
-          data = br.read(len)
+          len = br.readUInt32LE();
+          data = br.read(len);
         } catch (err) {
-          br.read()
+          br.read();
         }
         chunks.push({
           data,
-          op
-        })
+          op,
+        });
       } else {
         chunks.push({
-          op
-        })
+          op,
+        });
       }
     }
-    return new Script(chunks)
+    return new Script(chunks);
   }
 
   /**
@@ -183,8 +185,8 @@ export default class Script {
    * Constructs a new Script object.
    * @param chunks=[] - An array of script chunks to directly initialize the script.
    */
-  constructor (chunks: ScriptChunk[] = []) {
-    this.chunks = chunks
+  constructor(chunks: ScriptChunk[] = []) {
+    this.chunks = chunks;
   }
 
   /**
@@ -192,14 +194,14 @@ export default class Script {
    * Serializes the script to an ASM formatted string.
    * @returns The script in ASM string format.
    */
-  toASM (): string {
-    let str = ''
+  toASM(): string {
+    let str = "";
     for (let i = 0; i < this.chunks.length; i++) {
-      const chunk = this.chunks[i]
-      str += this._chunkToString(chunk)
+      const chunk = this.chunks[i];
+      str += this._chunkToString(chunk);
     }
 
-    return str.slice(1)
+    return str.slice(1);
   }
 
   /**
@@ -207,8 +209,8 @@ export default class Script {
    * Serializes the script to a hexadecimal string.
    * @returns The script in hexadecimal format.
    */
-  toHex (): string {
-    return encode(this.toBinary(), 'hex') as string
+  toHex(): string {
+    return encode(this.toBinary(), "hex") as string;
   }
 
   /**
@@ -216,30 +218,30 @@ export default class Script {
    * Serializes the script to a binary array.
    * @returns The script in binary array format.
    */
-  toBinary (): number[] {
-    const writer = new Writer()
+  toBinary(): number[] {
+    const writer = new Writer();
 
     for (let i = 0; i < this.chunks.length; i++) {
-      const chunk = this.chunks[i]
-      const op = chunk.op
-      writer.writeUInt8(op)
+      const chunk = this.chunks[i];
+      const op = chunk.op;
+      writer.writeUInt8(op);
       if (chunk.data) {
         if (op < OP.OP_PUSHDATA1) {
-          writer.write(chunk.data)
+          writer.write(chunk.data);
         } else if (op === OP.OP_PUSHDATA1) {
-          writer.writeUInt8(chunk.data.length)
-          writer.write(chunk.data)
+          writer.writeUInt8(chunk.data.length);
+          writer.write(chunk.data);
         } else if (op === OP.OP_PUSHDATA2) {
-          writer.writeUInt16LE(chunk.data.length)
-          writer.write(chunk.data)
+          writer.writeUInt16LE(chunk.data.length);
+          writer.write(chunk.data);
         } else if (op === OP.OP_PUSHDATA4) {
-          writer.writeUInt32LE(chunk.data.length)
-          writer.write(chunk.data)
+          writer.writeUInt32LE(chunk.data.length);
+          writer.write(chunk.data);
         }
       }
     }
 
-    return writer.toArray()
+    return writer.toArray();
   }
 
   /**
@@ -248,9 +250,9 @@ export default class Script {
    * @param script - The script to append.
    * @returns This script instance for chaining.
    */
-  writeScript (script: Script): Script {
-    this.chunks = this.chunks.concat(script.chunks)
-    return this
+  writeScript(script: Script): Script {
+    this.chunks = this.chunks.concat(script.chunks);
+    return this;
   }
 
   /**
@@ -259,9 +261,9 @@ export default class Script {
    * @param op - The opcode to append.
    * @returns This script instance for chaining.
    */
-  writeOpCode (op: number): Script {
-    this.chunks.push({ op })
-    return this
+  writeOpCode(op: number): Script {
+    this.chunks.push({ op });
+    return this;
   }
 
   /**
@@ -271,9 +273,9 @@ export default class Script {
    * @param op - The opcode to set.
    * @returns This script instance for chaining.
    */
-  setChunkOpCode (i: number, op: number): Script {
-    this.chunks[i] = { op }
-    return this
+  setChunkOpCode(i: number, op: number): Script {
+    this.chunks[i] = { op };
+    return this;
   }
 
   /**
@@ -282,25 +284,25 @@ export default class Script {
    * @param bn - The BigNumber to append.
    * @returns This script instance for chaining.
    */
-  writeBn (bn: BigNumber): Script {
+  writeBn(bn: BigNumber): Script {
     if (bn.cmpn(0) === OP.OP_0) {
       this.chunks.push({
-        op: OP.OP_0
-      })
+        op: OP.OP_0,
+      });
     } else if (bn.cmpn(-1) === 0) {
       this.chunks.push({
-        op: OP.OP_1NEGATE
-      })
+        op: OP.OP_1NEGATE,
+      });
     } else if (bn.cmpn(1) >= 0 && bn.cmpn(16) <= 0) {
       // see OP_1 - OP_16
       this.chunks.push({
-        op: bn.toNumber() + OP.OP_1 - 1
-      })
+        op: bn.toNumber() + OP.OP_1 - 1,
+      });
     } else {
-      const buf = bn.toSm('little')
-      this.writeBin(buf)
+      const buf = bn.toSm("little");
+      this.writeBin(buf);
     }
-    return this
+    return this;
   }
 
   /**
@@ -310,26 +312,26 @@ export default class Script {
    * @returns This script instance for chaining.
    * @throws {Error} Throws an error if the data is too large to be pushed.
    */
-  writeBin (bin: number[]): Script {
-    let op
+  writeBin(bin: number[]): Script {
+    let op;
     if (bin.length > 0 && bin.length < OP.OP_PUSHDATA1) {
-      op = bin.length
+      op = bin.length;
     } else if (bin.length === 0) {
-      op = OP.OP_0
+      op = OP.OP_0;
     } else if (bin.length < Math.pow(2, 8)) {
-      op = OP.OP_PUSHDATA1
+      op = OP.OP_PUSHDATA1;
     } else if (bin.length < Math.pow(2, 16)) {
-      op = OP.OP_PUSHDATA2
+      op = OP.OP_PUSHDATA2;
     } else if (bin.length < Math.pow(2, 32)) {
-      op = OP.OP_PUSHDATA4
+      op = OP.OP_PUSHDATA4;
     } else {
-      throw new Error("You can't push that much data")
+      throw new Error("You can't push that much data");
     }
     this.chunks.push({
       data: bin,
-      op
-    })
-    return this
+      op,
+    });
+    return this;
   }
 
   /**
@@ -338,9 +340,9 @@ export default class Script {
    * @param num - The number to append.
    * @returns This script instance for chaining.
    */
-  writeNumber (num: number): Script {
-    this.writeBn(new BigNumber(num))
-    return this
+  writeNumber(num: number): Script {
+    this.writeBn(new BigNumber(num));
+    return this;
   }
 
   /**
@@ -348,15 +350,15 @@ export default class Script {
    * Removes all OP_CODESEPARATOR opcodes from the script.
    * @returns This script instance for chaining.
    */
-  removeCodeseparators (): Script {
-    const chunks = []
+  removeCodeseparators(): Script {
+    const chunks: ScriptChunk[] = [];
     for (let i = 0; i < this.chunks.length; i++) {
       if (this.chunks[i].op !== OP.OP_CODESEPARATOR) {
-        chunks.push(this.chunks[i])
+        chunks.push(this.chunks[i]);
       }
     }
-    this.chunks = chunks
-    return this
+    this.chunks = chunks;
+    return this;
   }
 
   /**
@@ -366,16 +368,16 @@ export default class Script {
    *
    * @returns This script instance for chaining.
    */
-  findAndDelete (script: Script): Script {
-    const buf = script.toHex()
+  findAndDelete(script: Script): Script {
+    const buf = script.toHex();
     for (let i = 0; i < this.chunks.length; i++) {
-      const script2 = new Script([this.chunks[i]])
-      const buf2 = script2.toHex()
+      const script2 = new Script([this.chunks[i]]);
+      const buf2 = script2.toHex();
       if (buf === buf2) {
-        this.chunks.splice(i, 1)
+        this.chunks.splice(i, 1);
       }
     }
-    return this
+    return this;
   }
 
   /**
@@ -383,15 +385,15 @@ export default class Script {
    * Checks if the script contains only push data operations.
    * @returns True if the script is push-only, otherwise false.
    */
-  isPushOnly (): boolean {
+  isPushOnly(): boolean {
     for (let i = 0; i < this.chunks.length; i++) {
-      const chunk = this.chunks[i]
-      const opCodeNum = chunk.op
+      const chunk = this.chunks[i];
+      const opCodeNum = chunk.op;
       if (opCodeNum > OP.OP_16) {
-        return false
+        return false;
       }
     }
-    return true
+    return true;
   }
 
   /**
@@ -399,8 +401,8 @@ export default class Script {
    * Determines if the script is a locking script.
    * @returns True if the script is a locking script, otherwise false.
    */
-  isLockingScript (): boolean {
-    throw new Error('Not implemented')
+  isLockingScript(): boolean {
+    throw new Error("Not implemented");
   }
 
   /**
@@ -408,8 +410,8 @@ export default class Script {
    * Determines if the script is an unlocking script.
    * @returns True if the script is an unlocking script, otherwise false.
    */
-  isUnlockingScript (): boolean {
-    throw new Error('Not implemented')
+  isUnlockingScript(): boolean {
+    throw new Error("Not implemented");
   }
 
   /**
@@ -419,15 +421,15 @@ export default class Script {
    * @param chunk - The script chunk.
    * @returns The string representation of the chunk.
    */
-  private _chunkToString (chunk: ScriptChunk): string {
-    const op = chunk.op
-    let str = ''
-    if (typeof chunk.data === 'undefined') {
-      const val = OP[op] as string
-      str = `${str} ${val}`
+  private _chunkToString(chunk: ScriptChunk): string {
+    const op = chunk.op;
+    let str = "";
+    if (typeof chunk.data === "undefined") {
+      const val = OP[op] as string;
+      str = `${str} ${val}`;
     } else {
-      str = `${str} ${toHex(chunk.data)}`
+      str = `${str} ${toHex(chunk.data)}`;
     }
-    return str
+    return str;
   }
 }

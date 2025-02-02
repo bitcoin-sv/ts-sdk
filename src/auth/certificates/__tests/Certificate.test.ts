@@ -166,7 +166,7 @@ describe("Certificate", () => {
     // Verify the signature
     await expect(
       certificate.verify()
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Signature is not valid"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot('"Signature is not valid"');
   });
 
   it("should handle certificates with empty fields", async () => {

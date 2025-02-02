@@ -9,7 +9,7 @@
     "baseUrl": "./",
     "strict": false,
     "isolatedModules": true,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "downlevelIteration": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,

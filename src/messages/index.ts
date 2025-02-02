@@ -1,2 +1,2 @@
-export * as SignedMessage from './SignedMessage'
-export * as EncryptedMessage from './EncryptedMessage'
+export * as SignedMessage from "./SignedMessage";
+export * as EncryptedMessage from "./EncryptedMessage";

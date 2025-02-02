@@ -8,6 +8,7 @@ import TransactionSignature from "../../primitives/TransactionSignature";
 import { sha256 } from "../../primitives/Hash";
 import ScriptChunk from "../ScriptChunk";
 import BigNumber from "../../primitives/BigNumber";
+import Script from "../Script";
 
 /**
  * RPuzzle class implementing ScriptTemplate.
@@ -113,21 +114,23 @@ export default class RPuzzle implements ScriptTemplate {
           );
         }
         const preimage = TransactionSignature.format({
-          sourceTXID: input.sourceTransaction.id("hex"),
-          sourceOutputIndex: input.sourceOutputIndex,
+          sourceTXID: input.sourceTransaction?.id("hex") ?? "",
+          sourceOutputIndex: input.sourceOutputIndex ?? 0,
           sourceSatoshis:
-            input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis,
+            input.sourceTransaction?.outputs[input.sourceOutputIndex]
+              ?.satoshis ?? 0,
           transactionVersion: tx.version,
           otherInputs,
           inputIndex,
           outputs: tx.outputs,
-          inputSequence: input.sequence,
+          inputSequence: input.sequence ?? 0xffffffff,
           subscript:
-            input.sourceTransaction.outputs[input.sourceOutputIndex]
-              .lockingScript,
+            input.sourceTransaction?.outputs[input.sourceOutputIndex]
+              ?.lockingScript ?? new Script(),
           lockTime: tx.lockTime,
           scope: signatureScope,
         });
+
         const rawSignature = privateKey.sign(
           sha256(preimage),
           undefined,

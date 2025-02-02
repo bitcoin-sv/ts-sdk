@@ -1,9 +1,8 @@
-import { WalletInterface } from "../Wallet.interfaces";
+import { WalletInterface, SecurityLevel } from "../Wallet.interfaces";
 import WalletWire from "./WalletWire";
 import { Utils } from "../../primitives/index";
 import calls from "./WalletWireCalls";
 import Certificate from "../../auth/certificates/Certificate";
-import { SecurityLevel } from "../Wallet.interfaces";
 
 /**
  * Processes incoming wallet calls received over a wallet wire, with a given wallet.

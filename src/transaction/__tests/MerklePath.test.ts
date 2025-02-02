@@ -125,6 +125,7 @@ class FakeChainTracker implements ChainTracker {
       height === 10000
     );
   }
+
   async currentHeight(): Promise<number> {
     return 10100;
   }

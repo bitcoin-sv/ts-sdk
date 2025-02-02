@@ -3,22 +3,22 @@ import {
   PublicKey,
   SymmetricKey,
   Hash,
-  Utils
-} from '../primitives/index'
-import { WalletProtocol, PubKeyHex } from './Wallet.interfaces'
+  Utils,
+} from "../primitives/index";
+import { WalletProtocol, PubKeyHex } from "./Wallet.interfaces";
 
-export type Counterparty = PublicKey | PubKeyHex | 'self' | 'anyone'
+export type Counterparty = PublicKey | PubKeyHex | "self" | "anyone";
 
 export interface KeyDeriverApi {
   /**
    * The root key from which all other keys are derived.
    */
-  rootKey: PrivateKey
+  rootKey: PrivateKey;
 
   /**
    * The identity of this key deriver which is normally the public key associated with the `rootKey`
    */
-  identityKey: string
+  identityKey: string;
 
   /**
    * Derives a public key based on protocol ID, key ID, and counterparty.
@@ -33,7 +33,7 @@ export interface KeyDeriverApi {
     keyID: string,
     counterparty: Counterparty,
     forSelf?: boolean
-  ) => PublicKey
+  ) => PublicKey;
 
   /**
    * Derives a private key based on protocol ID, key ID, and counterparty.
@@ -46,7 +46,7 @@ export interface KeyDeriverApi {
     protocolID: WalletProtocol,
     keyID: string,
     counterparty: Counterparty
-  ) => PrivateKey
+  ) => PrivateKey;
 
   /**
    * Derives a symmetric key based on protocol ID, key ID, and counterparty.
@@ -60,7 +60,7 @@ export interface KeyDeriverApi {
     protocolID: WalletProtocol,
     keyID: string,
     counterparty: Counterparty
-  ) => SymmetricKey
+  ) => SymmetricKey;
 
   /**
    * Reveals the shared secret between the root key and the counterparty.
@@ -69,7 +69,7 @@ export interface KeyDeriverApi {
    * @returns {number[]} - The shared secret as a number array.
    * @throws {Error} - Throws an error if attempting to reveal a shared secret for 'self'.
    */
-  revealCounterpartySecret: (counterparty: Counterparty) => number[]
+  revealCounterpartySecret: (counterparty: Counterparty) => number[];
 
   /**
    * Reveals the specific key association for a given protocol ID, key ID, and counterparty.
@@ -82,7 +82,7 @@ export interface KeyDeriverApi {
     counterparty: Counterparty,
     protocolID: WalletProtocol,
     keyID: string
-  ) => number[]
+  ) => number[];
 }
 
 /**
@@ -90,20 +90,20 @@ export interface KeyDeriverApi {
  * It supports deriving public and private keys, symmetric keys, and revealing key linkages.
  */
 export class KeyDeriver implements KeyDeriverApi {
-  rootKey: PrivateKey
-  identityKey: string
+  rootKey: PrivateKey;
+  identityKey: string;
 
   /**
    * Initializes the KeyDeriver instance with a root private key.
    * @param {PrivateKey | 'anyone'} rootKey - The root private key or the string 'anyone'.
    */
-  constructor (rootKey: PrivateKey | 'anyone') {
-    if (rootKey === 'anyone') {
-      this.rootKey = new PrivateKey(1)
+  constructor(rootKey: PrivateKey | "anyone") {
+    if (rootKey === "anyone") {
+      this.rootKey = new PrivateKey(1);
     } else {
-      this.rootKey = rootKey
+      this.rootKey = rootKey;
     }
-    this.identityKey = this.rootKey.toPublicKey().toString()
+    this.identityKey = this.rootKey.toPublicKey().toString();
   }
 
   /**
@@ -114,22 +114,22 @@ export class KeyDeriver implements KeyDeriverApi {
    * @param {boolean} [forSelf=false] - Whether deriving for self.
    * @returns {PublicKey} - The derived public key.
    */
-  derivePublicKey (
+  derivePublicKey(
     protocolID: WalletProtocol,
     keyID: string,
     counterparty: Counterparty,
     forSelf: boolean = false
   ): PublicKey {
-    counterparty = this.normalizeCounterparty(counterparty)
+    counterparty = this.normalizeCounterparty(counterparty);
     if (forSelf) {
       return this.rootKey
         .deriveChild(counterparty, this.computeInvoiceNumber(protocolID, keyID))
-        .toPublicKey()
+        .toPublicKey();
     } else {
       return counterparty.deriveChild(
         this.rootKey,
         this.computeInvoiceNumber(protocolID, keyID)
-      )
+      );
     }
   }
 
@@ -140,16 +140,16 @@ export class KeyDeriver implements KeyDeriverApi {
    * @param {Counterparty} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
    * @returns {PrivateKey} - The derived private key.
    */
-  derivePrivateKey (
+  derivePrivateKey(
     protocolID: WalletProtocol,
     keyID: string,
     counterparty: Counterparty
   ): PrivateKey {
-    counterparty = this.normalizeCounterparty(counterparty)
+    counterparty = this.normalizeCounterparty(counterparty);
     return this.rootKey.deriveChild(
       counterparty,
       this.computeInvoiceNumber(protocolID, keyID)
-    )
+    );
   }
 
   /**
@@ -160,30 +160,34 @@ export class KeyDeriver implements KeyDeriverApi {
    * @param {Counterparty} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
    * @returns {SymmetricKey} - The derived symmetric key.
    */
-  deriveSymmetricKey (
+  deriveSymmetricKey(
     protocolID: WalletProtocol,
     keyID: string,
     counterparty: Counterparty
   ): SymmetricKey {
     // If counterparty is 'anyone', we use 1*G as the public key.
     // This is a publicly derivable key and should only be used in scenarios where public disclosure is intended.
-    if (counterparty === 'anyone') {
-      counterparty = new PrivateKey(1).toPublicKey()
+    if (counterparty === "anyone") {
+      counterparty = new PrivateKey(1).toPublicKey();
     }
-    counterparty = this.normalizeCounterparty(counterparty)
+    counterparty = this.normalizeCounterparty(counterparty);
     const derivedPublicKey = this.derivePublicKey(
       protocolID,
       keyID,
       counterparty
-    )
+    );
     const derivedPrivateKey = this.derivePrivateKey(
       protocolID,
       keyID,
       counterparty
-    )
-    return new SymmetricKey(
-      derivedPrivateKey.deriveSharedSecret(derivedPublicKey).x.toArray()
-    )
+    );
+
+    const sharedSecret = derivedPrivateKey.deriveSharedSecret(derivedPublicKey);
+    if (!sharedSecret.x) {
+      throw new Error("Failed to derive shared secret: x-coordinate is null");
+    }
+
+    return new SymmetricKey(sharedSecret.x.toArray());
   }
 
   /**
@@ -193,30 +197,30 @@ export class KeyDeriver implements KeyDeriverApi {
    * @returns {number[]} - The shared secret as a number array.
    * @throws {Error} - Throws an error if attempting to reveal a shared secret for 'self'.
    */
-  revealCounterpartySecret (counterparty: Counterparty): number[] {
-    if (counterparty === 'self') {
+  revealCounterpartySecret(counterparty: Counterparty): number[] {
+    if (counterparty === "self") {
       throw new Error(
-        'Counterparty secrets cannot be revealed for counterparty=self.'
-      )
+        "Counterparty secrets cannot be revealed for counterparty=self."
+      );
     }
-    counterparty = this.normalizeCounterparty(counterparty)
+    counterparty = this.normalizeCounterparty(counterparty);
 
     // Double-check to ensure not revealing the secret for 'self'
-    const self = this.rootKey.toPublicKey()
-    const keyDerivedBySelf = this.rootKey.deriveChild(self, 'test').toHex()
+    const self = this.rootKey.toPublicKey();
+    const keyDerivedBySelf = this.rootKey.deriveChild(self, "test").toHex();
     const keyDerivedByCounterparty = this.rootKey
-      .deriveChild(counterparty, 'test')
-      .toHex()
+      .deriveChild(counterparty, "test")
+      .toHex();
 
     if (keyDerivedBySelf === keyDerivedByCounterparty) {
       throw new Error(
-        'Counterparty secrets cannot be revealed for counterparty=self.'
-      )
+        "Counterparty secrets cannot be revealed for counterparty=self."
+      );
     }
 
     return this.rootKey
       .deriveSharedSecret(counterparty)
-      .encode(true) as number[]
+      .encode(true) as number[];
   }
 
   /**
@@ -226,18 +230,18 @@ export class KeyDeriver implements KeyDeriverApi {
    * @param {string} keyID - The key identifier.
    * @returns {number[]} - The specific key association as a number array.
    */
-  revealSpecificSecret (
+  revealSpecificSecret(
     counterparty: Counterparty,
     protocolID: WalletProtocol,
     keyID: string
   ): number[] {
-    counterparty = this.normalizeCounterparty(counterparty)
-    const sharedSecret = this.rootKey.deriveSharedSecret(counterparty)
+    counterparty = this.normalizeCounterparty(counterparty);
+    const sharedSecret = this.rootKey.deriveSharedSecret(counterparty);
     const invoiceNumberBin = Utils.toArray(
       this.computeInvoiceNumber(protocolID, keyID),
-      'utf8'
-    )
-    return Hash.sha256hmac(sharedSecret.encode(true), invoiceNumberBin)
+      "utf8"
+    );
+    return Hash.sha256hmac(sharedSecret.encode(true), invoiceNumberBin);
   }
 
   /**
@@ -246,17 +250,17 @@ export class KeyDeriver implements KeyDeriverApi {
    * @returns {PublicKey} - The normalized counterparty public key.
    * @throws {Error} - Throws an error if the counterparty is invalid.
    */
-  private normalizeCounterparty (counterparty: Counterparty): PublicKey {
+  private normalizeCounterparty(counterparty: Counterparty): PublicKey {
     if (!counterparty) {
-      throw new Error('counterparty must be self, anyone or a public key!')
-    } else if (counterparty === 'self') {
-      return this.rootKey.toPublicKey()
-    } else if (counterparty === 'anyone') {
-      return new PrivateKey(1).toPublicKey()
-    } else if (typeof counterparty === 'string') {
-      return PublicKey.fromString(counterparty)
+      throw new Error("counterparty must be self, anyone or a public key!");
+    } else if (counterparty === "self") {
+      return this.rootKey.toPublicKey();
+    } else if (counterparty === "anyone") {
+      return new PrivateKey(1).toPublicKey();
+    } else if (typeof counterparty === "string") {
+      return PublicKey.fromString(counterparty);
     } else {
-      return counterparty
+      return counterparty;
     }
   }
 
@@ -267,59 +271,59 @@ export class KeyDeriver implements KeyDeriverApi {
    * @returns {string} - The computed invoice number.
    * @throws {Error} - Throws an error if protocol ID or key ID are invalid.
    */
-  private computeInvoiceNumber (
+  private computeInvoiceNumber(
     protocolID: WalletProtocol,
     keyID: string
   ): string {
-    const securityLevel = protocolID[0]
+    const securityLevel = protocolID[0];
     if (
       !Number.isInteger(securityLevel) ||
       securityLevel < 0 ||
       securityLevel > 2
     ) {
-      throw new Error('Protocol security level must be 0, 1, or 2')
+      throw new Error("Protocol security level must be 0, 1, or 2");
     }
-    const protocolName = protocolID[1].toLowerCase().trim()
+    const protocolName = protocolID[1].toLowerCase().trim();
     if (keyID.length > 800) {
-      throw new Error('Key IDs must be 800 characters or less')
+      throw new Error("Key IDs must be 800 characters or less");
     }
     if (keyID.length < 1) {
-      throw new Error('Key IDs must be 1 character or more')
+      throw new Error("Key IDs must be 1 character or more");
     }
     if (protocolName.length > 400) {
       // Specific linkage revelation is the only protocol ID that can contain another protocol ID.
       // Therefore, we allow it to be long enough to encapsulate the target protocol
-      if (protocolName.startsWith('specific linkage revelation ')) {
+      if (protocolName.startsWith("specific linkage revelation ")) {
         // The format is: 'specific linkage revelation x YYYYY'
         // Where: x is the security level and YYYYY is the target protocol
         // Thus, the max acceptable length is 30 + 400 = 430 bytes
         if (protocolName.length > 430) {
           throw new Error(
-            'Specific linkage revelation protocol names must be 430 characters or less'
-          )
+            "Specific linkage revelation protocol names must be 430 characters or less"
+          );
         }
       } else {
-        throw new Error('Protocol names must be 400 characters or less')
+        throw new Error("Protocol names must be 400 characters or less");
       }
     }
     if (protocolName.length < 5) {
-      throw new Error('Protocol names must be 5 characters or more')
+      throw new Error("Protocol names must be 5 characters or more");
     }
-    if (protocolName.includes('  ')) {
+    if (protocolName.includes("  ")) {
       throw new Error(
         'Protocol names cannot contain multiple consecutive spaces ("  ")'
-      )
+      );
     }
     if (!/^[a-z0-9 ]+$/g.test(protocolName)) {
       throw new Error(
-        'Protocol names can only contain letters, numbers and spaces'
-      )
+        "Protocol names can only contain letters, numbers and spaces"
+      );
     }
-    if (protocolName.endsWith(' protocol')) {
-      throw new Error('No need to end your protocol name with " protocol"')
+    if (protocolName.endsWith(" protocol")) {
+      throw new Error('No need to end your protocol name with " protocol"');
     }
-    return `${securityLevel}-${protocolName}-${keyID}`
+    return `${securityLevel}-${protocolName}-${keyID}`;
   }
 }
 
-export default KeyDeriver
+export default KeyDeriver;

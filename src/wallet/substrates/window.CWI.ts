@@ -37,7 +37,7 @@ declare const window: {
  * Facilitates wallet operations over the window.CWI interface.
  */
 export default class WindowCWISubstrate implements WalletInterface {
-  private CWI: WalletInterface;
+  private readonly CWI: WalletInterface;
   constructor() {
     if (typeof window !== "object") {
       throw new Error(
@@ -49,7 +49,7 @@ export default class WindowCWISubstrate implements WalletInterface {
         "The window.CWI interface does not appear to be bound to the window object."
       );
     }
-    this.CWI = window.CWI as WalletInterface; // Binding CWI to prevent changes
+    this.CWI = window.CWI; // Binding CWI to prevent changes
   }
 
   async createAction(
@@ -96,7 +96,7 @@ export default class WindowCWISubstrate implements WalletInterface {
     }>;
     signableTransaction?: { tx: BEEF; reference: Base64String };
   }> {
-    return this.CWI.createAction(args, originator);
+    return await this.CWI.createAction(args, originator);
   }
 
   async signAction(
@@ -124,14 +124,14 @@ export default class WindowCWISubstrate implements WalletInterface {
       status: "unproven" | "sending" | "failed";
     }>;
   }> {
-    return this.CWI.signAction(args, originator);
+    return await this.CWI.signAction(args, originator);
   }
 
   async abortAction(
     args: { reference: Base64String },
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ aborted: true }> {
-    return this.CWI.abortAction(args, originator);
+    return await this.CWI.abortAction(args, originator);
   }
 
   async listActions(
@@ -186,7 +186,7 @@ export default class WindowCWISubstrate implements WalletInterface {
       }>;
     }>;
   }> {
-    return this.CWI.listActions(args, originator);
+    return await this.CWI.listActions(args, originator);
   }
 
   async internalizeAction(
@@ -211,7 +211,7 @@ export default class WindowCWISubstrate implements WalletInterface {
     },
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ accepted: true }> {
-    return this.CWI.internalizeAction(args, originator);
+    return await this.CWI.internalizeAction(args, originator);
   }
 
   async listOutputs(
@@ -240,14 +240,14 @@ export default class WindowCWISubstrate implements WalletInterface {
       labels?: LabelStringUnder300Bytes[];
     }>;
   }> {
-    return this.CWI.listOutputs(args, originator);
+    return await this.CWI.listOutputs(args, originator);
   }
 
   async relinquishOutput(
     args: { basket: BasketStringUnder300Bytes; output: OutpointString },
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ relinquished: true }> {
-    return this.CWI.relinquishOutput(args, originator);
+    return await this.CWI.relinquishOutput(args, originator);
   }
 
   async getPublicKey(
@@ -262,7 +262,7 @@ export default class WindowCWISubstrate implements WalletInterface {
     },
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ publicKey: PubKeyHex }> {
-    return this.CWI.getPublicKey(args, originator);
+    return await this.CWI.getPublicKey(args, originator);
   }
 
   async revealCounterpartyKeyLinkage(
@@ -281,7 +281,7 @@ export default class WindowCWISubstrate implements WalletInterface {
     encryptedLinkage: Byte[];
     encryptedLinkageProof: Byte[];
   }> {
-    return this.CWI.revealCounterpartyKeyLinkage(args, originator);
+    return await this.CWI.revealCounterpartyKeyLinkage(args, originator);
   }
 
   async revealSpecificKeyLinkage(
@@ -304,7 +304,7 @@ export default class WindowCWISubstrate implements WalletInterface {
     encryptedLinkageProof: Byte[];
     proofType: Byte;
   }> {
-    return this.CWI.revealSpecificKeyLinkage(args, originator);
+    return await this.CWI.revealSpecificKeyLinkage(args, originator);
   }
 
   async encrypt(
@@ -318,7 +318,7 @@ export default class WindowCWISubstrate implements WalletInterface {
     },
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ ciphertext: Byte[] }> {
-    return this.CWI.encrypt(args, originator);
+    return await this.CWI.encrypt(args, originator);
   }
 
   async decrypt(
@@ -332,7 +332,7 @@ export default class WindowCWISubstrate implements WalletInterface {
     },
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ plaintext: Byte[] }> {
-    return this.CWI.decrypt(args, originator);
+    return await this.CWI.decrypt(args, originator);
   }
 
   async createHmac(
@@ -346,7 +346,7 @@ export default class WindowCWISubstrate implements WalletInterface {
     },
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ hmac: Byte[] }> {
-    return this.CWI.createHmac(args, originator);
+    return await this.CWI.createHmac(args, originator);
   }
 
   async verifyHmac(
@@ -361,7 +361,7 @@ export default class WindowCWISubstrate implements WalletInterface {
     },
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ valid: true }> {
-    return this.CWI.verifyHmac(args, originator);
+    return await this.CWI.verifyHmac(args, originator);
   }
 
   async createSignature(
@@ -376,7 +376,7 @@ export default class WindowCWISubstrate implements WalletInterface {
     },
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ signature: Byte[] }> {
-    return this.CWI.createSignature(args, originator);
+    return await this.CWI.createSignature(args, originator);
   }
 
   async verifySignature(
@@ -393,7 +393,7 @@ export default class WindowCWISubstrate implements WalletInterface {
     },
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ valid: true }> {
-    return this.CWI.verifySignature(args, originator);
+    return await this.CWI.verifySignature(args, originator);
   }
 
   async acquireCertificate(
@@ -420,7 +420,7 @@ export default class WindowCWISubstrate implements WalletInterface {
     signature: HexString;
     fields: Record<CertificateFieldNameUnder50Bytes, string>;
   }> {
-    return this.CWI.acquireCertificate(args, originator);
+    return await this.CWI.acquireCertificate(args, originator);
   }
 
   async listCertificates(
@@ -445,7 +445,7 @@ export default class WindowCWISubstrate implements WalletInterface {
       fields: Record<CertificateFieldNameUnder50Bytes, string>;
     }>;
   }> {
-    return this.CWI.listCertificates(args, originator);
+    return await this.CWI.listCertificates(args, originator);
   }
 
   async proveCertificate(
@@ -468,7 +468,7 @@ export default class WindowCWISubstrate implements WalletInterface {
   ): Promise<{
     keyringForVerifier: Record<CertificateFieldNameUnder50Bytes, Base64String>;
   }> {
-    return this.CWI.proveCertificate(args, originator);
+    return await this.CWI.proveCertificate(args, originator);
   }
 
   async relinquishCertificate(
@@ -479,7 +479,7 @@ export default class WindowCWISubstrate implements WalletInterface {
     },
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ relinquished: true }> {
-    return this.CWI.relinquishCertificate(args, originator);
+    return await this.CWI.relinquishCertificate(args, originator);
   }
 
   async discoverByIdentityKey(
@@ -512,7 +512,7 @@ export default class WindowCWISubstrate implements WalletInterface {
       decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
     }>;
   }> {
-    return this.CWI.discoverByIdentityKey(args, originator);
+    return await this.CWI.discoverByIdentityKey(args, originator);
   }
 
   async discoverByAttributes(
@@ -545,48 +545,48 @@ export default class WindowCWISubstrate implements WalletInterface {
       decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
     }>;
   }> {
-    return this.CWI.discoverByAttributes(args, originator);
+    return await this.CWI.discoverByAttributes(args, originator);
   }
 
   async isAuthenticated(
     args: {},
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ authenticated: true }> {
-    return this.CWI.isAuthenticated(args, originator);
+    return await this.CWI.isAuthenticated(args, originator);
   }
 
   async waitForAuthentication(
     args: {},
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ authenticated: true }> {
-    return this.CWI.waitForAuthentication(args, originator);
+    return await this.CWI.waitForAuthentication(args, originator);
   }
 
   async getHeight(
     args: {},
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ height: PositiveInteger }> {
-    return this.CWI.getHeight(args, originator);
+    return await this.CWI.getHeight(args, originator);
   }
 
   async getHeaderForHeight(
     args: { height: PositiveInteger },
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ header: HexString }> {
-    return this.CWI.getHeaderForHeight(args, originator);
+    return await this.CWI.getHeaderForHeight(args, originator);
   }
 
   async getNetwork(
     args: {},
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ network: "mainnet" | "testnet" }> {
-    return this.CWI.getNetwork(args, originator);
+    return await this.CWI.getNetwork(args, originator);
   }
 
   async getVersion(
     args: {},
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ version: VersionString7To30Bytes }> {
-    return this.CWI.getVersion(args, originator);
+    return await this.CWI.getVersion(args, originator);
   }
 }

@@ -66,11 +66,11 @@ export class SimplifiedFetchTransport implements Transport {
       }
     } else {
       // Parse message payload
-      const httpRequest = this.deserializeRequestPayload(message.payload);
+      const httpRequest = this.deserializeRequestPayload(message.payload ?? []);
 
       // Send the byte array as the HTTP payload
       const url = `${this.baseUrl}${httpRequest.urlPostfix}`;
-      let httpRequestWithAuthHeaders: any = httpRequest;
+      const httpRequestWithAuthHeaders: any = httpRequest;
       if (typeof httpRequest.headers !== "object") {
         httpRequestWithAuthHeaders.headers = {};
       }
@@ -84,7 +84,7 @@ export class SimplifiedFetchTransport implements Transport {
       httpRequestWithAuthHeaders.headers["x-bsv-auth-your-nonce"] =
         message.yourNonce;
       httpRequestWithAuthHeaders.headers["x-bsv-auth-signature"] = Utils.toHex(
-        message.signature
+        message.signature ?? []
       );
       httpRequestWithAuthHeaders.headers["x-bsv-auth-request-id"] =
         httpRequest.requestId;
@@ -173,9 +173,9 @@ export class SimplifiedFetchTransport implements Transport {
       // - Custom headers prefixed with x-bsv are included, except auth
       // - x-bsv-auth headers are not allowed
       // - authorization header is signed by the server
-      const includedHeaders: [string, string][] = [];
+      const includedHeaders: Array<[string, string]> = [];
       // Collect headers into a raw array for sorting
-      const headersArray: [string, string][] = [];
+      const headersArray: Array<[string, string]> = [];
       response.headers.forEach((value, key) => {
         const lowerKey = key.toLowerCase();
         if (lowerKey.startsWith("x-bsv-") || lowerKey === "authorization") {
@@ -215,21 +215,21 @@ export class SimplifiedFetchTransport implements Transport {
 
       // Build the correct AuthMessage for the response
       const responseMessage: AuthMessage = {
-        version: response.headers.get("x-bsv-auth-version"),
+        version: response.headers.get("x-bsv-auth-version") ?? "", // Ensure string
         messageType:
           response.headers.get("x-bsv-auth-message-type") ===
           "certificateRequest"
             ? "certificateRequest"
             : "general",
-        identityKey: response.headers.get("x-bsv-auth-identity-key"),
-        nonce: response.headers.get("x-bsv-auth-nonce"),
-        yourNonce: response.headers.get("x-bsv-auth-your-nonce"),
+        identityKey: response.headers.get("x-bsv-auth-identity-key") ?? "",
+        nonce: response.headers.get("x-bsv-auth-nonce") ?? undefined,
+        yourNonce: response.headers.get("x-bsv-auth-your-nonce") ?? undefined,
         requestedCertificates: JSON.parse(
-          response.headers.get("x-bsv-auth-requested-certificates")
+          response.headers.get("x-bsv-auth-requested-certificates") ?? "[]"
         ) as RequestedCertificateSet,
         payload: payloadWriter.toArray(),
         signature: Utils.toArray(
-          response.headers.get("x-bsv-auth-signature"),
+          response.headers.get("x-bsv-auth-signature") ?? "",
           "hex"
         ),
       };

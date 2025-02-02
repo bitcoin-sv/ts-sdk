@@ -1,5 +1,5 @@
-import Mersenne from './Mersenne'
-import BigNumber from './BigNumber'
+import Mersenne from "./Mersenne";
+import BigNumber from "./BigNumber";
 
 /**
  * A class representing K-256, a prime number with optimizations, specifically used in the secp256k1 curve.
@@ -22,11 +22,11 @@ export default class K256 extends Mersenne {
    * @example
    * const k256 = new K256();
    */
-  constructor () {
+  constructor() {
     super(
-      'k256',
-      'ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe fffffc2f'
-    )
+      "k256",
+      "ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe fffffc2f"
+    );
   }
 
   /**
@@ -42,38 +42,38 @@ export default class K256 extends Mersenne {
    * const output = new BigNumber(0);
    * k256.split(input, output);
    */
-  split (input: BigNumber, output: BigNumber): void {
+  split(input: BigNumber, output: BigNumber): void {
     // 256 = 9 * 26 + 22
-    const mask = 0x3fffff
+    const mask = 0x3fffff;
 
-    const outLen = Math.min(input.length, 9)
-    let i = 0
+    const outLen = Math.min(input.length, 9);
+    let i = 0;
     for (; i < outLen; i++) {
-      output.words[i] = input.words[i]
+      output.words[i] = input.words[i];
     }
-    output.length = outLen
+    output.length = outLen;
 
     if (input.length <= 9) {
-      input.words[0] = 0
-      input.length = 1
-      return
+      input.words[0] = 0;
+      input.length = 1;
+      return;
     }
 
     // Shift by 9 limbs
-    let prev = input.words[9]
-    output.words[output.length++] = prev & mask
+    let prev = input.words[9];
+    output.words[output.length++] = prev & mask;
 
     for (i = 10; i < input.length; i++) {
-      const next = input.words[i] | 0
-      input.words[i - 10] = ((next & mask) << 4) | (prev >>> 22)
-      prev = next
+      const next = input.words[i] | 0;
+      input.words[i - 10] = ((next & mask) << 4) | (prev >>> 22);
+      prev = next;
     }
-    prev >>>= 22
-    input.words[i - 10] = prev
+    prev >>>= 22;
+    input.words[i - 10] = prev;
     if (prev === 0 && input.length > 10) {
-      input.length -= 10
+      input.length -= 10;
     } else {
-      input.length -= 9
+      input.length -= 9;
     }
   }
 
@@ -89,28 +89,28 @@ export default class K256 extends Mersenne {
    * const number = new BigNumber(12345);
    * const result = k256.imulK(number);
    */
-  imulK (num: BigNumber): BigNumber {
+  imulK(num: BigNumber): BigNumber {
     // K = 0x1000003d1 = [ 0x40, 0x3d1 ]
-    num.words[num.length] = 0
-    num.words[num.length + 1] = 0
-    num.length += 2
+    num.words[num.length] = 0;
+    num.words[num.length + 1] = 0;
+    num.length += 2;
 
     // bounded at: 0x40 * 0x3ffffff + 0x3d0 = 0x100000390
-    let lo = 0
+    let lo = 0;
     for (let i = 0; i < num.length; i++) {
-      const w = num.words[i] | 0
-      lo += w * 0x3d1
-      num.words[i] = lo & 0x3ffffff
-      lo = w * 0x40 + ((lo / 0x4000000) | 0)
+      const w = num.words[i] | 0;
+      lo += w * 0x3d1;
+      num.words[i] = lo & 0x3ffffff;
+      lo = w * 0x40 + ((lo / 0x4000000) | 0);
     }
 
     // Fast length reduction
     if (num.words[num.length - 1] === 0) {
-      num.length--
+      num.length--;
       if (num.words[num.length - 1] === 0) {
-        num.length--
+        num.length--;
       }
     }
-    return num
+    return num;
   }
 }

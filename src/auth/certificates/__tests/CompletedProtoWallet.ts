@@ -1,4 +1,4 @@
-import { PrivateKey } from '../../../../mod'
+import { PrivateKey } from "../../../../mod";
 import {
   ProtoWallet,
   WalletInterface,
@@ -38,8 +38,8 @@ import {
   PubKeyHex,
   AuthenticatedResult,
   GetNetworkResult,
-  GetVersionResult
-} from '../../../wallet/index'
+  GetVersionResult,
+} from "../../../wallet/index";
 
 // Test Mock wallet which extends ProtoWallet but still implements Wallet interface
 // Unsupported methods throw
@@ -47,64 +47,82 @@ export class CompletedProtoWallet
   extends ProtoWallet
   implements WalletInterface
 {
-  constructor(rootKeyOrKeyDeriver: PrivateKey | 'anyone' | KeyDeriverApi) {
-    super(rootKeyOrKeyDeriver)
-    if (typeof rootKeyOrKeyDeriver['identityKey'] !== 'string') {
-      rootKeyOrKeyDeriver = new KeyDeriver(
-        rootKeyOrKeyDeriver as PrivateKey | 'anyone'
-      )
+  keyDeriver: KeyDeriver;
+  constructor(rootKeyOrKeyDeriver: PrivateKey | "anyone" | KeyDeriverApi) {
+    super(rootKeyOrKeyDeriver);
+
+    if (rootKeyOrKeyDeriver instanceof KeyDeriver) {
+      this.keyDeriver = rootKeyOrKeyDeriver;
+    } else if (
+      typeof rootKeyOrKeyDeriver === "string" ||
+      rootKeyOrKeyDeriver instanceof PrivateKey
+    ) {
+      this.keyDeriver = new KeyDeriver(rootKeyOrKeyDeriver);
+    } else {
+      throw new Error("Invalid key deriver provided");
     }
-    this.keyDeriver = rootKeyOrKeyDeriver as KeyDeriver
   }
-  isAuthenticated(
+
+  async isAuthenticated(
     args: {},
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<AuthenticatedResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
-  waitForAuthentication(
+
+  async waitForAuthentication(
     args: {},
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<AuthenticatedResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
-  getNetwork(
+
+  async getNetwork(
     args: {},
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<GetNetworkResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
-  getVersion(
+
+  async getVersion(
     args: {},
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<GetVersionResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
+
   async getPublicKey(
     args: GetPublicKeyArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<{ publicKey: PubKeyHex }> {
     if (args.privileged) {
-      throw new Error('no privilege support')
+      throw new Error("no privilege support");
     }
     if (args.identityKey) {
-      return { publicKey: this.keyDeriver.rootKey.toPublicKey().toString() }
+      if (!this.keyDeriver) {
+        throw new Error("keyDeriver is not initialized");
+      }
+      return { publicKey: this.keyDeriver.rootKey.toPublicKey().toString() };
     } else {
       if (!args.protocolID || !args.keyID) {
         throw new Error(
-          'protocolID and keyID are required if identityKey is false or undefined.'
-        )
+          "protocolID and keyID are required if identityKey is false or undefined."
+        );
       }
+      if (!this.keyDeriver) {
+        throw new Error("keyDeriver is not initialized");
+      }
+
       return {
         publicKey: this.keyDeriver
           .derivePublicKey(
             args.protocolID,
             args.keyID,
-            args.counterparty || 'self',
+            args.counterparty || "self",
             args.forSelf
           )
-          .toString()
-      }
+          .toString(),
+      };
     }
   }
 
@@ -112,90 +130,104 @@ export class CompletedProtoWallet
     args: CreateActionArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<CreateActionResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
+
   async signAction(
     args: SignActionArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<SignActionResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
+
   async abortAction(
     args: AbortActionArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<AbortActionResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
+
   async listActions(
     args: ListActionsArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<ListActionsResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
+
   async internalizeAction(
     args: InternalizeActionArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<InternalizeActionResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
+
   async listOutputs(
     args: ListOutputsArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<ListOutputsResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
+
   async relinquishOutput(
     args: RelinquishOutputArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<RelinquishOutputResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
+
   async acquireCertificate(
     args: AcquireCertificateArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<AcquireCertificateResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
+
   async listCertificates(
     args: ListCertificatesArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<ListCertificatesResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
+
   async proveCertificate(
     args: ProveCertificateArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<ProveCertificateResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
+
   async relinquishCertificate(
     args: RelinquishCertificateArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<RelinquishCertificateResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
+
   async discoverByIdentityKey(
     args: DiscoverByIdentityKeyArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<DiscoverCertificatesResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
+
   async discoverByAttributes(
     args: DiscoverByAttributesArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<DiscoverCertificatesResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
+
   async getHeight(
     args: {},
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<GetHeightResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
+
   async getHeaderForHeight(
     args: GetHeaderArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ): Promise<GetHeaderResult> {
-    throw new Error('not implemented')
+    throw new Error("not implemented");
   }
 }

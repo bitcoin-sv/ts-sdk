@@ -6,25 +6,25 @@ import {
   HexString,
   OutpointString,
   PubKeyHex,
-  ProtoWallet
-} from '../../../mod'
-import Certificate from './Certificate'
+  ProtoWallet,
+} from "../../../mod";
+import Certificate from "./Certificate";
 
 /**
  * VerifiableCertificate extends the Certificate class, adding functionality to manage a verifier-specific keyring.
  * This keyring allows selective decryption of certificate fields for authorized verifiers.
  */
 export class VerifiableCertificate extends Certificate {
-  declare type: Base64String
-  declare serialNumber: Base64String
-  declare subject: PubKeyHex
-  declare certifier: PubKeyHex
-  declare revocationOutpoint: OutpointString
-  declare fields: Record<CertificateFieldNameUnder50Bytes, string>
-  declare signature?: HexString
+  declare type: Base64String;
+  declare serialNumber: Base64String;
+  declare subject: PubKeyHex;
+  declare certifier: PubKeyHex;
+  declare revocationOutpoint: OutpointString;
+  declare fields: Record<CertificateFieldNameUnder50Bytes, string>;
+  declare signature?: HexString;
 
-  keyring: Record<CertificateFieldNameUnder50Bytes, string>
-  decryptedFields?: Record<CertificateFieldNameUnder50Bytes, Base64String>
+  keyring: Record<CertificateFieldNameUnder50Bytes, string>;
+  decryptedFields?: Record<CertificateFieldNameUnder50Bytes, Base64String>;
 
   constructor(
     type: Base64String,
@@ -45,9 +45,9 @@ export class VerifiableCertificate extends Certificate {
       revocationOutpoint,
       fields,
       signature
-    )
-    this.keyring = keyring
-    this.decryptedFields = decryptedFields
+    );
+    this.keyring = keyring;
+    this.decryptedFields = decryptedFields;
   }
 
   /**
@@ -61,32 +61,32 @@ export class VerifiableCertificate extends Certificate {
   ): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
     if (!this.keyring || Object.keys(this.keyring).length === 0) {
       throw new Error(
-        'A keyring is required to decrypt certificate fields for the verifier.'
-      )
+        "A keyring is required to decrypt certificate fields for the verifier."
+      );
     }
     try {
       const decryptedFields: Record<CertificateFieldNameUnder50Bytes, string> =
-        {}
+        {};
       for (const fieldName in this.keyring) {
         const { plaintext: fieldRevelationKey } = await verifierWallet.decrypt({
-          ciphertext: Utils.toArray(this.keyring[fieldName], 'base64'),
+          ciphertext: Utils.toArray(this.keyring[fieldName], "base64"),
           ...Certificate.getCertificateFieldEncryptionDetails(
             fieldName,
             this.serialNumber
           ),
-          counterparty: this.subject
-        })
+          counterparty: this.subject,
+        });
 
         const fieldValue = new SymmetricKey(fieldRevelationKey).decrypt(
-          Utils.toArray(this.fields[fieldName], 'base64')
-        )
-        decryptedFields[fieldName] = Utils.toUTF8(fieldValue as number[])
+          Utils.toArray(this.fields[fieldName], "base64")
+        );
+        decryptedFields[fieldName] = Utils.toUTF8(fieldValue as number[]);
       }
-      return decryptedFields
+      return decryptedFields;
     } catch (error) {
       throw new Error(
         `Failed to decrypt selectively revealed certificate fields using keyring: ${error instanceof Error ? error.message : error}`
-      )
+      );
     }
   }
 }
