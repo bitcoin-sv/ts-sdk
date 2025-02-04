@@ -1,16 +1,16 @@
 export class WalletError extends Error {
-  code: number;
-  isError: boolean = true;
+  code: number
+  isError: boolean = true
 
-  constructor(message: string, code = 1, stack?: string) {
-    super(message);
-    this.code = code;
-    this.name = this.constructor.name;
+  constructor (message: string, code = 1, stack?: string) {
+    super(message)
+    this.code = code
+    this.name = this.constructor.name
 
-    if (stack) {
-      this.stack = stack;
-    } else if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor);
+    if (stack !== undefined && stack !== null && stack !== '') {
+      this.stack = stack
+    } else {
+      Error.captureStackTrace(this, this.constructor)
     }
   }
 }
@@ -23,5 +23,5 @@ enum walletErrors {
   invalidSignature = 4,
 }
 
-export default walletErrors;
-export type WalletErrorCode = keyof typeof walletErrors;
+export default walletErrors
+export type WalletErrorCode = keyof typeof walletErrors

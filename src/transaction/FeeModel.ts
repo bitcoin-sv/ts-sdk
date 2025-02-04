@@ -1,5 +1,4 @@
-import Transaction from "./Transaction";
-import BigNumber from "../primitives/BigNumber";
+import Transaction from './Transaction'
 
 /**
  * Represents the interface for a transaction fee model.
@@ -9,5 +8,5 @@ import BigNumber from "../primitives/BigNumber";
  * @property {function} computeFee - A function that takes a Transaction object and returns a BigNumber representing the number of satoshis the transaction should cost.
  */
 export default interface FeeModel {
-  computeFee: (transaction: Transaction) => Promise<number>;
+  computeFee: (transaction: Transaction) => Promise<number>
 }

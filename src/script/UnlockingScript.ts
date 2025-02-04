@@ -1,4 +1,4 @@
-import Script from "./Script";
+import Script from './Script'
 
 /**
  * The UnlockingScript class represents an unlocking script in a Bitcoin SV transaction.
@@ -15,8 +15,8 @@ export default class UnlockingScript extends Script {
    * Determines if the script is a locking script.
    * @returns {boolean} Always returns false for an UnlockingScript instance.
    */
-  isLockingScript(): boolean {
-    return false;
+  isLockingScript (): boolean {
+    return false
   }
 
   /**
@@ -24,7 +24,7 @@ export default class UnlockingScript extends Script {
    * Determines if the script is an unlocking script.
    * @returns {boolean} Always returns true for an UnlockingScript instance.
    */
-  isUnlockingScript(): boolean {
-    return true;
+  isUnlockingScript (): boolean {
+    return true
   }
 }

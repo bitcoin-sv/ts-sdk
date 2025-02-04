@@ -1,13 +1,13 @@
-import Transaction from "../transaction/Transaction";
-import TransactionInput from "../transaction/TransactionInput";
-import LockingScript from "../script/LockingScript";
-import UnlockingScript from "../script/UnlockingScript";
+import Transaction from '../transaction/Transaction'
+import TransactionInput from '../transaction/TransactionInput'
+import LockingScript from '../script/LockingScript'
+import UnlockingScript from '../script/UnlockingScript'
 
 interface jsonUtxo {
-  txid: string;
-  vout: number;
-  satoshis: number;
-  script: string;
+  txid: string
+  vout: number
+  satoshis: number
+  script: string
 }
 /**
  * @method fromUtxo
@@ -36,24 +36,24 @@ interface jsonUtxo {
  * @param unlockingScriptTemplate: { sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>, estimateLength: (tx: Transaction, inputIndex: number) => Promise<number> }
  * @returns
  */
-export default function fromUtxo(
+export default function fromUtxo (
   utxo: jsonUtxo,
   unlockingScriptTemplate: {
-    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-    estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
+    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
+    estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>
   }
 ): TransactionInput {
-  const sourceTransaction = new Transaction(0, [], [], 0);
-  sourceTransaction.outputs = Array(utxo.vout + 1).fill(null);
+  const sourceTransaction = new Transaction(0, [], [], 0)
+  sourceTransaction.outputs = Array(utxo.vout + 1).fill(null)
   sourceTransaction.outputs[utxo.vout] = {
     satoshis: utxo.satoshis,
-    lockingScript: LockingScript.fromHex(utxo.script),
-  };
+    lockingScript: LockingScript.fromHex(utxo.script)
+  }
   return {
     sourceTransaction,
     sourceTXID: utxo.txid,
     sourceOutputIndex: utxo.vout,
     unlockingScriptTemplate,
-    sequence: 0xffffffff,
-  };
+    sequence: 0xffffffff
+  }
 }

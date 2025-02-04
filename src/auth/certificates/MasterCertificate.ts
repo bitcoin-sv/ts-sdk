@@ -8,14 +8,13 @@ import {
   PubKeyHex,
   Random,
   WalletCounterparty,
-  ProtoWallet,
-  OriginatorDomainNameStringUnder250Bytes,
-} from "../../../mod";
-import Certificate from "./Certificate";
+  ProtoWallet
+} from '../../../mod'
+import Certificate from './Certificate'
 
 interface CreateCertificateFieldsResult {
-  certificateFields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-  masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
+  certificateFields: Record<CertificateFieldNameUnder50Bytes, Base64String>
+  masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>
 }
 
 /**
@@ -27,17 +26,17 @@ interface CreateCertificateFieldsResult {
  *
  */
 export class MasterCertificate extends Certificate {
-  declare type: Base64String;
-  declare serialNumber: Base64String;
-  declare subject: PubKeyHex;
-  declare certifier: PubKeyHex;
-  declare revocationOutpoint: OutpointString;
-  declare fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-  declare signature?: HexString;
+  declare type: Base64String
+  declare serialNumber: Base64String
+  declare subject: PubKeyHex
+  declare certifier: PubKeyHex
+  declare revocationOutpoint: OutpointString
+  declare fields: Record<CertificateFieldNameUnder50Bytes, Base64String>
+  declare signature?: HexString
 
-  masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
+  masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>
 
-  constructor(
+  constructor (
     type: Base64String,
     serialNumber: Base64String,
     subject: PubKeyHex,
@@ -55,18 +54,18 @@ export class MasterCertificate extends Certificate {
       revocationOutpoint,
       fields,
       signature
-    );
+    )
 
     // Ensure every field in `fields` is a string and has a corresponding key in `masterKeyring`
     for (const fieldName of Object.keys(fields)) {
-      if (!masterKeyring[fieldName]) {
+      if (masterKeyring[fieldName] === undefined || masterKeyring[fieldName] === '') {
         throw new Error(
-          `Master keyring must contain a value for every field. Missing key for field: "${fieldName}".`
-        );
+      `Master keyring must contain a value for every field. Missing or empty key for field: "${fieldName}".`
+        )
       }
     }
 
-    this.masterKeyring = masterKeyring;
+    this.masterKeyring = masterKeyring
   }
 
   /**
@@ -83,45 +82,43 @@ export class MasterCertificate extends Certificate {
    *   - `masterKeyring` {Record<CertificateFieldNameUnder50Bytes, Base64String>}:
    *     The master keyring containing encrypted revelation keys for each field.
    */
-  static async createCertificateFields(
+  static async createCertificateFields (
     creatorWallet: ProtoWallet,
     certifierOrSubject: WalletCounterparty,
-    fields: Record<CertificateFieldNameUnder50Bytes, string>,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    fields: Record<CertificateFieldNameUnder50Bytes, string>
   ): Promise<CreateCertificateFieldsResult> {
     const certificateFields: Record<
-      CertificateFieldNameUnder50Bytes,
-      Base64String
-    > = {};
+    CertificateFieldNameUnder50Bytes,
+    Base64String
+    > = {}
     const masterKeyring: Record<
-      CertificateFieldNameUnder50Bytes,
-      Base64String
-    > = {};
+    CertificateFieldNameUnder50Bytes,
+    Base64String
+    > = {}
     for (const [fieldName, fieldValue] of Object.entries(fields)) {
-      const fieldSymmetricKey = SymmetricKey.fromRandom();
+      const fieldSymmetricKey = SymmetricKey.fromRandom()
       const encryptedFieldValue = fieldSymmetricKey.encrypt(
-        Utils.toArray(fieldValue, "utf8")
-      );
+        Utils.toArray(fieldValue, 'utf8')
+      )
       certificateFields[fieldName] = Utils.toBase64(
         encryptedFieldValue as number[]
-      );
+      )
 
       const { ciphertext: encryptedFieldRevelationKey } =
         await creatorWallet.encrypt(
           {
             plaintext: fieldSymmetricKey.toArray(),
             ...Certificate.getCertificateFieldEncryptionDetails(fieldName), // Only fieldName used on MasterCertificate
-            counterparty: certifierOrSubject,
-          },
-          originator
-        );
-      masterKeyring[fieldName] = Utils.toBase64(encryptedFieldRevelationKey);
+            counterparty: certifierOrSubject
+          }
+        )
+      masterKeyring[fieldName] = Utils.toBase64(encryptedFieldRevelationKey)
     }
 
     return {
       certificateFields,
-      masterKeyring,
-    };
+      masterKeyring
+    }
   }
 
   /**
@@ -140,26 +137,25 @@ export class MasterCertificate extends Certificate {
    *   - A field in `fieldsToReveal` does not exist in the certificate.
    *   - The decrypted master field key fails to decrypt the corresponding field (indicating an invalid key).
    */
-  static async createKeyringForVerifier(
+  static async createKeyringForVerifier (
     subjectWallet: ProtoWallet,
     certifier: WalletCounterparty,
     verifier: WalletCounterparty,
     fields: Record<CertificateFieldNameUnder50Bytes, Base64String>,
     fieldsToReveal: string[],
     masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>,
-    serialNumber: Base64String,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    serialNumber: Base64String
   ): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
     if (!Array.isArray(fieldsToReveal)) {
-      throw new Error("fieldsToReveal must be an array of strings");
+      throw new Error('fieldsToReveal must be an array of strings')
     }
-    const fieldRevelationKeyring = {};
+    const fieldRevelationKeyring = {}
     for (const fieldName of fieldsToReveal) {
       // Make sure that fields to reveal is a subset of the certificate fields
-      if (!fields[fieldName]) {
+      if (fields[fieldName] === undefined || fields[fieldName] === null || fields[fieldName] === '') {
         throw new Error(
           `Fields to reveal must be a subset of the certificate fields. Missing the "${fieldName}" field.`
-        );
+        )
       }
 
       // Decrypt the master field key and verify that derived key actually decrypts requested field
@@ -171,7 +167,7 @@ export class MasterCertificate extends Certificate {
           fields[fieldName],
           certifier
         )
-      ).fieldRevelationKey;
+      ).fieldRevelationKey
 
       // Encrypt derived fieldRevelationKey for verifier
       const { ciphertext: encryptedFieldRevelationKey } =
@@ -182,19 +178,18 @@ export class MasterCertificate extends Certificate {
               fieldName,
               serialNumber
             ),
-            counterparty: verifier,
-          },
-          originator
-        );
+            counterparty: verifier
+          }
+        )
 
       // Add encryptedFieldRevelationKey to fieldRevelationKeyring
       fieldRevelationKeyring[fieldName] = Utils.toBase64(
         encryptedFieldRevelationKey
-      );
+      )
     }
 
     // Return the field revelation keyring which can be used to create a verifiable certificate for a verifier.
-    return fieldRevelationKeyring;
+    return fieldRevelationKeyring
   }
 
   /**
@@ -216,43 +211,41 @@ export class MasterCertificate extends Certificate {
    *
    * @throws {Error} Throws an error if any operation (e.g., encryption, signing) fails during certificate issuance.
    */
-  static async issueCertificateForSubject(
+  static async issueCertificateForSubject (
     certifierWallet: ProtoWallet,
     subject: WalletCounterparty,
     fields: Record<CertificateFieldNameUnder50Bytes, string>,
     certificateType: string,
-    getRevocationOutpoint = async (serialNumber: string): Promise<string> => {
-      return "Certificate revocation not tracked.";
+    getRevocationOutpoint = async (_serial: string): Promise<string> => {
+      void _serial // Explicitly acknowledge unused parameter
+      return 'Certificate revocation not tracked.'
     },
-    serialNumber?: string
+    serialNumber?: string // ✅ Optional parameter
   ): Promise<MasterCertificate> {
     // 1. Generate a random serialNumber if not provided
-    if (!serialNumber) {
-      serialNumber = Utils.toBase64(Random(32));
-    }
+    const finalSerialNumber = serialNumber ?? Utils.toBase64(Random(32)) // ✅ Explicit nullish check
 
     // 2. Create encrypted certificate fields and associated master keyring
     const { certificateFields, masterKeyring } =
-      await this.createCertificateFields(certifierWallet, subject, fields);
+      await this.createCertificateFields(certifierWallet, subject, fields)
 
-    // 3. Obtain a revocation outpoint (ex. certifier can call wallet.createAction())
-    const revocationOutpoint = await getRevocationOutpoint(serialNumber);
-    // TODO: Validate revocation outpoint format
+    // 3. Obtain a revocation outpoint
+    const revocationOutpoint = await getRevocationOutpoint(finalSerialNumber) // ✅ Use `finalSerialNumber`
 
     // 4. Create new MasterCertificate instance
     const certificate = new MasterCertificate(
       certificateType,
-      serialNumber,
+      finalSerialNumber, // ✅ Use `finalSerialNumber`
       subject,
       (await certifierWallet.getPublicKey({ identityKey: true })).publicKey,
       revocationOutpoint,
       certificateFields,
       masterKeyring
-    );
+    )
 
     // 5. Sign and return the new MasterCertificate certifying the subject.
-    await certificate.sign(certifierWallet);
-    return certificate;
+    await certificate.sign(certifierWallet)
+    return certificate
   }
 
   /**
@@ -272,18 +265,18 @@ export class MasterCertificate extends Certificate {
    *
    * @throws {Error} Throws an error if the `masterKeyring` is invalid or if decryption fails for any field.
    */
-  static async decryptFields(
+  static async decryptFields (
     subjectOrCertifierWallet: ProtoWallet,
     masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>,
     fields: Record<CertificateFieldNameUnder50Bytes, Base64String>,
     counterparty: WalletCounterparty
   ): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
-    if (!masterKeyring || Object.keys(masterKeyring).length === 0) {
-      throw new Error("A MasterCertificate must have a valid masterKeyring!");
+    if (masterKeyring == null || Object.keys(masterKeyring).length === 0) {
+      throw new Error('A MasterCertificate must have a valid masterKeyring!')
     }
     try {
       const decryptedFields: Record<CertificateFieldNameUnder50Bytes, string> =
-        {};
+        {}
       // Note: we want to iterate through all fields, not just masterKeyring keys/value pairs.
       for (const fieldName of Object.keys(fields)) {
         decryptedFields[fieldName] = (
@@ -294,45 +287,43 @@ export class MasterCertificate extends Certificate {
             fields[fieldName],
             counterparty
           )
-        ).decryptedFieldValue;
+        ).decryptedFieldValue
       }
-      return decryptedFields;
-    } catch (e) {
-      throw new Error("Failed to decrypt all master certificate fields.");
+      return decryptedFields
+    } catch {
+      throw new Error('Failed to decrypt all master certificate fields.')
     }
   }
 
-  static async decryptField(
+  static async decryptField (
     subjectOrCertifierWallet: ProtoWallet,
     masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>,
     fieldName: Base64String,
     fieldValue: Base64String,
-    counterparty: WalletCounterparty,
-    originator?: OriginatorDomainNameStringUnder250Bytes
-  ): Promise<{ fieldRevelationKey: number[]; decryptedFieldValue: string }> {
-    if (!masterKeyring || Object.keys(masterKeyring).length === 0) {
-      throw new Error("A MasterCertificate must have a valid masterKeyring!");
+    counterparty: WalletCounterparty
+  ): Promise<{ fieldRevelationKey: number[], decryptedFieldValue: string }> {
+    if (masterKeyring == null || Object.keys(masterKeyring).length === 0) {
+      throw new Error('A MasterCertificate must have a valid masterKeyring!')
     }
     try {
       const { plaintext: fieldRevelationKey } =
         await subjectOrCertifierWallet.decrypt(
           {
-            ciphertext: Utils.toArray(masterKeyring[fieldName], "base64"),
+            ciphertext: Utils.toArray(masterKeyring[fieldName], 'base64'),
             ...Certificate.getCertificateFieldEncryptionDetails(fieldName), // Only fieldName used on MasterCertificate
-            counterparty,
-          },
-          originator
-        );
+            counterparty
+          }
+        )
 
       const decryptedFieldValue = new SymmetricKey(fieldRevelationKey).decrypt(
-        Utils.toArray(fieldValue, "base64")
-      );
+        Utils.toArray(fieldValue, 'base64')
+      )
       return {
         fieldRevelationKey,
-        decryptedFieldValue: Utils.toUTF8(decryptedFieldValue as number[]),
-      };
-    } catch (e) {
-      throw new Error("Failed to decrypt certificate field!");
+        decryptedFieldValue: Utils.toUTF8(decryptedFieldValue as number[])
+      }
+    } catch {
+      throw new Error('Failed to decrypt certificate field!')
     }
   }
 }

@@ -1,7 +1,8 @@
 {
   "files": [],
   "compilerOptions": {
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "strictNullChecks": true
   },
   "references": [
     {

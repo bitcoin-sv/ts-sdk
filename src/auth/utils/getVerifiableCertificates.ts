@@ -1,6 +1,6 @@
-import { VerifiableCertificate } from "../certificates/VerifiableCertificate";
-import { WalletInterface } from "../../../mod";
-import { RequestedCertificateSet } from "../types";
+import { VerifiableCertificate } from '../certificates/VerifiableCertificate'
+import { WalletInterface } from '../../../mod'
+import { RequestedCertificateSet } from '../types'
 
 /**
  * Retrieves an array of verifiable certificates based on the request.
@@ -19,8 +19,8 @@ export const getVerifiableCertificates = async (
   // Note: This may return multiple certificates that match the correct type.
   const matchingCertificates = await wallet.listCertificates({
     certifiers: requestedCertificates.certifiers,
-    types: Object.keys(requestedCertificates.types),
-  });
+    types: Object.keys(requestedCertificates.types)
+  })
 
   // For each certificate requested, create a verifiable cert with selectively revealed fields
   return await Promise.all(
@@ -28,8 +28,8 @@ export const getVerifiableCertificates = async (
       const { keyringForVerifier } = await wallet.proveCertificate({
         certificate,
         fieldsToReveal: requestedCertificates.types[certificate.type],
-        verifier: verifierIdentityKey,
-      });
+        verifier: verifierIdentityKey
+      })
       return new VerifiableCertificate(
         certificate.type,
         certificate.serialNumber,
@@ -39,7 +39,7 @@ export const getVerifiableCertificates = async (
         certificate.fields,
         keyringForVerifier,
         certificate.signature
-      );
+      )
     })
-  );
-};
+  )
+}

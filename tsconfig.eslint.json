@@ -1,12 +1,16 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "types": ["@types/node"],
     "noEmit": true,
     "allowJs": true
   },
   "include": [
-    "./src/**/*.ts",
-    ".eslintrc.js",
-    "jest.config.js",
+    "./src/**/*.{ts,tsx,js,jsx}",   // ✅ Keep this if your TypeScript files are in src/
+    "./eslint.config.js",  // ✅ Adjusted path to be at root
+    "./jest.config.js",    // ✅ Adjusted path to be at root
+    "./**/*.js", 
+    "./**/*.ts",
+    "./*.ts"               // ✅ Ensures any root-level TS files are included (optional)
   ]
 }

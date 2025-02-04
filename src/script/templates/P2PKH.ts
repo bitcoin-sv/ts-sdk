@@ -1,17 +1,17 @@
-import OP from "../OP";
-import ScriptTemplate from "../ScriptTemplate";
-import { fromBase58Check } from "../../primitives/utils";
-import LockingScript from "../LockingScript";
-import UnlockingScript from "../UnlockingScript";
-import Transaction from "../../transaction/Transaction";
-import PrivateKey from "../../primitives/PrivateKey";
-import TransactionSignature from "../../primitives/TransactionSignature";
-import { sha256 } from "../../primitives/Hash";
-import Script from "../Script";
+import OP from '../OP'
+import ScriptTemplate from '../ScriptTemplate'
+import { fromBase58Check } from '../../primitives/utils'
+import LockingScript from '../LockingScript'
+import UnlockingScript from '../UnlockingScript'
+import Transaction from '../../transaction/Transaction'
+import PrivateKey from '../../primitives/PrivateKey'
+import TransactionSignature from '../../primitives/TransactionSignature'
+import { sha256 } from '../../primitives/Hash'
+import Script from '../Script'
 
-function verifyTruthy<T>(v: T | undefined): T {
-  if (v == null) throw new Error("must have value");
-  return v;
+function verifyTruthy<T> (v: T | undefined): T {
+  if (v == null) throw new Error('must have value')
+  return v
 }
 
 /**
@@ -26,27 +26,27 @@ export default class P2PKH implements ScriptTemplate {
    * @param {number[] | string} pubkeyhash or address - An array or address representing the public key hash.
    * @returns {LockingScript} - A P2PKH locking script.
    */
-  lock(pubkeyhash: string | number[]): LockingScript {
-    let data: number[];
-    if (typeof pubkeyhash === "string") {
-      const hash = fromBase58Check(pubkeyhash);
+  lock (pubkeyhash: string | number[]): LockingScript {
+    let data: number[]
+    if (typeof pubkeyhash === 'string') {
+      const hash = fromBase58Check(pubkeyhash)
       if (hash.prefix[0] !== 0x00 && hash.prefix[0] !== 0x6f) {
-        throw new Error("only P2PKH is supported");
+        throw new Error('only P2PKH is supported')
       }
-      data = hash.data as number[];
+      data = hash.data as number[]
     } else {
-      data = pubkeyhash;
+      data = pubkeyhash
     }
     if (data.length !== 20) {
-      throw new Error("P2PKH hash length must be 20 bytes");
+      throw new Error('P2PKH hash length must be 20 bytes')
     }
     return new LockingScript([
       { op: OP.OP_DUP },
       { op: OP.OP_HASH160 },
       { op: data.length, data },
       { op: OP.OP_EQUALVERIFY },
-      { op: OP.OP_CHECKSIG },
-    ]);
+      { op: OP.OP_CHECKSIG }
+    ])
   }
 
   /**
@@ -64,60 +64,63 @@ export default class P2PKH implements ScriptTemplate {
    * @param {Script} lockingScript - Optional. The lockinScript. Otherwise the input.sourceTransaction is required.
    * @returns {Object} - An object containing the `sign` and `estimateLength` functions.
    */
-  unlock(
+  unlock (
     privateKey: PrivateKey,
-    signOutputs: "all" | "none" | "single" = "all",
+    signOutputs: 'all' | 'none' | 'single' = 'all',
     anyoneCanPay: boolean = false,
     sourceSatoshis?: number,
     lockingScript?: Script
   ): {
-    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-    estimateLength: () => Promise<108>;
-  } {
+      sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
+      estimateLength: () => Promise<108>
+    } {
     return {
       sign: async (tx: Transaction, inputIndex: number) => {
-        let signatureScope = TransactionSignature.SIGHASH_FORKID;
-        if (signOutputs === "all") {
-          signatureScope |= TransactionSignature.SIGHASH_ALL;
+        let signatureScope = TransactionSignature.SIGHASH_FORKID
+        if (signOutputs === 'all') {
+          signatureScope |= TransactionSignature.SIGHASH_ALL
         }
-        if (signOutputs === "none") {
-          signatureScope |= TransactionSignature.SIGHASH_NONE;
+        if (signOutputs === 'none') {
+          signatureScope |= TransactionSignature.SIGHASH_NONE
         }
-        if (signOutputs === "single") {
-          signatureScope |= TransactionSignature.SIGHASH_SINGLE;
+        if (signOutputs === 'single') {
+          signatureScope |= TransactionSignature.SIGHASH_SINGLE
         }
         if (anyoneCanPay) {
-          signatureScope |= TransactionSignature.SIGHASH_ANYONECANPAY;
+          signatureScope |= TransactionSignature.SIGHASH_ANYONECANPAY
         }
 
-        const input = tx.inputs[inputIndex];
+        const input = tx.inputs[inputIndex]
 
         const otherInputs = tx.inputs.filter(
           (_, index) => index !== inputIndex
-        );
+        )
 
-        const sourceTXID = input.sourceTXID
-          ? input.sourceTXID
-          : input.sourceTransaction?.id("hex");
+        const sourceTXID = input.sourceTXID ?? input.sourceTransaction?.id('hex')
+        if (sourceTXID == null || sourceTXID == undefined) {
+          throw new Error(
+            'The input sourceTXID or sourceTransaction is required for transaction signing.'
+          )
+        }
         if (!sourceTXID) {
           throw new Error(
-            "The input sourceTXID or sourceTransaction is required for transaction signing."
-          );
+            'The input sourceTXID or sourceTransaction is required for transaction signing.'
+          )
         }
         sourceSatoshis ||=
-          input.sourceTransaction?.outputs[input.sourceOutputIndex].satoshis;
-        if (!sourceSatoshis) {
+          input.sourceTransaction?.outputs[input.sourceOutputIndex].satoshis
+        if (sourceSatoshis == null || sourceSatoshis == undefined) {
           throw new Error(
-            "The sourceSatoshis or input sourceTransaction is required for transaction signing."
-          );
+            'The sourceSatoshis or input sourceTransaction is required for transaction signing.'
+          )
         }
         lockingScript ||=
           input.sourceTransaction?.outputs[input.sourceOutputIndex]
-            .lockingScript;
-        if (!lockingScript) {
+            .lockingScript
+        if (lockingScript == null) {
           throw new Error(
-            "The lockingScript or input sourceTransaction is required for transaction signing."
-          );
+            'The lockingScript or input sourceTransaction is required for transaction signing.'
+          )
         }
 
         const preimage = TransactionSignature.format({
@@ -131,29 +134,29 @@ export default class P2PKH implements ScriptTemplate {
           inputSequence: verifyTruthy(input.sequence),
           subscript: lockingScript,
           lockTime: tx.lockTime,
-          scope: signatureScope,
-        });
+          scope: signatureScope
+        })
 
-        const rawSignature = privateKey.sign(sha256(preimage));
+        const rawSignature = privateKey.sign(sha256(preimage))
         const sig = new TransactionSignature(
           rawSignature.r,
           rawSignature.s,
           signatureScope
-        );
-        const sigForScript = sig.toChecksigFormat();
+        )
+        const sigForScript = sig.toChecksigFormat()
         const pubkeyForScript = privateKey
           .toPublicKey()
-          .encode(true) as number[];
+          .encode(true) as number[]
         return new UnlockingScript([
           { op: sigForScript.length, data: sigForScript },
-          { op: pubkeyForScript.length, data: pubkeyForScript },
-        ]);
+          { op: pubkeyForScript.length, data: pubkeyForScript }
+        ])
       },
       estimateLength: async () => {
         // public key (1+33) + signature (1+73)
         // Note: We add 1 to each element's length because of the associated OP_PUSH
-        return 108;
-      },
-    };
+        return 108
+      }
+    }
   }
 }

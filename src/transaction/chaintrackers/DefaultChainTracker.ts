@@ -1,6 +1,6 @@
-import WhatsOnChain from "./WhatsOnChain";
-import ChainTracker from "../ChainTracker";
+import WhatsOnChain from './WhatsOnChain'
+import ChainTracker from '../ChainTracker'
 
-export function defaultChainTracker(): ChainTracker {
-  return new WhatsOnChain();
+export function defaultChainTracker (): ChainTracker {
+  return new WhatsOnChain()
 }

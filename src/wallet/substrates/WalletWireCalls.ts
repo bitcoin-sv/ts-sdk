@@ -30,5 +30,5 @@ enum calls {
   getVersion = 28,
 }
 
-export default calls;
-export type CallType = keyof typeof calls;
+export default calls
+export type CallType = keyof typeof calls

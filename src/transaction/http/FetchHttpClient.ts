@@ -1,8 +1,8 @@
 import {
   HttpClient,
   HttpClientRequestOptions,
-  HttpClientResponse,
-} from "./HttpClient";
+  HttpClientResponse
+} from './HttpClient'
 
 /** fetch function interface limited to options needed by ts-sdk */
 /**
@@ -10,7 +10,7 @@ import {
  * @param url The URL to make the request to.
  * @param options The request configuration.
  */
-export type Fetch = (url: string, options: FetchOptions) => Promise<Response>;
+export type Fetch = (url: string, options: FetchOptions) => Promise<Response>
 
 /**
  * An interface for configuration of the request to be passed to the fetch method
@@ -18,18 +18,18 @@ export type Fetch = (url: string, options: FetchOptions) => Promise<Response>;
  */
 export interface FetchOptions {
   /** A string to set request's method. */
-  method?: string;
+  method?: string
   /** An object literal set request's headers. */
-  headers?: Record<string, string>;
+  headers?: Record<string, string>
   /** An object or null to set request's body. */
-  body?: string | null;
+  body?: string | null
 }
 
 /**
  * Adapter for Node Https module to be used as HttpClient
  */
 export class FetchHttpClient implements HttpClient {
-  constructor(private readonly fetch: Fetch) {}
+  constructor (private readonly fetch: Fetch) {}
 
   async request<D>(
     url: string,
@@ -38,20 +38,20 @@ export class FetchHttpClient implements HttpClient {
     const fetchOptions: FetchOptions = {
       method: options.method,
       headers: options.headers,
-      body: JSON.stringify(options.data),
-    };
+      body: JSON.stringify(options.data)
+    }
 
-    const res = await this.fetch(url, fetchOptions);
-    const mediaType = res.headers.get("Content-Type") ?? "";
-    const data = mediaType.startsWith("application/json")
+    const res = await this.fetch(url, fetchOptions)
+    const mediaType = res.headers.get('Content-Type') ?? ''
+    const data = mediaType.startsWith('application/json')
       ? await res.json()
-      : await res.text();
+      : await res.text()
 
     return {
       ok: res.ok,
       status: res.status,
       statusText: res.statusText,
-      data: data as D,
-    };
+      data: data as D
+    }
   }
 }

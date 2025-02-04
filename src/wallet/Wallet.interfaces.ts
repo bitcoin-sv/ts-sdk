@@ -2,13 +2,13 @@
  * @typedef {boolean} BooleanDefaultFalse
  * Represents an optional boolean parameter, which defaults to `false` if not provided.
  */
-export type BooleanDefaultFalse = boolean;
+export type BooleanDefaultFalse = boolean
 
 /**
  * @typedef {boolean} BooleanDefaultTrue
  * Represents an optional boolean parameter, which defaults to `true` if not provided.
  */
-export type BooleanDefaultTrue = boolean;
+export type BooleanDefaultTrue = boolean
 
 /**
  * @typedef {number} Byte
@@ -16,7 +16,7 @@ export type BooleanDefaultTrue = boolean;
  * @minimum 0
  * @maximum 255
  */
-export type Byte = number;
+export type Byte = number
 
 /**
  * @typedef {number} PositiveIntegerOrZero
@@ -24,7 +24,7 @@ export type Byte = number;
  * @minimum 0
  * @maximum 4294967295
  */
-export type PositiveIntegerOrZero = number;
+export type PositiveIntegerOrZero = number
 
 /**
  * @typedef {number} PositiveInteger
@@ -32,7 +32,7 @@ export type PositiveIntegerOrZero = number;
  * @minimum 1
  * @maximum 4294967295
  */
-export type PositiveInteger = number;
+export type PositiveInteger = number
 
 /**
  * @typedef {number} PositiveIntegerMax10
@@ -40,7 +40,7 @@ export type PositiveInteger = number;
  * @minimum 1
  * @maximum 10
  */
-export type PositiveIntegerMax10 = number;
+export type PositiveIntegerMax10 = number
 
 /**
  * @typedef {number} PositiveIntegerDefault10Max10000
@@ -49,7 +49,7 @@ export type PositiveIntegerMax10 = number;
  * @default 10
  * @maximum 10000
  */
-export type PositiveIntegerDefault10Max10000 = number;
+export type PositiveIntegerDefault10Max10000 = number
 
 /**
  * @typedef {number} SatoshiValue
@@ -57,117 +57,117 @@ export type PositiveIntegerDefault10Max10000 = number;
  * @minimum 1
  * @maximum 2100000000000000
  */
-export type SatoshiValue = number;
+export type SatoshiValue = number
 
 /**
  * @typedef {string} ISOTimestampString
  * Represents an ISO timestamp string.
  */
-export type ISOTimestampString = string;
+export type ISOTimestampString = string
 
 /**
  * @typedef {string} HexString
  * A string containing only hexadecimal characters (0-9, a-f).
  */
-export type HexString = string;
+export type HexString = string
 
 /**
  * @typedef {HexString} TXIDHexString
  * Represents a transaction ID, enforced to be exactly 64 characters in length and in hexadecimal format.
  * @length 64
  */
-export type TXIDHexString = HexString;
+export type TXIDHexString = HexString
 
 /**
  * @typedef {string} OutpointString
  * Represents a transaction ID and output index pair. The TXID is given as a hex string followed by a period "." and then the output index is given as a decimal integer.
  */
-export type OutpointString = string;
+export type OutpointString = string
 
 /**
  * @typedef {HexString} PubKeyHex
  * Represents a compressed DER secp256k1 public key, exactly 66 hex characters (33 bytes) in length.
  * @length 66
  */
-export type PubKeyHex = HexString;
+export type PubKeyHex = HexString
 
 /**
  * @typedef {string} Base64String
  * A standard base64 encoded string.
  */
-export type Base64String = string;
+export type Base64String = string
 
 /**
  * @typedef {string} OriginatorDomainNameStringUnder250Bytes
  * Represents the fully qualified domain name (FQDN) of the application that originates the request.
  */
-export type OriginatorDomainNameStringUnder250Bytes = string;
+export type OriginatorDomainNameStringUnder250Bytes = string
 
 /**
  * @typedef {string & { minLength: 5, maxLength: 50 }} DescriptionString5to50Bytes
  * A string used for descriptions, with a length between 5 and 50 characters.
  */
-export type DescriptionString5to50Bytes = string;
+export type DescriptionString5to50Bytes = string
 
 /**
  * @typedef {string & { maxLength: 300 }} BasketStringUnder300Bytes
  * A string for naming baskets, with a maximum length of 300 characters.
  */
-export type BasketStringUnder300Bytes = string;
+export type BasketStringUnder300Bytes = string
 
 /**
  * @typedef {string & { maxLength: 300 }} OutputTagStringUnder300Bytes
  * A string for tagging outputs, with a maximum length of 300 characters.
  */
-export type OutputTagStringUnder300Bytes = string;
+export type OutputTagStringUnder300Bytes = string
 
 /**
  * @typedef {string & { maxLength: 300 }} LabelStringUnder300Bytes
  * A string for labeling transactions, with a maximum length of 300 characters.
  */
-export type LabelStringUnder300Bytes = string;
+export type LabelStringUnder300Bytes = string
 
 /**
  * @typedef {Byte[]} BEEF
  * An array of integers, each ranging from 0 to 255, indicating transaction data in BEEF (BRC-62) format.
  */
-export type BEEF = Byte[];
+export type BEEF = Byte[]
 
 /**
  * @typedef {Byte[]} AtomicBEEF
  * An array of integers, each ranging from 0 to 255, indicating transaction data in Atomic BEEF (BRC-95) format.
  */
-export type AtomicBEEF = Byte[];
+export type AtomicBEEF = Byte[]
 
 /**
  * @typedef {string & { minLength: 5, maxLength: 400 }} ProtocolString5To400Bytes
  * A protocol identifier with a length between 5 and 400 characters.
  */
-export type ProtocolString5To400Bytes = string;
+export type ProtocolString5To400Bytes = string
 
 /**
  * @typedef {string & { maxLength: 800 }} KeyIDStringUnder800Bytes
  * Represents a key identifier string, with a maximum length of 800 characters.
  */
-export type KeyIDStringUnder800Bytes = string;
+export type KeyIDStringUnder800Bytes = string
 
 /**
  * @typedef {string & { maxLength: 50 }} CertificateFieldNameUnder50Bytes
  * Represents a certificate field name with a maximum length of 50 characters.
  */
-export type CertificateFieldNameUnder50Bytes = string;
+export type CertificateFieldNameUnder50Bytes = string
 
 /**
  * @typedef {string & { maxLength: 100 }} EntityNameStringMax100Bytes
  * Represents a trusted entity name with a maximum length of 100 characters.
  */
-export type EntityNameStringMax100Bytes = string;
+export type EntityNameStringMax100Bytes = string
 
 /**
  * @typedef {string & { maxLength: 500 }} EntityIconURLStringMax500Bytes
  * Represents a trusted entity icon URL with a maximum length of 500 characters.
  */
-export type EntityIconURLStringMax500Bytes = string;
+export type EntityIconURLStringMax500Bytes = string
 
 /**
  * @typedef {string & { minLength: 7, maxLength: 30 }} VersionString7To30Bytes
@@ -175,21 +175,21 @@ export type EntityIconURLStringMax500Bytes = string;
  *
  * The format is [vendor]-[major].[minor].[patch]
  */
-export type VersionString7To30Bytes = string;
+export type VersionString7To30Bytes = string
 
 /**
  * @typedef {string & { minLength: 10, maxLength: 40 }} ErrorCodeString10To40Bytes
  * Represents a machine-readable error code string, with a length between 10 and 40 characters.
  */
-export type ErrorCodeString10To40Bytes = string;
+export type ErrorCodeString10To40Bytes = string
 
 /**
  * @typedef {string & { minLength: 20, maxLength: 200 }} ErrorDescriptionString20To200Bytes
  * Represents a human-readable error description string, with a length between 20 and 200 characters.
  */
-export type ErrorDescriptionString20To200Bytes = string;
+export type ErrorDescriptionString20To200Bytes = string
 
-export type WalletNetwork = "mainnet" | "testnet";
+export type WalletNetwork = 'mainnet' | 'testnet'
 
 /**
  * @enum {number} SecurityLevels
@@ -212,24 +212,24 @@ export enum SecurityLevels {
  * 2 = Requires user approval per counterparty per application.
  *
  */
-export type SecurityLevel = 0 | 1 | 2;
+export type SecurityLevel = 0 | 1 | 2
 
-export type WalletProtocol = [SecurityLevel, ProtocolString5To400Bytes];
+export type WalletProtocol = [SecurityLevel, ProtocolString5To400Bytes]
 
-export type WalletCounterparty = PubKeyHex | "self" | "anyone";
+export type WalletCounterparty = PubKeyHex | 'self' | 'anyone'
 
-export type AcquisitionProtocol = "direct" | "issuance";
+export type AcquisitionProtocol = 'direct' | 'issuance'
 
-export type KeyringRevealer = PubKeyHex | "certifier";
+export type KeyringRevealer = PubKeyHex | 'certifier'
 
 export type ActionStatus =
-  | "completed"
-  | "unprocessed"
-  | "sending"
-  | "unproven"
-  | "unsigned"
-  | "nosend"
-  | "nonfinal";
+  | 'completed'
+  | 'unprocessed'
+  | 'sending'
+  | 'unproven'
+  | 'unsigned'
+  | 'nosend'
+  | 'nonfinal'
 
 /**
  * Controls behavior of input BEEF validation.
@@ -238,7 +238,7 @@ export type ActionStatus =
  *
  * If undefined, input BEEFs must be complete and valid.
  */
-export type TrustSelf = "known";
+export type TrustSelf = 'known'
 
 /**
  * @param {OutpointString} outpoint - The outpoint being consumed.
@@ -248,11 +248,11 @@ export type TrustSelf = "known";
  * @param {PositiveIntegerOrZero} sequenceNumber - Optional. The sequence number applied to the input.
  */
 export interface CreateActionInput {
-  outpoint: OutpointString;
-  inputDescription: DescriptionString5to50Bytes;
-  unlockingScript?: HexString;
-  unlockingScriptLength?: PositiveInteger;
-  sequenceNumber?: PositiveIntegerOrZero;
+  outpoint: OutpointString
+  inputDescription: DescriptionString5to50Bytes
+  unlockingScript?: HexString
+  unlockingScriptLength?: PositiveInteger
+  sequenceNumber?: PositiveIntegerOrZero
 }
 
 /**
@@ -264,12 +264,12 @@ export interface CreateActionInput {
  * @param {OutputTagStringUnder300Bytes[]} [tags] - Tags assigned to the output for sorting or filtering.
  */
 export interface CreateActionOutput {
-  lockingScript: HexString;
-  satoshis: SatoshiValue;
-  outputDescription: DescriptionString5to50Bytes;
-  basket?: BasketStringUnder300Bytes;
-  customInstructions?: string;
-  tags?: OutputTagStringUnder300Bytes[];
+  lockingScript: HexString
+  satoshis: SatoshiValue
+  outputDescription: DescriptionString5to50Bytes
+  basket?: BasketStringUnder300Bytes
+  customInstructions?: string
+  tags?: OutputTagStringUnder300Bytes[]
 }
 
 /**
@@ -284,35 +284,35 @@ export interface CreateActionOutput {
  * @param {BooleanDefaultTrue} [randomizeOutputs] — optional. When set to false, the wallet will avoid randomizing the order of outputs within the transaction.
  */
 export interface CreateActionOptions {
-  signAndProcess?: BooleanDefaultTrue;
-  acceptDelayedBroadcast?: BooleanDefaultTrue;
-  trustSelf?: TrustSelf;
-  knownTxids?: TXIDHexString[];
-  returnTXIDOnly?: BooleanDefaultFalse;
-  noSend?: BooleanDefaultFalse;
-  noSendChange?: OutpointString[];
-  sendWith?: TXIDHexString[];
-  randomizeOutputs?: BooleanDefaultTrue;
+  signAndProcess?: BooleanDefaultTrue
+  acceptDelayedBroadcast?: BooleanDefaultTrue
+  trustSelf?: TrustSelf
+  knownTxids?: TXIDHexString[]
+  returnTXIDOnly?: BooleanDefaultFalse
+  noSend?: BooleanDefaultFalse
+  noSendChange?: OutpointString[]
+  sendWith?: TXIDHexString[]
+  randomizeOutputs?: BooleanDefaultTrue
 }
 
-export type SendWithResultStatus = "unproven" | "sending" | "failed";
+export type SendWithResultStatus = 'unproven' | 'sending' | 'failed'
 
 export interface SendWithResult {
-  txid: TXIDHexString;
-  status: SendWithResultStatus;
+  txid: TXIDHexString
+  status: SendWithResultStatus
 }
 
 export interface SignableTransaction {
-  tx: AtomicBEEF;
-  reference: Base64String;
+  tx: AtomicBEEF
+  reference: Base64String
 }
 
 export interface CreateActionResult {
-  txid?: TXIDHexString;
-  tx?: AtomicBEEF;
-  noSendChange?: OutpointString[];
-  sendWithResults?: SendWithResult[];
-  signableTransaction?: SignableTransaction;
+  txid?: TXIDHexString
+  tx?: AtomicBEEF
+  noSendChange?: OutpointString[]
+  sendWithResults?: SendWithResult[]
+  signableTransaction?: SignableTransaction
 }
 
 /**
@@ -326,14 +326,14 @@ export interface CreateActionResult {
  * @param {CreateActionOptions} [options] - Optional settings modifying transaction processing behavior.
  */
 export interface CreateActionArgs {
-  description: DescriptionString5to50Bytes;
-  inputBEEF?: BEEF;
-  inputs?: CreateActionInput[];
-  outputs?: CreateActionOutput[];
-  lockTime?: PositiveIntegerOrZero;
-  version?: PositiveIntegerOrZero;
-  labels?: LabelStringUnder300Bytes[];
-  options?: CreateActionOptions;
+  description: DescriptionString5to50Bytes
+  inputBEEF?: BEEF
+  inputs?: CreateActionInput[]
+  outputs?: CreateActionOutput[]
+  lockTime?: PositiveIntegerOrZero
+  version?: PositiveIntegerOrZero
+  labels?: LabelStringUnder300Bytes[]
+  options?: CreateActionOptions
 }
 
 /**
@@ -341,8 +341,8 @@ export interface CreateActionArgs {
  * @param {PositiveIntegerOrZero} [sequenceNumber] - The sequence number of the input.
  */
 export interface SignActionSpend {
-  unlockingScript: HexString;
-  sequenceNumber?: PositiveIntegerOrZero;
+  unlockingScript: HexString
+  sequenceNumber?: PositiveIntegerOrZero
 }
 
 /**
@@ -354,10 +354,10 @@ export interface SignActionSpend {
  * @param {TXIDHexString[]} [sendWith] - Optional. Sends a batch of actions previously created as `noSend` actions to the network; either synchronously if `acceptDelayedBroadcast` is true or by a background process.
  */
 export interface SignActionOptions {
-  acceptDelayedBroadcast?: BooleanDefaultTrue;
-  returnTXIDOnly?: BooleanDefaultFalse;
-  noSend?: BooleanDefaultFalse;
-  sendWith?: TXIDHexString[];
+  acceptDelayedBroadcast?: BooleanDefaultTrue
+  returnTXIDOnly?: BooleanDefaultFalse
+  noSend?: BooleanDefaultFalse
+  sendWith?: TXIDHexString[]
 }
 
 /**
@@ -366,30 +366,32 @@ export interface SignActionOptions {
  * @param {SignActionOptions} [options] - Optional settings modifying transaction processing behavior.
  */
 export interface SignActionArgs {
-  spends: Record<PositiveIntegerOrZero, SignActionSpend>;
-  reference: Base64String;
-  options?: SignActionOptions;
+  spends: Record<PositiveIntegerOrZero, SignActionSpend>
+  reference: Base64String
+  options?: SignActionOptions
 }
 
 /**
  *
  */
 export interface SignActionResult {
-  txid?: TXIDHexString;
-  tx?: AtomicBEEF;
-  sendWithResults?: SendWithResult[];
+  txid?: TXIDHexString
+  tx?: AtomicBEEF
+  sendWithResults?: SendWithResult[]
 }
 
 /**
  * @param {Base64String} reference - Reference number for the transaction to abort.
  */
 export interface AbortActionArgs {
-  reference: Base64String;
+  reference: Base64String
 }
 
 export interface AbortActionResult {
-  aborted: true;
+  aborted: true
 }
+
+export type AcquireCertificateResult = WalletCertificate
 
 /**
  * @param {LabelStringUnder300Bytes[]} labels - An array of labels used to filter actions.
@@ -405,71 +407,71 @@ export interface AbortActionResult {
  * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
  */
 export interface ListActionsArgs {
-  labels: LabelStringUnder300Bytes[];
-  labelQueryMode?: "any" | "all";
-  includeLabels?: BooleanDefaultFalse;
-  includeInputs?: BooleanDefaultFalse;
-  includeInputSourceLockingScripts?: BooleanDefaultFalse;
-  includeInputUnlockingScripts?: BooleanDefaultFalse;
-  includeOutputs?: BooleanDefaultFalse;
-  includeOutputLockingScripts?: BooleanDefaultFalse;
-  limit?: PositiveIntegerDefault10Max10000;
-  offset?: PositiveIntegerOrZero;
-  seekPermission?: BooleanDefaultTrue;
+  labels: LabelStringUnder300Bytes[]
+  labelQueryMode?: 'any' | 'all'
+  includeLabels?: BooleanDefaultFalse
+  includeInputs?: BooleanDefaultFalse
+  includeInputSourceLockingScripts?: BooleanDefaultFalse
+  includeInputUnlockingScripts?: BooleanDefaultFalse
+  includeOutputs?: BooleanDefaultFalse
+  includeOutputLockingScripts?: BooleanDefaultFalse
+  limit?: PositiveIntegerDefault10Max10000
+  offset?: PositiveIntegerOrZero
+  seekPermission?: BooleanDefaultTrue
 }
 
 export interface WalletActionInput {
-  sourceOutpoint: OutpointString;
-  sourceSatoshis: SatoshiValue;
-  sourceLockingScript?: HexString;
-  unlockingScript?: HexString;
-  inputDescription: DescriptionString5to50Bytes;
-  sequenceNumber: PositiveIntegerOrZero;
+  sourceOutpoint: OutpointString
+  sourceSatoshis: SatoshiValue
+  sourceLockingScript?: HexString
+  unlockingScript?: HexString
+  inputDescription: DescriptionString5to50Bytes
+  sequenceNumber: PositiveIntegerOrZero
 }
 
 export interface WalletActionOutput {
-  satoshis: SatoshiValue;
-  lockingScript?: HexString;
-  spendable: boolean;
-  customInstructions?: string;
+  satoshis: SatoshiValue
+  lockingScript?: HexString
+  spendable: boolean
+  customInstructions?: string
 
-  tags: OutputTagStringUnder300Bytes[];
+  tags: OutputTagStringUnder300Bytes[]
 
-  outputIndex: PositiveIntegerOrZero;
-  outputDescription: DescriptionString5to50Bytes;
+  outputIndex: PositiveIntegerOrZero
+  outputDescription: DescriptionString5to50Bytes
 
-  basket: BasketStringUnder300Bytes;
+  basket: BasketStringUnder300Bytes
 }
 
 export interface WalletOutput {
-  satoshis: SatoshiValue;
-  lockingScript?: HexString;
-  spendable: boolean;
-  customInstructions?: string;
+  satoshis: SatoshiValue
+  lockingScript?: HexString
+  spendable: boolean
+  customInstructions?: string
 
-  tags?: OutputTagStringUnder300Bytes[];
+  tags?: OutputTagStringUnder300Bytes[]
 
-  outpoint: OutpointString;
+  outpoint: OutpointString
 
-  labels?: LabelStringUnder300Bytes[];
+  labels?: LabelStringUnder300Bytes[]
 }
 
 export interface WalletAction {
-  txid: TXIDHexString;
-  satoshis: SatoshiValue;
-  status: ActionStatus;
-  isOutgoing: boolean;
-  description: DescriptionString5to50Bytes;
-  labels?: LabelStringUnder300Bytes[];
-  version: PositiveIntegerOrZero;
-  lockTime: PositiveIntegerOrZero;
-  inputs?: WalletActionInput[];
-  outputs?: WalletActionOutput[];
+  txid: TXIDHexString
+  satoshis: SatoshiValue
+  status: ActionStatus
+  isOutgoing: boolean
+  description: DescriptionString5to50Bytes
+  labels?: LabelStringUnder300Bytes[]
+  version: PositiveIntegerOrZero
+  lockTime: PositiveIntegerOrZero
+  inputs?: WalletActionInput[]
+  outputs?: WalletActionOutput[]
 }
 
 export interface ListActionsResult {
-  totalActions: PositiveIntegerOrZero;
-  actions: WalletAction[];
+  totalActions: PositiveIntegerOrZero
+  actions: WalletAction[]
 }
 
 /**
@@ -478,9 +480,9 @@ export interface ListActionsResult {
  * @param {PubKeyHex} senderIdentityKey - Public identity key of the sender (for payments).
  */
 export interface WalletPayment {
-  derivationPrefix: Base64String;
-  derivationSuffix: Base64String;
-  senderIdentityKey: PubKeyHex;
+  derivationPrefix: Base64String
+  derivationSuffix: Base64String
+  senderIdentityKey: PubKeyHex
 }
 
 /**
@@ -489,9 +491,9 @@ export interface WalletPayment {
  * @param {OutputTagStringUnder300Bytes[]} [tags] - Tags attached to the output (for insertions).
  */
 export interface BasketInsertion {
-  basket: BasketStringUnder300Bytes;
-  customInstructions?: string;
-  tags?: OutputTagStringUnder300Bytes[];
+  basket: BasketStringUnder300Bytes
+  customInstructions?: string
+  tags?: OutputTagStringUnder300Bytes[]
 }
 
 /**
@@ -501,10 +503,10 @@ export interface BasketInsertion {
  * @param {BasketInsertion} [insertionRemittance] - Optional. Remittance data, structured accordingly for the insertion operation.
  */
 export interface InternalizeOutput {
-  outputIndex: PositiveIntegerOrZero;
-  protocol: "wallet payment" | "basket insertion";
-  paymentRemittance?: WalletPayment;
-  insertionRemittance?: BasketInsertion;
+  outputIndex: PositiveIntegerOrZero
+  protocol: 'wallet payment' | 'basket insertion'
+  paymentRemittance?: WalletPayment
+  insertionRemittance?: BasketInsertion
 }
 
 /**
@@ -515,15 +517,15 @@ export interface InternalizeOutput {
  * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
  */
 export interface InternalizeActionArgs {
-  tx: AtomicBEEF;
-  outputs: InternalizeOutput[];
-  description: DescriptionString5to50Bytes;
-  labels?: LabelStringUnder300Bytes[];
-  seekPermission?: BooleanDefaultTrue;
+  tx: AtomicBEEF
+  outputs: InternalizeOutput[]
+  description: DescriptionString5to50Bytes
+  labels?: LabelStringUnder300Bytes[]
+  seekPermission?: BooleanDefaultTrue
 }
 
 export interface InternalizeActionResult {
-  accepted: true;
+  accepted: true
 }
 
 /**
@@ -540,31 +542,31 @@ export interface InternalizeActionResult {
  * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
  */
 export interface ListOutputsArgs {
-  basket: BasketStringUnder300Bytes;
-  tags?: OutputTagStringUnder300Bytes[];
-  tagQueryMode?: "all" | "any";
-  include?: "locking scripts" | "entire transactions";
-  includeCustomInstructions?: BooleanDefaultFalse;
-  includeTags?: BooleanDefaultFalse;
-  includeLabels?: BooleanDefaultFalse;
-  limit?: PositiveIntegerDefault10Max10000;
-  offset?: PositiveIntegerOrZero;
-  seekPermission?: BooleanDefaultTrue;
+  basket: BasketStringUnder300Bytes
+  tags?: OutputTagStringUnder300Bytes[]
+  tagQueryMode?: 'all' | 'any'
+  include?: 'locking scripts' | 'entire transactions'
+  includeCustomInstructions?: BooleanDefaultFalse
+  includeTags?: BooleanDefaultFalse
+  includeLabels?: BooleanDefaultFalse
+  limit?: PositiveIntegerDefault10Max10000
+  offset?: PositiveIntegerOrZero
+  seekPermission?: BooleanDefaultTrue
 }
 
 export interface ListOutputsResult {
-  totalOutputs: PositiveIntegerOrZero;
-  BEEF?: BEEF;
-  outputs: WalletOutput[];
+  totalOutputs: PositiveIntegerOrZero
+  BEEF?: BEEF
+  outputs: WalletOutput[]
 }
 
 export interface RelinquishOutputArgs {
-  basket: BasketStringUnder300Bytes;
-  output: OutpointString;
+  basket: BasketStringUnder300Bytes
+  output: OutpointString
 }
 
 export interface RelinquishOutputResult {
-  relinquished: true;
+  relinquished: true
 }
 
 /**
@@ -576,12 +578,12 @@ export interface RelinquishOutputResult {
  * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
  */
 export interface WalletEncryptionArgs {
-  protocolID: WalletProtocol;
-  keyID: KeyIDStringUnder800Bytes;
-  counterparty?: WalletCounterparty;
-  privileged?: BooleanDefaultFalse;
-  privilegedReason?: DescriptionString5to50Bytes;
-  seekPermission?: BooleanDefaultTrue;
+  protocolID: WalletProtocol
+  keyID: KeyIDStringUnder800Bytes
+  counterparty?: WalletCounterparty
+  privileged?: BooleanDefaultFalse
+  privilegedReason?: DescriptionString5to50Bytes
+  seekPermission?: BooleanDefaultTrue
 }
 
 /**
@@ -593,8 +595,8 @@ export interface WalletEncryptionArgs {
  * @param {BooleanDefaultFalse} [forSelf] - Whether to return the public key derived from the current user's own identity (as opposed to the counterparty's identity).
  */
 export interface GetPublicKeyArgs extends Partial<WalletEncryptionArgs> {
-  identityKey?: true;
-  forSelf?: BooleanDefaultFalse;
+  identityKey?: true
+  forSelf?: BooleanDefaultFalse
 }
 
 /**
@@ -604,10 +606,10 @@ export interface GetPublicKeyArgs extends Partial<WalletEncryptionArgs> {
  * @param {BooleanDefaultFalse} [privileged] - Whether this is a privileged request.
  */
 export interface RevealCounterpartyKeyLinkageArgs {
-  counterparty: PubKeyHex;
-  verifier: PubKeyHex;
-  privileged?: BooleanDefaultFalse;
-  privilegedReason?: DescriptionString5to50Bytes;
+  counterparty: PubKeyHex
+  verifier: PubKeyHex
+  privileged?: BooleanDefaultFalse
+  privilegedReason?: DescriptionString5to50Bytes
 }
 
 /**
@@ -619,69 +621,69 @@ export interface RevealCounterpartyKeyLinkageArgs {
  * @param {BooleanDefaultFalse} [privileged] - Optional. Whether this is a privileged request.
  */
 export interface RevealSpecificKeyLinkageArgs {
-  counterparty: WalletCounterparty;
-  verifier: PubKeyHex;
-  protocolID: WalletProtocol;
-  keyID: KeyIDStringUnder800Bytes;
-  privilegedReason?: DescriptionString5to50Bytes;
-  privileged?: BooleanDefaultFalse;
+  counterparty: WalletCounterparty
+  verifier: PubKeyHex
+  protocolID: WalletProtocol
+  keyID: KeyIDStringUnder800Bytes
+  privilegedReason?: DescriptionString5to50Bytes
+  privileged?: BooleanDefaultFalse
 }
 
 /**
  */
 export interface KeyLinkageResult {
-  encryptedLinkage: Byte[];
-  encryptedLinkageProof: Byte[];
-  prover: PubKeyHex;
-  verifier: PubKeyHex;
-  counterparty: PubKeyHex;
+  encryptedLinkage: Byte[]
+  encryptedLinkageProof: Byte[]
+  prover: PubKeyHex
+  verifier: PubKeyHex
+  counterparty: PubKeyHex
 }
 
 /**
  */
 export interface RevealCounterpartyKeyLinkageResult extends KeyLinkageResult {
-  revelationTime: ISOTimestampString;
+  revelationTime: ISOTimestampString
 }
 
 /**
  */
 export interface RevealSpecificKeyLinkageResult extends KeyLinkageResult {
-  protocolID: WalletProtocol;
-  keyID: KeyIDStringUnder800Bytes;
-  proofType: Byte;
+  protocolID: WalletProtocol
+  keyID: KeyIDStringUnder800Bytes
+  proofType: Byte
 }
 
 /**
  * @param {Byte[]} plaintext - Array of bytes constituting the plaintext data to be encrypted.
  */
 export interface WalletEncryptArgs extends WalletEncryptionArgs {
-  plaintext: Byte[];
+  plaintext: Byte[]
 }
 
 export interface WalletEncryptResult {
-  ciphertext: Byte[];
+  ciphertext: Byte[]
 }
 
 /**
  * @param {Byte[]} ciphertext - Encrypted bytes, including the initialization vector, for decryption.
  */
 export interface WalletDecryptArgs extends WalletEncryptionArgs {
-  ciphertext: Byte[];
+  ciphertext: Byte[]
 }
 
 export interface WalletDecryptResult {
-  plaintext: Byte[];
+  plaintext: Byte[]
 }
 
 /**
  * @param {Byte[]} data - Input data (in bytes) for which the HMAC needs to be created.
  */
 export interface CreateHmacArgs extends WalletEncryptionArgs {
-  data: Byte[];
+  data: Byte[]
 }
 
 export interface CreateHmacResult {
-  hmac: Byte[];
+  hmac: Byte[]
 }
 
 /**
@@ -689,12 +691,12 @@ export interface CreateHmacResult {
  * @param {Byte[]} hmac - Byte array representing the HMAC value to be verified.
  */
 export interface VerifyHmacArgs extends WalletEncryptionArgs {
-  data: Byte[];
-  hmac: Byte[];
+  data: Byte[]
+  hmac: Byte[]
 }
 
 export interface VerifyHmacResult {
-  valid: true;
+  valid: true
 }
 
 /**
@@ -702,12 +704,12 @@ export interface VerifyHmacResult {
  * @param {Byte[]} [hashToDirectlySign] - Sign a pre-hashed value in situations where data can't or shouldn't be revealed, whether due to its size or for privacy.
  */
 export interface CreateSignatureArgs extends WalletEncryptionArgs {
-  data?: Byte[];
-  hashToDirectlySign?: Byte[];
+  data?: Byte[]
+  hashToDirectlySign?: Byte[]
 }
 
 export interface CreateSignatureResult {
-  signature: Byte[];
+  signature: Byte[]
 }
 
 /**
@@ -717,14 +719,14 @@ export interface CreateSignatureResult {
  * @param {BooleanDefaultFalse} [args.forSelf] - Whether the signature to be verified was created by this user rather than the counterparty.
  */
 export interface VerifySignatureArgs extends WalletEncryptionArgs {
-  data?: Byte[];
-  hashToDirectlyVerify?: Byte[];
-  signature: Byte[];
-  forSelf?: BooleanDefaultFalse;
+  data?: Byte[]
+  hashToDirectlyVerify?: Byte[]
+  signature: Byte[]
+  forSelf?: BooleanDefaultFalse
 }
 
 export interface VerifySignatureResult {
-  valid: true;
+  valid: true
 }
 
 /**
@@ -742,47 +744,45 @@ export interface VerifySignatureResult {
  * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
  */
 export interface AcquireCertificateArgs {
-  type: Base64String;
-  certifier: PubKeyHex;
-  acquisitionProtocol: AcquisitionProtocol;
-  fields: Record<CertificateFieldNameUnder50Bytes, string>;
-  serialNumber?: Base64String;
-  revocationOutpoint?: OutpointString;
-  signature?: HexString;
-  certifierUrl?: string;
-  keyringRevealer?: KeyringRevealer;
-  keyringForSubject?: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-  privileged?: BooleanDefaultFalse;
-  privilegedReason?: DescriptionString5to50Bytes;
+  type: Base64String
+  certifier: PubKeyHex
+  acquisitionProtocol: AcquisitionProtocol
+  fields: Record<CertificateFieldNameUnder50Bytes, string>
+  serialNumber?: Base64String
+  revocationOutpoint?: OutpointString
+  signature?: HexString
+  certifierUrl?: string
+  keyringRevealer?: KeyringRevealer
+  keyringForSubject?: Record<CertificateFieldNameUnder50Bytes, Base64String>
+  privileged?: BooleanDefaultFalse
+  privilegedReason?: DescriptionString5to50Bytes
 }
 
 export interface WalletCertificate {
-  type: Base64String;
-  subject: PubKeyHex;
-  serialNumber: Base64String;
-  certifier: PubKeyHex;
-  revocationOutpoint: OutpointString;
-  signature: HexString;
-  fields: Record<CertificateFieldNameUnder50Bytes, string>;
+  type: Base64String
+  subject: PubKeyHex
+  serialNumber: Base64String
+  certifier: PubKeyHex
+  revocationOutpoint: OutpointString
+  signature: HexString
+  fields: Record<CertificateFieldNameUnder50Bytes, string>
 }
 
 export interface IdentityCertifier {
-  name: EntityNameStringMax100Bytes;
-  iconUrl: EntityIconURLStringMax500Bytes;
-  description: DescriptionString5to50Bytes;
-  trust: PositiveIntegerMax10;
+  name: EntityNameStringMax100Bytes
+  iconUrl: EntityIconURLStringMax500Bytes
+  description: DescriptionString5to50Bytes
+  trust: PositiveIntegerMax10
 }
 
 export interface IdentityCertificate extends WalletCertificate {
-  certifierInfo: IdentityCertifier;
+  certifierInfo: IdentityCertifier
   publiclyRevealedKeyring: Record<
-    CertificateFieldNameUnder50Bytes,
-    Base64String
-  >;
-  decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
+  CertificateFieldNameUnder50Bytes,
+  Base64String
+  >
+  decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>
 }
-
-export interface AcquireCertificateResult extends WalletCertificate {}
 
 /**
  * @param {PubKeyHex[]} certifiers - An array of public keys for specific certifiers (filters by these certifiers).
@@ -793,22 +793,22 @@ export interface AcquireCertificateResult extends WalletCertificate {}
  * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
  */
 export interface ListCertificatesArgs {
-  certifiers: PubKeyHex[];
-  types: Base64String[];
-  limit?: PositiveIntegerDefault10Max10000;
-  offset?: PositiveIntegerOrZero;
-  privileged?: BooleanDefaultFalse;
-  privilegedReason?: DescriptionString5to50Bytes;
+  certifiers: PubKeyHex[]
+  types: Base64String[]
+  limit?: PositiveIntegerDefault10Max10000
+  offset?: PositiveIntegerOrZero
+  privileged?: BooleanDefaultFalse
+  privilegedReason?: DescriptionString5to50Bytes
 }
 
 export interface CertificateResult extends WalletCertificate {
-  keyring?: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-  verifier?: string;
+  keyring?: Record<CertificateFieldNameUnder50Bytes, Base64String>
+  verifier?: string
 }
 
 export interface ListCertificatesResult {
-  totalCertificates: PositiveIntegerOrZero;
-  certificates: CertificateResult[];
+  totalCertificates: PositiveIntegerOrZero
+  certificates: CertificateResult[]
 }
 
 /**
@@ -819,17 +819,17 @@ export interface ListCertificatesResult {
  * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
  */
 export interface ProveCertificateArgs {
-  certificate: Partial<WalletCertificate>;
-  fieldsToReveal: CertificateFieldNameUnder50Bytes[];
-  verifier: PubKeyHex;
-  privileged?: BooleanDefaultFalse;
-  privilegedReason?: DescriptionString5to50Bytes;
+  certificate: Partial<WalletCertificate>
+  fieldsToReveal: CertificateFieldNameUnder50Bytes[]
+  verifier: PubKeyHex
+  privileged?: BooleanDefaultFalse
+  privilegedReason?: DescriptionString5to50Bytes
 }
 
 export interface ProveCertificateResult {
-  keyringForVerifier: Record<CertificateFieldNameUnder50Bytes, Base64String>;
-  certificate?: WalletCertificate;
-  verifier?: PubKeyHex;
+  keyringForVerifier: Record<CertificateFieldNameUnder50Bytes, Base64String>
+  certificate?: WalletCertificate
+  verifier?: PubKeyHex
 }
 
 /**
@@ -838,40 +838,40 @@ export interface ProveCertificateResult {
  * @param {Base64String} serialNumber - Serial number of the certificate to relinquish.
  */
 export interface RelinquishCertificateArgs {
-  type: Base64String;
-  serialNumber: Base64String;
-  certifier: PubKeyHex;
+  type: Base64String
+  serialNumber: Base64String
+  certifier: PubKeyHex
 }
 
 export interface RelinquishCertificateResult {
-  relinquished: true;
+  relinquished: true
 }
 
 export interface AuthenticatedResult {
-  authenticated: true;
+  authenticated: true
 }
 
 export interface GetHeightResult {
-  height: PositiveInteger;
+  height: PositiveInteger
 }
 
 /**
  * @param {PositiveInteger} height - Specifies the height at which the block header needs to be retrieved.
  */
 export interface GetHeaderArgs {
-  height: PositiveInteger;
+  height: PositiveInteger
 }
 
 export interface GetHeaderResult {
-  header: HexString;
+  header: HexString
 }
 
 export interface GetNetworkResult {
-  network: WalletNetwork;
+  network: WalletNetwork
 }
 
 export interface GetVersionResult {
-  version: VersionString7To30Bytes;
+  version: VersionString7To30Bytes
 }
 
 /**
@@ -881,17 +881,17 @@ export interface GetVersionResult {
  * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
  */
 export interface DiscoverByIdentityKeyArgs {
-  identityKey: PubKeyHex;
-  limit?: PositiveIntegerDefault10Max10000;
-  offset?: PositiveIntegerOrZero;
-  seekPermission?: BooleanDefaultTrue;
+  identityKey: PubKeyHex
+  limit?: PositiveIntegerDefault10Max10000
+  offset?: PositiveIntegerOrZero
+  seekPermission?: BooleanDefaultTrue
 }
 
 /**
  */
 export interface DiscoverCertificatesResult {
-  totalCertificates: PositiveIntegerOrZero;
-  certificates: IdentityCertificate[];
+  totalCertificates: PositiveIntegerOrZero
+  certificates: IdentityCertificate[]
 }
 
 /**
@@ -901,11 +901,13 @@ export interface DiscoverCertificatesResult {
  * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
  */
 export interface DiscoverByAttributesArgs {
-  attributes: Record<CertificateFieldNameUnder50Bytes, string>;
-  limit?: PositiveIntegerDefault10Max10000;
-  offset?: PositiveIntegerOrZero;
-  seekPermission?: BooleanDefaultTrue;
+  attributes: Record<CertificateFieldNameUnder50Bytes, string>
+  limit?: PositiveIntegerDefault10Max10000
+  offset?: PositiveIntegerOrZero
+  seekPermission?: BooleanDefaultTrue
 }
+
+// export interface AcquireCertificateResult extends WalletCertificate {}
 
 /**
  * Every method of the `Wallet` interface has a return value of the form `Promise<object>`.
@@ -914,14 +916,14 @@ export interface DiscoverByAttributesArgs {
  * Deserialization should rethrow `WalletErrorObject` conforming objects.
  */
 export interface WalletErrorObject extends Error {
-  isError: true;
+  isError: true
 }
 
 /**
  *
  */
 export interface GetPublicKeyResult {
-  publicKey: PubKeyHex;
+  publicKey: PubKeyHex
 }
 
 /**
@@ -948,7 +950,7 @@ export interface WalletInterface {
   getPublicKey: (
     args: GetPublicKeyArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<GetPublicKeyResult>;
+  ) => Promise<GetPublicKeyResult>
 
   /**
    * Reveals the key linkage between ourselves and a counterparty, to a particular verifier, across all interactions with the counterparty.
@@ -960,7 +962,7 @@ export interface WalletInterface {
   revealCounterpartyKeyLinkage: (
     args: RevealCounterpartyKeyLinkageArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<RevealCounterpartyKeyLinkageResult>;
+  ) => Promise<RevealCounterpartyKeyLinkageResult>
 
   /**
    * Reveals the key linkage between ourselves and a counterparty, to a particular verifier, with respect to a specific interaction.
@@ -972,7 +974,7 @@ export interface WalletInterface {
   revealSpecificKeyLinkage: (
     args: RevealSpecificKeyLinkageArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<RevealSpecificKeyLinkageResult>;
+  ) => Promise<RevealSpecificKeyLinkageResult>
 
   /**
    * Encrypts the provided plaintext data using derived keys, based on the protocol ID, key ID, counterparty, and other factors.
@@ -984,7 +986,7 @@ export interface WalletInterface {
   encrypt: (
     args: WalletEncryptArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<WalletEncryptResult>;
+  ) => Promise<WalletEncryptResult>
 
   /**
    * Decrypts the provided ciphertext using derived keys, based on the protocol ID, key ID, counterparty, and other factors.
@@ -996,7 +998,7 @@ export interface WalletInterface {
   decrypt: (
     args: WalletDecryptArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<WalletDecryptResult>;
+  ) => Promise<WalletDecryptResult>
 
   /**
    * Creates an HMAC (Hash-based Message Authentication Code) based on the provided data, protocol, key ID, counterparty, and other factors.
@@ -1008,7 +1010,7 @@ export interface WalletInterface {
   createHmac: (
     args: CreateHmacArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<CreateHmacResult>;
+  ) => Promise<CreateHmacResult>
 
   /**
    * Verifies an HMAC (Hash-based Message Authentication Code) based on the provided data, protocol, key ID, counterparty, and other factors.
@@ -1020,7 +1022,7 @@ export interface WalletInterface {
   verifyHmac: (
     args: VerifyHmacArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<VerifyHmacResult>;
+  ) => Promise<VerifyHmacResult>
 
   /**
    * Creates a digital signature for the provided data or hash using a specific protocol, key, and optionally considering privilege and counterparty.
@@ -1032,7 +1034,7 @@ export interface WalletInterface {
   createSignature: (
     args: CreateSignatureArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<CreateSignatureResult>;
+  ) => Promise<CreateSignatureResult>
 
   /**
    * Verifies a digital signature for the provided data or hash using a specific protocol, key, and optionally considering privilege and counterparty.
@@ -1044,7 +1046,7 @@ export interface WalletInterface {
   verifySignature: (
     args: VerifySignatureArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<VerifySignatureResult>;
+  ) => Promise<VerifySignatureResult>
 
   /**
    * Creates a new Bitcoin transaction based on the provided inputs, outputs, labels, locks, and other options.
@@ -1056,7 +1058,7 @@ export interface WalletInterface {
   createAction: (
     args: CreateActionArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<CreateActionResult>;
+  ) => Promise<CreateActionResult>
 
   /**
    * Signs a transaction previously created using `createAction`.
@@ -1068,7 +1070,7 @@ export interface WalletInterface {
   signAction: (
     args: SignActionArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<SignActionResult>;
+  ) => Promise<SignActionResult>
 
   /**
    * Aborts a transaction that is in progress and has not yet been finalized or sent to the network.
@@ -1080,7 +1082,7 @@ export interface WalletInterface {
   abortAction: (
     args: AbortActionArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<AbortActionResult>;
+  ) => Promise<AbortActionResult>
 
   /**
    * Lists all transactions matching the specified labels.
@@ -1092,7 +1094,7 @@ export interface WalletInterface {
   listActions: (
     args: ListActionsArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<ListActionsResult>;
+  ) => Promise<ListActionsResult>
 
   /**
    * Submits a transaction to be internalized and optionally labeled, outputs paid to the wallet balance, inserted into baskets, and/or tagged.
@@ -1104,7 +1106,7 @@ export interface WalletInterface {
   internalizeAction: (
     args: InternalizeActionArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<InternalizeActionResult>;
+  ) => Promise<InternalizeActionResult>
 
   /**
    * Lists the spendable outputs kept within a specific basket, optionally tagged with specific labels.
@@ -1116,7 +1118,7 @@ export interface WalletInterface {
   listOutputs: (
     args: ListOutputsArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<ListOutputsResult>;
+  ) => Promise<ListOutputsResult>
 
   /**
    * Relinquish an output out of a basket, removing it from tracking without spending it.
@@ -1130,7 +1132,7 @@ export interface WalletInterface {
   relinquishOutput: (
     args: RelinquishOutputArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<RelinquishOutputResult>;
+  ) => Promise<RelinquishOutputResult>
 
   /**
    * Acquires an identity certificate, whether by acquiring one from the certifier or by directly receiving it.
@@ -1142,7 +1144,7 @@ export interface WalletInterface {
   acquireCertificate: (
     args: AcquireCertificateArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<AcquireCertificateResult>;
+  ) => Promise<WalletCertificate>
 
   /**
    * Lists identity certificates belonging to the user, filtered by certifier(s) and type(s).
@@ -1154,7 +1156,7 @@ export interface WalletInterface {
   listCertificates: (
     args: ListCertificatesArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<ListCertificatesResult>;
+  ) => Promise<ListCertificatesResult>
 
   /**
    * Proves select fields of an identity certificate, as specified, when requested by a verifier.
@@ -1166,7 +1168,7 @@ export interface WalletInterface {
   proveCertificate: (
     args: ProveCertificateArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<ProveCertificateResult>;
+  ) => Promise<ProveCertificateResult>
 
   /**
    * Relinquishes an identity certificate, removing it from the wallet regardless of whether the revocation outpoint has become spent.
@@ -1178,7 +1180,7 @@ export interface WalletInterface {
   relinquishCertificate: (
     args: RelinquishCertificateArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<RelinquishCertificateResult>;
+  ) => Promise<RelinquishCertificateResult>
 
   /**
    * Discovers identity certificates, issued to a given identity key by a trusted entity.
@@ -1190,7 +1192,7 @@ export interface WalletInterface {
   discoverByIdentityKey: (
     args: DiscoverByIdentityKeyArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<DiscoverCertificatesResult>;
+  ) => Promise<DiscoverCertificatesResult>
 
   /**
    * Discovers identity certificates belonging to other users, where the documents contain specific attributes, issued by a trusted entity.
@@ -1202,7 +1204,7 @@ export interface WalletInterface {
   discoverByAttributes: (
     args: DiscoverByAttributesArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<DiscoverCertificatesResult>;
+  ) => Promise<DiscoverCertificatesResult>
 
   /**
    * Checks the authentication status of the user.
@@ -1212,9 +1214,9 @@ export interface WalletInterface {
    * @returns {Promise<AuthenticatedResult>} The promise resolves to an object indicating whether the user is authenticated or an error response.
    */
   isAuthenticated: (
-    args: {},
+    args: object,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<AuthenticatedResult>;
+  ) => Promise<AuthenticatedResult>
 
   /**
    * Continuously waits until the user is authenticated, returning the result once confirmed.
@@ -1224,9 +1226,9 @@ export interface WalletInterface {
    * @returns {Promise<AuthenticatedResult>} The final result indicating that the user is authenticated or an error object.
    */
   waitForAuthentication: (
-    args: {},
+    args: object,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<AuthenticatedResult>;
+  ) => Promise<AuthenticatedResult>
 
   /**
    * Retrieves the current height of the blockchain.
@@ -1236,9 +1238,9 @@ export interface WalletInterface {
    * @returns {Promise<Object>} Resolves to an object indicating the current height or an error on failure.
    */
   getHeight: (
-    args: {},
+    args: object,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<GetHeightResult>;
+  ) => Promise<GetHeightResult>
 
   /**
    * Retrieves the block header of a block at a specified height.
@@ -1250,7 +1252,7 @@ export interface WalletInterface {
   getHeaderForHeight: (
     args: GetHeaderArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<GetHeaderResult>;
+  ) => Promise<GetHeaderResult>
 
   /**
    * Retrieves the Bitcoin network the client is using (mainnet or testnet).
@@ -1260,9 +1262,9 @@ export interface WalletInterface {
    * @returns {Promise<GetNetworkResult>} The promise resolves to an object indicating whether the client is using the mainnet or testnet.
    */
   getNetwork: (
-    args: {},
+    args: object,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<GetNetworkResult>;
+  ) => Promise<GetNetworkResult>
 
   /**
    * Retrieves the current version string of the wallet.
@@ -1272,7 +1274,7 @@ export interface WalletInterface {
    * @returns {Promise<GetVersionResult>} Resolves to an object containing the version string of the wallet, or an error.
    */
   getVersion: (
-    args: {},
+    args: object,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<GetVersionResult>;
+  ) => Promise<GetVersionResult>
 }

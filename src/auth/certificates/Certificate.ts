@@ -7,8 +7,8 @@ import {
   CertificateFieldNameUnder50Bytes,
   Signature,
   WalletProtocol,
-  ProtoWallet,
-} from "../../../mod";
+  ProtoWallet
+} from '../../../mod'
 
 /**
  * Represents an Identity Certificate as per the Wallet interface specifications.
@@ -19,37 +19,37 @@ export default class Certificate {
   /**
    * Type identifier for the certificate, base64 encoded string, 32 bytes.
    */
-  type: Base64String;
+  type: Base64String
 
   /**
    * Unique serial number of the certificate, base64 encoded string, 32 bytes.
    */
-  serialNumber: Base64String;
+  serialNumber: Base64String
 
   /**
    * The public key belonging to the certificate's subject, compressed public key hex string.
    */
-  subject: PubKeyHex;
+  subject: PubKeyHex
 
   /**
    * Public key of the certifier who issued the certificate, compressed public key hex string.
    */
-  certifier: PubKeyHex;
+  certifier: PubKeyHex
 
   /**
    * The outpoint used to confirm that the certificate has not been revoked (TXID.OutputIndex), as a string.
    */
-  revocationOutpoint: OutpointString;
+  revocationOutpoint: OutpointString
 
   /**
    * All the fields present in the certificate, with field names as keys and encrypted field values as Base64 strings.
    */
-  fields: Record<CertificateFieldNameUnder50Bytes, Base64String>;
+  fields: Record<CertificateFieldNameUnder50Bytes, Base64String>
 
   /**
    * Certificate signature by the certifier's private key, DER encoded hex string.
    */
-  signature?: HexString;
+  signature?: HexString
 
   /**
    * Constructs a new Certificate.
@@ -62,7 +62,7 @@ export default class Certificate {
    * @param {Record<CertificateFieldNameUnder50Bytes, string>} fields - All the fields present in the certificate.
    * @param {HexString} signature - Certificate signature by the certifier's private key, DER encoded hex string.
    */
-  constructor(
+  constructor (
     type: Base64String,
     serialNumber: Base64String,
     subject: PubKeyHex,
@@ -71,13 +71,13 @@ export default class Certificate {
     fields: Record<CertificateFieldNameUnder50Bytes, string>,
     signature?: HexString
   ) {
-    this.type = type;
-    this.serialNumber = serialNumber;
-    this.subject = subject;
-    this.certifier = certifier;
-    this.revocationOutpoint = revocationOutpoint;
-    this.fields = fields;
-    this.signature = signature;
+    this.type = type
+    this.serialNumber = serialNumber
+    this.subject = subject
+    this.certifier = certifier
+    this.revocationOutpoint = revocationOutpoint
+    this.fields = fields
+    this.signature = signature
   }
 
   /**
@@ -86,56 +86,56 @@ export default class Certificate {
    * @param {boolean} [includeSignature=true] - Whether to include the signature in the serialization.
    * @returns {number[]} - The serialized certificate in binary format.
    */
-  toBinary(includeSignature: boolean = true): number[] {
-    const writer = new Utils.Writer();
+  toBinary (includeSignature: boolean = true): number[] {
+    const writer = new Utils.Writer()
 
     // Write type (Base64String, 32 bytes)
-    const typeBytes = Utils.toArray(this.type, "base64");
-    writer.write(typeBytes);
+    const typeBytes = Utils.toArray(this.type, 'base64')
+    writer.write(typeBytes)
 
     // Write serialNumber (Base64String, 32 bytes)
-    const serialNumberBytes = Utils.toArray(this.serialNumber, "base64");
-    writer.write(serialNumberBytes);
+    const serialNumberBytes = Utils.toArray(this.serialNumber, 'base64')
+    writer.write(serialNumberBytes)
 
     // Write subject (33 bytes compressed PubKeyHex)
-    const subjectBytes = Utils.toArray(this.subject, "hex");
-    writer.write(subjectBytes);
+    const subjectBytes = Utils.toArray(this.subject, 'hex')
+    writer.write(subjectBytes)
 
     // Write certifier (33 bytes compressed PubKeyHex)
-    const certifierBytes = Utils.toArray(this.certifier, "hex");
-    writer.write(certifierBytes);
+    const certifierBytes = Utils.toArray(this.certifier, 'hex')
+    writer.write(certifierBytes)
 
     // Write revocationOutpoint (TXID + OutputIndex)
-    const [txid, outputIndex] = this.revocationOutpoint.split(".");
-    const txidBytes = Utils.toArray(txid, "hex");
-    writer.write(txidBytes);
-    writer.writeVarIntNum(Number(outputIndex));
+    const [txid, outputIndex] = this.revocationOutpoint.split('.')
+    const txidBytes = Utils.toArray(txid, 'hex')
+    writer.write(txidBytes)
+    writer.writeVarIntNum(Number(outputIndex))
 
     // Write fields
     // Sort field names lexicographically
-    const fieldNames = Object.keys(this.fields).sort();
-    writer.writeVarIntNum(fieldNames.length);
+    const fieldNames = Object.keys(this.fields).sort()
+    writer.writeVarIntNum(fieldNames.length)
     for (const fieldName of fieldNames) {
-      const fieldValue = this.fields[fieldName];
+      const fieldValue = this.fields[fieldName]
 
       // Field name
-      const fieldNameBytes = Utils.toArray(fieldName, "utf8");
-      writer.writeVarIntNum(fieldNameBytes.length);
-      writer.write(fieldNameBytes);
+      const fieldNameBytes = Utils.toArray(fieldName, 'utf8')
+      writer.writeVarIntNum(fieldNameBytes.length)
+      writer.write(fieldNameBytes)
 
       // Field value
-      const fieldValueBytes = Utils.toArray(fieldValue, "utf8");
-      writer.writeVarIntNum(fieldValueBytes.length);
-      writer.write(fieldValueBytes);
+      const fieldValueBytes = Utils.toArray(fieldValue, 'utf8')
+      writer.writeVarIntNum(fieldValueBytes.length)
+      writer.write(fieldValueBytes)
     }
 
     // Write signature if included
-    if (includeSignature && this.signature && this.signature.length > 0) {
-      const signatureBytes = Utils.toArray(this.signature, "hex");
-      writer.write(signatureBytes);
+    if (includeSignature && (this.signature ?? '').length > 0) { // ✅ Explicitly handle nullish signature
+      const signatureBytes = Utils.toArray(this.signature as string, 'hex') // ✅ Type assertion ensures it's a string
+      writer.write(signatureBytes)
     }
 
-    return writer.toArray();
+    return writer.toArray()
   }
 
   /**
@@ -144,54 +144,54 @@ export default class Certificate {
    * @param {number[]} bin - The binary data representing the certificate.
    * @returns {Certificate} - The deserialized Certificate object.
    */
-  static fromBinary(bin: number[]): Certificate {
-    const reader = new Utils.Reader(bin);
+  static fromBinary (bin: number[]): Certificate {
+    const reader = new Utils.Reader(bin)
 
     // Read type
-    const typeBytes = reader.read(32);
-    const type = Utils.toBase64(typeBytes);
+    const typeBytes = reader.read(32)
+    const type = Utils.toBase64(typeBytes)
 
     // Read serialNumber
-    const serialNumberBytes = reader.read(32);
-    const serialNumber = Utils.toBase64(serialNumberBytes);
+    const serialNumberBytes = reader.read(32)
+    const serialNumber = Utils.toBase64(serialNumberBytes)
 
     // Read subject (33 bytes)
-    const subjectBytes = reader.read(33);
-    const subject = Utils.toHex(subjectBytes);
+    const subjectBytes = reader.read(33)
+    const subject = Utils.toHex(subjectBytes)
 
     // Read certifier (33 bytes)
-    const certifierBytes = reader.read(33);
-    const certifier = Utils.toHex(certifierBytes);
+    const certifierBytes = reader.read(33)
+    const certifier = Utils.toHex(certifierBytes)
 
     // Read revocationOutpoint
-    const txidBytes = reader.read(32);
-    const txid = Utils.toHex(txidBytes);
-    const outputIndex = reader.readVarIntNum();
-    const revocationOutpoint = `${txid}.${outputIndex}`;
+    const txidBytes = reader.read(32)
+    const txid = Utils.toHex(txidBytes)
+    const outputIndex = reader.readVarIntNum()
+    const revocationOutpoint = `${txid}.${outputIndex}`
 
     // Read fields
-    const numFields = reader.readVarIntNum();
-    const fields: Record<CertificateFieldNameUnder50Bytes, string> = {};
+    const numFields = reader.readVarIntNum()
+    const fields: Record<CertificateFieldNameUnder50Bytes, string> = {}
     for (let i = 0; i < numFields; i++) {
       // Field name
-      const fieldNameLength = reader.readVarIntNum();
-      const fieldNameBytes = reader.read(fieldNameLength);
-      const fieldName = Utils.toUTF8(fieldNameBytes);
+      const fieldNameLength = reader.readVarIntNum()
+      const fieldNameBytes = reader.read(fieldNameLength)
+      const fieldName = Utils.toUTF8(fieldNameBytes)
 
       // Field value
-      const fieldValueLength = reader.readVarIntNum();
-      const fieldValueBytes = reader.read(fieldValueLength);
-      const fieldValue = Utils.toUTF8(fieldValueBytes);
+      const fieldValueLength = reader.readVarIntNum()
+      const fieldValueBytes = reader.read(fieldValueLength)
+      const fieldValue = Utils.toUTF8(fieldValueBytes)
 
-      fields[fieldName] = fieldValue;
+      fields[fieldName] = fieldValue
     }
 
     // Read signature if present
-    let signature: string | undefined;
+    let signature: string | undefined
     if (!reader.eof()) {
-      const signatureBytes = reader.read();
-      const sig = Signature.fromDER(signatureBytes);
-      signature = sig.toString("hex") as string;
+      const signatureBytes = reader.read()
+      const sig = Signature.fromDER(signatureBytes)
+      signature = sig.toString('hex') as string
     }
 
     return new Certificate(
@@ -202,7 +202,7 @@ export default class Certificate {
       revocationOutpoint,
       fields,
       signature
-    );
+    )
   }
 
   /**
@@ -210,46 +210,49 @@ export default class Certificate {
    *
    * @returns {Promise<boolean>} - A promise that resolves to true if the signature is valid.
    */
-  async verify(): Promise<boolean> {
+  async verify (): Promise<boolean> {
     // A verifier can be any wallet capable of verifying signatures
-    const verifier = new ProtoWallet("anyone");
-    const verificationData = this.toBinary(false); // Exclude the signature from the verification data
+    const verifier = new ProtoWallet('anyone')
+    const verificationData = this.toBinary(false) // Exclude the signature from the verification data
+
+    const signatureHex = this.signature ?? '' // Provide a fallback value (empty string)
 
     const { valid } = await verifier.verifySignature({
-      signature: Utils.toArray(this.signature, "hex"),
+      signature: Utils.toArray(signatureHex, 'hex'), // Now it is always a string
       data: verificationData,
-      protocolID: [2, "certificate signature"],
+      protocolID: [2, 'certificate signature'],
       keyID: `${this.type} ${this.serialNumber}`,
-      counterparty: this.certifier, // The certifier is the one who signed the certificate
-    });
-    return valid;
+      counterparty: this.certifier // The certifier is the one who signed the certificate
+    })
+
+    return valid
   }
 
   /**
-   * Signs the certificate using the provided certifier wallet.
-   *
-   * @param {Wallet} certifierWallet - The wallet representing the certifier.
-   * @returns {Promise<void>}
-   */
-  async sign(certifierWallet: ProtoWallet): Promise<void> {
-    if (this.signature) {
+ * Signs the certificate using the provided certifier wallet.
+ *
+ * @param {Wallet} certifierWallet - The wallet representing the certifier.
+ * @returns {Promise<void>}
+ */
+  async sign (certifierWallet: ProtoWallet): Promise<void> {
+    if (this.signature != null && this.signature.length > 0) { // ✅ Explicitly checking for null/undefined
       throw new Error(
-        `Certificate has already been signed! Signature present: ${this.signature}`
-      );
+      `Certificate has already been signed! Signature present: ${this.signature}`
+      )
     }
 
     // Ensure the certifier declared is the one actually signing
     this.certifier = (
       await certifierWallet.getPublicKey({ identityKey: true })
-    ).publicKey;
+    ).publicKey
 
-    const preimage = this.toBinary(false); // Exclude the signature when signing
+    const preimage = this.toBinary(false) // Exclude the signature when signing
     const { signature } = await certifierWallet.createSignature({
       data: preimage,
-      protocolID: [2, "certificate signature"],
-      keyID: `${this.type} ${this.serialNumber}`,
-    });
-    this.signature = Utils.toHex(signature);
+      protocolID: [2, 'certificate signature'],
+      keyID: `${this.type} ${this.serialNumber}`
+    })
+    this.signature = Utils.toHex(signature)
   }
 
   /**
@@ -261,13 +264,13 @@ export default class Certificate {
    *   - `protocolID` (WalletProtocol): The protocol ID for certificate field encryption.
    *   - `keyID` (string): A unique key identifier derived from the serial number and field name.
    */
-  static getCertificateFieldEncryptionDetails(
+  static getCertificateFieldEncryptionDetails (
     fieldName: string,
     serialNumber?: string
-  ): { protocolID: WalletProtocol; keyID: string } {
+  ): { protocolID: WalletProtocol, keyID: string } {
     return {
-      protocolID: [2, "certificate field encryption"],
-      keyID: `${serialNumber} ${fieldName}`,
-    };
+      protocolID: [2, 'certificate field encryption'],
+      keyID: `${serialNumber ?? 'unknown'} ${fieldName}`
+    }
   }
 }

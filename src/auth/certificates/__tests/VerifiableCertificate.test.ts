@@ -1,33 +1,32 @@
-import { VerifiableCertificate } from "../../../auth/certificates/VerifiableCertificate";
-import { PrivateKey, SymmetricKey, Utils } from "../../../../mod";
-import { CompletedProtoWallet } from "../../../auth/certificates/__tests/CompletedProtoWallet";
-import { Certificate } from "../../../auth/certificates/index";
-import { MasterCertificate } from "../../../auth/certificates/MasterCertificate";
-import { ProtoWallet } from "../../../wallet/index";
+import { VerifiableCertificate } from '../../../auth/certificates/VerifiableCertificate'
+import { PrivateKey, Utils } from '../../../../mod'
+import { CompletedProtoWallet } from '../../../auth/certificates/__tests/CompletedProtoWallet'
+import { MasterCertificate } from '../../../auth/certificates/MasterCertificate'
+import { ProtoWallet } from '../../../wallet/index'
 
-describe("VerifiableCertificate", () => {
-  const subjectPrivateKey = PrivateKey.fromRandom();
-  const subjectIdentityKey = subjectPrivateKey.toPublicKey().toString();
-  const certifierPrivateKey = PrivateKey.fromRandom();
-  const certifierIdentityKey = certifierPrivateKey.toPublicKey().toString();
-  const verifierPrivateKey = PrivateKey.fromRandom();
-  const verifierIdentityKey = verifierPrivateKey.toPublicKey().toString();
+describe('VerifiableCertificate', () => {
+  const subjectPrivateKey = PrivateKey.fromRandom()
+  const subjectIdentityKey = subjectPrivateKey.toPublicKey().toString()
+  const certifierPrivateKey = PrivateKey.fromRandom()
+  const certifierIdentityKey = certifierPrivateKey.toPublicKey().toString()
+  const verifierPrivateKey = PrivateKey.fromRandom()
+  const verifierIdentityKey = verifierPrivateKey.toPublicKey().toString()
 
-  const subjectWallet = new CompletedProtoWallet(subjectPrivateKey);
-  const verifierWallet = new CompletedProtoWallet(verifierPrivateKey);
+  const subjectWallet = new CompletedProtoWallet(subjectPrivateKey)
+  const verifierWallet = new CompletedProtoWallet(verifierPrivateKey)
 
-  const sampleType = Utils.toBase64(new Array(32).fill(1));
-  const sampleSerialNumber = Utils.toBase64(new Array(32).fill(2));
+  const sampleType = Utils.toBase64(new Array(32).fill(1))
+  const sampleSerialNumber = Utils.toBase64(new Array(32).fill(2))
   const sampleRevocationOutpoint =
-    "deadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000.1";
+    'deadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000.1'
 
   const plaintextFields = {
-    name: "Alice",
-    email: "alice@example.com",
-    organization: "Example Corp",
-  };
+    name: 'Alice',
+    email: 'alice@example.com',
+    organization: 'Example Corp'
+  }
 
-  let verifiableCert: VerifiableCertificate;
+  let verifiableCert: VerifiableCertificate
 
   beforeEach(async () => {
     // For each test, we'll build a fresh VerifiableCertificate with valid encryption
@@ -36,7 +35,7 @@ describe("VerifiableCertificate", () => {
         subjectWallet,
         certifierIdentityKey,
         plaintextFields
-      );
+      )
     const keyringForVerifier = await MasterCertificate.createKeyringForVerifier(
       subjectWallet,
       certifierIdentityKey,
@@ -45,7 +44,7 @@ describe("VerifiableCertificate", () => {
       Object.keys(certificateFields),
       masterKeyring,
       sampleSerialNumber
-    );
+    )
     verifiableCert = new VerifiableCertificate(
       sampleType,
       sampleSerialNumber,
@@ -54,42 +53,42 @@ describe("VerifiableCertificate", () => {
       sampleRevocationOutpoint,
       certificateFields,
       keyringForVerifier
-    );
-  });
+    )
+  })
 
-  describe("constructor", () => {
-    it("should create a VerifiableCertificate with all required properties", () => {
-      expect(verifiableCert).toBeInstanceOf(VerifiableCertificate);
-      expect(verifiableCert.type).toEqual(sampleType);
-      expect(verifiableCert.serialNumber).toEqual(sampleSerialNumber);
-      expect(verifiableCert.subject).toEqual(subjectIdentityKey);
-      expect(verifiableCert.certifier).toEqual(certifierIdentityKey);
+  describe('constructor', () => {
+    it('should create a VerifiableCertificate with all required properties', () => {
+      expect(verifiableCert).toBeInstanceOf(VerifiableCertificate)
+      expect(verifiableCert.type).toEqual(sampleType)
+      expect(verifiableCert.serialNumber).toEqual(sampleSerialNumber)
+      expect(verifiableCert.subject).toEqual(subjectIdentityKey)
+      expect(verifiableCert.certifier).toEqual(certifierIdentityKey)
       expect(verifiableCert.revocationOutpoint).toEqual(
         sampleRevocationOutpoint
-      );
-      expect(verifiableCert.fields).toBeDefined();
-      expect(verifiableCert.keyring).toBeDefined();
-    });
-  });
+      )
+      expect(verifiableCert.fields).toBeDefined()
+      expect(verifiableCert.keyring).toBeDefined()
+    })
+  })
 
-  describe("decryptFields", () => {
-    it("should decrypt fields successfully when provided the correct verifier wallet and keyring", async () => {
-      const decrypted = await verifiableCert.decryptFields(verifierWallet);
-      expect(decrypted).toEqual(plaintextFields);
-    });
+  describe('decryptFields', () => {
+    it('should decrypt fields successfully when provided the correct verifier wallet and keyring', async () => {
+      const decrypted = await verifiableCert.decryptFields(verifierWallet)
+      expect(decrypted).toEqual(plaintextFields)
+    })
 
-    it("should fail if the verifier wallet does not have the correct private key (wrong key)", async () => {
-      const wrongPrivateKey = PrivateKey.fromRandom();
-      const wrongWallet = new CompletedProtoWallet(wrongPrivateKey);
+    it('should fail if the verifier wallet does not have the correct private key (wrong key)', async () => {
+      const wrongPrivateKey = PrivateKey.fromRandom()
+      const wrongWallet = new CompletedProtoWallet(wrongPrivateKey)
 
       await expect(verifiableCert.decryptFields(wrongWallet)).rejects.toThrow(
         /Failed to decrypt selectively revealed certificate fields using keyring/
-      );
-    });
+      )
+    })
 
-    it("should fail if the keyring is empty or missing keys", async () => {
+    it('should fail if the keyring is empty or missing keys', async () => {
       // Create a new VerifiableCertificate but with an empty keyring
-      const fields = verifiableCert.fields;
+      const fields = verifiableCert.fields
       const emptyKeyringCert = new VerifiableCertificate(
         verifiableCert.type,
         verifiableCert.serialNumber,
@@ -99,55 +98,55 @@ describe("VerifiableCertificate", () => {
         fields,
         {}, // empty
         verifiableCert.signature
-      );
+      )
 
       await expect(
         emptyKeyringCert.decryptFields(verifierWallet)
       ).rejects.toThrow(
-        "A keyring is required to decrypt certificate fields for the verifier."
-      );
-    });
+        'A keyring is required to decrypt certificate fields for the verifier.'
+      )
+    })
 
-    it("should fail if the encrypted field or its key is tampered", async () => {
+    it('should fail if the encrypted field or its key is tampered', async () => {
       // Tamper the keyring so it doesn't match the field encryption
-      verifiableCert.keyring.name = Utils.toBase64([9, 9, 9, 9]);
+      verifiableCert.keyring.name = Utils.toBase64([9, 9, 9, 9])
       await expect(
         verifiableCert.decryptFields(verifierWallet)
       ).rejects.toThrow(
         /Failed to decrypt selectively revealed certificate fields using keyring/
-      );
-    });
+      )
+    })
 
-    it("should be able to decrypt fields using the anyone wallet", async () => {
+    it('should be able to decrypt fields using the anyone wallet', async () => {
       const { certificateFields, masterKeyring } =
         await MasterCertificate.createCertificateFields(
           subjectWallet,
           certifierIdentityKey,
           plaintextFields
-        );
+        )
       const keyringForVerifier =
         await MasterCertificate.createKeyringForVerifier(
           subjectWallet,
           certifierIdentityKey,
-          "anyone",
+          'anyone',
           certificateFields,
           Object.keys(certificateFields),
           masterKeyring,
           sampleSerialNumber
-        );
+        )
       verifiableCert = new VerifiableCertificate(
         sampleType,
         sampleSerialNumber,
         subjectIdentityKey,
-        "anyone",
+        'anyone',
         sampleRevocationOutpoint,
         certificateFields,
         keyringForVerifier
-      );
+      )
       const decrypted = await verifiableCert.decryptFields(
-        new ProtoWallet("anyone")
-      );
-      expect(decrypted).toEqual(plaintextFields);
-    });
-  });
-});
+        new ProtoWallet('anyone')
+      )
+      expect(decrypted).toEqual(plaintextFields)
+    })
+  })
+})

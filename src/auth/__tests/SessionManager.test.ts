@@ -1,134 +1,135 @@
-import { SessionManager } from "../SessionManager";
-import { PeerSession } from "../types";
+import { SessionManager } from '../SessionManager'
+import { PeerSession } from '../types'
 
-describe("SessionManager", () => {
-  let sessionManager: SessionManager;
-  let validSession: PeerSession;
+describe('SessionManager', () => {
+  let sessionManager: SessionManager
+  let validSession: PeerSession
 
   beforeEach(() => {
-    sessionManager = new SessionManager();
+    sessionManager = new SessionManager()
     validSession = {
       isAuthenticated: false,
-      sessionNonce: "testSessionNonce",
-      peerIdentityKey: "testPeerIdentityKey",
-    } as PeerSession;
-  });
+      sessionNonce: 'testSessionNonce',
+      peerIdentityKey: 'testPeerIdentityKey'
+    } as PeerSession
+  })
 
-  describe("addSession", () => {
-    it("should add a session when sessionNonce and peerIdentityKey are present", () => {
-      sessionManager.addSession(validSession);
+  describe('addSession', () => {
+    it('should add a session when sessionNonce and peerIdentityKey are present', () => {
+      sessionManager.addSession(validSession)
 
-      if (validSession.sessionNonce) {
+      if (typeof validSession.sessionNonce === 'string') {
         expect(sessionManager.getSession(validSession.sessionNonce)).toBe(
           validSession
-        );
+        )
       }
-      if (validSession.peerIdentityKey) {
+
+      if (typeof validSession.peerIdentityKey === 'string') {
         expect(sessionManager.getSession(validSession.peerIdentityKey)).toBe(
           validSession
-        );
+        )
       }
-    });
+    })
 
-    it("should throw an error if sessionNonce and peerIdentityKey are missing", () => {
+    it('should throw an error if sessionNonce and peerIdentityKey are missing', () => {
       const invalidSession = {
         ...validSession,
         sessionNonce: undefined,
-        peerIdentityKey: undefined,
-      };
+        peerIdentityKey: undefined
+      }
 
       expect(() => sessionManager.addSession(invalidSession)).toThrow(
-        "Invalid session: at least one of sessionNonce or peerIdentityKey is required."
-      );
-    });
+        'Invalid session: at least one of sessionNonce or peerIdentityKey is required.'
+      )
+    })
 
-    it("should not throw an error if just peerIdentityKey is missing", () => {
-      const invalidSession = { ...validSession, peerIdentityKey: undefined };
+    it('should not throw an error if just peerIdentityKey is missing', () => {
+      const invalidSession = { ...validSession, peerIdentityKey: undefined }
 
       expect(() => sessionManager.addSession(invalidSession)).not.toThrow(
-        "Invalid session: peerIdentityKey is required."
-      );
-    });
-  });
+        'Invalid session: peerIdentityKey is required.'
+      )
+    })
+  })
 
-  describe("getSession", () => {
-    it("should retrieve a session by sessionNonce", () => {
-      sessionManager.addSession(validSession);
+  describe('getSession', () => {
+    it('should retrieve a session by sessionNonce', () => {
+      sessionManager.addSession(validSession)
 
-      if (validSession.sessionNonce) {
+      if (typeof validSession.sessionNonce === 'string') {
         const retrievedSession = sessionManager.getSession(
           validSession.sessionNonce
-        );
-        expect(retrievedSession).toBe(validSession);
+        )
+        expect(retrievedSession).toBe(validSession)
       }
-    });
+    })
 
-    it("should retrieve a session by peerIdentityKey", () => {
-      sessionManager.addSession(validSession);
+    it('should retrieve a session by peerIdentityKey', () => {
+      sessionManager.addSession(validSession)
 
-      if (validSession.peerIdentityKey) {
+      if (typeof validSession.peerIdentityKey === 'string') {
         const retrievedSession = sessionManager.getSession(
           validSession.peerIdentityKey
-        );
-        expect(retrievedSession).toBe(validSession);
+        )
+        expect(retrievedSession).toBe(validSession)
       }
-    });
+    })
 
-    it("should return undefined for a non-existent identifier", () => {
+    it('should return undefined for a non-existent identifier', () => {
       const retrievedSession = sessionManager.getSession(
-        "nonExistentIdentifier"
-      );
-      expect(retrievedSession).toBeUndefined();
-    });
-  });
+        'nonExistentIdentifier'
+      )
+      expect(retrievedSession).toBeUndefined()
+    })
+  })
 
-  describe("removeSession", () => {
-    it("should remove a session by both sessionNonce and peerIdentityKey", () => {
-      sessionManager.addSession(validSession);
+  describe('removeSession', () => {
+    it('should remove a session by both sessionNonce and peerIdentityKey', () => {
+      sessionManager.addSession(validSession)
 
-      sessionManager.removeSession(validSession);
+      sessionManager.removeSession(validSession)
 
-      if (validSession.sessionNonce) {
+      if (typeof validSession.sessionNonce === 'string') {
         expect(
           sessionManager.getSession(validSession.sessionNonce)
-        ).toBeUndefined();
+        ).toBeUndefined()
       }
-      if (validSession.peerIdentityKey) {
+      if (typeof validSession.peerIdentityKey === 'string') {
         expect(
           sessionManager.getSession(validSession.peerIdentityKey)
-        ).toBeUndefined();
+        ).toBeUndefined()
       }
-    });
+    })
 
-    it("should not throw an error when removing a session with undefined identifiers", () => {
+    it('should not throw an error when removing a session with undefined identifiers', () => {
       const sessionWithUndefinedIdentifiers = {
         ...validSession,
         sessionNonce: undefined,
-        peerIdentityKey: undefined,
-      };
+        peerIdentityKey: undefined
+      }
 
       expect(() =>
         sessionManager.removeSession(sessionWithUndefinedIdentifiers)
-      ).not.toThrow();
-    });
-  });
+      ).not.toThrow()
+    })
+  })
 
-  describe("hasSession", () => {
-    it("should return true if a session exists for the identifier", () => {
-      sessionManager.addSession(validSession);
+  describe('hasSession', () => {
+    it('should return true if a session exists for the identifier', () => {
+      sessionManager.addSession(validSession)
 
-      if (validSession.sessionNonce) {
-        expect(sessionManager.hasSession(validSession.sessionNonce)).toBe(true);
+      if (typeof validSession.sessionNonce === 'string') {
+        expect(sessionManager.hasSession(validSession.sessionNonce)).toBe(true)
       }
-      if (validSession.peerIdentityKey) {
+      if (typeof validSession.peerIdentityKey === 'string') {
         expect(sessionManager.hasSession(validSession.peerIdentityKey)).toBe(
           true
-        );
+        )
       }
-    });
+    })
 
-    it("should return false if no session exists for the identifier", () => {
-      expect(sessionManager.hasSession("nonExistentIdentifier")).toBe(false);
-    });
-  });
-});
+    it('should return false if no session exists for the identifier', () => {
+      expect(sessionManager.hasSession('nonExistentIdentifier')).toBe(false)
+    })
+  })
+})

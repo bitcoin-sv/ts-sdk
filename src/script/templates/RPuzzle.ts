@@ -1,14 +1,14 @@
-import OP from "../OP";
-import ScriptTemplate from "../ScriptTemplate";
-import LockingScript from "../LockingScript";
-import UnlockingScript from "../UnlockingScript";
-import Transaction from "../../transaction/Transaction";
-import PrivateKey from "../../primitives/PrivateKey";
-import TransactionSignature from "../../primitives/TransactionSignature";
-import { sha256 } from "../../primitives/Hash";
-import ScriptChunk from "../ScriptChunk";
-import BigNumber from "../../primitives/BigNumber";
-import Script from "../Script";
+import OP from '../OP'
+import ScriptTemplate from '../ScriptTemplate'
+import LockingScript from '../LockingScript'
+import UnlockingScript from '../UnlockingScript'
+import Transaction from '../../transaction/Transaction'
+import PrivateKey from '../../primitives/PrivateKey'
+import TransactionSignature from '../../primitives/TransactionSignature'
+import { sha256 } from '../../primitives/Hash'
+import ScriptChunk from '../ScriptChunk'
+import BigNumber from '../../primitives/BigNumber'
+import Script from '../Script'
 
 /**
  * RPuzzle class implementing ScriptTemplate.
@@ -16,7 +16,7 @@ import Script from "../Script";
  * This class provides methods to create R Puzzle and R Puzzle Hash locking and unlocking scripts, including the unlocking of UTXOs with the correct K value.
  */
 export default class RPuzzle implements ScriptTemplate {
-  type: "raw" | "SHA1" | "SHA256" | "HASH256" | "RIPEMD160" | "HASH160" = "raw";
+  type: 'raw' | 'SHA1' | 'SHA256' | 'HASH256' | 'RIPEMD160' | 'HASH160' = 'raw'
 
   /**
    * @constructor
@@ -24,16 +24,16 @@ export default class RPuzzle implements ScriptTemplate {
    *
    * @param {'raw'|'SHA1'|'SHA256'|'HASH256'|'RIPEMD160'|'HASH160'} type Denotes the type of puzzle to create
    */
-  constructor(
+  constructor (
     type:
-      | "raw"
-      | "SHA1"
-      | "SHA256"
-      | "HASH256"
-      | "RIPEMD160"
-      | "HASH160" = "raw"
+    | 'raw'
+    | 'SHA1'
+    | 'SHA256'
+    | 'HASH256'
+    | 'RIPEMD160'
+    | 'HASH160' = 'raw'
   ) {
-    this.type = type;
+    this.type = type
   }
 
   /**
@@ -42,7 +42,7 @@ export default class RPuzzle implements ScriptTemplate {
    * @param {number[]} value - An array representing the R value or its hash.
    * @returns {LockingScript} - An R puzzle locking script.
    */
-  lock(value: number[]): LockingScript {
+  lock (value: number[]): LockingScript {
     const chunks: ScriptChunk[] = [
       { op: OP.OP_OVER },
       { op: OP.OP_3 },
@@ -52,17 +52,17 @@ export default class RPuzzle implements ScriptTemplate {
       { op: OP.OP_SPLIT },
       { op: OP.OP_SWAP },
       { op: OP.OP_SPLIT },
-      { op: OP.OP_DROP },
-    ];
-    if (this.type !== "raw") {
+      { op: OP.OP_DROP }
+    ]
+    if (this.type !== 'raw') {
       chunks.push({
-        op: OP["OP_" + this.type],
-      });
+        op: OP['OP_' + this.type]
+      })
     }
-    chunks.push({ op: value.length, data: value });
-    chunks.push({ op: OP.OP_EQUALVERIFY });
-    chunks.push({ op: OP.OP_CHECKSIG });
-    return new LockingScript(chunks);
+    chunks.push({ op: value.length, data: value })
+    chunks.push({ op: OP.OP_EQUALVERIFY })
+    chunks.push({ op: OP.OP_CHECKSIG })
+    return new LockingScript(chunks)
   }
 
   /**
@@ -79,42 +79,42 @@ export default class RPuzzle implements ScriptTemplate {
    * @param {boolean} anyoneCanPay - Flag indicating if the signature allows for other inputs to be added later.
    * @returns {Object} - An object containing the `sign` and `estimateLength` functions.
    */
-  unlock(
+  unlock (
     k: BigNumber,
     privateKey: PrivateKey,
-    signOutputs: "all" | "none" | "single" = "all",
+    signOutputs: 'all' | 'none' | 'single' = 'all',
     anyoneCanPay: boolean = false
   ): {
-    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-    estimateLength: () => Promise<108>;
-  } {
+      sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
+      estimateLength: () => Promise<108>
+    } {
     return {
       sign: async (tx: Transaction, inputIndex: number) => {
-        if (typeof privateKey === "undefined") {
-          privateKey = PrivateKey.fromRandom();
+        if (typeof privateKey === 'undefined') {
+          privateKey = PrivateKey.fromRandom()
         }
-        let signatureScope = TransactionSignature.SIGHASH_FORKID;
-        if (signOutputs === "all") {
-          signatureScope |= TransactionSignature.SIGHASH_ALL;
+        let signatureScope = TransactionSignature.SIGHASH_FORKID
+        if (signOutputs === 'all') {
+          signatureScope |= TransactionSignature.SIGHASH_ALL
         }
-        if (signOutputs === "none") {
-          signatureScope |= TransactionSignature.SIGHASH_NONE;
+        if (signOutputs === 'none') {
+          signatureScope |= TransactionSignature.SIGHASH_NONE
         }
-        if (signOutputs === "single") {
-          signatureScope |= TransactionSignature.SIGHASH_SINGLE;
+        if (signOutputs === 'single') {
+          signatureScope |= TransactionSignature.SIGHASH_SINGLE
         }
         if (anyoneCanPay) {
-          signatureScope |= TransactionSignature.SIGHASH_ANYONECANPAY;
+          signatureScope |= TransactionSignature.SIGHASH_ANYONECANPAY
         }
-        const otherInputs = [...tx.inputs];
-        const [input] = otherInputs.splice(inputIndex, 1);
-        if (typeof input.sourceTransaction !== "object") {
+        const otherInputs = [...tx.inputs]
+        const [input] = otherInputs.splice(inputIndex, 1)
+        if (typeof input.sourceTransaction !== 'object') {
           throw new Error(
-            "The source transaction is needed for transaction signing."
-          );
+            'The source transaction is needed for transaction signing.'
+          )
         }
         const preimage = TransactionSignature.format({
-          sourceTXID: input.sourceTransaction?.id("hex") ?? "",
+          sourceTXID: input.sourceTransaction?.id('hex') ?? '',
           sourceOutputIndex: input.sourceOutputIndex ?? 0,
           sourceSatoshis:
             input.sourceTransaction?.outputs[input.sourceOutputIndex]
@@ -128,34 +128,34 @@ export default class RPuzzle implements ScriptTemplate {
             input.sourceTransaction?.outputs[input.sourceOutputIndex]
               ?.lockingScript ?? new Script(),
           lockTime: tx.lockTime,
-          scope: signatureScope,
-        });
+          scope: signatureScope
+        })
 
         const rawSignature = privateKey.sign(
           sha256(preimage),
           undefined,
           true,
           k
-        );
+        )
         const sig = new TransactionSignature(
           rawSignature.r,
           rawSignature.s,
           signatureScope
-        );
-        const sigForScript = sig.toChecksigFormat();
+        )
+        const sigForScript = sig.toChecksigFormat()
         const pubkeyForScript = privateKey
           .toPublicKey()
-          .encode(true) as number[];
+          .encode(true) as number[]
         return new UnlockingScript([
           { op: sigForScript.length, data: sigForScript },
-          { op: pubkeyForScript.length, data: pubkeyForScript },
-        ]);
+          { op: pubkeyForScript.length, data: pubkeyForScript }
+        ])
       },
       estimateLength: async () => {
         // public key (1+33) + signature (1+73)
         // Note: We add 1 to each element's length because of the associated OP_PUSH
-        return 108;
-      },
-    };
+        return 108
+      }
+    }
   }
 }

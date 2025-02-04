@@ -1,14 +1,14 @@
-import { PeerSession } from "./types";
+import { PeerSession } from './types'
 
 /**
  * Manages sessions for peers, allowing sessions to be added, retrieved, updated, and removed
  * by relevant identifiers (sessionNonce and peerIdentityKey).
  */
 export class SessionManager {
-  private readonly identifierToSession: Map<string, PeerSession>;
+  private readonly identifierToSession: Map<string, PeerSession>
 
-  constructor() {
-    this.identifierToSession = new Map<string, PeerSession>();
+  constructor () {
+    this.identifierToSession = new Map<string, PeerSession>()
   }
 
   /**
@@ -16,18 +16,19 @@ export class SessionManager {
    *
    * @param {PeerSession} session - The peer session to add.
    */
-  addSession(session: PeerSession): void {
-    if (!session.sessionNonce && !session.peerIdentityKey) {
+  addSession (session: PeerSession): void {
+    if ((session.sessionNonce === null || session.sessionNonce === undefined || session.sessionNonce === '') &&
+        (session.peerIdentityKey === null || session.peerIdentityKey === undefined || session.peerIdentityKey === '')) {
       throw new Error(
-        "Invalid session: at least one of sessionNonce or peerIdentityKey is required."
-      );
+        'Invalid session: at least one of sessionNonce or peerIdentityKey is required.'
+      )
     }
 
-    if (session.sessionNonce) {
-      this.identifierToSession.set(session.sessionNonce, session);
+    if (session.sessionNonce !== null && session.sessionNonce !== undefined && session.sessionNonce !== '') {
+      this.identifierToSession.set(session.sessionNonce, session)
     }
-    if (session.peerIdentityKey) {
-      this.identifierToSession.set(session.peerIdentityKey, session);
+    if (session.peerIdentityKey !== null && session.peerIdentityKey !== undefined && session.peerIdentityKey !== '') {
+      this.identifierToSession.set(session.peerIdentityKey, session)
     }
   }
 
@@ -36,9 +37,9 @@ export class SessionManager {
    *
    * @param {PeerSession} session - The peer session to update.
    */
-  updateSession(session: PeerSession): void {
-    this.removeSession(session);
-    this.addSession(session);
+  updateSession (session: PeerSession): void {
+    this.removeSession(session)
+    this.addSession(session)
   }
 
   /**
@@ -47,8 +48,8 @@ export class SessionManager {
    * @param {string} identifier - The identifier for the session (sessionNonce or peerIdentityKey).
    * @returns {PeerSession | undefined} - The matching peer session, or undefined if not found.
    */
-  getSession(identifier: string): PeerSession | undefined {
-    return this.identifierToSession.get(identifier);
+  getSession (identifier: string): PeerSession | undefined {
+    return this.identifierToSession.get(identifier)
   }
 
   /**
@@ -56,12 +57,12 @@ export class SessionManager {
    *
    * @param {PeerSession} session - The peer session to remove.
    */
-  removeSession(session: PeerSession): void {
-    if (session.sessionNonce) {
-      this.identifierToSession.delete(session.sessionNonce);
+  removeSession (session: PeerSession): void {
+    if (session.sessionNonce !== null && session.sessionNonce !== undefined && session.sessionNonce !== '') {
+      this.identifierToSession.delete(session.sessionNonce)
     }
-    if (session.peerIdentityKey) {
-      this.identifierToSession.delete(session.peerIdentityKey);
+    if (session.peerIdentityKey !== null && session.peerIdentityKey !== undefined && session.peerIdentityKey !== '') {
+      this.identifierToSession.delete(session.peerIdentityKey)
     }
   }
 
@@ -71,7 +72,7 @@ export class SessionManager {
    * @param {string} identifier - The identifier to check.
    * @returns {boolean} - True if the session exists, false otherwise.
    */
-  hasSession(identifier: string): boolean {
-    return this.identifierToSession.has(identifier);
+  hasSession (identifier: string): boolean {
+    return this.identifierToSession.has(identifier)
   }
 }

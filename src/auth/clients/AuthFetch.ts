@@ -1,24 +1,24 @@
-import { Utils, Random, P2PKH, PublicKey, WalletInterface } from "../../../mod";
-import { Peer } from "../Peer";
-import { SimplifiedFetchTransport } from "../transports/SimplifiedFetchTransport";
-import { SessionManager } from "../SessionManager";
-import { RequestedCertificateSet } from "../types";
-import { VerifiableCertificate } from "../certificates/VerifiableCertificate";
-import { Writer } from "../../primitives/utils";
+import { Utils, Random, P2PKH, PublicKey, WalletInterface } from '../../../mod'
+import { Peer } from '../Peer'
+import { SimplifiedFetchTransport } from '../transports/SimplifiedFetchTransport'
+import { SessionManager } from '../SessionManager'
+import { RequestedCertificateSet } from '../types'
+import { VerifiableCertificate } from '../certificates/VerifiableCertificate'
+import { Writer } from '../../primitives/utils'
 
 interface SimplifiedFetchRequestOptions {
-  method?: string;
-  headers?: Record<string, string>;
-  body?: any;
-  retryCounter?: number;
+  method?: string
+  headers?: Record<string, string>
+  body?: string | Record<string, unknown> | null // ✅ Explicitly define allowed types
+  retryCounter?: number
 }
 interface AuthPeer {
-  peer: Peer;
-  identityKey?: string;
-  supportsMutualAuth?: boolean;
+  peer: Peer
+  identityKey?: string
+  supportsMutualAuth?: boolean
 }
 
-const PAYMENT_VERSION = "1.0";
+const PAYMENT_VERSION = '1.0'
 
 /**
  * AuthFetch provides a lightweight fetch client for interacting with servers
@@ -29,210 +29,190 @@ const PAYMENT_VERSION = "1.0";
  * and sending BSV payment transactions when necessary.
  */
 export class AuthFetch {
-  private readonly sessionManager: SessionManager;
-  private readonly wallet: WalletInterface;
-  private callbacks: Record<string, { resolve: Function; reject: Function }> =
-    {};
+  private readonly sessionManager: SessionManager
+  private readonly wallet: WalletInterface
+  private callbacks: Record<
+  string,
+  { resolve: (value?: unknown) => void, reject: (reason?: unknown) => void }
+  > = {}
 
-  private readonly certificatesReceived: VerifiableCertificate[] = [];
-  private readonly requestedCertificates?: RequestedCertificateSet;
-  peers: Record<string, AuthPeer> = {};
+  private readonly certificatesReceived: VerifiableCertificate[] = []
+  private readonly requestedCertificates?: RequestedCertificateSet
+  peers: Record<string, AuthPeer> = {}
 
   /**
    * Constructs a new AuthFetch instance.
    * @param wallet - The wallet instance for signing and authentication.
    * @param requestedCertificates - Optional set of certificates to request from peers.
    */
-  constructor(
+  constructor (
     wallet: WalletInterface,
     requestedCertificates?: RequestedCertificateSet,
     sessionManager?: SessionManager
   ) {
-    this.wallet = wallet;
-    this.requestedCertificates = requestedCertificates;
-    this.sessionManager = sessionManager || new SessionManager();
+    this.wallet = wallet
+    this.requestedCertificates = requestedCertificates
+    this.sessionManager = sessionManager ?? new SessionManager()
   }
 
   /**
-   * Mutually authenticates and sends a HTTP request to a server.
-   *
-   * 1) Attempt the request.
-   * 2) If 402 Payment Required, automatically create and send payment.
-   * 3) Return the final response.
-   *
-   * @param url - The URL to send the request to.
-   * @param config - Configuration options for the request, including method, headers, and body.
-   * @returns A promise that resolves with the server's response, structured as a Response-like object.
-   *
-   * @throws Will throw an error if unsupported headers are used or other validation fails.
-   */
-  async fetch(
+ * Mutually authenticates and sends a HTTP request to a server.
+ */
+  async fetch (
     url: string,
     config: SimplifiedFetchRequestOptions = {}
   ): Promise<Response> {
-    if (config.retryCounter) {
+    if (config.retryCounter !== undefined) {
       if (config.retryCounter <= 0) {
-        throw new Error("Request failed after maximum number of retries.");
+        throw new Error('Request failed after maximum number of retries.')
       }
-      config.retryCounter--;
+      config.retryCounter--
     }
-    const response = await new Promise<Response>(async (resolve, reject) => {
-      try {
-        // Apply defaults
-        const { method = "GET", headers = {}, body } = config;
 
-        // Extract a base url
-        const parsedUrl = new URL(url);
-        const baseURL = parsedUrl.origin;
+    try {
+    // Apply defaults
+      const { method = 'GET', headers = {}, body } = config
+      const parsedUrl = new URL(url)
+      const baseURL = parsedUrl.origin
 
-        // Create a new transport for this base url if needed
-        let peerToUse: AuthPeer;
-        if (!this.peers[baseURL]) {
-          // Create a peer for the request
-          const newTransport = new SimplifiedFetchTransport(baseURL);
-          peerToUse = {
-            peer: new Peer(
-              this.wallet,
-              newTransport,
-              this.requestedCertificates,
-              this.sessionManager
-            ),
-          };
-          this.peers[baseURL] = peerToUse;
-          const callbackId = this.peers[
-            baseURL
-          ].peer.listenForCertificatesReceived(
-            (senderPublicKey: string, certs: VerifiableCertificate[]) => {
-              this.certificatesReceived.push(...certs);
-              // peerToUse.peer.stopListeningForCertificatesReceived()
-            }
-          );
-        } else {
-          // Check if there's a session associated with this baseURL
-          if (!this.peers[baseURL].supportsMutualAuth) {
-            // Use standard fetch if mutual authentication is not supported
-            try {
-              const response = await this.handleFetchAndValidate(
-                url,
-                config,
-                this.peers[baseURL]
-              );
-              resolve(response);
-            } catch (error) {
-              reject(error);
-            }
-          }
-          peerToUse = this.peers[baseURL];
+      // Create a new transport for this base URL if needed
+      let peerToUse: AuthPeer
+      if (this.peers[baseURL] === undefined) {
+        const newTransport = new SimplifiedFetchTransport(baseURL)
+        peerToUse = {
+          peer: new Peer(
+            this.wallet,
+            newTransport,
+            this.requestedCertificates,
+            this.sessionManager
+          )
         }
+        this.peers[baseURL] = peerToUse
 
-        // Serialize the simplified fetch request.
-        const requestNonce = Random(32);
-        const requestNonceAsBase64 = Utils.toBase64(requestNonce);
+        // Listen for certificates
+        this.peers[baseURL].peer.listenForCertificatesReceived(
+          (senderPublicKey: string, certs: VerifiableCertificate[]) => {
+            this.certificatesReceived.push(...certs)
+          }
+        )
+      } else {
+        peerToUse = this.peers[baseURL]
 
-        const writer = await this.serializeRequest(
-          method,
-          headers,
-          body,
-          parsedUrl,
-          requestNonce
-        );
+        // If mutual auth is not supported, fallback to standard fetch
+        if (peerToUse.supportsMutualAuth === false) {
+          return await this.handleFetchAndValidate(url, {
+            ...config,
+            body: config.body !== undefined && config.body !== null && typeof config.body === 'object'
+              ? JSON.stringify(config.body)
+              : config.body
+          }, peerToUse)
+        }
+      }
 
-        // Setup general message listener to resolve requests once a response is received
-        this.callbacks[requestNonceAsBase64] = { resolve, reject };
+      // Serialize the simplified fetch request
+      const requestNonce = Random(32)
+      const requestNonceAsBase64 = Utils.toBase64(requestNonce)
+
+      const writer = await this.serializeRequest(
+        method,
+        headers,
+        body ?? null,
+        parsedUrl,
+        requestNonce
+      )
+
+      // Set up the request promise
+      const responsePromise = new Promise<Response>((resolve, reject) => {
+        this.callbacks[requestNonceAsBase64] = { resolve, reject }
+
+        // Listen for response messages
         const listenerId = peerToUse.peer.listenForGeneralMessages(
           (senderPublicKey: string, payload: number[]) => {
-            // Create a reader
-            const responseReader = new Utils.Reader(payload);
-            // Deserialize first 32 bytes of payload
-            const responseNonceAsBase64 = Utils.toBase64(
-              responseReader.read(32)
-            );
-            if (responseNonceAsBase64 === requestNonceAsBase64) {
-              peerToUse.peer.stopListeningForGeneralMessages(listenerId);
+            try {
+              const responseReader = new Utils.Reader(payload)
+              const responseNonceAsBase64 = Utils.toBase64(responseReader.read(32))
 
-              // Save the identity key for the peer for future requests, since we have it here.
-              this.peers[baseURL].identityKey = senderPublicKey;
-              this.peers[baseURL].supportsMutualAuth = true;
+              if (responseNonceAsBase64 === requestNonceAsBase64) {
+                peerToUse.peer.stopListeningForGeneralMessages(listenerId)
 
-              // Status code
-              const statusCode = responseReader.readVarIntNum();
+                // Save identity key
+                this.peers[baseURL].identityKey = senderPublicKey
+                this.peers[baseURL].supportsMutualAuth = true
 
-              // Headers
-              const responseHeaders = {};
-              const nHeaders = responseReader.readVarIntNum();
-              if (nHeaders > 0) {
+                // Deserialize response
+                const statusCode = responseReader.readVarIntNum()
+                const responseHeaders: Record<string, string> = {}
+                const nHeaders = responseReader.readVarIntNum()
+
                 for (let i = 0; i < nHeaders; i++) {
-                  const nHeaderKeyBytes = responseReader.readVarIntNum();
-                  const headerKeyBytes = responseReader.read(nHeaderKeyBytes);
-                  const headerKey = Utils.toUTF8(headerKeyBytes);
-                  const nHeaderValueBytes = responseReader.readVarIntNum();
-                  const headerValueBytes =
-                    responseReader.read(nHeaderValueBytes);
-                  const headerValue = Utils.toUTF8(headerValueBytes);
-                  responseHeaders[headerKey] = headerValue;
+                  const key = Utils.toUTF8(responseReader.read(responseReader.readVarIntNum()))
+                  const value = Utils.toUTF8(responseReader.read(responseReader.readVarIntNum()))
+                  responseHeaders[key] = value
                 }
-              }
 
-              // Add back the server identity key header
-              responseHeaders["x-bsv-auth-identity-key"] = senderPublicKey;
+                // Add server identity key header
+                responseHeaders['x-bsv-auth-identity-key'] = senderPublicKey
 
-              // Body
-              let responseBody;
-              const responseBodyBytes = responseReader.readVarIntNum();
-              if (responseBodyBytes > 0) {
-                responseBody = responseReader.read(responseBodyBytes);
-              }
+                // Read response body
+                const responseBodyBytes = responseReader.readVarIntNum()
+                const responseBody =
+                responseBodyBytes > 0 ? responseReader.read(responseBodyBytes) : new Uint8Array([])
 
-              // Create the Response object
-              const responseValue = new Response(
-                responseBody
-                  ? new Uint8Array(responseBody)
-                  : new Uint8Array([]),
-                {
+                // Construct response
+                const responseValue = new Response(new Uint8Array(responseBody), {
                   status: statusCode,
                   statusText: `${statusCode}`,
-                  headers: new Headers(responseHeaders),
-                }
-              );
+                  headers: new Headers(responseHeaders)
+                })
 
-              // Resolve or reject the correct request with the response data
-              this.callbacks[requestNonceAsBase64].resolve(responseValue);
-
-              // Clean up
-              delete this.callbacks[requestNonceAsBase64];
+                resolve(responseValue)
+                Reflect.deleteProperty(this.callbacks, requestNonceAsBase64)
+              }
+            } catch (err) {
+              reject(err)
             }
           }
-        );
+        )
 
-        // Send the request, now that all listeners are set up
-        await peerToUse.peer
-          .toPeer(writer.toArray(), peerToUse.identityKey)
-          .catch(async (error) => {
-            if (error.message.includes("HTTP server failed to authenticate")) {
-              try {
-                const response = await this.handleFetchAndValidate(
-                  url,
-                  config,
-                  peerToUse
-                );
-                resolve(response);
-              } catch (fetchError) {
-                reject(fetchError);
-              }
-            } else {
-              reject(error);
+        // Send request
+        peerToUse.peer.toPeer(writer.toArray(), peerToUse.identityKey).catch(async (error: unknown) => {
+          if (
+            typeof error === 'object' &&
+          error !== null &&
+          'message' in error &&
+          typeof (error as { message: string }).message === 'string' &&
+          (error as { message: string }).message.includes('HTTP server failed to authenticate')
+          ) {
+            try {
+              const response = await this.handleFetchAndValidate(url, {
+                ...config,
+                body: config.body !== undefined && config.body !== null && typeof config.body === 'object'
+                  ? JSON.stringify(config.body)
+                  : config.body
+              }, peerToUse)
+
+              resolve(response)
+            } catch (fetchError) {
+              reject(fetchError)
             }
-          });
-      } catch (e) {
-        reject(e);
+          } else {
+            reject(error)
+          }
+        })
+      })
+
+      // Wait for response
+      const response = await responsePromise
+
+      // Handle 402 Payment Required
+      if (response.status === 402) {
+        return await this.handlePaymentAndRetry(url, config, response)
       }
-    });
 
-    if (response.status === 402) {
-      return await this.handlePaymentAndRetry(url, config, response);
+      return response
+    } catch (error) {
+      throw new Error(`Fetch request failed: ${error instanceof Error ? error.message : String(error)}`)
     }
-
-    return response;
   }
 
   /**
@@ -240,60 +220,59 @@ export class AuthFetch {
    * @param baseUrl
    * @param certificatesToRequest
    */
-  async sendCertificateRequest(
+  async sendCertificateRequest (
     baseUrl: string,
     certificatesToRequest: RequestedCertificateSet
   ): Promise<VerifiableCertificate[]> {
-    const parsedUrl = new URL(baseUrl);
-    const baseURL = parsedUrl.origin;
+    const parsedUrl = new URL(baseUrl)
+    const baseURL = parsedUrl.origin
 
-    let peerToUse: { peer: Peer; identityKey?: string };
-    if (this.peers[baseURL]) {
-      peerToUse = { peer: this.peers[baseURL].peer };
+    let peerToUse: { peer: Peer, identityKey?: string }
+    if (this.peers[baseURL] !== undefined) { // ✅ Explicit undefined check
+      peerToUse = { peer: this.peers[baseURL].peer }
     } else {
-      const newTransport = new SimplifiedFetchTransport(baseURL);
+      const newTransport = new SimplifiedFetchTransport(baseURL)
       peerToUse = {
         peer: new Peer(
           this.wallet,
           newTransport,
           this.requestedCertificates,
           this.sessionManager
-        ),
-      };
-      this.peers[baseURL] = peerToUse;
+        )
+      }
+      this.peers[baseURL] = peerToUse
     }
 
     // Return a promise that resolves when certificates are received
-    return await new Promise<VerifiableCertificate[]>(
-      async (resolve, reject) => {
-        // Set up the listener before making the request
-        const callbackId = peerToUse.peer.listenForCertificatesReceived(
-          (_senderPublicKey: string, certs: VerifiableCertificate[]) => {
-            peerToUse.peer.stopListeningForCertificatesReceived(callbackId);
-            this.certificatesReceived.push(...certs);
-            resolve(certs);
-          }
-        );
-
-        try {
-          // Initiate the certificate request
-          await peerToUse.peer.requestCertificates(
-            certificatesToRequest,
-            peerToUse.identityKey
-          );
-        } catch (err) {
-          peerToUse.peer.stopListeningForCertificatesReceived(callbackId);
-          reject(err);
+    // Return a promise that resolves when certificates are received
+    return await new Promise<VerifiableCertificate[]>((resolve, reject) => {
+      // Set up the listener before making the request
+      const callbackId = peerToUse.peer.listenForCertificatesReceived(
+        (_senderPublicKey: string, certs: VerifiableCertificate[]) => {
+          peerToUse.peer.stopListeningForCertificatesReceived(callbackId)
+          this.certificatesReceived.push(...certs)
+          resolve(certs)
         }
-      }
-    );
+      )
+
+      // Initiate the certificate request without using await
+      peerToUse.peer
+        .requestCertificates(certificatesToRequest, peerToUse.identityKey)
+        .then(() => {
+          // Successfully requested certificates
+        })
+        .catch((err) => {
+          peerToUse.peer.stopListeningForCertificatesReceived(callbackId)
+          reject(err)
+        })
+    })
   }
 
   /**
    * Return any certificates we've collected thus far, then clear them out.
    */
-  public consumeReceivedCertificates(): VerifiableCertificate[] {
-    return this.certificatesReceived.splice(0);
+  public consumeReceivedCertificates (): VerifiableCertificate[] {
+    return this.certificatesReceived.splice(0)
   }
 
   /**
@@ -308,114 +287,119 @@ export class AuthFetch {
    *
    * @throws Will throw an error if unsupported headers are used or serialization fails.
    */
-  private async serializeRequest(
+  private async serializeRequest (
     method: string,
     headers: Record<string, string>,
-    body: any,
+    body: string | Record<string, unknown> | null,
     parsedUrl: URL,
     requestNonce: number[]
   ): Promise<Writer> {
-    const writer = new Utils.Writer();
+    const writer = new Utils.Writer()
     // Write request nonce
-    writer.write(requestNonce);
+    writer.write(requestNonce)
     // Method length
-    writer.writeVarIntNum(method.length);
+    writer.writeVarIntNum(method.length)
     // Method
-    writer.write(Utils.toArray(method));
+    writer.write(Utils.toArray(method))
 
     // Handle pathname (e.g. /path/to/resource)
     if (parsedUrl.pathname.length > 0) {
       // Pathname length
-      const pathnameAsArray = Utils.toArray(parsedUrl.pathname);
-      writer.writeVarIntNum(pathnameAsArray.length);
+      const pathnameAsArray = Utils.toArray(parsedUrl.pathname)
+      writer.writeVarIntNum(pathnameAsArray.length)
       // Pathname
-      writer.write(pathnameAsArray);
+      writer.write(pathnameAsArray)
     } else {
-      writer.writeVarIntNum(-1);
+      writer.writeVarIntNum(-1)
     }
 
     // Handle search params (e.g. ?q=hello)
     if (parsedUrl.search.length > 0) {
       // search length
-      const searchAsArray = Utils.toArray(parsedUrl.search);
-      writer.writeVarIntNum(searchAsArray.length);
+      const searchAsArray = Utils.toArray(parsedUrl.search)
+      writer.writeVarIntNum(searchAsArray.length)
       // search
-      writer.write(searchAsArray);
+      writer.write(searchAsArray)
     } else {
-      writer.writeVarIntNum(-1);
+      writer.writeVarIntNum(-1)
     }
 
     // Construct headers to send / sign:
     // - Custom headers prefixed with x-bsv are included
     // - x-bsv-auth headers are not allowed
     // - content-type and authorization are signed by client
-    const includedHeaders: Array<[string, string]> = [];
-    for (let [k, v] of Object.entries(headers)) {
-      k = k.toLowerCase(); // We will always sign lower-case header keys
+    const includedHeaders: Array<[string, string]> = []
+    for (const [k, v] of Object.entries(headers)) { // ✅ Use const instead of let
+      const lowerCaseKey = k.toLowerCase() // ✅ Use a new variable for the lower-case key
       if (
-        k.startsWith("x-bsv-") ||
-        k === "content-type" ||
-        k === "authorization"
+        lowerCaseKey.startsWith('x-bsv-') ||
+    lowerCaseKey === 'content-type' ||
+    lowerCaseKey === 'authorization'
       ) {
-        if (k.startsWith("x-bsv-auth")) {
-          throw new Error("No BSV auth headers allowed here!");
+        if (k.startsWith('x-bsv-auth')) {
+          throw new Error('No BSV auth headers allowed here!')
         }
-        includedHeaders.push([k, v]);
+        includedHeaders.push([k, v])
       } else {
         throw new Error(
-          "Unsupported header in the simplified fetch implementation. Only content-type, authorization, and x-bsv-* headers are supported."
-        );
+          'Unsupported header in the simplified fetch implementation. Only content-type, authorization, and x-bsv-* headers are supported.'
+        )
       }
     }
 
     // nHeaders
-    writer.writeVarIntNum(includedHeaders.length);
+    writer.writeVarIntNum(includedHeaders.length)
     for (let i = 0; i < includedHeaders.length; i++) {
       // headerKeyLength
-      const headerKeyAsArray = Utils.toArray(includedHeaders[i][0], "utf8");
-      writer.writeVarIntNum(headerKeyAsArray.length);
+      const headerKeyAsArray = Utils.toArray(includedHeaders[i][0], 'utf8')
+      writer.writeVarIntNum(headerKeyAsArray.length)
       // headerKey
-      writer.write(headerKeyAsArray);
+      writer.write(headerKeyAsArray)
       // headerValueLength
-      const headerValueAsArray = Utils.toArray(includedHeaders[i][1], "utf8");
-      writer.writeVarIntNum(headerValueAsArray.length);
+      const headerValueAsArray = Utils.toArray(includedHeaders[i][1], 'utf8')
+      writer.writeVarIntNum(headerValueAsArray.length)
       // headerValue
-      writer.write(headerValueAsArray);
+      writer.write(headerValueAsArray)
     }
 
     // Handle body
-    if (body) {
-      const reqBody = await this.normalizeBodyToNumberArray(body); // Use the utility function
-      writer.writeVarIntNum(reqBody.length);
-      writer.write(reqBody);
+    if (body !== null && body !== undefined && Object.keys(body).length !== 0) {
+      // ✅ Ensure `body` is correctly formatted as a string before processing
+      const formattedBody = typeof body === 'object'
+        ? JSON.stringify(body) // Convert objects to JSON strings
+        : body // Keep strings as they are
+
+      const reqBody = await this.normalizeBodyToNumberArray(formattedBody)
+      writer.writeVarIntNum(reqBody.length)
+      writer.write(reqBody)
     } else {
-      writer.writeVarIntNum(-1); // No body
+      writer.writeVarIntNum(-1) // No body
     }
-    return writer;
+    return writer
   }
 
   /**
    * Handles a non-authenticated fetch requests and validates that the server is not claiming to be authenticated.
    */
-  private async handleFetchAndValidate(
+  private async handleFetchAndValidate (
     url: string,
     config: RequestInit,
     peerToUse: AuthPeer
   ): Promise<Response> {
-    const response = await fetch(url, config);
+    const response = await fetch(url, config)
     response.headers.forEach((header) => {
-      if (header.toLocaleLowerCase().startsWith("x-bsv")) {
+      if (header.toLocaleLowerCase().startsWith('x-bsv')) {
         throw new Error(
-          "The server is trying to claim it has been authenticated when it has not!"
-        );
+          'The server is trying to claim it has been authenticated when it has not!'
+        )
       }
-    });
+    })
 
     if (response.ok) {
-      peerToUse.supportsMutualAuth = false;
-      return response;
+      peerToUse.supportsMutualAuth = false
+      return response
     } else {
-      throw new Error(`Request failed with status: ${response.status}`);
+      throw new Error(`Request failed with status: ${response.status}`)
     }
   }
 
@@ -423,65 +407,64 @@ export class AuthFetch {
    * If we get 402 Payment Required, we build a transaction via wallet.createAction()
    * and re-attempt the request with an x-bsv-payment header.
    */
-  private async handlePaymentAndRetry(
+  private async handlePaymentAndRetry (
     url: string,
     config: SimplifiedFetchRequestOptions = {},
     originalResponse: Response
   ): Promise<Response> {
     // Make sure the server is using the correct payment version
     const paymentVersion = originalResponse.headers.get(
-      "x-bsv-payment-version"
-    );
-    if (!paymentVersion || paymentVersion !== PAYMENT_VERSION) {
+      'x-bsv-payment-version'
+    )
+    if (paymentVersion === null || paymentVersion === undefined || paymentVersion.trim() === '' || paymentVersion !== PAYMENT_VERSION) {
       throw new Error(
-        `Unsupported x-bsv-payment-version response header. Client version: ${PAYMENT_VERSION}, Server version: ${paymentVersion}`
-      );
+        `Unsupported x-bsv-payment-version response header. Client version: ${PAYMENT_VERSION}, Server version: ${paymentVersion ?? 'unknown'}`
+      )
     }
 
     // Get required headers from the 402 response
     const satoshisRequiredHeader = originalResponse.headers.get(
-      "x-bsv-payment-satoshis-required"
-    );
-    if (!satoshisRequiredHeader) {
+      'x-bsv-payment-satoshis-required'
+    )
+    if (satoshisRequiredHeader === null || satoshisRequiredHeader === undefined || satoshisRequiredHeader.trim() === '') {
       throw new Error(
-        "Missing x-bsv-payment-satoshis-required response header."
-      );
+        'Missing x-bsv-payment-satoshis-required response header.'
+      )
     }
-    const satoshisRequired = parseInt(satoshisRequiredHeader);
+
+    const satoshisRequired = parseInt(satoshisRequiredHeader)
     if (isNaN(satoshisRequired) || satoshisRequired <= 0) {
       throw new Error(
-        "Invalid x-bsv-payment-satoshis-required response header value."
-      );
+        'Invalid x-bsv-payment-satoshis-required response header value.'
+      )
     }
 
     const serverIdentityKey = originalResponse.headers.get(
-      "x-bsv-auth-identity-key"
-    );
-    if (!serverIdentityKey) {
-      throw new Error("Missing x-bsv-auth-identity-key response header.");
+      'x-bsv-auth-identity-key'
+    )
+    if (serverIdentityKey === null || serverIdentityKey === undefined || serverIdentityKey.trim() === '') {
+      throw new Error('Missing x-bsv-auth-identity-key response header.')
     }
 
     const derivationPrefix = originalResponse.headers.get(
-      "x-bsv-payment-derivation-prefix"
-    );
-    if (!derivationPrefix) {
-      throw new Error(
-        "Missing x-bsv-payment-derivation-prefix response header."
-      );
+      'x-bsv-payment-derivation-prefix'
+    )
+    if (derivationPrefix === null || derivationPrefix === undefined || derivationPrefix.trim() === '') {
+      throw new Error('Missing x-bsv-payment-derivation-prefix response header.')
     }
 
     // Create a random suffix for the derivation path
-    const derivationSuffix = Utils.toBase64(Random(10));
+    const derivationSuffix = Utils.toBase64(Random(10))
 
     // Derive the script hex from the server identity key
     const { publicKey: derivedPublicKey } = await this.wallet.getPublicKey({
-      protocolID: [2, "wallet payment"],
+      protocolID: [2, 'wallet payment'],
       keyID: `${derivationPrefix} ${derivationSuffix}`,
-      counterparty: serverIdentityKey,
-    });
+      counterparty: serverIdentityKey
+    })
     const lockingScript = new P2PKH()
       .lock(PublicKey.fromString(derivedPublicKey).toHash())
-      .toHex();
+      .toHex()
 
     // Create the payment transaction using createAction
     const { tx } = await this.wallet.createAction({
@@ -490,43 +473,44 @@ export class AuthFetch {
         {
           satoshis: satoshisRequired,
           lockingScript,
-          outputDescription: "HTTP request payment",
-        },
-      ],
-    });
+          outputDescription: 'HTTP request payment'
+        }
+      ]
+    })
 
     // Attach the payment to the request headers
-    if (!tx) {
-      throw new Error("Transaction object is undefined.");
+    if (tx == null) {
+      throw new Error('Transaction object is undefined.')
     }
 
-    config.headers = config.headers || {};
-    config.headers["x-bsv-payment"] = JSON.stringify({
+    config.headers = config.headers ?? {} // ✅ Correctly handle nullish headers
+    config.headers['x-bsv-payment'] = JSON.stringify({
       derivationPrefix,
-      transaction: Utils.toBase64(tx),
-    });
-    config.retryCounter ??= 3;
+      transaction: Utils.toBase64(tx)
+    })
+
+    config.retryCounter ??= 3
 
     // Re-attempt request with payment attached
-    return await this.fetch(url, config);
+    return await this.fetch(url, config)
   }
 
-  private async normalizeBodyToNumberArray(
+  private async normalizeBodyToNumberArray (
     body: BodyInit | null | undefined
   ): Promise<number[]> {
     // 1. Null / undefined
     if (body == null) {
-      return [];
+      return []
     }
 
     // 2. number[]
-    if (Array.isArray(body) && body.every((item) => typeof item === "number")) {
-      return body; // Return the array as is
+    if (Array.isArray(body) && body.every((item) => typeof item === 'number')) {
+      return body // Return the array as is
     }
 
     // 3. string
-    if (typeof body === "string") {
-      return Utils.toArray(body, "utf8");
+    if (typeof body === 'string') {
+      return Utils.toArray(body, 'utf8')
     }
 
     // 4. ArrayBuffer / TypedArrays
@@ -534,41 +518,41 @@ export class AuthFetch {
       const typedArray =
         body instanceof ArrayBuffer
           ? new Uint8Array(body)
-          : new Uint8Array(body.buffer);
-      return Array.from(typedArray);
+          : new Uint8Array(body.buffer)
+      return Array.from(typedArray)
     }
 
     // 5. Blob
     if (body instanceof Blob) {
-      const arrayBuffer = await body.arrayBuffer();
-      return Array.from(new Uint8Array(arrayBuffer));
+      const arrayBuffer = await body.arrayBuffer()
+      return Array.from(new Uint8Array(arrayBuffer))
     }
 
     // 6. FormData
     if (body instanceof FormData) {
-      const entries: Array<[string, string]> = [];
+      const entries: Array<[string, string]> = []
       body.forEach((value, key) => {
-        entries.push([key, value.toString()]);
-      });
-      const urlEncoded = new URLSearchParams(entries).toString();
-      return Utils.toArray(urlEncoded, "utf8");
+        entries.push([key, typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value)])
+      })
+      const urlEncoded = new URLSearchParams(entries).toString()
+      return Utils.toArray(urlEncoded, 'utf8')
     }
 
     // 7. URLSearchParams
     if (body instanceof URLSearchParams) {
-      return Utils.toArray(body.toString(), "utf8");
+      return Utils.toArray(body.toString(), 'utf8')
     }
 
     // 8. ReadableStream
     if (body instanceof ReadableStream) {
       throw new Error(
-        "ReadableStream cannot be directly converted to number[]."
-      );
+        'ReadableStream cannot be directly converted to number[].'
+      )
     }
 
     // 9. Fallback
     throw new Error(
-      "Unsupported body type in this SimplifiedFetch implementation."
-    );
+      'Unsupported body type in this SimplifiedFetch implementation.'
+    )
   }
 }
