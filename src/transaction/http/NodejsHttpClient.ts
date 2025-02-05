@@ -42,7 +42,7 @@ export class NodejsHttpClient implements HttpClient {
           const ok = res.statusCode >= 200 && res.statusCode <= 299
           const mediaType = res.headers['content-type']
           const data: T =
-            body && mediaType.startsWith('application/json')
+            body !== '' && mediaType.startsWith('application/json')
               ? JSON.parse(body)
               : (body as unknown as T)
           resolve({

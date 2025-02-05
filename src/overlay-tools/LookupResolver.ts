@@ -98,7 +98,7 @@ export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
         'HTTPS facilitator can only use URLs that start with "https:"'
       )
     }
-    const timeoutPromise = new Promise((_, reject) =>
+    const timeoutPromise = new Promise((resolve, reject) =>
       setTimeout(() => reject(new Error('Request timed out')), timeout)
     )
 
@@ -136,10 +136,22 @@ export default class LookupResolver {
   private readonly additionalHosts: Record<string, string[]>
 
   constructor (config?: LookupResolverConfig) {
-    const { facilitator, slapTrackers, hostOverrides, additionalHosts } =
-      config ?? ({} as LookupResolverConfig)
+    const defaultConfig: LookupResolverConfig = {
+      facilitator: new HTTPSOverlayLookupFacilitator(),
+      slapTrackers: DEFAULT_SLAP_TRACKERS,
+      hostOverrides: {},
+      additionalHosts: {}
+    }
+
+    const {
+      facilitator = defaultConfig.facilitator,
+      slapTrackers = defaultConfig.slapTrackers,
+      hostOverrides = defaultConfig.hostOverrides,
+      additionalHosts = defaultConfig.additionalHosts
+    } = config ?? defaultConfig // ✅ Use a default object directly
+
     this.facilitator = facilitator ?? new HTTPSOverlayLookupFacilitator()
-    this.slapTrackers = slapTrackers ?? DEFAULT_SLAP_TRACKERS
+    this.slapTrackers = slapTrackers ?? []
     this.hostOverrides = hostOverrides ?? {}
     this.additionalHosts = additionalHosts ?? {}
   }
@@ -190,33 +202,38 @@ export default class LookupResolver {
     if (successfulResponses[0].type === 'freeform') {
       // Return the first freeform response
       return successfulResponses[0]
-    } else {
-      // Aggregate outputs from all successful responses
-      const outputs = new Map<
-      string,
-      { beef: number[], outputIndex: number }
-      >()
-      for (const response of successfulResponses) {
-        if (response.type !== 'output-list') {
-          continue
-        }
-        try {
-          for (const output of response.outputs) {
-            try {
-              const key = `${Transaction.fromBEEF(output.beef).id('hex')}.${output.outputIndex}`
+    }
+
+    // Aggregate outputs from all successful responses
+    const outputs = new Map<string, { beef: number[], outputIndex: number }>()
+
+    for (const response of successfulResponses) {
+      if (response.type !== 'output-list') {
+        continue
+      }
+      try {
+        for (const output of response.outputs) {
+          try {
+            const txId: string = String(Transaction.fromBEEF(output.beef).id('hex'))
+
+            if (txId !== '') { // ✅ Ensures `txId` is always a non-empty string
+              const key = `${String(txId)}.${String(output.outputIndex)}`
               outputs.set(key, output)
-            } catch {
-              continue
+            } else {
+              console.warn('Invalid transaction ID:', txId)
             }
+          } catch {
+            continue
           }
-        } catch {
-          continue
         }
+      } catch (error) {
+        console.error('Error processing response outputs:', error)
       }
-      return {
-        type: 'output-list',
-        outputs: Array.from(outputs.values())
-      }
+    }
+    // ✅ Ensure function always returns a value
+    return {
+      type: 'output-list',
+      outputs: Array.from(outputs.values())
     }
   }
 

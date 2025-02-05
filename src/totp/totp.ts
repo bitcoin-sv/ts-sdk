@@ -25,6 +25,7 @@ export type TOTPValidateOptions = TOTPOptions & {
   skew?: number
 }
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class TOTP {
   /**
    * Generates a Time-based One-Time Password (TOTP).
@@ -54,7 +55,7 @@ export class TOTP {
   ): boolean {
     const _options = this.withDefaultValidateOptions(options)
     passcode = passcode.trim()
-    if (passcode.length != _options.digits) {
+    if (passcode.length !== _options.digits) {
       return false
     }
 
@@ -123,7 +124,7 @@ function calcHMAC (
   secret: number[],
   timePad: number[],
   algorithm: TOTPAlgorithm
-) {
+): SHA1HMAC | SHA256HMAC | SHA512HMAC {
   switch (algorithm) {
     case 'SHA-1':
       return new SHA1HMAC(secret).update(timePad)

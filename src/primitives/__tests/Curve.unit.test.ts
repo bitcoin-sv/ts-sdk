@@ -21,6 +21,9 @@ describe('Curve', () => {
     ).toBe(true)
 
     // Endomorphism test
+    if (curve.endo === null || curve.endo === undefined) {
+      throw new Error('curve.endo is undefined')
+    }
     expect(curve.endo).toBeDefined()
     expect(curve.endo.beta.fromRed().toString(16)).toEqual(
       '7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c28719501ee'

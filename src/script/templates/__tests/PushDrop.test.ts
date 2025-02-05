@@ -16,7 +16,7 @@ describe('PushDrop', () => {
     counterparty: string = 'self',
     signOutputs: 'all' | 'none' | 'single' = 'all',
     anyoneCanPay: boolean = false
-  ) => {
+  ): Promise<void> => {
     const lockingScript = await pushDrop.lock(
       fields,
       protocolID,

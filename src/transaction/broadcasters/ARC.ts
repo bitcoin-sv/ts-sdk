@@ -25,7 +25,7 @@ export interface ArcConfig {
   headers?: Record<string, string>
 }
 
-function defaultDeploymentId () {
+function defaultDeploymentId (): string {
   return `ts-sdk-${toHex(Random(16))}`
 }
 
@@ -65,6 +65,7 @@ export default class ARC implements Broadcaster {
       this.callbackToken = undefined
       this.callbackUrl = undefined
     } else {
+      const configObj: ArcConfig = config ?? {}
       const {
         apiKey,
         deploymentId,
@@ -72,7 +73,7 @@ export default class ARC implements Broadcaster {
         callbackToken,
         callbackUrl,
         headers
-      } = config ?? ({} as ArcConfig)
+      } = configObj
       this.apiKey = apiKey
       this.httpClient = httpClient ?? defaultHttpClient()
       this.deploymentId = deploymentId ?? defaultDeploymentId()
@@ -85,7 +86,7 @@ export default class ARC implements Broadcaster {
   /**
    * Constructs a dictionary of the default & supplied request headers.
    */
-  private requestHeaders () {
+  private requestHeaders (): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'XDeployment-ID': this.deploymentId

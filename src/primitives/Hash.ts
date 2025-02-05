@@ -237,7 +237,7 @@ export function toArray (
     return msg.slice() // Ensure msg is treated as a number array
   }
 
-  if (!msg) {
+  if (msg === '' || msg === null || msg === undefined) {
     return []
   }
 
@@ -505,28 +505,34 @@ function Kh (j): number {
   }
 }
 
-function sum64 (buf, pos, ah, al) {
-  const bh = buf[pos]
-  const bl = buf[pos + 1]
+function sum64 (buf: Uint32Array, pos: number, ah: number, al: number): void {
+  const bh = Number(buf[pos]) // Ensure value is treated as a number
+  const bl = Number(buf[pos + 1])
 
-  const lo = (al + bl) >>> 0
+  const lo = (al + bl) >>> 0 // Ensure numeric addition
   const hi = (lo < al ? 1 : 0) + ah + bh
+
   buf[pos] = hi >>> 0
-  buf[pos + 1] = lo
+  buf[pos + 1] = lo >>> 0 // Ensure it's stored as a valid unsigned 32-bit integer
 }
 
-function sum64_hi (ah, al, bh, bl) {
+function sum64hi (ah: number, al: number, bh: number, bl: number): number {
   const lo = (al + bl) >>> 0
   const hi = (lo < al ? 1 : 0) + ah + bh
   return hi >>> 0
 }
 
-function sum64_lo (ah, al, bh, bl) {
+function sum64lo (ah: number, al: number, bh: number, bl: number): number {
   const lo = al + bl
   return lo >>> 0
 }
 
-function sum64_4_hi (ah, al, bh, bl, ch, cl, dh, dl) {
+function sum644hi (
+  ah: number, al: number,
+  bh: number, bl: number,
+  ch: number, cl: number,
+  dh: number, dl: number
+): number {
   let carry = 0
   let lo = al
   lo = (lo + bl) >>> 0
@@ -540,12 +546,23 @@ function sum64_4_hi (ah, al, bh, bl, ch, cl, dh, dl) {
   return hi >>> 0
 }
 
-function sum64_4_lo (ah, al, bh, bl, ch, cl, dh, dl) {
+function sum644lo (
+  ah: number, al: number,
+  bh: number, bl: number,
+  ch: number, cl: number,
+  dh: number, dl: number
+): number {
   const lo = al + bl + cl + dl
   return lo >>> 0
 }
 
-function sum64_5_hi (ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
+function sum645hi (
+  ah: number, al: number,
+  bh: number, bl: number,
+  ch: number, cl: number,
+  dh: number, dl: number,
+  eh: number, el: number
+): number {
   let carry = 0
   let lo = al
   lo = (lo + bl) >>> 0
@@ -561,27 +578,32 @@ function sum64_5_hi (ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
   return hi >>> 0
 }
 
-function sum64_5_lo (ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
+function sum645lo (
+  ah: number, al: number,
+  bh: number, bl: number,
+  ch: number, cl: number,
+  dh: number, dl: number,
+  eh: number, el: number
+): number {
   const lo = al + bl + cl + dl + el
-
   return lo >>> 0
 }
 
-function rotr64_hi (ah, al, num) {
+function rotr64hi (ah: number, al: number, num: number): number {
   const r = (al << (32 - num)) | (ah >>> num)
   return r >>> 0
 }
 
-function rotr64_lo (ah, al, num) {
+function rotr64lo (ah: number, al: number, num: number): number {
   const r = (ah << (32 - num)) | (al >>> num)
   return r >>> 0
 }
 
-function shr64_hi (ah, al, num) {
+function shr64hi (ah: number, al: number, num: number): number {
   return ah >>> num
 }
 
-function shr64_lo (ah, al, num) {
+function shr64lo (ah: number, al: number, num: number): number {
   const r = (ah << (32 - num)) | (al >>> num)
   return r >>> 0
 }
@@ -903,40 +925,28 @@ export class SHA512 extends BaseHash {
     this.W = new Array(160)
   }
 
-  _prepareBlock (msg, start) {
+  _prepareBlock (msg: Uint32Array, start: number): void {
     const W = this.W
-
     // 32 x 32bit words
-    let i
-    for (i = 0; i < 32; i++) {
-      W[i] = msg[start + i]
+    for (let i = 0; i < 32; i++) {
+      W[i] = msg[start + i] // ✅ start is explicitly typed as number
     }
-    for (; i < W.length; i += 2) {
-      const c0_hi = g1_512_hi(W[i - 4], W[i - 3]) // i - 2
-      const c0_lo = g1_512_lo(W[i - 4], W[i - 3])
-      const c1_hi = W[i - 14] // i - 7
-      const c1_lo = W[i - 13]
-      const c2_hi = g0_512_hi(W[i - 30], W[i - 29]) // i - 15
-      const c2_lo = g0_512_lo(W[i - 30], W[i - 29])
-      const c3_hi = W[i - 32] // i - 16
-      const c3_lo = W[i - 31]
-
-      W[i] = sum64_4_hi(c0_hi, c0_lo, c1_hi, c1_lo, c2_hi, c2_lo, c3_hi, c3_lo)
-      W[i + 1] = sum64_4_lo(
-        c0_hi,
-        c0_lo,
-        c1_hi,
-        c1_lo,
-        c2_hi,
-        c2_lo,
-        c3_hi,
-        c3_lo
-      )
+    for (let i = 32; i < W.length; i += 2) {
+      const c0hi = g1512hi(W[i - 4], W[i - 3]) // i - 2
+      const c0lo = g1512lo(W[i - 4], W[i - 3])
+      const c1hi = W[i - 14] // i - 7
+      const c1lo = W[i - 13]
+      const c2hi = g0512hi(W[i - 30], W[i - 29]) // i - 15
+      const c2lo = g0512lo(W[i - 30], W[i - 29])
+      const c3hi = W[i - 32]// i - 16
+      const c3lo = W[i - 31]
+      W[i] = sum644hi(c0hi, c0lo, c1hi, c1lo, c2hi, c2lo, c3hi, c3lo)
+      W[i + 1] = sum644lo(c0hi, c0lo, c1hi, c1lo, c2hi, c2lo, c3hi, c3lo)
     }
   }
 
-  _update (msg, start) {
-    this._prepareBlock(msg, start)
+  _update (msg: number[], start: number): void {
+    this._prepareBlock(new Uint32Array(msg), start)
 
     const W = this.W
 
@@ -959,49 +969,49 @@ export class SHA512 extends BaseHash {
 
     assert(this.k.length === W.length)
     for (let i = 0; i < W.length; i += 2) {
-      let c0_hi = hh
-      let c0_lo = hl
-      let c1_hi = s1_512_hi(eh, el)
-      let c1_lo = s1_512_lo(eh, el)
-      const c2_hi = ch64_hi(eh, el, fh, fl, gh, gl)
-      const c2_lo = ch64_lo(eh, el, fh, fl, gh, gl)
-      const c3_hi = this.k[i]
-      const c3_lo = this.k[i + 1]
-      const c4_hi = W[i]
-      const c4_lo = W[i + 1]
+      let c0hi = hh
+      let c0lo = hl
+      let c1hi = s1512hi(eh, el)
+      let c1lo = s1512lo(eh, el)
+      const c2hi = ch64hi(eh, el, fh, fl, gh, gl)
+      const c2lo = ch64lo(eh, el, fh, fl, gh, gl)
+      const c3hi = this.k[i]
+      const c3lo = this.k[i + 1]
+      const c4hi = W[i]
+      const c4lo = W[i + 1]
 
-      const T1_hi = sum64_5_hi(
-        c0_hi,
-        c0_lo,
-        c1_hi,
-        c1_lo,
-        c2_hi,
-        c2_lo,
-        c3_hi,
-        c3_lo,
-        c4_hi,
-        c4_lo
+      const T1hi = sum645hi(
+        c0hi,
+        c0lo,
+        c1hi,
+        c1lo,
+        c2hi,
+        c2lo,
+        c3hi,
+        c3lo,
+        c4hi,
+        c4lo
       )
-      const T1_lo = sum64_5_lo(
-        c0_hi,
-        c0_lo,
-        c1_hi,
-        c1_lo,
-        c2_hi,
-        c2_lo,
-        c3_hi,
-        c3_lo,
-        c4_hi,
-        c4_lo
+      const T1lo = sum645lo(
+        c0hi,
+        c0lo,
+        c1hi,
+        c1lo,
+        c2hi,
+        c2lo,
+        c3hi,
+        c3lo,
+        c4hi,
+        c4lo
       )
 
-      c0_hi = s0_512_hi(ah, al)
-      c0_lo = s0_512_lo(ah, al)
-      c1_hi = maj64_hi(ah, al, bh, bl, ch, cl)
-      c1_lo = maj64_lo(ah, al, bh, bl, ch, cl)
+      c0hi = s0512hi(ah, al)
+      c0lo = s0512lo(ah, al)
+      c1hi = maj64hi(ah, al, bh, bl, ch, cl)
+      c1lo = maj64lo(ah, al, bh, bl, ch, cl)
 
-      const T2_hi = sum64_hi(c0_hi, c0_lo, c1_hi, c1_lo)
-      const T2_lo = sum64_lo(c0_hi, c0_lo, c1_hi, c1_lo)
+      const T2hi = sum64hi(c0hi, c0lo, c1hi, c1lo)
+      const T2lo = sum64lo(c0hi, c0lo, c1hi, c1lo)
 
       hh = gh
       hl = gl
@@ -1012,8 +1022,8 @@ export class SHA512 extends BaseHash {
       fh = eh
       fl = el
 
-      eh = sum64_hi(dh, dl, T1_hi, T1_lo)
-      el = sum64_lo(dl, dl, T1_hi, T1_lo)
+      eh = sum64hi(dh, dl, T1hi, T1lo)
+      el = sum64lo(dl, dl, T1hi, T1lo)
 
       dh = ch
       dl = cl
@@ -1024,30 +1034,30 @@ export class SHA512 extends BaseHash {
       bh = ah
       bl = al
 
-      ah = sum64_hi(T1_hi, T1_lo, T2_hi, T2_lo)
-      al = sum64_lo(T1_hi, T1_lo, T2_hi, T2_lo)
+      ah = sum64hi(T1hi, T1lo, T2hi, T2lo)
+      al = sum64lo(T1hi, T1lo, T2hi, T2lo)
     }
 
-    sum64(this.h, 0, ah, al)
-    sum64(this.h, 2, bh, bl)
-    sum64(this.h, 4, ch, cl)
-    sum64(this.h, 6, dh, dl)
-    sum64(this.h, 8, eh, el)
-    sum64(this.h, 10, fh, fl)
-    sum64(this.h, 12, gh, gl)
-    sum64(this.h, 14, hh, hl)
+    sum64(new Uint32Array(this.h), 0, ah, al)
+    sum64(new Uint32Array(this.h), 2, bh, bl)
+    sum64(new Uint32Array(this.h), 4, ch, cl)
+    sum64(new Uint32Array(this.h), 6, dh, dl)
+    sum64(new Uint32Array(this.h), 8, eh, el)
+    sum64(new Uint32Array(this.h), 10, fh, fl)
+    sum64(new Uint32Array(this.h), 12, gh, gl)
+    sum64(new Uint32Array(this.h), 14, hh, hl)
   }
 
-  _digest () {
+  _digest (): number[] {
     return split32(this.h, 'big')
   }
 
-  _digestHex () {
+  _digestHex (): string {
     return toHex32(this.h, 'big')
   }
 }
 
-function ch64_hi (xh: number, xl: number, yh: number, yl: number, zh: number, zl: number) {
+function ch64hi (xh: number, xl: number, yh: number, yl: number, zh: number, zl: number): number {
   void xl
   void yl
   void zl // Mark unused variables to suppress ESLint warnings
@@ -1058,7 +1068,7 @@ function ch64_hi (xh: number, xl: number, yh: number, yl: number, zh: number, zl
   return r
 }
 
-function ch64_lo (xh: number, xl: number, yh: number, yl: number, zh: number, zl: number): number {
+function ch64lo (xh: number, xl: number, yh: number, yl: number, zh: number, zl: number): number {
   void xh
   void yh
   void zh
@@ -1069,7 +1079,7 @@ function ch64_lo (xh: number, xl: number, yh: number, yl: number, zh: number, zl
   return r
 }
 
-function maj64_hi (xh: number, xl: number, yh: number, yl: number, zh: number, zl: number): number {
+function maj64hi (xh: number, xl: number, yh: number, yl: number, zh: number, zl: number): number {
   void xl
   void yl
   void zl // Mark unused variables to suppress ESLint warnings
@@ -1080,7 +1090,7 @@ function maj64_hi (xh: number, xl: number, yh: number, yl: number, zh: number, z
   return r
 }
 
-function maj64_lo (xh, xl, yh, yl, zh, zl) {
+function maj64lo (xh: number, xl: number, yh: number, yl: number, zh: number, zl: number): number {
   let r = (xl & yl) ^ (xl & zl) ^ (yl & zl)
   if (r < 0) {
     r += 0x100000000
@@ -1088,96 +1098,96 @@ function maj64_lo (xh, xl, yh, yl, zh, zl) {
   return r
 }
 
-function s0_512_hi (xh, xl) {
-  const c0_hi = rotr64_hi(xh, xl, 28)
-  const c1_hi = rotr64_hi(xl, xh, 2) // 34
-  const c2_hi = rotr64_hi(xl, xh, 7) // 39
+function s0512hi (xh: number, xl: number): number {
+  const c0hi = rotr64hi(xh, xl, 28)
+  const c1hi = rotr64hi(xl, xh, 2) // 34
+  const c2hi = rotr64hi(xl, xh, 7) // 39
 
-  let r = c0_hi ^ c1_hi ^ c2_hi
+  let r = c0hi ^ c1hi ^ c2hi
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function s0_512_lo (xh, xl) {
-  const c0_lo = rotr64_lo(xh, xl, 28)
-  const c1_lo = rotr64_lo(xl, xh, 2) // 34
-  const c2_lo = rotr64_lo(xl, xh, 7) // 39
+function s0512lo (xh: number, xl: number): number {
+  const c0lo = rotr64lo(xh, xl, 28)
+  const c1lo = rotr64lo(xl, xh, 2) // 34
+  const c2lo = rotr64lo(xl, xh, 7) // 39
 
-  let r = c0_lo ^ c1_lo ^ c2_lo
+  let r = c0lo ^ c1lo ^ c2lo
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function s1_512_hi (xh, xl) {
-  const c0_hi = rotr64_hi(xh, xl, 14)
-  const c1_hi = rotr64_hi(xh, xl, 18)
-  const c2_hi = rotr64_hi(xl, xh, 9) // 41
+function s1512hi (xh: number, xl: number): number {
+  const c0hi = rotr64hi(xh, xl, 14)
+  const c1hi = rotr64hi(xh, xl, 18)
+  const c2hi = rotr64hi(xl, xh, 9) // 41
 
-  let r = c0_hi ^ c1_hi ^ c2_hi
+  let r = c0hi ^ c1hi ^ c2hi
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function s1_512_lo (xh, xl) {
-  const c0_lo = rotr64_lo(xh, xl, 14)
-  const c1_lo = rotr64_lo(xh, xl, 18)
-  const c2_lo = rotr64_lo(xl, xh, 9) // 41
+function s1512lo (xh: number, xl: number): number {
+  const c0lo = rotr64lo(xh, xl, 14)
+  const c1lo = rotr64lo(xh, xl, 18)
+  const c2lo = rotr64lo(xl, xh, 9) // 41
 
-  let r = c0_lo ^ c1_lo ^ c2_lo
+  let r = c0lo ^ c1lo ^ c2lo
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function g0_512_hi (xh, xl) {
-  const c0_hi = rotr64_hi(xh, xl, 1)
-  const c1_hi = rotr64_hi(xh, xl, 8)
-  const c2_hi = shr64_hi(xh, xl, 7)
+function g0512hi (xh: number, xl: number): number {
+  const c0hi = rotr64hi(xh, xl, 1)
+  const c1hi = rotr64hi(xh, xl, 8)
+  const c2hi = shr64hi(xh, xl, 7)
 
-  let r = c0_hi ^ c1_hi ^ c2_hi
+  let r = c0hi ^ c1hi ^ c2hi
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function g0_512_lo (xh, xl) {
-  const c0_lo = rotr64_lo(xh, xl, 1)
-  const c1_lo = rotr64_lo(xh, xl, 8)
-  const c2_lo = shr64_lo(xh, xl, 7)
+function g0512lo (xh: number, xl: number): number {
+  const c0lo = rotr64lo(xh, xl, 1)
+  const c1lo = rotr64lo(xh, xl, 8)
+  const c2lo = shr64lo(xh, xl, 7)
 
-  let r = c0_lo ^ c1_lo ^ c2_lo
+  let r = c0lo ^ c1lo ^ c2lo
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function g1_512_hi (xh, xl) {
-  const c0_hi = rotr64_hi(xh, xl, 19)
-  const c1_hi = rotr64_hi(xl, xh, 29) // 61
-  const c2_hi = shr64_hi(xh, xl, 6)
+function g1512hi (xh: number, xl: number): number {
+  const c0hi = rotr64hi(xh, xl, 19)
+  const c1hi = rotr64hi(xl, xh, 29) // 61
+  const c2hi = shr64hi(xh, xl, 6)
 
-  let r = c0_hi ^ c1_hi ^ c2_hi
+  let r = c0hi ^ c1hi ^ c2hi
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function g1_512_lo (xh, xl) {
-  const c0_lo = rotr64_lo(xh, xl, 19)
-  const c1_lo = rotr64_lo(xl, xh, 29) // 61
-  const c2_lo = shr64_lo(xh, xl, 6)
+function g1512lo (xh: number, xl: number): number {
+  const c0lo = rotr64lo(xh, xl, 19)
+  const c1lo = rotr64lo(xl, xh, 29) // 61
+  const c2lo = shr64lo(xh, xl, 6)
 
-  let r = c0_lo ^ c1_lo ^ c2_lo
+  let r = c0lo ^ c1lo ^ c2lo
   if (r < 0) {
     r += 0x100000000
   }

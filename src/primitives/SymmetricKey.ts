@@ -69,7 +69,7 @@ export default class SymmetricKey extends BigNumber {
    * @throws {Error} Will throw an error if the decryption fails, likely due to message tampering or incorrect decryption key.
    */
   decrypt (msg: number[] | string, enc?: 'hex' | 'utf8'): string | number[] {
-    msg = toArray(msg, enc) as number[]
+    msg = toArray(msg, enc)
     const iv = msg.slice(0, 32)
     const ciphertextWithTag = msg.slice(32)
     const messageTag = ciphertextWithTag.slice(-16)

@@ -93,7 +93,7 @@ const utf8ToArray = (msg: string): number[] => {
     const c = msg.charCodeAt(i)
     const hi = c >> 8
     const lo = c & 0xff
-    if (hi) {
+    if (hi !== 0) {
       res.push(hi, lo)
     } else {
       res.push(lo)
@@ -124,25 +124,19 @@ export const toUTF8 = (arr: number[]): string => {
     // 1-byte sequence (0xxxxxxx)
     if (byte <= 0x7f) {
       result += String.fromCharCode(byte)
-    }
-    // 2-byte sequence (110xxxxx 10xxxxxx)
-    else if (byte >= 0xc0 && byte <= 0xdf) {
+    } else if (byte >= 0xc0 && byte <= 0xdf) {
       const byte2 = arr[i + 1]
       skip = 1
       const codePoint = ((byte & 0x1f) << 6) | (byte2 & 0x3f)
       result += String.fromCharCode(codePoint)
-    }
-    // 3-byte sequence (1110xxxx 10xxxxxx 10xxxxxx)
-    else if (byte >= 0xe0 && byte <= 0xef) {
+    } else if (byte >= 0xe0 && byte <= 0xef) { // 3-byte sequence (1110xxxx 10xxxxxx 10xxxxxx)
       const byte2 = arr[i + 1]
       const byte3 = arr[i + 2]
       skip = 2
       const codePoint =
         ((byte & 0x0f) << 12) | ((byte2 & 0x3f) << 6) | (byte3 & 0x3f)
       result += String.fromCharCode(codePoint)
-    }
-    // 4-byte sequence (11110xxx 10xxxxxx 10xxxxxx 10xxxxxx)
-    else if (byte >= 0xf0 && byte <= 0xf7) {
+    } else if (byte >= 0xf0 && byte <= 0xf7) { // 4-byte sequence (11110xxx 10xxxxxx 10xxxxxx 10xxxxxx)
       const byte2 = arr[i + 1]
       const byte3 = arr[i + 2]
       const byte4 = arr[i + 3]
@@ -227,13 +221,13 @@ const base58chars =
  * @returns The binary representation
  */
 export const fromBase58 = (str: string): number[] => {
-  if (!str || typeof str !== 'string') {
+  if (str === '' || typeof str !== 'string') {
     throw new Error(`Expected base58 string but got “${str}”`)
   }
 
   if (/[IOl0]/.test(str)) {
     throw new Error(
-      `Invalid base58 character “${str.match(/[IOl0]/gmu)?.join('')}”`
+      `Invalid base58 character “${str.match(/[IOl0]/gmu)?.join('') ?? ''}”`
     )
   }
 
@@ -288,14 +282,14 @@ export const toBase58 = (bin: number[]): string => {
       result[j] = base58chars.charCodeAt(x % 58)
       carry = Math.floor(x / 58)
     }
-    while (carry) {
+    while (carry !== 0) {
       result.push(base58chars.charCodeAt(carry % 58))
       carry = Math.floor(carry / 58)
     }
   }
 
   for (const byte of bin) {
-    if (byte) break
+    if (byte !== 0) break
     else result.push('1'.charCodeAt(0))
   }
 
@@ -309,7 +303,7 @@ export const toBase58 = (bin: number[]): string => {
  * @param bin - The binary array to convert to base58check
  * @returns The base58check string representation
  */
-export const toBase58Check = (bin: number[], prefix: number[] = [0]) => {
+export const toBase58Check = (bin: number[], prefix: number[] = [0]): string => {
   let hash = hash256([...prefix, ...bin])
   hash = [...prefix, ...bin, ...hash.slice(0, 4)]
   return toBase58(hash)
@@ -326,7 +320,7 @@ export const fromBase58Check = (
   str: string,
   enc?: 'hex',
   prefixLength: number = 1
-) => {
+): { prefix: string | number[], data: string | number[] } => {
   const bin = fromBase58(str)
   let prefix: string | number[] = bin.slice(0, prefixLength)
   let data: string | number[] = bin.slice(prefixLength, -4)

@@ -37,15 +37,21 @@ export const sign = (
   const invoiceNumber = `2-message signing-${keyIDBase64}`
   const signingKey = signer.deriveChild(resolvedVerifier, invoiceNumber)
   const signature = signingKey.sign(message).toDER()
-  const senderPublicKey = signer.toPublicKey().encode(true)
+  const senderPublicKey = toArray(signer.toPublicKey().encode(true), 'hex')
   const version = toArray(VERSION, 'hex')
+
+  // ✅ Convert resolvedVerifier.encode(true) output to number[] safely
+  const resolvedVerifierBytes = Array.from(
+    toArray(resolvedVerifier.encode(true), 'hex'),
+    (val) => Number.parseInt(val.toString(), 16)
+  )
 
   return [
     ...version,
-    ...senderPublicKey,
-    ...(recipientAnyone ? [0] : resolvedVerifier.encode(true)), // Use resolvedVerifier
-    ...keyID,
-    ...signature
+    ...Array.from(new Uint8Array(senderPublicKey)).map(Number),
+    ...(recipientAnyone ? [0] : resolvedVerifierBytes), // ✅ Ensure number[] type
+    ...Array.from(keyID).map(Number),
+    ...Array.from(signature as number[]).map(Number)
   ]
 }
 

@@ -53,7 +53,7 @@ export default class XDMSubstrate implements WalletInterface {
     return await new Promise<unknown>((resolve, reject) => {
       const id = Utils.toBase64(Random(12))
 
-      const listener = async (e: MessageEvent) => {
+      const listener = (e: MessageEvent): void => {
         if (
           !(e instanceof MessageEvent) || // ✅ Ensures 'e' is a MessageEvent
           !e.isTrusted || // ✅ Explicitly checks the boolean

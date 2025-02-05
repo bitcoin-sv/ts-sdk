@@ -718,10 +718,13 @@ export default class BigNumber {
     if (carry !== 0) {
       out = carry.toString(16) + out
     }
-    if (padding === 0 && out === '0') {
+    if (padding === 0) {
       return ''
     }
-    while (out.length % padding !== 0 && padding !== 0) {
+    if (out === '0') {
+      return ''
+    }
+    while (out.length % padding !== 0) {
       out = '0' + out
     }
     if (this.negative !== 0) {
@@ -4536,7 +4539,7 @@ export default class BigNumber {
    */
   static fromBits (bits: number, strict: boolean = false): BigNumber {
     // Convert to signed 32-bit value manually without using Buffer
-    bits = bits & 0x80000000 ? bits - 0x100000000 : bits
+    bits = (bits & 0x80000000) !== 0 ? bits - 0x100000000 : bits
     if (strict && (bits & 0x00800000) !== 0) {
       throw new Error('negative bit set')
     }
@@ -4601,11 +4604,11 @@ export default class BigNumber {
       byteArray.shift()
     }
 
-    let nsize = byteArray.length
+    let nsize: number = byteArray.length
 
     // We're interested in the first three bytes for the "nword"
     // or in smaller cases, what's available
-    let nword = byteArray.slice(0, 3).reduce((acc, val) => acc * 256 + val, 0)
+    let nword = byteArray.slice(0, 3).reduce((acc: number, val: number) => acc * 256 + val, 0)
 
     // Ensure we don't have the sign bit set initially
     if ((nword & 0x800000) !== 0) {

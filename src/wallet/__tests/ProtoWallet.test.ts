@@ -497,7 +497,7 @@ describe('ProtoWallet', () => {
         .encode(true)
 
       // Function to compute the invoice number
-      const computeInvoiceNumber = function (protocolID, keyID) {
+      const computeInvoiceNumber = function (protocolID, keyID): string {
         const securityLevel = protocolID[0]
         if (
           !Number.isInteger(securityLevel) ||
@@ -532,7 +532,7 @@ describe('ProtoWallet', () => {
         if (String(protocolName).endsWith(' protocol')) {
           throw new Error('No need to end your protocol name with " protocol"')
         }
-        return `${securityLevel}-${protocolName}-${keyID}`
+        return `${String(securityLevel)}-${String(protocolName)}-${String(keyID)}`
       }
       const invoiceNumber = computeInvoiceNumber(protocolID, keyID)
       const invoiceNumberBin = Utils.toArray(invoiceNumber, 'utf8')

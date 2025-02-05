@@ -47,7 +47,7 @@ export default class WalletWireProcessor implements WalletWire {
 
       // Map call code to call name
       const callName = calls[callCode] // calls is enum
-      if (!callName) {
+      if (callName === undefined || callName === '') {
         // Invalid call code
         throw new Error(`Invalid call code: ${callCode}`)
       }
@@ -316,7 +316,7 @@ export default class WalletWireProcessor implements WalletWire {
           }
 
           // Call the method
-          if (!args.description) {
+          if (args.description === undefined || args.description === '') {
             args.description = 'Default Description' // Ensure it's always a string
           }
 

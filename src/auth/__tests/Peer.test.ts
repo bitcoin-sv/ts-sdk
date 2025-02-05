@@ -325,7 +325,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
           // Check and use the decrypted fields
           if (
             Object.keys(decryptedFields).length !== 0 &&
-            decryptedFields.libraryCardNumber
+            decryptedFields.libraryCardNumber !== ''
           ) {
             console.log(
               `Alice received Bob's library card number: ${decryptedFields.libraryCardNumber}`
@@ -380,13 +380,14 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     )
 
     const bobReceivedGeneralMessage = new Promise<void>((resolve) => {
-      bob.listenForGeneralMessages(async (senderPublicKey, payload) => {
-        await bobReceivedCertificates
-        console.log('Bob received message:', Utils.toUTF8(payload))
-
-        // Bob requests additional certificates after initial communication
-        await bob.requestCertificates(certificatesToRequest, senderPublicKey)
-        resolve()
+      bob.listenForGeneralMessages((senderPublicKey, payload) => {
+        void (async () => {
+          await bobReceivedCertificates
+          console.log('Bob received message:', Utils.toUTF8(payload))
+          // Bob requests additional certificates after initial communication
+          await bob.requestCertificates(certificatesToRequest, senderPublicKey)
+          resolve()
+        })()
       })
     })
 
@@ -461,7 +462,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
           for (const cert of certificates) {
             // Decrypt Alice's certificate fields
             const decryptedFields = await cert.decryptFields(walletB)
-            if (decryptedFields.membershipStatus) {
+            if (decryptedFields.membershipStatus !== '') {
               console.log(
                 `Bob received Alice's membership status: ${decryptedFields.membershipStatus}`
               )
@@ -552,7 +553,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
         void (async () => { // ✅ Wrap async function inside a void IIFE
           for (const cert of certificates) {
             const decryptedFields = await cert.decryptFields(walletA)
-            if (decryptedFields.driversLicenseNumber) {
+            if (decryptedFields.driversLicenseNumber !== '') {
               console.log(
                 `Alice received Bob's driver's license number: ${decryptedFields.driversLicenseNumber}`
               )
@@ -570,7 +571,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
         void (async () => { // ✅ Wrap async function inside a void IIFE
           for (const cert of certificates) {
             const decryptedFields = await cert.decryptFields(walletB)
-            if (decryptedFields.driversLicenseNumber) {
+            if (decryptedFields.driversLicenseNumber !== '') {
               console.log(
                 `Bob received Alice's driver's license number: ${decryptedFields.driversLicenseNumber}`
               )
@@ -678,7 +679,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
         void (async () => { // ✅ Wrap async function inside a void IIFE
           for (const cert of certificates) {
             const decryptedFields = await cert.decryptFields(walletA)
-            if (decryptedFields.email || decryptedFields.name) {
+            if ((decryptedFields.email !== undefined && decryptedFields.email !== '') || (decryptedFields.name !== undefined && decryptedFields.name !== '')) {
               console.log(
                 `Alice received Bob's certificate with fields: ${Object.keys(decryptedFields).join(', ')}`
               )
@@ -696,7 +697,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
         void (async () => { // ✅ Wrap async function inside a void IIFE
           for (const cert of certificates) {
             const decryptedFields = await cert.decryptFields(walletB)
-            if (decryptedFields.email || decryptedFields.name) {
+            if ((decryptedFields.email !== undefined && decryptedFields.email !== '') || (decryptedFields.name !== undefined && decryptedFields.name !== '')) {
               console.log(
                 `Bob received Alice's certificate with fields: ${Object.keys(decryptedFields).join(', ')}`
               )

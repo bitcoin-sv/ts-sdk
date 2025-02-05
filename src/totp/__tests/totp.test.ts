@@ -57,7 +57,7 @@ describe('totp generation and validation', () => {
     const checkAdjacentWindow = (
       timeOfGeneration: number,
       expected: boolean
-    ) => {
+    ): void => {
       jest.setSystemTime(timeOfGeneration)
       const adjacentTimewindowPasscode = TOTP.generate(secret, options)
 
@@ -68,12 +68,13 @@ describe('totp generation and validation', () => {
     }
 
     // because the 'skew' is '1' by default, the passcode for the next window also should be valid
-    checkAdjacentWindow(time + periodMS, true)
+    checkAdjacentWindow((time as number) + periodMS, true)
+
     checkAdjacentWindow(time - periodMS, true)
 
     // for 'skew': 1, other passcodes for further timewindows should not be valid
     for (let i = 2; i < 10; i++) {
-      checkAdjacentWindow(time + i * periodMS, false)
+      checkAdjacentWindow((time as number) + i * periodMS, false)
       checkAdjacentWindow(time - i * periodMS, false)
     }
   })

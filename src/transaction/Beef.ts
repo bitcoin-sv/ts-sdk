@@ -158,7 +158,7 @@ export class Beef {
     const beefTx = this.findTxid(txid)
     if ((beefTx == null) || (beefTx.tx == null)) return undefined // Ensure beefTx.tx exists before using it
 
-    const addInputProof = (beef: Beef, tx: Transaction) => {
+    const addInputProof = (beef: Beef, tx: Transaction): void => {
       const mp = beef.findBump(tx.id('hex'))
       if (mp != null) {
         tx.merklePath = mp
@@ -293,7 +293,7 @@ export class Beef {
    * Removes an existing transaction from the BEEF, given its TXID
    * @param txid TXID of the transaction to remove
    */
-  removeExistingTxid (txid: string) {
+  removeExistingTxid (txid: string): void {
     const existingTxIndex = this.txs.findIndex((t) => t.txid === txid)
     if (existingTxIndex >= 0) {
       this.txs.splice(existingTxIndex, 1)
@@ -328,7 +328,7 @@ export class Beef {
     return beefTx
   }
 
-  mergeBeef (beef: number[] | Beef) {
+  mergeBeef (beef: number[] | Beef): void {
     const b: Beef = Array.isArray(beef) ? Beef.fromBinary(beef) : beef
 
     for (const bump of b.bumps) {
@@ -414,7 +414,7 @@ export class Beef {
 
     const confirmComputedRoot = (b: MerklePath, txid: string): boolean => {
       const root = b.computeRoot(txid)
-      if (!r.roots[b.blockHeight]) {
+      if (r.roots[b.blockHeight] === undefined || r.roots[b.blockHeight] === '') {
         // accept the root as valid for this block and reuse for subsequent txids
         r.roots[b.blockHeight] = root
       }
@@ -453,7 +453,7 @@ export class Beef {
    * Serializes this data to `writer`
    * @param writer
    */
-  toWriter (writer: Writer) {
+  toWriter (writer: Writer): void {
     writer.writeUInt32LE(this.version)
 
     writer.writeVarIntNum(this.bumps.length)
@@ -487,7 +487,7 @@ export class Beef {
    * @param txid
    * @returns serialized contents of this Beef with AtomicBEEF prefix.
    */
-  toBinaryAtomic (txid: string) {
+  toBinaryAtomic (txid: string): number[] {
     this.sortTxs()
     const tx = this.findTxid(txid)
     if (tx == null) {
@@ -717,7 +717,7 @@ export class Beef {
    * Ensure that all the txids in `knownTxids` are txidOnly
    * @param knownTxids
    */
-  trimKnownTxids (knownTxids: string[]) {
+  trimKnownTxids (knownTxids: string[]): void {
     for (let i = 0; i < this.txs.length;) {
       const tx = this.txs[i]
       if (tx.isTxidOnly && knownTxids.includes(tx.txid)) {
@@ -742,14 +742,14 @@ export class Beef {
    */
   toLogString (): string {
     let log = ''
-    log += `BEEF with ${this.bumps.length} BUMPS and ${this.txs.length} Transactions, isValid ${this.isValid()}\n`
+    log += `BEEF with ${this.bumps.length} BUMPS and ${this.txs.length} Transactions, isValid ${this.isValid().toString()}\n`
     let i = -1
 
     for (const b of this.bumps) {
       i++
       log += `  BUMP ${i}\n    block: ${b.blockHeight}\n    txids: [\n${b.path[0]
             .filter((n) => n.txid === true) // ✅ Explicitly check if txid is `true`
-            .map((n) => `      '${n.hash}'`)
+            .map((n) => `      '${n.hash ?? ''}'`)
             .join(',\n')}\n    ]\n`
     }
 
@@ -779,7 +779,7 @@ export class Beef {
  * In some circumstances it may be helpful for the BUMP MerklePaths to include
  * leaves that can be computed from row zero.
  */
-  addComputedLeaves () {
+  addComputedLeaves (): void {
     const hash = (m: string): string =>
       toHex(hash256(toArray(m, 'hex').reverse()).reverse())
 

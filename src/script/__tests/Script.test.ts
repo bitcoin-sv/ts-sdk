@@ -48,7 +48,7 @@ describe('Script', () => {
     it('should error when attempting to parse this strange Base58Check encoded string', () => {
       const priv = PrivateKey.fromRandom()
       const address = priv.toAddress([0x88])
-      function attemptToDeriveAddress () {
+      function attemptToDeriveAddress (): string {
         const script = new P2PKH().lock(address).toASM()
         return script
       }
@@ -280,7 +280,7 @@ describe('Script', () => {
     it('should know this is invalid hex', () => {
       const asm = 'OP_RETURN 026d02 0568656c6c6fzz'
 
-      const createScript = () => {
+      const createScript = (): string => {
         const script = Script.fromASM(asm)
         return script.toASM()
       }

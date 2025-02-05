@@ -179,7 +179,7 @@ export default class Transaction {
     const unusedTxTxids = new Set<string>()
     for (const txid of Object.keys(transactions)) unusedTxTxids.add(txid)
 
-    const traverseDependencies = (txid: string) => {
+    const traverseDependencies = (txid: string): void => {
       unusedTxTxids.delete(txid)
       if (validTxids.has(txid)) {
         return
@@ -209,9 +209,10 @@ export default class Transaction {
     traverseDependencies(subjectTXID)
 
     // Check for any unrelated transactions
-    for (const txid of unusedTxTxids) {
+    if (unusedTxTxids.size > 0) {
+      const txid = Array.from(unusedTxTxids)[0]
       throw new Error(
-        `Unrelated transaction with TXID ${txid} found in Atomic BEEF data.`
+        `Unrelated transaction with TXID ${String(txid)} found in Atomic BEEF data.`
       )
     }
 
@@ -626,8 +627,8 @@ export default class Transaction {
     changeToUse -= changeOutputs.length
     distributedChange += changeOutputs.length
     for (let i = 0; i < changeOutputs.length - 1; i++) {
-      const portion = this.benfordNumber(0, changeToUse)
-      benfordNumbers[i] += portion
+      const portion: number = this.benfordNumber(0, changeToUse)
+      benfordNumbers[i] = (benfordNumbers[i] as number) + portion
       distributedChange += portion
       changeToUse -= portion
     }

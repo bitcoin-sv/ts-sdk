@@ -86,10 +86,10 @@ export default class MerklePath {
           duplicate?: boolean
         } = { offset }
 
-        if (flags & 1) {
+        if ((flags & 1) !== 0) {
           leaf.duplicate = true
         } else {
-          if (flags & 2) {
+          if ((flags & 2) !== 0) {
             leaf.txid = true
           }
           leaf.hash = toHex(reader.read(32).reverse())
@@ -150,12 +150,12 @@ export default class MerklePath {
     const legalOffsets = Array(this.path.length)
       .fill(0)
       .map(() => new Set())
-    this.path.map((leaves, height) => {
+    this.path.forEach((leaves, height) => {
       if (leaves.length === 0 && height === 0) {
         throw new Error(`Empty level at height: ${height}`)
       }
       const offsetsAtThisHeight = new Set()
-      leaves.map((leaf) => {
+      leaves.forEach((leaf) => {
         if (offsetsAtThisHeight.has(leaf.offset)) {
           throw new Error(
             `Duplicate offset: ${leaf.offset}, at height: ${height}`
@@ -180,7 +180,7 @@ export default class MerklePath {
 
     // every txid must calculate to the same root.
     let root: string
-    this.path[0].map((leaf, idx) => {
+    this.path[0].forEach((leaf, idx) => {
       if (idx === 0) root = this.computeRoot(leaf.hash)
       if (root !== this.computeRoot(leaf.hash)) {
         throw new Error('Mismatched roots')
@@ -251,7 +251,7 @@ export default class MerklePath {
     if (typeof txid !== 'string') {
       txid = this.path[0].find((leaf) => Boolean(leaf?.hash))?.hash ?? ''
     }
-    if (!txid) {
+    if (txid === '') {
       throw new Error('Transaction ID is missing or invalid.')
     }
 
@@ -276,7 +276,7 @@ export default class MerklePath {
       }
 
       const leafHash = leaf.hash ?? ''
-      if (!leafHash) {
+      if (leafHash === '') {
         throw new Error(
           `Leaf hash is missing for index ${index} at height ${height}`
         )
@@ -330,7 +330,7 @@ export default class MerklePath {
     if (leaf1.duplicate !== undefined && leaf1.duplicate !== null && leaf1.duplicate) {
       workinghash = hash(leaf0.hash + leaf0.hash)
     } else {
-      workinghash = hash(leaf1.hash + leaf0.hash)
+      workinghash = hash((leaf1.hash ?? '') + (leaf0.hash ?? ''))
     }
     leaf = {
       offset,
@@ -413,14 +413,14 @@ export default class MerklePath {
    * Assumes that at least all required nodes are present.
    * Leaves all levels sorted by increasing offset.
    */
-  trim () {
-    const pushIfNew = (v: number, a: number[]) => {
+  trim (): void {
+    const pushIfNew = (v: number, a: number[]): void => {
       if (a.length === 0 || a.slice(-1)[0] !== v) {
         a.push(v)
       }
     }
 
-    const dropOffsetsFromLevel = (dropOffsets: number[], level: number) => {
+    const dropOffsetsFromLevel = (dropOffsets: number[], level: number): void => {
       for (let i = dropOffsets.length; i >= 0; i--) {
         const l = this.path[level].findIndex(
           (n) => n.offset === dropOffsets[i]

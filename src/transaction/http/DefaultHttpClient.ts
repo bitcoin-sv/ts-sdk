@@ -9,15 +9,18 @@ import * as https from 'https'
 const httpsWrapper: HttpsNodejs = {
   request: (url, options, callback) => {
     const req = https.request(url, options as https.RequestOptions, (res) => {
-      callback({
-        on: (event: string, cb: (data: Buffer | string) => void) => {
-          res.on(event, cb)
-        },
-        statusCode: res.statusCode ?? 500,
-        statusMessage: res.statusMessage ?? 'Unknown Error',
+      // Define a properly typed wrapped response
+      const wrappedRes = {
+        on: (event: string, cb: (data: Buffer | string) => void) => res.on(event, cb),
+        statusCode: res.statusCode ?? 500, // Ensure it's always a number
+        statusMessage: res.statusMessage ?? 'Unknown Error', // Ensure it's always a string
         headers: res.headers as { [key: string]: string }
-      })
+      }
+
+      // Pass the variable instead of an object literal
+      callback(wrappedRes)
     })
+
     return {
       write: (chunk: string) => req.write(chunk),
       on: (event: string, cb: (data: Buffer | string) => void) => req.on(event, cb),
@@ -39,7 +42,7 @@ export function defaultHttpClient (): HttpClient {
 
   if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
     return new FetchHttpClient(window.fetch.bind(window))
-  } else if (typeof process !== 'undefined' && process.versions?.node) {
+  } else if (typeof process !== 'undefined' && process.versions?.node !== '') {
     try {
       return new NodejsHttpClient(httpsWrapper) // ✅ Pass wrapped https object
     } catch {

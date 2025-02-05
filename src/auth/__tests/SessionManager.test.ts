@@ -11,7 +11,7 @@ describe('SessionManager', () => {
       isAuthenticated: false,
       sessionNonce: 'testSessionNonce',
       peerIdentityKey: 'testPeerIdentityKey'
-    } as PeerSession
+    }
   })
 
   describe('addSession', () => {

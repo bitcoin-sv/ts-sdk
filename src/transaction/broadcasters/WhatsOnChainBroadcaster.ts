@@ -66,7 +66,7 @@ export default class WhatsOnChainBroadcaster implements Broadcaster {
         return {
           status: 'error',
           code: response.status.toString() ?? 'ERR_UNKNOWN',
-          description: response.data ?? 'Unknown error'
+          description: typeof response.data === 'string' ? response.data : 'Unknown error'
         }
       }
     } catch (error) {

@@ -817,7 +817,7 @@ describe('Fees', () => {
         const tx = Transaction.fromBEEF(toArray(BRC62Hex, 'hex'))
 
         // Ensure the transaction and required properties exist
-        if (tx == null || tx == undefined) throw new Error('Transaction could not be deserialized.')
+        if (tx == null || tx === undefined) throw new Error('Transaction could not be deserialized.')
         if (tx.inputs.length === 0) throw new Error('Transaction has no inputs.')
         if (tx.inputs[0].sourceTransaction == null) { throw new Error('Source transaction is missing.') }
         if (tx.inputs[0].sourceTransaction.merklePath == null) { throw new Error('Merkle path is missing.') }

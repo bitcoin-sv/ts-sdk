@@ -31,7 +31,10 @@ describe('WhatsOnChain ChainTracker', () => {
 
   it('should verify merkleroot successfully using Node.js https', async () => {
     // Mocking Node.js https module
-    mockedHttps(successResponse)
+    mockedHttps({
+      ...successResponse,
+      data: JSON.stringify(successResponse.data) // Ensure data is a string
+    })
     global.window = {} as unknown as Window & typeof globalThis
 
     const chainTracker = new WhatsOnChain(network)
@@ -59,7 +62,10 @@ describe('WhatsOnChain ChainTracker', () => {
   })
 
   it('should verify merkleroot successfully using provided Node.js https', async () => {
-    const mockHttps = mockedHttps(successResponse)
+    const mockHttps = mockedHttps({
+      ...successResponse,
+      data: JSON.stringify(successResponse.data) // Convert data to a string
+    })
 
     const chainTracker = new WhatsOnChain(network, {
       httpClient: new NodejsHttpClient(mockHttps)
@@ -154,34 +160,43 @@ describe('WhatsOnChain ChainTracker', () => {
     await expect(await chainTracker.currentHeight()).toBe(875904)
   })
 
-  function mockedFetch (response) {
-    return jest.fn().mockResolvedValue({
-      ok: response.status === 200,
-      status: response.status,
-      statusText: response.status === 200 ? 'OK' : 'Bad request',
-      headers: {
-        get (key: string) {
-          if (key === 'Content-Type') {
-            return 'application/json'
-          }
-        }
-      },
-      json: async () => response.data
-    })
+  function mockedFetch (response: { status: number, data: any }): jest.Mock<Promise<Response>> {
+    return jest.fn().mockResolvedValue(
+      new Response(JSON.stringify(response.data), {
+        status: response.status,
+        statusText: response.status === 200 ? 'OK' : 'Bad request',
+        headers: new Headers({ 'Content-Type': 'application/json' }) // Uses Headers API
+      })
+    )
   }
 
-  function mockedHttps (response) {
+  function mockedHttps (response: { status: number, data: string }): {
+    request: (
+      url: string,
+      options: unknown,
+      callback: (res: {
+        statusCode: number
+        statusMessage: string
+        headers: { 'content-type': string }
+        on: (event: string, handler: (chunk?: any) => void) => void
+      }) => void
+    ) => {
+      on: jest.Mock
+      write: jest.Mock
+      end: jest.Mock
+    }
+  } {
     const https = {
       request: (url, options, callback) => {
         // eslint-disable-next-line
         callback({
           statusCode: response.status,
-          statusMessage: response.status == 200 ? 'OK' : 'Bad request',
+          statusMessage: response.status === 200 ? 'OK' : 'Bad request',
           headers: {
             'content-type': 'application/json'
           },
           on: (event, handler) => {
-            if (event === 'data') handler(JSON.stringify(response.data))
+            if (event === 'data') handler(response.data)
             if (event === 'end') handler()
           }
         })

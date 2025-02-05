@@ -6,7 +6,7 @@ import Point from '../primitives/Point'
 import * as Hash from '../primitives/Hash'
 import { toArray, toHex, encode } from '../primitives/utils'
 
-function AES (key) {
+function AES (key): void {
   if (this._tables[0][0][0] === undefined) this._precompute()
 
   let tmp, encKey, decKey
@@ -46,7 +46,7 @@ function AES (key) {
 
   // schedule decryption keys
   for (let j = 0; i > 0; j++, i--) {
-    tmp = encKey[j & 3 ? i : i - 4]
+    tmp = encKey[(j & 3) !== 0 ? i : i - 4]
     if (i <= 4 || j < 4) {
       decKey[j] = tmp
     } else {
@@ -130,7 +130,7 @@ AES.prototype = {
       th[(d[i] = (i << 1) ^ ((i >> 7) * 283)) ^ i] = i
     }
 
-    for (x = xInv = 0; typeof sbox[x] === 'undefined'; x ^= (x2 !== undefined ? x2 : 1), xInv = th[xInv] || 1) {
+    for (x = xInv = 0; typeof sbox[x] === 'undefined'; x ^= (x2 !== undefined ? x2 : 1), xInv = th[xInv] !== undefined ? th[xInv] : 1) {
       // Compute sbox
       s = xInv ^ (xInv << 1) ^ (xInv << 2) ^ (xInv << 3) ^ (xInv << 4)
       s = (s >> 8) ^ (s & 255) ^ 99
@@ -235,15 +235,14 @@ AES.prototype = {
     return out
   }
 }
-
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 class AESWrapper {
   public static encrypt (messageBuf: number[], keyBuf: number[]): number[] {
     const key = AESWrapper.buf2Words(keyBuf)
     const message = AESWrapper.buf2Words(messageBuf)
     const a = new AES(key)
     const enc = a.encrypt(message)
-    const encBuf = AESWrapper.words2Buf(enc)
-    return encBuf
+    return AESWrapper.words2Buf(enc)
   }
 
   public static decrypt (encBuf: number[], keyBuf: number[]): number[] {
@@ -251,8 +250,7 @@ class AESWrapper {
     const key = AESWrapper.buf2Words(keyBuf)
     const a = new AES(key)
     const message = a.decrypt(enc)
-    const messageBuf = AESWrapper.words2Buf(message)
-    return messageBuf
+    return AESWrapper.words2Buf(message)
   }
 
   public static buf2Words (buf: number[]): number[] {
@@ -260,14 +258,14 @@ class AESWrapper {
       throw new Error('buf length must be a multiple of 4')
     }
 
-    const words: number[] = [] // Explicitly define the type
+    const words: number[] = []
 
     for (let i = 0; i < buf.length / 4; i++) {
       const val =
-        buf[i * 4] * 0x1000000 + // Shift the first byte by 24 bits
-        ((buf[i * 4 + 1] << 16) | // Shift the second byte by 16 bits
-          (buf[i * 4 + 2] << 8) | // Shift the third byte by 8 bits
-          buf[i * 4 + 3]) // The fourth byte
+        buf[i * 4] * 0x1000000 +
+        ((buf[i * 4 + 1] << 16) |
+          (buf[i * 4 + 2] << 8) |
+          buf[i * 4 + 3])
 
       words.push(val)
     }
@@ -290,6 +288,7 @@ class AESWrapper {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 class CBC {
   public static buf2BlocksBuf (buf: number[], blockSize: number): number[][] {
     const bytesize = blockSize / 8
@@ -472,6 +471,7 @@ class CBC {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 class AESCBC {
   public static encrypt (
     messageBuf: number[],
@@ -511,6 +511,7 @@ class AESCBC {
  * @prprecated This class is deprecated in favor of the BRC-78 standard for portable encrypted messages,
  * which provides a more comprehensive and secure solution by integrating with BRC-42 and BRC-43 standards.
  */
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export default class ECIES {
   /**
    * Generates the initialization vector (iv), encryption key (kE), and MAC key (kM)

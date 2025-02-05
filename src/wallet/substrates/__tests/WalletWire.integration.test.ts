@@ -585,16 +585,15 @@ it('Validates the revealSpecificKeyLinkage function', async () => {
     .encode(true)
 
   // Function to compute the invoice number
-  const computeInvoiceNumber = function (protocolID, keyID) {
-    const securityLevel = protocolID[0]
-    if (
-      !Number.isInteger(securityLevel) ||
-          securityLevel < 0 ||
-          securityLevel > 2
-    ) {
+  const computeInvoiceNumber = function (protocolID: [number, string], keyID: string): string {
+    const securityLevel: number = protocolID[0]
+
+    if (!Number.isInteger(securityLevel) || securityLevel < 0 || securityLevel > 2) {
       throw new Error('Protocol security level must be 0, 1, or 2')
     }
-    const protocolName = protocolID[1].toLowerCase().trim()
+
+    const protocolName: string = protocolID[1].toLowerCase().trim()
+
     if (keyID.length > 800) {
       throw new Error('Key IDs must be 800 characters or less')
     }
@@ -622,6 +621,7 @@ it('Validates the revealSpecificKeyLinkage function', async () => {
     if (protocolName.endsWith(' protocol')) {
       throw new Error('No need to end your protocol name with " protocol"')
     }
+
     return `${securityLevel}-${protocolName}-${keyID}`
   }
   const invoiceNumber = computeInvoiceNumber(protocolID, keyID)
@@ -634,7 +634,7 @@ it('Validates the revealSpecificKeyLinkage function', async () => {
   expect(linkage).toEqual(expectedLinkage)
 })
 // Helper function to create a test wallet wire setup
-const createTestWalletWire = (wallet: CompletedProtoWallet) => {
+const createTestWalletWire = (wallet: CompletedProtoWallet): WalletWireTransceiver => {
   const processor = new WalletWireProcessor(wallet)
   const transceiver = new WalletWireTransceiver(processor)
   return transceiver
@@ -644,9 +644,13 @@ const createTestWalletWire = (wallet: CompletedProtoWallet) => {
 const mockUnsupportedMethods = (
   methods: Partial<CompletedProtoWallet>
 ): CompletedProtoWallet => {
-  return {
-    ...methods
-  } as CompletedProtoWallet
+  // Ensure `keyDeriver` is always set (or provide a mock default)
+  const completedWallet = new CompletedProtoWallet('anyone')
+
+  // Override properties with the provided methods (if any)
+  Object.assign(completedWallet, methods)
+
+  return completedWallet
 }
 
 describe('createAction', () => {

@@ -47,20 +47,20 @@ export class KeyShares {
       if (shareParts.length !== 4) {
         throw Error(
           'Invalid share format in share ' +
-            idx +
+            idx.toString() +
             '. Expected format: "x.y.t.i" - received ' +
             share
         )
       }
       const [x, y, t, i] = shareParts
-      if (!t) throw Error('Threshold not found in share ' + idx)
-      if (!i) throw Error('Integrity not found in share ' + idx)
+      if (t === '') throw Error('Threshold not found in share ' + idx.toString())
+      if (i === '') throw Error('Integrity not found in share ' + idx.toString())
       const tInt = parseInt(t)
       if (idx !== 0 && threshold !== tInt) {
-        throw Error('Threshold mismatch in share ' + idx)
+        throw Error('Threshold mismatch in share ' + idx.toString())
       }
       if (idx !== 0 && integrity !== i) {
-        throw Error('Integrity mismatch in share ' + idx)
+        throw Error('Integrity mismatch in share ' + idx.toString())
       }
       threshold = tInt
       integrity = i
@@ -69,9 +69,9 @@ export class KeyShares {
     return new KeyShares(points, threshold, integrity)
   }
 
-  toBackupFormat () {
+  toBackupFormat (): string[] {
     return this.points.map(
-      (share) => share.toString() + '.' + this.threshold + '.' + this.integrity
+      (share) => `${share.toString()}.${String(this.threshold)}.${String(this.integrity)}`
     )
   }
 }

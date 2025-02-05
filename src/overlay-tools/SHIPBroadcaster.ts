@@ -138,21 +138,22 @@ export default class SHIPCast implements Broadcaster {
       throw new Error('Every topic must start with "tm_".')
     }
     this.topics = topics
-    const {
-      facilitator,
-      resolver,
-      requireAcknowledgmentFromAllHostsForTopics,
-      requireAcknowledgmentFromAnyHostForTopics,
-      requireAcknowledgmentFromSpecificHostsForTopics
-    } = config ?? ({} as SHIPBroadcasterConfig)
-    this.facilitator = facilitator ?? new HTTPSOverlayBroadcastFacilitator()
-    this.resolver = resolver ?? new LookupResolver()
+    const defaultConfig: SHIPBroadcasterConfig = {
+      facilitator: new HTTPSOverlayBroadcastFacilitator(),
+      resolver: new LookupResolver(),
+      requireAcknowledgmentFromAllHostsForTopics: [],
+      requireAcknowledgmentFromAnyHostForTopics: 'all',
+      requireAcknowledgmentFromSpecificHostsForTopics: {}
+    }
+    const finalConfig: SHIPBroadcasterConfig = config ?? defaultConfig
+    this.facilitator = finalConfig.facilitator ?? new HTTPSOverlayBroadcastFacilitator()
+    this.resolver = finalConfig.resolver
     this.requireAcknowledgmentFromAllHostsForTopics =
-      requireAcknowledgmentFromAllHostsForTopics ?? []
+      finalConfig.requireAcknowledgmentFromAllHostsForTopics ?? 'all'
     this.requireAcknowledgmentFromAnyHostForTopics =
-      requireAcknowledgmentFromAnyHostForTopics ?? 'all'
+      finalConfig.requireAcknowledgmentFromAnyHostForTopics ?? 'all'
     this.requireAcknowledgmentFromSpecificHostsForTopics =
-      requireAcknowledgmentFromSpecificHostsForTopics ?? {}
+      finalConfig.requireAcknowledgmentFromSpecificHostsForTopics ?? {}
   }
 
   /**

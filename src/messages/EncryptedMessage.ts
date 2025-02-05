@@ -20,8 +20,7 @@ export const encrypt = (
   recipient: PublicKey
 ): number[] => {
   const keyID = Random(32)
-  const keyIDBase64 = toBase64(keyID)
-  const invoiceNumber = `2-message encryption-${keyIDBase64}`
+  const invoiceNumber = `2-message encryption-${toHex(keyID)}`
   const signingPriv = sender.deriveChild(recipient, invoiceNumber)
   const recipientPub = recipient.deriveChild(sender, invoiceNumber)
   const sharedSecret = signingPriv.deriveSharedSecret(recipientPub)
@@ -31,8 +30,8 @@ export const encrypt = (
   const version = toArray(VERSION, 'hex')
   return [
     ...version,
-    ...senderPublicKey,
-    ...recipient.encode(true),
+    ...toArray(senderPublicKey, 'hex'),
+    ...toArray(recipient.encode(true), 'hex'),
     ...keyID,
     ...encrypted
   ]

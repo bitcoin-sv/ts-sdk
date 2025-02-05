@@ -189,7 +189,7 @@ export default class Signature {
    * @example
    * const der = signature.toString('base64');
    */
-  toString (enc?: 'hex' | 'base64') {
+  toString (enc?: 'hex' | 'base64'): number[] | string {
     return this.toDER(enc)
   }
 
@@ -321,7 +321,7 @@ export default class Signature {
     const s = this.s
 
     // A set LSB signifies that the y-coordinate is odd
-    const isYOdd = !!(recovery & 1)
+    const isYOdd = (recovery & 1) !== 0
 
     // The more significant bit specifies whether we should use the
     // first or second candidate key.
@@ -332,7 +332,7 @@ export default class Signature {
     const G = curve.g
 
     // 1.1 LEt x = r + jn
-    const x = isSecondKey ? r.add(n) : r
+    const x = isSecondKey !== 0 ? r.add(n) : r
     const R = Point.fromX(x, isYOdd)
 
     // 1.4 Check that nR is at infinity

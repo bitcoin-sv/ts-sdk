@@ -1307,7 +1307,7 @@ export default class Spend {
 
           // Clean up stack of actual arguments
           while (i-- > 1) {
-            if (!fSuccess && !ikey2 && this.stacktop(-1).length > 0) {
+            if (!fSuccess && ikey2 === 0 && this.stacktop(-1).length > 0) {
               this.scriptEvaluationError(
                 `${OP[currentOpcode] as string} failed to verify a signature, and requires an empty signature when verification fails.`
               )

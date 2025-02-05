@@ -42,7 +42,7 @@ export default class BeefTx {
     return this._txid !== undefined && this._txid !== null && (this._rawTx == null) && (this._tx == null)
   }
 
-  get txid () {
+  get txid (): string {
     if (this._txid !== undefined && this._txid !== null && this._txid !== '') return this._txid
     if (this._tx != null) {
       this._txid = this._tx.id('hex')
@@ -55,7 +55,7 @@ export default class BeefTx {
     throw new Error('Internal')
   }
 
-  get tx () {
+  get tx (): Transaction | undefined {
     if (this._tx != null) return this._tx
     if (this._rawTx != null) {
       this._tx = Transaction.fromBinary(this._rawTx)
@@ -64,7 +64,7 @@ export default class BeefTx {
     return undefined
   }
 
-  get rawTx () {
+  get rawTx (): number[] | undefined {
     if (this._rawTx != null) return this._rawTx
     if (this._tx != null) {
       this._rawTx = this._tx.toBinary()
@@ -101,7 +101,7 @@ export default class BeefTx {
     return new BeefTx(txid, bumpIndex)
   }
 
-  private updateInputTxids () {
+  private updateInputTxids (): void {
     if (this.hasProof || (this.tx == null)) {
       // If we have a proof, or don't have a parsed transaction
       this.inputTxids = []
@@ -118,18 +118,18 @@ export default class BeefTx {
   }
 
   toWriter (writer: Writer, version: number): void {
-    const writeByte = (bb: number) => {
+    const writeByte = (bb: number): void => {
       writer.writeUInt8(bb)
     }
 
-    const writeTxid = () => {
+    const writeTxid = (): void => {
       if (this._txid == null) {
         throw new Error('Transaction ID (_txid) is undefined')
       }
       writer.writeReverse(toArray(this._txid, 'hex'))
     }
 
-    const writeTx = () => {
+    const writeTx = (): void => {
       if (this._rawTx != null) {
         writer.write(this._rawTx)
       } else if (this._tx != null) {
@@ -139,7 +139,7 @@ export default class BeefTx {
       }
     }
 
-    const writeBumpIndex = () => {
+    const writeBumpIndex = (): void => {
       if (this.bumpIndex === undefined) {
         writeByte(TX_DATA_FORMAT.RAWTX) // 0
       } else {
@@ -185,7 +185,7 @@ export default class BeefTx {
     } else {
       // V1
       data = Transaction.fromReader(br)
-      bumpIndex = br.readUInt8() ? br.readVarIntNum() : undefined
+      bumpIndex = br.readUInt8() !== 0 ? br.readVarIntNum() : undefined
       beefTx = BeefTx.fromTx(data, bumpIndex)
     }
 

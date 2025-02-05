@@ -24,7 +24,7 @@ export default class HTTPWalletWire implements WalletWire {
 
     // Map call code to call name
     const callName = WalletWireCalls[callCode] // calls is enum
-    if (!callName) {
+    if (callName === undefined || callName === '') {
       // Invalid call code
       throw new Error(`Invalid call code: ${callCode}`)
     }

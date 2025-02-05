@@ -19,7 +19,7 @@ describe('PrivateKey', () => {
   describe('PrivateKey Validation and Conversion', () => {
     const curve = new Curve()
 
-    const isValidPrivateKey = (key) => {
+    const isValidPrivateKey = (key: string): boolean => {
       try {
         const keyAsNumber = new BigNumber(key, 16)
         return (

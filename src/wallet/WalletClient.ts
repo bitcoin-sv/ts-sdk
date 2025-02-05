@@ -69,17 +69,17 @@ export default class WalletClient implements WalletInterface {
     this.originator = originator
   }
 
-  async connectToSubstrate () {
+  async connectToSubstrate (): Promise<void> {
     if (typeof this.substrate === 'object') {
       return // substrate is already connected
     }
     let sub: WalletInterface
-    const checkSub = async (timeout?: number) => {
+    const checkSub = async (timeout?: number): Promise<void> => {
       let result
       if (typeof timeout === 'number') {
         result = await Promise.race([
           sub.getVersion({}),
-          new Promise<never>((_, reject) =>
+          new Promise<never>((_resolve, reject) =>
             setTimeout(() => reject(new Error('Timed out.')), timeout)
           )
         ])

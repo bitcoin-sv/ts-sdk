@@ -194,7 +194,7 @@ describe('BN.js/Constructor', () => {
   describe('with Buffer input', () => {
     it('should not fail on empty Buffer', () => {
       expect(
-        new BigNumber(Buffer.alloc(0).toString('hex') || '0').toString(16)
+        new BigNumber(Buffer.alloc(0).toString('hex') === '' ? '0' : Buffer.alloc(0).toString('hex')).toString(16)
       ).toEqual('0')
     })
 

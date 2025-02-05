@@ -186,7 +186,7 @@ describe('Spend', () => {
     const k = new PrivateKey(2)
     const c = new Curve()
 
-    if (c.g == null || c.g == undefined) {
+    if (c.g == null || c.g === undefined) {
       throw new Error('Curve generator point is null')
     }
 
@@ -256,7 +256,7 @@ describe('Spend', () => {
     const wrongK = new PrivateKey(5)
     const c = new Curve()
 
-    if (c.g == null || c.g == undefined) {
+    if (c.g == null || c.g === undefined) {
       throw new Error('Curve generator point is null')
     }
 
@@ -324,7 +324,7 @@ describe('Spend', () => {
     const k = new PrivateKey(2)
     const c = new Curve()
 
-    if (c.g == null || c.g == undefined) {
+    if (c.g == null || c.g === undefined) {
       throw new Error('Curve generator point is null')
     }
 

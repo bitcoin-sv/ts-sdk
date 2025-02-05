@@ -144,53 +144,47 @@ describe('Beef tests', () => {
   })
 
   test('1_all merkleRoots equal', async () => {
-    {
-      const beef = Beef.fromString(beefs[0])
-      expect(beef.isValid(undefined)).toBe(true)
-      const mp = beef.bumps[0]
-      mp.path[0].push({
-        offset: 2,
-        hash: 'd0ae03111611f04a4c6e45a0a93f62f69c5594b64b369c0262289695feb2f991',
-        txid: true,
-        duplicate: false
-      })
-      mp.path[0].push({
-        offset: 3,
-        hash: undefined,
-        txid: false,
-        duplicate: true
-      })
-      expect(beef.isValid(undefined)).toBe(true)
-      mp.path[0][2].hash =
+    const beef = Beef.fromString(beefs[0])
+    expect(beef.isValid(undefined)).toBe(true)
+    const mp = beef.bumps[0]
+    mp.path[0].push({
+      offset: 2,
+      hash: 'd0ae03111611f04a4c6e45a0a93f62f69c5594b64b369c0262289695feb2f991',
+      txid: true,
+      duplicate: false
+    })
+    mp.path[0].push({
+      offset: 3,
+      hash: undefined,
+      txid: false,
+      duplicate: true
+    })
+    expect(beef.isValid(undefined)).toBe(true)
+    mp.path[0][2].hash =
         'ffae03111611f04a4c6e45a0a93f62f69c5594b64b369c0262289695feb2f991'
-      expect(beef.isValid(undefined)).toBe(false)
-      expect(await beef.verify(chainTracker, undefined)).toBe(false)
-    }
+    expect(beef.isValid(undefined)).toBe(false)
+    expect(await beef.verify(chainTracker, undefined)).toBe(false)
   })
 
   test('2_allowTxidOnly', async () => {
-    {
-      const beef = Beef.fromString(beefs[0])
-      expect(beef.isValid(undefined)).toBe(true)
-      beef.mergeTxidOnly(
-        'd0ae03111611f04a4c6e45a0a93f62f69c5594b64b369c0262289695feb2f991'
-      )
-      expect(beef.isValid(undefined)).toBe(false)
-      expect(beef.isValid(true)).toBe(true)
-    }
+    const beef = Beef.fromString(beefs[0])
+    expect(beef.isValid(undefined)).toBe(true)
+    beef.mergeTxidOnly(
+      'd0ae03111611f04a4c6e45a0a93f62f69c5594b64b369c0262289695feb2f991'
+    )
+    expect(beef.isValid(undefined)).toBe(false)
+    expect(beef.isValid(true)).toBe(true)
   })
 
   test('3_removeExistingTxid', async () => {
-    {
-      const beef = Beef.fromString(beefs[0])
-      expect(beef.isValid(undefined)).toBe(true)
-      expect(beef.txs.length).toBe(1)
-      beef.removeExistingTxid(
-        'bd4a39c6dce3bdd982be3c67eb04b83934fd431f8bcb64f9da4413c91c634d07'
-      )
-      expect(beef.isValid(undefined)).toBe(true)
-      expect(beef.txs.length).toBe(0)
-    }
+    const beef = Beef.fromString(beefs[0])
+    expect(beef.isValid(undefined)).toBe(true)
+    expect(beef.txs.length).toBe(1)
+    beef.removeExistingTxid(
+      'bd4a39c6dce3bdd982be3c67eb04b83934fd431f8bcb64f9da4413c91c634d07'
+    )
+    expect(beef.isValid(undefined)).toBe(true)
+    expect(beef.txs.length).toBe(0)
   })
 
   test('4_mergeTransaction with parent txs', async () => {
@@ -386,17 +380,15 @@ describe('Beef tests', () => {
   })
 
   test('8_toBinaryAtomic', async () => {
-    {
-      const beef = Beef.fromString(beefs[0])
-      const tx = Transaction.fromHex(txs[0])
-      beef.mergeTransaction(tx)
-      beef.sortTxs()
-      beef.toLogString()
-      const atomic = beef.toBinaryAtomic(tx.id('hex'))
-      const t2 = Transaction.fromAtomicBEEF(atomic)
-      const beef2 = t2.toAtomicBEEF()
-      expect(atomic).toEqual(beef2)
-    }
+    const beef = Beef.fromString(beefs[0])
+    const tx = Transaction.fromHex(txs[0])
+    beef.mergeTransaction(tx)
+    beef.sortTxs()
+    beef.toLogString()
+    const atomic = beef.toBinaryAtomic(tx.id('hex'))
+    const t2 = Transaction.fromAtomicBEEF(atomic)
+    const beef2 = t2.toAtomicBEEF()
+    expect(atomic).toEqual(beef2)
   })
   test('9_sortTxs', async () => {
     {
@@ -418,7 +410,7 @@ describe('Beef tests', () => {
   })
 
   test('10_deserialize beef with extra leaves', async () => {
-    const b58Beef = b58Beef_10
+    const b58Beef = b58Beef10
     const beef = Beef.fromBinary(fromBase58(b58Beef))
     expect(beef.isValid()).toBe(true)
     const abeef = beef.toBinaryAtomic(beef.txs[beef.txs.length - 1].txid)
@@ -451,7 +443,7 @@ describe('Beef tests', () => {
     expect(await beef.verify(mockChainTracker)).toBe(true)
   })
 
-  const b58Beef_10 =
+  const b58Beef10 =
     'gno9MC7VXii1KoCkc2nsVyYJpqzN3dhBzYATETJcys62emMKfpBof4R7GozwYEaSapUtnNvqQ57aaYYjm3U2dv9eUJ1sV46boHkQgppYmAz9YH8FdZduV8aJayPViaKcyPmbDhEw6UW8TM5iFZLXNs7HBnJHUKCeTdNK4FUEL7vAugxAV9WUUZ43BZjJk2SmSeps9TCXjt1Ci9fKWp3d9QSoYvTpxwzyUFHjRKtbUgwq55ZfkBp5bV2Bpz9qSuKywKewW7Hh4S1nCUScwwzpKDozb3zic1V9p2k8rQxoPsRxjUJ8bjhNDdsN8d7KukFuc3n47fXzdWttvnxwsujLJRGnQbgJuknQqx3KLf5kJXHzwjG6TzigZk2t24qeB6d3hbYiaDr2fFkUJBL3tukTHhfNkQYRXuz3kucVDzvejHyqJaF51mXG8BjMN5aQj91ZJXCaPVqkMWCzmvyaqmXMdRiJdSAynhXbQK91xf6RwdNhz1tg5f9B6oJJMhsi9UYSVymmax8VLKD9AKzBCBDcfyD83m3jyS1VgKGZn3SkQmr6bsoWq88L3GsMnnmYUGogvdAYarTqg3pzkjCMxHzmJBMN6ofnUk8c1sRTXQue7BbyUaN5uZu3KW6CmFsEfpuqVvnqFW93TU1jrPP2S8yz8AexAnARPCKE8Yz7RfVaT6RCavwQKL3u5iookwRWEZXW1QWmM37yJWHD87SjVynyg327a1CLwcBxmE2CB48QeNVGyQki4CTQMqw2o8TMhDPJej1g68oniAjBcxBLSCs7KGvK3k7AfrHbCMULX9CTibYhCjdFjbsbBoocqJpxxcvkMo1fEEiAzZuiBVZQDYktDdTVbhKHvYkW25HcYX75NJrpNAhm7AjFeKLzEVxqAQkMfvTufpESNRZF4kQqg2Rg8h2ajcKTd5cpEPwXCrZLHm4EaZEmZVbg3QNfGhn7BJu1bHMtLqPD4y8eJxm2uGrW6saf6qKYmmu64F8A667NbD4yskPRQ1S863VzwGpxxmgLc1Ta3R46jEqsAoRDoZVUaCgBBZG3Yg1CTgi1EVBMXU7qvY4n3h8o2FLCEMWY4KadnV3iD4FbcdCmg4yxBosNAZgbPjhgGjCimjh4YsLd9zymGLmivmz2ZBg5m3xaiXT9NN81X9C1JUujd'
 
   const txs: string[] = [

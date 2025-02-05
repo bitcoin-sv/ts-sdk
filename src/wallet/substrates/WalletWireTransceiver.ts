@@ -1772,7 +1772,16 @@ export default class WalletWireTransceiver implements WalletInterface {
     const paramWriter = new Utils.Writer()
 
     // Ensure `certificate` exists and provide default empty values
-    const cert = args.certificate ?? ({} as WalletCertificate)
+    const cert: WalletCertificate = {
+      type: '',
+      subject: '',
+      serialNumber: '',
+      certifier: '',
+      revocationOutpoint: '',
+      signature: '',
+      fields: {},
+      ...args.certificate
+    }
 
     // Ensure required fields are valid strings
     const typeAsArray = Utils.toArray(cert.type ?? '', 'base64')
@@ -2046,7 +2055,7 @@ export default class WalletWireTransceiver implements WalletInterface {
   ): Promise<{ authenticated: true }> {
     const result = await this.transmit('isAuthenticated', originator)
     // @ts-expect-error: Result might be empty, explicitly checking first element
-    return { authenticated: !!result[0] }
+    return { authenticated: result[0] !== 0 && !isNaN(result[0]) }
   }
 
   async waitForAuthentication (

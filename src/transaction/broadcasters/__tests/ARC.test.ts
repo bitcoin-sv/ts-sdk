@@ -3,15 +3,16 @@ import Transaction from '../../../transaction/Transaction'
 import { NodejsHttpClient } from '../../../transaction/http/NodejsHttpClient'
 import { FetchHttpClient } from '../../../transaction/http/FetchHttpClient'
 import { HttpClientRequestOptions } from '../../http'
+import { RequestOptions } from 'https'
 
 // Mock Transaction
 jest.mock('../../../transaction/Transaction', () => {
   class MockTransaction {
-    toHex () {
+    toHex (): string {
       return 'mocked_transaction_hex'
     }
 
-    toHexEF () {
+    toHexEF (): string {
       return 'mocked_transaction_hexEF'
     }
   }
@@ -108,7 +109,7 @@ describe('ARC Broadcaster', () => {
     await broadcaster.broadcast(transaction)
 
     // Ensure headers exist and cast to the correct type
-    const requestOptions = (mockFetch as jest.Mock).mock.calls[0][1] as HttpClientRequestOptions
+    const requestOptions = mockFetch.mock.calls[0][1] as HttpClientRequestOptions
     const headers = (requestOptions?.headers ?? {}) // ✅ Proper typing
 
     expect(headers['Content-Type']).toEqual('application/json')
@@ -128,7 +129,7 @@ describe('ARC Broadcaster', () => {
     await broadcaster.broadcast(transaction)
 
     // Extract and properly type headers
-    const requestOptions = (mockFetch as jest.Mock).mock.calls[0][1] as HttpClientRequestOptions
+    const requestOptions = mockFetch.mock.calls[0][1] as HttpClientRequestOptions
     const headers = (requestOptions?.headers ?? {}) // ✅ Correct typing
 
     expect(headers['XDeployment-ID']).toBeDefined()
@@ -146,7 +147,7 @@ describe('ARC Broadcaster', () => {
     await broadcaster.broadcast(transaction)
 
     // Ensure headers is always defined
-    const headers = ((mockFetch as jest.Mock).mock.calls[0][1] as HttpClientRequestOptions)?.headers ?? {}
+    const headers = (mockFetch.mock.calls[0][1] as HttpClientRequestOptions)?.headers ?? {}
 
     expect(headers.Authorization).toEqual(`Bearer ${apiKey}`)
   })
@@ -163,8 +164,7 @@ describe('ARC Broadcaster', () => {
 
     // Ensure headers is always defined
     const headers =
-      ((((mockFetch as jest.Mock).mock.calls[0][1] as HttpClientRequestOptions)
-        ?.headers) != null) || {}
+    (mockFetch.mock.calls[0]?.[1]?.headers) ?? {}
 
     expect(headers['XDeployment-ID']).toEqual(deploymentId)
   })
@@ -188,7 +188,7 @@ describe('ARC Broadcaster', () => {
 
   it('should handle non-200 responses', async () => {
     const mockFetch = mockedFetch({
-      status: '400',
+      status: 400,
       data: JSON.stringify({
         detail: 'Bad request'
       })
@@ -250,37 +250,65 @@ describe('ARC Broadcaster', () => {
     }
   })
 
-  function mockedFetch (response) {
+  function mockedFetch (response: { status: number, data: any }): jest.Mock {
     return jest.fn().mockResolvedValue({
       ok: response.status === 200,
       status: response.status,
       statusText: response.status === 200 ? 'OK' : 'Bad request',
       headers: {
-        get (key: string) {
+        get: (key: string): string | undefined => {
           if (key === 'Content-Type') {
             return 'application/json; charset=UTF-8'
           }
+          return undefined
         }
       },
       json: async () => response.data
     })
   }
 
-  function mockedHttps (response) {
+  function mockedHttps (response: { status: number, data: any }): {
+    request: (
+      url: string,
+      options: RequestOptions,
+      callback: (res: {
+        statusCode: number
+        statusMessage: string
+        headers: { 'content-type': string }
+        on: (event: string, handler: (chunk?: any) => void) => void
+      }) => void
+    ) => {
+      on: jest.Mock
+      write: jest.Mock
+      end: jest.Mock
+    }
+  } {
     const https = {
-      request: (url, options, callback) => {
-        // eslint-disable-next-line
-        callback({
+      request: (
+        url: string,
+        options: RequestOptions,
+        callback: (res: {
+          statusCode: number
+          statusMessage: string
+          headers: { 'content-type': string }
+          on: (event: string, handler: (chunk?: any) => void) => void
+        }) => void
+      ) => {
+        const mockResponse = {
           statusCode: response.status,
-          statusMessage: response.status == 200 ? 'OK' : 'Bad request',
+          statusMessage: response.status === 200 ? 'OK' : 'Bad request',
           headers: {
             'content-type': 'application/json; charset=UTF-8'
           },
-          on: (event, handler) => {
+          on (event: string, handler: (chunk?: any) => void) {
             if (event === 'data') handler(JSON.stringify(response.data))
             if (event === 'end') handler()
           }
-        })
+        }
+
+        // ✅ Call the callback asynchronously to match Node.js behavior
+        process.nextTick(() => callback(mockResponse))
+
         return {
           on: jest.fn(),
           write: jest.fn(),
@@ -288,6 +316,7 @@ describe('ARC Broadcaster', () => {
         }
       }
     }
+
     jest.mock('https', () => https)
     return https
   }

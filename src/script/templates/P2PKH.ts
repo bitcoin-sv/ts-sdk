@@ -97,19 +97,19 @@ export default class P2PKH implements ScriptTemplate {
         )
 
         const sourceTXID = input.sourceTXID ?? input.sourceTransaction?.id('hex')
-        if (sourceTXID == null || sourceTXID == undefined) {
+        if (sourceTXID == null || sourceTXID === undefined) {
           throw new Error(
             'The input sourceTXID or sourceTransaction is required for transaction signing.'
           )
         }
-        if (!sourceTXID) {
+        if (sourceTXID === '') {
           throw new Error(
             'The input sourceTXID or sourceTransaction is required for transaction signing.'
           )
         }
         sourceSatoshis ||=
           input.sourceTransaction?.outputs[input.sourceOutputIndex].satoshis
-        if (sourceSatoshis == null || sourceSatoshis == undefined) {
+        if (sourceSatoshis == null || sourceSatoshis === undefined) {
           throw new Error(
             'The sourceSatoshis or input sourceTransaction is required for transaction signing.'
           )

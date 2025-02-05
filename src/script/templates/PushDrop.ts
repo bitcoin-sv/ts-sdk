@@ -161,7 +161,7 @@ export default class PushDrop implements ScriptTemplate {
       pushDropChunks.push({ op: OP.OP_2DROP })
       notYetDropped -= 2
     }
-    if (notYetDropped) {
+    if (notYetDropped !== 0) {
       pushDropChunks.push({ op: OP.OP_DROP })
     }
     if (lockPosition === 'before') {
@@ -222,14 +222,14 @@ export default class PushDrop implements ScriptTemplate {
         )
 
         const sourceTXID = input.sourceTXID ?? input.sourceTransaction?.id('hex')
-        if (sourceTXID == null || sourceTXID == undefined) {
+        if (sourceTXID == null || sourceTXID === undefined) {
           throw new Error(
             'The input sourceTXID or sourceTransaction is required for transaction signing.'
           )
         }
         sourceSatoshis ||=
           input.sourceTransaction?.outputs[input.sourceOutputIndex].satoshis
-        if (sourceSatoshis == null || sourceSatoshis == undefined) {
+        if (sourceSatoshis == null || sourceSatoshis === undefined) {
           throw new Error(
             'The sourceSatoshis or input sourceTransaction is required for transaction signing.'
           )

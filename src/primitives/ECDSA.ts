@@ -137,18 +137,18 @@ export const sign = (
     ): bigint {
       if (typeof customK === 'function') {
         // Call customK function to get k as BigNumber
-        const k_bn = customK(iter)
+        const kbn = customK(iter)
         // Convert k_bn (BigNumber) to BigInt
-        const k_str = k_bn.toString(16)
-        return BigInt('0x' + k_str)
+        const kstr = kbn.toString(16)
+        return BigInt('0x' + kstr)
       } else if ((customK != null) && BigNumber.isBN(customK)) {
         // Use customK provided, convert to BigInt
-        const k_str = customK.toString(16)
-        return BigInt('0x' + k_str)
+        const kstr = customK.toString(16)
+        return BigInt('0x' + kstr)
       } else {
         // Use DRBG to generate k
-        const k_hex = drbg.generate(bytes) // Generate hex string
-        return BigInt('0x' + k_hex)
+        const khex = drbg.generate(bytes) // Generate hex string
+        return BigInt('0x' + khex)
       }
     }
 
@@ -291,9 +291,9 @@ export const sign = (
       }
 
       // Return signature as BigNumbers
-      const r_bn = new BigNumber(r.toString(16), 16)
-      const s_bn = new BigNumber(s.toString(16), 16)
-      return new Signature(r_bn, s_bn)
+      const rbn = new BigNumber(r.toString(16), 16)
+      const sbn = new BigNumber(s.toString(16), 16)
+      return new Signature(rbn, sbn)
     }
   } else {
     const curve = new Curve()
@@ -375,7 +375,6 @@ export const sign = (
         s = curve.n.sub(s)
       }
       return new Signature(r, s)
-      throw new Error('Failed to generate a valid signature')
     }
   }
   throw new Error('Failed to generate a valid signature')
@@ -426,15 +425,15 @@ export const verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
     const mod = (a: bigint, m: bigint): bigint => ((a % m) + m) % m
     const modInv = (a: bigint, m: bigint): bigint => {
       // Extended Euclidean Algorithm for modular inverse
-      let [old_r, r] = [a, m]
-      let [old_s, s] = [BigInt(1), BigInt(0)]
+      let [oldr, r] = [a, m]
+      let [olds, s] = [BigInt(1), BigInt(0)]
       while (r !== zero) {
-        const q = old_r / r;
-        [old_r, r] = [r, old_r - q * r];
-        [old_s, s] = [s, old_s - q * s]
+        const q = oldr / r;
+        [oldr, r] = [r, oldr - q * r];
+        [olds, s] = [s, olds - q * s]
       }
-      if (old_r > one) return zero // No inverse
-      return mod(old_s, m)
+      if (oldr > one) return zero // No inverse
+      return mod(olds, m)
     }
     const modMul = (a: bigint, b: bigint, m: bigint): bigint => mod(a * b, m)
     const modSub = (a: bigint, b: bigint, m: bigint): bigint => mod(a - b, m)
@@ -458,13 +457,13 @@ export const verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
         return { X: zero, Y: one, Z: zero } // Point at infinity
       }
 
-      const Y1_sq = modMul(Y1, Y1, p) // Y1^2
-      const S = modMul(four, modMul(X1, Y1_sq, p), p) // S = 4 * X1 * Y1^2
+      const Y1sq = modMul(Y1, Y1, p) // Y1^2
+      const S = modMul(four, modMul(X1, Y1sq, p), p) // S = 4 * X1 * Y1^2
       const M = modMul(three, modMul(X1, X1, p), p) // M = 3 * X1^2
       const X3 = modSub(modMul(M, M, p), modMul(two, S, p), p) // X3 = M^2 - 2 * S
       const Y3 = modSub(
         modMul(M, modSub(S, X3, p), p),
-        modMul(eight, modMul(Y1_sq, Y1_sq, p), p),
+        modMul(eight, modMul(Y1sq, Y1sq, p), p),
         p
       ) // Y3 = M * (S - X3) - 8 * Y1^4
       const Z3 = modMul(two, modMul(Y1, Z1, p), p) // Z3 = 2 * Y1 * Z1
@@ -563,10 +562,10 @@ export const verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
         return false // No inverse exists
       }
       const ZInv2 = modMul(ZInv, ZInv, p)
-      const x1_affine = modMul(R.X, ZInv2, p)
+      const x1affine = modMul(R.X, ZInv2, p)
 
       // Compute v = x1_affine mod n
-      const v = mod(x1_affine, n)
+      const v = mod(x1affine, n)
 
       // Signature is valid if v == r mod n
       return v === r

@@ -35,7 +35,7 @@ export default class Mnemonic {
    */
   public toBinary (): number[] {
     const bw = new Writer()
-    if (this.mnemonic) {
+    if (this.mnemonic !== '') {
       const buf = toArray(this.mnemonic, 'utf8')
       bw.writeVarIntNum(buf.length)
       bw.write(buf)
@@ -189,7 +189,7 @@ export default class Mnemonic {
     if (bin.length % 11 !== 0) {
       throw new Error(
         'internal error - entropy not an even multiple of 11 bits - ' +
-          bin.length
+          bin.length.toString()
       )
     }
 
@@ -229,7 +229,7 @@ export default class Mnemonic {
     if (bin.length % 11 !== 0) {
       throw new Error(
         'internal error - entropy not an even multiple of 11 bits - ' +
-          bin.length
+          bin.length.toString()
       )
     }
 

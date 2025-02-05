@@ -221,31 +221,24 @@ export default class HD {
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let bip32: HD = this
-    for (const i in e) {
-      const c = e[i]
-
-      if (i === '0') {
+    for (const [index, c] of e.entries()) { // ✅ Iterate over both index & value
+      if (index === 0) { // ✅ Compare index instead of string comparison
         if (c !== 'm') {
           throw new Error('invalid path')
         }
         continue
       }
-
       if (parseInt(c.replace("'", ''), 10).toString() !== c.replace("'", '')) {
         throw new Error('invalid path')
       }
-
       const usePrivate = c.length > 1 && c[c.length - 1] === "'"
       let childIndex =
         parseInt(usePrivate ? c.slice(0, c.length - 1) : c, 10) & 0x7fffffff
-
       if (usePrivate) {
         childIndex += 0x80000000
       }
-
       bip32 = bip32.deriveChild(childIndex)
     }
-
     return bip32
   }
 

@@ -295,7 +295,7 @@ describe('XDMSubstrate', () => {
   })
 
   // Helper function to test methods
-  const testMethod = (methodName, args, result) => {
+  const testMethod = (methodName: string, args: any, result: any): void => {
     describe(methodName, () => {
       beforeEach(() => {
         xdmSubstrate = new XDMSubstrate()

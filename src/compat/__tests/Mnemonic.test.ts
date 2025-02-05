@@ -33,7 +33,7 @@ describe('Mnemonic', function () {
   })
 
   it('should generate a mnemonic phrase that passes the check', () => {
-    let mnemonic
+    let mnemonic: string
 
     // should be able to make a mnemonic with or without the default wordlist
     let m = new Mnemonic().fromRandom(128)
@@ -161,7 +161,7 @@ describe('Mnemonic', function () {
 
   describe('vectors', () => {
     vectors.english.forEach((vector, v) => {
-      it('should pass english test vector ' + v, () => {
+      it('should pass english test vector ' + v.toString(), () => {
         const entropy = toArray(vector.entropy, 'hex')
         const m = new Mnemonic().fromEntropy(entropy)
         expect(m.toString()).toEqual(vector.mnemonic)

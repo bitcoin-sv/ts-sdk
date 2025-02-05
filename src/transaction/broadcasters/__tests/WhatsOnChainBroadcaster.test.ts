@@ -6,11 +6,11 @@ import { FetchHttpClient } from '../../../transaction/http/FetchHttpClient'
 // Mock Transaction
 jest.mock('../../../transaction/Transaction', () => {
   class MockTransaction {
-    toHex () {
+    toHex (): string {
       return 'mocked_transaction_hex'
     }
 
-    toHexEF () {
+    toHexEF (): string {
       return 'mocked_transaction_hexEF'
     }
   }
@@ -127,29 +127,38 @@ describe('WhatsOnChainBroadcaster', () => {
     })
   })
 
-  function mockedFetch (response) {
-    return jest.fn().mockResolvedValue({
-      ok: response.status === 200,
-      status: response.status,
-      statusText: response.status === 200 ? 'OK' : 'Bad request',
-      headers: {
-        get (key: string) {
-          if (key === 'Content-Type') {
-            return 'text/plain'
-          }
-        }
-      },
-      text: async () => response.data
-    })
+  function mockedFetch (response: { status: number, data: string }): jest.Mock<Promise<Response>> {
+    return jest.fn().mockResolvedValue(
+      new Response(response.data, {
+        status: response.status,
+        statusText: response.status === 200 ? 'OK' : 'Bad request',
+        headers: new Headers({ 'Content-Type': 'text/plain' }) // Uses Headers API
+      })
+    )
   }
 
-  function mockedHttps (response) {
+  function mockedHttps (response: { status: number, data: string }): {
+    request: (
+      url: string,
+      options: unknown,
+      callback: (res: {
+        statusCode: number
+        statusMessage: string
+        headers: { 'content-type': string }
+        on: (event: string, handler: (chunk?: any) => void) => void
+      }) => void
+    ) => {
+      on: jest.Mock
+      write: jest.Mock
+      end: jest.Mock
+    }
+  } {
     const https = {
       request: (url, options, callback) => {
         // eslint-disable-next-line
         callback({
           statusCode: response.status,
-          statusMessage: response.status == 200 ? 'OK' : 'Bad request',
+          statusMessage: response.status === 200 ? 'OK' : 'Bad request',
           headers: {
             'content-type': 'text/plain'
           },

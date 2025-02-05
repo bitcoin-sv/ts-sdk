@@ -80,19 +80,19 @@ export default class WhatsOnChain implements ChainTracker {
           `Failed to get current height because of an error: ${JSON.stringify(response.data)} `
         )
       }
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(
-        `Failed to get current height because of an error: ${error?.message}`
+        `Failed to get current height because of an error: ${error instanceof Error ? error.message : String(error)}`
       )
     }
   }
 
-  private getHttpHeaders () {
+  private getHttpHeaders (): Record<string, string> {
     const headers: Record<string, string> = {
       Accept: 'application/json'
     }
 
-    if (this.apiKey) {
+    if (typeof this.apiKey === 'string' && this.apiKey !== '') {
       headers.Authorization = this.apiKey
     }
 
