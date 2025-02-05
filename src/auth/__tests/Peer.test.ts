@@ -202,6 +202,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
   })
 
   it('Neither Alice nor Bob request certificates, mutual authentication completes successfully', async () => {
+    setupPeers(false, false)
     const bobReceivedGeneralMessage = new Promise<void>((resolve) => {
       bob.listenForGeneralMessages((senderPublicKey, payload) => { // ✅ Ensure it's a sync function
         void (async () => { // ✅ Wrap async function in a void IIFE
@@ -253,6 +254,8 @@ describe('Peer class mutual authentication and certificate exchange', () => {
       alicePubKey,
       bobPubKey
     )
+
+    setupPeers(false, false)
 
     const bobReceivedGeneralMessage = new Promise<void>((resolve) => {
       bob.listenForGeneralMessages((senderPublicKey, payload) => { // ✅ Ensure it's a sync function
@@ -336,6 +339,8 @@ describe('Peer class mutual authentication and certificate exchange', () => {
       })()
     })
 
+    setupPeers(false, false)
+
     const bobReceivedGeneralMessage = new Promise<void>((resolve) => {
       bob.listenForGeneralMessages((senderPublicKey, payload) => { // ✅ Ensure it's a sync function
         console.log('Bob received message from Alice:', Utils.toUTF8(payload))
@@ -378,6 +383,8 @@ describe('Peer class mutual authentication and certificate exchange', () => {
       alicePubKey,
       bobPubKey
     )
+
+    setupPeers(false, false)
 
     const bobReceivedGeneralMessage = new Promise<void>((resolve) => {
       bob.listenForGeneralMessages((senderPublicKey, payload) => {
@@ -474,6 +481,8 @@ describe('Peer class mutual authentication and certificate exchange', () => {
         })()
       })
     })
+
+    setupPeers(false, false)
 
     const bobReceivedGeneralMessage = new Promise<void>((resolve) => {
       bob.listenForGeneralMessages((senderPublicKey, payload) => {
@@ -583,6 +592,8 @@ describe('Peer class mutual authentication and certificate exchange', () => {
         })()
       })
     })
+
+    setupPeers(false, false)
 
     const bobReceivedGeneralMessage = new Promise<void>((resolve) => {
       bob.listenForGeneralMessages((senderPublicKey, payload) => { // ✅ Ensure it's a sync function
@@ -709,6 +720,8 @@ describe('Peer class mutual authentication and certificate exchange', () => {
         })()
       })
     })
+
+    setupPeers(false, false)
 
     const bobReceivedGeneralMessage = new Promise<void>((resolve) => {
       bob.listenForGeneralMessages((senderPublicKey, payload) => {

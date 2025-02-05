@@ -713,8 +713,9 @@ export default class Transaction {
     }
     const unlockingScripts = await Promise.all(
       this.inputs.map(async (x, i): Promise<UnlockingScript | undefined> => {
-        if (typeof this.inputs[i].unlockingScriptTemplate === 'object') {
-          return await this.inputs[i].unlockingScriptTemplate.sign(this, i)
+        const input = this.inputs[i] // Store input in a variable
+        if (input?.unlockingScriptTemplate != null) {
+          return await input.unlockingScriptTemplate.sign(this, i)
         } else {
           return await Promise.resolve(undefined)
         }

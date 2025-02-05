@@ -47,8 +47,15 @@ export default class PublicKey extends Point {
    * const myPubKey = PublicKey.fromString("03....")
    */
   static fromString (str: string): PublicKey {
-    const p = Point.fromString(str)
-    return new PublicKey(p.x, p.y)
+    console.log('🔍 [DEBUG] Converting string to PublicKey:', str)
+
+    try {
+      const point = Point.fromString(str)
+      return new PublicKey(point)
+    } catch (error) {
+      console.error('❌ [DEBUG] Failed to convert string to PublicKey:', str, error)
+      throw error
+    }
   }
 
   /**
@@ -111,7 +118,11 @@ export default class PublicKey extends Point {
    * const sharedSecret = myPubKey.deriveSharedSecret(myPrivKey)
    */
   deriveSharedSecret (priv: PrivateKey): Point {
+    console.log('🔍 [DEBUG] Attempting ECDH secret derivation')
+    console.log('Public Key:', this.toString())
+    console.log('Private Key:', priv.toString())
     if (!this.validate()) {
+      console.error('Invalid public key used in ECDH:', this.toString())
       throw new Error('Public key not valid for ECDH secret derivation')
     }
     return this.mul(priv)

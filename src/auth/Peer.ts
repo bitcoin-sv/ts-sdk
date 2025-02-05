@@ -226,18 +226,22 @@ export class Peer {
     let peerSession = (identityKey !== undefined && identityKey !== null)
       ? this.sessionManager.getSession(identityKey)
       : undefined
+    if (peerSession == null || !peerSession.isAuthenticated) {
+      try {
+        const sessionNonce = await this.initiateHandshake(
+          identityKey ?? undefined, // Explicitly handling `undefined`
+          maxWaitTime
+        )
+        peerSession = this.sessionManager.getSession(identityKey ?? sessionNonce)
+      } catch (error) {
+        throw new Error('Handshake failed: Unable to establish mutual authentication with peer.')
+      }
 
-    if ((peerSession == null) || !peerSession.isAuthenticated) {
-      const sessionNonce = await this.initiateHandshake(
-        identityKey ?? undefined, // Explicitly handling `undefined`
-        maxWaitTime
-      )
-
-      peerSession = this.sessionManager.getSession(identityKey ?? sessionNonce)
-
-      if ((peerSession == null) || !peerSession.isAuthenticated) {
+      if (peerSession == null || !peerSession.isAuthenticated) {
         throw new Error('Unable to establish mutual authentication with peer!')
       }
+    } else {
+      console.log('✅ [DEBUG] Returning existing authenticated session.')
     }
 
     return peerSession

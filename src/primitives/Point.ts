@@ -907,10 +907,27 @@ export default class Point extends BasePoint {
       // Try to avoid Projective points, if possible
       const jpa = points[a].toJ()
 
-      if (points[a].y.cmp(points[b].y) === 0) {
+      let fcheck = 0
+      let scheck = 0
+      const yA = points[a]?.y
+      const yB = points[b]?.y
+
+      if (yA != null && yB != null) {
+        if (yA.cmp(yB) !== null) {
+          fcheck = yA.cmp(yB)
+        }
+      }
+
+      if (yA != null && yB != null) {
+        if (yA.cmp(yB.redNeg()) === 0) {
+          scheck = yA.cmp(yB.redNeg())
+        }
+      }
+
+      if (fcheck === 0) {
         comb[1] = points[a].add(points[b])
         comb[2] = jpa.mixedAdd(points[b].neg()).toP() // Convert back to affine
-      } else if (points[a].y.cmp(points[b].y.redNeg()) === 0) {
+      } else if (scheck === 0) {
         comb[1] = jpa.mixedAdd(points[b]).toP() // Convert back to affine
         comb[2] = points[a].add(points[b].neg())
       } else {

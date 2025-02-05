@@ -191,7 +191,7 @@ export default class LookupResolver {
     )
 
     const successfulResponses = hostResponses
-      .filter((result) => result.status === 'fulfilled')
+      .filter((result): result is PromiseFulfilledResult<LookupAnswer> => result.status === 'fulfilled')
       .map((result) => result.value)
 
     if (successfulResponses.length === 0) {
