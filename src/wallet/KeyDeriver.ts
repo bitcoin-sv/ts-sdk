@@ -107,55 +107,30 @@ export class KeyDeriver implements KeyDeriverApi {
   }
 
   /**
- * Derives a public key based on protocol ID, key ID, and counterparty.
- * @param {WalletProtocol} protocolID - The protocol ID including a security level and protocol name.
- * @param {string} keyID - The key identifier.
- * @param {Counterparty} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
- * @param {boolean} [forSelf=false] - Whether deriving for self.
- * @returns {PublicKey} - The derived public key.
- */
+   * Derives a public key based on protocol ID, key ID, and counterparty.
+   * @param {WalletProtocol} protocolID - The protocol ID including a security level and protocol name.
+   * @param {string} keyID - The key identifier.
+   * @param {Counterparty} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
+   * @param {boolean} [forSelf=false] - Whether deriving for self.
+   * @returns {PublicKey} - The derived public key.
+   */
   derivePublicKey (
     protocolID: WalletProtocol,
     keyID: string,
     counterparty: Counterparty,
     forSelf: boolean = false
   ): PublicKey {
-    console.log('🔍 [DEBUG] Entering derivePublicKey')
-    console.log('Protocol ID:', protocolID)
-    console.log('Key ID:', keyID)
-    console.log('Counterparty before normalization:', counterparty)
-
-    try {
-      counterparty = this.normalizeCounterparty(counterparty)
-      console.log('✅ [DEBUG] Normalized Counterparty:', counterparty.toString())
-    } catch (error) {
-      console.error('❌ [ERROR] normalizeCounterparty() failed:', error)
-      throw new Error('derivePublicKey() failed due to invalid counterparty')
-    }
-
-    let derivedKey: PublicKey
-
+    counterparty = this.normalizeCounterparty(counterparty)
     if (forSelf) {
-      console.log('🔍 [DEBUG] Deriving key for self...')
-      derivedKey = this.rootKey
+      return this.rootKey
         .deriveChild(counterparty, this.computeInvoiceNumber(protocolID, keyID))
         .toPublicKey()
     } else {
-      console.log('🔍 [DEBUG] Deriving key for counterparty...')
-      derivedKey = counterparty.deriveChild(
+      return counterparty.deriveChild(
         this.rootKey,
         this.computeInvoiceNumber(protocolID, keyID)
       )
     }
-
-    // ✅ Validate the derived key before returning
-    if (!derivedKey.validate()) {
-      console.error('❌ [DEBUG] Invalid derived public key:', derivedKey.toString())
-      throw new Error('derivePublicKey() generated an invalid key')
-    }
-
-    console.log('✅ [DEBUG] Successfully derived public key:', derivedKey.toString())
-    return derivedKey
   }
 
   /**
@@ -269,45 +244,18 @@ export class KeyDeriver implements KeyDeriverApi {
     return Hash.sha256hmac(sharedSecret.encode(true), invoiceNumberBin)
   }
 
-  public normalizeCounterparty (counterparty: Counterparty): PublicKey {
-    console.log('🔍 [DEBUG] Normalizing counterparty:', counterparty)
-
+  private normalizeCounterparty (counterparty: Counterparty): PublicKey {
     if (counterparty === undefined || counterparty === null) {
-      throw new Error('Counterparty must be "self", "anyone", or a valid public key string!')
-    }
-
-    let normalizedKey: PublicKey
-
-    if (counterparty === 'self') {
-      console.log('✅ [DEBUG] Counterparty is "self", returning root key.')
-      normalizedKey = this.rootKey.toPublicKey()
+      throw new Error('counterparty must be self, anyone or a public key!')
+    } else if (counterparty === 'self') {
+      return this.rootKey.toPublicKey()
     } else if (counterparty === 'anyone') {
-      console.log('✅ [DEBUG] Counterparty is "anyone", using fixed key.')
-      normalizedKey = new PrivateKey(1).toPublicKey()
+      return new PrivateKey(1).toPublicKey()
     } else if (typeof counterparty === 'string') {
-      try {
-        console.log('🔍 [DEBUG] Counterparty is a string, attempting to parse public key:', counterparty)
-        normalizedKey = PublicKey.fromString(counterparty)
-
-        if (!normalizedKey.validate()) {
-          throw new Error('Parsed public key failed validation.')
-        }
-      } catch (error) {
-        console.error('❌ [ERROR] Failed to parse public key from string:', counterparty, error)
-        throw new Error(`Invalid public key string: ${counterparty}`)
-      }
+      return PublicKey.fromString(counterparty)
     } else {
-      normalizedKey = counterparty
+      return counterparty
     }
-
-    // ✅ Validate before returning
-    if (!normalizedKey.validate()) {
-      console.error('❌ [ERROR] Invalid normalized counterparty public key:', normalizedKey.toString())
-      throw new Error('normalizeCounterparty() produced an invalid key')
-    }
-
-    console.log('✅ [DEBUG] Successfully normalized counterparty key:', normalizedKey.toString())
-    return normalizedKey
   }
 
   /**
@@ -317,7 +265,7 @@ export class KeyDeriver implements KeyDeriverApi {
    * @returns {string} - The computed invoice number.
    * @throws {Error} - Throws an error if protocol ID or key ID are invalid.
    */
-  public computeInvoiceNumber (
+  private computeInvoiceNumber (
     protocolID: WalletProtocol,
     keyID: string
   ): string {
