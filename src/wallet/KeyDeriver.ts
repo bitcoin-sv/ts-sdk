@@ -244,7 +244,7 @@ export class KeyDeriver implements KeyDeriverApi {
     return Hash.sha256hmac(sharedSecret.encode(true), invoiceNumberBin)
   }
 
-  private normalizeCounterparty (counterparty: Counterparty): PublicKey {
+  public normalizeCounterparty (counterparty: Counterparty): PublicKey {
     if (counterparty === undefined || counterparty === null) {
       throw new Error('counterparty must be self, anyone or a public key!')
     } else if (counterparty === 'self') {
@@ -265,7 +265,7 @@ export class KeyDeriver implements KeyDeriverApi {
    * @returns {string} - The computed invoice number.
    * @throws {Error} - Throws an error if protocol ID or key ID are invalid.
    */
-  private computeInvoiceNumber (
+  public computeInvoiceNumber (
     protocolID: WalletProtocol,
     keyID: string
   ): string {
