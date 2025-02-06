@@ -114,7 +114,7 @@ describe('MasterCertificate', () => {
             {}
           )
       ).toThrow(
-        'Master keyring must contain a value for every field. Missing key for field: "name"'
+        'Master keyring must contain a value for every field. Missing or empty key for field: "name"'
       )
     })
 

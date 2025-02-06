@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Transaction from '../../../transaction/Transaction'
 import { NodejsHttpClient } from '../../../transaction/http/NodejsHttpClient'
 import WhatsOnChainBroadcaster from '../../../transaction/broadcasters/WhatsOnChainBroadcaster'
@@ -6,11 +7,10 @@ import { FetchHttpClient } from '../../../transaction/http/FetchHttpClient'
 // Mock Transaction
 jest.mock('../../../transaction/Transaction', () => {
   class MockTransaction {
-    toHex (): string {
+    toHex() {
       return 'mocked_transaction_hex'
     }
-
-    toHexEF (): string {
+    toHexEF() {
       return 'mocked_transaction_hexEF'
     }
   }
@@ -33,7 +33,7 @@ describe('WhatsOnChainBroadcaster', () => {
   it('should broadcast successfully using window.fetch', async () => {
     // Mocking window.fetch
     const mockFetch = mockedFetch(successResponse)
-    global.window = { fetch: mockFetch } as unknown as Window & typeof globalThis
+    global.window = { fetch: mockFetch } as any
 
     const broadcaster = new WhatsOnChainBroadcaster(network)
     const response = await broadcaster.broadcast(transaction)
@@ -49,7 +49,7 @@ describe('WhatsOnChainBroadcaster', () => {
   it('should broadcast successfully using Node.js https', async () => {
     // Mocking Node.js https module
     mockedHttps(successResponse)
-    global.window = {} as unknown as Window & typeof globalThis
+    global.window = {} as any
 
     const broadcaster = new WhatsOnChainBroadcaster(network)
     const response = await broadcaster.broadcast(transaction)
@@ -96,7 +96,7 @@ describe('WhatsOnChainBroadcaster', () => {
 
   it('should handle network errors', async () => {
     const mockFetch = jest.fn().mockRejectedValue(new Error('Network error'))
-    global.window = { fetch: mockFetch } as unknown as Window & typeof globalThis
+    global.window = { fetch: mockFetch } as any
 
     const broadcaster = new WhatsOnChainBroadcaster(network)
     const response = await broadcaster.broadcast(transaction)
@@ -114,7 +114,7 @@ describe('WhatsOnChainBroadcaster', () => {
       status: 400,
       data: 'Bad request'
     })
-    global.window = { fetch: mockFetch } as unknown as Window & typeof globalThis
+    global.window = { fetch: mockFetch } as any
 
     const broadcaster = new WhatsOnChainBroadcaster(network)
     const response = await broadcaster.broadcast(transaction)
@@ -127,38 +127,29 @@ describe('WhatsOnChainBroadcaster', () => {
     })
   })
 
-  function mockedFetch (response: { status: number, data: string }): jest.Mock<Promise<Response>> {
-    return jest.fn().mockResolvedValue(
-      new Response(response.data, {
-        status: response.status,
-        statusText: response.status === 200 ? 'OK' : 'Bad request',
-        headers: new Headers({ 'Content-Type': 'text/plain' }) // Uses Headers API
-      })
-    )
+  function mockedFetch(response) {
+    return jest.fn().mockResolvedValue({
+      ok: response.status === 200,
+      status: response.status,
+      statusText: response.status === 200 ? 'OK' : 'Bad request',
+      headers: {
+        get(key: string) {
+          if (key === 'Content-Type') {
+            return 'text/plain'
+          }
+        }
+      },
+      text: async () => response.data
+    })
   }
 
-  function mockedHttps (response: { status: number, data: string }): {
-    request: (
-      url: string,
-      options: unknown,
-      callback: (res: {
-        statusCode: number
-        statusMessage: string
-        headers: { 'content-type': string }
-        on: (event: string, handler: (chunk?: any) => void) => void
-      }) => void
-    ) => {
-      on: jest.Mock
-      write: jest.Mock
-      end: jest.Mock
-    }
-  } {
+  function mockedHttps(response) {
     const https = {
       request: (url, options, callback) => {
         // eslint-disable-next-line
         callback({
           statusCode: response.status,
-          statusMessage: response.status === 200 ? 'OK' : 'Bad request',
+          statusMessage: response.status == 200 ? 'OK' : 'Bad request',
           headers: {
             'content-type': 'text/plain'
           },

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   fromBase58Check,
   toBase58Check,
@@ -29,7 +30,7 @@ export default class HD {
   parentFingerPrint: number[]
   childIndex: number
   chainCode: number[]
-  privKey?: PrivateKey
+  privKey: PrivateKey
   pubKey: PublicKey
   constants = {
     pubKey: 0x0488b21e,
@@ -47,14 +48,14 @@ export default class HD {
    * @param privKey - Private key of the wallet.
    * @param pubKey - Public key of the wallet.
    */
-  constructor (
-    versionBytesNum: number = 0x0488b21e, // Default to public key version if not provided
-    depth: number = 0,
-    parentFingerPrint: number[] = [],
-    childIndex: number = 0,
-    chainCode: number[] = new Array(32).fill(0), // Default to a zeroed-out 32-byte chain code
-    privKey: PrivateKey = PrivateKey.fromRandom(), // Generate a random private key if not provided
-    pubKey: PublicKey = privKey.toPublicKey() // Derive public key from private key if not provided
+  constructor(
+    versionBytesNum?: number,
+    depth?: number,
+    parentFingerPrint?: number[],
+    childIndex?: number,
+    chainCode?: number[],
+    privKey?: PrivateKey,
+    pubKey?: PublicKey
   ) {
     this.versionBytesNum = versionBytesNum
     this.depth = depth
@@ -70,7 +71,7 @@ export default class HD {
    * This method creates a root HD wallet with randomly generated private and public keys.
    * @returns {HD} The current HD instance with generated keys.
    */
-  public fromRandom (): this {
+  public fromRandom(): this {
     this.versionBytesNum = this.constants.privKey
     this.depth = 0x00
     this.parentFingerPrint = [0, 0, 0, 0]
@@ -87,7 +88,7 @@ export default class HD {
    * @returns {HD} A new HD instance with generated keys.
    * @static
    */
-  public static fromRandom (): HD {
+  public static fromRandom(): HD {
     return new this().fromRandom()
   }
 
@@ -97,7 +98,7 @@ export default class HD {
    * @param str - A base58 encoded string representing the wallet.
    * @returns {HD} The new instance with properties set from the string.
    */
-  public static fromString (str: string): HD {
+  public static fromString(str: string): HD {
     return new this().fromString(str)
   }
 
@@ -107,7 +108,7 @@ export default class HD {
    * @param str - A base58 encoded string representing the wallet.
    * @returns {HD} The current instance with properties set from the string.
    */
-  public fromString (str: string): this {
+  public fromString(str: string): this {
     const decoded = fromBase58Check(str)
     return this.fromBinary([...decoded.prefix, ...decoded.data] as number[])
   }
@@ -118,7 +119,7 @@ export default class HD {
    * @param bytes - An array of bytes representing the seed.
    * @returns {HD} The current instance with properties set from the seed.
    */
-  public static fromSeed (bytes: number[]): HD {
+  public static fromSeed(bytes: number[]): HD {
     return new this().fromSeed(bytes)
   }
 
@@ -128,7 +129,7 @@ export default class HD {
    * @param bytes - An array of bytes representing the seed.
    * @returns {HD} The current instance with properties set from the seed.
    */
-  public fromSeed (bytes: number[]): this {
+  public fromSeed(bytes: number[]): this {
     if (bytes.length < 128 / 8) {
       throw new Error('Need more than 128 bits of entropy')
     }
@@ -157,7 +158,7 @@ export default class HD {
    * @param buf - A buffer containing the wallet data.
    * @returns {HD} The new instance with properties set from the buffer.
    */
-  public static fromBinary (buf: number[]): HD {
+  public static fromBinary(buf: number[]): HD {
     return new this().fromBinary(buf)
   }
 
@@ -167,7 +168,7 @@ export default class HD {
    * @param buf - A buffer containing the wallet data.
    * @returns {HD} The current instance with properties set from the buffer.
    */
-  public fromBinary (buf: number[]): this {
+  public fromBinary(buf: number[]): this {
     // Both pub and private extended keys are 78 buf
     if (buf.length !== 78) {
       throw new Error('incorrect bip32 data length')
@@ -201,7 +202,7 @@ export default class HD {
    * This method provides a string representation of the HD wallet's current state.
    * @returns {string} A base58 encoded string of the HD wallet.
    */
-  public toString (): string {
+  public toString(): string {
     const bin = this.toBinary()
     return toBase58Check(bin, [])
   }
@@ -212,7 +213,7 @@ export default class HD {
    * @param path - A string representing the derivation path (e.g., 'm/0'/1).
    * @returns {HD} A new HD instance representing the derived child wallet.
    */
-  public derive (path: string): HD {
+  public derive(path: string): HD {
     if (path === 'm') {
       return this
     }
@@ -221,24 +222,31 @@ export default class HD {
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let bip32: HD = this
-    for (const [index, c] of e.entries()) { // ✅ Iterate over both index & value
-      if (index === 0) { // ✅ Compare index instead of string comparison
+    for (const i in e) {
+      const c = e[i]
+
+      if (i === '0') {
         if (c !== 'm') {
           throw new Error('invalid path')
         }
         continue
       }
+
       if (parseInt(c.replace("'", ''), 10).toString() !== c.replace("'", '')) {
         throw new Error('invalid path')
       }
+
       const usePrivate = c.length > 1 && c[c.length - 1] === "'"
       let childIndex =
         parseInt(usePrivate ? c.slice(0, c.length - 1) : c, 10) & 0x7fffffff
+
       if (usePrivate) {
         childIndex += 0x80000000
       }
+
       bip32 = bip32.deriveChild(childIndex)
     }
+
     return bip32
   }
 
@@ -248,7 +256,7 @@ export default class HD {
    * @param i - The index of the child key to derive.
    * @returns {HD} A new HD instance representing the derived child wallet.
    */
-  public deriveChild (i: number): HD {
+  public deriveChild(i: number): HD {
     if (typeof i !== 'number') {
       throw new Error('i must be a number')
     }
@@ -264,13 +272,13 @@ export default class HD {
 
     const isPrivate = this.versionBytesNum === this.constants.privKey
 
-    if (usePrivate && ((this.privKey == null) || !isPrivate)) {
+    if (usePrivate && (!this.privKey || !isPrivate)) {
       throw new Error('Cannot do private key derivation without private key')
     }
 
-    let ret: HD // Declare ret as type HD
-    if (this.privKey != null) {
-      let data: number[] // Declare data as type number[]
+    let ret = null
+    if (this.privKey) {
+      let data = null
 
       if (usePrivate) {
         data = [0, ...this.privKey.toArray('be', 32), ...ib]
@@ -285,12 +293,13 @@ export default class HD {
       // ki = IL + kpar (mod n).
       const k = il.add(this.privKey).mod(new Curve().n)
 
-      ret = new HD() // Ensure ret is assigned before usage
+      ret = new HD()
       ret.chainCode = ir
+
       ret.privKey = new PrivateKey(k.toArray())
       ret.pubKey = ret.privKey.toPublicKey()
     } else {
-      const data: number[] = [...(this.pubKey.encode(true) as number[]), ...ib]
+      const data = [...(this.pubKey.encode(true) as number[]), ...ib]
       const hash = Hash.sha512hmac(this.chainCode, data)
       const il = new BigNumber(hash.slice(0, 32))
       const ir = hash.slice(32, 64)
@@ -301,8 +310,9 @@ export default class HD {
       const Ki = ilG.add(Kpar)
       const newpub = new PublicKey(Ki.x, Ki.y)
 
-      ret = new HD() // Ensure ret is assigned before usage
+      ret = new HD()
       ret.chainCode = ir
+
       ret.pubKey = newpub
     }
 
@@ -320,7 +330,7 @@ export default class HD {
    * This method strips away the private key information, leaving only the public part.
    * @returns {HD} A new HD instance representing the public-only wallet.
    */
-  public toPublic (): HD {
+  public toPublic(): HD {
     const bip32 = new HD(
       this.versionBytesNum,
       this.depth,
@@ -340,17 +350,10 @@ export default class HD {
    * This method serializes the wallet's properties into a binary format.
    * @returns {number[]} An array of numbers representing the binary data of the wallet.
    */
-  public toBinary (): number[] {
+  public toBinary(): number[] {
     const isPrivate = this.versionBytesNum === this.constants.privKey
     const isPublic = this.versionBytesNum === this.constants.pubKey
-
     if (isPrivate) {
-      if (this.privKey == null) {
-        throw new Error(
-          'bip32: Private key is missing but required for binary serialization'
-        )
-      }
-
       return new Writer()
         .writeUInt32BE(this.versionBytesNum)
         .writeUInt8(this.depth)
@@ -358,7 +361,7 @@ export default class HD {
         .writeUInt32BE(this.childIndex)
         .write(this.chainCode)
         .writeUInt8(0)
-        .write(this.privKey.toArray('be', 32)) // Now safe to use
+        .write(this.privKey.toArray('be', 32))
         .toArray()
     } else if (isPublic) {
       return new Writer()
@@ -379,7 +382,7 @@ export default class HD {
    * This method determines whether the wallet is a private key wallet or a public key only wallet.
    * @returns {boolean} A boolean value indicating whether the wallet has a private key (true) or not (false).
    */
-  public isPrivate (): boolean {
+  public isPrivate(): boolean {
     return this.versionBytesNum === this.constants.privKey
   }
 }

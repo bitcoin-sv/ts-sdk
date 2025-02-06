@@ -383,7 +383,7 @@ describe('SHIPCast', () => {
 
     // First host acknowledges 'tm_foo', but it's not the right host.
     mockFacilitator.send.mockImplementationOnce(
-      async (host, { topics }) => {
+      async (host, { beef, topics }) => {
         const steak = {}
         for (const topic of topics) {
           steak[topic] = {
@@ -574,7 +574,7 @@ describe('SHIPCast', () => {
 
     // First host acknowledges 'tm_foo'
     mockFacilitator.send.mockImplementationOnce(
-      async (host, { topics }) => {
+      async (host, { beef, topics }) => {
         const steak = {}
         for (const topic of topics) {
           steak[topic] = {
@@ -588,7 +588,7 @@ describe('SHIPCast', () => {
 
     // Second host does not acknowledge any topics
     mockFacilitator.send.mockImplementationOnce(
-      async (host, { topics }) => {
+      async (host, { beef, topics }) => {
         const steak = {}
         for (const topic of topics) {
           steak[topic] = {
@@ -666,7 +666,7 @@ describe('SHIPCast', () => {
 
     // First host acknowledges no topics
     mockFacilitator.send.mockImplementationOnce(
-      async (host, { topics }) => {
+      async (host, { beef, topics }) => {
         const steak = {}
         for (const topic of topics) {
           steak[topic] = {
@@ -680,7 +680,7 @@ describe('SHIPCast', () => {
 
     // Second host acknowledges 'tm_bar'
     mockFacilitator.send.mockImplementationOnce(
-      async (host, { topics }) => {
+      async (host, { beef, topics }) => {
         const steak = {}
         for (const topic of topics) {
           steak[topic] = {
@@ -738,7 +738,7 @@ describe('SHIPCast', () => {
 
     // Host acknowledges no topics
     mockFacilitator.send.mockImplementationOnce(
-      async (host, { topics }) => {
+      async (host, { beef, topics }) => {
         const steak = {}
         for (const topic of topics) {
           steak[topic] = {
@@ -819,7 +819,7 @@ describe('SHIPCast', () => {
 
     // First host acknowledges 'tm_foo'
     mockFacilitator.send.mockImplementationOnce(
-      async (host, { topics }) => {
+      async (host, { beef, topics }) => {
         const steak = {}
         for (const topic of topics) {
           steak[topic] = {
@@ -833,7 +833,7 @@ describe('SHIPCast', () => {
 
     // Second host does not acknowledge 'tm_bar'
     mockFacilitator.send.mockImplementationOnce(
-      async (host, { topics }) => {
+      async (host, { beef, topics }) => {
         const steak = {}
         for (const topic of topics) {
           steak[topic] = {
@@ -916,7 +916,7 @@ describe('SHIPCast', () => {
 
     // First host acknowledges 'tm_foo' with coinsRemoved
     mockFacilitator.send.mockImplementationOnce(
-      async (host, { topics }) => {
+      async (host, { beef, topics }) => {
         const steak = {}
         for (const topic of topics) {
           steak[topic] = {
@@ -931,7 +931,7 @@ describe('SHIPCast', () => {
 
     // Second host does not acknowledge 'tm_bar'
     mockFacilitator.send.mockImplementationOnce(
-      async (host, { topics }) => {
+      async (host, { beef, topics }) => {
         const steak = {}
         for (const topic of topics) {
           steak[topic] = {
@@ -1004,7 +1004,7 @@ describe('SHIPCast', () => {
 
     // Host does not acknowledge 'tm_foo'
     mockFacilitator.send.mockImplementationOnce(
-      async (host, { topics }) => {
+      async (host, { beef, topics }) => {
         const steak = {}
         for (const topic of topics) {
           steak[topic] = {
@@ -1100,8 +1100,11 @@ describe('SHIPCast', () => {
           'https://host1.com': new Set(['tm_foo', 'tm_bar']),
           'https://host2.com': new Set(['tm_foo', 'tm_bar'])
         }
-        const requiredTopics = ['tm_foo', 'tm_bar']
-        const result = shipCast.checkAcknowledgmentForTesting(hostAcknowledgments, requiredTopics, 'all')
+        const result = (shipCast as any).checkAcknowledgmentFromAllHosts(
+          hostAcknowledgments,
+          ['tm_foo', 'tm_bar'],
+          'all'
+        )
         expect(result).toBe(true)
       })
 
@@ -1110,7 +1113,7 @@ describe('SHIPCast', () => {
           'https://host1.com': new Set(['tm_foo']),
           'https://host2.com': new Set(['tm_foo', 'tm_bar'])
         }
-        const result = shipCast.checkAcknowledgmentForTesting(
+        const result = (shipCast as any).checkAcknowledgmentFromAllHosts(
           hostAcknowledgments,
           ['tm_foo', 'tm_bar'],
           'all'
@@ -1123,7 +1126,7 @@ describe('SHIPCast', () => {
           'https://host1.com': new Set(['tm_foo']),
           'https://host2.com': new Set(['tm_bar'])
         }
-        const result = shipCast.checkAcknowledgmentForTesting(
+        const result = (shipCast as any).checkAcknowledgmentFromAllHosts(
           hostAcknowledgments,
           ['tm_foo', 'tm_bar'],
           'any'
@@ -1132,179 +1135,168 @@ describe('SHIPCast', () => {
       })
 
       it('should return false when any host does not acknowledge any of the required topics', () => {
-        const hostAcknowledgments: Record<string, Set<string>> = {
-          'https://host1.com': new Set<string>(), // ✅ Explicitly typed as Set<string>
-          'https://host2.com': new Set<string>(['tm_bar']) // ✅ Ensures Set<string>
+        const hostAcknowledgments = {
+          'https://host1.com': new Set(),
+          'https://host2.com': new Set(['tm_bar'])
         }
-
-        const result = shipCast.checkAcknowledgmentForTesting(
+        const result = (shipCast as any).checkAcknowledgmentFromAllHosts(
           hostAcknowledgments,
           ['tm_foo', 'tm_bar'],
           'any'
         )
+        expect(result).toBe(false)
+      })
+    })
 
+    describe('checkAcknowledgmentFromAnyHost', () => {
+      it('should return true when at least one host acknowledges all required topics', () => {
+        const hostAcknowledgments = {
+          'https://host1.com': new Set(['tm_foo', 'tm_bar']),
+          'https://host2.com': new Set(['tm_foo'])
+        }
+        const result = (shipCast as any).checkAcknowledgmentFromAnyHost(
+          hostAcknowledgments,
+          ['tm_foo', 'tm_bar'],
+          'all'
+        )
+        expect(result).toBe(true)
+      })
+
+      it('should return false when no host acknowledges all required topics', () => {
+        const hostAcknowledgments = {
+          'https://host1.com': new Set(['tm_foo']),
+          'https://host2.com': new Set(['tm_bar'])
+        }
+        const result = (shipCast as any).checkAcknowledgmentFromAnyHost(
+          hostAcknowledgments,
+          ['tm_foo', 'tm_bar'],
+          'all'
+        )
         expect(result).toBe(false)
       })
 
-      describe('checkAcknowledgmentFromAnyHost', () => {
-        it('should return true when at least one host acknowledges all required topics', () => {
-          const hostAcknowledgments = {
-            'https://host1.com': new Set(['tm_foo', 'tm_bar']),
-            'https://host2.com': new Set(['tm_foo'])
-          }
-          const result = shipCast.checkAcknowledgmentForTesting(
-            hostAcknowledgments,
-            ['tm_foo', 'tm_bar'],
-            'all'
-          )
-          expect(result).toBe(true)
-        })
-
-        it('should return false when no host acknowledges all required topics', () => {
-          const hostAcknowledgments = {
-            'https://host1.com': new Set(['tm_foo']),
-            'https://host2.com': new Set(['tm_bar'])
-          }
-          const result = shipCast.checkAcknowledgmentForTesting(
-            hostAcknowledgments,
-            ['tm_foo', 'tm_bar'],
-            'all'
-          )
-          expect(result).toBe(false)
-        })
-
-        it('should return true when at least one host acknowledges any of the required topics', () => {
-          const hostAcknowledgments: Record<string, Set<string>> = {
-            'https://host1.com': new Set<string>(), // ✅ Explicitly typed as Set<string>
-            'https://host2.com': new Set<string>(['tm_bar']) // ✅ Ensures Set<string>
-          }
-          const result = shipCast.checkAcknowledgmentForTesting(
-            hostAcknowledgments,
-            ['tm_foo', 'tm_bar'],
-            'any'
-          )
-          expect(result).toBe(true)
-        })
-
-        it('should return false when no host acknowledges any of the required topics', () => {
-          const hostAcknowledgments: Record<string, Set<string>> = {
-            'https://host1.com': new Set<string>(), // ✅ Explicitly typed as Set<string>
-            'https://host2.com': new Set<string>(['tm_bar']) // ✅ Ensures Set<string>
-          }
-          const result = shipCast.checkAcknowledgmentForTesting(
-            hostAcknowledgments,
-            ['tm_foo', 'tm_bar'],
-            'any'
-          )
-          expect(result).toBe(false)
-        })
+      it('should return true when at least one host acknowledges any of the required topics', () => {
+        const hostAcknowledgments = {
+          'https://host1.com': new Set(['tm_foo']),
+          'https://host2.com': new Set()
+        }
+        const result = (shipCast as any).checkAcknowledgmentFromAnyHost(
+          hostAcknowledgments,
+          ['tm_foo', 'tm_bar'],
+          'any'
+        )
+        expect(result).toBe(true)
       })
 
-      describe('checkAcknowledgmentFromSpecificHosts', () => {
-        it('should return true when specific hosts acknowledge all required topics', () => {
-          const hostAcknowledgments = {
-            'https://host1.com': new Set(['tm_foo', 'tm_bar']),
-            'https://host2.com': new Set(['tm_foo'])
-          }
-          const requirements = {
-            'https://host1.com': ['tm_foo', 'tm_bar']
-          }
-          const result = shipCast.checkAcknowledgmentForTesting(
-            hostAcknowledgments,
-            Object.values(requirements).flat(), // Convert object values into a single array
-            'all' // or 'any', depending on logic
-          )
+      it('should return false when no host acknowledges any of the required topics', () => {
+        const hostAcknowledgments = {
+          'https://host1.com': new Set(),
+          'https://host2.com': new Set()
+        }
+        const result = (shipCast as any).checkAcknowledgmentFromAnyHost(
+          hostAcknowledgments,
+          ['tm_foo', 'tm_bar'],
+          'any'
+        )
+        expect(result).toBe(false)
+      })
+    })
 
-          expect(result).toBe(true)
-        })
+    describe('checkAcknowledgmentFromSpecificHosts', () => {
+      it('should return true when specific hosts acknowledge all required topics', () => {
+        const hostAcknowledgments = {
+          'https://host1.com': new Set(['tm_foo', 'tm_bar']),
+          'https://host2.com': new Set(['tm_foo'])
+        }
+        const requirements = {
+          'https://host1.com': ['tm_foo', 'tm_bar']
+        }
+        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(
+          hostAcknowledgments,
+          requirements
+        )
+        expect(result).toBe(true)
+      })
 
-        it('should return false when specific hosts do not acknowledge all required topics', () => {
-          const hostAcknowledgments = {
-            'https://host1.com': new Set(['tm_foo']),
-            'https://host2.com': new Set(['tm_bar'])
-          }
-          const requirements = {
-            'https://host1.com': ['tm_foo', 'tm_bar']
-          }
-          const result = shipCast.checkAcknowledgmentForTesting(
-            hostAcknowledgments,
-            Object.values(requirements).flat(),
-            'all' // or 'any', depending on the intended logic
-          )
+      it('should return false when specific hosts do not acknowledge all required topics', () => {
+        const hostAcknowledgments = {
+          'https://host1.com': new Set(['tm_foo']),
+          'https://host2.com': new Set(['tm_bar'])
+        }
+        const requirements = {
+          'https://host1.com': ['tm_foo', 'tm_bar']
+        }
+        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(
+          hostAcknowledgments,
+          requirements
+        )
+        expect(result).toBe(false)
+      })
 
-          expect(result).toBe(false)
-        })
+      it('should return true when specific hosts acknowledge any of the required topics', () => {
+        const hostAcknowledgments = {
+          'https://host1.com': new Set(['tm_foo']),
+          'https://host2.com': new Set(['tm_bar'])
+        }
+        const requirements = {
+          'https://host1.com': 'any'
+        }
+        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(
+          hostAcknowledgments,
+          requirements
+        )
+        expect(result).toBe(true)
+      })
 
-        it('should return true when specific hosts acknowledge any of the required topics', () => {
-          const hostAcknowledgments = {
-            'https://host1.com': new Set(['tm_foo']),
-            'https://host2.com': new Set(['tm_bar'])
-          }
-          const requirements = {
-            'https://host1.com': 'any'
-          }
-          const result = shipCast.checkAcknowledgmentForTesting(
-            hostAcknowledgments,
-            Object.values(requirements).flat(),
-            'all' // or 'any', depending on the intended logic
-          )
-          expect(result).toBe(true)
-        })
+      it('should return false when specific hosts do not acknowledge any of the required topics', () => {
+        const hostAcknowledgments = {
+          'https://host1.com': new Set(),
+          'https://host2.com': new Set(['tm_bar'])
+        }
+        const requirements = {
+          'https://host1.com': 'any'
+        }
+        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(
+          hostAcknowledgments,
+          requirements
+        )
+        expect(result).toBe(false)
+      })
 
-        it('should return false when specific hosts do not acknowledge any of the required topics', () => {
-          const hostAcknowledgments: Record<string, Set<string>> = {
-            'https://host1.com': new Set<string>(), // ✅ Explicitly typed as Set<string>
-            'https://host2.com': new Set<string>(['tm_bar']) // ✅ Ensures Set<string>
-          }
-          const requirements = {
-            'https://host1.com': 'any'
-          }
-          const result = shipCast.checkAcknowledgmentForTesting(
-            hostAcknowledgments,
-            Object.values(requirements).flat(),
-            'all' // or 'any', depending on the intended logic
-          )
-          expect(result).toBe(false)
-        })
+      it('should handle multiple hosts with different requirements', () => {
+        const hostAcknowledgments = {
+          'https://host1.com': new Set(['tm_foo']),
+          'https://host2.com': new Set(['tm_bar']),
+          'https://host3.com': new Set(['tm_foo', 'tm_bar'])
+        }
+        const requirements = {
+          'https://host1.com': ['tm_foo'],
+          'https://host2.com': 'any',
+          'https://host3.com': 'all'
+        }
+        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(
+          hostAcknowledgments,
+          requirements
+        )
+        expect(result).toBe(true)
+      })
 
-        it('should handle multiple hosts with different requirements', () => {
-          const hostAcknowledgments = {
-            'https://host1.com': new Set(['tm_foo']),
-            'https://host2.com': new Set(['tm_bar']),
-            'https://host3.com': new Set(['tm_foo', 'tm_bar'])
-          }
-          const requirements = {
-            'https://host1.com': ['tm_foo'],
-            'https://host2.com': 'any',
-            'https://host3.com': 'all'
-          }
-          const result = shipCast.checkAcknowledgmentForTesting(
-            hostAcknowledgments,
-            Object.values(requirements).flat(),
-            'all' // or 'any', depending on the intended logic
-          )
-          expect(result).toBe(true)
-        })
-
-        it('should return false if any specific host fails to meet its requirement', () => {
-          const hostAcknowledgments: Record<string, Set<string>> = {
-            'https://host1.com': new Set(['tm_foo']),
-            'https://host2.com': new Set<string>(), // ✅ Fix: Explicitly define Set<string>
-            'https://host3.com': new Set(['tm_foo'])
-          }
-
-          const requirements = {
-            'https://host1.com': ['tm_foo'],
-            'https://host2.com': 'any',
-            'https://host3.com': ['tm_foo', 'tm_bar']
-          }
-          const result = shipCast.checkAcknowledgmentForTesting(
-            hostAcknowledgments,
-            Object.values(requirements).flat(),
-            'all' // or 'any', depending on the intended logic
-          )
-          expect(result).toBe(false)
-        })
+      it('should return false if any specific host fails to meet its requirement', () => {
+        const hostAcknowledgments = {
+          'https://host1.com': new Set(['tm_foo']),
+          'https://host2.com': new Set(),
+          'https://host3.com': new Set(['tm_foo'])
+        }
+        const requirements = {
+          'https://host1.com': ['tm_foo'],
+          'https://host2.com': 'any',
+          'https://host3.com': ['tm_foo', 'tm_bar']
+        }
+        const result = (shipCast as any).checkAcknowledgmentFromSpecificHosts(
+          hostAcknowledgments,
+          requirements
+        )
+        expect(result).toBe(false)
       })
     })
   })

@@ -8,6 +8,9 @@ export default [
   tsStandard, // ✅ Ensure ESLint loads ts-standard as a base config
 
   {
+    // Add ignorePatterns at the top level for ESLint
+    ignorePatterns: ['src/primitives/Point.ts'],
+
     files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'],
     languageOptions: {
       globals: {

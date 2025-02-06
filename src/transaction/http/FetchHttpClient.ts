@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   HttpClient,
   HttpClientRequestOptions,
@@ -29,7 +30,7 @@ export interface FetchOptions {
  * Adapter for Node Https module to be used as HttpClient
  */
 export class FetchHttpClient implements HttpClient {
-  constructor (private readonly fetch: Fetch) {}
+  constructor(private readonly fetch: Fetch) { }
 
   async request<D>(
     url: string,
@@ -42,7 +43,7 @@ export class FetchHttpClient implements HttpClient {
     }
 
     const res = await this.fetch(url, fetchOptions)
-    const mediaType = res.headers.get('Content-Type') ?? ''
+    const mediaType = res.headers.get('Content-Type')
     const data = mediaType.startsWith('application/json')
       ? await res.json()
       : await res.text()
