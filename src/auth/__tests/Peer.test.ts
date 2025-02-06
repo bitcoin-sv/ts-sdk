@@ -12,7 +12,7 @@ jest.mock('../../auth/utils/getVerifiableCertificates')
 
 class LocalTransport implements Transport {
   private peerTransport?: LocalTransport
-  private onDataCallback?: (message: AuthMessage) => Promise<void>
+  private onDataCallback?: (message: AuthMessage) => void
 
   connect(peerTransport: LocalTransport): void {
     this.peerTransport = peerTransport
@@ -25,7 +25,7 @@ class LocalTransport implements Transport {
       this.peerTransport?.onDataCallback !== null
     ) {
       // Simulate message delivery by calling the onData callback of the peer
-      await this.peerTransport.onDataCallback(message)
+      this.peerTransport.onDataCallback(message)
     } else {
       throw new Error(
         'Peer transport is not connected or not listening for data.'
@@ -34,7 +34,7 @@ class LocalTransport implements Transport {
   }
 
   async onData(
-    callback: (message: AuthMessage) => Promise<void>
+    callback: (message: AuthMessage) => void
   ): Promise<void> {
     this.onDataCallback = callback
   }
