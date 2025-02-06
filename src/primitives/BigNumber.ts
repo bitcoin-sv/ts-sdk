@@ -722,8 +722,9 @@ export default class BigNumber {
     if (padding === 0 && out === '0') {
       return ''
     }
-    while (out.length % padding !== 0 && padding !== 0) {
+    while (out.length % padding !== 0) {
       out = '0' + out
+      if (padding === 0) break // Ensures the loop doesn't run indefinitely
     }
     if (this.negative !== 0) {
       out = '-' + out
@@ -3163,7 +3164,7 @@ export default class BigNumber {
 
       if (mode !== 'div') {
         mod = res.mod.neg()
-        if (positive && mod.negative !== 0) {
+        if (positive !== undefined && mod.negative !== 0) {
           mod.iadd(num)
         }
       }
@@ -4477,7 +4478,7 @@ export default class BigNumber {
    */
   static fromBits (bits: number, strict: boolean = false): BigNumber {
     // Convert to signed 32-bit value manually without using Buffer
-    bits = bits & 0x80000000 ? bits - 0x100000000 : bits
+    bits = (bits & 0x80000000) !== 0 ? bits - 0x100000000 : bits
     if (strict && (bits & 0x00800000) !== 0) {
       throw new Error('negative bit set')
     }
@@ -4520,7 +4521,7 @@ export default class BigNumber {
    * const bits = bigNumber.toBits();
    */
   toBits (): number {
-    let byteArray
+    let byteArray: number[]
     if (this.ltn(0)) {
       byteArray = this.neg().toArray('be')
     } else {
@@ -4593,7 +4594,7 @@ export default class BigNumber {
     if (num.length > maxNumSize) {
       throw new Error('script number overflow')
     }
-    if (requireMinimal && num.length > 0) {
+    if (requireMinimal === true && num.length > 0) {
       // Check that the number is encoded with the minimum possible
       // number of bytes.
       //
