@@ -390,7 +390,7 @@ export class Peer {
    * @private
    * @param {number} callbackID - The ID of the callback to remove.
    */
-  private stopListeningForInitialResponses (callbackID: number) {
+  private stopListeningForInitialResponses (callbackID: number): void {
     this.onInitialResponseReceivedCallbacks.delete(callbackID)
   }
 
@@ -401,7 +401,7 @@ export class Peer {
    * @returns {Promise<void>}
    */
   private async handleIncomingMessage (message: AuthMessage): Promise<void> {
-    if (!message.version || message.version !== AUTH_VERSION) {
+    if (message.version === undefined || message.version === '' || message.version !== AUTH_VERSION) {
       console.error(
         `Invalid message auth version! Received: ${message.version}, expected: ${AUTH_VERSION}`
       )
@@ -426,7 +426,7 @@ export class Peer {
         break
       default:
         console.error(
-          `Unknown message type of ${message.messageType} from ${message.identityKey}`
+          `Unknown message type of ${String(message.messageType)} from ${String(message.identityKey)}`
         )
     }
   }
@@ -437,8 +437,8 @@ export class Peer {
    * @param {AuthMessage} message - The incoming initial request message.
    * @returns {Promise<void>}
    */
-  async processInitialRequest (message: AuthMessage) {
-    if (!message.identityKey || !message.initialNonce) {
+  async processInitialRequest (message: AuthMessage): Promise<void> {
+    if (message.identityKey === undefined || message.identityKey === '' || message.initialNonce === undefined || message.initialNonce === '') {
       throw new Error('Missing required fields in initialResponse message.')
     }
 
@@ -490,7 +490,7 @@ export class Peer {
     }
 
     // For security, only set the last-interacted-with peer here if this is the first peer we've interacted with.
-    if (!this.lastInteractedWithPeer) {
+    if (this.lastInteractedWithPeer === undefined || this.lastInteractedWithPeer === null) {
       this.lastInteractedWithPeer = message.identityKey
     }
 
@@ -505,7 +505,7 @@ export class Peer {
    * @returns {Promise<void>}
    * @throws Will throw an error if nonce verification or signature verification fails.
    */
-  private async processInitialResponse (message: AuthMessage) {
+  private async processInitialResponse (message: AuthMessage): Promise<void> {
     const validNonce = await verifyNonce(message.yourNonce, this.wallet)
     if (!validNonce) {
       throw new Error(
@@ -514,19 +514,19 @@ export class Peer {
     }
 
     const peerSession = this.sessionManager.getSession(message.yourNonce)
-    if (!peerSession) {
+    if (peerSession === null || peerSession === undefined) {
       throw new Error(`Peer session not found for peer: ${message.identityKey}`)
     }
 
     // Validate message signature
     const { valid } = await this.wallet.verifySignature({
       data: Utils.toArray(
-        peerSession.sessionNonce + message.initialNonce,
+        (peerSession.sessionNonce ?? '') + (message.initialNonce ?? ''),
         'base64'
       ),
       signature: message.signature,
       protocolID: [2, 'auth message signature'],
-      keyID: `${peerSession.sessionNonce} ${message.initialNonce}`,
+      keyID: `${peerSession.sessionNonce ?? ''} ${message.initialNonce ?? ''}`,
       counterparty: message.identityKey
     })
     if (!valid) {
@@ -546,8 +546,8 @@ export class Peer {
 
     // Process certificates received
     if (
-      this.certificatesToRequest?.certifiers?.length &&
-      message.certificates?.length
+      (this.certificatesToRequest?.certifiers?.length ?? 0) > 0 &&
+      (message.certificates !== null && message.certificates !== undefined && message.certificates.length > 0)
     ) {
       await validateCertificates(
         this.wallet,
@@ -563,7 +563,7 @@ export class Peer {
     this.lastInteractedWithPeer = message.identityKey
 
     this.onInitialResponseReceivedCallbacks.forEach(entry => {
-      if (entry && entry.sessionNonce === peerSession.sessionNonce) {
+      if (entry?.sessionNonce === peerSession.sessionNonce) {
         entry.callback(peerSession.sessionNonce)
       }
     })
@@ -598,7 +598,7 @@ export class Peer {
    * @param {AuthMessage} message - The certificate request message received from the peer.
    * @throws {Error} Throws an error if nonce verification fails, or the message signature is invalid.
    */
-  private async processCertificateRequest (message: AuthMessage) {
+  private async processCertificateRequest (message: AuthMessage): Promise<void> {
     const validNonce = await verifyNonce(message.yourNonce, this.wallet)
     if (!validNonce) {
       throw new Error(
@@ -614,13 +614,13 @@ export class Peer {
       ),
       signature: message.signature,
       protocolID: [2, 'auth message signature'],
-      keyID: `${message.nonce} ${peerSession.sessionNonce}`,
+      keyID: `${message.nonce ?? ''} ${peerSession.sessionNonce ?? ''}`,
       counterparty: peerSession.peerIdentityKey
     })
 
     if (!valid) {
       throw new Error(
-        `Invalid signature in certificate request message from ${peerSession.peerIdentityKey}`
+        `Invalid signature in certificate request message from ${peerSession.peerIdentityKey ?? 'unknown'}`
       )
     }
 
@@ -657,13 +657,13 @@ export class Peer {
   async sendCertificateResponse (
     verifierIdentityKey: string,
     certificates: VerifiableCertificate[]
-  ) {
+  ): Promise<void> {
     const peerSession = await this.getAuthenticatedSession(verifierIdentityKey)
     const requestNonce = Utils.toBase64(Random(32))
     const { signature } = await this.wallet.createSignature({
       data: Utils.toArray(JSON.stringify(certificates), 'utf8'),
       protocolID: [2, 'auth message signature'],
-      keyID: `${requestNonce} ${peerSession.peerNonce}`,
+      keyID: `${requestNonce} ${peerSession.peerNonce ?? ''}`,
       counterparty: peerSession.peerIdentityKey
     })
 
@@ -681,9 +681,10 @@ export class Peer {
 
     try {
       await this.transport.send(certificateResponse)
-    } catch (error) {
+    } catch (error: any) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
       throw new Error(
-        `Failed to send certificate response message to peer ${peerSession.peerIdentityKey}: ${error.message}`
+        `Failed to send certificate response message to peer ${peerSession.peerIdentityKey ?? 'unknown'}: ${errorMessage}`
       )
     }
   }
@@ -696,7 +697,7 @@ export class Peer {
    * @returns {Promise<void>}
    * @throws Will throw an error if nonce verification or signature verification fails.
    */
-  private async processCertificateResponse (message: AuthMessage) {
+  private async processCertificateResponse (message: AuthMessage): Promise<void> {
     const validNonce = await verifyNonce(message.yourNonce, this.wallet)
     if (!validNonce) {
       throw new Error(
@@ -710,7 +711,7 @@ export class Peer {
       data: Utils.toArray(JSON.stringify(message.certificates), 'utf8'),
       signature: message.signature,
       protocolID: [2, 'auth message signature'],
-      keyID: `${message.nonce} ${peerSession.sessionNonce}`,
+      keyID: `${message.nonce ?? ''} ${peerSession.sessionNonce ?? ''}`,
       counterparty: message.identityKey
     })
 
@@ -740,7 +741,7 @@ export class Peer {
    * @returns {Promise<void>}
    * @throws Will throw an error if nonce verification or signature verification fails.
    */
-  private async processGeneralMessage (message: AuthMessage) {
+  private async processGeneralMessage (message: AuthMessage): Promise<void> {
     const validNonce = await verifyNonce(message.yourNonce, this.wallet)
     if (!validNonce) {
       throw new Error(
@@ -753,13 +754,13 @@ export class Peer {
       data: message.payload,
       signature: message.signature,
       protocolID: [2, 'auth message signature'],
-      keyID: `${message.nonce} ${peerSession.sessionNonce}`,
+      keyID: `${message.nonce ?? ''} ${peerSession.sessionNonce ?? ''}`,
       counterparty: peerSession.peerIdentityKey
     })
 
     if (!valid) {
       throw new Error(
-        `Invalid signature in generalMessage from ${peerSession.peerIdentityKey}`
+        `Invalid signature in generalMessage from ${peerSession.peerIdentityKey ?? 'unknown'}`
       )
     }
 
