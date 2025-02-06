@@ -1,4 +1,4 @@
-import { PrivateKey, PublicKey } from "../../../mod"
+import { PrivateKey, PublicKey } from '../../../mod'
 
 describe('Peer class mutual authentication and certificate exchange', () => {
   for (let i = 0; i < 20; i++) {

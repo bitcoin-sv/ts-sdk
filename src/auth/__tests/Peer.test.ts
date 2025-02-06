@@ -3,7 +3,7 @@ import { AuthMessage, Transport } from '../../auth/types'
 import { jest } from '@jest/globals'
 import { WalletInterface } from '../../wallet/Wallet.interfaces'
 import { CompletedProtoWallet } from '../../auth/certificates/__tests/CompletedProtoWallet'
-import { Utils, PrivateKey, SymmetricKey } from '../../primitives/index'
+import { Utils, PrivateKey } from '../../primitives/index'
 import { VerifiableCertificate } from '../../auth/certificates/VerifiableCertificate'
 import { MasterCertificate } from '../../auth/certificates/MasterCertificate'
 import { getVerifiableCertificates } from '../../auth/utils/getVerifiableCertificates'
@@ -13,13 +13,13 @@ class LocalTransport implements Transport {
   private peerTransport?: LocalTransport
   private onDataCallback?: (message: AuthMessage) => void
 
-  connect(peerTransport: LocalTransport): void {
+  connect (peerTransport: LocalTransport): void {
     this.peerTransport = peerTransport
     peerTransport.peerTransport = this
   }
 
-  async send(message: AuthMessage): Promise<void> {
-    if (this.peerTransport && this.peerTransport.onDataCallback) {
+  async send (message: AuthMessage): Promise<void> {
+    if (this.peerTransport?.onDataCallback !== undefined && this.peerTransport?.onDataCallback !== null) {
       // Simulate message delivery by calling the onData callback of the peer
       this.peerTransport.onDataCallback(message)
     } else {
@@ -29,7 +29,7 @@ class LocalTransport implements Transport {
     }
   }
 
-  async onData(
+  async onData (
     callback: (message: AuthMessage) => Promise<void>
   ): Promise<void> {
     this.onDataCallback = callback
@@ -44,7 +44,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
   let certificatesReceivedByBob: VerifiableCertificate[] | undefined
 
   const certificateType = Utils.toBase64(new Array(32).fill(1))
-  const certificateSerialNumber = Utils.toBase64(new Array(32).fill(2))
+  // const certificateSerialNumber = Utils.toBase64(new Array(32).fill(2))
   const certifierPrivateKey = PrivateKey.fromRandom()
   const certifierPublicKey = certifierPrivateKey.toPublicKey().toString()
   const certificatesToRequest = {
@@ -63,7 +63,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     libraryCardNumber: 'B654321'
   }
 
-  async function createMasterCertificate(
+  async function createMasterCertificate (
     subjectWallet: WalletInterface,
     fields: Record<string, string>
   ) {
@@ -91,7 +91,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     return masterCertificate
   }
 
-  async function createVerifiableCertificate(
+  async function createVerifiableCertificate (
     masterCertificate: MasterCertificate,
     wallet: WalletInterface,
     verifierIdentityKey: string,
@@ -120,7 +120,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     )
   }
 
-  function setupPeers(
+  function setupPeers (
     aliceRequests: boolean,
     bobRequests: boolean,
     options: {
@@ -161,7 +161,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     return { aliceReceivedCertificates, bobReceivedCertificates }
   }
 
-  function mockGetVerifiableCertificates(
+  function mockGetVerifiableCertificates (
     aliceCertificate: VerifiableCertificate | undefined,
     bobCertificate: VerifiableCertificate | undefined,
     alicePubKey: string,
@@ -170,11 +170,11 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     ; (getVerifiableCertificates as jest.Mock).mockImplementation(
       (wallet, _, verifierIdentityKey) => {
         if (wallet === walletA && verifierIdentityKey === bobPubKey) {
-          return aliceCertificate
+          return aliceCertificate !== null && aliceCertificate !== undefined
             ? Promise.resolve([aliceCertificate])
             : Promise.resolve([])
         } else if (wallet === walletB && verifierIdentityKey === alicePubKey) {
-          return bobCertificate
+          return bobCertificate !== null && bobCertificate !== undefined
             ? Promise.resolve([bobCertificate])
             : Promise.resolve([])
         }
