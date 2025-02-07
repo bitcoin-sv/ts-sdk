@@ -39,7 +39,7 @@ export default interface ScriptTemplate {
 }
 ```
 
-See also: [LockingScript](#class-lockingscript), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [sign](#variable-sign)
+See also: [LockingScript](./script.md#class-lockingscript), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
 
 <details>
 
@@ -52,7 +52,7 @@ Creates a locking script with the given parameters.
 ```ts
 lock: (...params: any) => LockingScript | Promise<LockingScript>
 ```
-See also: [LockingScript](#class-lockingscript)
+See also: [LockingScript](./script.md#class-lockingscript)
 
 #### Property unlock
 
@@ -68,7 +68,7 @@ unlock: (...params: any) => {
     estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
 }
 ```
-See also: [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [sign](#variable-sign)
+See also: [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
 
 </details>
 
@@ -105,7 +105,7 @@ export default class LockingScript extends Script {
 }
 ```
 
-See also: [Script](#class-script)
+See also: [Script](./script.md#class-script)
 
 <details>
 
@@ -152,7 +152,7 @@ export default class P2PKH implements ScriptTemplate {
 }
 ```
 
-See also: [LockingScript](#class-lockingscript), [PrivateKey](#class-privatekey), [Script](#class-script), [ScriptTemplate](#interface-scripttemplate), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [sign](#variable-sign)
+See also: [LockingScript](./script.md#class-lockingscript), [PrivateKey](./primitives.md#class-privatekey), [Script](./script.md#class-script), [ScriptTemplate](./script.md#interface-scripttemplate), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
 
 <details>
 
@@ -165,7 +165,7 @@ Creates a P2PKH locking script for a given public key hash or address string
 ```ts
 lock(pubkeyhash: string | number[]): LockingScript 
 ```
-See also: [LockingScript](#class-lockingscript)
+See also: [LockingScript](./script.md#class-lockingscript)
 
 Returns
 
@@ -191,7 +191,7 @@ unlock(privateKey: PrivateKey, signOutputs: "all" | "none" | "single" = "all", a
     estimateLength: () => Promise<108>;
 } 
 ```
-See also: [PrivateKey](#class-privatekey), [Script](#class-script), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [sign](#variable-sign)
+See also: [PrivateKey](./primitives.md#class-privatekey), [Script](./script.md#class-script), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
 
 Returns
 
@@ -239,7 +239,7 @@ export default class PushDrop implements ScriptTemplate {
 }
 ```
 
-See also: [LockingScript](#class-lockingscript), [PublicKey](#class-publickey), [ScriptTemplate](#interface-scripttemplate), [SecurityLevel](#type-securitylevel), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [WalletInterface](#interface-walletinterface), [sign](#variable-sign)
+See also: [LockingScript](./script.md#class-lockingscript), [PublicKey](./primitives.md#class-publickey), [ScriptTemplate](./script.md#interface-scripttemplate), [SecurityLevel](./wallet.md#type-securitylevel), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [WalletInterface](./wallet.md#interface-walletinterface), [sign](./compat.md#variable-sign)
 
 <details>
 
@@ -252,7 +252,7 @@ Constructs a new instance of the PushDrop class.
 ```ts
 constructor(wallet: WalletInterface) 
 ```
-See also: [WalletInterface](#interface-walletinterface)
+See also: [WalletInterface](./wallet.md#interface-walletinterface)
 
 Argument Details
 
@@ -270,7 +270,7 @@ static decode(script: LockingScript): {
     fields: number[][];
 } 
 ```
-See also: [LockingScript](#class-lockingscript), [PublicKey](#class-publickey)
+See also: [LockingScript](./script.md#class-lockingscript), [PublicKey](./primitives.md#class-publickey)
 
 Returns
 
@@ -291,7 +291,7 @@ async lock(fields: number[][], protocolID: [
     string
 ], keyID: string, counterparty: string, forSelf = false, includeSignature = true, lockPosition: "before" | "after" = "before"): Promise<LockingScript> 
 ```
-See also: [LockingScript](#class-lockingscript), [SecurityLevel](#type-securitylevel)
+See also: [LockingScript](./script.md#class-lockingscript), [SecurityLevel](./wallet.md#type-securitylevel)
 
 Returns
 
@@ -325,7 +325,7 @@ unlock(protocolID: [
     estimateLength: () => Promise<73>;
 } 
 ```
-See also: [LockingScript](#class-lockingscript), [SecurityLevel](#type-securitylevel), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [sign](#variable-sign)
+See also: [LockingScript](./script.md#class-lockingscript), [SecurityLevel](./wallet.md#type-securitylevel), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
 
 Returns
 
@@ -373,7 +373,7 @@ export default class RPuzzle implements ScriptTemplate {
 }
 ```
 
-See also: [BigNumber](#class-bignumber), [LockingScript](#class-lockingscript), [PrivateKey](#class-privatekey), [ScriptTemplate](#interface-scripttemplate), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [sign](#variable-sign)
+See also: [BigNumber](./primitives.md#class-bignumber), [LockingScript](./script.md#class-lockingscript), [PrivateKey](./primitives.md#class-privatekey), [ScriptTemplate](./script.md#interface-scripttemplate), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
 
 <details>
 
@@ -397,7 +397,7 @@ Creates an R puzzle locking script for a given R value or R value hash.
 ```ts
 lock(value: number[]): LockingScript 
 ```
-See also: [LockingScript](#class-lockingscript)
+See also: [LockingScript](./script.md#class-lockingscript)
 
 Returns
 
@@ -423,7 +423,7 @@ unlock(k: BigNumber, privateKey: PrivateKey, signOutputs: "all" | "none" | "sing
     estimateLength: () => Promise<108>;
 } 
 ```
-See also: [BigNumber](#class-bignumber), [PrivateKey](#class-privatekey), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [sign](#variable-sign)
+See also: [BigNumber](./primitives.md#class-bignumber), [PrivateKey](./primitives.md#class-privatekey), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
 
 Returns
 
@@ -475,7 +475,7 @@ export default class Script {
 }
 ```
 
-See also: [BigNumber](#class-bignumber), [ScriptChunk](#interface-scriptchunk), [toHex](#variable-tohex)
+See also: [BigNumber](./primitives.md#class-bignumber), [ScriptChunk](./script.md#interface-scriptchunk), [toHex](./primitives.md#variable-tohex)
 
 <details>
 
@@ -486,7 +486,7 @@ See also: [BigNumber](#class-bignumber), [ScriptChunk](#interface-scriptchunk), 
 ```ts
 constructor(chunks: ScriptChunk[] = []) 
 ```
-See also: [ScriptChunk](#interface-scriptchunk)
+See also: [ScriptChunk](./script.md#interface-scriptchunk)
 
 Argument Details
 
@@ -500,7 +500,7 @@ Deletes the given item wherever it appears in the current script.
 ```ts
 findAndDelete(script: Script): Script 
 ```
-See also: [Script](#class-script)
+See also: [Script](./script.md#class-script)
 
 Returns
 
@@ -516,7 +516,7 @@ Argument Details
 ```ts
 static fromASM(asm: string): Script 
 ```
-See also: [Script](#class-script)
+See also: [Script](./script.md#class-script)
 
 Returns
 
@@ -538,7 +538,7 @@ const script = Script.fromASM("OP_DUP OP_HASH160 abcd... OP_EQUALVERIFY OP_CHECK
 ```ts
 static fromBinary(bin: number[]): Script 
 ```
-See also: [Script](#class-script)
+See also: [Script](./script.md#class-script)
 
 Returns
 
@@ -560,7 +560,7 @@ const script = Script.fromBinary([0x76, 0xa9, ...])
 ```ts
 static fromHex(hex: string): Script 
 ```
-See also: [Script](#class-script)
+See also: [Script](./script.md#class-script)
 
 Returns
 
@@ -612,7 +612,7 @@ True if the script is an unlocking script, otherwise false.
 ```ts
 removeCodeseparators(): Script 
 ```
-See also: [Script](#class-script)
+See also: [Script](./script.md#class-script)
 
 Returns
 
@@ -623,7 +623,7 @@ This script instance for chaining.
 ```ts
 setChunkOpCode(i: number, op: number): Script 
 ```
-See also: [Script](#class-script)
+See also: [Script](./script.md#class-script)
 
 Returns
 
@@ -671,7 +671,7 @@ The script in hexadecimal format.
 ```ts
 writeBin(bin: number[]): Script 
 ```
-See also: [Script](#class-script)
+See also: [Script](./script.md#class-script)
 
 Returns
 
@@ -691,7 +691,7 @@ Throws an error if the data is too large to be pushed.
 ```ts
 writeBn(bn: BigNumber): Script 
 ```
-See also: [BigNumber](#class-bignumber), [Script](#class-script)
+See also: [BigNumber](./primitives.md#class-bignumber), [Script](./script.md#class-script)
 
 Returns
 
@@ -707,7 +707,7 @@ Argument Details
 ```ts
 writeNumber(num: number): Script 
 ```
-See also: [Script](#class-script)
+See also: [Script](./script.md#class-script)
 
 Returns
 
@@ -723,7 +723,7 @@ Argument Details
 ```ts
 writeOpCode(op: number): Script 
 ```
-See also: [Script](#class-script)
+See also: [Script](./script.md#class-script)
 
 Returns
 
@@ -739,7 +739,7 @@ Argument Details
 ```ts
 writeScript(script: Script): Script 
 ```
-See also: [Script](#class-script)
+See also: [Script](./script.md#class-script)
 
 Returns
 
@@ -799,7 +799,7 @@ export default class Spend {
 }
 ```
 
-See also: [LockingScript](#class-lockingscript), [TransactionInput](#interface-transactioninput), [TransactionOutput](#interface-transactionoutput), [UnlockingScript](#class-unlockingscript)
+See also: [LockingScript](./script.md#class-lockingscript), [TransactionInput](./transaction.md#interface-transactioninput), [TransactionOutput](./transaction.md#interface-transactionoutput), [UnlockingScript](./script.md#class-unlockingscript)
 
 <details>
 
@@ -822,7 +822,7 @@ constructor(params: {
     lockTime: number;
 }) 
 ```
-See also: [LockingScript](#class-lockingscript), [TransactionInput](#interface-transactioninput), [TransactionOutput](#interface-transactionoutput), [UnlockingScript](#class-unlockingscript)
+See also: [LockingScript](./script.md#class-lockingscript), [TransactionInput](./transaction.md#interface-transactioninput), [TransactionOutput](./transaction.md#interface-transactionoutput), [UnlockingScript](./script.md#class-unlockingscript)
 
 Argument Details
 
@@ -907,7 +907,7 @@ export default class UnlockingScript extends Script {
 }
 ```
 
-See also: [Script](#class-script)
+See also: [Script](./script.md#class-script)
 
 <details>
 

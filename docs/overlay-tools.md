@@ -114,7 +114,7 @@ export interface LookupResolverConfig {
 }
 ```
 
-See also: [OverlayLookupFacilitator](#interface-overlaylookupfacilitator)
+See also: [OverlayLookupFacilitator](./overlay-tools.md#interface-overlaylookupfacilitator)
 
 <details>
 
@@ -135,7 +135,7 @@ The facilitator used to make requests to Overlay Services hosts.
 ```ts
 facilitator?: OverlayLookupFacilitator
 ```
-See also: [OverlayLookupFacilitator](#interface-overlaylookupfacilitator)
+See also: [OverlayLookupFacilitator](./overlay-tools.md#interface-overlaylookupfacilitator)
 
 #### Property hostOverrides
 
@@ -168,7 +168,7 @@ export interface OverlayBroadcastFacilitator {
 }
 ```
 
-See also: [STEAK](#type-steak), [TaggedBEEF](#interface-taggedbeef)
+See also: [STEAK](./overlay-tools.md#type-steak), [TaggedBEEF](./overlay-tools.md#interface-taggedbeef)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -183,7 +183,7 @@ export interface OverlayLookupFacilitator {
 }
 ```
 
-See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookupquestion)
+See also: [LookupAnswer](./overlay-tools.md#type-lookupanswer), [LookupQuestion](./overlay-tools.md#interface-lookupquestion)
 
 <details>
 
@@ -196,7 +196,7 @@ Returns a lookup answer for a lookup question
 ```ts
 lookup: (url: string, question: LookupQuestion, timeout?: number) => Promise<LookupAnswer>
 ```
-See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookupquestion)
+See also: [LookupAnswer](./overlay-tools.md#type-lookupanswer), [LookupQuestion](./overlay-tools.md#interface-lookupquestion)
 
 </details>
 
@@ -217,7 +217,7 @@ export interface SHIPBroadcasterConfig {
 }
 ```
 
-See also: [LookupResolver](#class-lookupresolver), [OverlayBroadcastFacilitator](#interface-overlaybroadcastfacilitator)
+See also: [LookupResolver](./overlay-tools.md#class-lookupresolver), [OverlayBroadcastFacilitator](./overlay-tools.md#interface-overlaybroadcastfacilitator)
 
 <details>
 
@@ -230,7 +230,7 @@ The facilitator used to make requests to Overlay Services hosts.
 ```ts
 facilitator?: OverlayBroadcastFacilitator
 ```
-See also: [OverlayBroadcastFacilitator](#interface-overlaybroadcastfacilitator)
+See also: [OverlayBroadcastFacilitator](./overlay-tools.md#interface-overlaybroadcastfacilitator)
 
 #### Property requireAcknowledgmentFromAllHostsForTopics
 
@@ -263,7 +263,7 @@ The resolver used to locate suitable hosts with SHIP
 ```ts
 resolver: LookupResolver
 ```
-See also: [LookupResolver](#class-lookupresolver)
+See also: [LookupResolver](./overlay-tools.md#class-lookupresolver)
 
 </details>
 
@@ -308,7 +308,7 @@ export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilit
 }
 ```
 
-See also: [OverlayBroadcastFacilitator](#interface-overlaybroadcastfacilitator), [STEAK](#type-steak), [TaggedBEEF](#interface-taggedbeef)
+See also: [OverlayBroadcastFacilitator](./overlay-tools.md#interface-overlaybroadcastfacilitator), [STEAK](./overlay-tools.md#type-steak), [TaggedBEEF](./overlay-tools.md#interface-taggedbeef)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -323,7 +323,7 @@ export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
 }
 ```
 
-See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookupquestion), [OverlayLookupFacilitator](#interface-overlaylookupfacilitator)
+See also: [LookupAnswer](./overlay-tools.md#type-lookupanswer), [LookupQuestion](./overlay-tools.md#interface-lookupquestion), [OverlayLookupFacilitator](./overlay-tools.md#interface-overlaylookupfacilitator)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -339,7 +339,7 @@ export default class LookupResolver {
 }
 ```
 
-See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookupquestion), [LookupResolverConfig](#interface-lookupresolverconfig)
+See also: [LookupAnswer](./overlay-tools.md#type-lookupanswer), [LookupQuestion](./overlay-tools.md#interface-lookupquestion), [LookupResolverConfig](./overlay-tools.md#interface-lookupresolverconfig)
 
 <details>
 
@@ -352,7 +352,7 @@ Given a LookupQuestion, returns a LookupAnswer. Aggregates across multiple servi
 ```ts
 async query(question: LookupQuestion, timeout?: number): Promise<LookupAnswer> 
 ```
-See also: [LookupAnswer](#type-lookupanswer), [LookupQuestion](#interface-lookupquestion)
+See also: [LookupAnswer](./overlay-tools.md#type-lookupanswer), [LookupQuestion](./overlay-tools.md#interface-lookupquestion)
 
 </details>
 
@@ -381,7 +381,7 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
 }
 ```
 
-See also: [LockingScript](#class-lockingscript), [PushDrop](#class-pushdrop), [ScriptTemplate](#interface-scripttemplate), [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [WalletInterface](#interface-walletinterface), [sign](#variable-sign)
+See also: [LockingScript](./script.md#class-lockingscript), [PushDrop](./script.md#class-pushdrop), [ScriptTemplate](./script.md#interface-scripttemplate), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [WalletInterface](./wallet.md#interface-walletinterface), [sign](./compat.md#variable-sign)
 
 <details>
 
@@ -394,7 +394,7 @@ Constructs a new Overlay Admin template instance
 ```ts
 constructor(wallet: WalletInterface) 
 ```
-See also: [WalletInterface](#interface-walletinterface)
+See also: [WalletInterface](./wallet.md#interface-walletinterface)
 
 Argument Details
 
@@ -413,7 +413,7 @@ static decode(script: LockingScript): {
     topicOrService: string;
 } 
 ```
-See also: [LockingScript](#class-lockingscript)
+See also: [LockingScript](./script.md#class-lockingscript)
 
 Returns
 
@@ -431,7 +431,7 @@ Creates a new advertisement locking script
 ```ts
 async lock(protocol: "SHIP" | "SLAP", domain: string, topicOrService: string): Promise<LockingScript> 
 ```
-See also: [LockingScript](#class-lockingscript)
+See also: [LockingScript](./script.md#class-lockingscript)
 
 Returns
 
@@ -456,7 +456,7 @@ unlock(protocol: "SHIP" | "SLAP"): {
     estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
 } 
 ```
-See also: [Transaction](#class-transaction), [UnlockingScript](#class-unlockingscript), [sign](#variable-sign)
+See also: [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
 
 Returns
 
@@ -483,7 +483,7 @@ export default class SHIPCast implements Broadcaster {
 }
 ```
 
-See also: [BroadcastFailure](#interface-broadcastfailure), [BroadcastResponse](#interface-broadcastresponse), [Broadcaster](#interface-broadcaster), [SHIPBroadcasterConfig](#interface-shipbroadcasterconfig), [Transaction](#class-transaction)
+See also: [BroadcastFailure](./transaction.md#interface-broadcastfailure), [BroadcastResponse](./transaction.md#interface-broadcastresponse), [Broadcaster](./transaction.md#interface-broadcaster), [SHIPBroadcasterConfig](./overlay-tools.md#interface-shipbroadcasterconfig), [Transaction](./transaction.md#class-transaction)
 
 <details>
 
@@ -496,7 +496,7 @@ Constructs an instance of the SHIP broadcaster.
 ```ts
 constructor(topics: string[], config?: SHIPBroadcasterConfig) 
 ```
-See also: [SHIPBroadcasterConfig](#interface-shipbroadcasterconfig)
+See also: [SHIPBroadcasterConfig](./overlay-tools.md#interface-shipbroadcasterconfig)
 
 Argument Details
 
@@ -512,7 +512,7 @@ Broadcasts a transaction to Overlay Services via SHIP.
 ```ts
 async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> 
 ```
-See also: [BroadcastFailure](#interface-broadcastfailure), [BroadcastResponse](#interface-broadcastresponse), [Transaction](#class-transaction)
+See also: [BroadcastFailure](./transaction.md#interface-broadcastfailure), [BroadcastResponse](./transaction.md#interface-broadcastresponse), [Transaction](./transaction.md#class-transaction)
 
 Returns
 
@@ -570,7 +570,7 @@ Submitted Transaction Execution AcKnowledgment
 export type STEAK = Record<string, AdmittanceInstructions>
 ```
 
-See also: [AdmittanceInstructions](#interface-admittanceinstructions)
+See also: [AdmittanceInstructions](./overlay-tools.md#interface-admittanceinstructions)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
