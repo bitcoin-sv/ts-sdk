@@ -1,4 +1,3 @@
-// @ts-nocheck
 import PublicKey from '../primitives/PublicKey'
 import PrivateKey from '../primitives/PrivateKey'
 import SymmetricKey from '../primitives/SymmetricKey'
