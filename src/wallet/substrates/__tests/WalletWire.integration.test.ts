@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { CompletedProtoWallet } from '../../../auth/certificates/__tests/CompletedProtoWallet'
 import { Utils, PrivateKey, Hash } from '../../../primitives/index'
 import WalletWireTransceiver from '../../../wallet/substrates/WalletWireTransceiver'
@@ -659,6 +658,7 @@ describe('WalletWire Integration Tests', () => {
   const mockUnsupportedMethods = (
     methods: Partial<CompletedProtoWallet>
   ): CompletedProtoWallet => {
+    // @ts-expect-error
     const result: CompletedProtoWallet = {
       ...methods
     }
