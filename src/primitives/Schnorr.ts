@@ -37,7 +37,7 @@ import { PrivateKey, PublicKey } from './index.js'
 export default class Schnorr {
   private readonly curve: Curve
 
-  constructor() {
+  constructor () {
     this.curve = new Curve()
   }
 
@@ -49,7 +49,7 @@ export default class Schnorr {
    * @param S Shared secret
    * @returns Proof (R, S', z)
    */
-  generateProof(
+  generateProof (
     aArg: PrivateKey,
     AArg: PublicKey,
     BArg: PublicKey,
@@ -71,7 +71,7 @@ export default class Schnorr {
    * @param proof Proof (R, S', z)
    * @returns True if the proof is valid, false otherwise
    */
-  verifyProof(
+  verifyProof (
     A: Point,
     B: Point,
     S: Point,
@@ -97,7 +97,7 @@ export default class Schnorr {
     return true
   }
 
-  private computeChallenge(
+  private computeChallenge (
     A: Point,
     B: Point,
     S: Point,

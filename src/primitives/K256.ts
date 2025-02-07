@@ -22,7 +22,7 @@ export default class K256 extends Mersenne {
    * @example
    * const k256 = new K256();
    */
-  constructor() {
+  constructor () {
     super(
       'k256',
       'ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe fffffc2f'
@@ -42,7 +42,7 @@ export default class K256 extends Mersenne {
    * const output = new BigNumber(0);
    * k256.split(input, output);
    */
-  split(input: BigNumber, output: BigNumber): void {
+  split (input: BigNumber, output: BigNumber): void {
     // 256 = 9 * 26 + 22
     const mask = 0x3fffff
 
@@ -89,7 +89,7 @@ export default class K256 extends Mersenne {
    * const number = new BigNumber(12345);
    * const result = k256.imulK(number);
    */
-  imulK(num: BigNumber): BigNumber {
+  imulK (num: BigNumber): BigNumber {
     // K = 0x1000003d1 = [ 0x40, 0x3d1 ]
     num.words[num.length] = 0
     num.words[num.length + 1] = 0

@@ -23,7 +23,7 @@ import DRBG from './DRBG.js'
  * let msg = new BigNumber('1234567890abcdef', 16);
  * let truncatedMsg = truncateToN(msg);
  */
-function truncateToN(
+function truncateToN (
   msg: BigNumber,
   truncOnly?: boolean,
   curve = new Curve()
@@ -89,7 +89,7 @@ export const sign = (
     }
 
     // Helper function to convert BigInt to byte array
-    function bigIntToBytes(value: bigint, length: number): Uint8Array {
+    function bigIntToBytes (value: bigint, length: number): Uint8Array {
       const hex = value.toString(16).padStart(length * 2, '0')
       const bytes = new Uint8Array(length)
       for (let i = 0; i < length; i++) {
@@ -114,7 +114,7 @@ export const sign = (
     let iter = 0
 
     // Truncate to N function for BigInt
-    function truncateToN(
+    function truncateToN (
       k: bigint,
       n: bigint,
       truncOnly: boolean = true
@@ -132,7 +132,7 @@ export const sign = (
       }
     }
 
-    function generateK(
+    function generateK (
       customK?: BigNumber | ((iter: number) => BigNumber)
     ): bigint {
       if (typeof customK === 'function') {
@@ -153,11 +153,11 @@ export const sign = (
     }
 
     // Modular arithmetic functions
-    function mod(a: bigint, m: bigint): bigint {
+    function mod (a: bigint, m: bigint): bigint {
       return ((a % m) + m) % m
     }
 
-    function modInv(a: bigint, m: bigint): bigint {
+    function modInv (a: bigint, m: bigint): bigint {
       let lm = one
       let hm = zero
       let low = mod(a, m)
@@ -174,7 +174,7 @@ export const sign = (
       return mod(lm, m)
     }
 
-    function pointAdd(
+    function pointAdd (
       P: { x: bigint, y: bigint } | null,
       Q: { x: bigint, y: bigint } | null
     ): { x: bigint, y: bigint } | null {
@@ -206,7 +206,7 @@ export const sign = (
       return { x: xR, y: yR }
     }
 
-    function scalarMul(
+    function scalarMul (
       k: bigint,
       P: { x: bigint, y: bigint }
     ): { x: bigint, y: bigint } {

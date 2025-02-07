@@ -32,7 +32,7 @@ export class BeefParty extends Beef {
    *
    * @param parties Optional array of initial unique party identifiers.
    */
-  constructor(parties?: string[]) {
+  constructor (parties?: string[]) {
     super()
     if (parties != null) {
       for (const party of parties) {
@@ -45,7 +45,7 @@ export class BeefParty extends Beef {
    * @param party
    * @returns `true` if `party` has already been added to this `BeefParty`.
    */
-  isParty(party: string): boolean {
+  isParty (party: string): boolean {
     const r = Object.keys(this.knownTo).includes(party)
     return r
   }
@@ -54,7 +54,7 @@ export class BeefParty extends Beef {
    * Adds a new unique party identifier to this `BeefParty`.
    * @param party
    */
-  addParty(party: string): void {
+  addParty (party: string): void {
     if (this.isParty(party)) {
       throw new Error(`Party ${party} already exists.`)
     }
@@ -65,7 +65,7 @@ export class BeefParty extends Beef {
    * @param party
    * @returns Array of txids "known" to `party`.
    */
-  getKnownTxidsForParty(party: string): string[] {
+  getKnownTxidsForParty (party: string): string[] {
     const knownTxids = this.knownTo[party]
 
     if (knownTxids === undefined) { // ✅ Explicitly check for undefined
@@ -79,7 +79,7 @@ export class BeefParty extends Beef {
    * @param party
    * @returns trimmed beef of unknown transactions and proofs for `party`
    */
-  getTrimmedBeefForParty(party: string): Beef {
+  getTrimmedBeefForParty (party: string): Beef {
     const knownTxids = this.getKnownTxidsForParty(party)
     const prunedBeef = this.clone()
     prunedBeef.trimKnownTxids(knownTxids)
@@ -91,7 +91,7 @@ export class BeefParty extends Beef {
    * @param party unique identifier, added if new.
    * @param knownTxids
    */
-  addKnownTxidsForParty(party: string, knownTxids: string[]): void {
+  addKnownTxidsForParty (party: string, knownTxids: string[]): void {
     if (!this.isParty(party)) {
       this.addParty(party)
     }
@@ -112,7 +112,7 @@ export class BeefParty extends Beef {
    * @param party
    * @param beef
    */
-  mergeBeefFromParty(party: string, beef: number[] | Beef): void {
+  mergeBeefFromParty (party: string, beef: number[] | Beef): void {
     const b: Beef = Array.isArray(beef) ? Beef.fromBinary(beef) : beef
     const knownTxids = b.getValidTxids()
     this.mergeBeef(b)

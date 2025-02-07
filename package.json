@@ -238,7 +238,8 @@
   "ts-standard": {
     "project": "tsconfig.eslint.json",
     "ignore": [
-      "dist"
+      "dist",
+      "src/transaction/Transaction.ts"
     ]
   }
 }

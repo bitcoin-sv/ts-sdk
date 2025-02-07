@@ -18,7 +18,7 @@ export default class CachedKeyDeriver {
    * @param {Object} [options] - Optional settings for the cache.
    * @param {number} [options.maxCacheSize=1000] - The maximum number of entries to store in the cache.
    */
-  constructor(
+  constructor (
     rootKey: PrivateKey | 'anyone',
     options?: { maxCacheSize?: number }
   ) {
@@ -37,7 +37,7 @@ export default class CachedKeyDeriver {
    * @param {boolean} [forSelf=false] - Whether deriving for self.
    * @returns {PublicKey} - The derived public key.
    */
-  derivePublicKey(
+  derivePublicKey (
     protocolID: WalletProtocol,
     keyID: string,
     counterparty: Counterparty,
@@ -76,7 +76,7 @@ export default class CachedKeyDeriver {
    * @param {Counterparty} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
    * @returns {PrivateKey} - The derived private key.
    */
-  derivePrivateKey(
+  derivePrivateKey (
     protocolID: WalletProtocol,
     keyID: string,
     counterparty: Counterparty
@@ -113,7 +113,7 @@ export default class CachedKeyDeriver {
    * @returns {SymmetricKey} - The derived symmetric key.
    * @throws {Error} - Throws an error if attempting to derive a symmetric key for 'anyone'.
    */
-  deriveSymmetricKey(
+  deriveSymmetricKey (
     protocolID: WalletProtocol,
     keyID: string,
     counterparty: Counterparty
@@ -148,7 +148,7 @@ export default class CachedKeyDeriver {
    * @returns {number[]} - The shared secret as a number array.
    * @throws {Error} - Throws an error if attempting to reveal a shared secret for 'self'.
    */
-  revealCounterpartySecret(counterparty: Counterparty): number[] {
+  revealCounterpartySecret (counterparty: Counterparty): number[] {
     const cacheKey = this.generateCacheKey(
       'revealCounterpartySecret',
       counterparty
@@ -174,7 +174,7 @@ export default class CachedKeyDeriver {
    * @param {string} keyID - The key identifier.
    * @returns {number[]} - The specific key association as a number array.
    */
-  revealSpecificSecret(
+  revealSpecificSecret (
     counterparty: Counterparty,
     protocolID: WalletProtocol,
     keyID: string
@@ -208,7 +208,7 @@ export default class CachedKeyDeriver {
    * @param {...any} args - The arguments passed to the method.
    * @returns {string} - The generated cache key.
    */
-  private generateCacheKey(methodName: string, ...args: Array<string | number | boolean | PublicKey | PrivateKey | Counterparty | WalletProtocol>): string {
+  private generateCacheKey (methodName: string, ...args: Array<string | number | boolean | PublicKey | PrivateKey | Counterparty | WalletProtocol>): string {
     const serializedArgs = args
       .map((arg) => this.serializeArgument(arg))
       .join('|')
@@ -220,7 +220,7 @@ export default class CachedKeyDeriver {
    * @param {any} arg - The argument to serialize.
    * @returns {string} - The serialized argument.
    */
-  private serializeArgument(arg: string | number | boolean | PublicKey | PrivateKey | Counterparty | WalletProtocol | object | null): string {
+  private serializeArgument (arg: string | number | boolean | PublicKey | PrivateKey | Counterparty | WalletProtocol | object | null): string {
     if (arg instanceof PublicKey || arg instanceof PrivateKey) {
       return arg.toString()
     } else if (Array.isArray(arg)) {
@@ -237,7 +237,7 @@ export default class CachedKeyDeriver {
    * @param {string} cacheKey - The key of the cached item.
    * @returns {any} - The cached value.
    */
-  private cacheGet(cacheKey: string): PublicKey | PrivateKey | SymmetricKey | number[] | undefined {
+  private cacheGet (cacheKey: string): PublicKey | PrivateKey | SymmetricKey | number[] | undefined {
     const value = this.cache.get(cacheKey)
     // Update the entry to reflect recent use
     this.cache.delete(cacheKey)
@@ -252,7 +252,7 @@ export default class CachedKeyDeriver {
    * @param {string} cacheKey - The key of the item to cache.
    * @param {any} value - The value to cache.
    */
-  private cacheSet(cacheKey: string, value: PublicKey | PrivateKey | SymmetricKey | number[]): void {
+  private cacheSet (cacheKey: string, value: PublicKey | PrivateKey | SymmetricKey | number[]): void {
     if (this.cache.size >= this.maxCacheSize) {
       // Evict the least recently used item (first item in Map)
       const firstKey = this.cache.keys().next().value

@@ -36,7 +36,7 @@ interface jsonUtxo {
  * @param unlockingScriptTemplate: { sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>, estimateLength: (tx: Transaction, inputIndex: number) => Promise<number> }
  * @returns
  */
-export default function fromUtxo(
+export default function fromUtxo (
   utxo: jsonUtxo,
   unlockingScriptTemplate: {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>

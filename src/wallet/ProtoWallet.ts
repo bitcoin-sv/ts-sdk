@@ -40,7 +40,7 @@ import {
 export class ProtoWallet {
   keyDeriver?: KeyDeriverApi
 
-  constructor(rootKeyOrKeyDeriver?: PrivateKey | 'anyone' | KeyDeriverApi) {
+  constructor (rootKeyOrKeyDeriver?: PrivateKey | 'anyone' | KeyDeriverApi) {
     if (typeof (rootKeyOrKeyDeriver as KeyDeriver).identityKey !== 'string') {
       rootKeyOrKeyDeriver = new KeyDeriver(
         rootKeyOrKeyDeriver as PrivateKey | 'anyone'
@@ -49,7 +49,7 @@ export class ProtoWallet {
     this.keyDeriver = rootKeyOrKeyDeriver as KeyDeriver
   }
 
-  async getPublicKey(
+  async getPublicKey (
     args: GetPublicKeyArgs
   ): Promise<{ publicKey: PubKeyHex }> {
     if (args.identityKey) {
@@ -81,7 +81,7 @@ export class ProtoWallet {
     }
   }
 
-  async revealCounterpartyKeyLinkage(
+  async revealCounterpartyKeyLinkage (
     args: RevealCounterpartyKeyLinkageArgs
   ): Promise<RevealCounterpartyKeyLinkageResult> {
     const { publicKey: identityKey } = await this.getPublicKey({
@@ -125,7 +125,7 @@ export class ProtoWallet {
     }
   }
 
-  async revealSpecificKeyLinkage(
+  async revealSpecificKeyLinkage (
     args: RevealSpecificKeyLinkageArgs
   ): Promise<RevealSpecificKeyLinkageResult> {
     const { publicKey: identityKey } = await this.getPublicKey({
@@ -169,7 +169,7 @@ export class ProtoWallet {
     }
   }
 
-  async encrypt(
+  async encrypt (
     args: WalletEncryptArgs
   ): Promise<WalletEncryptResult> {
     if (this.keyDeriver == null) {
@@ -183,7 +183,7 @@ export class ProtoWallet {
     return { ciphertext: key.encrypt(args.plaintext) as number[] }
   }
 
-  async decrypt(
+  async decrypt (
     args: WalletDecryptArgs
   ): Promise<WalletDecryptResult> {
     if (this.keyDeriver == null) {
@@ -197,7 +197,7 @@ export class ProtoWallet {
     return { plaintext: key.decrypt(args.ciphertext) as number[] }
   }
 
-  async createHmac(
+  async createHmac (
     args: CreateHmacArgs
   ): Promise<CreateHmacResult> {
     if (this.keyDeriver == null) {
@@ -211,7 +211,7 @@ export class ProtoWallet {
     return { hmac: Hash.sha256hmac(key.toArray(), args.data) }
   }
 
-  async verifyHmac(
+  async verifyHmac (
     args: VerifyHmacArgs
   ): Promise<VerifyHmacResult> {
     if (this.keyDeriver == null) {
@@ -233,7 +233,7 @@ export class ProtoWallet {
     return { valid }
   }
 
-  async createSignature(
+  async createSignature (
     args: CreateSignatureArgs
   ): Promise<CreateSignatureResult> {
     if ((args.hashToDirectlySign == null) && (args.data == null)) {
@@ -259,7 +259,7 @@ export class ProtoWallet {
     }
   }
 
-  async verifySignature(
+  async verifySignature (
     args: VerifySignatureArgs
   ): Promise<VerifySignatureResult> {
     if ((args.hashToDirectlyVerify == null) && (args.data == null)) {

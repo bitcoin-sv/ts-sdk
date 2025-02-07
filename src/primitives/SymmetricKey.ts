@@ -22,7 +22,7 @@ export default class SymmetricKey extends BigNumber {
    * @example
    * const symmetricKey = SymmetricKey.fromRandom();
    */
-  static fromRandom(): SymmetricKey {
+  static fromRandom (): SymmetricKey {
     return new SymmetricKey(Random(32))
   }
 
@@ -40,7 +40,7 @@ export default class SymmetricKey extends BigNumber {
    * const key = new SymmetricKey(1234);
    * const encryptedMessage = key.encrypt('plainText', 'utf8');
    */
-  encrypt(msg: number[] | string, enc?: 'hex'): string | number[] {
+  encrypt (msg: number[] | string, enc?: 'hex'): string | number[] {
     const iv = Random(32)
     msg = toArray(msg, enc)
     const { result, authenticationTag } = AESGCM(
@@ -68,7 +68,7 @@ export default class SymmetricKey extends BigNumber {
    *
    * @throws {Error} Will throw an error if the decryption fails, likely due to message tampering or incorrect decryption key.
    */
-  decrypt(msg: number[] | string, enc?: 'hex' | 'utf8'): string | number[] {
+  decrypt (msg: number[] | string, enc?: 'hex' | 'utf8'): string | number[] {
     msg = toArray(msg, enc)
     const iv = msg.slice(0, 32)
     const ciphertextWithTag = msg.slice(32)

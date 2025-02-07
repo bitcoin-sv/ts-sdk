@@ -8,17 +8,17 @@ export class PointInFiniteField {
   x: BigNumber
   y: BigNumber
 
-  constructor(x: BigNumber, y: BigNumber) {
+  constructor (x: BigNumber, y: BigNumber) {
     const P = new Curve().p // arithmetic is mod P
     this.x = x.umod(P)
     this.y = y.umod(P)
   }
 
-  toString(): string {
+  toString (): string {
     return toBase58(this.x.toArray()) + '.' + toBase58(this.y.toArray())
   }
 
-  static fromString(str: string): PointInFiniteField {
+  static fromString (str: string): PointInFiniteField {
     const [x, y] = str.split('.')
     return new PointInFiniteField(
       new BigNumber(fromBase58(x)),
@@ -46,12 +46,12 @@ export default class Polynomial {
   readonly points: PointInFiniteField[]
   readonly threshold: number
 
-  constructor(points: PointInFiniteField[], threshold?: number) {
+  constructor (points: PointInFiniteField[], threshold?: number) {
     this.points = points
     this.threshold = threshold ?? points.length // ✅ Handles undefined safely
   }
 
-  static fromPrivateKey(key: PrivateKey, threshold: number): Polynomial {
+  static fromPrivateKey (key: PrivateKey, threshold: number): Polynomial {
     const P = new Curve().p // arithmetic is mod P
     // The key is the y-intercept of the polynomial where x=0.
     const points = [
@@ -69,7 +69,7 @@ export default class Polynomial {
   }
 
   // Evaluate the polynomial at x by using Lagrange interpolation
-  valueAt(x: BigNumber): BigNumber {
+  valueAt (x: BigNumber): BigNumber {
     const P = new Curve().p // arithmetic is mod P
     let y = new BigNumber(0)
     for (let i = 0; i < this.threshold; i++) {
