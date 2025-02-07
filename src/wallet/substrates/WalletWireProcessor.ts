@@ -52,7 +52,7 @@ export default class WalletWireProcessor implements WalletWire {
       const paramsReader = messageReader // Remaining bytes
 
       switch (callName) {
-        case 'createAction':
+        case 'createAction': {
           // Deserialize parameters from paramsReader
           const args: any = {}
 
@@ -312,7 +312,7 @@ export default class WalletWireProcessor implements WalletWire {
           const resultWriter = new Utils.Writer()
 
           // txid
-          if (createActionResult.txid) {
+          if (createActionResult.txid != null && createActionResult.txid !== '') {
             resultWriter.writeInt8(1)
             resultWriter.write(Utils.toArray(createActionResult.txid, 'hex'))
           } else {
@@ -377,7 +377,7 @@ export default class WalletWireProcessor implements WalletWire {
           responseWriter.writeUInt8(0) // errorByte = 0
           responseWriter.write(resultWriter.toArray())
           return responseWriter.toArray()
-
+        }
         case 'signAction': {
           const args: any = {}
 
@@ -467,7 +467,7 @@ export default class WalletWireProcessor implements WalletWire {
           const resultWriter = new Utils.Writer()
 
           // txid
-          if (signActionResult.txid) {
+          if (signActionResult.txid != null && signActionResult.txid !== '') {
             resultWriter.writeInt8(1)
             resultWriter.write(Utils.toArray(signActionResult.txid, 'hex'))
           } else {
@@ -1096,7 +1096,7 @@ export default class WalletWireProcessor implements WalletWire {
           const identityKeyFlag = paramsReader.readUInt8()
           args.identityKey = identityKeyFlag === 1
 
-          if (!args.identityKey) {
+          if (args.identityKey !== true) {
             // Deserialize protocolID
             args.protocolID = this.decodeProtocolID(paramsReader)
 
@@ -2028,16 +2028,16 @@ export default class WalletWireProcessor implements WalletWire {
       }
     } catch (err) {
       const responseWriter = new Utils.Writer()
-      responseWriter.writeUInt8(err.code || 1) // errorCode = 1 (generic error)
+      responseWriter.writeUInt8(typeof err.code === 'number' ? err.code : 1) // errorCode = 1 (generic error)
 
       // Serialize the error message
-      const errorMessage = err.message || 'Unknown error'
+      const errorMessage = typeof err.message === 'string' ? err.message : 'Unknown error'
       const errorMessageBytes = Utils.toArray(errorMessage, 'utf8')
       responseWriter.writeVarIntNum(errorMessageBytes.length)
       responseWriter.write(errorMessageBytes)
 
       // Serialize the stack trace
-      const stackTrace = err.stack || ''
+      const stackTrace = typeof err.stack === 'string' ? err.stack : ''
       const stackTraceBytes = Utils.toArray(stackTrace, 'utf8')
       responseWriter.writeVarIntNum(stackTraceBytes.length)
       responseWriter.write(stackTraceBytes)
