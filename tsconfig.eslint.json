@@ -1,9 +1,12 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": ["@types/node"],
+    "types": [
+      "@types/node"
+    ],
     "noEmit": true,
-    "allowJs": true
+    "strict": true,
+    "strictNullChecks": true
   },
   "include": [
     "./src/**/*.{ts,tsx,js,jsx}",   // ✅ Keep this if your TypeScript files are in src/
