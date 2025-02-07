@@ -6,17 +6,13 @@ import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
 import { hash256 } from '../primitives/Hash.js'
 import FeeModel from './FeeModel.js'
 import SatoshisPerKilobyte from './fee-models/SatoshisPerKilobyte.js'
-import {
-  Broadcaster,
-  BroadcastResponse,
-  BroadcastFailure
-} from './Broadcaster.js'
+import { Broadcaster, BroadcastResponse, BroadcastFailure } from './Broadcaster.js'
 import MerklePath from './MerklePath.js'
 import Spend from '../script/Spend.js'
 import ChainTracker from './ChainTracker.js'
 import { defaultBroadcaster } from './broadcasters/DefaultBroadcaster.js'
 import { defaultChainTracker } from './chaintrackers/DefaultChainTracker.js'
-import { ATOMIC_BEEF, BEEF_V1 } from './Beef.js'
+import { Beef, BEEF_V1 } from './Beef.js'
 import P2PKH from '../script/templates/P2PKH.js'
 
 /**
@@ -99,159 +95,51 @@ export default class Transaction {
   }
 
   /**
-   * Creates a new transaction, linked to its inputs and their associated merkle paths, from a BEEF (BRC-62) structure.
+   * Creates a new transaction, linked to its inputs and their associated merkle paths, from a BEEF V1, V2 or Atomic.
    * Optionally, you can provide a specific TXID to retrieve a particular transaction from the BEEF data.
    * If the TXID is provided but not found in the BEEF data, an error will be thrown.
-   * If no TXID is provided, the last transaction in the BEEF data is returned.
+   * If no TXID is provided, the last transaction in the BEEF data is returned, or the atomic txid.
    * @param beef A binary representation of transactions in BEEF format.
    * @param txid Optional TXID of the transaction to retrieve from the BEEF data.
    * @returns An anchored transaction, linked to its associated inputs populated with merkle paths.
    */
   static fromBEEF(beef: number[], txid?: string): Transaction {
-    const reader = new Reader(beef)
-    const { transactions, BUMPs } = Transaction.parseBEEFData(reader)
-
-    // The last transaction in the BEEF data can be used if txid is not provided
-    const txids = Object.keys(transactions)
-    const lastTXID = txids[txids.length - 1]
-    const targetTXID = txid != null && txid !== '' ? txid : lastTXID
-
-    if (transactions[targetTXID] == null) {
-      throw new Error(
-        `Transaction with TXID ${targetTXID} not found in BEEF data.`
-      )
-    }
-
-    this.addPathOrInputs(transactions[targetTXID], transactions, BUMPs)
-
-    return transactions[targetTXID].tx
+    const { tx } = Transaction.fromAnyBeef(beef, txid)
+    return tx
   }
 
   /**
    * Creates a new transaction from an Atomic BEEF (BRC-95) structure.
-   * Extracts the subject transaction and ensures that all transactions within the BEEF data
-   * are part of the dependency graph of the subject transaction.
-   * Throws errors if the Atomic BEEF data does not strictly adhere to the BRC-95 specification.
+   * Extracts the subject transaction and supporting merkle path and source transactions contained in the BEEF data
    *
    * @param beef A binary representation of an Atomic BEEF structure.
    * @returns The subject transaction, linked to its associated inputs populated with merkle paths.
    */
   static fromAtomicBEEF(beef: number[]): Transaction {
-    const reader = new Reader(beef)
-    // Read the Atomic BEEF prefix
-    const prefix = reader.readUInt32LE()
-    if (prefix !== ATOMIC_BEEF) {
-      throw new Error(
-        `Invalid Atomic BEEF prefix. Expected 0x01010101, received 0x${prefix.toString(16)}.`
-      )
+    const { tx, txid, beef: b } = Transaction.fromAnyBeef(beef)
+    if (txid !== b.atomicTxid) {
+      if (b.atomicTxid)
+        throw new Error(`Transaction with TXID ${b.atomicTxid} not found in BEEF data.`)
+      else
+        throw new Error(`beef must conform to BRC-95 and must contain the subject txid.`)
     }
-
-    // Read the subject TXID
-    const subjectTXIDArray = reader.read(32)
-    const subjectTXID = toHex(subjectTXIDArray)
-
-    // The remaining data is the BEEF data
-    const beefReader = new Reader(reader.read())
-    const { transactions, BUMPs } = Transaction.parseBEEFData(beefReader)
-
-    // Ensure that the subject transaction exists
-    if (transactions[subjectTXID] == null) {
-      throw new Error(
-        `Subject transaction with TXID ${subjectTXID} not found in Atomic BEEF data.`
-      )
-    }
-
-    // Ensure that all transactions are part of the dependency graph of the subject transaction
-    const validTxids = new Set<string>()
-    // All BUMP level 0 hashes are valid.
-    for (const bump of BUMPs) {
-      for (const n of bump.path[0]) {
-        if (n.hash != null && n.hash !== '') {
-          validTxids.add(n.hash)
-        }
-      }
-    }
-    // To keep track of which transactions were used.
-    const unusedTxTxids = new Set<string>()
-    for (const txid of Object.keys(transactions)) unusedTxTxids.add(txid)
-
-    const traverseDependencies = (txid: string): void => {
-      unusedTxTxids.delete(txid)
-      if (validTxids.has(txid)) {
-        return
-      }
-      validTxids.add(txid)
-      const tx = transactions[txid].tx
-      for (const input of tx.inputs) {
-        const inputTxid = input.sourceTXID
-        if (inputTxid === undefined || transactions[inputTxid] === undefined) {
-          throw new Error(
-            `Input transaction with TXID ${inputTxid ?? 'undefined'} is missing in Atomic BEEF data.`
-          )
-        }
-        traverseDependencies(inputTxid)
-      }
-    }
-
-    traverseDependencies(subjectTXID)
-
-    // Check for any unrelated transactions
-    if (unusedTxTxids.size > 0) {
-      const txid = Array.from(unusedTxTxids)[0]
-      throw new Error(
-        `Unrelated transaction with TXID ${String(txid)} found in Atomic BEEF data.`
-      )
-    }
-
-    this.addPathOrInputs(transactions[subjectTXID], transactions, BUMPs)
-
-    return transactions[subjectTXID].tx
+    return tx
   }
 
-  /**
-   * Parses BEEF data from a Reader and returns the transactions and BUMPs.
-   *
-   * @param reader The Reader positioned at the start of BEEF data.
-   * @returns An object containing the transactions and BUMPs.
-   */
-  private static parseBEEFData(reader: Reader): {
-    transactions: Record<string, { pathIndex?: number, tx: Transaction }>
-    BUMPs: MerklePath[]
-  } {
-    // Read the version
-    const version = reader.readUInt32LE()
-    if (version !== BEEF_V1) {
-      throw new Error(
-        `Invalid BEEF version. Expected ${BEEF_V1}, received ${version}.`
-      )
+  private static fromAnyBeef(beef: number[], txid?: string): { tx: Transaction, beef: Beef, txid: string } {
+    const b = Beef.fromBinary(beef)
+    if (b.txs.length < 1) {
+      throw new Error(`beef must include at least one transaction.`)
     }
-
-    // Read the BUMPs
-    const numberOfBUMPs = reader.readVarIntNum()
-    const BUMPs: MerklePath[] = []
-    for (let i = 0; i < numberOfBUMPs; i++) {
-      BUMPs.push(MerklePath.fromReader(reader))
+    const target = txid || b.atomicTxid || b.txs.slice(-1)[0].txid
+    const tx = b.findAtomicTransaction(target)
+    if (!tx) {
+      if (txid)
+        throw new Error(`Transaction with TXID ${target} not found in BEEF data.`)
+      else
+        throw new Error(`beef does not contain transaction for atomic txid.`)
     }
-
-    // Read all transactions into an object
-    // The object has keys of TXIDs and values of objects with transactions and BUMP indexes
-    const numberOfTransactions = reader.readVarIntNum()
-    const transactions: Record<
-      string,
-      { pathIndex?: number, tx: Transaction }
-    > = {}
-    for (let i = 0; i < numberOfTransactions; i++) {
-      const tx = Transaction.fromReader(reader)
-      const obj: { pathIndex?: number, tx: Transaction } = { tx }
-      const txid = tx.id('hex')
-      const hasBump = Boolean(reader.readUInt8())
-      if (hasBump) {
-        obj.pathIndex = reader.readVarIntNum()
-      }
-      transactions[txid] = obj
-    }
-
-    return { transactions, BUMPs }
+    return { tx, beef: b, txid: target }
   }
 
   /**
