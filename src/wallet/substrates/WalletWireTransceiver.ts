@@ -1,9 +1,9 @@
 
-// @ts-nocheck
 import {
   AcquireCertificateArgs,
   AcquireCertificateResult,
   SecurityLevel,
+  SecurityLevels,
   Base64String,
   BasketStringUnder300Bytes,
   BEEF,
@@ -134,7 +134,7 @@ export default class WalletWireTransceiver implements WalletInterface {
           paramWriter.write(unlockingScriptBytes)
         } else {
           paramWriter.writeVarIntNum(-1)
-          paramWriter.writeVarIntNum(input.unlockingScriptLength)
+          paramWriter.writeVarIntNum(input.unlockingScriptLength ?? 0)
         }
 
         // inputDescription
@@ -374,7 +374,7 @@ export default class WalletWireTransceiver implements WalletInterface {
         const txidBytes = resultReader.read(32)
         const txid = Utils.toHex(txidBytes)
         const statusCode = resultReader.readInt8()
-        let status: 'unproven' | 'sending' | 'failed'
+        let status: 'unproven' | 'sending' | 'failed' = 'unproven'
         if (statusCode === 1) status = 'unproven'
         else if (statusCode === 2) status = 'sending'
         else if (statusCode === 3) status = 'failed'
@@ -506,7 +506,7 @@ export default class WalletWireTransceiver implements WalletInterface {
         const txidBytes = resultReader.read(32)
         const txid = Utils.toHex(txidBytes)
         const statusCode = resultReader.readInt8()
-        let status: 'unproven' | 'sending' | 'failed'
+        let status: 'unproven' | 'sending' | 'failed' = 'unproven'
         if (statusCode === 1) status = 'unproven'
         else if (statusCode === 2) status = 'sending'
         else if (statusCode === 3) status = 'failed'
@@ -844,6 +844,9 @@ export default class WalletWireTransceiver implements WalletInterface {
     for (const out of args.outputs) {
       paramWriter.writeVarIntNum(out.outputIndex)
       if (out.protocol === 'wallet payment') {
+        if (out.paymentRemittance == null) {
+          throw new Error('Payment remittance is required for wallet payment')
+        }
         paramWriter.writeUInt8(1)
         paramWriter.write(
           Utils.toArray(out.paymentRemittance.senderIdentityKey, 'hex')
@@ -863,12 +866,12 @@ export default class WalletWireTransceiver implements WalletInterface {
       } else {
         paramWriter.writeUInt8(2)
         const basketAsArray = Utils.toArray(
-          out.insertionRemittance.basket,
+          out.insertionRemittance?.basket,
           'utf8'
         )
         paramWriter.writeVarIntNum(basketAsArray.length)
         paramWriter.write(basketAsArray)
-        if (typeof out.insertionRemittance.customInstructions === 'string' && out.insertionRemittance.customInstructions !== '') {
+        if (typeof out.insertionRemittance?.customInstructions === 'string' && out.insertionRemittance.customInstructions !== '') {
           const customInstructionsAsArray = Utils.toArray(
             out.insertionRemittance.customInstructions,
             'utf8'
@@ -878,7 +881,7 @@ export default class WalletWireTransceiver implements WalletInterface {
         } else {
           paramWriter.writeVarIntNum(-1)
         }
-        if (typeof out.insertionRemittance.tags === 'object') {
+        if (typeof out.insertionRemittance?.tags === 'object') {
           paramWriter.writeVarIntNum(out.insertionRemittance.tags.length)
           for (const tag of out.insertionRemittance.tags) {
             const tagAsArray = Utils.toArray(tag, 'utf8')
@@ -1105,8 +1108,8 @@ export default class WalletWireTransceiver implements WalletInterface {
     if (!args.identityKey) {
       paramWriter.write(
         this.encodeKeyRelatedParams(
-          args.protocolID,
-          args.keyID,
+          args.protocolID ??= [SecurityLevels.Silent, 'default'],
+          args.keyID ??= '',
           args.counterparty,
           args.privileged,
           args.privilegedReason
@@ -1447,7 +1450,7 @@ export default class WalletWireTransceiver implements WalletInterface {
       paramWriter.write(args.data)
     } else {
       paramWriter.writeUInt8(2)
-      paramWriter.write(args.hashToDirectlySign)
+      paramWriter.write(args.hashToDirectlySign ??= [])
     }
     // Serialize seekPermission
     paramWriter.writeInt8(
@@ -1504,7 +1507,7 @@ export default class WalletWireTransceiver implements WalletInterface {
       paramWriter.write(args.data)
     } else {
       paramWriter.writeUInt8(2)
-      paramWriter.write(args.hashToDirectlyVerify)
+      paramWriter.write(args.hashToDirectlyVerify ?? [])
     }
     // Serialize seekPermission
     paramWriter.writeInt8(
@@ -1576,7 +1579,7 @@ export default class WalletWireTransceiver implements WalletInterface {
 
     if (args.acquisitionProtocol === 'direct') {
       paramWriter.write(Utils.toArray(args.serialNumber, 'base64'))
-      paramWriter.write(this.encodeOutpoint(args.revocationOutpoint))
+      paramWriter.write(this.encodeOutpoint(args.revocationOutpoint ?? ''))
       const signatureAsArray = Utils.toArray(args.signature, 'hex')
       paramWriter.writeVarIntNum(signatureAsArray.length)
       paramWriter.write(signatureAsArray)
@@ -1587,14 +1590,14 @@ export default class WalletWireTransceiver implements WalletInterface {
           : [11]
       paramWriter.write(keyringRevealerAsArray)
 
-      const keyringKeys = Object.keys(args.keyringForSubject)
+      const keyringKeys = Object.keys(args.keyringForSubject ?? {})
       paramWriter.writeVarIntNum(keyringKeys.length)
       for (let i = 0; i < keyringKeys.length; i++) {
         const keyringKeysAsArray = Utils.toArray(keyringKeys[i], 'utf8')
         paramWriter.writeVarIntNum(keyringKeysAsArray.length)
         paramWriter.write(keyringKeysAsArray)
         const keyringForSubjectAsArray = Utils.toArray(
-          args.keyringForSubject[keyringKeys[i]],
+          args.keyringForSubject?.[keyringKeys[i]],
           'base64'
         )
         paramWriter.writeVarIntNum(keyringForSubjectAsArray.length)
@@ -1720,13 +1723,13 @@ export default class WalletWireTransceiver implements WalletInterface {
     const certifierAsArray = Utils.toArray(args.certificate.certifier, 'hex')
     paramWriter.write(certifierAsArray)
     const revocationOutpointAsArray = this.encodeOutpoint(
-      args.certificate.revocationOutpoint
+      args.certificate.revocationOutpoint ?? ''
     )
     paramWriter.write(revocationOutpointAsArray)
     const signatureAsArray = Utils.toArray(args.certificate.signature, 'hex')
     paramWriter.writeVarIntNum(signatureAsArray.length)
     paramWriter.write(signatureAsArray)
-    const fieldEntries = Object.entries(args.certificate.fields)
+    const fieldEntries = Object.entries(args.certificate.fields ?? {})
     paramWriter.writeVarIntNum(fieldEntries.length)
     for (const [key, value] of fieldEntries) {
       const keyAsArray = Utils.toArray(key, 'utf8')
