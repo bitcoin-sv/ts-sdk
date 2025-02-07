@@ -11,7 +11,7 @@ export default [
     // Add ignorePatterns at the top level for ESLint
     ignorePatterns: ['src/primitives/Point.ts'],
 
-    files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'],
+    files: ['src/**/*.ts', '**/*.{js,mjs,cjs,ts,jsx,tsx}'], // ✅ Ensure TS files are included
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -20,8 +20,8 @@ export default [
       },
       parser: tseslint.parser,
       parserOptions: {
-        project: './tsconfig.eslint.json',
-        tsconfigRootDir: import.meta.dirname
+        project: './tsconfig.json', // ✅ Ensure this file exists
+        tsconfigRootDir: process.cwd() // ✅ Use process.cwd() instead of import.meta.dirname
       }
     },
     plugins: {

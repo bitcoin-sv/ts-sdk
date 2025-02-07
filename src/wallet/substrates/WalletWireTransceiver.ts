@@ -186,7 +186,7 @@ export default class WalletWireTransceiver implements WalletInterface {
         }
 
         // customInstructions
-        if (output.customInstructions) {
+        if (output.customInstructions != null && output.customInstructions !== '') {
           const customInstructionsBytes = Utils.toArray(
             output.customInstructions,
             'utf8'
@@ -868,7 +868,7 @@ export default class WalletWireTransceiver implements WalletInterface {
         )
         paramWriter.writeVarIntNum(basketAsArray.length)
         paramWriter.write(basketAsArray)
-        if (typeof out.insertionRemittance.customInstructions) {
+        if (typeof out.insertionRemittance.customInstructions === 'string' && out.insertionRemittance.customInstructions !== '') {
           const customInstructionsAsArray = Utils.toArray(
             out.insertionRemittance.customInstructions,
             'utf8'
@@ -1967,7 +1967,7 @@ export default class WalletWireTransceiver implements WalletInterface {
   ): Promise<{ authenticated: true }> {
     const result = await this.transmit('isAuthenticated', originator)
     // @ts-expect-error
-    return { authenticated: !!result[0] }
+    return { authenticated: result[0] === 1 }
   }
 
   async waitForAuthentication (

@@ -13,7 +13,6 @@ import {
   ISOTimestampString,
   KeyIDStringUnder800Bytes,
   LabelStringUnder300Bytes,
-  OriginatorDomainNameStringUnder250Bytes,
   OutpointString,
   OutputTagStringUnder300Bytes,
   PositiveInteger,
@@ -53,14 +52,16 @@ export default class XDMSubstrate implements WalletInterface {
   async invoke (call: CallType, args: any): Promise<any> {
     return await new Promise((resolve, reject) => {
       const id = Utils.toBase64(Random(12))
-      const listener = async e => {
+      const listener = (e: MessageEvent): void => {
         if (
           e.data.type !== 'CWI' ||
           !e.isTrusted ||
           e.data.id !== id ||
-          e.data.isInvocation
+          e.data.isInvocation === true
         ) { return }
-        if (typeof window.removeEventListener === 'function') { window.removeEventListener('message', listener) }
+        if (typeof window.removeEventListener === 'function') {
+          window.removeEventListener('message', listener)
+        }
         if (e.data.status === 'error') {
           const err = new WalletError(e.data.description, e.data.code)
           reject(err)
