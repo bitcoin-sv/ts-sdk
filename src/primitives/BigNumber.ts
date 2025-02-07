@@ -722,9 +722,9 @@ export default class BigNumber {
     if (padding === 0 && out === '0') {
       return ''
     }
-    while (out.length % padding !== 0) {
+    // eslint-disable-next-line no-unmodified-loop-condition
+    while (out.length % padding !== 0 && padding !== 0) {
       out = '0' + out
-      if (padding === 0) break // Ensures the loop doesn't run indefinitely
     }
     if (this.negative !== 0) {
       out = '-' + out
@@ -3164,7 +3164,7 @@ export default class BigNumber {
 
       if (mode !== 'div') {
         mod = res.mod.neg()
-        if (positive !== undefined && mod.negative !== 0) {
+        if (positive === true && mod.negative !== 0) {
           mod.iadd(num)
         }
       }
@@ -3193,7 +3193,7 @@ export default class BigNumber {
 
       if (mode !== 'div') {
         mod = res.mod.neg()
-        if (positive !== undefined && mod.negative !== 0) {
+        if (positive === true && mod.negative !== 0) {
           mod.isub(num)
         }
       }
