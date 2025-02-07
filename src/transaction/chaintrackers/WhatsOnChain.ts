@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import ChainTracker from '../ChainTracker'
 import { HttpClient } from '../http/HttpClient'
 import { defaultHttpClient } from '../http/DefaultHttpClient'
@@ -38,7 +38,7 @@ export default class WhatsOnChain implements ChainTracker {
     this.network = network
     this.URL = `https://api.whatsonchain.com/v1/bsv/${network}`
     this.httpClient = httpClient ?? defaultHttpClient()
-    this.apiKey = apiKey
+    this.apiKey = apiKey ?? ''
   }
 
   async isValidRootForHeight (root: string, height: number): Promise<boolean> {
