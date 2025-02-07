@@ -601,7 +601,7 @@ describe('WalletWire Integration Tests', () => {
         .encode(true)
 
       // Function to compute the invoice number
-      const computeInvoiceNumber = function (protocolID, keyID) {
+      const computeInvoiceNumber = function (protocolID: [number, string], keyID: string): string {
         const securityLevel = protocolID[0]
         if (
           !Number.isInteger(securityLevel) ||
@@ -649,7 +649,7 @@ describe('WalletWire Integration Tests', () => {
     })
   })
   // Helper function to create a test wallet wire setup
-  const createTestWalletWire = (wallet: CompletedProtoWallet) => {
+  const createTestWalletWire = (wallet: CompletedProtoWallet): WalletWireTransceiver => {
     const processor = new WalletWireProcessor(wallet)
     const transceiver = new WalletWireTransceiver(processor)
     return transceiver
@@ -659,9 +659,10 @@ describe('WalletWire Integration Tests', () => {
   const mockUnsupportedMethods = (
     methods: Partial<CompletedProtoWallet>
   ): CompletedProtoWallet => {
-    return {
+    const result: CompletedProtoWallet = {
       ...methods
-    } as CompletedProtoWallet
+    }
+    return result
   }
 
   describe('createAction', () => {
