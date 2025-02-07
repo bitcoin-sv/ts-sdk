@@ -1,7 +1,6 @@
 /**
  * @jest-environment jsdom
  */
-// @ts-nocheck
 
 import XDMSubstrate from '../../../wallet/substrates/XDM'
 import { WalletError } from '../../../wallet/WalletError'
@@ -10,7 +9,7 @@ import { Utils } from '../../../primitives/index'
 describe('XDMSubstrate', () => {
   let xdmSubstrate
   let originalWindow
-  let eventHandlers = {}
+  let eventHandlers: Record<string, (event: any) => void> = {}
 
   beforeEach(() => {
     // Save the original window object
