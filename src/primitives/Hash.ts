@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /* eslint-disable @typescript-eslint/naming-convention */
 const assert = (
   expression: unknown,
@@ -239,7 +239,7 @@ export function toArray (
   if (!(msg as unknown as boolean)) {
     return []
   }
-  const res = []
+  const res: number[] = []
   if (typeof msg === 'string') {
     if (enc !== 'hex') {
       // Inspired by stringToUtf8ByteArray() in closure-library by Google
@@ -390,7 +390,7 @@ function SUM32_5 (
   return (a + b + c + d + e) >>> 0
 }
 
-function FT_1 (s, x, y, z): number {
+function FT_1 (s: number, x: number, y: number, z: number): number {
   if (s === 0) {
     return ch32(x, y, z)
   }
@@ -400,6 +400,8 @@ function FT_1 (s, x, y, z): number {
   if (s === 2) {
     return maj32(x, y, z)
   }
+
+  throw new Error(`Invalid value for 's': ${s}`)
 }
 
 function ch32 (x, y, z): number {
@@ -1087,7 +1089,7 @@ export class SHA512 extends BaseHash {
     return split32(this.h, 'big')
   }
 
-  _digestHex (): number[] {
+  _digestHex (): string {
     return toHex32(this.h, 'big')
   }
 }
