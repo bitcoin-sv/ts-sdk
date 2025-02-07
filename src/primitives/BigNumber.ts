@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import ReductionContext from './ReductionContext'
 
 /**
@@ -4029,7 +4029,10 @@ export default class BigNumber {
       this.red,
       'fromRed works only with numbers in reduction context'
     )
-    return this.red.convertFrom(this)
+    if (this.red !== null) {
+      return this.red.convertFrom(this)
+    }
+    throw new Error('Reduction context is null')
   }
 
   /**
@@ -4066,7 +4069,10 @@ export default class BigNumber {
    */
   redAdd (num: BigNumber): BigNumber {
     this.assert(this.red, 'redAdd works only with red numbers')
-    return this.red.add(this, num)
+    if (this.red !== null) {
+      return this.red.add(this, num)
+    }
+    throw new Error('Reduction context is null')
   }
 
   /**
@@ -4085,7 +4091,10 @@ export default class BigNumber {
    */
   redIAdd (num: BigNumber): BigNumber {
     this.assert(this.red, 'redIAdd works only with red numbers')
-    return this.red.iadd(this, num)
+    if (this.red !== null) {
+      return this.red.iadd(this, num)
+    }
+    throw new Error('Reduction context is null')
   }
 
   /**
@@ -4104,7 +4113,10 @@ export default class BigNumber {
    */
   redSub (num: BigNumber): BigNumber {
     this.assert(this.red, 'redSub works only with red numbers')
-    return this.red.sub(this, num)
+    if (this.red !== null) {
+      return this.red.sub(this, num)
+    }
+    throw new Error('Reduction context is null')
   }
 
   /**
@@ -4123,7 +4135,10 @@ export default class BigNumber {
    */
   redISub (num: BigNumber): BigNumber {
     this.assert(this.red, 'redISub works only with red numbers')
-    return this.red.isub(this, num)
+    if (this.red !== null) {
+      return this.red.isub(this, num)
+    }
+    throw new Error('Reduction context is null')
   }
 
   /**
@@ -4142,7 +4157,10 @@ export default class BigNumber {
    */
   redShl (num: number): BigNumber {
     this.assert(this.red, 'redShl works only with red numbers')
-    return this.red.shl(this, num)
+    if (this.red !== null) {
+      return this.red.shl(this, num)
+    }
+    throw new Error('Reduction context is null')
   }
 
   /**
@@ -4161,8 +4179,13 @@ export default class BigNumber {
    */
   redMul (num: BigNumber): BigNumber {
     this.assert(this.red, 'redMul works only with red numbers')
-    this.red.verify2(this, num)
-    return this.red.mul(this, num)
+    if (this.red !== null) {
+      this.red.verify2(this, num)
+    }
+    if (this.red !== null) {
+      return this.red.mul(this, num)
+    }
+    throw new Error('Reduction context is null')
   }
 
   /**
@@ -4180,8 +4203,13 @@ export default class BigNumber {
    */
   redIMul (num: BigNumber): BigNumber {
     this.assert(this.red, 'redMul works only with red numbers')
-    this.red.verify2(this, num)
-    return this.red.imul(this, num)
+    if (this.red !== null) {
+      this.red.verify2(this, num)
+    }
+    if (this.red !== null) {
+      return this.red.imul(this, num)
+    }
+    throw new Error('Reduction context is null')
   }
 
   /**
@@ -4201,8 +4229,13 @@ export default class BigNumber {
    */
   redSqr (): BigNumber {
     this.assert(this.red, 'redSqr works only with red numbers')
-    this.red.verify1(this)
-    return this.red.sqr(this)
+    if (this.red !== null) {
+      this.red.verify1(this)
+    }
+    if (this.red !== null) {
+      return this.red.sqr(this)
+    }
+    throw new Error('Reduction context is null')
   }
 
   /**
@@ -4222,8 +4255,13 @@ export default class BigNumber {
    */
   redISqr (): BigNumber {
     this.assert(this.red, 'redISqr works only with red numbers')
-    this.red.verify1(this)
-    return this.red.isqr(this)
+    if (this.red !== null) {
+      this.red.verify1(this)
+    }
+    if (this.red !== null) {
+      return this.red.isqr(this)
+    }
+    throw new Error('Reduction context is null')
   }
 
   /**
@@ -4244,8 +4282,13 @@ export default class BigNumber {
    */
   redSqrt (): BigNumber {
     this.assert(this.red, 'redSqrt works only with red numbers')
-    this.red.verify1(this)
-    return this.red.sqrt(this)
+    if (this.red !== null) {
+      this.red.verify1(this)
+    }
+    if (this.red !== null) {
+      return this.red.sqrt(this)
+    }
+    throw new Error('Reduction context is null')
   }
 
   /**
@@ -4263,8 +4306,13 @@ export default class BigNumber {
    */
   redInvm (): BigNumber {
     this.assert(this.red, 'redInvm works only with red numbers')
-    this.red.verify1(this)
-    return this.red.invm(this)
+    if (this.red !== null) {
+      this.red.verify1(this)
+    }
+    if (this.red !== null) {
+      return this.red.invm(this)
+    }
+    throw new Error('Reduction context is null')
   }
 
   /**
@@ -4282,8 +4330,13 @@ export default class BigNumber {
    */
   redNeg (): BigNumber {
     this.assert(this.red, 'redNeg works only with red numbers')
-    this.red.verify1(this)
-    return this.red.neg(this)
+    if (this.red !== null) {
+      this.red.verify1(this)
+    }
+    if (this.red !== null) {
+      return this.red.neg(this)
+    }
+    throw new Error('Reduction context is null')
   }
 
   /**
@@ -4303,8 +4356,13 @@ export default class BigNumber {
    */
   redPow (num: BigNumber): BigNumber {
     this.assert(this.red != null && num.red == null, 'redPow(normalNum)')
-    this.red.verify1(this)
-    return this.red.pow(this, num)
+    if (this.red !== null) {
+      this.red.verify1(this)
+    }
+    if (this.red !== null) {
+      return this.red.pow(this, num)
+    }
+    throw new Error('Reduction context is null')
   }
 
   /**
