@@ -230,5 +230,12 @@
     "typescript": "^5.2.2",
     "webpack": "^5.95.0",
     "webpack-cli": "^5.1.4"
+  },
+  "ts-standard": {
+    "project": "tsconfig.eslint.json",
+    "ignore": [
+      "dist",
+      "src/**/*.ts"
+    ]
   }
 }

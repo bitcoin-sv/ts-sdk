@@ -1,8 +1,11 @@
 {
   "compilerOptions": {
-    "types": ["@types/node"],
+    "types": [
+      "@types/node"
+    ],
     "noEmit": true,
-    "allowJs": true
+    "strict": true,
+    "strictNullChecks": true
   },
   "include": [
     "./src/**/*.ts",
