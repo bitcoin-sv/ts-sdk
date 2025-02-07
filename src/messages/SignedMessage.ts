@@ -1,4 +1,3 @@
-
 import PublicKey from '../primitives/PublicKey'
 import PrivateKey from '../primitives/PrivateKey'
 import Signature from '../primitives/Signature'

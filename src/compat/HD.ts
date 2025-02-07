@@ -57,13 +57,13 @@ export default class HD {
     privKey?: PrivateKey,
     pubKey?: PublicKey
   ) {
-    this.versionBytesNum = versionBytesNum
-    this.depth = depth
-    this.parentFingerPrint = parentFingerPrint
-    this.childIndex = childIndex
-    this.chainCode = chainCode
+    this.versionBytesNum = versionBytesNum ?? 0
+    this.depth = depth ?? 0
+    this.parentFingerPrint = parentFingerPrint ?? [0, 0, 0, 0]
+    this.childIndex = childIndex ?? 0
+    this.chainCode = chainCode ?? []
     this.privKey = privKey
-    this.pubKey = pubKey
+    this.pubKey = pubKey ?? new PublicKey(new Curve().g)
   }
 
   /**
@@ -274,9 +274,9 @@ export default class HD {
       throw new Error('Cannot do private key derivation without private key')
     }
 
-    let ret = null
+    let ret = new HD()
     if (this.privKey !== null && this.privKey !== undefined) {
-      let data = null
+      let data: number[] = []
 
       if (usePrivate) {
         data = [0, ...this.privKey.toArray('be', 32), ...ib]
@@ -339,7 +339,7 @@ export default class HD {
       this.pubKey
     )
     bip32.versionBytesNum = this.constants.pubKey
-    bip32.privKey = undefined
+    bip32.privKey = new PrivateKey(new BigNumber(0))
     return bip32
   }
 
