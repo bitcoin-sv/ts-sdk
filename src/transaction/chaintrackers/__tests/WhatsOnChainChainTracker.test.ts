@@ -32,7 +32,7 @@ describe('WhatsOnChain ChainTracker', () => {
   it('should verify merkleroot successfully using Node.js https', async () => {
     // Mocking Node.js https module
     mockedHttps(successResponse)
-    if (global.window) global.window = {} as any
+    if (typeof global.window !== 'undefined') global.window = {} as any
 
     const chainTracker = new WhatsOnChain(network)
     const response = await chainTracker.isValidRootForHeight(
@@ -154,7 +154,7 @@ describe('WhatsOnChain ChainTracker', () => {
     await expect(await chainTracker.currentHeight()).toBe(875904)
   })
 
-  function mockedFetch (response) {
+  function mockedFetch (response: { status: number, data: any }): jest.Mock<any, any, any> {
     return jest.fn().mockResolvedValue({
       ok: response.status === 200,
       status: response.status,
@@ -170,13 +170,13 @@ describe('WhatsOnChain ChainTracker', () => {
     })
   }
 
-  function mockedHttps (response) {
+  function mockedHttps (response: { status: number, data: any }): { request: (url: string, options: any, callback: (res: any) => void) => any } {
     const https = {
       request: (url, options, callback) => {
         // eslint-disable-next-line
         callback({
           statusCode: response.status,
-          statusMessage: response.status == 200 ? 'OK' : 'Bad request',
+          statusMessage: response.status === 200 ? 'OK' : 'Bad request',
           headers: {
             'content-type': 'application/json'
           },
