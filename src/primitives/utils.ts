@@ -341,7 +341,7 @@ export class Writer {
   public bufs: number[][]
 
   constructor(bufs?: number[][]) {
-    this.bufs = bufs || []
+    this.bufs = bufs !== undefined ? bufs : []
   }
 
   getLength(): number {
