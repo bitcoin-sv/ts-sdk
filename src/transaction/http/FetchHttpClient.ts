@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   HttpClient,
   HttpClientRequestOptions,
@@ -44,7 +43,7 @@ export class FetchHttpClient implements HttpClient {
 
     const res = await this.fetch(url, fetchOptions)
     const mediaType = res.headers.get('Content-Type')
-    const data = mediaType.startsWith('application/json')
+    const data = mediaType?.startsWith('application/json') ?? false
       ? await res.json()
       : await res.text()
 
