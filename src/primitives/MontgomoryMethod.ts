@@ -1,5 +1,5 @@
-import ReductionContext from './ReductionContext'
-import BigNumber from './BigNumber'
+import ReductionContext from './ReductionContext.js'
+import BigNumber from './BigNumber.js'
 
 /**
  * Represents a Montgomery reduction context, which is a mathematical method
@@ -31,7 +31,7 @@ export default class MontgomoryMethod extends ReductionContext {
    * @constructor
    * @param m - The modulus to be used for the Montgomery method reductions.
    */
-  constructor (m: BigNumber | 'k256') {
+  constructor(m: BigNumber | 'k256') {
     super(m)
 
     this.shift = this.m.bitLength()
@@ -59,7 +59,7 @@ export default class MontgomoryMethod extends ReductionContext {
    * const montMethod = new MontgomoryMethod(m);
    * const convertedNum = montMethod.convertTo(num);
    */
-  convertTo (num: BigNumber): BigNumber {
+  convertTo(num: BigNumber): BigNumber {
     return this.imod(num.ushln(this.shift))
   }
 
@@ -74,7 +74,7 @@ export default class MontgomoryMethod extends ReductionContext {
    * const montMethod = new MontgomoryMethod(m);
    * const convertedNum = montMethod.convertFrom(num);
    */
-  convertFrom (num: BigNumber): BigNumber {
+  convertFrom(num: BigNumber): BigNumber {
     const r = this.imod(num.mul(this.rinv))
     r.red = null
     return r
@@ -92,7 +92,7 @@ export default class MontgomoryMethod extends ReductionContext {
    * const montMethod = new MontgomoryMethod(m);
    * const product = montMethod.imul(a, b);
    */
-  imul (a: BigNumber, b: BigNumber): BigNumber {
+  imul(a: BigNumber, b: BigNumber): BigNumber {
     if (a.isZero() || b.isZero()) {
       a.words[0] = 0
       a.length = 1
@@ -125,7 +125,7 @@ export default class MontgomoryMethod extends ReductionContext {
    * const montMethod = new MontgomoryMethod(m);
    * const product = montMethod.mul(a, b);
    */
-  mul (a: BigNumber, b: BigNumber): BigNumber {
+  mul(a: BigNumber, b: BigNumber): BigNumber {
     if (a.isZero() || b.isZero()) return new BigNumber(0).forceRed(this)
 
     const t = a.mul(b)
@@ -152,7 +152,7 @@ export default class MontgomoryMethod extends ReductionContext {
    * const montMethod = new MontgomoryMethod(m);
    * const inverse = montMethod.invm(a);
    */
-  invm (a: BigNumber): BigNumber {
+  invm(a: BigNumber): BigNumber {
     // (AR)^-1 * R^2 = (A^-1 * R^-1) * R^2 = A^-1 * R
     const res = this.imod(a._invmp(this.m).mul(this.r2))
     return res.forceRed(this)

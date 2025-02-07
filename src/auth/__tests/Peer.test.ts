@@ -1,12 +1,12 @@
-import { Peer } from '../../auth/Peer'
-import { AuthMessage, Transport } from '../../auth/types'
+import { Peer } from '../../auth/Peer.js'
+import { AuthMessage, Transport } from '../../auth/types.js'
 import { jest } from '@jest/globals'
-import { WalletInterface } from '../../wallet/Wallet.interfaces'
-import { Utils, PrivateKey } from '../../primitives/index'
-import { VerifiableCertificate } from '../../auth/certificates/VerifiableCertificate'
-import { MasterCertificate } from '../../auth/certificates/MasterCertificate'
-import { getVerifiableCertificates } from '../../auth/utils/getVerifiableCertificates'
-import { CompletedProtoWallet } from '../../../mod'
+import { WalletInterface } from '../../wallet/Wallet.interfaces.js'
+import { Utils, PrivateKey } from '../../primitives/index.js'
+import { VerifiableCertificate } from '../../auth/certificates/VerifiableCertificate.js'
+import { MasterCertificate } from '../../auth/certificates/MasterCertificate.js'
+import { getVerifiableCertificates } from '../../auth/utils/getVerifiableCertificates.js'
+import { CompletedProtoWallet } from '../../../mod.js'
 
 jest.mock('../../auth/utils/getVerifiableCertificates')
 
@@ -14,12 +14,12 @@ class LocalTransport implements Transport {
   private peerTransport?: LocalTransport
   private onDataCallback?: (message: AuthMessage) => void
 
-  connect (peerTransport: LocalTransport): void {
+  connect(peerTransport: LocalTransport): void {
     this.peerTransport = peerTransport
     peerTransport.peerTransport = this
   }
 
-  async send (message: AuthMessage): Promise<void> {
+  async send(message: AuthMessage): Promise<void> {
     if (
       this.peerTransport?.onDataCallback !== undefined &&
       this.peerTransport?.onDataCallback !== null
@@ -33,7 +33,7 @@ class LocalTransport implements Transport {
     }
   }
 
-  async onData (
+  async onData(
     callback: (message: AuthMessage) => void
   ): Promise<void> {
     this.onDataCallback = callback
@@ -67,7 +67,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     libraryCardNumber: 'B654321'
   }
 
-  async function createMasterCertificate (
+  async function createMasterCertificate(
     subjectWallet: WalletInterface,
     fields: Record<string, string>
   ): Promise<MasterCertificate> {
@@ -94,7 +94,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     return masterCertificate
   }
 
-  async function createVerifiableCertificate (
+  async function createVerifiableCertificate(
     masterCertificate: MasterCertificate,
     wallet: WalletInterface,
     verifierIdentityKey: string,
@@ -127,7 +127,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     )
   }
 
-  function setupPeers (
+  function setupPeers(
     aliceRequests: boolean,
     bobRequests: boolean,
     options: {
@@ -168,7 +168,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     return { aliceReceivedCertificates, bobReceivedCertificates }
   }
 
-  async function mockGetVerifiableCertificates (
+  async function mockGetVerifiableCertificates(
     aliceCertificate: VerifiableCertificate | undefined,
     bobCertificate: VerifiableCertificate | undefined,
     alicePubKey: string,

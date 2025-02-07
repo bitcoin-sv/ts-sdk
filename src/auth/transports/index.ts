@@ -1,1 +1,1 @@
-export * from './SimplifiedFetchTransport'
+export * from './SimplifiedFetchTransport.js'

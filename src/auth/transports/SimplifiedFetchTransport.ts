@@ -1,5 +1,6 @@
-import { AuthMessage, RequestedCertificateSet, Transport } from '../types'
-import { Utils } from '../../../mod'
+// @ts-nocheck
+import { AuthMessage, RequestedCertificateSet, Transport } from '../types.js'
+import { Utils } from '../../../mod.js'
 
 // Define the expected shape of error responses
 interface ErrorInfo {
@@ -27,7 +28,7 @@ export class SimplifiedFetchTransport implements Transport {
    * @param baseUrl - The base URL for all HTTP requests made by this transport.
    * @param fetchClient - A fetch implementation to use for HTTP requests (default: global fetch).
    */
-  constructor (baseUrl: string, fetchClient = defaultFetch) {
+  constructor(baseUrl: string, fetchClient = defaultFetch) {
     this.fetchClient = fetchClient
     this.baseUrl = baseUrl
   }
@@ -43,7 +44,7 @@ export class SimplifiedFetchTransport implements Transport {
    *
    * @throws Will throw an error if no listener has been registered via `onData`.
    */
-  async send (message: AuthMessage): Promise<void> {
+  async send(message: AuthMessage): Promise<void> {
     if (this.onDataCallback == null) {
       throw new Error(
         'Listen before you start speaking. God gave you two ears and one mouth for a reason.'
@@ -121,8 +122,8 @@ export class SimplifiedFetchTransport implements Transport {
         // Transform body based on Content-Type
         if (typeof httpRequestWithAuthHeaders.body !== 'undefined') {
           if (contentType.includes('application/json') ||
-              contentType.includes('application/x-www-form-urlencoded') ||
-              contentType.includes('text/plain')) {
+            contentType.includes('application/x-www-form-urlencoded') ||
+            contentType.includes('text/plain')) {
             // Convert byte array or object to UTF-8 string
             if (httpRequestWithAuthHeaders.body instanceof Uint8Array) {
               httpRequestWithAuthHeaders.body = Utils.toUTF8(
@@ -239,7 +240,7 @@ export class SimplifiedFetchTransport implements Transport {
         version: response.headers.get('x-bsv-auth-version') ?? '', // Ensure string
         messageType:
           response.headers.get('x-bsv-auth-message-type') ===
-          'certificateRequest'
+            'certificateRequest'
             ? 'certificateRequest'
             : 'general',
         identityKey: response.headers.get('x-bsv-auth-identity-key') ?? '',
@@ -272,7 +273,7 @@ export class SimplifiedFetchTransport implements Transport {
    * @param callback - A function to invoke when an incoming AuthMessage is received.
    * @returns A promise that resolves once the callback is set.
    */
-  async onData (
+  async onData(
     callback: (message: AuthMessage) => Promise<void>
   ): Promise<void> {
     this.onDataCallback = (m) => { // ✅ Removed `async` here
@@ -296,7 +297,7 @@ export class SimplifiedFetchTransport implements Transport {
    * @returns An object representing the deserialized request, including the method,
    *          URL postfix (path and query string), headers, body, and request ID.
    */
-  deserializeRequestPayload (payload: number[]): {
+  deserializeRequestPayload(payload: number[]): {
     method: string
     urlPostfix: string
     headers: Record<string, string>

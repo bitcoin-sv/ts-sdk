@@ -1,12 +1,12 @@
-import PushDrop from '../script/templates/PushDrop'
-import { WalletInterface } from '../wallet/Wallet.interfaces'
+import PushDrop from '../script/templates/PushDrop.js'
+import { WalletInterface } from '../wallet/Wallet.interfaces.js'
 import {
   LockingScript,
   ScriptTemplate,
   UnlockingScript
-} from '../script/index'
-import { Transaction } from '../transaction/index'
-import { Utils } from '../primitives/index'
+} from '../script/index.js'
+import { Transaction } from '../transaction/index.js'
+import { Utils } from '../primitives/index.js'
 
 /**
  * Script template enabling the creation, unlocking, and decoding of SHIP and SLAP advertisements.
@@ -19,7 +19,7 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
    * @param script Locking script comprising a SHIP or SLAP token to decode
    * @returns Decoded SHIP or SLAP advertisement
    */
-  static decode (script: LockingScript): {
+  static decode(script: LockingScript): {
     protocol: 'SHIP' | 'SLAP'
     identityKey: string
     domain: string
@@ -48,7 +48,7 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
    * Constructs a new Overlay Admin template instance
    * @param wallet Wallet to use for locking and unlocking
    */
-  constructor (wallet: WalletInterface) {
+  constructor(wallet: WalletInterface) {
     this.pushDrop = new PushDrop(wallet)
   }
 
@@ -59,7 +59,7 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
    * @param topicOrService Topic or service to advertise
    * @returns Locking script comprising the advertisement token
    */
-  async lock (
+  async lock(
     protocol: 'SHIP' | 'SLAP',
     domain: string,
     topicOrService: string
@@ -90,7 +90,7 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
    * @param protocol SHIP or SLAP, depending on the token to unlock
    * @returns Script unlocker capable of unlocking the advertisement token
    */
-  unlock (protocol: 'SHIP' | 'SLAP'): {
+  unlock(protocol: 'SHIP' | 'SLAP'): {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
     estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>
   } {

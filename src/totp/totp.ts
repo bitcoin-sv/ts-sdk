@@ -1,5 +1,5 @@
-import { SHA1HMAC, SHA256HMAC, SHA512HMAC } from '../primitives/Hash'
-import BigNumber from '../primitives/BigNumber'
+import { SHA1HMAC, SHA256HMAC, SHA512HMAC } from '../primitives/Hash.js'
+import BigNumber from '../primitives/BigNumber.js'
 
 export type TOTPAlgorithm = 'SHA-1' | 'SHA-256' | 'SHA-512'
 
@@ -33,7 +33,7 @@ export class TOTP {
    * @param {TOTPOptions} options - Optional parameters for TOTP.
    * @returns {string} The generated TOTP.
    */
-  static generate (secret: number[], options?: TOTPOptions): string {
+  static generate(secret: number[], options?: TOTPOptions): string {
     const _options = this.withDefaultOptions(options)
 
     const counter = this.getCounter(_options.timestamp, _options.period)
@@ -48,7 +48,7 @@ export class TOTP {
    * @param {TOTPValidateOptions} options - Optional parameters for TOTP validation.
    * @returns {boolean} A boolean indicating whether the passcode is valid.
    */
-  static validate (
+  static validate(
     secret: number[],
     passcode: string,
     options?: TOTPValidateOptions
@@ -76,13 +76,13 @@ export class TOTP {
     return false
   }
 
-  private static getCounter (timestamp: number, period: number): number {
+  private static getCounter(timestamp: number, period: number): number {
     const epochSeconds = Math.floor(timestamp / 1000)
     const counter = Math.floor(epochSeconds / period)
     return counter
   }
 
-  private static withDefaultOptions (
+  private static withDefaultOptions(
     options?: TOTPOptions
   ): Required<TOTPOptions> {
     return {
@@ -94,14 +94,14 @@ export class TOTP {
     }
   }
 
-  private static withDefaultValidateOptions (
+  private static withDefaultValidateOptions(
     options?: TOTPValidateOptions
   ): Required<TOTPValidateOptions> {
     return { skew: 1, ...this.withDefaultOptions(options) }
   }
 }
 
-function generateHOTP (
+function generateHOTP(
   secret: number[],
   counter: number,
   options: Required<TOTPOptions>
@@ -120,7 +120,7 @@ function generateHOTP (
   return otp
 }
 
-function calcHMAC (
+function calcHMAC(
   secret: number[],
   timePad: number[],
   algorithm: TOTPAlgorithm

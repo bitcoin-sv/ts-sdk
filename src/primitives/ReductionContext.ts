@@ -1,6 +1,6 @@
-import BigNumber from './BigNumber'
-import K256 from './K256'
-import Mersenne from './Mersenne'
+import BigNumber from './BigNumber.js'
+import K256 from './K256.js'
+import Mersenne from './Mersenne.js'
 
 /**
  * A base reduction engine that provides several arithmetic operations over
@@ -26,7 +26,7 @@ export default class ReductionContext {
    * new ReductionContext(new BigNumber(11));
    * new ReductionContext('k256');
    */
-  constructor (m: BigNumber | 'k256') {
+  constructor(m: BigNumber | 'k256') {
     if (m === 'k256') {
       const prime = new K256()
       this.m = prime.p
@@ -50,7 +50,7 @@ export default class ReductionContext {
    * this.assert(1 < 2, '1 is not less than 2');
    * this.assert(2 < 1, '2 is less than 1'); // throws an Error with message '2 is less than 1'
    */
-  private assert (val: unknown, msg: string = 'Assertion failed'): void {
+  private assert(val: unknown, msg: string = 'Assertion failed'): void {
     if (!(val as boolean)) throw new Error(msg)
   }
 
@@ -65,7 +65,7 @@ export default class ReductionContext {
    * this.verify1(new BigNumber(-10).toRed()); //throws an Error
    * this.verify1(new BigNumber(10)); //throws an Error
    */
-  verify1 (a: BigNumber): void {
+  verify1(a: BigNumber): void {
     this.assert(a.negative === 0, 'red works only with positives')
     this.assert(a.red, 'red works only with red numbers')
   }
@@ -83,7 +83,7 @@ export default class ReductionContext {
    * this.verify2(new BigNumber(-10).toRed(this), new BigNumber(20).toRed(this)); //throws an Error
    * this.verify2(new BigNumber(10).toRed(this), new BigNumber(20)); //throws an Error
    */
-  verify2 (a: BigNumber, b: BigNumber): void {
+  verify2(a: BigNumber, b: BigNumber): void {
     this.assert(
       (a.negative | b.negative) === 0,
       'red works only with positives'
@@ -107,7 +107,7 @@ export default class ReductionContext {
    * const context = new ReductionContext(new BigNumber(7));
    * context.imod(new BigNumber(19)); // Returns 5
    */
-  imod (a: BigNumber): BigNumber {
+  imod(a: BigNumber): BigNumber {
     if (this.prime != null) return this.prime.ireduce(a).forceRed(this)
 
     BigNumber.move(a, a.umod(this.m).forceRed(this))
@@ -127,7 +127,7 @@ export default class ReductionContext {
    * const context = new ReductionContext(new BigNumber(7));
    * context.neg(new BigNumber(3)); // Returns 4
    */
-  neg (a: BigNumber): BigNumber {
+  neg(a: BigNumber): BigNumber {
     if (a.isZero()) {
       return a.clone()
     }
@@ -149,7 +149,7 @@ export default class ReductionContext {
    * const context = new ReductionContext(new BigNumber(5));
    * context.add(new BigNumber(2), new BigNumber(4)); // Returns 1
    */
-  add (a: BigNumber, b: BigNumber): BigNumber {
+  add(a: BigNumber, b: BigNumber): BigNumber {
     this.verify2(a, b)
 
     const res = a.add(b)
@@ -175,7 +175,7 @@ export default class ReductionContext {
    * const a = new BigNumber(2);
    * context.iadd(a, new BigNumber(4)); // Modifies 'a' to be 1
    */
-  iadd (a: BigNumber, b: BigNumber): BigNumber {
+  iadd(a: BigNumber, b: BigNumber): BigNumber {
     this.verify2(a, b)
 
     const res = a.iadd(b)
@@ -199,7 +199,7 @@ export default class ReductionContext {
    * const context = new ReductionContext(new BigNumber(7));
    * context.sub(new BigNumber(3), new BigNumber(2)); // Returns 1
    */
-  sub (a: BigNumber, b: BigNumber): BigNumber {
+  sub(a: BigNumber, b: BigNumber): BigNumber {
     this.verify2(a, b)
 
     const res = a.sub(b)
@@ -225,7 +225,7 @@ export default class ReductionContext {
    * const a = new BigNumber(4);
    * context.isub(a, new BigNumber(2)); // Modifies 'a' to be 2
    */
-  isub (a: BigNumber, b: BigNumber): BigNumber {
+  isub(a: BigNumber, b: BigNumber): BigNumber {
     this.verify2(a, b)
 
     const res = a.isub(b)
@@ -249,7 +249,7 @@ export default class ReductionContext {
    * const context = new ReductionContext(new BigNumber(32));
    * context.shl(new BigNumber(4), 2); // Returns 16
    */
-  shl (a: BigNumber, num: number): BigNumber {
+  shl(a: BigNumber, num: number): BigNumber {
     this.verify1(a)
     return this.imod(a.ushln(num))
   }
@@ -270,7 +270,7 @@ export default class ReductionContext {
    * const a = new BigNumber(3);
    * context.imul(a, new BigNumber(2)); // Modifies 'a' to be 6
    */
-  imul (a: BigNumber, b: BigNumber): BigNumber {
+  imul(a: BigNumber, b: BigNumber): BigNumber {
     this.verify2(a, b)
     return this.imod(a.imul(b))
   }
@@ -289,7 +289,7 @@ export default class ReductionContext {
    * const context = new ReductionContext(new BigNumber(7));
    * context.mul(new BigNumber(3), new BigNumber(2)); // Returns 6
    */
-  mul (a: BigNumber, b: BigNumber): BigNumber {
+  mul(a: BigNumber, b: BigNumber): BigNumber {
     this.verify2(a, b)
     return this.imod(a.mul(b))
   }
@@ -309,7 +309,7 @@ export default class ReductionContext {
    * const a = new BigNumber(3);
    * context.isqr(a); // Modifies 'a' to be 2 (9 % 7 = 2)
    */
-  isqr (a: BigNumber): BigNumber {
+  isqr(a: BigNumber): BigNumber {
     return this.imul(a, a.clone())
   }
 
@@ -326,7 +326,7 @@ export default class ReductionContext {
    * const context = new ReductionContext(new BigNumber(7));
    * context.sqr(new BigNumber(3)); // Returns 2 (9 % 7 = 2)
    */
-  sqr (a: BigNumber): BigNumber {
+  sqr(a: BigNumber): BigNumber {
     return this.mul(a, a)
   }
 
@@ -343,7 +343,7 @@ export default class ReductionContext {
    * const context = new ReductionContext(new BigNumber(9));
    * context.sqrt(new BigNumber(4)); // Returns 2
    */
-  sqrt (a: BigNumber): BigNumber {
+  sqrt(a: BigNumber): BigNumber {
     if (a.isZero()) return a.clone()
 
     const mod3 = this.m.andln(3)
@@ -414,7 +414,7 @@ export default class ReductionContext {
    * const context = new ReductionContext(new BigNumber(11));
    * context.invm(new BigNumber(3)); // Returns 4 (3*4 mod 11 = 1)
    */
-  invm (a: BigNumber): BigNumber {
+  invm(a: BigNumber): BigNumber {
     const inv = a._invmp(this.m)
     if (inv.negative !== 0) {
       inv.negative = 0
@@ -438,7 +438,7 @@ export default class ReductionContext {
    * const context = new ReductionContext(new BigNumber(7));
    * context.pow(new BigNumber(3), new BigNumber(2)); // Returns 2 (3^2 % 7)
    */
-  pow (a: BigNumber, num: BigNumber): BigNumber {
+  pow(a: BigNumber, num: BigNumber): BigNumber {
     if (num.isZero()) return new BigNumber(1).toRed(this)
     if (num.cmpn(1) === 0) return a.clone()
 
@@ -500,7 +500,7 @@ export default class ReductionContext {
    * const context = new ReductionContext(new BigNumber(7));
    * context.convertTo(new BigNumber(8)); // Returns 1 (8 % 7)
    */
-  convertTo (num: BigNumber): BigNumber {
+  convertTo(num: BigNumber): BigNumber {
     const r = num.umod(this.m)
 
     return r === num ? r.clone() : r
@@ -520,7 +520,7 @@ export default class ReductionContext {
    * const a = context.convertTo(new BigNumber(8)); // 'a' is now 1 in the reduction context
    * context.convertFrom(a); // Returns 1
    */
-  convertFrom (num: BigNumber): BigNumber {
+  convertFrom(num: BigNumber): BigNumber {
     const res = num.clone()
     res.red = null
     return res

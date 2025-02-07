@@ -1,5 +1,5 @@
-import { Transaction } from '../transaction/index'
-import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate'
+import { Transaction } from '../transaction/index.js'
+import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate.js'
 
 /**
  * The question asked to the Overlay Services Engine when a consumer of state wishes to look up information.
@@ -84,11 +84,11 @@ export interface OverlayLookupFacilitator {
 export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
   fetchClient: typeof fetch
 
-  constructor (httpClient = fetch) {
+  constructor(httpClient = fetch) {
     this.fetchClient = httpClient
   }
 
-  async lookup (
+  async lookup(
     url: string,
     question: LookupQuestion,
     timeout: number = 5000
@@ -135,7 +135,7 @@ export default class LookupResolver {
   private readonly hostOverrides: Record<string, string[]>
   private readonly additionalHosts: Record<string, string[]>
 
-  constructor (config?: LookupResolverConfig) {
+  constructor(config?: LookupResolverConfig) {
     const defaultConfig: LookupResolverConfig = {
       facilitator: new HTTPSOverlayLookupFacilitator(),
       slapTrackers: DEFAULT_SLAP_TRACKERS,
@@ -159,7 +159,7 @@ export default class LookupResolver {
   /**
    * Given a LookupQuestion, returns a LookupAnswer. Aggregates across multiple services and supports resiliency.
    */
-  async query (
+  async query(
     question: LookupQuestion,
     timeout?: number
   ): Promise<LookupAnswer> {
@@ -242,7 +242,7 @@ export default class LookupResolver {
    * @param service Service for which competent hosts are to be returned
    * @returns Array of hosts competent for resolving queries
    */
-  private async findCompetentHosts (service: string): Promise<string[]> {
+  private async findCompetentHosts(service: string): Promise<string[]> {
     const query: LookupQuestion = {
       service: 'ls_slap',
       query: {

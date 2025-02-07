@@ -1,4 +1,4 @@
-export { default as ARC } from './ARC'
-export type { ArcConfig } from './ARC'
-export { default as WhatsOnChainBroadcaster } from './WhatsOnChainBroadcaster'
-export { defaultBroadcaster } from './DefaultBroadcaster'
+export { default as ARC } from './ARC.js'
+export type { ArcConfig } from './ARC.js'
+export { default as WhatsOnChainBroadcaster } from './WhatsOnChainBroadcaster.js'
+export { defaultBroadcaster } from './DefaultBroadcaster.js'

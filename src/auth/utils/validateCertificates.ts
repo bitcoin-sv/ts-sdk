@@ -1,6 +1,6 @@
-import { WalletInterface } from '../../wallet/index'
-import { AuthMessage, RequestedCertificateSet } from '../types'
-import { VerifiableCertificate } from '../certificates/VerifiableCertificate'
+import { WalletInterface } from '../../wallet/index.js'
+import { AuthMessage, RequestedCertificateSet } from '../types.js'
+import { VerifiableCertificate } from '../certificates/VerifiableCertificate.js'
 
 /**
  * Validates and processes the certificates received from a peer.
@@ -60,7 +60,7 @@ export const validateCertificates = async (
         const requestedFields = types[certToVerify.type]
         if (requestedFields == null) { // ✅ Explicitly check for null or undefined
           throw new Error(
-    `Certificate with type ${certToVerify.type} was not requested`
+            `Certificate with type ${certToVerify.type} was not requested`
           )
         }
       }

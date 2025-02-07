@@ -1,5 +1,5 @@
-import UnlockingScript from '../script/UnlockingScript'
-import Transaction from './Transaction'
+import UnlockingScript from '../script/UnlockingScript.js'
+import Transaction from './Transaction.js'
 
 /**
  * Represents an input to a Bitcoin transaction.

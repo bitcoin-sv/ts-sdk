@@ -1,6 +1,6 @@
-import LockingScript from './LockingScript'
-import UnlockingScript from './UnlockingScript'
-import Transaction from '../transaction/Transaction'
+import LockingScript from './LockingScript.js'
+import UnlockingScript from './UnlockingScript.js'
+import Transaction from '../transaction/Transaction.js'
 
 /**
  * @interface

@@ -1,5 +1,5 @@
-import FeeModel from '../FeeModel'
-import Transaction from '../Transaction'
+import FeeModel from '../FeeModel.js'
+import Transaction from '../Transaction.js'
 
 /**
  * Represents the "satoshis per kilobyte" transaction fee model.
@@ -16,7 +16,7 @@ export default class SatoshisPerKilobyte implements FeeModel {
    *
    * @param {number} value - The number of satoshis per kilobyte to charge as a fee.
    */
-  constructor (value: number) {
+  constructor(value: number) {
     this.value = value
   }
 
@@ -26,7 +26,7 @@ export default class SatoshisPerKilobyte implements FeeModel {
    * @param tx The transaction for which a fee is to be computed.
    * @returns The fee in satoshis for the transaction, as a BigNumber.
    */
-  async computeFee (tx: Transaction): Promise<number> {
+  async computeFee(tx: Transaction): Promise<number> {
     const getVarIntSize = (i: number): number => {
       if (i > 2 ** 32) {
         return 9

@@ -1,4 +1,4 @@
-import LockingScript from '../script/LockingScript'
+import LockingScript from '../script/LockingScript.js'
 
 /**
  * Represents an output in a Bitcoin transaction.

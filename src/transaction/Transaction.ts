@@ -1,23 +1,23 @@
-import TransactionInput from './TransactionInput'
-import TransactionOutput from './TransactionOutput'
-import UnlockingScript from '../script/UnlockingScript'
-import LockingScript from '../script/LockingScript'
-import { Reader, Writer, toHex, toArray } from '../primitives/utils'
-import { hash256 } from '../primitives/Hash'
-import FeeModel from './FeeModel'
-import SatoshisPerKilobyte from './fee-models/SatoshisPerKilobyte'
+import TransactionInput from './TransactionInput.js'
+import TransactionOutput from './TransactionOutput.js'
+import UnlockingScript from '../script/UnlockingScript.js'
+import LockingScript from '../script/LockingScript.js'
+import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
+import { hash256 } from '../primitives/Hash.js'
+import FeeModel from './FeeModel.js'
+import SatoshisPerKilobyte from './fee-models/SatoshisPerKilobyte.js'
 import {
   Broadcaster,
   BroadcastResponse,
   BroadcastFailure
-} from './Broadcaster'
-import MerklePath from './MerklePath'
-import Spend from '../script/Spend'
-import ChainTracker from './ChainTracker'
-import { defaultBroadcaster } from './broadcasters/DefaultBroadcaster'
-import { defaultChainTracker } from './chaintrackers/DefaultChainTracker'
-import { ATOMIC_BEEF, BEEF_V1 } from './Beef'
-import P2PKH from '../script/templates/P2PKH'
+} from './Broadcaster.js'
+import MerklePath from './MerklePath.js'
+import Spend from '../script/Spend.js'
+import ChainTracker from './ChainTracker.js'
+import { defaultBroadcaster } from './broadcasters/DefaultBroadcaster.js'
+import { defaultChainTracker } from './chaintrackers/DefaultChainTracker.js'
+import { ATOMIC_BEEF, BEEF_V1 } from './Beef.js'
+import P2PKH from '../script/templates/P2PKH.js'
 
 /**
  * Represents a complete Bitcoin transaction. This class encapsulates all the details
@@ -64,14 +64,14 @@ export default class Transaction {
   private cachedHash?: number[]
 
   // Recursive function for adding merkle proofs or input transactions
-  private static addPathOrInputs (
+  private static addPathOrInputs(
     obj: { pathIndex?: number, tx: Transaction },
     transactions: Record<
-    string,
-    {
-      pathIndex?: number
-      tx: Transaction
-    }
+      string,
+      {
+        pathIndex?: number
+        tx: Transaction
+      }
     >,
     BUMPs: MerklePath[]
   ): void {
@@ -107,7 +107,7 @@ export default class Transaction {
    * @param txid Optional TXID of the transaction to retrieve from the BEEF data.
    * @returns An anchored transaction, linked to its associated inputs populated with merkle paths.
    */
-  static fromBEEF (beef: number[], txid?: string): Transaction {
+  static fromBEEF(beef: number[], txid?: string): Transaction {
     const reader = new Reader(beef)
     const { transactions, BUMPs } = Transaction.parseBEEFData(reader)
 
@@ -136,7 +136,7 @@ export default class Transaction {
    * @param beef A binary representation of an Atomic BEEF structure.
    * @returns The subject transaction, linked to its associated inputs populated with merkle paths.
    */
-  static fromAtomicBEEF (beef: number[]): Transaction {
+  static fromAtomicBEEF(beef: number[]): Transaction {
     const reader = new Reader(beef)
     // Read the Atomic BEEF prefix
     const prefix = reader.readUInt32LE()
@@ -214,7 +214,7 @@ export default class Transaction {
    * @param reader The Reader positioned at the start of BEEF data.
    * @returns An object containing the transactions and BUMPs.
    */
-  private static parseBEEFData (reader: Reader): {
+  private static parseBEEFData(reader: Reader): {
     transactions: Record<string, { pathIndex?: number, tx: Transaction }>
     BUMPs: MerklePath[]
   } {
@@ -237,8 +237,8 @@ export default class Transaction {
     // The object has keys of TXIDs and values of objects with transactions and BUMP indexes
     const numberOfTransactions = reader.readVarIntNum()
     const transactions: Record<
-    string,
-    { pathIndex?: number, tx: Transaction }
+      string,
+      { pathIndex?: number, tx: Transaction }
     > = {}
     for (let i = 0; i < numberOfTransactions; i++) {
       const tx = Transaction.fromReader(reader)
@@ -259,7 +259,7 @@ export default class Transaction {
    * @param ef A binary representation of a transaction in EF format.
    * @returns An extended transaction, linked to its associated inputs by locking script and satoshis amounts only.
    */
-  static fromEF (ef: number[]): Transaction {
+  static fromEF(ef: number[]): Transaction {
     const br = new Reader(ef)
     const version = br.readUInt32LE()
     if (toHex(br.read(6)) !== '0000000000ef') { throw new Error('Invalid EF marker') }
@@ -321,7 +321,7 @@ export default class Transaction {
    *   outputs: { vout: number, offset: number, length: number }[]
    * }
    */
-  static parseScriptOffsets (bin: number[]): {
+  static parseScriptOffsets(bin: number[]): {
     inputs: Array<{ vin: number, offset: number, length: number }>
     outputs: Array<{ vout: number, offset: number, length: number }>
   } {
@@ -347,7 +347,7 @@ export default class Transaction {
     return { inputs, outputs }
   }
 
-  static fromReader (br: Reader): Transaction {
+  static fromReader(br: Reader): Transaction {
     const version = br.readUInt32LE()
     const inputsLength = br.readVarIntNum()
     const inputs: TransactionInput[] = []
@@ -388,7 +388,7 @@ export default class Transaction {
    * @param {number[]} bin - The binary array representation of the transaction.
    * @returns {Transaction} - A new Transaction instance.
    */
-  static fromBinary (bin: number[]): Transaction {
+  static fromBinary(bin: number[]): Transaction {
     const br = new Reader(bin)
     return Transaction.fromReader(br)
   }
@@ -400,7 +400,7 @@ export default class Transaction {
    * @param {string} hex - The hexadecimal string representation of the transaction.
    * @returns {Transaction} - A new Transaction instance.
    */
-  static fromHex (hex: string): Transaction {
+  static fromHex(hex: string): Transaction {
     return Transaction.fromBinary(toArray(hex, 'hex'))
   }
 
@@ -411,7 +411,7 @@ export default class Transaction {
    * @param {string} hex - The hexadecimal string representation of the transaction EF.
    * @returns {Transaction} - A new Transaction instance.
    */
-  static fromHexEF (hex: string): Transaction {
+  static fromHexEF(hex: string): Transaction {
     return Transaction.fromEF(toArray(hex, 'hex'))
   }
 
@@ -426,11 +426,11 @@ export default class Transaction {
    * @param {string} [txid] - Optional TXID of the transaction to retrieve from the BEEF data.
    * @returns {Transaction} - A new Transaction instance.
    */
-  static fromHexBEEF (hex: string, txid?: string): Transaction {
+  static fromHexBEEF(hex: string, txid?: string): Transaction {
     return Transaction.fromBEEF(toArray(hex, 'hex'), txid)
   }
 
-  constructor (
+  constructor(
     version: number = 1,
     inputs: TransactionInput[] = [],
     outputs: TransactionOutput[] = [],
@@ -452,7 +452,7 @@ export default class Transaction {
    * @param {TransactionInput} input - The TransactionInput object to add to the transaction.
    * @throws {Error} - If the input does not have a sourceTXID or sourceTransaction defined.
    */
-  addInput (input: TransactionInput): void {
+  addInput(input: TransactionInput): void {
     if (
       typeof input.sourceTXID === 'undefined' &&
       typeof input.sourceTransaction === 'undefined'
@@ -474,7 +474,7 @@ export default class Transaction {
    *
    * @param {TransactionOutput} output - The TransactionOutput object to add to the transaction.
    */
-  addOutput (output: TransactionOutput): void {
+  addOutput(output: TransactionOutput): void {
     this.cachedHash = undefined
     if (output.change !== true) {
       if (typeof output.satoshis === 'undefined') {
@@ -495,7 +495,7 @@ export default class Transaction {
    * @param {number} [satoshis] - The number of satoshis to send to the address - if not provided, the output is considered a change output.
    *
    */
-  addP2PKHOutput (address: number[] | string, satoshis?: number): void {
+  addP2PKHOutput(address: number[] | string, satoshis?: number): void {
     const lockingScript = new P2PKH().lock(address)
     if (typeof satoshis === 'undefined') {
       return this.addOutput({ lockingScript, change: true })
@@ -511,7 +511,7 @@ export default class Transaction {
    *
    * @param {Record<string, any>} metadata - The metadata object to merge into the existing metadata.
    */
-  updateMetadata (metadata: Record<string, any>): void {
+  updateMetadata(metadata: Record<string, any>): void {
     this.metadata = {
       ...this.metadata,
       ...metadata
@@ -528,7 +528,7 @@ export default class Transaction {
    * amongst the change outputs
    *
    */
-  async fee (
+  async fee(
     modelOrFee: FeeModel | number = new SatoshisPerKilobyte(10),
     changeDistribution: 'equal' | 'random' = 'equal'
   ): Promise<void> {
@@ -548,7 +548,7 @@ export default class Transaction {
     this.distributeChange(change, changeDistribution)
   }
 
-  private calculateChange (fee: number): number {
+  private calculateChange(fee: number): number {
     let change = 0
     for (const input of this.inputs) {
       if (typeof input.sourceTransaction !== 'object') {
@@ -570,7 +570,7 @@ export default class Transaction {
     return change
   }
 
-  private distributeChange (
+  private distributeChange(
     change: number,
     changeDistribution: 'equal' | 'random'
   ): void {
@@ -591,7 +591,7 @@ export default class Transaction {
     }
   }
 
-  private distributeRandomChange (
+  private distributeRandomChange(
     change: number,
     changeOutputs: TransactionOutput[]
   ): number {
@@ -612,7 +612,7 @@ export default class Transaction {
     return distributedChange
   }
 
-  private distributeEqualChange (
+  private distributeEqualChange(
     change: number,
     changeOutputs: TransactionOutput[]
   ): number {
@@ -625,7 +625,7 @@ export default class Transaction {
     return distributedChange
   }
 
-  private benfordNumber (min: number, max: number): number {
+  private benfordNumber(min: number, max: number): number {
     const d = Math.floor(Math.random() * 9) + 1
     return Math.floor(
       min + ((max - min) * Math.log10(1 + 1 / d)) / Math.log10(10)
@@ -637,7 +637,7 @@ export default class Transaction {
    *
    * @returns The current transaction fee
    */
-  getFee (): number {
+  getFee(): number {
     let totalIn = 0
     for (const input of this.inputs) {
       if (typeof input.sourceTransaction !== 'object') {
@@ -658,7 +658,7 @@ export default class Transaction {
   /**
    * Signs a transaction, hydrating all its unlocking scripts based on the provided script templates where they are available.
    */
-  async sign (): Promise<void> {
+  async sign(): Promise<void> {
     this.cachedHash = undefined
     for (const out of this.outputs) {
       if (typeof out.satoshis === 'undefined') {
@@ -695,7 +695,7 @@ export default class Transaction {
    * @param broadcaster The Broadcaster instance wwhere the transaction will be sent
    * @returns A BroadcastResponse or BroadcastFailure from the Broadcaster
    */
-  async broadcast (
+  async broadcast(
     broadcaster: Broadcaster = defaultBroadcaster()
   ): Promise<BroadcastResponse | BroadcastFailure> {
     return await broadcaster.broadcast(this)
@@ -706,7 +706,7 @@ export default class Transaction {
    *
    * @returns {number[]} - The binary array representation of the transaction.
    */
-  toBinary (): number[] {
+  toBinary(): number[] {
     const writer = new Writer()
     writer.writeUInt32LE(this.version)
     writer.writeVarIntNum(this.inputs.length)
@@ -745,7 +745,7 @@ export default class Transaction {
    *
    * @returns {number[]} - The BRC-30 EF representation of the transaction.
    */
-  toEF (): number[] {
+  toEF(): number[] {
     const writer = new Writer()
     writer.writeUInt32LE(this.version)
     writer.write([0, 0, 0, 0, 0, 0xef])
@@ -795,7 +795,7 @@ export default class Transaction {
    *
    * @returns {string} - The hexadecimal string representation of the transaction EF.
    */
-  toHexEF (): string {
+  toHexEF(): string {
     return toHex(this.toEF())
   }
 
@@ -804,7 +804,7 @@ export default class Transaction {
    *
    * @returns {string} - The hexadecimal string representation of the transaction.
    */
-  toHex (): string {
+  toHex(): string {
     return toHex(this.toBinary())
   }
 
@@ -813,7 +813,7 @@ export default class Transaction {
    *
    * @returns {string} - The hexadecimal string representation of the transaction BEEF.
    */
-  toHexBEEF (): string {
+  toHexBEEF(): string {
     return toHex(this.toBEEF())
   }
 
@@ -822,7 +822,7 @@ export default class Transaction {
    *
    * @returns {string} - The hexadecimal string representation of the transaction Atomic BEEF.
    */
-  toHexAtomicBEEF (): string {
+  toHexAtomicBEEF(): string {
     return toHex(this.toAtomicBEEF())
   }
 
@@ -832,7 +832,7 @@ export default class Transaction {
    * @param {'hex' | undefined} enc - The encoding to use for the hash. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
    * @returns {string | number[]} - The hash of the transaction in the specified format.
    */
-  hash (enc?: 'hex'): number[] | string {
+  hash(enc?: 'hex'): number[] | string {
     let hash
     if (this.cachedHash != null) {
       hash = this.cachedHash
@@ -851,21 +851,21 @@ export default class Transaction {
    *
    * @returns {number[]} - The ID of the transaction in the binary array format.
    */
-  id (): number[]
+  id(): number[]
   /**
    * Calculates the transaction's ID in hexadecimal format.
    *
    * @param {'hex'} enc - The encoding to use for the ID. If 'hex', returns a hexadecimal string.
    * @returns {string} - The ID of the transaction in the hex format.
    */
-  id (enc: 'hex'): string
+  id(enc: 'hex'): string
   /**
    * Calculates the transaction's ID.
    *
    * @param {'hex' | undefined} enc - The encoding to use for the ID. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
    * @returns {string | number[]} - The ID of the transaction in the specified format.
    */
-  id (enc?: 'hex'): number[] | string {
+  id(enc?: 'hex'): number[] | string {
     const id = [...(this.hash() as number[])]
     id.reverse()
     if (enc === 'hex') {
@@ -883,7 +883,7 @@ export default class Transaction {
    *
    * @example tx.verify(new WhatsOnChain(), new SatoshisPerKilobyte(1))
    */
-  async verify (
+  async verify(
     chainTracker: ChainTracker | 'scripts only' = defaultChainTracker(),
     feeModel?: FeeModel
   ): Promise<boolean> {
@@ -1011,7 +1011,7 @@ export default class Transaction {
    * @returns The serialized BEEF structure
    * @throws Error if there are any missing sourceTransactions unless `allowPartial` is true.
    */
-  toBEEF (allowPartial?: boolean): number[] {
+  toBEEF(allowPartial?: boolean): number[] {
     const writer = new Writer()
     writer.writeUInt32LE(BEEF_V1)
     const BUMPs: MerklePath[] = []
@@ -1098,7 +1098,7 @@ export default class Transaction {
    * @returns {number[]} - The serialized Atomic BEEF structure.
    * @throws Error if there are any missing sourceTransactions unless `allowPartial` is true.
    */
-  toAtomicBEEF (allowPartial?: boolean): number[] {
+  toAtomicBEEF(allowPartial?: boolean): number[] {
     const writer = new Writer()
     // Write the Atomic BEEF prefix
     writer.writeUInt32LE(0x01010101)

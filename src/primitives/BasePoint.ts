@@ -1,4 +1,4 @@
-import Curve from './Curve'
+import Curve from './Curve.js'
 
 /**
  * Base class for Point (affine coordinates) and JacobianPoint classes,
@@ -13,7 +13,7 @@ export default abstract class BasePoint {
     beta?: BasePoint | null
   } | null
 
-  constructor (type: 'affine' | 'jacobian') {
+  constructor(type: 'affine' | 'jacobian') {
     this.curve = new Curve() // Always initialized, so never null
     this.type = type
     this.precomputed = null

@@ -1,13 +1,13 @@
-import WalletWire from './WalletWire'
-import WalletWireCalls from './WalletWireCalls'
-import { Utils } from '../../primitives/index'
+import WalletWire from './WalletWire.js'
+import WalletWireCalls from './WalletWireCalls.js'
+import { Utils } from '../../primitives/index.js'
 
 export default class HTTPWalletWire implements WalletWire {
   baseUrl: string
   httpClient: typeof fetch
   originator: string | undefined
 
-  constructor (
+  constructor(
     originator: string | undefined,
     baseUrl: string = 'http://localhost:3301',
     httpClient = fetch
@@ -17,7 +17,7 @@ export default class HTTPWalletWire implements WalletWire {
     this.originator = originator
   }
 
-  async transmitToWallet (message: number[]): Promise<number[]> {
+  async transmitToWallet(message: number[]): Promise<number[]> {
     const messageReader = new Utils.Reader(message)
     // Read call code
     const callCode = messageReader.readUInt8()

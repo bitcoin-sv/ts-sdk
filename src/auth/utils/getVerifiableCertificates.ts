@@ -1,6 +1,6 @@
-import { VerifiableCertificate } from '../certificates/VerifiableCertificate'
-import { WalletInterface } from '../../../mod'
-import { RequestedCertificateSet } from '../types'
+import { VerifiableCertificate } from '../certificates/VerifiableCertificate.js'
+import { WalletInterface } from '../../../mod.js'
+import { RequestedCertificateSet } from '../types.js'
 
 /**
  * Retrieves an array of verifiable certificates based on the request.

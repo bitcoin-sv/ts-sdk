@@ -1,15 +1,15 @@
-import OP from '../OP'
-import ScriptTemplate from '../ScriptTemplate'
-import { fromBase58Check } from '../../primitives/utils'
-import LockingScript from '../LockingScript'
-import UnlockingScript from '../UnlockingScript'
-import Transaction from '../../transaction/Transaction'
-import PrivateKey from '../../primitives/PrivateKey'
-import TransactionSignature from '../../primitives/TransactionSignature'
-import { sha256 } from '../../primitives/Hash'
-import Script from '../Script'
+import OP from '../OP.js'
+import ScriptTemplate from '../ScriptTemplate.js'
+import { fromBase58Check } from '../../primitives/utils.js'
+import LockingScript from '../LockingScript.js'
+import UnlockingScript from '../UnlockingScript.js'
+import Transaction from '../../transaction/Transaction.js'
+import PrivateKey from '../../primitives/PrivateKey.js'
+import TransactionSignature from '../../primitives/TransactionSignature.js'
+import { sha256 } from '../../primitives/Hash.js'
+import Script from '../Script.js'
 
-function verifyTruthy<T> (v: T | undefined): T {
+function verifyTruthy<T>(v: T | undefined): T {
   if (v == null) throw new Error('must have value')
   return v
 }
@@ -26,7 +26,7 @@ export default class P2PKH implements ScriptTemplate {
    * @param {number[] | string} pubkeyhash or address - An array or address representing the public key hash.
    * @returns {LockingScript} - A P2PKH locking script.
    */
-  lock (pubkeyhash: string | number[]): LockingScript {
+  lock(pubkeyhash: string | number[]): LockingScript {
     let data: number[]
     if (typeof pubkeyhash === 'string') {
       const hash = fromBase58Check(pubkeyhash)
@@ -64,16 +64,16 @@ export default class P2PKH implements ScriptTemplate {
    * @param {Script} lockingScript - Optional. The lockinScript. Otherwise the input.sourceTransaction is required.
    * @returns {Object} - An object containing the `sign` and `estimateLength` functions.
    */
-  unlock (
+  unlock(
     privateKey: PrivateKey,
     signOutputs: 'all' | 'none' | 'single' = 'all',
     anyoneCanPay: boolean = false,
     sourceSatoshis?: number,
     lockingScript?: Script
   ): {
-      sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
-      estimateLength: () => Promise<108>
-    } {
+    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
+    estimateLength: () => Promise<108>
+  } {
     return {
       sign: async (tx: Transaction, inputIndex: number) => {
         let signatureScope = TransactionSignature.SIGHASH_FORKID

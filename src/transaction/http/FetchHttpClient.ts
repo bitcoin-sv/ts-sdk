@@ -2,7 +2,7 @@ import {
   HttpClient,
   HttpClientRequestOptions,
   HttpClientResponse
-} from './HttpClient'
+} from './HttpClient.js'
 
 /** fetch function interface limited to options needed by ts-sdk */
 /**
@@ -29,7 +29,7 @@ export interface FetchOptions {
  * Adapter for Node Https module to be used as HttpClient
  */
 export class FetchHttpClient implements HttpClient {
-  constructor (private readonly fetch: Fetch) { }
+  constructor(private readonly fetch: Fetch) { }
 
   async request<D>(
     url: string,

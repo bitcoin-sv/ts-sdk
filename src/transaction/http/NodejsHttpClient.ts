@@ -2,7 +2,7 @@ import {
   HttpClient,
   HttpClientRequestOptions,
   HttpClientResponse
-} from './HttpClient'
+} from './HttpClient.js'
 
 /** Node Https module interface limited to options needed by ts-sdk */
 export interface HttpsNodejs {
@@ -26,9 +26,9 @@ export interface NodejsHttpClientRequest {
  * Adapter for Node Https module to be used as HttpClient
  */
 export class NodejsHttpClient implements HttpClient {
-  constructor (private readonly https: HttpsNodejs) { }
+  constructor(private readonly https: HttpsNodejs) { }
 
-  async request (
+  async request(
     url: string,
     requestOptions: HttpClientRequestOptions
   ): Promise<HttpClientResponse> {

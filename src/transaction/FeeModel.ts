@@ -1,4 +1,4 @@
-import Transaction from './Transaction'
+import Transaction from './Transaction.js'
 
 /**
  * Represents the interface for a transaction fee model.

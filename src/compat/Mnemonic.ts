@@ -1,7 +1,7 @@
-import { wordList } from './bip-39-wordlist-en'
-import { encode, toArray, Reader, Writer } from '../primitives/utils'
-import * as Hash from '../primitives/Hash'
-import Random from '../primitives/Random'
+import { wordList } from './bip-39-wordlist-en.js'
+import { encode, toArray, Reader, Writer } from '../primitives/utils.js'
+import * as Hash from '../primitives/Hash.js'
+import Random from '../primitives/Random.js'
 
 /**
  * @class Mnemonic
@@ -23,7 +23,7 @@ export default class Mnemonic {
    * @param {number[]} [seed] - An optional seed derived from the mnemonic.
    * @param {object} [wordlist=wordList] - An object containing a list of words and space character used in the mnemonic.
    */
-  constructor (mnemonic?: string, seed?: number[], wordlist = wordList) {
+  constructor(mnemonic?: string, seed?: number[], wordlist = wordList) {
     this.mnemonic = mnemonic ?? '' // Default to empty string if undefined
     this.seed = seed ?? [] // Default to empty array if undefined
     this.Wordlist = wordlist
@@ -33,7 +33,7 @@ export default class Mnemonic {
    * Converts the mnemonic and seed into a binary representation.
    * @returns {number[]} The binary representation of the mnemonic and seed.
    */
-  public toBinary (): number[] {
+  public toBinary(): number[] {
     const bw = new Writer()
     if (this.mnemonic !== '') {
       const buf = toArray(this.mnemonic, 'utf8')
@@ -56,7 +56,7 @@ export default class Mnemonic {
    * @param {number[]} bin - The binary representation of a mnemonic and seed.
    * @returns {this} The Mnemonic instance with loaded mnemonic and seed.
    */
-  public fromBinary (bin: number[]): this {
+  public fromBinary(bin: number[]): this {
     const br = new Reader(bin)
     const mnemoniclen = br.readVarIntNum()
     if (mnemoniclen > 0) {
@@ -75,7 +75,7 @@ export default class Mnemonic {
    * @returns {this} The Mnemonic instance with the new random mnemonic.
    * @throws {Error} If the bit length is not a multiple of 32 or is less than 128.
    */
-  public fromRandom (bits?: number): this {
+  public fromRandom(bits?: number): this {
     if (bits === undefined || bits === null || isNaN(bits) || bits === 0) {
       bits = 128
     }
@@ -96,7 +96,7 @@ export default class Mnemonic {
    * @param {number} [bits=128] - The bit length for the random mnemonic.
    * @returns {Mnemonic} A new Mnemonic instance.
    */
-  public static fromRandom (bits?: number): Mnemonic {
+  public static fromRandom(bits?: number): Mnemonic {
     return new this().fromRandom(bits)
   }
 
@@ -107,7 +107,7 @@ export default class Mnemonic {
    * @returns {this} The Mnemonic instance with the mnemonic set from the given entropy.
    * @throws {Error} If the entropy is less than 128 bits.
    */
-  public fromEntropy (buf: number[]): this {
+  public fromEntropy(buf: number[]): this {
     this.entropy2Mnemonic(buf)
     return this
   }
@@ -117,7 +117,7 @@ export default class Mnemonic {
    * @param {number[]} buf - The entropy buffer.
    * @returns {Mnemonic} A new Mnemonic instance.
    */
-  public static fromEntropy (buf: number[]): Mnemonic {
+  public static fromEntropy(buf: number[]): Mnemonic {
     return new this().fromEntropy(buf)
   }
 
@@ -126,7 +126,7 @@ export default class Mnemonic {
    * @param {string} mnemonic - The mnemonic phrase as a string.
    * @returns {this} The Mnemonic instance with the set mnemonic.
    */
-  public fromString (mnemonic: string): this {
+  public fromString(mnemonic: string): this {
     this.mnemonic = mnemonic
     return this
   }
@@ -136,7 +136,7 @@ export default class Mnemonic {
    * @param {string} str - The mnemonic phrase.
    * @returns {Mnemonic} A new Mnemonic instance.
    */
-  public static fromString (str: string): Mnemonic {
+  public static fromString(str: string): Mnemonic {
     return new this().fromString(str)
   }
 
@@ -144,7 +144,7 @@ export default class Mnemonic {
    * Converts the instance's mnemonic to a string representation.
    * @returns {string} The mnemonic phrase as a string.
    */
-  public toString (): string {
+  public toString(): string {
     return this.mnemonic
   }
 
@@ -155,7 +155,7 @@ export default class Mnemonic {
    * @returns {number[]} The generated seed.
    * @throws {Error} If the mnemonic is invalid.
    */
-  public toSeed (passphrase?: string): number[] {
+  public toSeed(passphrase?: string): number[] {
     this.mnemonic2Seed(passphrase)
     return this.seed
   }
@@ -169,7 +169,7 @@ export default class Mnemonic {
    * @returns {this} The Mnemonic instance with the mnemonic set from the entropy.
    * @throws {Error} If the entropy is less than 128 bits or if it's not an even multiple of 11 bits.
    */
-  public entropy2Mnemonic (buf: number[]): this {
+  public entropy2Mnemonic(buf: number[]): this {
     if (buf.length < 128 / 8) {
       throw new Error(
         'Entropy is less than 128 bits. It must be 128 bits or more.'
@@ -189,7 +189,7 @@ export default class Mnemonic {
     if (bin.length % 11 !== 0) {
       throw new Error(
         'internal error - entropy not an even multiple of 11 bits - ' +
-          bin.length.toString()
+        bin.length.toString()
       )
     }
 
@@ -212,7 +212,7 @@ export default class Mnemonic {
    * @returns {boolean} True if the mnemonic is valid, false otherwise.
    * @throws {Error} If the mnemonic is not an even multiple of 11 bits.
    */
-  public check (): boolean {
+  public check(): boolean {
     const mnemonic = this.mnemonic
 
     // confirm no invalid words
@@ -229,7 +229,7 @@ export default class Mnemonic {
     if (bin.length % 11 !== 0) {
       throw new Error(
         'internal error - entropy not an even multiple of 11 bits - ' +
-          bin.length.toString()
+        bin.length.toString()
       )
     }
 
@@ -258,7 +258,7 @@ export default class Mnemonic {
    * @returns {this} The Mnemonic instance with the seed generated from the mnemonic.
    * @throws {Error} If the mnemonic does not pass validation or if the passphrase is not a string.
    */
-  public mnemonic2Seed (passphrase = ''): this {
+  public mnemonic2Seed(passphrase = ''): this {
     let mnemonic = this.mnemonic
     if (!this.check()) {
       throw new Error(
@@ -285,7 +285,7 @@ export default class Mnemonic {
    * @param {string} [passphrase=''] - The passphrase to validate.
    * @returns {boolean} True if the mnemonic and passphrase combination is valid, false otherwise.
    */
-  public isValid (passphrase = ''): boolean {
+  public isValid(passphrase = ''): boolean {
     let isValid
     try {
       this.mnemonic2Seed(passphrase)
@@ -302,7 +302,7 @@ export default class Mnemonic {
    * @param {string} [passphrase=''] - The passphrase to validate.
    * @returns {boolean} True if the combination is valid, false otherwise.
    */
-  public static isValid (mnemonic: string, passphrase = ''): boolean {
+  public static isValid(mnemonic: string, passphrase = ''): boolean {
     return new Mnemonic(mnemonic).isValid(passphrase)
   }
 }

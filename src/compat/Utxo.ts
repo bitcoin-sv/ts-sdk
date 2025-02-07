@@ -1,7 +1,7 @@
-import Transaction from '../transaction/Transaction'
-import TransactionInput from '../transaction/TransactionInput'
-import LockingScript from '../script/LockingScript'
-import UnlockingScript from '../script/UnlockingScript'
+import Transaction from '../transaction/Transaction.js'
+import TransactionInput from '../transaction/TransactionInput.js'
+import LockingScript from '../script/LockingScript.js'
+import UnlockingScript from '../script/UnlockingScript.js'
 
 interface jsonUtxo {
   txid: string
@@ -36,7 +36,7 @@ interface jsonUtxo {
  * @param unlockingScriptTemplate: { sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>, estimateLength: (tx: Transaction, inputIndex: number) => Promise<number> }
  * @returns
  */
-export default function fromUtxo (
+export default function fromUtxo(
   utxo: jsonUtxo,
   unlockingScriptTemplate: {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
