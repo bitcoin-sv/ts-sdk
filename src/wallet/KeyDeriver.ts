@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   PrivateKey,
   PublicKey,
@@ -183,7 +182,7 @@ export class KeyDeriver implements KeyDeriverApi {
       counterparty
     )
     return new SymmetricKey(
-      derivedPrivateKey.deriveSharedSecret(derivedPublicKey).x.toArray()
+      derivedPrivateKey.deriveSharedSecret(derivedPublicKey)?.x?.toArray() ?? []
     )
   }
 
