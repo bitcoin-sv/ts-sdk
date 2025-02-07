@@ -98,7 +98,7 @@ export class KeyDeriver implements KeyDeriverApi {
    * Initializes the KeyDeriver instance with a root private key.
    * @param {PrivateKey | 'anyone'} rootKey - The root private key or the string 'anyone'.
    */
-  constructor(rootKey: PrivateKey | 'anyone') {
+  constructor (rootKey: PrivateKey | 'anyone') {
     if (rootKey === 'anyone') {
       this.rootKey = new PrivateKey(1)
     } else {
@@ -115,7 +115,7 @@ export class KeyDeriver implements KeyDeriverApi {
    * @param {boolean} [forSelf=false] - Whether deriving for self.
    * @returns {PublicKey} - The derived public key.
    */
-  derivePublicKey(
+  derivePublicKey (
     protocolID: WalletProtocol,
     keyID: string,
     counterparty: Counterparty,
@@ -141,7 +141,7 @@ export class KeyDeriver implements KeyDeriverApi {
    * @param {Counterparty} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
    * @returns {PrivateKey} - The derived private key.
    */
-  derivePrivateKey(
+  derivePrivateKey (
     protocolID: WalletProtocol,
     keyID: string,
     counterparty: Counterparty
@@ -161,7 +161,7 @@ export class KeyDeriver implements KeyDeriverApi {
    * @param {Counterparty} counterparty - The counterparty's public key or a predefined value ('self' or 'anyone').
    * @returns {SymmetricKey} - The derived symmetric key.
    */
-  deriveSymmetricKey(
+  deriveSymmetricKey (
     protocolID: WalletProtocol,
     keyID: string,
     counterparty: Counterparty
@@ -194,7 +194,7 @@ export class KeyDeriver implements KeyDeriverApi {
    * @returns {number[]} - The shared secret as a number array.
    * @throws {Error} - Throws an error if attempting to reveal a shared secret for 'self'.
    */
-  revealCounterpartySecret(counterparty: Counterparty): number[] {
+  revealCounterpartySecret (counterparty: Counterparty): number[] {
     if (counterparty === 'self') {
       throw new Error(
         'Counterparty secrets cannot be revealed for counterparty=self.'
@@ -227,7 +227,7 @@ export class KeyDeriver implements KeyDeriverApi {
    * @param {string} keyID - The key identifier.
    * @returns {number[]} - The specific key association as a number array.
    */
-  revealSpecificSecret(
+  revealSpecificSecret (
     counterparty: Counterparty,
     protocolID: WalletProtocol,
     keyID: string
@@ -247,8 +247,8 @@ export class KeyDeriver implements KeyDeriverApi {
    * @returns {PublicKey} - The normalized counterparty public key.
    * @throws {Error} - Throws an error if the counterparty is invalid.
    */
-  private normalizeCounterparty(counterparty: Counterparty): PublicKey {
-    if (!counterparty) {
+  private normalizeCounterparty (counterparty: Counterparty): PublicKey {
+    if (counterparty === null || counterparty === undefined) {
       throw new Error('counterparty must be self, anyone or a public key!')
     } else if (counterparty === 'self') {
       return this.rootKey.toPublicKey()
@@ -268,7 +268,7 @@ export class KeyDeriver implements KeyDeriverApi {
    * @returns {string} - The computed invoice number.
    * @throws {Error} - Throws an error if protocol ID or key ID are invalid.
    */
-  private computeInvoiceNumber(
+  private computeInvoiceNumber (
     protocolID: WalletProtocol,
     keyID: string
   ): string {

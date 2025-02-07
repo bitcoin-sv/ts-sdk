@@ -7,10 +7,11 @@ import { FetchHttpClient } from '../../../transaction/http/FetchHttpClient'
 // Mock Transaction
 jest.mock('../../../transaction/Transaction', () => {
   class MockTransaction {
-    toHex() {
+    toHex () {
       return 'mocked_transaction_hex'
     }
-    toHexEF() {
+
+    toHexEF () {
       return 'mocked_transaction_hexEF'
     }
   }
@@ -127,13 +128,13 @@ describe('WhatsOnChainBroadcaster', () => {
     })
   })
 
-  function mockedFetch(response) {
+  function mockedFetch (response) {
     return jest.fn().mockResolvedValue({
       ok: response.status === 200,
       status: response.status,
       statusText: response.status === 200 ? 'OK' : 'Bad request',
       headers: {
-        get(key: string) {
+        get (key: string) {
           if (key === 'Content-Type') {
             return 'text/plain'
           }
@@ -143,7 +144,7 @@ describe('WhatsOnChainBroadcaster', () => {
     })
   }
 
-  function mockedHttps(response) {
+  function mockedHttps (response) {
     const https = {
       request: (url, options, callback) => {
         // eslint-disable-next-line

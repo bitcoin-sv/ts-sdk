@@ -177,7 +177,7 @@ describe('Transaction', () => {
     it('Signs unlocking script templates, hydrating the scripts', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -222,7 +222,7 @@ describe('Transaction', () => {
     it('Signs a large number of unlocking script templates in a timely manner', async () => {
       const privateKey = new PrivateKey(134)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const spendCount = 30
       const output = {
@@ -323,7 +323,7 @@ describe('Transaction', () => {
     it('Computes fees with the default fee model', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -368,7 +368,7 @@ describe('Transaction', () => {
     it('Computes fees with a custom fee model', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -414,7 +414,7 @@ describe('Transaction', () => {
     it('Computes fee using FixedFee model', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -457,7 +457,7 @@ describe('Transaction', () => {
     it('Distributes change equally among multiple change outputs', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -523,7 +523,7 @@ describe('Transaction', () => {
     it('Distributes change randomly among multiple change outputs', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -596,7 +596,7 @@ describe('Transaction', () => {
     it('Distributes change randomly among multiple change outputs, with one set output', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -668,7 +668,7 @@ describe('Transaction', () => {
     it('Distributes change randomly among multiple change outputs, thinnly spread', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -753,7 +753,7 @@ describe('Transaction', () => {
         status: 200,
         statusText: 'OK',
         headers: {
-          get(key: string) {
+          get (key: string) {
             if (key === 'Content-Type') {
               return 'application/json'
             }
@@ -854,7 +854,7 @@ describe('Transaction', () => {
         status: 200,
         statusText: 'OK',
         headers: {
-          get(key: string) {
+          get (key: string) {
             if (key === 'Content-Type') {
               return 'application/json'
             }
@@ -947,7 +947,7 @@ describe('Transaction', () => {
             lockTime: tx.lockTime,
             scope: nHashType
           })
-          const hash = hash256(preimage) as number[]
+          const hash = hash256(preimage)
           hash.reverse()
           expect(toHex(hash)).toEqual(toHex(sighashBuf))
         })
@@ -992,7 +992,7 @@ describe('Transaction', () => {
       it('should serialize a transaction to Atomic BEEF format correctly', async () => {
         const privateKey = new PrivateKey(1)
         const publicKey = new Curve().g.mul(privateKey)
-        const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+        const publicKeyHash = hash160(publicKey.encode(true))
         const p2pkh = new P2PKH()
 
         // Create a simple transaction
@@ -1081,7 +1081,7 @@ describe('Transaction', () => {
         // Create two unrelated transactions
         const privateKey1 = new PrivateKey(1)
         const publicKey1 = new Curve().g.mul(privateKey1)
-        const publicKeyHash1 = hash160(publicKey1.encode(true)) as number[]
+        const publicKeyHash1 = hash160(publicKey1.encode(true))
         const p2pkh = new P2PKH()
 
         const sourceTx1 = new Transaction(
@@ -1118,7 +1118,7 @@ describe('Transaction', () => {
         // Another unrelated transaction
         const privateKey2 = new PrivateKey(2)
         const publicKey2 = new Curve().g.mul(privateKey2)
-        const publicKeyHash2 = hash160(publicKey2.encode(true)) as number[]
+        const publicKeyHash2 = hash160(publicKey2.encode(true))
 
         const sourceTx2 = new Transaction(
           1,
@@ -1197,7 +1197,7 @@ describe('Transaction', () => {
         // Create two transactions, one depending on the other
         const privateKey = new PrivateKey(1)
         const publicKey = new Curve().g.mul(privateKey)
-        const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+        const publicKeyHash = hash160(publicKey.encode(true))
         const p2pkh = new P2PKH()
 
         const sourceTx = new Transaction(

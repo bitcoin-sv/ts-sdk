@@ -34,12 +34,12 @@ export interface MerklePathLeaf {
 export default class MerklePath {
   blockHeight: number
   path: Array<
-    Array<{
-      offset: number
-      hash?: string
-      txid?: boolean
-      duplicate?: boolean
-    }>
+  Array<{
+    offset: number
+    hash?: string
+    txid?: boolean
+    duplicate?: boolean
+  }>
   >
 
   /**
@@ -49,11 +49,11 @@ export default class MerklePath {
    * @param {string} hex - The hexadecimal string representation of the Merkle Path.
    * @returns {MerklePath} - A new MerklePath instance.
    */
-  static fromHex(hex: string): MerklePath {
+  static fromHex (hex: string): MerklePath {
     return MerklePath.fromBinary(toArray(hex, 'hex'))
   }
 
-  static fromReader(
+  static fromReader (
     reader: Reader,
     legalOffsetsOnly: boolean = true
   ): MerklePath {
@@ -97,7 +97,7 @@ export default class MerklePath {
    * @param {number[]} bump - The binary array representation of the Merkle Path.
    * @returns {MerklePath} - A new MerklePath instance.
    */
-  static fromBinary(bump: number[]): MerklePath {
+  static fromBinary (bump: number[]): MerklePath {
     const reader = new Reader(bump)
     return MerklePath.fromReader(reader)
   }
@@ -113,19 +113,19 @@ export default class MerklePath {
    * @param {number} height - The height of the block.
    * @returns {MerklePath} - A new MerklePath instance which assumes the tx is in a block with no other transactions.
    */
-  static fromCoinbaseTxidAndHeight(txid: string, height: number): MerklePath {
+  static fromCoinbaseTxidAndHeight (txid: string, height: number): MerklePath {
     return new MerklePath(height, [[{ offset: 0, hash: txid, txid: true }]])
   }
 
-  constructor(
+  constructor (
     blockHeight: number,
     path: Array<
-      Array<{
-        offset: number
-        hash?: string
-        txid?: boolean
-        duplicate?: boolean
-      }>
+    Array<{
+      offset: number
+      hash?: string
+      txid?: boolean
+      duplicate?: boolean
+    }>
     >,
     legalOffsetsOnly: boolean = true
   ) {
@@ -179,7 +179,7 @@ export default class MerklePath {
    *
    * @returns {number[]} - The binary array representation of the Merkle Path.
    */
-  toBinary(): number[] {
+  toBinary (): number[] {
     const writer = new Writer()
     writer.writeVarIntNum(this.blockHeight)
     const treeHeight = this.path.length
@@ -210,12 +210,12 @@ export default class MerklePath {
    *
    * @returns {string} - The hexadecimal string representation of the Merkle Path.
    */
-  toHex(): string {
+  toHex (): string {
     return toHex(this.toBinary())
   }
 
   //
-  private indexOf(txid: string): number {
+  private indexOf (txid: string): number {
     return this.path[0].find((l) => l.hash === txid).offset
   }
 
@@ -226,7 +226,7 @@ export default class MerklePath {
    * @returns {string} - The computed Merkle root as a hexadecimal string.
    * @throws {Error} - If the transaction ID is not part of the Merkle Path.
    */
-  computeRoot(txid?: string): string {
+  computeRoot (txid?: string): string {
     if (typeof txid !== 'string') {
       txid = this.path[0].find((leaf) => Boolean(leaf?.hash)).hash
     }
@@ -269,7 +269,7 @@ export default class MerklePath {
    * @param height
    * @param offset
    */
-  findOrComputeLeaf(
+  findOrComputeLeaf (
     height: number,
     offset: number
   ): MerklePathLeaf | undefined {
@@ -280,7 +280,7 @@ export default class MerklePath {
       (l) => l.offset === offset
     )
 
-    if (leaf) return leaf
+    if (leaf != null) return leaf
 
     if (height === 0) return undefined
 
@@ -288,10 +288,10 @@ export default class MerklePath {
     const l = offset << 1
 
     const leaf0 = this.findOrComputeLeaf(h, l)
-    if (!leaf0 || !leaf0.hash) return undefined
+    if ((leaf0 == null) || !leaf0.hash) return undefined
 
     const leaf1 = this.findOrComputeLeaf(h, l + 1)
-    if (!leaf1) return undefined
+    if (leaf1 == null) return undefined
 
     let workinghash: string
     if (leaf1.duplicate) {
@@ -314,7 +314,7 @@ export default class MerklePath {
    * @param {ChainTracker} chainTracker - The ChainTracker instance used to verify the Merkle root.
    * @returns {boolean} - True if the transaction ID is valid within the Merkle Path at the specified block height.
    */
-  async verify(txid: string, chainTracker: ChainTracker): Promise<boolean> {
+  async verify (txid: string, chainTracker: ChainTracker): Promise<boolean> {
     const root = this.computeRoot(txid)
     if (this.indexOf(txid) === 0) {
       // Coinbase transaction outputs can only be spent once they're 100 blocks deep.
@@ -333,7 +333,7 @@ export default class MerklePath {
    * @param {MerklePath} other - Another MerklePath to combine with this path.
    * @throws {Error} - If the paths have different block heights or roots.
    */
-  combine(other: MerklePath): void {
+  combine (other: MerklePath): void {
     if (this.blockHeight !== other.blockHeight) {
       throw new Error(
         'You cannot combine paths which do not have the same block height.'
@@ -379,7 +379,7 @@ export default class MerklePath {
    * Assumes that at least all required nodes are present.
    * Leaves all levels sorted by increasing offset.
    */
-  trim() {
+  trim () {
     const pushIfNew = (v: number, a: number[]) => {
       if (a.length === 0 || a.slice(-1)[0] !== v) {
         a.push(v)
