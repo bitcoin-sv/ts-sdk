@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import {
   fromBase58Check,
   toBase58Check,
@@ -62,6 +62,7 @@ export default class HD {
     this.parentFingerPrint = parentFingerPrint ?? [0, 0, 0, 0]
     this.childIndex = childIndex ?? 0
     this.chainCode = chainCode ?? []
+    // @ts-expect-error
     this.privKey = privKey
     this.pubKey = pubKey ?? new PublicKey(new Curve().g)
   }
