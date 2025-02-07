@@ -1,5 +1,3 @@
-
-// @ts-nocheck
 import PrivateKey from '../../primitives/PrivateKey'
 import { hash160, hash256 } from '../../primitives/Hash'
 import Curve from '../../primitives/Curve'
@@ -112,11 +110,13 @@ describe('Spend', () => {
   it('Successfully validates an R-puzzle spend', async () => {
     const k = new PrivateKey(2)
     const c = new Curve()
-    let r = c.g.mul(k).x.umod(c.n).toArray()
-    r = r[0] > 127 ? [0, ...r] : r
+    let r = c.g.mul(k).x?.umod(c.n)?.toArray()
+    if (r !== null && r !== undefined) {
+      r = r[0] > 127 ? [0, ...r] : r
+    }
 
     const puz = new RPuzzle()
-    const lockingScript = puz.lock(r)
+    const lockingScript = puz.lock(r ?? [])
     const satoshis = 1
 
     // ✅ Fix: Ensure privateKey is valid and within range
@@ -170,12 +170,13 @@ describe('Spend', () => {
   it('Successfully validates an R-puzzle spend (HASH256)', async () => {
     const k = new PrivateKey(2)
     const c = new Curve()
-    let r = c.g.mul(k).x.umod(c.n).toArray()
-    r = r[0] > 127 ? [0, ...r] : r
-    r = hash256(r)
-
+    let r = c.g.mul(k).x?.umod(c.n)?.toArray()
+    if (r !== null && r !== undefined) {
+      r = r[0] > 127 ? [0, ...r] : r
+      r = hash256(r)
+    }
     const puz = new RPuzzle('HASH256')
-    const lockingScript = puz.lock(r)
+    const lockingScript = puz.lock(r ?? [])
     const satoshis = 1
 
     // ✅ Fix: Ensure privateKey is valid and within range
@@ -230,12 +231,13 @@ describe('Spend', () => {
     const k = new PrivateKey(2)
     const wrongK = new PrivateKey(5)
     const c = new Curve()
-    let r = c.g.mul(k).x.umod(c.n).toArray()
-    r = r[0] > 127 ? [0, ...r] : r
-    r = hash256(r)
-
+    let r = c.g.mul(k).x?.umod(c.n)?.toArray()
+    if (r !== null && r !== undefined) {
+      r = r[0] > 127 ? [0, ...r] : r
+      r = hash256(r)
+    }
     const puz = new RPuzzle('HASH256')
-    const lockingScript = puz.lock(r)
+    const lockingScript = puz.lock(r ?? [])
     const satoshis = 1
 
     // ✅ Fix: Ensure privateKey is valid and within range
@@ -288,12 +290,13 @@ describe('Spend', () => {
   it('Fails to validate an R-puzzle spend with the wrong hash', async () => {
     const k = new PrivateKey(2)
     const c = new Curve()
-    let r = c.g.mul(k).x.umod(c.n).toArray()
-    r = r[0] > 127 ? [0, ...r] : r
-    r = hash160(r)
-
+    let r = c.g.mul(k).x?.umod(c.n)?.toArray()
+    if (r !== null && r !== undefined) {
+      r = r[0] > 127 ? [0, ...r] : r
+      r = hash160(r)
+    }
     const puz = new RPuzzle('HASH256')
-    const lockingScript = puz.lock(r)
+    const lockingScript = puz.lock(r ?? [])
     const satoshis = 1
 
     // ✅ Fix: Ensure privateKey is valid and within range
