@@ -6,31 +6,30 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [AbortActionArgs](#interface-abortactionargs) | [GetVersionResult](#interface-getversionresult) | [SignActionArgs](#interface-signactionargs) |
-| [AbortActionResult](#interface-abortactionresult) | [IdentityCertificate](#interface-identitycertificate) | [SignActionOptions](#interface-signactionoptions) |
-| [AcquireCertificateArgs](#interface-acquirecertificateargs) | [IdentityCertifier](#interface-identitycertifier) | [SignActionResult](#interface-signactionresult) |
-| [AcquireCertificateResult](#interface-acquirecertificateresult) | [InternalizeActionArgs](#interface-internalizeactionargs) | [SignActionSpend](#interface-signactionspend) |
-| [AuthenticatedResult](#interface-authenticatedresult) | [InternalizeActionResult](#interface-internalizeactionresult) | [SignableTransaction](#interface-signabletransaction) |
-| [BasketInsertion](#interface-basketinsertion) | [InternalizeOutput](#interface-internalizeoutput) | [VerifyHmacArgs](#interface-verifyhmacargs) |
-| [CertificateResult](#interface-certificateresult) | [KeyDeriverApi](#interface-keyderiverapi) | [VerifyHmacResult](#interface-verifyhmacresult) |
-| [CreateActionArgs](#interface-createactionargs) | [KeyLinkageResult](#interface-keylinkageresult) | [VerifySignatureArgs](#interface-verifysignatureargs) |
-| [CreateActionInput](#interface-createactioninput) | [ListActionsArgs](#interface-listactionsargs) | [VerifySignatureResult](#interface-verifysignatureresult) |
-| [CreateActionOptions](#interface-createactionoptions) | [ListActionsResult](#interface-listactionsresult) | [WalletAction](#interface-walletaction) |
-| [CreateActionOutput](#interface-createactionoutput) | [ListCertificatesArgs](#interface-listcertificatesargs) | [WalletActionInput](#interface-walletactioninput) |
-| [CreateActionResult](#interface-createactionresult) | [ListCertificatesResult](#interface-listcertificatesresult) | [WalletActionOutput](#interface-walletactionoutput) |
-| [CreateHmacArgs](#interface-createhmacargs) | [ListOutputsArgs](#interface-listoutputsargs) | [WalletCertificate](#interface-walletcertificate) |
-| [CreateHmacResult](#interface-createhmacresult) | [ListOutputsResult](#interface-listoutputsresult) | [WalletDecryptArgs](#interface-walletdecryptargs) |
-| [CreateSignatureArgs](#interface-createsignatureargs) | [ProveCertificateArgs](#interface-provecertificateargs) | [WalletDecryptResult](#interface-walletdecryptresult) |
-| [CreateSignatureResult](#interface-createsignatureresult) | [ProveCertificateResult](#interface-provecertificateresult) | [WalletEncryptArgs](#interface-walletencryptargs) |
-| [DiscoverByAttributesArgs](#interface-discoverbyattributesargs) | [RelinquishCertificateArgs](#interface-relinquishcertificateargs) | [WalletEncryptResult](#interface-walletencryptresult) |
-| [DiscoverByIdentityKeyArgs](#interface-discoverbyidentitykeyargs) | [RelinquishCertificateResult](#interface-relinquishcertificateresult) | [WalletEncryptionArgs](#interface-walletencryptionargs) |
-| [DiscoverCertificatesResult](#interface-discovercertificatesresult) | [RelinquishOutputArgs](#interface-relinquishoutputargs) | [WalletErrorObject](#interface-walleterrorobject) |
-| [GetHeaderArgs](#interface-getheaderargs) | [RelinquishOutputResult](#interface-relinquishoutputresult) | [WalletInterface](#interface-walletinterface) |
-| [GetHeaderResult](#interface-getheaderresult) | [RevealCounterpartyKeyLinkageArgs](#interface-revealcounterpartykeylinkageargs) | [WalletOutput](#interface-walletoutput) |
-| [GetHeightResult](#interface-getheightresult) | [RevealCounterpartyKeyLinkageResult](#interface-revealcounterpartykeylinkageresult) | [WalletPayment](#interface-walletpayment) |
-| [GetNetworkResult](#interface-getnetworkresult) | [RevealSpecificKeyLinkageArgs](#interface-revealspecifickeylinkageargs) | [WalletWire](#interface-walletwire) |
-| [GetPublicKeyArgs](#interface-getpublickeyargs) | [RevealSpecificKeyLinkageResult](#interface-revealspecifickeylinkageresult) |  |
-| [GetPublicKeyResult](#interface-getpublickeyresult) | [SendWithResult](#interface-sendwithresult) |  |
+| [AbortActionArgs](#interface-abortactionargs) | [GetVersionResult](#interface-getversionresult) | [SendWithResult](#interface-sendwithresult) |
+| [AbortActionResult](#interface-abortactionresult) | [IdentityCertificate](#interface-identitycertificate) | [SignActionArgs](#interface-signactionargs) |
+| [AcquireCertificateArgs](#interface-acquirecertificateargs) | [IdentityCertifier](#interface-identitycertifier) | [SignActionOptions](#interface-signactionoptions) |
+| [AuthenticatedResult](#interface-authenticatedresult) | [InternalizeActionArgs](#interface-internalizeactionargs) | [SignActionResult](#interface-signactionresult) |
+| [BasketInsertion](#interface-basketinsertion) | [InternalizeActionResult](#interface-internalizeactionresult) | [SignActionSpend](#interface-signactionspend) |
+| [CertificateResult](#interface-certificateresult) | [InternalizeOutput](#interface-internalizeoutput) | [SignableTransaction](#interface-signabletransaction) |
+| [CreateActionArgs](#interface-createactionargs) | [KeyDeriverApi](#interface-keyderiverapi) | [VerifyHmacArgs](#interface-verifyhmacargs) |
+| [CreateActionInput](#interface-createactioninput) | [KeyLinkageResult](#interface-keylinkageresult) | [VerifyHmacResult](#interface-verifyhmacresult) |
+| [CreateActionOptions](#interface-createactionoptions) | [ListActionsArgs](#interface-listactionsargs) | [VerifySignatureArgs](#interface-verifysignatureargs) |
+| [CreateActionOutput](#interface-createactionoutput) | [ListActionsResult](#interface-listactionsresult) | [VerifySignatureResult](#interface-verifysignatureresult) |
+| [CreateActionResult](#interface-createactionresult) | [ListCertificatesArgs](#interface-listcertificatesargs) | [WalletAction](#interface-walletaction) |
+| [CreateHmacArgs](#interface-createhmacargs) | [ListCertificatesResult](#interface-listcertificatesresult) | [WalletActionInput](#interface-walletactioninput) |
+| [CreateHmacResult](#interface-createhmacresult) | [ListOutputsArgs](#interface-listoutputsargs) | [WalletActionOutput](#interface-walletactionoutput) |
+| [CreateSignatureArgs](#interface-createsignatureargs) | [ListOutputsResult](#interface-listoutputsresult) | [WalletCertificate](#interface-walletcertificate) |
+| [CreateSignatureResult](#interface-createsignatureresult) | [ProveCertificateArgs](#interface-provecertificateargs) | [WalletDecryptArgs](#interface-walletdecryptargs) |
+| [DiscoverByAttributesArgs](#interface-discoverbyattributesargs) | [ProveCertificateResult](#interface-provecertificateresult) | [WalletDecryptResult](#interface-walletdecryptresult) |
+| [DiscoverByIdentityKeyArgs](#interface-discoverbyidentitykeyargs) | [RelinquishCertificateArgs](#interface-relinquishcertificateargs) | [WalletEncryptArgs](#interface-walletencryptargs) |
+| [DiscoverCertificatesResult](#interface-discovercertificatesresult) | [RelinquishCertificateResult](#interface-relinquishcertificateresult) | [WalletEncryptResult](#interface-walletencryptresult) |
+| [GetHeaderArgs](#interface-getheaderargs) | [RelinquishOutputArgs](#interface-relinquishoutputargs) | [WalletEncryptionArgs](#interface-walletencryptionargs) |
+| [GetHeaderResult](#interface-getheaderresult) | [RelinquishOutputResult](#interface-relinquishoutputresult) | [WalletErrorObject](#interface-walleterrorobject) |
+| [GetHeightResult](#interface-getheightresult) | [RevealCounterpartyKeyLinkageArgs](#interface-revealcounterpartykeylinkageargs) | [WalletInterface](#interface-walletinterface) |
+| [GetNetworkResult](#interface-getnetworkresult) | [RevealCounterpartyKeyLinkageResult](#interface-revealcounterpartykeylinkageresult) | [WalletOutput](#interface-walletoutput) |
+| [GetPublicKeyArgs](#interface-getpublickeyargs) | [RevealSpecificKeyLinkageArgs](#interface-revealspecifickeylinkageargs) | [WalletPayment](#interface-walletpayment) |
+| [GetPublicKeyResult](#interface-getpublickeyresult) | [RevealSpecificKeyLinkageResult](#interface-revealspecifickeylinkageresult) | [WalletWire](#interface-walletwire) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -80,18 +79,6 @@ export interface AcquireCertificateArgs {
 ```
 
 See also: [AcquisitionProtocol](./wallet.md#type-acquisitionprotocol), [Base64String](./wallet.md#type-base64string), [BooleanDefaultFalse](./wallet.md#type-booleandefaultfalse), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [DescriptionString5to50Bytes](./wallet.md#type-descriptionstring5to50bytes), [HexString](./wallet.md#type-hexstring), [KeyringRevealer](./wallet.md#type-keyringrevealer), [OutpointString](./wallet.md#type-outpointstring), [PubKeyHex](./wallet.md#type-pubkeyhex)
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
-
----
-### Interface: AcquireCertificateResult
-
-```ts
-export interface AcquireCertificateResult extends WalletCertificate {
-}
-```
-
-See also: [WalletCertificate](./wallet.md#interface-walletcertificate)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -1193,22 +1180,22 @@ export interface WalletInterface {
     internalizeAction: (args: InternalizeActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<InternalizeActionResult>;
     listOutputs: (args: ListOutputsArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<ListOutputsResult>;
     relinquishOutput: (args: RelinquishOutputArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<RelinquishOutputResult>;
-    acquireCertificate: (args: AcquireCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<AcquireCertificateResult>;
+    acquireCertificate: (args: AcquireCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<WalletCertificate>;
     listCertificates: (args: ListCertificatesArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<ListCertificatesResult>;
     proveCertificate: (args: ProveCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<ProveCertificateResult>;
     relinquishCertificate: (args: RelinquishCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<RelinquishCertificateResult>;
     discoverByIdentityKey: (args: DiscoverByIdentityKeyArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<DiscoverCertificatesResult>;
     discoverByAttributes: (args: DiscoverByAttributesArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<DiscoverCertificatesResult>;
-    isAuthenticated: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<AuthenticatedResult>;
-    waitForAuthentication: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<AuthenticatedResult>;
-    getHeight: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetHeightResult>;
+    isAuthenticated: (args: object, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<AuthenticatedResult>;
+    waitForAuthentication: (args: object, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<AuthenticatedResult>;
+    getHeight: (args: object, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetHeightResult>;
     getHeaderForHeight: (args: GetHeaderArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetHeaderResult>;
-    getNetwork: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetNetworkResult>;
-    getVersion: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetVersionResult>;
+    getNetwork: (args: object, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetNetworkResult>;
+    getVersion: (args: object, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetVersionResult>;
 }
 ```
 
-See also: [AbortActionArgs](./wallet.md#interface-abortactionargs), [AbortActionResult](./wallet.md#interface-abortactionresult), [AcquireCertificateArgs](./wallet.md#interface-acquirecertificateargs), [AcquireCertificateResult](./wallet.md#interface-acquirecertificateresult), [AuthenticatedResult](./wallet.md#interface-authenticatedresult), [CreateActionArgs](./wallet.md#interface-createactionargs), [CreateActionResult](./wallet.md#interface-createactionresult), [CreateHmacArgs](./wallet.md#interface-createhmacargs), [CreateHmacResult](./wallet.md#interface-createhmacresult), [CreateSignatureArgs](./wallet.md#interface-createsignatureargs), [CreateSignatureResult](./wallet.md#interface-createsignatureresult), [DiscoverByAttributesArgs](./wallet.md#interface-discoverbyattributesargs), [DiscoverByIdentityKeyArgs](./wallet.md#interface-discoverbyidentitykeyargs), [DiscoverCertificatesResult](./wallet.md#interface-discovercertificatesresult), [GetHeaderArgs](./wallet.md#interface-getheaderargs), [GetHeaderResult](./wallet.md#interface-getheaderresult), [GetHeightResult](./wallet.md#interface-getheightresult), [GetNetworkResult](./wallet.md#interface-getnetworkresult), [GetPublicKeyArgs](./wallet.md#interface-getpublickeyargs), [GetPublicKeyResult](./wallet.md#interface-getpublickeyresult), [GetVersionResult](./wallet.md#interface-getversionresult), [InternalizeActionArgs](./wallet.md#interface-internalizeactionargs), [InternalizeActionResult](./wallet.md#interface-internalizeactionresult), [ListActionsArgs](./wallet.md#interface-listactionsargs), [ListActionsResult](./wallet.md#interface-listactionsresult), [ListCertificatesArgs](./wallet.md#interface-listcertificatesargs), [ListCertificatesResult](./wallet.md#interface-listcertificatesresult), [ListOutputsArgs](./wallet.md#interface-listoutputsargs), [ListOutputsResult](./wallet.md#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [ProveCertificateArgs](./wallet.md#interface-provecertificateargs), [ProveCertificateResult](./wallet.md#interface-provecertificateresult), [RelinquishCertificateArgs](./wallet.md#interface-relinquishcertificateargs), [RelinquishCertificateResult](./wallet.md#interface-relinquishcertificateresult), [RelinquishOutputArgs](./wallet.md#interface-relinquishoutputargs), [RelinquishOutputResult](./wallet.md#interface-relinquishoutputresult), [RevealCounterpartyKeyLinkageArgs](./wallet.md#interface-revealcounterpartykeylinkageargs), [RevealCounterpartyKeyLinkageResult](./wallet.md#interface-revealcounterpartykeylinkageresult), [RevealSpecificKeyLinkageArgs](./wallet.md#interface-revealspecifickeylinkageargs), [RevealSpecificKeyLinkageResult](./wallet.md#interface-revealspecifickeylinkageresult), [SignActionArgs](./wallet.md#interface-signactionargs), [SignActionResult](./wallet.md#interface-signactionresult), [VerifyHmacArgs](./wallet.md#interface-verifyhmacargs), [VerifyHmacResult](./wallet.md#interface-verifyhmacresult), [VerifySignatureArgs](./wallet.md#interface-verifysignatureargs), [VerifySignatureResult](./wallet.md#interface-verifysignatureresult), [WalletDecryptArgs](./wallet.md#interface-walletdecryptargs), [WalletDecryptResult](./wallet.md#interface-walletdecryptresult), [WalletEncryptArgs](./wallet.md#interface-walletencryptargs), [WalletEncryptResult](./wallet.md#interface-walletencryptresult), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
+See also: [AbortActionArgs](./wallet.md#interface-abortactionargs), [AbortActionResult](./wallet.md#interface-abortactionresult), [AcquireCertificateArgs](./wallet.md#interface-acquirecertificateargs), [AuthenticatedResult](./wallet.md#interface-authenticatedresult), [CreateActionArgs](./wallet.md#interface-createactionargs), [CreateActionResult](./wallet.md#interface-createactionresult), [CreateHmacArgs](./wallet.md#interface-createhmacargs), [CreateHmacResult](./wallet.md#interface-createhmacresult), [CreateSignatureArgs](./wallet.md#interface-createsignatureargs), [CreateSignatureResult](./wallet.md#interface-createsignatureresult), [DiscoverByAttributesArgs](./wallet.md#interface-discoverbyattributesargs), [DiscoverByIdentityKeyArgs](./wallet.md#interface-discoverbyidentitykeyargs), [DiscoverCertificatesResult](./wallet.md#interface-discovercertificatesresult), [GetHeaderArgs](./wallet.md#interface-getheaderargs), [GetHeaderResult](./wallet.md#interface-getheaderresult), [GetHeightResult](./wallet.md#interface-getheightresult), [GetNetworkResult](./wallet.md#interface-getnetworkresult), [GetPublicKeyArgs](./wallet.md#interface-getpublickeyargs), [GetPublicKeyResult](./wallet.md#interface-getpublickeyresult), [GetVersionResult](./wallet.md#interface-getversionresult), [InternalizeActionArgs](./wallet.md#interface-internalizeactionargs), [InternalizeActionResult](./wallet.md#interface-internalizeactionresult), [ListActionsArgs](./wallet.md#interface-listactionsargs), [ListActionsResult](./wallet.md#interface-listactionsresult), [ListCertificatesArgs](./wallet.md#interface-listcertificatesargs), [ListCertificatesResult](./wallet.md#interface-listcertificatesresult), [ListOutputsArgs](./wallet.md#interface-listoutputsargs), [ListOutputsResult](./wallet.md#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [ProveCertificateArgs](./wallet.md#interface-provecertificateargs), [ProveCertificateResult](./wallet.md#interface-provecertificateresult), [RelinquishCertificateArgs](./wallet.md#interface-relinquishcertificateargs), [RelinquishCertificateResult](./wallet.md#interface-relinquishcertificateresult), [RelinquishOutputArgs](./wallet.md#interface-relinquishoutputargs), [RelinquishOutputResult](./wallet.md#interface-relinquishoutputresult), [RevealCounterpartyKeyLinkageArgs](./wallet.md#interface-revealcounterpartykeylinkageargs), [RevealCounterpartyKeyLinkageResult](./wallet.md#interface-revealcounterpartykeylinkageresult), [RevealSpecificKeyLinkageArgs](./wallet.md#interface-revealspecifickeylinkageargs), [RevealSpecificKeyLinkageResult](./wallet.md#interface-revealspecifickeylinkageresult), [SignActionArgs](./wallet.md#interface-signactionargs), [SignActionResult](./wallet.md#interface-signactionresult), [VerifyHmacArgs](./wallet.md#interface-verifyhmacargs), [VerifyHmacResult](./wallet.md#interface-verifyhmacresult), [VerifySignatureArgs](./wallet.md#interface-verifysignatureargs), [VerifySignatureResult](./wallet.md#interface-verifysignatureresult), [WalletCertificate](./wallet.md#interface-walletcertificate), [WalletDecryptArgs](./wallet.md#interface-walletdecryptargs), [WalletDecryptResult](./wallet.md#interface-walletdecryptresult), [WalletEncryptArgs](./wallet.md#interface-walletencryptargs), [WalletEncryptResult](./wallet.md#interface-walletencryptresult), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
 
 <details>
 
@@ -1228,9 +1215,9 @@ See also: [AbortActionArgs](./wallet.md#interface-abortactionargs), [AbortAction
 Acquires an identity certificate, whether by acquiring one from the certifier or by directly receiving it.
 
 ```ts
-acquireCertificate: (args: AcquireCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<AcquireCertificateResult>
+acquireCertificate: (args: AcquireCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<WalletCertificate>
 ```
-See also: [AcquireCertificateArgs](./wallet.md#interface-acquirecertificateargs), [AcquireCertificateResult](./wallet.md#interface-acquirecertificateresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes)
+See also: [AcquireCertificateArgs](./wallet.md#interface-acquirecertificateargs), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [WalletCertificate](./wallet.md#interface-walletcertificate)
 
 #### Property createAction
 
@@ -1309,7 +1296,7 @@ See also: [GetHeaderArgs](./wallet.md#interface-getheaderargs), [GetHeaderResult
 Retrieves the current height of the blockchain.
 
 ```ts
-getHeight: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetHeightResult>
+getHeight: (args: object, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetHeightResult>
 ```
 See also: [GetHeightResult](./wallet.md#interface-getheightresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes)
 
@@ -1318,7 +1305,7 @@ See also: [GetHeightResult](./wallet.md#interface-getheightresult), [OriginatorD
 Retrieves the Bitcoin network the client is using (mainnet or testnet).
 
 ```ts
-getNetwork: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetNetworkResult>
+getNetwork: (args: object, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetNetworkResult>
 ```
 See also: [GetNetworkResult](./wallet.md#interface-getnetworkresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes)
 
@@ -1336,7 +1323,7 @@ See also: [GetPublicKeyArgs](./wallet.md#interface-getpublickeyargs), [GetPublic
 Retrieves the current version string of the wallet.
 
 ```ts
-getVersion: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetVersionResult>
+getVersion: (args: object, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<GetVersionResult>
 ```
 See also: [GetVersionResult](./wallet.md#interface-getversionresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes)
 
@@ -1354,7 +1341,7 @@ See also: [InternalizeActionArgs](./wallet.md#interface-internalizeactionargs), 
 Checks the authentication status of the user.
 
 ```ts
-isAuthenticated: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<AuthenticatedResult>
+isAuthenticated: (args: object, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<AuthenticatedResult>
 ```
 See also: [AuthenticatedResult](./wallet.md#interface-authenticatedresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes)
 
@@ -1462,7 +1449,7 @@ See also: [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatord
 Continuously waits until the user is authenticated, returning the result once confirmed.
 
 ```ts
-waitForAuthentication: (args: {}, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<AuthenticatedResult>
+waitForAuthentication: (args: object, originator?: OriginatorDomainNameStringUnder250Bytes) => Promise<AuthenticatedResult>
 ```
 See also: [AuthenticatedResult](./wallet.md#interface-authenticatedresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes)
 
@@ -1714,7 +1701,7 @@ export default class HTTPWalletJSON implements WalletInterface {
     baseUrl: string;
     httpClient: typeof fetch;
     originator: OriginatorDomainNameStringUnder250Bytes | undefined;
-    api: (call: string, args: any) => Promise<any>;
+    api: (call: string, args: object) => Promise<unknown>;
     constructor(originator: OriginatorDomainNameStringUnder250Bytes | undefined, baseUrl: string = "http://localhost:3321", httpClient = fetch) 
     async createAction(args: CreateActionArgs): Promise<CreateActionResult> 
     async signAction(args: SignActionArgs): Promise<SignActionResult> 
@@ -1903,13 +1890,13 @@ export default class HTTPWalletJSON implements WalletInterface {
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
     }): Promise<DiscoverCertificatesResult> 
-    async isAuthenticated(args: {}): Promise<{
+    async isAuthenticated(args: object): Promise<{
         authenticated: true;
     }> 
-    async waitForAuthentication(args: {}): Promise<{
+    async waitForAuthentication(args: object): Promise<{
         authenticated: true;
     }> 
-    async getHeight(args: {}): Promise<{
+    async getHeight(args: object): Promise<{
         height: PositiveInteger;
     }> 
     async getHeaderForHeight(args: {
@@ -1917,16 +1904,16 @@ export default class HTTPWalletJSON implements WalletInterface {
     }): Promise<{
         header: HexString;
     }> 
-    async getNetwork(args: {}): Promise<{
+    async getNetwork(args: object): Promise<{
         network: "mainnet" | "testnet";
     }> 
-    async getVersion(args: {}): Promise<{
+    async getVersion(args: object): Promise<{
         version: VersionString7To30Bytes;
     }> 
 }
 ```
 
-See also: [AcquireCertificateArgs](./wallet.md#interface-acquirecertificateargs), [AcquireCertificateResult](./wallet.md#interface-acquirecertificateresult), [Base64String](./wallet.md#type-base64string), [BasketStringUnder300Bytes](./wallet.md#type-basketstringunder300bytes), [BooleanDefaultFalse](./wallet.md#type-booleandefaultfalse), [BooleanDefaultTrue](./wallet.md#type-booleandefaulttrue), [Byte](./wallet.md#type-byte), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [CreateActionArgs](./wallet.md#interface-createactionargs), [CreateActionResult](./wallet.md#interface-createactionresult), [DescriptionString5to50Bytes](./wallet.md#type-descriptionstring5to50bytes), [DiscoverCertificatesResult](./wallet.md#interface-discovercertificatesresult), [HexString](./wallet.md#type-hexstring), [ISOTimestampString](./wallet.md#type-isotimestampstring), [InternalizeActionArgs](./wallet.md#interface-internalizeactionargs), [KeyIDStringUnder800Bytes](./wallet.md#type-keyidstringunder800bytes), [ListActionsArgs](./wallet.md#interface-listactionsargs), [ListActionsResult](./wallet.md#interface-listactionsresult), [ListCertificatesResult](./wallet.md#interface-listcertificatesresult), [ListOutputsArgs](./wallet.md#interface-listoutputsargs), [ListOutputsResult](./wallet.md#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [OutpointString](./wallet.md#type-outpointstring), [PositiveInteger](./wallet.md#type-positiveinteger), [PositiveIntegerDefault10Max10000](./wallet.md#type-positiveintegerdefault10max10000), [PositiveIntegerOrZero](./wallet.md#type-positiveintegerorzero), [ProtocolString5To400Bytes](./wallet.md#type-protocolstring5to400bytes), [ProveCertificateArgs](./wallet.md#interface-provecertificateargs), [ProveCertificateResult](./wallet.md#interface-provecertificateresult), [PubKeyHex](./wallet.md#type-pubkeyhex), [SecurityLevel](./wallet.md#type-securitylevel), [SignActionArgs](./wallet.md#interface-signactionargs), [SignActionResult](./wallet.md#interface-signactionresult), [VersionString7To30Bytes](./wallet.md#type-versionstring7to30bytes), [WalletInterface](./wallet.md#interface-walletinterface), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
+See also: [AcquireCertificateArgs](./wallet.md#interface-acquirecertificateargs), [AcquireCertificateResult](./wallet.md#type-acquirecertificateresult), [Base64String](./wallet.md#type-base64string), [BasketStringUnder300Bytes](./wallet.md#type-basketstringunder300bytes), [BooleanDefaultFalse](./wallet.md#type-booleandefaultfalse), [BooleanDefaultTrue](./wallet.md#type-booleandefaulttrue), [Byte](./wallet.md#type-byte), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [CreateActionArgs](./wallet.md#interface-createactionargs), [CreateActionResult](./wallet.md#interface-createactionresult), [DescriptionString5to50Bytes](./wallet.md#type-descriptionstring5to50bytes), [DiscoverCertificatesResult](./wallet.md#interface-discovercertificatesresult), [HexString](./wallet.md#type-hexstring), [ISOTimestampString](./wallet.md#type-isotimestampstring), [InternalizeActionArgs](./wallet.md#interface-internalizeactionargs), [KeyIDStringUnder800Bytes](./wallet.md#type-keyidstringunder800bytes), [ListActionsArgs](./wallet.md#interface-listactionsargs), [ListActionsResult](./wallet.md#interface-listactionsresult), [ListCertificatesResult](./wallet.md#interface-listcertificatesresult), [ListOutputsArgs](./wallet.md#interface-listoutputsargs), [ListOutputsResult](./wallet.md#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [OutpointString](./wallet.md#type-outpointstring), [PositiveInteger](./wallet.md#type-positiveinteger), [PositiveIntegerDefault10Max10000](./wallet.md#type-positiveintegerdefault10max10000), [PositiveIntegerOrZero](./wallet.md#type-positiveintegerorzero), [ProtocolString5To400Bytes](./wallet.md#type-protocolstring5to400bytes), [ProveCertificateArgs](./wallet.md#interface-provecertificateargs), [ProveCertificateResult](./wallet.md#interface-provecertificateresult), [PubKeyHex](./wallet.md#type-pubkeyhex), [SecurityLevel](./wallet.md#type-securitylevel), [SignActionArgs](./wallet.md#interface-signactionargs), [SignActionResult](./wallet.md#interface-signactionresult), [VersionString7To30Bytes](./wallet.md#type-versionstring7to30bytes), [WalletInterface](./wallet.md#interface-walletinterface), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -2117,21 +2104,21 @@ enable the management of identity certificates, or store any data. It is also no
 export class ProtoWallet {
     keyDeriver?: KeyDeriverApi;
     constructor(rootKeyOrKeyDeriver?: PrivateKey | "anyone" | KeyDeriverApi) 
-    async getPublicKey(args: GetPublicKeyArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+    async getPublicKey(args: GetPublicKeyArgs): Promise<{
         publicKey: PubKeyHex;
     }> 
-    async revealCounterpartyKeyLinkage(args: RevealCounterpartyKeyLinkageArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<RevealCounterpartyKeyLinkageResult> 
-    async revealSpecificKeyLinkage(args: RevealSpecificKeyLinkageArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<RevealSpecificKeyLinkageResult> 
-    async encrypt(args: WalletEncryptArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<WalletEncryptResult> 
-    async decrypt(args: WalletDecryptArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<WalletDecryptResult> 
-    async createHmac(args: CreateHmacArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<CreateHmacResult> 
-    async verifyHmac(args: VerifyHmacArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<VerifyHmacResult> 
-    async createSignature(args: CreateSignatureArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<CreateSignatureResult> 
-    async verifySignature(args: VerifySignatureArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<VerifySignatureResult> 
+    async revealCounterpartyKeyLinkage(args: RevealCounterpartyKeyLinkageArgs): Promise<RevealCounterpartyKeyLinkageResult> 
+    async revealSpecificKeyLinkage(args: RevealSpecificKeyLinkageArgs): Promise<RevealSpecificKeyLinkageResult> 
+    async encrypt(args: WalletEncryptArgs): Promise<WalletEncryptResult> 
+    async decrypt(args: WalletDecryptArgs): Promise<WalletDecryptResult> 
+    async createHmac(args: CreateHmacArgs): Promise<CreateHmacResult> 
+    async verifyHmac(args: VerifyHmacArgs): Promise<VerifyHmacResult> 
+    async createSignature(args: CreateSignatureArgs): Promise<CreateSignatureResult> 
+    async verifySignature(args: VerifySignatureArgs): Promise<VerifySignatureResult> 
 }
 ```
 
-See also: [CreateHmacArgs](./wallet.md#interface-createhmacargs), [CreateHmacResult](./wallet.md#interface-createhmacresult), [CreateSignatureArgs](./wallet.md#interface-createsignatureargs), [CreateSignatureResult](./wallet.md#interface-createsignatureresult), [GetPublicKeyArgs](./wallet.md#interface-getpublickeyargs), [KeyDeriverApi](./wallet.md#interface-keyderiverapi), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [PrivateKey](./primitives.md#class-privatekey), [PubKeyHex](./wallet.md#type-pubkeyhex), [RevealCounterpartyKeyLinkageArgs](./wallet.md#interface-revealcounterpartykeylinkageargs), [RevealCounterpartyKeyLinkageResult](./wallet.md#interface-revealcounterpartykeylinkageresult), [RevealSpecificKeyLinkageArgs](./wallet.md#interface-revealspecifickeylinkageargs), [RevealSpecificKeyLinkageResult](./wallet.md#interface-revealspecifickeylinkageresult), [VerifyHmacArgs](./wallet.md#interface-verifyhmacargs), [VerifyHmacResult](./wallet.md#interface-verifyhmacresult), [VerifySignatureArgs](./wallet.md#interface-verifysignatureargs), [VerifySignatureResult](./wallet.md#interface-verifysignatureresult), [WalletDecryptArgs](./wallet.md#interface-walletdecryptargs), [WalletDecryptResult](./wallet.md#interface-walletdecryptresult), [WalletEncryptArgs](./wallet.md#interface-walletencryptargs), [WalletEncryptResult](./wallet.md#interface-walletencryptresult), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
+See also: [CreateHmacArgs](./wallet.md#interface-createhmacargs), [CreateHmacResult](./wallet.md#interface-createhmacresult), [CreateSignatureArgs](./wallet.md#interface-createsignatureargs), [CreateSignatureResult](./wallet.md#interface-createsignatureresult), [GetPublicKeyArgs](./wallet.md#interface-getpublickeyargs), [KeyDeriverApi](./wallet.md#interface-keyderiverapi), [PrivateKey](./primitives.md#class-privatekey), [PubKeyHex](./wallet.md#type-pubkeyhex), [RevealCounterpartyKeyLinkageArgs](./wallet.md#interface-revealcounterpartykeylinkageargs), [RevealCounterpartyKeyLinkageResult](./wallet.md#interface-revealcounterpartykeylinkageresult), [RevealSpecificKeyLinkageArgs](./wallet.md#interface-revealspecifickeylinkageargs), [RevealSpecificKeyLinkageResult](./wallet.md#interface-revealspecifickeylinkageresult), [VerifyHmacArgs](./wallet.md#interface-verifyhmacargs), [VerifyHmacResult](./wallet.md#interface-verifyhmacresult), [VerifySignatureArgs](./wallet.md#interface-verifysignatureargs), [VerifySignatureResult](./wallet.md#interface-verifysignatureresult), [WalletDecryptArgs](./wallet.md#interface-walletdecryptargs), [WalletDecryptResult](./wallet.md#interface-walletdecryptresult), [WalletEncryptArgs](./wallet.md#interface-walletencryptargs), [WalletEncryptResult](./wallet.md#interface-walletencryptresult), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -2145,7 +2132,7 @@ export default class WalletClient implements WalletInterface {
     public substrate: "auto" | WalletInterface;
     originator?: OriginatorDomainNameStringUnder250Bytes;
     constructor(substrate: "auto" | "Cicada" | "XDM" | "window.CWI" | "json-api" | WalletInterface = "auto", originator?: OriginatorDomainNameStringUnder250Bytes) 
-    async connectToSubstrate() 
+    async connectToSubstrate(): Promise<void> 
     async createAction(args: CreateActionArgs): Promise<CreateActionResult> 
     async signAction(args: SignActionArgs): Promise<SignActionResult> 
     async abortAction(args: {
@@ -2324,11 +2311,11 @@ export default class WalletClient implements WalletInterface {
         limit?: PositiveIntegerDefault10Max10000;
         offset?: PositiveIntegerOrZero;
     }): Promise<DiscoverCertificatesResult> 
-    async isAuthenticated(args: {} = {}): Promise<AuthenticatedResult> 
-    async waitForAuthentication(args: {} = {}): Promise<{
+    async isAuthenticated(args: object = {}): Promise<AuthenticatedResult> 
+    async waitForAuthentication(args: object = {}): Promise<{
         authenticated: true;
     }> 
-    async getHeight(args: {} = {}): Promise<{
+    async getHeight(args: object = {}): Promise<{
         height: PositiveInteger;
     }> 
     async getHeaderForHeight(args: {
@@ -2336,16 +2323,16 @@ export default class WalletClient implements WalletInterface {
     }): Promise<{
         header: HexString;
     }> 
-    async getNetwork(args: {} = {}): Promise<{
+    async getNetwork(args: object = {}): Promise<{
         network: "mainnet" | "testnet";
     }> 
-    async getVersion(args: {} = {}): Promise<{
+    async getVersion(args: object = {}): Promise<{
         version: VersionString7To30Bytes;
     }> 
 }
 ```
 
-See also: [AcquireCertificateArgs](./wallet.md#interface-acquirecertificateargs), [AcquireCertificateResult](./wallet.md#interface-acquirecertificateresult), [AuthenticatedResult](./wallet.md#interface-authenticatedresult), [Base64String](./wallet.md#type-base64string), [BasketStringUnder300Bytes](./wallet.md#type-basketstringunder300bytes), [BooleanDefaultFalse](./wallet.md#type-booleandefaultfalse), [Byte](./wallet.md#type-byte), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [CreateActionArgs](./wallet.md#interface-createactionargs), [CreateActionResult](./wallet.md#interface-createactionresult), [DescriptionString5to50Bytes](./wallet.md#type-descriptionstring5to50bytes), [DiscoverCertificatesResult](./wallet.md#interface-discovercertificatesresult), [HexString](./wallet.md#type-hexstring), [ISOTimestampString](./wallet.md#type-isotimestampstring), [InternalizeActionArgs](./wallet.md#interface-internalizeactionargs), [KeyIDStringUnder800Bytes](./wallet.md#type-keyidstringunder800bytes), [ListActionsArgs](./wallet.md#interface-listactionsargs), [ListActionsResult](./wallet.md#interface-listactionsresult), [ListCertificatesResult](./wallet.md#interface-listcertificatesresult), [ListOutputsArgs](./wallet.md#interface-listoutputsargs), [ListOutputsResult](./wallet.md#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [OutpointString](./wallet.md#type-outpointstring), [PositiveInteger](./wallet.md#type-positiveinteger), [PositiveIntegerDefault10Max10000](./wallet.md#type-positiveintegerdefault10max10000), [PositiveIntegerOrZero](./wallet.md#type-positiveintegerorzero), [ProtocolString5To400Bytes](./wallet.md#type-protocolstring5to400bytes), [ProveCertificateArgs](./wallet.md#interface-provecertificateargs), [ProveCertificateResult](./wallet.md#interface-provecertificateresult), [PubKeyHex](./wallet.md#type-pubkeyhex), [SecurityLevel](./wallet.md#type-securitylevel), [SignActionArgs](./wallet.md#interface-signactionargs), [SignActionResult](./wallet.md#interface-signactionresult), [VersionString7To30Bytes](./wallet.md#type-versionstring7to30bytes), [WalletInterface](./wallet.md#interface-walletinterface), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
+See also: [AcquireCertificateArgs](./wallet.md#interface-acquirecertificateargs), [AcquireCertificateResult](./wallet.md#type-acquirecertificateresult), [AuthenticatedResult](./wallet.md#interface-authenticatedresult), [Base64String](./wallet.md#type-base64string), [BasketStringUnder300Bytes](./wallet.md#type-basketstringunder300bytes), [BooleanDefaultFalse](./wallet.md#type-booleandefaultfalse), [Byte](./wallet.md#type-byte), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [CreateActionArgs](./wallet.md#interface-createactionargs), [CreateActionResult](./wallet.md#interface-createactionresult), [DescriptionString5to50Bytes](./wallet.md#type-descriptionstring5to50bytes), [DiscoverCertificatesResult](./wallet.md#interface-discovercertificatesresult), [HexString](./wallet.md#type-hexstring), [ISOTimestampString](./wallet.md#type-isotimestampstring), [InternalizeActionArgs](./wallet.md#interface-internalizeactionargs), [KeyIDStringUnder800Bytes](./wallet.md#type-keyidstringunder800bytes), [ListActionsArgs](./wallet.md#interface-listactionsargs), [ListActionsResult](./wallet.md#interface-listactionsresult), [ListCertificatesResult](./wallet.md#interface-listcertificatesresult), [ListOutputsArgs](./wallet.md#interface-listoutputsargs), [ListOutputsResult](./wallet.md#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [OutpointString](./wallet.md#type-outpointstring), [PositiveInteger](./wallet.md#type-positiveinteger), [PositiveIntegerDefault10Max10000](./wallet.md#type-positiveintegerdefault10max10000), [PositiveIntegerOrZero](./wallet.md#type-positiveintegerorzero), [ProtocolString5To400Bytes](./wallet.md#type-protocolstring5to400bytes), [ProveCertificateArgs](./wallet.md#interface-provecertificateargs), [ProveCertificateResult](./wallet.md#interface-provecertificateresult), [PubKeyHex](./wallet.md#type-pubkeyhex), [SecurityLevel](./wallet.md#type-securitylevel), [SignActionArgs](./wallet.md#interface-signactionargs), [SignActionResult](./wallet.md#interface-signactionresult), [VersionString7To30Bytes](./wallet.md#type-versionstring7to30bytes), [WalletInterface](./wallet.md#interface-walletinterface), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -2598,7 +2585,7 @@ export default class WalletWireTransceiver implements WalletInterface {
 }
 ```
 
-See also: [AcquireCertificateArgs](./wallet.md#interface-acquirecertificateargs), [AcquireCertificateResult](./wallet.md#interface-acquirecertificateresult), [Base64String](./wallet.md#type-base64string), [BasketStringUnder300Bytes](./wallet.md#type-basketstringunder300bytes), [BooleanDefaultFalse](./wallet.md#type-booleandefaultfalse), [BooleanDefaultTrue](./wallet.md#type-booleandefaulttrue), [Byte](./wallet.md#type-byte), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [CreateActionArgs](./wallet.md#interface-createactionargs), [CreateActionResult](./wallet.md#interface-createactionresult), [DescriptionString5to50Bytes](./wallet.md#type-descriptionstring5to50bytes), [DiscoverCertificatesResult](./wallet.md#interface-discovercertificatesresult), [HexString](./wallet.md#type-hexstring), [ISOTimestampString](./wallet.md#type-isotimestampstring), [InternalizeActionArgs](./wallet.md#interface-internalizeactionargs), [KeyIDStringUnder800Bytes](./wallet.md#type-keyidstringunder800bytes), [ListActionsArgs](./wallet.md#interface-listactionsargs), [ListActionsResult](./wallet.md#interface-listactionsresult), [ListCertificatesResult](./wallet.md#interface-listcertificatesresult), [ListOutputsArgs](./wallet.md#interface-listoutputsargs), [ListOutputsResult](./wallet.md#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [OutpointString](./wallet.md#type-outpointstring), [PositiveInteger](./wallet.md#type-positiveinteger), [PositiveIntegerDefault10Max10000](./wallet.md#type-positiveintegerdefault10max10000), [PositiveIntegerOrZero](./wallet.md#type-positiveintegerorzero), [ProtocolString5To400Bytes](./wallet.md#type-protocolstring5to400bytes), [ProveCertificateArgs](./wallet.md#interface-provecertificateargs), [ProveCertificateResult](./wallet.md#interface-provecertificateresult), [PubKeyHex](./wallet.md#type-pubkeyhex), [SecurityLevel](./wallet.md#type-securitylevel), [SignActionArgs](./wallet.md#interface-signactionargs), [SignActionResult](./wallet.md#interface-signactionresult), [VersionString7To30Bytes](./wallet.md#type-versionstring7to30bytes), [WalletInterface](./wallet.md#interface-walletinterface), [WalletWire](./wallet.md#interface-walletwire), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
+See also: [AcquireCertificateArgs](./wallet.md#interface-acquirecertificateargs), [AcquireCertificateResult](./wallet.md#type-acquirecertificateresult), [Base64String](./wallet.md#type-base64string), [BasketStringUnder300Bytes](./wallet.md#type-basketstringunder300bytes), [BooleanDefaultFalse](./wallet.md#type-booleandefaultfalse), [BooleanDefaultTrue](./wallet.md#type-booleandefaulttrue), [Byte](./wallet.md#type-byte), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [CreateActionArgs](./wallet.md#interface-createactionargs), [CreateActionResult](./wallet.md#interface-createactionresult), [DescriptionString5to50Bytes](./wallet.md#type-descriptionstring5to50bytes), [DiscoverCertificatesResult](./wallet.md#interface-discovercertificatesresult), [HexString](./wallet.md#type-hexstring), [ISOTimestampString](./wallet.md#type-isotimestampstring), [InternalizeActionArgs](./wallet.md#interface-internalizeactionargs), [KeyIDStringUnder800Bytes](./wallet.md#type-keyidstringunder800bytes), [ListActionsArgs](./wallet.md#interface-listactionsargs), [ListActionsResult](./wallet.md#interface-listactionsresult), [ListCertificatesResult](./wallet.md#interface-listcertificatesresult), [ListOutputsArgs](./wallet.md#interface-listoutputsargs), [ListOutputsResult](./wallet.md#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [OutpointString](./wallet.md#type-outpointstring), [PositiveInteger](./wallet.md#type-positiveinteger), [PositiveIntegerDefault10Max10000](./wallet.md#type-positiveintegerdefault10max10000), [PositiveIntegerOrZero](./wallet.md#type-positiveintegerorzero), [ProtocolString5To400Bytes](./wallet.md#type-protocolstring5to400bytes), [ProveCertificateArgs](./wallet.md#interface-provecertificateargs), [ProveCertificateResult](./wallet.md#interface-provecertificateresult), [PubKeyHex](./wallet.md#type-pubkeyhex), [SecurityLevel](./wallet.md#type-securitylevel), [SignActionArgs](./wallet.md#interface-signactionargs), [SignActionResult](./wallet.md#interface-signactionresult), [VersionString7To30Bytes](./wallet.md#type-versionstring7to30bytes), [WalletInterface](./wallet.md#interface-walletinterface), [WalletWire](./wallet.md#interface-walletwire), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -3018,13 +3005,13 @@ export default class WindowCWISubstrate implements WalletInterface {
             decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>;
         }>;
     }> 
-    async isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+    async isAuthenticated(args: object, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         authenticated: true;
     }> 
-    async waitForAuthentication(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+    async waitForAuthentication(args: object, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         authenticated: true;
     }> 
-    async getHeight(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+    async getHeight(args: object, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         height: PositiveInteger;
     }> 
     async getHeaderForHeight(args: {
@@ -3032,10 +3019,10 @@ export default class WindowCWISubstrate implements WalletInterface {
     }, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         header: HexString;
     }> 
-    async getNetwork(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+    async getNetwork(args: object, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         network: "mainnet" | "testnet";
     }> 
-    async getVersion(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+    async getVersion(args: object, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         version: VersionString7To30Bytes;
     }> 
 }
@@ -3496,6 +3483,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
+| [AcquireCertificateResult](#type-acquirecertificateresult) | [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500bytes) | [PositiveIntegerMax10](#type-positiveintegermax10) |
 | [AcquisitionProtocol](#type-acquisitionprotocol) | [EntityNameStringMax100Bytes](#type-entitynamestringmax100bytes) | [PositiveIntegerOrZero](#type-positiveintegerorzero) |
 | [ActionStatus](#type-actionstatus) | [ErrorCodeString10To40Bytes](#type-errorcodestring10to40bytes) | [ProtocolString5To400Bytes](#type-protocolstring5to400bytes) |
 | [AtomicBEEF](#type-atomicbeef) | [ErrorDescriptionString20To200Bytes](#type-errordescriptionstring20to200bytes) | [PubKeyHex](#type-pubkeyhex) |
@@ -3509,12 +3497,22 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes) | [OutputTagStringUnder300Bytes](#type-outputtagstringunder300bytes) | [WalletErrorCode](#type-walleterrorcode) |
 | [Counterparty](#type-counterparty) | [PositiveInteger](#type-positiveinteger) | [WalletNetwork](#type-walletnetwork) |
 | [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes) | [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000) | [WalletProtocol](#type-walletprotocol) |
-| [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500bytes) | [PositiveIntegerMax10](#type-positiveintegermax10) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
 
+### Type: AcquireCertificateResult
+
+```ts
+export type AcquireCertificateResult = WalletCertificate
+```
+
+See also: [WalletCertificate](./wallet.md#interface-walletcertificate)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
 ### Type: AcquisitionProtocol
 
 ```ts
