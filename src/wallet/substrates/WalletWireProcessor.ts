@@ -5,7 +5,6 @@ import { Utils } from '../../primitives/index'
 import calls from './WalletWireCalls'
 import Certificate from '../../auth/certificates/Certificate'
 
-
 /**
  * Processes incoming wallet calls received over a wallet wire, with a given wallet.
  */
