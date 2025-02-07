@@ -1,4 +1,3 @@
-
 import LockingScript from './LockingScript'
 import UnlockingScript from './UnlockingScript'
 import Script from './Script'

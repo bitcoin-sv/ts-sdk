@@ -1,4 +1,3 @@
-// @ts-nocheck
 import BigNumber from './BigNumber'
 import { hash256 } from './Hash'
 
@@ -225,7 +224,8 @@ export const fromBase58 = (str: string): number[] => {
   if (str === '' || typeof str !== 'string') {
     throw new Error(`Expected base58 string but got “${str}”`)
   }
-  const match: number[] = str.match(/[IOl0]/gmu)
+  const match: string[] | null = str.match(/[IOl0]/gmu)
+
   if (match !== null) {
     throw new Error(`Invalid base58 character “${match.join('')}”`)
   }
@@ -235,8 +235,9 @@ export const fromBase58 = (str: string): number[] => {
 
   const uint8 = new Uint8Array([
     ...new Uint8Array(psz),
-    ...str
-      .match(/./gmu)
+    ...(
+      str.match(/./gmu) ?? [] // ✅ Safe Fix: If null, use []
+    )
       .map((i) => base58chars.indexOf(i))
       .reduce((acc, i) => {
         acc = acc.map((j) => {
@@ -269,7 +270,7 @@ export const toBase58 = (bin: number[]): string => {
     base58Map[base58chars.charCodeAt(i)] = i
   }
 
-  const result = []
+  const result: number[] = []
 
   for (const byte of bin) {
     let carry = byte
