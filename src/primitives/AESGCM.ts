@@ -1,5 +1,4 @@
 
-// @ts-nocheck
 const SBox = [[0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76],
   [0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0],
   [0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15],
@@ -139,7 +138,8 @@ function keyExpansion (roundLimit: number, key: number[]): number[][] {
   let i
   let j
   const nK = parseInt(String(key.length / 4))
-  const result = []
+  // eslint-disable-next-line prefer-const
+  let result: any[][] = []
 
   for (i = 0; i < key.length; i++) {
     if (i % 4 === 0) {
@@ -177,8 +177,8 @@ export function AES (input: number[], key: number[]): number[] {
   let j
   let round: number
   let roundLimit
-  const state = [[], [], [], []]
-  const output = []
+  const state: number [][] = [[], [], [], []]
+  const output: number [] = []
 
   // Since the BigNumber representation of keys ignores big endian zeroes,
   // extend incoming key arrays with zeros to the smallest standard key size.
@@ -243,7 +243,7 @@ export const getBytes = function (numericValue: number): number[] {
 
 const createZeroBlock = function (length: number): number[] {
   let i
-  const result = []
+  const result: number [] = []
 
   for (i = 0; i < length; i++) {
     result.push(0x00)
@@ -256,7 +256,7 @@ const R = [0xe1].concat(createZeroBlock(15))
 
 export const exclusiveOR = function (block0: number[], block1: number[]): number[] {
   let i
-  const result = []
+  const result: number [] = []
 
   for (i = 0; i < block0.length; i++) {
     result[i] = block0[i] ^ block1[i]
@@ -350,7 +350,7 @@ function gctr (
   let j
   let y
   let counterBlock = initialCounterBlock
-  const output = []
+  const output: any[] = []
 
   if (input.length === 0) {
     return input
