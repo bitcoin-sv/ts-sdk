@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import PublicKey from '../primitives/PublicKey'
 import PrivateKey from '../primitives/PrivateKey'
 import Signature from '../primitives/Signature'
@@ -31,6 +31,9 @@ export const sign = (
   const keyID = Random(32)
   const keyIDBase64 = toBase64(keyID)
   const invoiceNumber = `2-message signing-${keyIDBase64}`
+  if (verifier == null) {
+    throw new Error('Verifier must be a PublicKey')
+  }
   const signingKey = signer.deriveChild(verifier, invoiceNumber)
   const signature = signingKey.sign(message).toDER()
   const senderPublicKey = signer.toPublicKey().encode(true)
