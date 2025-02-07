@@ -1,24 +1,27 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 export default {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  testPathIgnorePatterns: ['dist/'],
-  moduleDirectories: ['node_modules', 'src'],
-  collectCoverageFrom: ['src/**/*.ts'],
+  // Use the preset specifically designed for ESM
+  preset: 'ts-jest/presets/default-esm',
 
-  // ✅ Ensure Jest can resolve imports correctly
-  moduleNameMapper: {
-    '^@primitives/(.*)$': '<rootDir>/src/primitives/$1',
-    '^@auth/(.*)$': '<rootDir>/src/auth/$1',
-    '^@transaction/(.*)$': '<rootDir>/src/transaction/$1',
-    '^@wallet/(.*)$': '<rootDir>/src/wallet/$1',
-    '^@compat/(.*)$': '<rootDir>/src/compat/$1',
-    '^@messages/(.*)$': '<rootDir>/src/messages/$1',
-    '^@overlay-tools/(.*)$': '<rootDir>/src/overlay-tools/$1',
-    '^@script/(.*)$': '<rootDir>/src/script/$1',
-    '^@totp/(.*)$': '<rootDir>/src/totp/$1'
+  // Use the Node environment for testing
+  testEnvironment: 'node',
+
+  // Ignore compiled output
+  testPathIgnorePatterns: ['dist/'],
+
+  // These globals configure ts-jest to output ESM
+  globals: {
+    'ts-jest': {
+      useESM: true
+    }
   },
 
-  // ✅ Ensure Jest recognizes TypeScript and resolves `.ts` extensions
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node']
+  // Tell Jest that files ending in .ts should be treated as ESM modules
+  extensionsToTreatAsEsm: ['.ts'],
+
+  // Optionally, if you have imports with a .js extension in your source (or tests)
+  // but your source files are actually TypeScript, this mapper will remove the extension.
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1'
+  }
 }

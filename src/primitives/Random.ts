@@ -1,11 +1,15 @@
 class Rand {
-  _rand: Function
+  _rand: (n: number) => number[] // ✅ Explicit function type
+
   constructor () {
-    const noRand = () => {
+    const noRand = (): never => {
       throw new Error(
         'No secure random number generator is available in this environment.'
       )
     }
+
+    this._rand = noRand // Assign the function
+
     if (typeof self === 'object') {
       /* eslint-disable-next-line */
       if (self.crypto?.getRandomValues) {
@@ -25,7 +29,7 @@ class Rand {
         if (typeof crypto.randomBytes === 'function') {
           this._rand = (n: number) => [...crypto.randomBytes(n)]
         }
-      } catch (e) {
+      } catch {
         this._rand = noRand
       }
     }

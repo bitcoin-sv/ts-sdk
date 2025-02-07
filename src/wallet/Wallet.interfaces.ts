@@ -391,6 +391,8 @@ export interface AbortActionResult {
   aborted: true
 }
 
+export type AcquireCertificateResult = WalletCertificate
+
 /**
  * @param {LabelStringUnder300Bytes[]} labels - An array of labels used to filter actions.
  * @param {'any' | 'all'} [labelQueryMode] - Specifies how to match labels (default is any which matches any of the labels).
@@ -782,8 +784,6 @@ export interface IdentityCertificate extends WalletCertificate {
   decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>
 }
 
-export interface AcquireCertificateResult extends WalletCertificate {}
-
 /**
  * @param {PubKeyHex[]} certifiers - An array of public keys for specific certifiers (filters by these certifiers).
  * @param {Base64String[]} types - An array of certificate types issued by any of the specified certifiers, which should be returned.
@@ -906,6 +906,8 @@ export interface DiscoverByAttributesArgs {
   offset?: PositiveIntegerOrZero
   seekPermission?: BooleanDefaultTrue
 }
+
+// export interface AcquireCertificateResult extends WalletCertificate {}
 
 /**
  * Every method of the `Wallet` interface has a return value of the form `Promise<object>`.
@@ -1142,7 +1144,7 @@ export interface WalletInterface {
   acquireCertificate: (
     args: AcquireCertificateArgs,
     originator?: OriginatorDomainNameStringUnder250Bytes
-  ) => Promise<AcquireCertificateResult>
+  ) => Promise<WalletCertificate>
 
   /**
    * Lists identity certificates belonging to the user, filtered by certifier(s) and type(s).
@@ -1212,7 +1214,7 @@ export interface WalletInterface {
    * @returns {Promise<AuthenticatedResult>} The promise resolves to an object indicating whether the user is authenticated or an error response.
    */
   isAuthenticated: (
-    args: {},
+    args: object,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ) => Promise<AuthenticatedResult>
 
@@ -1224,7 +1226,7 @@ export interface WalletInterface {
    * @returns {Promise<AuthenticatedResult>} The final result indicating that the user is authenticated or an error object.
    */
   waitForAuthentication: (
-    args: {},
+    args: object,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ) => Promise<AuthenticatedResult>
 
@@ -1236,7 +1238,7 @@ export interface WalletInterface {
    * @returns {Promise<Object>} Resolves to an object indicating the current height or an error on failure.
    */
   getHeight: (
-    args: {},
+    args: object,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ) => Promise<GetHeightResult>
 
@@ -1260,7 +1262,7 @@ export interface WalletInterface {
    * @returns {Promise<GetNetworkResult>} The promise resolves to an object indicating whether the client is using the mainnet or testnet.
    */
   getNetwork: (
-    args: {},
+    args: object,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ) => Promise<GetNetworkResult>
 
@@ -1272,7 +1274,7 @@ export interface WalletInterface {
    * @returns {Promise<GetVersionResult>} Resolves to an object containing the version string of the wallet, or an error.
    */
   getVersion: (
-    args: {},
+    args: object,
     originator?: OriginatorDomainNameStringUnder250Bytes
   ) => Promise<GetVersionResult>
 }

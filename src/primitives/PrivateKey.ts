@@ -1,13 +1,13 @@
-import BigNumber from './BigNumber'
-import Signature from './Signature'
-import PublicKey from './PublicKey'
-import Point from './Point'
-import Curve from './Curve'
-import { sign, verify } from './ECDSA'
-import { sha256, sha256hmac } from './Hash'
-import Random from './Random'
-import { fromBase58Check, toArray, toBase58, toBase58Check } from './utils'
-import Polynomial, { PointInFiniteField } from './Polynomial'
+import BigNumber from './BigNumber.js'
+import Signature from './Signature.js'
+import PublicKey from './PublicKey.js'
+import Point from './Point.js'
+import Curve from './Curve.js'
+import { sign, verify } from './ECDSA.js'
+import { sha256, sha256hmac } from './Hash.js'
+import Random from './Random.js'
+import { fromBase58Check, toArray, toBase58Check } from './utils.js'
+import Polynomial, { PointInFiniteField } from './Polynomial.js'
 
 /**
  * @class KeyShares
@@ -45,19 +45,19 @@ export class KeyShares {
     const points = shares.map((share, idx) => {
       const shareParts = share.split('.')
       if (shareParts.length !== 4) {
-        throw Error(
+        throw new Error(
           'Invalid share format in share ' +
-            idx +
-            '. Expected format: "x.y.t.i" - received ' +
-            share
+          idx.toString() +
+          '. Expected format: "x.y.t.i" - received ' +
+          share
         )
       }
       const [x, y, t, i] = shareParts
-      if (!t) throw Error('Threshold not found in share ' + idx)
-      if (!i) throw Error('Integrity not found in share ' + idx)
+      if (t === undefined) throw new Error('Threshold not found in share ' + idx.toString())
+      if (i === undefined) throw new Error('Integrity not found in share ' + idx.toString())
       const tInt = parseInt(t)
-      if (idx !== 0 && threshold !== tInt) { throw Error('Threshold mismatch in share ' + idx) }
-      if (idx !== 0 && integrity !== i) { throw Error('Integrity mismatch in share ' + idx) }
+      if (idx !== 0 && threshold !== tInt) { throw new Error('Threshold mismatch in share ' + idx.toString()) }
+      if (idx !== 0 && integrity !== i) { throw new Error('Integrity mismatch in share ' + idx.toString()) }
       threshold = tInt
       integrity = i
       return PointInFiniteField.fromString([x, y].join('.'))
@@ -65,9 +65,9 @@ export class KeyShares {
     return new KeyShares(points, threshold, integrity)
   }
 
-  toBackupFormat () {
+  toBackupFormat (): string[] {
     return this.points.map(
-      (share) => share.toString() + '.' + this.threshold + '.' + this.integrity
+      (share) => share.toString() + '.' + this.threshold.toString() + '.' + this.integrity
     )
   }
 }
@@ -134,7 +134,7 @@ export default class PrivateKey extends BigNumber {
    * @throws Will throw an error if the string is not a valid WIF.
    **/
   static fromWif (wif: string, prefixLength: number = 1): PrivateKey {
-    const decoded = fromBase58Check(wif, null, prefixLength)
+    const decoded = fromBase58Check(wif, undefined, prefixLength)
     if (decoded.data.length !== 33) {
       throw new Error('Invalid WIF length')
     }
@@ -153,7 +153,7 @@ export default class PrivateKey extends BigNumber {
    *
    * @param endian - The endianness provided. By default is 'big endian'. Ignored if number is BigNumber.
    *
-   * @param modN - Optional. Default 'apply. If 'apply', apply modN to input to guarantee a valid PrivateKey. If 'error', if input is out of field throw Error('Input is out of field'). If 'nocheck', assumes input is in field.
+   * @param modN - Optional. Default 'apply. If 'apply', apply modN to input to guarantee a valid PrivateKey. If 'error', if input is out of field throw new Error('Input is out of field'). If 'nocheck', assumes input is in field.
    *
    * @example
    * import PrivateKey from './PrivateKey';
@@ -221,7 +221,7 @@ export default class PrivateKey extends BigNumber {
     msg: number[] | string,
     enc?: 'hex' | 'utf8',
     forceLowS: boolean = true,
-    customK?: Function | BigNumber
+    customK?: ((iter: number) => BigNumber) | BigNumber
   ): Signature {
     const msgHash = new BigNumber(sha256(msg, enc), 16)
     return sign(msgHash, this, forceLowS, customK)
@@ -389,7 +389,7 @@ export default class PrivateKey extends BigNumber {
 
     const poly = Polynomial.fromPrivateKey(this, threshold)
 
-    const points = []
+    const points: PointInFiniteField[] = []
     for (let i = 0; i < totalShares; i++) {
       const x = new BigNumber(PrivateKey.fromRandom().toArray())
       const y = poly.valueAt(x)

@@ -19,7 +19,7 @@ describe('createNonce', () => {
 
   it('throws an error if wallet fails to create HMAC', async () => {
     // Mock failure of HMAC creation
-    ;(mockWallet.createHmac as jest.Mock).mockRejectedValue(
+    (mockWallet.createHmac as jest.Mock).mockRejectedValue(
       new Error('Failed to create HMAC')
     )
 
@@ -49,10 +49,12 @@ describe('verifyNonce', () => {
   })
 
   it('does not verify an invalid nonce', async () => {
-    ;(mockWallet.verifyHmac as jest.Mock).mockResolvedValue({ valid: false })
+    (mockWallet.verifyHmac as jest.Mock).mockResolvedValue({ valid: false })
 
     const nonce = await createNonce(mockWallet)
-    await expect(verifyNonce(nonce + 'ABC', mockWallet)).resolves.toEqual(false)
+    await expect(verifyNonce(nonce + 'ABC', mockWallet)).resolves.toEqual(
+      false
+    )
     await expect(verifyNonce(nonce + '=', mockWallet)).resolves.toEqual(false)
     await expect(
       verifyNonce(
@@ -66,14 +68,14 @@ describe('verifyNonce', () => {
   })
 
   it('returns false for an invalid HMAC verification', async () => {
-    ;(mockWallet.verifyHmac as jest.Mock).mockResolvedValue({ valid: false })
+    (mockWallet.verifyHmac as jest.Mock).mockResolvedValue({ valid: false })
 
     const nonce = await createNonce(mockWallet)
     await expect(verifyNonce(nonce, mockWallet)).resolves.toEqual(false)
   })
 
   it('verifies a 256-bit nonce', async () => {
-    ;(mockWallet.verifyHmac as jest.Mock).mockResolvedValue({ valid: true })
+    (mockWallet.verifyHmac as jest.Mock).mockResolvedValue({ valid: true })
 
     const nonce1 = await createNonce(mockWallet)
     const nonce2 = await createNonce(mockWallet)

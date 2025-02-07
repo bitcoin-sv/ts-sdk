@@ -1,8 +1,8 @@
-import BigNumber from './BigNumber'
-import Curve from './Curve'
-import Point from './Point'
-import { sha256 } from './Hash'
-import { PrivateKey, PublicKey } from './index'
+import BigNumber from './BigNumber.js'
+import Curve from './Curve.js'
+import Point from './Point.js'
+import { sha256 } from './Hash.js'
+import { PrivateKey, PublicKey } from './index.js'
 
 /**
  * Class representing the Schnorr Zero-Knowledge Proof (ZKP) protocol.

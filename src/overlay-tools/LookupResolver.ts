@@ -1,5 +1,5 @@
-import { Transaction } from '../transaction/index'
-import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate'
+import { Transaction } from '../transaction/index.js'
+import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate.js'
 
 /**
  * The question asked to the Overlay Services Engine when a consumer of state wishes to look up information.
@@ -98,7 +98,7 @@ export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
         'HTTPS facilitator can only use URLs that start with "https:"'
       )
     }
-    const timeoutPromise = new Promise((_, reject) =>
+    const timeoutPromise = new Promise((resolve, reject) =>
       setTimeout(() => reject(new Error('Request timed out')), timeout)
     )
 
@@ -136,10 +136,22 @@ export default class LookupResolver {
   private readonly additionalHosts: Record<string, string[]>
 
   constructor (config?: LookupResolverConfig) {
-    const { facilitator, slapTrackers, hostOverrides, additionalHosts } =
-      config ?? ({} as LookupResolverConfig)
+    const defaultConfig: LookupResolverConfig = {
+      facilitator: new HTTPSOverlayLookupFacilitator(),
+      slapTrackers: DEFAULT_SLAP_TRACKERS,
+      hostOverrides: {},
+      additionalHosts: {}
+    }
+
+    const {
+      facilitator = defaultConfig.facilitator,
+      slapTrackers = defaultConfig.slapTrackers,
+      hostOverrides = defaultConfig.hostOverrides,
+      additionalHosts = defaultConfig.additionalHosts
+    } = config ?? defaultConfig // ✅ Use a default object directly
+
     this.facilitator = facilitator ?? new HTTPSOverlayLookupFacilitator()
-    this.slapTrackers = slapTrackers ?? DEFAULT_SLAP_TRACKERS
+    this.slapTrackers = slapTrackers ?? []
     this.hostOverrides = hostOverrides ?? {}
     this.additionalHosts = additionalHosts ?? {}
   }
@@ -154,12 +166,12 @@ export default class LookupResolver {
     let competentHosts: string[] = []
     if (question.service === 'ls_slap') {
       competentHosts = this.slapTrackers
-    } else if (this.hostOverrides[question.service]) {
+    } else if (this.hostOverrides[question.service] != null) {
       competentHosts = this.hostOverrides[question.service]
     } else {
       competentHosts = await this.findCompetentHosts(question.service)
     }
-    if (this.additionalHosts[question.service]) {
+    if (this.additionalHosts[question.service]?.length > 0) {
       competentHosts = [
         ...competentHosts,
         ...this.additionalHosts[question.service]
@@ -174,13 +186,13 @@ export default class LookupResolver {
     // Use Promise.allSettled to handle individual host failures
     const hostResponses = await Promise.allSettled(
       competentHosts.map(
-        async host => await this.facilitator.lookup(host, question, timeout)
+        async (host) => await this.facilitator.lookup(host, question, timeout)
       )
     )
 
     const successfulResponses = hostResponses
-      .filter(result => result.status === 'fulfilled')
-      .map(result => result.value)
+      .filter((result): result is PromiseFulfilledResult<LookupAnswer> => result.status === 'fulfilled')
+      .map((result) => result.value)
 
     if (successfulResponses.length === 0) {
       throw new Error('No successful responses from any hosts')
@@ -190,30 +202,38 @@ export default class LookupResolver {
     if (successfulResponses[0].type === 'freeform') {
       // Return the first freeform response
       return successfulResponses[0]
-    } else {
-      // Aggregate outputs from all successful responses
-      const outputs = new Map<string, { beef: number[], outputIndex: number }>()
-      for (const response of successfulResponses) {
-        if (response.type !== 'output-list') {
-          continue
-        }
-        try {
-          for (const output of response.outputs) {
-            try {
-              const key = `${Transaction.fromBEEF(output.beef).id('hex')}.${output.outputIndex}`
+    }
+
+    // Aggregate outputs from all successful responses
+    const outputs = new Map<string, { beef: number[], outputIndex: number }>()
+
+    for (const response of successfulResponses) {
+      if (response.type !== 'output-list') {
+        continue
+      }
+      try {
+        for (const output of response.outputs) {
+          try {
+            const txId: string = String(Transaction.fromBEEF(output.beef).id('hex'))
+
+            if (txId !== '') { // ✅ Ensures `txId` is always a non-empty string
+              const key = `${String(txId)}.${String(output.outputIndex)}`
               outputs.set(key, output)
-            } catch (e) {
-              continue
+            } else {
+              console.warn('Invalid transaction ID:', txId)
             }
+          } catch {
+            continue
           }
-        } catch (e) {
-          continue
         }
+      } catch (error) {
+        console.error('Error processing response outputs:', error)
       }
-      return {
-        type: 'output-list',
-        outputs: Array.from(outputs.values())
-      }
+    }
+    // ✅ Ensure function always returns a value
+    return {
+      type: 'output-list',
+      outputs: Array.from(outputs.values())
     }
   }
 
@@ -233,7 +253,7 @@ export default class LookupResolver {
     // Use Promise.allSettled to handle individual SLAP tracker failures
     const trackerResponses = await Promise.allSettled(
       this.slapTrackers.map(
-        async tracker =>
+        async (tracker) =>
           await this.facilitator.lookup(tracker, query, MAX_TRACKER_WAIT_TIME)
       )
     )
@@ -260,7 +280,7 @@ export default class LookupResolver {
               continue
             }
             hosts.add(parsed.domain)
-          } catch (e) {
+          } catch {
             // Invalid output, skip
             continue
           }

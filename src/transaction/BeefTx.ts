@@ -1,7 +1,7 @@
-import { hash256 } from '../primitives/Hash'
-import { Reader, Writer, toHex, toArray } from '../primitives/utils'
-import Transaction from './Transaction'
-import { BEEF_V2, TX_DATA_FORMAT } from './Beef'
+import { hash256 } from '../primitives/Hash.js'
+import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
+import Transaction from './Transaction.js'
+import { BEEF_V2, TX_DATA_FORMAT } from './Beef.js'
 
 /**
  * A single bitcoin transaction associated with a `Beef` validity proof set.
@@ -39,34 +39,34 @@ export default class BeefTx {
   }
 
   get isTxidOnly (): boolean {
-    return !!this._txid && !this._rawTx && !this._tx
+    return this._txid !== undefined && this._txid !== null && (this._rawTx == null) && (this._tx == null)
   }
 
-  get txid () {
-    if (this._txid) return this._txid
-    if (this._tx) {
+  get txid (): string {
+    if (this._txid !== undefined && this._txid !== null && this._txid !== '') return this._txid
+    if (this._tx != null) {
       this._txid = this._tx.id('hex')
       return this._txid
     }
-    if (this._rawTx) {
+    if (this._rawTx != null) {
       this._txid = toHex(hash256(this._rawTx))
       return this._txid
     }
     throw new Error('Internal')
   }
 
-  get tx () {
-    if (this._tx) return this._tx
-    if (this._rawTx) {
+  get tx (): Transaction | undefined {
+    if (this._tx != null) return this._tx
+    if (this._rawTx != null) {
       this._tx = Transaction.fromBinary(this._rawTx)
       return this._tx
     }
     return undefined
   }
 
-  get rawTx () {
-    if (this._rawTx) return this._rawTx
-    if (this._tx) {
+  get rawTx (): number[] | undefined {
+    if (this._rawTx != null) return this._rawTx
+    if (this._tx != null) {
       this._rawTx = this._tx.toBinary()
       return this._rawTx
     }
@@ -101,39 +101,45 @@ export default class BeefTx {
     return new BeefTx(txid, bumpIndex)
   }
 
-  private updateInputTxids () {
-    if (this.hasProof || !this.tx) {
+  private updateInputTxids (): void {
+    if (this.hasProof || (this.tx == null)) {
       // If we have a proof, or don't have a parsed transaction
       this.inputTxids = []
     } else {
-      const inputTxids = {}
+      const inputTxids: Record<string, boolean> = {} // ✅ Explicit object type
       for (const input of this.tx.inputs) {
-        inputTxids[input.sourceTXID] = true
+        if (input.sourceTXID !== undefined && input.sourceTXID !== null && input.sourceTXID !== '') {
+          // ✅ Ensure sourceTXID is defined
+          inputTxids[input.sourceTXID] = true
+        }
       }
       this.inputTxids = Object.keys(inputTxids)
     }
   }
 
   toWriter (writer: Writer, version: number): void {
-    const writeByte = (bb: number) => {
+    const writeByte = (bb: number): void => {
       writer.writeUInt8(bb)
     }
 
-    const writeTxid = () => {
+    const writeTxid = (): void => {
+      if (this._txid == null) {
+        throw new Error('Transaction ID (_txid) is undefined')
+      }
       writer.writeReverse(toArray(this._txid, 'hex'))
     }
 
-    const writeTx = () => {
-      if (this._rawTx) {
+    const writeTx = (): void => {
+      if (this._rawTx != null) {
         writer.write(this._rawTx)
-      } else if (this._tx) {
+      } else if (this._tx != null) {
         writer.write(this._tx.toBinary())
       } else {
         throw new Error('a valid serialized Transaction is expected')
       }
     }
 
-    const writeBumpIndex = () => {
+    const writeBumpIndex = (): void => {
       if (this.bumpIndex === undefined) {
         writeByte(TX_DATA_FORMAT.RAWTX) // 0
       } else {
@@ -179,7 +185,7 @@ export default class BeefTx {
     } else {
       // V1
       data = Transaction.fromReader(br)
-      bumpIndex = br.readUInt8() ? br.readVarIntNum() : undefined
+      bumpIndex = br.readUInt8() !== 0 ? br.readVarIntNum() : undefined
       beefTx = BeefTx.fromTx(data, bumpIndex)
     }
 

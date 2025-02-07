@@ -2,12 +2,12 @@ import { toArray } from '../../primitives/utils'
 import { TOTP } from '../../totp/totp'
 
 const secret = toArray('48656c6c6f21deadbeef', 'hex')
-const period = 30 //sec
-const periodMS = 30 * 1000 //ms
+const period = 30 // sec
+const periodMS = 30 * 1000 // ms
 const options = {
   digits: 6,
   period,
-  algorithm: 'SHA-1' as 'SHA-1'
+  algorithm: 'SHA-1' as const
 }
 
 describe('totp generation and validation', () => {
@@ -43,13 +43,13 @@ describe('totp generation and validation', () => {
   ])('$description', async ({ time, expected }) => {
     jest.setSystemTime(time)
 
-    //check if expected passcode is generated
+    // check if expected passcode is generated
     const passcode = TOTP.generate(secret, options)
     expect(passcode).toEqual(expected)
 
-    expect(TOTP.validate(secret, '000000', options)).toEqual(false) //this passcode should not be valid for any of above test cases
+    expect(TOTP.validate(secret, '000000', options)).toEqual(false) // this passcode should not be valid for any of above test cases
 
-    //should not be valid for only a part of passcode
+    // should not be valid for only a part of passcode
     expect(TOTP.validate(secret, passcode.slice(1), options)).toEqual(false)
 
     expect(TOTP.validate(secret, passcode, options)).toEqual(true)
@@ -57,7 +57,7 @@ describe('totp generation and validation', () => {
     const checkAdjacentWindow = (
       timeOfGeneration: number,
       expected: boolean
-    ) => {
+    ): void => {
       jest.setSystemTime(timeOfGeneration)
       const adjacentTimewindowPasscode = TOTP.generate(secret, options)
 
@@ -67,13 +67,14 @@ describe('totp generation and validation', () => {
       ).toEqual(expected)
     }
 
-    //because the 'skew' is '1' by default, the passcode for the next window also should be valid
-    checkAdjacentWindow(time + periodMS, true)
+    // because the 'skew' is '1' by default, the passcode for the next window also should be valid
+    checkAdjacentWindow((time as number) + periodMS, true)
+
     checkAdjacentWindow(time - periodMS, true)
 
-    //for 'skew': 1, other passcodes for further timewindows should not be valid
+    // for 'skew': 1, other passcodes for further timewindows should not be valid
     for (let i = 2; i < 10; i++) {
-      checkAdjacentWindow(time + i * periodMS, false)
+      checkAdjacentWindow((time as number) + i * periodMS, false)
       checkAdjacentWindow(time - i * periodMS, false)
     }
   })

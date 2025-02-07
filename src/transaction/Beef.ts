@@ -1,9 +1,14 @@
-import MerklePath from './MerklePath'
-import Transaction from './Transaction'
-import ChainTracker from './ChainTracker'
-import BeefTx from './BeefTx'
-import { Reader, Writer, toHex, toArray } from '../primitives/utils'
-import { hash256 } from '../primitives/Hash'
+import MerklePath from './MerklePath.js'
+import Transaction from './Transaction.js'
+import ChainTracker from './ChainTracker.js'
+import BeefTx from './BeefTx.js'
+import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
+import { hash256 } from '../primitives/Hash.js'
+
+function verifyTruthy<T> (v: T | undefined): T {
+  if (v == null) throw new Error('Expected a valid value, but got undefined.')
+  return v
+}
 
 export const BEEF_V1 = 4022206465 // 0100BEEF in LE order
 export const BEEF_V2 = 4022206466 // 0200BEEF in LE order
@@ -111,7 +116,9 @@ export class Beef {
    * @returns `MerklePath` with level zero hash equal to txid or undefined.
    */
   findBump (txid: string): MerklePath | undefined {
-    return this.bumps.find((b) => b.path[0].find((leaf) => leaf.hash === txid))
+    return this.bumps.find((b) =>
+      b.path[0].some((leaf) => leaf.hash === txid) // ✅ Ensure boolean return with `.some()`
+    )
   }
 
   /**
@@ -125,12 +132,12 @@ export class Beef {
    */
   findTransactionForSigning (txid: string): Transaction | undefined {
     const beefTx = this.findTxid(txid)
-    if (!beefTx) return undefined
+    if ((beefTx == null) || (beefTx.tx == null)) return undefined // Ensure beefTx.tx exists before using it
 
     for (const i of beefTx.tx.inputs) {
-      if (!i.sourceTransaction) {
-        const itx = this.findTxid(i.sourceTXID)
-        if (itx) {
+      if (i.sourceTransaction == null) {
+        const itx = this.findTxid(verifyTruthy(i.sourceTXID)) // Ensure sourceTXID is valid
+        if (itx != null) {
           i.sourceTransaction = itx.tx
         }
       }
@@ -149,23 +156,23 @@ export class Beef {
    */
   findAtomicTransaction (txid: string): Transaction | undefined {
     const beefTx = this.findTxid(txid)
-    if (!beefTx) return undefined
+    if ((beefTx == null) || (beefTx.tx == null)) return undefined // Ensure beefTx.tx exists before using it
 
-    const addInputProof = (beef: Beef, tx: Transaction) => {
+    const addInputProof = (beef: Beef, tx: Transaction): void => {
       const mp = beef.findBump(tx.id('hex'))
-      if (mp) {
+      if (mp != null) {
         tx.merklePath = mp
       } else {
         for (const i of tx.inputs) {
-          if (!i.sourceTransaction) {
-            const itx = beef.findTxid(i.sourceTXID)
-            if (itx) {
+          if (i.sourceTransaction == null) {
+            const itx = beef.findTxid(verifyTruthy(i.sourceTXID)) // Ensure sourceTXID is valid
+            if (itx != null) {
               i.sourceTransaction = itx.tx
             }
           }
-          if (i.sourceTransaction) {
+          if (i.sourceTransaction != null) {
             const mp = beef.findBump(i.sourceTransaction.id('hex'))
-            if (mp) {
+            if (mp != null) {
               i.sourceTransaction.merklePath = mp
             } else {
               addInputProof(beef, i.sourceTransaction)
@@ -175,7 +182,7 @@ export class Beef {
       }
     }
 
-    addInputProof(this, beefTx.tx)
+    addInputProof(this, beefTx.tx) // Safe because we checked that beefTx.tx exists
 
     return beefTx.tx
   }
@@ -213,11 +220,12 @@ export class Beef {
       this.bumps.push(bump)
     }
 
-    // review if any transactions are proven by this bump
+    // Review if any transactions are proven by this bump
     const b = this.bumps[bumpIndex]
     for (const tx of this.txs) {
       const txid = tx.txid
-      if (!tx.bumpIndex) {
+
+      if (tx.bumpIndex == null) { // ✅ Explicitly check for null or undefined
         for (const n of b.path[0]) {
           if (n.hash === txid) {
             tx.bumpIndex = bumpIndex
@@ -264,7 +272,7 @@ export class Beef {
     const txid = tx.id('hex')
     this.removeExistingTxid(txid)
     let bumpIndex: number | undefined
-    if (tx.merklePath) {
+    if (tx.merklePath != null) {
       bumpIndex = this.mergeBump(tx.merklePath)
     }
     const newTx = new BeefTx(tx, bumpIndex)
@@ -273,7 +281,7 @@ export class Beef {
     bumpIndex = newTx.bumpIndex
     if (bumpIndex === undefined) {
       for (const input of tx.inputs) {
-        if (input.sourceTransaction) {
+        if (input.sourceTransaction != null) {
           this.mergeTransaction(input.sourceTransaction)
         }
       }
@@ -285,7 +293,7 @@ export class Beef {
    * Removes an existing transaction from the BEEF, given its TXID
    * @param txid TXID of the transaction to remove
    */
-  removeExistingTxid (txid: string) {
+  removeExistingTxid (txid: string): void {
     const existingTxIndex = this.txs.findIndex((t) => t.txid === txid)
     if (existingTxIndex >= 0) {
       this.txs.splice(existingTxIndex, 1)
@@ -294,7 +302,7 @@ export class Beef {
 
   mergeTxidOnly (txid: string): BeefTx {
     let tx = this.txs.find((t) => t.txid === txid)
-    if (!tx) {
+    if (tx == null) {
       tx = new BeefTx(txid)
       this.txs.push(tx)
       this.tryToValidateBumpIndex(tx)
@@ -304,17 +312,23 @@ export class Beef {
 
   mergeBeefTx (btx: BeefTx): BeefTx {
     let beefTx = this.findTxid(btx.txid)
-    if (btx.isTxidOnly && !beefTx) {
+
+    if (btx.isTxidOnly && (beefTx == null)) {
       beefTx = this.mergeTxidOnly(btx.txid)
-    } else if (btx._tx && (!beefTx || beefTx.isTxidOnly)) {
+    } else if ((btx._tx != null) && ((beefTx == null) || beefTx.isTxidOnly)) {
       beefTx = this.mergeTransaction(btx._tx)
-    } else if (btx._rawTx && (!beefTx || beefTx.isTxidOnly)) {
+    } else if ((btx._rawTx != null) && ((beefTx == null) || beefTx.isTxidOnly)) {
       beefTx = this.mergeRawTx(btx._rawTx)
     }
+
+    if (beefTx == null) {
+      throw new Error(`Failed to merge BeefTx for txid: ${btx.txid}`)
+    }
+
     return beefTx
   }
 
-  mergeBeef (beef: number[] | Beef) {
+  mergeBeef (beef: number[] | Beef): void {
     const b: Beef = Array.isArray(beef) ? Beef.fromBinary(beef) : beef
 
     for (const bump of b.bumps) {
@@ -393,14 +407,14 @@ export class Beef {
 
     for (const tx of this.txs) {
       if (tx.isTxidOnly) {
-        if (!allowTxidOnly) return r
+        if (allowTxidOnly !== true) return r // ✅ Explicit check for `true`
         txids[tx.txid] = true
       }
     }
 
     const confirmComputedRoot = (b: MerklePath, txid: string): boolean => {
       const root = b.computeRoot(txid)
-      if (!r.roots[b.blockHeight]) {
+      if (r.roots[b.blockHeight] === undefined || r.roots[b.blockHeight] === '') {
         // accept the root as valid for this block and reuse for subsequent txids
         r.roots[b.blockHeight] = root
       }
@@ -412,9 +426,10 @@ export class Beef {
 
     for (const b of this.bumps) {
       for (const n of b.path[0]) {
-        if (n.txid && n.hash) {
+        if (n.txid === true && typeof n.hash === 'string' && n.hash.length > 0) {
           txids[n.hash] = true
-          // all txid hashes in all bumps must have agree on computed merkle path roots
+
+          // All txid hashes in all bumps must agree on computed merkle path roots
           if (!confirmComputedRoot(b, n.hash)) {
             return r
           }
@@ -438,7 +453,7 @@ export class Beef {
    * Serializes this data to `writer`
    * @param writer
    */
-  toWriter (writer: Writer) {
+  toWriter (writer: Writer): void {
     writer.writeUInt32LE(this.version)
 
     writer.writeVarIntNum(this.bumps.length)
@@ -472,22 +487,26 @@ export class Beef {
    * @param txid
    * @returns serialized contents of this Beef with AtomicBEEF prefix.
    */
-  toBinaryAtomic (txid: string) {
+  toBinaryAtomic (txid: string): number[] {
     this.sortTxs()
     const tx = this.findTxid(txid)
-    if (!tx) {
+    if (tx == null) {
       throw new Error(`${txid} does not exist in this Beef`)
     }
-    let beef: Beef = this
-    if (this.txs[this.txs.length - 1] !== tx) {
-      beef = this.clone()
+
+    // If the transaction is not the last one, clone and modify
+    const beef = (this.txs[this.txs.length - 1] === tx) ? this : this.clone()
+
+    if (beef !== this) {
       const i = this.txs.findIndex((t) => t.txid === txid)
       beef.txs.splice(i + 1)
     }
+
     const writer = new Writer()
     writer.writeUInt32LE(ATOMIC_BEEF)
     writer.write(toArray(txid, 'hex'))
     beef.toWriter(writer)
+
     return writer.toArray()
   }
 
@@ -634,11 +653,12 @@ export class Beef {
       // link their inputs that exist in this beef,
       // make a note of missing inputs.
       for (const inputTxid of tx.inputTxids) {
-        if (!txidToTx[inputTxid]) {
+        if (txidToTx[inputTxid] === undefined) { // Explicitly check for undefined
           missingInputs[inputTxid] = true
           hasMissingInput = true
         }
       }
+
       if (hasMissingInput) {
         txsMissingInputs.push(tx)
       } else {
@@ -698,7 +718,7 @@ export class Beef {
    * Ensure that all the txids in `knownTxids` are txidOnly
    * @param knownTxids
    */
-  trimKnownTxids (knownTxids: string[]) {
+  trimKnownTxids (knownTxids: string[]): void {
     for (let i = 0; i < this.txs.length;) {
       const tx = this.txs[i]
       if (tx.isTxidOnly && knownTxids.includes(tx.txid)) {
@@ -723,15 +743,17 @@ export class Beef {
    */
   toLogString (): string {
     let log = ''
-    log += `BEEF with ${this.bumps.length} BUMPS and ${this.txs.length} Transactions, isValid ${this.isValid()}\n`
+    log += `BEEF with ${this.bumps.length} BUMPS and ${this.txs.length} Transactions, isValid ${this.isValid().toString()}\n`
     let i = -1
+
     for (const b of this.bumps) {
       i++
       log += `  BUMP ${i}\n    block: ${b.blockHeight}\n    txids: [\n${b.path[0]
-        .filter((n) => !!n.txid)
-        .map((n) => `      '${n.hash}'`)
+        .filter((n) => n.txid === true) // ✅ Explicitly check if txid is `true`
+        .map((n) => `      '${n.hash ?? ''}'`)
         .join(',\n')}\n    ]\n`
     }
+
     i = -1
     for (const t of this.txs) {
       i++
@@ -742,41 +764,44 @@ export class Beef {
       if (t.isTxidOnly) {
         log += '    txidOnly\n'
       } else {
-        log += `    rawTx length=${t.rawTx.length}\n`
+        log += `    rawTx length=${t.rawTx?.length ?? 0}\n` // ✅ Fix applied here
       }
       if (t.inputTxids.length > 0) {
-        log += `    inputs: [\n${t.inputTxids.map((it) => `      '${it}'`).join(',\n')}\n    ]\n`
+        log += `    inputs: [\n${t.inputTxids
+          .map((it) => `      '${it}'`)
+          .join(',\n')}\n    ]\n`
       }
     }
+
     return log
   }
 
   /**
-   * In some circumstances it may be helpful for the BUMP MerkePaths to include
-   * leaves that can be computed from row zero.
-   */
-  addComputedLeaves () {
-    const beef = this
+ * In some circumstances it may be helpful for the BUMP MerklePaths to include
+ * leaves that can be computed from row zero.
+ */
+  addComputedLeaves (): void {
     const hash = (m: string): string =>
       toHex(hash256(toArray(m, 'hex').reverse()).reverse())
 
-    for (const bump of beef.bumps) {
+    for (const bump of this.bumps) { // ✅ Use `this` instead of `beef`
       for (let row = 1; row < bump.path.length; row++) {
         for (const leafL of bump.path[row - 1]) {
-          if (leafL.hash && (leafL.offset & 1) === 0) {
+          if (typeof leafL.hash === 'string' && (leafL.offset & 1) === 0) {
             const leafR = bump.path[row - 1].find(
               (l) => l.offset === leafL.offset + 1
             )
             const offsetOnRow = leafL.offset >> 1
+
             if (
-              leafR &&
-              leafR.hash &&
-              bump.path[row].findIndex((l) => l.offset === offsetOnRow) === -1
+              leafR !== undefined &&
+              typeof leafR.hash === 'string' &&
+              bump.path[row].every((l) => l.offset !== offsetOnRow)
             ) {
-              // computable leaf is missing... add it.
+              // Computable leaf is missing... add it.
               bump.path[row].push({
                 offset: offsetOnRow,
-                // string concatenation puts the right leaf on the left of the left leaf hash :-)
+                // String concatenation puts the right leaf on the left of the left leaf hash
                 hash: hash(leafR.hash + leafL.hash)
               })
             }

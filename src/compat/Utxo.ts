@@ -1,7 +1,7 @@
-import Transaction from '../transaction/Transaction'
-import TransactionInput from '../transaction/TransactionInput'
-import LockingScript from '../script/LockingScript'
-import UnlockingScript from '../script/UnlockingScript'
+import Transaction from '../transaction/Transaction.js'
+import TransactionInput from '../transaction/TransactionInput.js'
+import LockingScript from '../script/LockingScript.js'
+import UnlockingScript from '../script/UnlockingScript.js'
 
 interface jsonUtxo {
   txid: string

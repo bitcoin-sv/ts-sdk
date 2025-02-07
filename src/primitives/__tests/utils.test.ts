@@ -47,7 +47,7 @@ describe('utils', () => {
       expect(toHex(actual)).toEqual('00000039')
     })
     it('Throws when called with undefined base58 string', () => {
-      expect(() => (fromBase58 as any)()).toThrow(
+      expect(() => fromBase58(undefined as unknown as string)).toThrow(
         new Error('Expected base58 string but got “undefined”')
       )
     })

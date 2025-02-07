@@ -1,6 +1,6 @@
-import { WalletInterface } from '../../wallet/index'
-import { AuthMessage, RequestedCertificateSet } from '../types'
-import { VerifiableCertificate } from '../certificates/VerifiableCertificate'
+import { WalletInterface } from '../../wallet/index.js'
+import { AuthMessage, RequestedCertificateSet } from '../types.js'
+import { VerifiableCertificate } from '../certificates/VerifiableCertificate.js'
 
 /**
  * Validates and processes the certificates received from a peer.
@@ -15,6 +15,10 @@ export const validateCertificates = async (
   message: AuthMessage,
   certificatesRequested?: RequestedCertificateSet
 ): Promise<void> => {
+  if ((message.certificates == null) || message.certificates.length === 0) {
+    throw new Error('No certificates were provided in the AuthMessage.')
+  }
+
   await Promise.all(
     message.certificates.map(async (incomingCert: VerifiableCertificate) => {
       if (incomingCert.subject !== message.identityKey) {
@@ -42,7 +46,7 @@ export const validateCertificates = async (
       }
 
       // Check if the certificate matches requested certifiers, types, and fields
-      if (certificatesRequested) {
+      if (certificatesRequested != null) {
         const { certifiers, types } = certificatesRequested
 
         // Check certifier matches
@@ -54,7 +58,7 @@ export const validateCertificates = async (
 
         // Check type and fields match requested
         const requestedFields = types[certToVerify.type]
-        if (!requestedFields) {
+        if (requestedFields == null) { // ✅ Explicitly check for null or undefined
           throw new Error(
             `Certificate with type ${certToVerify.type} was not requested`
           )

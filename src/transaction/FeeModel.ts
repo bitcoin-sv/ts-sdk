@@ -1,5 +1,4 @@
-import Transaction from './Transaction'
-import BigNumber from '../primitives/BigNumber'
+import Transaction from './Transaction.js'
 
 /**
  * Represents the interface for a transaction fee model.

@@ -1,6 +1,6 @@
-import { VerifiableCertificate } from '../certificates/VerifiableCertificate'
-import { WalletInterface } from '../../../mod'
-import { RequestedCertificateSet } from '../types'
+import { VerifiableCertificate } from '../certificates/VerifiableCertificate.js'
+import { WalletInterface } from '../../../mod.js'
+import { RequestedCertificateSet } from '../types.js'
 
 /**
  * Retrieves an array of verifiable certificates based on the request.
@@ -24,7 +24,7 @@ export const getVerifiableCertificates = async (
 
   // For each certificate requested, create a verifiable cert with selectively revealed fields
   return await Promise.all(
-    matchingCertificates.certificates.map(async certificate => {
+    matchingCertificates.certificates.map(async (certificate) => {
       const { keyringForVerifier } = await wallet.proveCertificate({
         certificate,
         fieldsToReveal: requestedCertificates.types[certificate.type],

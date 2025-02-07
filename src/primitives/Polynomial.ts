@@ -1,8 +1,8 @@
-import PrivateKey from './PrivateKey'
-import BigNumber from './BigNumber'
-import Curve from './Curve'
-import Random from './Random'
-import { fromBase58, toBase58 } from './utils'
+import PrivateKey from './PrivateKey.js'
+import BigNumber from './BigNumber.js'
+import Curve from './Curve.js'
+import Random from './Random.js'
+import { fromBase58, toBase58 } from './utils.js'
 
 export class PointInFiniteField {
   x: BigNumber
@@ -48,7 +48,7 @@ export default class Polynomial {
 
   constructor (points: PointInFiniteField[], threshold?: number) {
     this.points = points
-    this.threshold = threshold || points.length
+    this.threshold = threshold ?? points.length // ✅ Handles undefined safely
   }
 
   static fromPrivateKey (key: PrivateKey, threshold: number): Polynomial {

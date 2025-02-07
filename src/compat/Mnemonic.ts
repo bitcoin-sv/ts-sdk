@@ -1,7 +1,7 @@
-import { wordList } from './bip-39-wordlist-en'
-import { encode, toArray, Reader, Writer } from '../primitives/utils'
-import * as Hash from '../primitives/Hash'
-import Random from '../primitives/Random'
+import { wordList } from './bip-39-wordlist-en.js'
+import { encode, toArray, Reader, Writer } from '../primitives/utils.js'
+import * as Hash from '../primitives/Hash.js'
+import Random from '../primitives/Random.js'
 
 /**
  * @class Mnemonic
@@ -24,8 +24,8 @@ export default class Mnemonic {
    * @param {object} [wordlist=wordList] - An object containing a list of words and space character used in the mnemonic.
    */
   constructor (mnemonic?: string, seed?: number[], wordlist = wordList) {
-    this.mnemonic = mnemonic
-    this.seed = seed
+    this.mnemonic = mnemonic ?? '' // Default to empty string if undefined
+    this.seed = seed ?? [] // Default to empty array if undefined
     this.Wordlist = wordlist
   }
 
@@ -35,14 +35,14 @@ export default class Mnemonic {
    */
   public toBinary (): number[] {
     const bw = new Writer()
-    if (this.mnemonic) {
+    if (this.mnemonic !== '') {
       const buf = toArray(this.mnemonic, 'utf8')
       bw.writeVarIntNum(buf.length)
       bw.write(buf)
     } else {
       bw.writeVarIntNum(0)
     }
-    if (this.seed) {
+    if (this.seed.length > 0) {
       bw.writeVarIntNum(this.seed.length)
       bw.write(this.seed)
     } else {
@@ -76,7 +76,7 @@ export default class Mnemonic {
    * @throws {Error} If the bit length is not a multiple of 32 or is less than 128.
    */
   public fromRandom (bits?: number): this {
-    if (!bits) {
+    if (bits === undefined || bits === null || isNaN(bits) || bits === 0) {
       bits = 128
     }
     if (bits % 32 !== 0) {
@@ -189,7 +189,7 @@ export default class Mnemonic {
     if (bin.length % 11 !== 0) {
       throw new Error(
         'internal error - entropy not an even multiple of 11 bits - ' +
-          bin.length
+        bin.length.toString()
       )
     }
 
@@ -229,7 +229,7 @@ export default class Mnemonic {
     if (bin.length % 11 !== 0) {
       throw new Error(
         'internal error - entropy not an even multiple of 11 bits - ' +
-          bin.length
+        bin.length.toString()
       )
     }
 
@@ -237,7 +237,8 @@ export default class Mnemonic {
     const cs = bin.length / 33
     const hashBits = bin.slice(-cs)
     const nonhashBits = bin.slice(0, bin.length - cs)
-    const buf = []
+    const buf: number[] = []
+
     for (let i = 0; i < nonhashBits.length / 8; i++) {
       buf.push(parseInt(bin.slice(i * 8, (i + 1) * 8), 2))
     }
@@ -287,8 +288,9 @@ export default class Mnemonic {
   public isValid (passphrase = ''): boolean {
     let isValid
     try {
-      isValid = !!this.mnemonic2Seed(passphrase)
-    } catch (err) {
+      this.mnemonic2Seed(passphrase)
+      isValid = true
+    } catch {
       isValid = false
     }
     return isValid

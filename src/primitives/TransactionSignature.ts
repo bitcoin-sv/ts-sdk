@@ -1,10 +1,10 @@
-import Signature from './Signature'
-import BigNumber from './BigNumber'
-import * as Hash from './Hash'
-import { toArray, Writer } from './utils'
-import Script from '../script/Script'
-import TransactionInput from '../transaction/TransactionInput'
-import TransactionOutput from '../transaction/TransactionOutput'
+import Signature from './Signature.js'
+import BigNumber from './BigNumber.js'
+import * as Hash from './Hash.js'
+import { toArray, Writer } from './utils.js'
+import Script from '../script/Script.js'
+import TransactionInput from '../transaction/TransactionInput.js'
+import TransactionOutput from '../transaction/TransactionOutput.js'
 
 export default class TransactionSignature extends Signature {
   public static readonly SIGHASH_ALL = 0x00000001
@@ -38,8 +38,12 @@ export default class TransactionSignature extends Signature {
 
     const getPrevoutHash = (): number[] => {
       const writer = new Writer()
+
       for (const input of inputs) {
         if (typeof input.sourceTXID === 'undefined') {
+          if (input.sourceTransaction == null) {
+            throw new Error('Missing sourceTransaction for input')
+          }
           writer.write(input.sourceTransaction.hash() as number[])
         } else {
           writer.writeReverse(toArray(input.sourceTXID, 'hex'))
@@ -56,7 +60,8 @@ export default class TransactionSignature extends Signature {
       const writer = new Writer()
 
       for (const input of inputs) {
-        writer.writeUInt32LE(input.sequence)
+        const sequence = input.sequence ?? 0xffffffff // Default to max sequence number
+        writer.writeUInt32LE(sequence)
       }
 
       const buf = writer.toArray()
@@ -68,17 +73,25 @@ export default class TransactionSignature extends Signature {
       const writer = new Writer()
 
       if (typeof outputIndex === 'undefined') {
-        let script: number[]
         for (const output of params.outputs) {
-          writer.writeUInt64LE(output.satoshis)
-          script = output.lockingScript.toBinary()
+          const satoshis = output.satoshis ?? 0 // Default to 0 if undefined
+          writer.writeUInt64LE(satoshis)
+
+          const script = output.lockingScript?.toBinary() ?? []
           writer.writeVarIntNum(script.length)
           writer.write(script)
         }
       } else {
         const output = params.outputs[outputIndex]
-        writer.writeUInt64LE(output.satoshis)
-        const script = output.lockingScript.toBinary()
+
+        if (output === undefined) { // ✅ Explicitly check for undefined
+          throw new Error(`Output at index ${outputIndex} does not exist`)
+        }
+
+        const satoshis = output.satoshis ?? 0 // Default to 0 if undefined
+        writer.writeUInt64LE(satoshis)
+
+        const script = output.lockingScript?.toBinary() ?? []
         writer.writeVarIntNum(script.length)
         writer.write(script)
       }

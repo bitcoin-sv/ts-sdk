@@ -7,8 +7,8 @@ import {
   OutpointString,
   PubKeyHex,
   ProtoWallet
-} from '../../../mod'
-import Certificate from './Certificate'
+} from '../../../mod.js'
+import Certificate from './Certificate.js'
 
 /**
  * VerifiableCertificate extends the Certificate class, adding functionality to manage a verifier-specific keyring.
@@ -59,11 +59,12 @@ export class VerifiableCertificate extends Certificate {
   async decryptFields(
     verifierWallet: ProtoWallet
   ): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
-    if (!this.keyring || Object.keys(this.keyring).length === 0) {
+    if (this.keyring == null || Object.keys(this.keyring).length === 0) { // ✅ Explicitly check null and empty object
       throw new Error(
         'A keyring is required to decrypt certificate fields for the verifier.'
       )
     }
+
     try {
       const decryptedFields: Record<CertificateFieldNameUnder50Bytes, string> =
         {}
@@ -85,7 +86,8 @@ export class VerifiableCertificate extends Certificate {
       return decryptedFields
     } catch (error) {
       throw new Error(
-        `Failed to decrypt selectively revealed certificate fields using keyring: ${error instanceof Error ? error.message : error}`
+        `Failed to decrypt selectively revealed certificate fields using keyring: ${String(error instanceof Error ? error.message : error)}`
+
       )
     }
   }

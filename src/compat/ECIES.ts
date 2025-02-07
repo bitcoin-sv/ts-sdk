@@ -1,13 +1,13 @@
 // import { AESWrappercbc } from './aescbc'
-import Random from '../primitives/Random'
-import PrivateKey from '../primitives/PrivateKey'
-import PublicKey from '../primitives/PublicKey'
-import Point from '../primitives/Point'
-import * as Hash from '../primitives/Hash'
-import { toArray, toHex, encode } from '../primitives/utils'
+import Random from '../primitives/Random.js'
+import PrivateKey from '../primitives/PrivateKey.js'
+import PublicKey from '../primitives/PublicKey.js'
+import Point from '../primitives/Point.js'
+import * as Hash from '../primitives/Hash.js'
+import { toArray, toHex, encode } from '../primitives/utils.js'
 
-function AES (key) {
-  if (!this._tables[0][0][0]) this._precompute()
+function AES (key): void {
+  if (this._tables[0][0][0] === 0) this._precompute()
 
   let tmp, encKey, decKey
   const sbox = this._tables[0][4]
@@ -22,7 +22,8 @@ function AES (key) {
   this._key = [(encKey = key.slice(0)), (decKey = [])]
 
   // schedule encryption keys
-  for (var i = keyLen; i < 4 * keyLen + 28; i++) {
+  let i: number
+  for (i = keyLen; i < 4 * keyLen + 28; i++) {
     tmp = encKey[i - 1]
 
     // apply sbox
@@ -44,8 +45,8 @@ function AES (key) {
   }
 
   // schedule decryption keys
-  for (let j = 0; i; j++, i--) {
-    tmp = encKey[j & 3 ? i : i - 4]
+  for (let j = 0; i > 0; j++, i--) {
+    tmp = encKey[(j & 3) !== 0 ? i : i - 4]
     if (i <= 4 || j < 4) {
       decKey[j] = tmp
     } else {
@@ -129,7 +130,7 @@ AES.prototype = {
       th[(d[i] = (i << 1) ^ ((i >> 7) * 283)) ^ i] = i
     }
 
-    for (x = xInv = 0; !sbox[x]; x ^= x2 || 1, xInv = th[xInv] || 1) {
+    for (x = xInv = 0; sbox[x] === 0; x ^= (x2 !== 0 ? x2 : 1), xInv = th[xInv] !== 0 ? th[xInv] : 1) {
       // Compute sbox
       s = xInv ^ (xInv << 1) ^ (xInv << 2) ^ (xInv << 3) ^ (xInv << 4)
       s = (s >> 8) ^ (s & 255) ^ 99
@@ -163,9 +164,9 @@ AES.prototype = {
     const key = this._key[dir]
     // state variables a,b,c,d are loaded with pre-whitened data
     let a = input[0] ^ key[0]
-    let b = input[dir ? 3 : 1] ^ key[1]
+    let b = input[dir === 1 ? 3 : 1] ^ key[1]
     let c = input[2] ^ key[2]
-    let d = input[dir ? 1 : 3] ^ key[3]
+    let d = input[dir === 1 ? 1 : 3] ^ key[3]
     let a2
     let b2
     let c2
@@ -218,7 +219,7 @@ AES.prototype = {
 
     // Last round.
     for (i = 0; i < 4; i++) {
-      out[dir ? 3 & -i : i] =
+      out[dir === 1 ? 3 & -i : i] =
         (sbox[a >>> 24] << 24) ^
         (sbox[(b >> 16) & 255] << 16) ^
         (sbox[(c >> 8) & 255] << 8) ^
@@ -235,6 +236,7 @@ AES.prototype = {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 class AESWrapper {
   public static encrypt (messageBuf: number[], keyBuf: number[]): number[] {
     const key = AESWrapper.buf2Words(keyBuf)
@@ -255,10 +257,10 @@ class AESWrapper {
   }
 
   public static buf2Words (buf: number[]): number[] {
-    if (buf.length % 4) {
+    if (buf.length % 4 !== 0) {
       throw new Error('buf length must be a multiple of 4')
     }
-    const words = []
+    const words: number[] = []
     for (let i = 0; i < buf.length / 4; i++) {
       const val =
         buf[i * 4] * 0x1000000 + // Shift the first byte by 24 bits
@@ -285,10 +287,11 @@ class AESWrapper {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 class CBC {
   public static buf2BlocksBuf (buf: number[], blockSize: number): number[][] {
     const bytesize = blockSize / 8
-    const blockBufs = []
+    const blockBufs: number[][] = []
 
     for (let i = 0; i <= buf.length / bytesize; i++) {
       let blockBuf = buf.slice(i * bytesize, i * bytesize + bytesize)
@@ -338,7 +341,7 @@ class CBC {
     cipherKeyBuf: number[]
   ): number[] {
     const bytesize = ivBuf.length
-    const encBufs = []
+    const encBufs: number[][] = []
     for (let i = 0; i < encBuf.length / bytesize; i++) {
       encBufs.push(encBuf.slice(i * bytesize, i * bytesize + bytesize))
     }
@@ -380,7 +383,7 @@ class CBC {
     blockCipher: any /* TODO: type */,
     cipherKeyBuf: number[]
   ): number[][] {
-    const encBufs = []
+    const encBufs: number[][] = []
 
     for (let i = 0; i < blockBufs.length; i++) {
       const blockBuf = blockBufs[i]
@@ -405,7 +408,7 @@ class CBC {
     blockCipher: any /* TODO: type */,
     cipherKeyBuf: number[]
   ): number[][] {
-    const blockBufs = []
+    const blockBufs: number[][] = []
 
     for (let i = 0; i < encBufs.length; i++) {
       const encBuf = encBufs[i]
@@ -462,6 +465,7 @@ class CBC {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 class AESCBC {
   public static encrypt (
     messageBuf: number[],
@@ -469,7 +473,7 @@ class AESCBC {
     ivBuf: number[],
     concatIvBuf = true
   ): number[] {
-    ivBuf = ivBuf || new Array(128 / 8).fill(0) || Random(128 / 8)
+    ivBuf = ivBuf ?? Random(128 / 8)
     const ctBuf = CBC.encrypt(messageBuf, ivBuf, AESWrapper, cipherKeyBuf)
     if (concatIvBuf) {
       return [...ivBuf, ...ctBuf]
@@ -483,7 +487,7 @@ class AESCBC {
     cipherKeyBuf: number[],
     ivBuf?: number[]
   ): number[] {
-    if (!ivBuf) {
+    if (ivBuf == null) {
       ivBuf = encBuf.slice(0, 128 / 8)
       const ctBuf = encBuf.slice(128 / 8)
       return CBC.decrypt(ctBuf, ivBuf, AESWrapper, cipherKeyBuf)
@@ -501,6 +505,7 @@ class AESCBC {
  * @prprecated This class is deprecated in favor of the BRC-78 standard for portable encrypted messages,
  * which provides a more comprehensive and secure solution by integrating with BRC-42 and BRC-43 standards.
  */
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export default class ECIES {
   /**
    * Generates the initialization vector (iv), encryption key (kE), and MAC key (kM)
@@ -542,8 +547,8 @@ export default class ECIES {
     fromPrivateKey?: PrivateKey,
     noKey = false
   ): number[] {
-    let Rbuf
-    if (!fromPrivateKey) {
+    let Rbuf: string | number[] | null = null
+    if (fromPrivateKey == null) {
       fromPrivateKey = PrivateKey.fromRandom()
     }
     if (!noKey) {
@@ -553,7 +558,7 @@ export default class ECIES {
     const ciphertext = AESCBC.encrypt(messageBuf, kE, iv, false)
     const BIE1 = toArray('BIE1', 'utf8')
     let encBuf: number[]
-    if (Rbuf) {
+    if (Rbuf !== undefined && Rbuf !== null && Rbuf.length > 0) {
       encBuf = [...BIE1, ...Rbuf, ...ciphertext]
     } else {
       encBuf = [...BIE1, ...ciphertext]
@@ -598,12 +603,12 @@ export default class ECIES {
       }
     }
 
-    if (Rbuf) {
-      if (!fromPublicKey) {
+    if (Rbuf !== null) {
+      if (fromPublicKey == null) {
         fromPublicKey = PublicKey.fromString(toHex(Rbuf))
       }
     } else {
-      if (!fromPublicKey) {
+      if (fromPublicKey == null) {
         throw new Error('Sender public key is required')
       }
     }
@@ -639,8 +644,11 @@ export default class ECIES {
     fromPrivateKey?: PrivateKey,
     ivBuf?: number[]
   ): number[] {
-    if (!fromPrivateKey) {
+    if (fromPrivateKey == null) {
       fromPrivateKey = PrivateKey.fromRandom()
+    }
+    if (ivBuf == null) {
+      ivBuf = Random(16)
     }
     const r = fromPrivateKey
     const RPublicKey = fromPrivateKey.toPublicKey()

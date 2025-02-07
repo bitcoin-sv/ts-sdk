@@ -1,6 +1,6 @@
-import BasePoint from './BasePoint'
-import BigNumber from './BigNumber'
-import Point from './Point'
+import BasePoint from './BasePoint.js'
+import BigNumber from './BigNumber.js'
+import Point from './Point.js'
 
 /**
  * The `JacobianPoint` class extends the `BasePoint` class for handling Jacobian coordinates on an Elliptic Curve.
@@ -190,6 +190,11 @@ export default class JacobianPoint extends BasePoint {
     // P + O = P
     if (p.isInfinity()) {
       return this
+    }
+
+    // Ensure x and y are not null
+    if (p.x === null || p.y === null) {
+      throw new Error('Point coordinates cannot be null')
     }
 
     // 8M + 3S + 7A
@@ -385,14 +390,20 @@ export default class JacobianPoint extends BasePoint {
    */
   eqXToP (x: BigNumber): boolean {
     const zs = this.z.redSqr()
-    const rx = x.toRed(this.curve.red).redMul(zs)
+    const rx = x.toRed(this.curve?.red).redMul(zs)
+
     if (this.x.cmp(rx) === 0) {
       return true
     }
 
     const xc = x.clone()
+    if (this.curve === null || (this.curve.redN == null)) {
+      throw new Error('Curve or redN is not initialized.')
+    }
+
     const t = this.curve.redN.redMul(zs)
-    for (;;) {
+
+    while (xc.cmp(this.curve.p) < 0) {
       xc.iadd(this.curve.n)
       if (xc.cmp(this.curve.p) >= 0) {
         return false
@@ -403,6 +414,9 @@ export default class JacobianPoint extends BasePoint {
         return true
       }
     }
+
+    // ✅ Ensure function always returns a boolean
+    return false
   }
 
   /**

@@ -1,10 +1,10 @@
-import BigNumber from '../primitives/BigNumber'
-import { Writer, toArray } from '../primitives/utils'
-import * as ECDSA from '../primitives/ECDSA'
-import * as Hash from '../primitives/Hash'
-import PrivateKey from '../primitives/PrivateKey'
-import PublicKey from '../primitives/PublicKey'
-import Signature from '../primitives/Signature'
+import BigNumber from '../primitives/BigNumber.js'
+import { Writer, toArray } from '../primitives/utils.js'
+import * as ECDSA from '../primitives/ECDSA.js'
+import * as Hash from '../primitives/Hash.js'
+import PrivateKey from '../primitives/PrivateKey.js'
+import PublicKey from '../primitives/PublicKey.js'
+import Signature from '../primitives/Signature.js'
 
 const prefix = 'Bitcoin Signed Message:\n'
 

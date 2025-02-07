@@ -7,9 +7,9 @@ export class WalletError extends Error {
     this.code = code
     this.name = this.constructor.name
 
-    if (stack) {
+    if (stack !== undefined && stack !== null && stack !== '') {
       this.stack = stack
-    } else if (Error.captureStackTrace) {
+    } else {
       Error.captureStackTrace(this, this.constructor)
     }
   }

@@ -1,16 +1,16 @@
-import LockingScript from './LockingScript'
-import UnlockingScript from './UnlockingScript'
-import Script from './Script'
-import BigNumber from '../primitives/BigNumber'
-import OP from './OP'
-import ScriptChunk from './ScriptChunk'
-import { toHex, minimallyEncode } from '../primitives/utils'
-import * as Hash from '../primitives/Hash'
-import TransactionSignature from '../primitives/TransactionSignature'
-import PublicKey from '../primitives/PublicKey'
-import { verify } from '../primitives/ECDSA'
-import TransactionInput from '../transaction/TransactionInput'
-import TransactionOutput from '../transaction/TransactionOutput'
+import LockingScript from './LockingScript.js'
+import UnlockingScript from './UnlockingScript.js'
+import Script from './Script.js'
+import BigNumber from '../primitives/BigNumber.js'
+import OP from './OP.js'
+import ScriptChunk from './ScriptChunk.js'
+import { toHex, minimallyEncode } from '../primitives/utils.js'
+import * as Hash from '../primitives/Hash.js'
+import TransactionSignature from '../primitives/TransactionSignature.js'
+import PublicKey from '../primitives/PublicKey.js'
+import { verify } from '../primitives/ECDSA.js'
+import TransactionInput from '../transaction/TransactionInput.js'
+import TransactionOutput from '../transaction/TransactionOutput.js'
 
 // These constants control the current behavior of the interpreter.
 // In the future, all of them will go away.
@@ -385,8 +385,7 @@ export default class Spend {
       bn3: BigNumber,
       bufSig: number[],
       bufPubkey: number[],
-      subscript,
-      bufHash: number[]
+      subscript
     let sig,
       pubkey,
       i: number,
@@ -600,10 +599,9 @@ export default class Spend {
         case OP.OP_TOALTSTACK:
           if (this.stack.length < 1) {
             this.scriptEvaluationError(
-              'OP_TOALTSTACK requires at oeast one item to be on the stack.'
-            )
+              'OP_TOALTSTACK requires at oeast one item to be on the stack.')
           }
-          this.altStack.push(this.stack.pop())
+          this.altStack.push(this.stack.pop() ?? [])
           break
 
         case OP.OP_FROMALTSTACK:
@@ -612,7 +610,7 @@ export default class Spend {
               'OP_FROMALTSTACK requires at least one item to be on the stack.'
             )
           }
-          this.stack.push(this.altStack.pop())
+          this.stack.push(this.altStack.pop() ?? [])
           break
 
         case OP.OP_2DROP:
@@ -1080,12 +1078,14 @@ export default class Spend {
         case OP.OP_SHA1:
         case OP.OP_SHA256:
         case OP.OP_HASH160:
-        case OP.OP_HASH256:
+        case OP.OP_HASH256: {
           if (this.stack.length < 1) {
             this.scriptEvaluationError(
               `${OP[currentOpcode] as string} requires at least one item to be on the stack.`
             )
           }
+
+          let bufHash: number[] = [] // ✅ Initialize bufHash to an empty array
           buf = this.stacktop(-1)
           if (currentOpcode === OP.OP_RIPEMD160) {
             bufHash = Hash.ripemd160(buf)
@@ -1098,9 +1098,11 @@ export default class Spend {
           } else if (currentOpcode === OP.OP_HASH256) {
             bufHash = Hash.hash256(buf)
           }
+
           this.stack.pop()
           this.stack.push(bufHash)
           break
+        }
 
         case OP.OP_CODESEPARATOR:
           this.lastCodeSeparator = this.programCounter
@@ -1130,11 +1132,11 @@ export default class Spend {
           // CScript scriptCode(pbegincodehash, pend);
           if (this.context === 'UnlockingScript') {
             subscript = new Script(
-              this.unlockingScript.chunks.slice(this.lastCodeSeparator)
+              this.unlockingScript.chunks.slice(this.lastCodeSeparator ?? 0)
             )
           } else {
             subscript = new Script(
-              this.lockingScript.chunks.slice(this.lastCodeSeparator)
+              this.lockingScript.chunks.slice(this.lastCodeSeparator ?? 0)
             )
           }
 
@@ -1226,11 +1228,11 @@ export default class Spend {
           // Subset of script starting at the most recent codeseparator
           if (this.context === 'UnlockingScript') {
             subscript = new Script(
-              this.unlockingScript.chunks.slice(this.lastCodeSeparator)
+              this.unlockingScript.chunks.slice(this.lastCodeSeparator ?? 0)
             )
           } else {
             subscript = new Script(
-              this.lockingScript.chunks.slice(this.lastCodeSeparator)
+              this.lockingScript.chunks.slice(this.lastCodeSeparator ?? 0)
             )
           }
 
@@ -1281,7 +1283,7 @@ export default class Spend {
 
           // Clean up stack of actual arguments
           while (i-- > 1) {
-            if (!fSuccess && !ikey2 && this.stacktop(-1).length > 0) {
+            if (!fSuccess && ikey2 === 0 && this.stacktop(-1).length > 0) {
               this.scriptEvaluationError(
                 `${OP[currentOpcode] as string} failed to verify a signature, and requires an empty signature when verification fails.`
               )

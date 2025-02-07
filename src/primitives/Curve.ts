@@ -1,8 +1,8 @@
-import BigNumber from './BigNumber'
-import ReductionContext from './ReductionContext'
-import MontgomoryMethod from './MontgomoryMethod'
-import Point from './Point'
-import { toArray } from './utils'
+import BigNumber from './BigNumber.js'
+import ReductionContext from './ReductionContext.js'
+import MontgomoryMethod from './MontgomoryMethod.js'
+import Point from './Point.js'
+import { toArray } from './utils.js'
 
 // This ensures that only one curve is ever created, enhancing performance.
 // This assumes there is never a need to have multiple distinct Curve instances.
@@ -23,13 +23,13 @@ export default class Curve {
   tinv: BigNumber
   zeroA: boolean
   threeA: boolean
-  endo: any // beta, lambda, basis
-  _endoWnafT1: any[]
-  _endoWnafT2: any[]
-  _wnafT1: any[]
-  _wnafT2: any[]
-  _wnafT3: any[]
-  _wnafT4: any[]
+  endo: { beta: BigNumber, lambda: BigNumber, basis: Array<{ a: BigNumber, b: BigNumber }> } | undefined // beta, lambda, basis
+  _endoWnafT1: BigNumber[]
+  _endoWnafT2: BigNumber[]
+  _wnafT1: BigNumber[]
+  _wnafT2: BigNumber[]
+  _wnafT3: BigNumber[]
+  _wnafT4: BigNumber[]
   _bitLength: number
 
   // Represent num in a w-NAF form
@@ -72,7 +72,7 @@ export default class Curve {
 
   // Represent k1, k2 in a Joint Sparse Form
   getJSF (k1: BigNumber, k2: BigNumber): number[][] {
-    const jsf: any[][] = [[], []]
+    const jsf: number[][] = [[], []]
 
     k1 = k1.clone()
     k2 = k2.clone()
@@ -976,7 +976,7 @@ export default class Curve {
 
     // Curve configuration, optional
     this.n = new BigNumber(conf.n, 16)
-    this.g = Point.fromJSON(conf.g, conf.gRed)
+    this.g = Point.fromJSON(conf.g as [string, string, { doubles?: { step: number, points: Array<[string, string]> }, naf?: { wnd: number, points: Array<[string, string]> } }], conf.gRed)
 
     // Temporary arrays
     this._wnafT1 = new Array(4)
@@ -1014,24 +1014,55 @@ export default class Curve {
     // Compute beta and lambda, that lambda * P = (beta * Px; Py)
     let beta: BigNumber
     let lambda: BigNumber
+
     if (conf.beta !== undefined) {
       beta = new BigNumber(conf.beta, 16).toRed(this.red)
     } else {
       const betas = this._getEndoRoots(this.p)
+      if (betas === null) {
+        throw new Error('Failed to get endomorphism roots for beta.')
+      }
       // Choose the smallest beta
       beta = betas[0].cmp(betas[1]) < 0 ? betas[0] : betas[1]
       beta = beta.toRed(this.red)
     }
+
     if (conf.lambda !== undefined) {
       lambda = new BigNumber(conf.lambda, 16)
     } else {
-      // Choose the lambda that is matching selected beta
+      // Choose the lambda that matches selected beta
       const lambdas = this._getEndoRoots(this.n)
-      if (this.g.mul(lambdas[0]).x.cmp(this.g.x.redMul(beta)) === 0) {
+      if (lambdas === null) {
+        throw new Error('Failed to get endomorphism roots for lambda.')
+      }
+
+      if (this.g == null) {
+        throw new Error('Curve generator point (g) is not defined.')
+      }
+
+      const gMulX = this.g.mul(lambdas[0])?.x
+      const gXRedMulBeta = (this.g.x != null) ? this.g.x.redMul(beta) : undefined
+
+      if ((gMulX != null) && (gXRedMulBeta != null) && gMulX.cmp(gXRedMulBeta) === 0) {
         lambda = lambdas[0]
       } else {
         lambda = lambdas[1]
-        Curve.assert(this.g.mul(lambda).x.cmp(this.g.x.redMul(beta)) === 0)
+
+        if (this.g == null) {
+          throw new Error('Curve generator point (g) is not defined.')
+        }
+
+        const gMulX = this.g.mul(lambda)?.x
+        const gXRedMulBeta = (this.g.x != null) ? this.g.x.redMul(beta) : undefined
+
+        if ((gMulX == null) || (gXRedMulBeta == null)) {
+          throw new Error('Lambda computation failed: g.mul(lambda).x or g.x.redMul(beta) is undefined.')
+        }
+
+        Curve.assert(
+          gMulX.cmp(gXRedMulBeta) === 0,
+          'Lambda selection does not match computed beta.'
+        )
       }
     }
 
@@ -1086,31 +1117,32 @@ export default class Curve {
     let y2 = new BigNumber(1)
 
     // NOTE: all vectors are roots of: a + b * lambda = 0 (mod n)
-    let a0: BigNumber
-    let b0: BigNumber
+    let a0: BigNumber | undefined
+    let b0: BigNumber | undefined
     // First vector
-    let a1: BigNumber
-    let b1: BigNumber
+    let a1: BigNumber | undefined
+    let b1: BigNumber | undefined
     // Second vector
     let a2: BigNumber
     let b2: BigNumber
 
-    let prevR
+    let prevR: BigNumber = new BigNumber(0)
     let i = 0
-    let r
-    let x
+    let r: BigNumber = new BigNumber(0)
+    let x: BigNumber = new BigNumber(0) // Ensure x is initialized
+
     while (u.cmpn(0) !== 0) {
       const q = v.div(u)
       r = v.sub(q.mul(u))
-      x = x2.sub(q.mul(x1))
+      x = x2.sub(q.mul(x1)) // Now TypeScript knows x is always assigned
       const y = y2.sub(q.mul(y1))
 
-      if (typeof a1 !== 'object' && r.cmp(aprxSqrt) < 0) {
+      if (a1 === undefined && r.cmp(aprxSqrt) < 0) {
         a0 = prevR.neg()
         b0 = x1
         a1 = r.neg()
         b1 = x
-      } else if (typeof a1 === 'object' && ++i === 2) {
+      } else if (a1 !== undefined && ++i === 2) {
         break
       }
       prevR = r
@@ -1122,11 +1154,23 @@ export default class Curve {
       y2 = y1
       y1 = y
     }
+
+    // Ensure a0 and b0 have been assigned
+    if (
+      a0 === undefined ||
+      b0 === undefined ||
+      a1 === undefined ||
+      b1 === undefined
+    ) {
+      throw new Error('Failed to compute Endo Basis values')
+    }
+
     a2 = r.neg()
     b2 = x
 
     const len1 = a1.sqr().add(b1.sqr())
     const len2 = a2.sqr().add(b2.sqr())
+
     if (len2.cmp(len1) >= 0) {
       a2 = a0
       b2 = b0
@@ -1149,6 +1193,9 @@ export default class Curve {
   }
 
   _endoSplit (k: BigNumber): { k1: BigNumber, k2: BigNumber } {
+    if (this.endo == null) {
+      throw new Error('Endomorphism is not defined.')
+    }
     const basis = this.endo.basis
     const v1 = basis[0]
     const v2 = basis[1]
@@ -1174,6 +1221,11 @@ export default class Curve {
 
     const x = point.x
     const y = point.y
+
+    // Ensure x and y are not null before proceeding
+    if (x === null || y === null) {
+      throw new Error('Point coordinates cannot be null')
+    }
 
     const ax = this.a.redMul(x)
     const rhs = x.redSqr().redMul(x).redIAdd(ax).redIAdd(this.b)

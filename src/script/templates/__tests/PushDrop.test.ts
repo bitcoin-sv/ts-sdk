@@ -6,7 +6,6 @@ import { Script, Spend } from '../../../script/index'
 import { Transaction } from '../../../transaction/index'
 
 describe('PushDrop', () => {
-  let privateKey: typeof PrivateKey
   let wallet
   let pushDrop: PushDrop
 
@@ -17,7 +16,7 @@ describe('PushDrop', () => {
     counterparty: string = 'self',
     signOutputs: 'all' | 'none' | 'single' = 'all',
     anyoneCanPay: boolean = false
-  ) => {
+  ): Promise<void> => {
     const lockingScript = await pushDrop.lock(
       fields,
       protocolID,
@@ -82,7 +81,7 @@ describe('PushDrop', () => {
   }
 
   beforeEach(() => {
-    let privateKey = PrivateKey.fromRandom()
+    const privateKey = PrivateKey.fromRandom()
     wallet = new CompletedProtoWallet(privateKey)
     pushDrop = new PushDrop(wallet)
   })

@@ -3,22 +3,17 @@ import {
   AcquireCertificateResult,
   Base64String,
   BasketStringUnder300Bytes,
-  BEEF,
   BooleanDefaultFalse,
-  BooleanDefaultTrue,
   Byte,
   CertificateFieldNameUnder50Bytes,
   CreateActionArgs,
   CreateActionResult,
   DescriptionString5to50Bytes,
   DiscoverCertificatesResult,
-  EntityIconURLStringMax500Bytes,
-  EntityNameStringMax100Bytes,
   HexString,
   InternalizeActionArgs,
   ISOTimestampString,
   KeyIDStringUnder800Bytes,
-  LabelStringUnder300Bytes,
   ListActionsArgs,
   ListActionsResult,
   ListCertificatesResult,
@@ -26,29 +21,25 @@ import {
   ListOutputsResult,
   OriginatorDomainNameStringUnder250Bytes,
   OutpointString,
-  OutputTagStringUnder300Bytes,
   PositiveInteger,
   PositiveIntegerDefault10Max10000,
-  PositiveIntegerMax10,
   PositiveIntegerOrZero,
   ProtocolString5To400Bytes,
   ProveCertificateArgs,
   ProveCertificateResult,
   PubKeyHex,
-  SatoshiValue,
   SecurityLevel,
   SignActionArgs,
   SignActionResult,
-  TXIDHexString,
   VersionString7To30Bytes,
   WalletInterface,
   AuthenticatedResult
-} from './Wallet.interfaces'
-import WindowCWISubstrate from './substrates/window.CWI'
-import XDMSubstrate from './substrates/XDM'
-import WalletWireTransceiver from './substrates/WalletWireTransceiver'
-import HTTPWalletWire from './substrates/HTTPWalletWire'
-import HTTPWalletJSON from './substrates/HTTPWalletJSON'
+} from './Wallet.interfaces.js'
+import WindowCWISubstrate from './substrates/window.CWI.js'
+import XDMSubstrate from './substrates/XDM.js'
+import WalletWireTransceiver from './substrates/WalletWireTransceiver.js'
+import HTTPWalletWire from './substrates/HTTPWalletWire.js'
+import HTTPWalletJSON from './substrates/HTTPWalletJSON.js'
 
 const MAX_XDM_RESPONSE_WAIT = 200
 
@@ -68,7 +59,9 @@ export default class WalletClient implements WalletInterface {
     | WalletInterface = 'auto',
     originator?: OriginatorDomainNameStringUnder250Bytes
   ) {
-    if (substrate === 'Cicada') { substrate = new WalletWireTransceiver(new HTTPWalletWire(originator)) }
+    if (substrate === 'Cicada') {
+      substrate = new WalletWireTransceiver(new HTTPWalletWire(originator))
+    }
     if (substrate === 'window.CWI') substrate = new WindowCWISubstrate()
     if (substrate === 'XDM') substrate = new XDMSubstrate()
     if (substrate === 'json-api') substrate = new HTTPWalletJSON(originator)
@@ -76,17 +69,17 @@ export default class WalletClient implements WalletInterface {
     this.originator = originator
   }
 
-  async connectToSubstrate () {
+  async connectToSubstrate (): Promise<void> {
     if (typeof this.substrate === 'object') {
       return // substrate is already connected
     }
     let sub: WalletInterface
-    const checkSub = async (timeout?: number) => {
+    const checkSub = async (timeout?: number): Promise<void> => {
       let result
       if (typeof timeout === 'number') {
         result = await Promise.race([
           sub.getVersion({}),
-          new Promise<never>((_, reject) =>
+          new Promise<never>((_resolve, reject) =>
             setTimeout(() => reject(new Error('Timed out.')), timeout)
           )
         ])
@@ -102,21 +95,25 @@ export default class WalletClient implements WalletInterface {
       await checkSub()
       this.substrate = sub
     } catch (e) {
+      console.error('XDMSubstrate initialization failed:', e) // Log the error
       try {
         sub = new XDMSubstrate()
         await checkSub(MAX_XDM_RESPONSE_WAIT)
         this.substrate = sub
       } catch (e) {
+        console.error('WalletWireTransceiver initialization failed:', e)
         try {
           sub = new WalletWireTransceiver(new HTTPWalletWire(this.originator))
           await checkSub()
           this.substrate = sub
         } catch (e) {
+          console.error('HTTPWalletJSON initialization failed:', e)
           try {
             sub = new HTTPWalletJSON(this.originator)
             await checkSub()
             this.substrate = sub
           } catch (e) {
+            console.error('No wallet available:', e)
             throw new Error(
               'No wallet available over any communication substrate. Install a BSV wallet today!'
             )
@@ -413,7 +410,7 @@ export default class WalletClient implements WalletInterface {
     )
   }
 
-  async isAuthenticated (args: {} = {}): Promise<AuthenticatedResult> {
+  async isAuthenticated (args: object = {}): Promise<AuthenticatedResult> {
     await this.connectToSubstrate()
     return await (this.substrate as WalletInterface).isAuthenticated(
       args,
@@ -421,7 +418,7 @@ export default class WalletClient implements WalletInterface {
     )
   }
 
-  async waitForAuthentication (args: {} = {}): Promise<{ authenticated: true }> {
+  async waitForAuthentication (args: object = {}): Promise<{ authenticated: true }> {
     await this.connectToSubstrate()
     return await (this.substrate as WalletInterface).waitForAuthentication(
       args,
@@ -429,7 +426,7 @@ export default class WalletClient implements WalletInterface {
     )
   }
 
-  async getHeight (args: {} = {}): Promise<{ height: PositiveInteger }> {
+  async getHeight (args: object = {}): Promise<{ height: PositiveInteger }> {
     await this.connectToSubstrate()
     return await (this.substrate as WalletInterface).getHeight(
       args,
@@ -447,7 +444,7 @@ export default class WalletClient implements WalletInterface {
     )
   }
 
-  async getNetwork (args: {} = {}): Promise<{ network: 'mainnet' | 'testnet' }> {
+  async getNetwork (args: object = {}): Promise<{ network: 'mainnet' | 'testnet' }> {
     await this.connectToSubstrate()
     return await (this.substrate as WalletInterface).getNetwork(
       args,
@@ -456,7 +453,7 @@ export default class WalletClient implements WalletInterface {
   }
 
   async getVersion (
-    args: {} = {}
+    args: object = {}
   ): Promise<{ version: VersionString7To30Bytes }> {
     await this.connectToSubstrate()
     return await (this.substrate as WalletInterface).getVersion(

@@ -1,11 +1,6 @@
 import { MasterCertificate } from '../../../auth/certificates/MasterCertificate'
 import { VerifiableCertificate } from '../../../auth/certificates/VerifiableCertificate'
-import {
-  PrivateKey,
-  SymmetricKey,
-  Utils,
-  Random
-} from '../../../../mod'
+import { PrivateKey, SymmetricKey, Utils, Random } from '../../../../mod'
 import { CompletedProtoWallet } from '../../../auth/certificates/__tests/CompletedProtoWallet'
 
 describe('MasterCertificate', () => {
@@ -71,7 +66,7 @@ describe('MasterCertificate', () => {
       const fields = { name: 'encrypted_value' }
       const masterKeyring = {} // intentionally empty
 
-      expect(() => {
+      expect(() => (
         new MasterCertificate(
           Utils.toBase64(Random(16)), // type
           Utils.toBase64(Random(16)), // serialNumber
@@ -81,7 +76,7 @@ describe('MasterCertificate', () => {
           fields,
           masterKeyring
         )
-      }).toThrowError(/Master keyring must contain a value for every field/)
+      )).toThrowError(/Master keyring must contain a value for every field/)
     })
   })
 
@@ -119,7 +114,7 @@ describe('MasterCertificate', () => {
             {}
           )
       ).toThrow(
-        'Master keyring must contain a value for every field. Missing key for field: "name"'
+        'Master keyring must contain a value for every field. Missing or empty key for field: "name"'
       )
     })
 
@@ -266,8 +261,7 @@ describe('MasterCertificate', () => {
           issuedCert.fields,
           fieldsToReveal,
           issuedCert.masterKeyring,
-          issuedCert.serialNumber,
-          'my-originator'
+          issuedCert.serialNumber
         )
       expect(keyringForVerifier).toHaveProperty('name')
     })
@@ -283,8 +277,7 @@ describe('MasterCertificate', () => {
         issuedCert.fields,
         fieldsToReveal,
         issuedCert.masterKeyring,
-        issuedCert.serialNumber,
-        'my-originator'
+        issuedCert.serialNumber
       )
       expect(anyoneKeyring).toHaveProperty('name')
 
@@ -296,8 +289,7 @@ describe('MasterCertificate', () => {
         issuedCert.fields,
         fieldsToReveal,
         issuedCert.masterKeyring,
-        issuedCert.serialNumber,
-        'my-originator'
+        issuedCert.serialNumber
       )
       expect(selfKeyring).toHaveProperty('name')
     })

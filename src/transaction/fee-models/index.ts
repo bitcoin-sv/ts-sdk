@@ -1,1 +1,1 @@
-export { default as SatoshisPerKilobyte } from "./SatoshisPerKilobyte";
+export { default as SatoshisPerKilobyte } from './SatoshisPerKilobyte.js'

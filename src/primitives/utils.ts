@@ -1,5 +1,5 @@
-import BigNumber from './BigNumber'
-import { hash256 } from './Hash'
+import BigNumber from './BigNumber.js'
+import { hash256 } from './Hash.js'
 
 /**
  * Prepends a '0' to an odd character length word to ensure it has an even number of characters.
@@ -37,7 +37,7 @@ export const toHex = (msg: number[]): string => {
  */
 export const toArray = (msg: any, enc?: 'hex' | 'utf8' | 'base64'): any[] => {
   if (Array.isArray(msg)) return msg.slice()
-  if (!msg) return []
+  if (msg === undefined) return []
 
   if (typeof msg !== 'string') {
     return Array.from(msg, (item: any) => item | 0)
@@ -90,7 +90,7 @@ const utf8ToArray = (msg: string): number[] => {
     const c = msg.charCodeAt(i)
     const hi = c >> 8
     const lo = c & 0xff
-    if (hi) {
+    if (hi !== 0) {
       res.push(hi, lo)
     } else {
       res.push(lo)
@@ -121,25 +121,22 @@ export const toUTF8 = (arr: number[]): string => {
     // 1-byte sequence (0xxxxxxx)
     if (byte <= 0x7f) {
       result += String.fromCharCode(byte)
-    }
-    // 2-byte sequence (110xxxxx 10xxxxxx)
-    else if (byte >= 0xc0 && byte <= 0xdf) {
+    } else if (byte >= 0xc0 && byte <= 0xdf) {
+      // 2-byte sequence (110xxxxx 10xxxxxx)
       const byte2 = arr[i + 1]
       skip = 1
       const codePoint = ((byte & 0x1f) << 6) | (byte2 & 0x3f)
       result += String.fromCharCode(codePoint)
-    }
-    // 3-byte sequence (1110xxxx 10xxxxxx 10xxxxxx)
-    else if (byte >= 0xe0 && byte <= 0xef) {
+    } else if (byte >= 0xe0 && byte <= 0xef) {
+      // 3-byte sequence (1110xxxx 10xxxxxx 10xxxxxx)
       const byte2 = arr[i + 1]
       const byte3 = arr[i + 2]
       skip = 2
       const codePoint =
         ((byte & 0x0f) << 12) | ((byte2 & 0x3f) << 6) | (byte3 & 0x3f)
       result += String.fromCharCode(codePoint)
-    }
-    // 4-byte sequence (11110xxx 10xxxxxx 10xxxxxx 10xxxxxx)
-    else if (byte >= 0xf0 && byte <= 0xf7) {
+    } else if (byte >= 0xf0 && byte <= 0xf7) {
+      // 4-byte sequence (11110xxx 10xxxxxx 10xxxxxx 10xxxxxx)
       const byte2 = arr[i + 1]
       const byte3 = arr[i + 2]
       const byte4 = arr[i + 3]
@@ -224,20 +221,23 @@ const base58chars =
  * @returns The binary representation
  */
 export const fromBase58 = (str: string): number[] => {
-  if (!str || typeof str !== 'string') {
+  if (str === '' || typeof str !== 'string') {
     throw new Error(`Expected base58 string but got “${str}”`)
   }
-  if (str.match(/[IOl0]/gmu)) {
-    throw new Error(`Invalid base58 character “${str.match(/[IOl0]/gmu)}”`)
+  const match: string[] | null = str.match(/[IOl0]/gmu)
+
+  if (match !== null) {
+    throw new Error(`Invalid base58 character “${match.join('')}”`)
   }
   const lz = str.match(/^1+/gmu)
-  const psz: number = lz ? lz[0].length : 0
+  const psz: number = (lz !== null) ? lz[0].length : 0
   const size = ((str.length - psz) * (Math.log(58) / Math.log(256)) + 1) >>> 0
 
   const uint8 = new Uint8Array([
     ...new Uint8Array(psz),
-    ...str
-      .match(/./gmu)
+    ...(
+      str.match(/./gmu) ?? [] // ✅ Safe Fix: If null, use []
+    )
       .map((i) => base58chars.indexOf(i))
       .reduce((acc, i) => {
         acc = acc.map((j) => {
@@ -270,7 +270,7 @@ export const toBase58 = (bin: number[]): string => {
     base58Map[base58chars.charCodeAt(i)] = i
   }
 
-  const result = []
+  const result: number[] = []
 
   for (const byte of bin) {
     let carry = byte
@@ -279,14 +279,14 @@ export const toBase58 = (bin: number[]): string => {
       result[j] = base58chars.charCodeAt(x % 58)
       carry = (x / 58) | 0
     }
-    while (carry) {
+    while (carry !== 0) {
       result.push(base58chars.charCodeAt(carry % 58))
       carry = (carry / 58) | 0
     }
   }
 
   for (const byte of bin) {
-    if (byte) break
+    if (byte !== 0) break
     else result.push('1'.charCodeAt(0))
   }
 
@@ -300,7 +300,7 @@ export const toBase58 = (bin: number[]): string => {
  * @param bin - The binary array to convert to base58check
  * @returns The base58check string representation
  */
-export const toBase58Check = (bin: number[], prefix: number[] = [0]) => {
+export const toBase58Check = (bin: number[], prefix: number[] = [0]): string => {
   let hash = hash256([...prefix, ...bin])
   hash = [...prefix, ...bin, ...hash.slice(0, 4)]
   return toBase58(hash)
@@ -317,7 +317,7 @@ export const fromBase58Check = (
   str: string,
   enc?: 'hex',
   prefixLength: number = 1
-) => {
+): any => {
   const bin = fromBase58(str)
   let prefix: string | number[] = bin.slice(0, prefixLength)
   let data: string | number[] = bin.slice(prefixLength, -4)
@@ -339,7 +339,7 @@ export class Writer {
   public bufs: number[][]
 
   constructor (bufs?: number[][]) {
-    this.bufs = bufs || []
+    this.bufs = bufs !== undefined ? bufs : []
   }
 
   getLength (): number {
@@ -658,7 +658,6 @@ export class Reader {
   public readVarIntNum (): number {
     const first = this.readUInt8()
     let bn: BigNumber
-    let n: number
     switch (first) {
       case 0xfd:
         return this.readUInt16LE()

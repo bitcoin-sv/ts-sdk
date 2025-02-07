@@ -1,8 +1,12 @@
-import PushDrop from '../script/templates/PushDrop'
-import { WalletInterface } from '../wallet/Wallet.interfaces'
-import { LockingScript, ScriptTemplate, UnlockingScript } from '../script/index'
-import { Transaction } from '../transaction/index'
-import { Utils } from '../primitives/index'
+import PushDrop from '../script/templates/PushDrop.js'
+import { WalletInterface } from '../wallet/Wallet.interfaces.js'
+import {
+  LockingScript,
+  ScriptTemplate,
+  UnlockingScript
+} from '../script/index.js'
+import { Transaction } from '../transaction/index.js'
+import { Utils } from '../primitives/index.js'
 
 /**
  * Script template enabling the creation, unlocking, and decoding of SHIP and SLAP advertisements.

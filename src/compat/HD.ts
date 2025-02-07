@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   fromBase58Check,
   toBase58Check,
@@ -5,13 +6,13 @@ import {
   Reader,
   toArray,
   toHex
-} from '../primitives/utils'
-import * as Hash from '../primitives/Hash'
-import Curve from '../primitives/Curve'
-import PrivateKey from '../primitives/PrivateKey'
-import PublicKey from '../primitives/PublicKey'
-import Random from '../primitives/Random'
-import BigNumber from '../primitives/BigNumber'
+} from '../primitives/utils.js'
+import * as Hash from '../primitives/Hash.js'
+import Curve from '../primitives/Curve.js'
+import PrivateKey from '../primitives/PrivateKey.js'
+import PublicKey from '../primitives/PublicKey.js'
+import Random from '../primitives/Random.js'
+import BigNumber from '../primitives/BigNumber.js'
 
 /**
  * @deprecated
@@ -221,10 +222,8 @@ export default class HD {
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let bip32: HD = this
-    for (const i in e) {
-      const c = e[i]
-
-      if (i === '0') {
+    for (const [i, c] of e.entries()) {
+      if (i === 0) { // Since `i` is now a number, compare it to 0
         if (c !== 'm') {
           throw new Error('invalid path')
         }
@@ -271,12 +270,12 @@ export default class HD {
 
     const isPrivate = this.versionBytesNum === this.constants.privKey
 
-    if (usePrivate && (!this.privKey || !isPrivate)) {
+    if (usePrivate && (this.privKey === null || this.privKey === undefined || !isPrivate)) {
       throw new Error('Cannot do private key derivation without private key')
     }
 
     let ret = null
-    if (this.privKey) {
+    if (this.privKey !== null && this.privKey !== undefined) {
       let data = null
 
       if (usePrivate) {

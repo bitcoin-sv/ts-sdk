@@ -8,7 +8,7 @@ import {
   Signature,
   WalletProtocol,
   ProtoWallet
-} from '../../../mod'
+} from '../../../mod.js'
 
 /**
  * Represents an Identity Certificate as per the Wallet interface specifications.
@@ -130,8 +130,8 @@ export default class Certificate {
     }
 
     // Write signature if included
-    if (includeSignature && this.signature && this.signature.length > 0) {
-      const signatureBytes = Utils.toArray(this.signature, 'hex')
+    if (includeSignature && (this.signature ?? '').length > 0) { // ✅ Explicitly handle nullish signature
+      const signatureBytes = Utils.toArray(this.signature as string, 'hex') // ✅ Type assertion ensures it's a string
       writer.write(signatureBytes)
     }
 
@@ -215,24 +215,27 @@ export default class Certificate {
     const verifier = new ProtoWallet('anyone')
     const verificationData = this.toBinary(false) // Exclude the signature from the verification data
 
+    const signatureHex = this.signature ?? '' // Provide a fallback value (empty string)
+
     const { valid } = await verifier.verifySignature({
-      signature: Utils.toArray(this.signature, 'hex'),
+      signature: Utils.toArray(signatureHex, 'hex'), // Now it is always a string
       data: verificationData,
       protocolID: [2, 'certificate signature'],
       keyID: `${this.type} ${this.serialNumber}`,
       counterparty: this.certifier // The certifier is the one who signed the certificate
     })
+
     return valid
   }
 
   /**
-   * Signs the certificate using the provided certifier wallet.
-   *
-   * @param {Wallet} certifierWallet - The wallet representing the certifier.
-   * @returns {Promise<void>}
-   */
+ * Signs the certificate using the provided certifier wallet.
+ *
+ * @param {Wallet} certifierWallet - The wallet representing the certifier.
+ * @returns {Promise<void>}
+ */
   async sign(certifierWallet: ProtoWallet): Promise<void> {
-    if (this.signature) {
+    if (this.signature != null && this.signature.length > 0) { // ✅ Explicitly checking for null/undefined
       throw new Error(
         `Certificate has already been signed! Signature present: ${this.signature}`
       )
@@ -264,10 +267,10 @@ export default class Certificate {
   static getCertificateFieldEncryptionDetails(
     fieldName: string,
     serialNumber?: string
-  ): { protocolID: WalletProtocol; keyID: string } {
+  ): { protocolID: WalletProtocol, keyID: string } {
     return {
       protocolID: [2, 'certificate field encryption'],
-      keyID: `${serialNumber} ${fieldName}`
+      keyID: `${serialNumber ?? 'unknown'} ${fieldName}`
     }
   }
 }

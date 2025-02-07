@@ -1,15 +1,16 @@
 import Transaction from '../../../transaction/Transaction'
-import { NodejsHttpClient } from '../../../transaction/http/NodejsHttpClient'
+import { NodejsHttpClient, HttpsNodejs } from '../../../transaction/http/NodejsHttpClient'
 import WhatsOnChainBroadcaster from '../../../transaction/broadcasters/WhatsOnChainBroadcaster'
 import { FetchHttpClient } from '../../../transaction/http/FetchHttpClient'
 
 // Mock Transaction
 jest.mock('../../../transaction/Transaction', () => {
   class MockTransaction {
-    toHex() {
+    toHex (): String {
       return 'mocked_transaction_hex'
     }
-    toHexEF() {
+
+    toHexEF (): String {
       return 'mocked_transaction_hexEF'
     }
   }
@@ -78,7 +79,7 @@ describe('WhatsOnChainBroadcaster', () => {
   })
 
   it('should broadcast successfully using provided https', async () => {
-    const mockHttps = mockedHttps(successResponse)
+    const mockHttps = mockedHttps(successResponse) as unknown as HttpsNodejs
     const broadcaster = new WhatsOnChainBroadcaster(
       network,
       new NodejsHttpClient(mockHttps)
@@ -126,13 +127,13 @@ describe('WhatsOnChainBroadcaster', () => {
     })
   })
 
-  function mockedFetch(response) {
+  function mockedFetch (response: any): jest.Mock<any, any, any> {
     return jest.fn().mockResolvedValue({
       ok: response.status === 200,
       status: response.status,
       statusText: response.status === 200 ? 'OK' : 'Bad request',
       headers: {
-        get(key: string) {
+        get (key: string) {
           if (key === 'Content-Type') {
             return 'text/plain'
           }
@@ -142,13 +143,13 @@ describe('WhatsOnChainBroadcaster', () => {
     })
   }
 
-  function mockedHttps(response) {
+  function mockedHttps (response: any): { request: Function } {
     const https = {
       request: (url, options, callback) => {
         // eslint-disable-next-line
         callback({
           statusCode: response.status,
-          statusMessage: response.status == 200 ? 'OK' : 'Bad request',
+          statusMessage: response.status === 200 ? 'OK' : 'Bad request',
           headers: {
             'content-type': 'text/plain'
           },

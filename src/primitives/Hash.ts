@@ -1,3 +1,5 @@
+// @ts-nocheck
+/* eslint-disable @typescript-eslint/naming-convention */
 const assert = (
   expression: unknown,
   message: string = 'Hash assertion failed'
@@ -498,7 +500,7 @@ function Kh (j): number {
   }
 }
 
-function sum64 (buf, pos, ah, al) {
+function sum64 (buf: number[], pos: number, ah: number, al: number): void {
   const bh = buf[pos]
   const bl = buf[pos + 1]
 
@@ -508,18 +510,27 @@ function sum64 (buf, pos, ah, al) {
   buf[pos + 1] = lo
 }
 
-function sum64_hi (ah, al, bh, bl) {
+function sum64HI (ah: number, al: number, bh: number, bl: number): number {
   const lo = (al + bl) >>> 0
   const hi = (lo < al ? 1 : 0) + ah + bh
   return hi >>> 0
 }
 
-function sum64_lo (ah, al, bh, bl) {
+function sum64LO (ah: number, al: number, bh: number, bl: number): number {
   const lo = al + bl
   return lo >>> 0
 }
 
-function sum64_4_hi (ah, al, bh, bl, ch, cl, dh, dl) {
+function sum64and4HI (
+  ah: number,
+  al: number,
+  bh: number,
+  bl: number,
+  ch: number,
+  cl: number,
+  dh: number,
+  dl: number
+): number {
   let carry = 0
   let lo = al
   lo = (lo + bl) >>> 0
@@ -533,12 +544,32 @@ function sum64_4_hi (ah, al, bh, bl, ch, cl, dh, dl) {
   return hi >>> 0
 }
 
-function sum64_4_lo (ah, al, bh, bl, ch, cl, dh, dl) {
+function sum64and4LO (
+  ah: number,
+  al: number,
+  bh: number,
+  bl: number,
+  ch: number,
+  cl: number,
+  dh: number,
+  dl: number
+): number {
   const lo = al + bl + cl + dl
   return lo >>> 0
 }
 
-function sum64_5_hi (ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
+function sum64and5HI (
+  ah: number,
+  al: number,
+  bh: number,
+  bl: number,
+  ch: number,
+  cl: number,
+  dh: number,
+  dl: number,
+  eh: number,
+  el: number
+): number {
   let carry = 0
   let lo = al
   lo = (lo + bl) >>> 0
@@ -554,27 +585,37 @@ function sum64_5_hi (ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
   return hi >>> 0
 }
 
-function sum64_5_lo (ah, al, bh, bl, ch, cl, dh, dl, eh, el) {
+function sum64and5LO (
+  ah: number,
+  al: number,
+  bh: number,
+  bl: number,
+  ch: number,
+  cl: number,
+  dh: number,
+  dl: number,
+  eh: number,
+  el: number
+): number {
   const lo = al + bl + cl + dl + el
-
   return lo >>> 0
 }
 
-function rotr64_hi (ah, al, num) {
+function rotr64HI (ah: number, al: number, num: number): number {
   const r = (al << (32 - num)) | (ah >>> num)
   return r >>> 0
 }
 
-function rotr64_lo (ah, al, num) {
+function rotr64LO (ah: number, al: number, num: number): number {
   const r = (ah << (32 - num)) | (al >>> num)
   return r >>> 0
 }
 
-function shr64_hi (ah, al, num) {
+function shr64HI (ah: number, al: number, num: number): number {
   return ah >>> num
 }
 
-function shr64_lo (ah, al, num) {
+function shr64LO (ah: number, al: number, num: number): number {
   const r = (ah << (32 - num)) | (al >>> num)
   return r >>> 0
 }
@@ -708,6 +749,11 @@ export class SHA256 extends BaseHash {
   _update (msg: number[], start?: number): void {
     const W = this.W
 
+    // Default start to 0
+    if (start === undefined) {
+      start = 0
+    }
+
     let i: number
     for (i = 0; i < 16; i++) {
       W[i] = msg[start + i]
@@ -791,6 +837,11 @@ export class SHA1 extends BaseHash {
 
   _update (msg: number[], start?: number): void {
     const W = this.W
+
+    // Default start to 0
+    if (start === undefined) {
+      start = 0
+    }
 
     let i: number
     for (i = 0; i < 16; i++) {
@@ -896,272 +947,273 @@ export class SHA512 extends BaseHash {
     this.W = new Array(160)
   }
 
-  _prepareBlock (msg, start) {
+  _prepareBlock (msg: number[], start: number): void {
     const W = this.W
 
     // 32 x 32bit words
-    let i
+    let i: number
     for (i = 0; i < 32; i++) {
       W[i] = msg[start + i]
     }
     for (; i < W.length; i += 2) {
-      const c0_hi = g1_512_hi(W[i - 4], W[i - 3]) // i - 2
-      const c0_lo = g1_512_lo(W[i - 4], W[i - 3])
-      const c1_hi = W[i - 14] // i - 7
-      const c1_lo = W[i - 13]
-      const c2_hi = g0_512_hi(W[i - 30], W[i - 29]) // i - 15
-      const c2_lo = g0_512_lo(W[i - 30], W[i - 29])
-      const c3_hi = W[i - 32] // i - 16
-      const c3_lo = W[i - 31]
+      const c0Hi = g1_512_hi(W[i - 4], W[i - 3]) // i - 2
+      const c0Lo = g1_512_lo(W[i - 4], W[i - 3])
+      const c1Hi = W[i - 14] // i - 7
+      const c1Lo = W[i - 13]
+      const c2Hi = g0_512_hi(W[i - 30], W[i - 29]) // i - 15
+      const c2Lo = g0_512_lo(W[i - 30], W[i - 29])
+      const c3Hi = W[i - 32] // i - 16
+      const c3Lo = W[i - 31]
 
-      W[i] = sum64_4_hi(c0_hi, c0_lo, c1_hi, c1_lo, c2_hi, c2_lo, c3_hi, c3_lo)
-      W[i + 1] = sum64_4_lo(
-        c0_hi,
-        c0_lo,
-        c1_hi,
-        c1_lo,
-        c2_hi,
-        c2_lo,
-        c3_hi,
-        c3_lo
+      W[i] = sum64and4HI(c0Hi, c0Lo, c1Hi, c1Lo, c2Hi, c2Lo, c3Hi, c3Lo)
+      W[i + 1] = sum64and4LO(
+        c0Hi,
+        c0Lo,
+        c1Hi,
+        c1Lo,
+        c2Hi,
+        c2Lo,
+        c3Hi,
+        c3Lo
       )
     }
   }
 
-  _update (msg, start) {
+  _update (msg: any, start: number): void {
     this._prepareBlock(msg, start)
 
     const W = this.W
 
-    let ah = this.h[0]
-    let al = this.h[1]
-    let bh = this.h[2]
-    let bl = this.h[3]
-    let ch = this.h[4]
-    let cl = this.h[5]
-    let dh = this.h[6]
-    let dl = this.h[7]
-    let eh = this.h[8]
-    let el = this.h[9]
-    let fh = this.h[10]
-    let fl = this.h[11]
-    let gh = this.h[12]
-    let gl = this.h[13]
-    let hh = this.h[14]
-    let hl = this.h[15]
+    let aHigh = this.h[0]
+    let aLow = this.h[1]
+    let bHigh = this.h[2]
+    let bLow = this.h[3]
+    let cHigh = this.h[4]
+    let cLow = this.h[5]
+    let dHigh = this.h[6]
+    let dLow = this.h[7]
+    let eHigh = this.h[8]
+    let eLow = this.h[9]
+    let fHigh = this.h[10]
+    let fLow = this.h[11]
+    let gHigh = this.h[12]
+    let gLow = this.h[13]
+    let hHigh = this.h[14]
+    let hLow = this.h[15]
 
     assert(this.k.length === W.length)
+
     for (let i = 0; i < W.length; i += 2) {
-      let c0_hi = hh
-      let c0_lo = hl
-      let c1_hi = s1_512_hi(eh, el)
-      let c1_lo = s1_512_lo(eh, el)
-      const c2_hi = ch64_hi(eh, el, fh, fl, gh, gl)
-      const c2_lo = ch64_lo(eh, el, fh, fl, gh, gl)
-      const c3_hi = this.k[i]
-      const c3_lo = this.k[i + 1]
-      const c4_hi = W[i]
-      const c4_lo = W[i + 1]
+      let temp0High = hHigh
+      let temp0Low = hLow
+      let temp1High = s1_512_hi(eHigh, eLow)
+      let temp1Low = s1_512_lo(eHigh, eLow)
+      const temp2High = ch64_hi(eHigh, eLow, fHigh, fLow, gHigh, gLow)
+      const temp2Low = ch64_lo(eHigh, eLow, fHigh, fLow, gHigh, gLow)
+      const temp3High = this.k[i]
+      const temp3Low = this.k[i + 1]
+      const temp4High = W[i]
+      const temp4Low = W[i + 1]
 
-      const T1_hi = sum64_5_hi(
-        c0_hi,
-        c0_lo,
-        c1_hi,
-        c1_lo,
-        c2_hi,
-        c2_lo,
-        c3_hi,
-        c3_lo,
-        c4_hi,
-        c4_lo
+      const t1High = sum64and5HI(
+        temp0High,
+        temp0Low,
+        temp1High,
+        temp1Low,
+        temp2High,
+        temp2Low,
+        temp3High,
+        temp3Low,
+        temp4High,
+        temp4Low
       )
-      const T1_lo = sum64_5_lo(
-        c0_hi,
-        c0_lo,
-        c1_hi,
-        c1_lo,
-        c2_hi,
-        c2_lo,
-        c3_hi,
-        c3_lo,
-        c4_hi,
-        c4_lo
+      const t1Low = sum64and5LO(
+        temp0High,
+        temp0Low,
+        temp1High,
+        temp1Low,
+        temp2High,
+        temp2Low,
+        temp3High,
+        temp3Low,
+        temp4High,
+        temp4Low
       )
 
-      c0_hi = s0_512_hi(ah, al)
-      c0_lo = s0_512_lo(ah, al)
-      c1_hi = maj64_hi(ah, al, bh, bl, ch, cl)
-      c1_lo = maj64_lo(ah, al, bh, bl, ch, cl)
+      temp0High = s0_512_hi(aHigh, aLow)
+      temp0Low = s0_512_lo(aHigh, aLow)
+      temp1High = maj64_hi(aHigh, aLow, bHigh, bLow, cHigh, cLow)
+      temp1Low = maj64_lo(aHigh, aLow, bHigh, bLow, cHigh, cLow)
 
-      const T2_hi = sum64_hi(c0_hi, c0_lo, c1_hi, c1_lo)
-      const T2_lo = sum64_lo(c0_hi, c0_lo, c1_hi, c1_lo)
+      const t2High = sum64HI(temp0High, temp0Low, temp1High, temp1Low)
+      const t2Low = sum64LO(temp0High, temp0Low, temp1High, temp1Low)
 
-      hh = gh
-      hl = gl
+      hHigh = gHigh
+      hLow = gLow
 
-      gh = fh
-      gl = fl
+      gHigh = fHigh
+      gLow = fLow
 
-      fh = eh
-      fl = el
+      fHigh = eHigh
+      fLow = eLow
 
-      eh = sum64_hi(dh, dl, T1_hi, T1_lo)
-      el = sum64_lo(dl, dl, T1_hi, T1_lo)
+      eHigh = sum64HI(dHigh, dLow, t1High, t1Low)
+      eLow = sum64LO(dLow, dLow, t1High, t1Low)
 
-      dh = ch
-      dl = cl
+      dHigh = cHigh
+      dLow = cLow
 
-      ch = bh
-      cl = bl
+      cHigh = bHigh
+      cLow = bLow
 
-      bh = ah
-      bl = al
+      bHigh = aHigh
+      bLow = aLow
 
-      ah = sum64_hi(T1_hi, T1_lo, T2_hi, T2_lo)
-      al = sum64_lo(T1_hi, T1_lo, T2_hi, T2_lo)
+      aHigh = sum64HI(t1High, t1Low, t2High, t2Low)
+      aLow = sum64LO(t1High, t1Low, t2High, t2Low)
     }
 
-    sum64(this.h, 0, ah, al)
-    sum64(this.h, 2, bh, bl)
-    sum64(this.h, 4, ch, cl)
-    sum64(this.h, 6, dh, dl)
-    sum64(this.h, 8, eh, el)
-    sum64(this.h, 10, fh, fl)
-    sum64(this.h, 12, gh, gl)
-    sum64(this.h, 14, hh, hl)
+    sum64(this.h, 0, aHigh, aLow)
+    sum64(this.h, 2, bHigh, bLow)
+    sum64(this.h, 4, cHigh, cLow)
+    sum64(this.h, 6, dHigh, dLow)
+    sum64(this.h, 8, eHigh, eLow)
+    sum64(this.h, 10, fHigh, fLow)
+    sum64(this.h, 12, gHigh, gLow)
+    sum64(this.h, 14, hHigh, hLow)
   }
 
-  _digest () {
+  _digest (): number[] {
     return split32(this.h, 'big')
   }
 
-  _digestHex () {
+  _digestHex (): number[] {
     return toHex32(this.h, 'big')
   }
 }
 
-function ch64_hi (xh, xl, yh, yl, zh, zl) {
-  let r = (xh & yh) ^ (~xh & zh)
+function ch64_hi (xh: number, xl: number, yh: number, yl: number, zh: number, zl: number): number {
+  let r: number = (xh & yh) ^ (~xh & zh)
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function ch64_lo (xh, xl, yh, yl, zh, zl) {
-  let r = (xl & yl) ^ (~xl & zl)
+function ch64_lo (xh: number, xl: number, yh: number, yl: number, zh: number, zl: number): number {
+  let r: number = (xl & yl) ^ (~xl & zl)
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function maj64_hi (xh, xl, yh, yl, zh, zl) {
-  let r = (xh & yh) ^ (xh & zh) ^ (yh & zh)
+function maj64_hi (xh: number, xl: number, yh: number, yl: number, zh: number, zl: number): number {
+  let r: number = (xh & yh) ^ (xh & zh) ^ (yh & zh)
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function maj64_lo (xh, xl, yh, yl, zh, zl) {
-  let r = (xl & yl) ^ (xl & zl) ^ (yl & zl)
+function maj64_lo (xh: number, xl: number, yh: number, yl: number, zh: number, zl: number): number {
+  let r: number = (xl & yl) ^ (xl & zl) ^ (yl & zl)
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function s0_512_hi (xh, xl) {
-  const c0_hi = rotr64_hi(xh, xl, 28)
-  const c1_hi = rotr64_hi(xl, xh, 2) // 34
-  const c2_hi = rotr64_hi(xl, xh, 7) // 39
+function s0_512_hi (xh: number, xl: number): number {
+  const c0_hi: number = rotr64HI(xh, xl, 28)
+  const c1_hi: number = rotr64HI(xl, xh, 2) // 34
+  const c2_hi: number = rotr64HI(xl, xh, 7) // 39
 
-  let r = c0_hi ^ c1_hi ^ c2_hi
+  let r: number = c0_hi ^ c1_hi ^ c2_hi
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function s0_512_lo (xh, xl) {
-  const c0_lo = rotr64_lo(xh, xl, 28)
-  const c1_lo = rotr64_lo(xl, xh, 2) // 34
-  const c2_lo = rotr64_lo(xl, xh, 7) // 39
+function s0_512_lo (xh: number, xl: number): number {
+  const c0_lo: number = rotr64LO(xh, xl, 28)
+  const c1_lo: number = rotr64LO(xl, xh, 2) // 34
+  const c2_lo: number = rotr64LO(xl, xh, 7) // 39
 
-  let r = c0_lo ^ c1_lo ^ c2_lo
+  let r: number = c0_lo ^ c1_lo ^ c2_lo
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function s1_512_hi (xh, xl) {
-  const c0_hi = rotr64_hi(xh, xl, 14)
-  const c1_hi = rotr64_hi(xh, xl, 18)
-  const c2_hi = rotr64_hi(xl, xh, 9) // 41
+function s1_512_hi (xh: number, xl: number): number {
+  const c0_hi: number = rotr64HI(xh, xl, 14)
+  const c1_hi: number = rotr64HI(xh, xl, 18)
+  const c2_hi: number = rotr64HI(xl, xh, 9) // 41
 
-  let r = c0_hi ^ c1_hi ^ c2_hi
+  let r: number = c0_hi ^ c1_hi ^ c2_hi
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function s1_512_lo (xh, xl) {
-  const c0_lo = rotr64_lo(xh, xl, 14)
-  const c1_lo = rotr64_lo(xh, xl, 18)
-  const c2_lo = rotr64_lo(xl, xh, 9) // 41
+function s1_512_lo (xh: number, xl: number): number {
+  const c0_lo: number = rotr64LO(xh, xl, 14)
+  const c1_lo: number = rotr64LO(xh, xl, 18)
+  const c2_lo: number = rotr64LO(xl, xh, 9) // 41
 
-  let r = c0_lo ^ c1_lo ^ c2_lo
+  let r: number = c0_lo ^ c1_lo ^ c2_lo
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function g0_512_hi (xh, xl) {
-  const c0_hi = rotr64_hi(xh, xl, 1)
-  const c1_hi = rotr64_hi(xh, xl, 8)
-  const c2_hi = shr64_hi(xh, xl, 7)
+function g0_512_hi (xh: number, xl: number): number {
+  const c0_hi: number = rotr64HI(xh, xl, 1)
+  const c1_hi: number = rotr64HI(xh, xl, 8)
+  const c2_hi: number = shr64HI(xh, xl, 7)
 
-  let r = c0_hi ^ c1_hi ^ c2_hi
+  let r: number = c0_hi ^ c1_hi ^ c2_hi
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function g0_512_lo (xh, xl) {
-  const c0_lo = rotr64_lo(xh, xl, 1)
-  const c1_lo = rotr64_lo(xh, xl, 8)
-  const c2_lo = shr64_lo(xh, xl, 7)
+function g0_512_lo (xh: number, xl: number): number {
+  const c0_lo: number = rotr64LO(xh, xl, 1)
+  const c1_lo: number = rotr64LO(xh, xl, 8)
+  const c2_lo: number = shr64LO(xh, xl, 7)
 
-  let r = c0_lo ^ c1_lo ^ c2_lo
+  let r: number = c0_lo ^ c1_lo ^ c2_lo
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function g1_512_hi (xh, xl) {
-  const c0_hi = rotr64_hi(xh, xl, 19)
-  const c1_hi = rotr64_hi(xl, xh, 29) // 61
-  const c2_hi = shr64_hi(xh, xl, 6)
+function g1_512_hi (xh: number, xl: number): number {
+  const c0_hi: number = rotr64HI(xh, xl, 19)
+  const c1_hi: number = rotr64HI(xl, xh, 29) // 61
+  const c2_hi: number = shr64HI(xh, xl, 6)
 
-  let r = c0_hi ^ c1_hi ^ c2_hi
+  let r: number = c0_hi ^ c1_hi ^ c2_hi
   if (r < 0) {
     r += 0x100000000
   }
   return r
 }
 
-function g1_512_lo (xh, xl) {
-  const c0_lo = rotr64_lo(xh, xl, 19)
-  const c1_lo = rotr64_lo(xl, xh, 29) // 61
-  const c2_lo = shr64_lo(xh, xl, 6)
+function g1_512_lo (xh: number, xl: number): number {
+  const c0_lo: number = rotr64LO(xh, xl, 19)
+  const c1_lo: number = rotr64LO(xl, xh, 29) // 61
+  const c2_lo: number = shr64LO(xh, xl, 6)
 
-  let r = c0_lo ^ c1_lo ^ c2_lo
+  let r: number = c0_lo ^ c1_lo ^ c2_lo
   if (r < 0) {
     r += 0x100000000
   }

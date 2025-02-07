@@ -20,7 +20,8 @@ describe('CachedKeyDeriver', () => {
 
     // Replace the internal keyDeriver instance with the mocked one
     cachedKeyDeriver = new CachedKeyDeriver(rootKey)
-    ;(cachedKeyDeriver as any).keyDeriver = mockKeyDeriver
+    // @ts-expect-error: Accessing private property for testing purposes
+    cachedKeyDeriver.keyDeriver = mockKeyDeriver
   })
 
   describe('derivePublicKey', () => {
@@ -266,14 +267,14 @@ describe('CachedKeyDeriver', () => {
     it('should not exceed the max cache size and evict least recently used items', () => {
       const maxCacheSize = 5
       // Create a new CachedKeyDeriver with a small cache size
-      cachedKeyDeriver = new CachedKeyDeriver(rootKey, { maxCacheSize })
-      ;(cachedKeyDeriver as any).keyDeriver = mockKeyDeriver
+      cachedKeyDeriver = new CachedKeyDeriver(rootKey, { maxCacheSize });
+      (cachedKeyDeriver as unknown as { keyDeriver: KeyDeriver }).keyDeriver = mockKeyDeriver
 
       const protocolID: [0, string] = [0, 'testprotocol']
       const counterparty = 'self'
 
       // Mock return values
-      const mockResults = [1, 2, 3, 4, 5, 6].map(n => new PublicKey(0))
+      const mockResults = [1, 2, 3, 4, 5, 6].map(() => new PublicKey(0))
 
       mockKeyDeriver.derivePublicKey
         .mockReturnValueOnce(mockResults[0])
@@ -289,7 +290,7 @@ describe('CachedKeyDeriver', () => {
       }
 
       // Cache should be full now
-      expect((cachedKeyDeriver as any).cache.size).toBe(maxCacheSize)
+      expect((cachedKeyDeriver as unknown as { cache: Map<string, PublicKey | PrivateKey | SymmetricKey | number[]> }).cache.size).toBe(maxCacheSize)
 
       // Access one of the earlier keys to make it recently used
       cachedKeyDeriver.derivePublicKey(protocolID, 'key0', counterparty)
@@ -298,11 +299,11 @@ describe('CachedKeyDeriver', () => {
       cachedKeyDeriver.derivePublicKey(protocolID, 'key5', counterparty)
 
       // Cache size should still be maxCacheSize
-      expect((cachedKeyDeriver as any).cache.size).toBe(maxCacheSize)
+      expect((cachedKeyDeriver as unknown as { cache: Map<string, PublicKey | PrivateKey | SymmetricKey | number[]> }).cache.size).toBe(maxCacheSize)
 
       // The least recently used item (key1) should have been evicted
       // The cache should contain keys: key0, key2, key3, key4, key5
-      expect(Array.from((cachedKeyDeriver as any).cache.keys())).toEqual([
+      expect(Array.from((cachedKeyDeriver as unknown as { cache: Map<string, PublicKey | PrivateKey | SymmetricKey | number[]> }).cache.keys())).toEqual([
         expect.stringContaining('key2'),
         expect.stringContaining('key3'),
         expect.stringContaining('key4'),
@@ -313,8 +314,8 @@ describe('CachedKeyDeriver', () => {
 
     it('should update the recentness of cache entries on access', () => {
       const maxCacheSize = 3
-      cachedKeyDeriver = new CachedKeyDeriver(rootKey, { maxCacheSize })
-      ;(cachedKeyDeriver as any).keyDeriver = mockKeyDeriver
+      cachedKeyDeriver = new CachedKeyDeriver(rootKey, { maxCacheSize });
+      (cachedKeyDeriver as unknown as { keyDeriver: KeyDeriver }).keyDeriver = mockKeyDeriver
 
       const protocolID: [0, string] = [0, 'testprotocol']
       const counterparty = 'self'
@@ -327,7 +328,7 @@ describe('CachedKeyDeriver', () => {
         .mockReturnValueOnce(publicKeys[2])
 
       // Fill the cache
-      keys.forEach(keyID => {
+      keys.forEach((keyID) => {
         cachedKeyDeriver.derivePublicKey(protocolID, keyID, counterparty)
       })
 
@@ -341,7 +342,7 @@ describe('CachedKeyDeriver', () => {
       cachedKeyDeriver.derivePublicKey(protocolID, newKeyID, counterparty)
 
       // 'key2' should be evicted as it is the least recently used
-      expect(Array.from((cachedKeyDeriver as any).cache.keys())).toEqual([
+      expect(Array.from((cachedKeyDeriver as unknown as { cache: Map<string, PublicKey | PrivateKey | SymmetricKey | number[]> }).cache.keys())).toEqual([
         expect.stringContaining('key3'),
         expect.stringContaining('key1'),
         expect.stringContaining('key4')
@@ -359,7 +360,9 @@ describe('CachedKeyDeriver', () => {
       // Simulate an expensive operation
       mockKeyDeriver.derivePublicKey.mockImplementation(() => {
         const start = Date.now()
-        while (Date.now() - start < 50) {} // Busy wait for 50ms
+        while (Date.now() - start < 50) {
+          // Intentional busy wait for 50ms
+        } // Busy wait for 50ms
         return publicKey
       })
 

@@ -4,8 +4,8 @@ import {
   SymmetricKey,
   Hash,
   Utils
-} from '../primitives/index'
-import { WalletProtocol, PubKeyHex } from './Wallet.interfaces'
+} from '../primitives/index.js'
+import { WalletProtocol, PubKeyHex } from './Wallet.interfaces.js'
 
 export type Counterparty = PublicKey | PubKeyHex | 'self' | 'anyone'
 
@@ -182,7 +182,7 @@ export class KeyDeriver implements KeyDeriverApi {
       counterparty
     )
     return new SymmetricKey(
-      derivedPrivateKey.deriveSharedSecret(derivedPublicKey).x.toArray()
+      derivedPrivateKey.deriveSharedSecret(derivedPublicKey)?.x?.toArray() ?? []
     )
   }
 
@@ -247,7 +247,7 @@ export class KeyDeriver implements KeyDeriverApi {
    * @throws {Error} - Throws an error if the counterparty is invalid.
    */
   private normalizeCounterparty (counterparty: Counterparty): PublicKey {
-    if (!counterparty) {
+    if (counterparty === null || counterparty === undefined) {
       throw new Error('counterparty must be self, anyone or a public key!')
     } else if (counterparty === 'self') {
       return this.rootKey.toPublicKey()

@@ -1,8 +1,9 @@
-import BasePoint from './BasePoint'
-import JPoint from './JacobianPoint'
-import BigNumber from './BigNumber'
-import { toArray, toHex } from './utils'
-import ReductionContext from './ReductionContext'
+
+import BasePoint from './BasePoint.js'
+import JPoint from './JacobianPoint.js'
+import BigNumber from './BigNumber.js'
+import { toArray, toHex } from './utils.js'
+import ReductionContext from './ReductionContext.js'
 
 /**
  * `Point` class is a representation of an elliptic curve point with affine coordinates.
@@ -149,7 +150,7 @@ export default class Point extends BasePoint {
       const p = BigInt(
         '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F'
       )
-      const a = BigInt(0)
+      // const a = BigInt(0)
       const b = BigInt(7)
 
       // Convert x to BigInt
@@ -401,19 +402,19 @@ export default class Point extends BasePoint {
       typeof this.precomputed === 'object' && this.precomputed !== null
         ? {
             doubles:
-              this.precomputed.doubles != null
-                ? {
-                    step: this.precomputed.doubles.step,
-                    points: this.precomputed.doubles.points.slice(1)
-                  }
-                : undefined,
+            this.precomputed.doubles != null
+              ? {
+                  step: this.precomputed.doubles.step,
+                  points: this.precomputed.doubles.points.slice(1)
+                }
+              : undefined,
             naf:
-              this.precomputed.naf != null
-                ? {
-                    wnd: this.precomputed.naf.wnd,
-                    points: this.precomputed.naf.points.slice(1)
-                  }
-                : undefined
+            this.precomputed.naf != null
+              ? {
+                  wnd: this.precomputed.naf.wnd,
+                  points: this.precomputed.naf.points.slice(1)
+                }
+              : undefined
           }
         : undefined
     ]
@@ -435,9 +436,9 @@ export default class Point extends BasePoint {
     }
     return (
       '<EC Point x: ' +
-      this.x.fromRed().toString(16, 2) +
+      (this.x?.fromRed()?.toString(16, 2) ?? 'undefined') +
       ' y: ' +
-      this.y.fromRed().toString(16, 2) +
+      (this.y?.fromRed()?.toString(16, 2) ?? 'undefined') +
       '>'
     )
   }
@@ -485,21 +486,25 @@ export default class Point extends BasePoint {
 
     // P + (-P) = O
     if (this.neg().eq(p)) {
-      return new Point(null, null)
+      return new Point(new BigNumber(0), new BigNumber(0))
     }
 
     // P + Q = O
-    if (this.x.cmp(p.x) === 0) {
-      return new Point(null, null)
+    if (this.x?.cmp(p.x ?? new BigNumber(0)) === 0) {
+      return new Point(new BigNumber(0), new BigNumber(0))
     }
 
-    let c = this.y.redSub(p.y)
+    let c = this.y?.redSub(p.y ?? new BigNumber(0)) ?? new BigNumber(0)
     if (c.cmpn(0) !== 0) {
-      c = c.redMul(this.x.redSub(p.x).redInvm())
+      c = c.redMul(this.x?.redSub(p.x ?? new BigNumber(0)).redInvm() ?? new BigNumber(1))
     }
-    const nx = c.redSqr().redISub(this.x).redISub(p.x)
-    const ny = c.redMul(this.x.redSub(nx)).redISub(this.y)
-    return new Point(nx, ny)
+
+    const nx = c?.redSqr().redISub(this.x ?? new BigNumber(0)).redISub(p.x ?? new BigNumber(0))
+    const ny = (c ?? new BigNumber(1))
+      .redMul((this.x ?? new BigNumber(0)).redSub(nx ?? new BigNumber(0)))
+      .redISub(this.y ?? new BigNumber(0))
+
+    return new Point(nx ?? new BigNumber(0), ny ?? new BigNumber(0))
   }
 
   /**
@@ -517,19 +522,19 @@ export default class Point extends BasePoint {
     }
 
     // 2P = O
-    const ys1 = this.y.redAdd(this.y)
+    const ys1 = (this.y ?? new BigNumber(0)).redAdd(this.y ?? new BigNumber(0))
     if (ys1.cmpn(0) === 0) {
-      return new Point(null, null)
+      return new Point(new BigNumber(0), new BigNumber(0))
     }
 
     const a = this.curve.a
-
-    const x2 = this.x.redSqr()
+    const x2 = (this.x ?? new BigNumber(0)).redSqr()
     const dyinv = ys1.redInvm()
     const c = x2.redAdd(x2).redIAdd(x2).redIAdd(a).redMul(dyinv)
 
-    const nx = c.redSqr().redISub(this.x.redAdd(this.x))
-    const ny = c.redMul(this.x.redSub(nx)).redISub(this.y)
+    const nx = c.redSqr().redISub((this.x ?? new BigNumber(0)).redAdd(this.x ?? new BigNumber(0)))
+    const ny = c.redMul((this.x ?? new BigNumber(0)).redSub(nx)).redISub(this.y ?? new BigNumber(0))
+
     return new Point(nx, ny)
   }
 
@@ -541,7 +546,7 @@ export default class Point extends BasePoint {
    * const x = P.getX();
    */
   getX (): BigNumber {
-    return this.x.fromRed()
+    return (this.x ?? new BigNumber(0)).fromRed()
   }
 
   /**
@@ -552,7 +557,7 @@ export default class Point extends BasePoint {
    * const x = P.getX();
    */
   getY (): BigNumber {
-    return this.y.fromRed()
+    return (this.y ?? new BigNumber(0)).fromRed()
   }
 
   /**
@@ -639,7 +644,7 @@ export default class Point extends BasePoint {
     return (
       this === p ||
       (this.inf === p.inf &&
-        (this.inf || (this.x.cmp(p.x) === 0 && this.y.cmp(p.y) === 0)))
+        (this.inf || ((this.x ?? new BigNumber(0)).cmp(p.x ?? new BigNumber(0)) === 0 && (this.y ?? new BigNumber(0)).cmp(p.y ?? new BigNumber(0)) === 0)))
     )
   }
 
@@ -656,23 +661,27 @@ export default class Point extends BasePoint {
     if (this.inf) {
       return this
     }
-
-    const res = new Point(this.x, this.y.redNeg())
-    if (_precompute && this.precomputed != null) {
+    const res = new Point(this.x, (this.y ?? new BigNumber(0)).redNeg())
+    if (_precompute === true && this.precomputed != null) {
       const pre = this.precomputed
       const negate = (p: Point): Point => p.neg()
       res.precomputed = {
-        naf: pre.naf != null && {
-          wnd: pre.naf.wnd,
-          points: pre.naf.points.map(negate)
-        },
-        doubles: pre.doubles != null && {
-          step: pre.doubles.step,
-          points: pre.doubles.points.map((p) => p.neg())
-        },
+        naf: pre.naf != null
+          ? {
+              wnd: pre.naf.wnd,
+              points: pre.naf.points.map(negate) as BasePoint[]
+            }
+          : undefined,
+        doubles: pre.doubles != null
+          ? {
+              step: pre.doubles.step,
+              points: pre.doubles.points.map((p) => (p as Point).neg())
+            }
+          : undefined,
         beta: undefined
       }
     }
+
     return res
   }
 
@@ -733,10 +742,16 @@ export default class Point extends BasePoint {
       return pre.beta as Point
     }
 
-    const beta = new Point(this.x.redMul(this.curve.endo.beta), this.y)
+    const beta = new Point((this.x ?? new BigNumber(0)).redMul(this.curve.endo.beta), this.y)
     if (pre != null) {
       const curve = this.curve
       const endoMul = (p: Point): Point => {
+        if (p.x === null) {
+          throw new Error('p.x is null')
+        }
+        if (curve.endo === undefined || curve.endo === null) {
+          throw new Error('curve.endo is undefined')
+        }
         return new Point(p.x.redMul(curve.endo.beta), p.y)
       }
       pre.beta = beta
@@ -804,17 +819,17 @@ export default class Point extends BasePoint {
     len: number,
     jacobianResult?: boolean
   ): BasePoint {
-    const wndWidth = this.curve._wnafT1
-    const wnd = this.curve._wnafT2
-    const naf = this.curve._wnafT3
+    const wndWidth: number[] = this.curve._wnafT1.map(num => num.toNumber()) // Convert BigNumber to number
+    const wnd: Point[][] = this.curve._wnafT2.map(() => []) // Initialize as empty Point[][] array
+    const naf: number[][] = this.curve._wnafT3.map(() => []) // Initialize as empty number[][] array
 
     // Fill all arrays
     let max = 0
     for (let i = 0; i < len; i++) {
       const p = points[i]
       const nafPoints = p._getNAFPoints(defW)
-      wndWidth[i] = nafPoints.wnd
-      wnd[i] = nafPoints.points
+      wndWidth[i] = nafPoints.wnd // Ensure correct type
+      wnd[i] = nafPoints.points // Ensure correct type
     }
 
     // Comb small window NAFs
@@ -845,10 +860,10 @@ export default class Point extends BasePoint {
       ]
 
       // Try to avoid Projective points, if possible
-      if (points[a].y.cmp(points[b].y) === 0) {
+      if ((points[a].y ?? new BigNumber(0)).cmp(points[b].y ?? new BigNumber(0)) === 0) {
         comb[1] = points[a].add(points[b])
         comb[2] = points[a].toJ().mixedAdd(points[b].neg())
-      } else if (points[a].y.cmp(points[b].y.redNeg()) === 0) {
+      } else if ((points[a].y ?? new BigNumber(0)).cmp((points[b].y ?? new BigNumber(0)).redNeg()) === 0) {
         comb[1] = points[a].toJ().mixedAdd(points[b])
         comb[2] = points[a].add(points[b].neg())
       } else {
@@ -883,8 +898,8 @@ export default class Point extends BasePoint {
       while (i >= 0) {
         let zero = true
         for (let j = 0; j < len; j++) {
-          tmp[j] = naf[j][i] | 0
-          if (tmp[j] !== 0) {
+          tmp[j] = new BigNumber(typeof naf[j][i] === 'number' ? naf[j][i] : 0) // Ensure type consistency
+          if (!tmp[j].isZero()) { // Use BigNumber's built-in comparison
             zero = false
           }
         }
@@ -902,15 +917,19 @@ export default class Point extends BasePoint {
         break
       }
 
+      const one = new BigNumber(1)
+      const two = new BigNumber(2)
+
       for (let j = 0; j < len; j++) {
         const z = tmp[j]
         let p
-        if (z === 0) {
+
+        if (z.cmpn(0) === 0) { // Check if z is 0
           continue
-        } else if (z > 0) {
-          p = wnd[j][(z - 1) >> 1]
-        } else if (z < 0) {
-          p = wnd[j][(-z - 1) >> 1].neg()
+        } else if (!z.isNeg()) { // If z is positive
+          p = wnd[j][z.sub(one).div(two).toNumber()]
+        } else { // If z is negative
+          p = wnd[j][z.neg().sub(one).div(two).toNumber()].neg()
         }
 
         if (p.type === 'affine') {
@@ -922,10 +941,10 @@ export default class Point extends BasePoint {
     }
     // Zeroify references
     for (let i = 0; i < len; i++) {
-      wnd[i] = null
+      wnd[i] = []
     }
 
-    if (jacobianResult) {
+    if (jacobianResult === true) {
       return acc
     } else {
       return acc.toP()
@@ -934,16 +953,16 @@ export default class Point extends BasePoint {
 
   private _endoWnafMulAdd (
     points: Point[],
-    coeffs,
+    coeffs: BigNumber[], // Explicitly type coeffs
     jacobianResult?: boolean
   ): BasePoint {
-    const npoints = this.curve._endoWnafT1
-    const ncoeffs = this.curve._endoWnafT2
-    let i
+    const npoints: Point[] = new Array(points.length * 2)
+    const ncoeffs: BigNumber[] = new Array(points.length * 2)
+    let i: number
     for (i = 0; i < points.length; i++) {
       const split = this.curve._endoSplit(coeffs[i])
       let p = points[i]
-      let beta = p._getBeta()
+      let beta: Point = p._getBeta() ?? new Point(new BigNumber(0), new BigNumber(0))
 
       if (split.k1.negative !== 0) {
         split.k1.ineg()
@@ -959,12 +978,13 @@ export default class Point extends BasePoint {
       ncoeffs[i * 2] = split.k1
       ncoeffs[i * 2 + 1] = split.k2
     }
+
     const res = this._wnafMulAdd(1, npoints, ncoeffs, i * 2, jacobianResult)
 
     // Clean-up references to points and coefficients
     for (let j = 0; j < i * 2; j++) {
-      npoints[j] = null
-      ncoeffs[j] = null
+      npoints[j] = null as unknown as Point
+      ncoeffs[j] = null as unknown as BigNumber
     }
     return res
   }
@@ -1000,14 +1020,14 @@ export default class Point extends BasePoint {
     const doubles = [this]
     /* eslint-disable @typescript-eslint/no-this-alias */
     let acc: Point = this
-    for (let i = 0; i < power; i += step) {
-      for (let j = 0; j < step; j++) {
+    for (let i = 0; i < (power ?? 0); i += (step ?? 1)) {
+      for (let j = 0; j < (step ?? 1); j++) {
         acc = acc.dbl()
       }
       doubles.push(acc as this)
     }
     return {
-      step,
+      step: step ?? 1,
       points: doubles
     }
   }
@@ -1026,7 +1046,9 @@ export default class Point extends BasePoint {
     const max = (1 << wnd) - 1
     const dbl = max === 1 ? null : this.dbl()
     for (let i = 1; i < max; i++) {
-      res[i] = res[i - 1].add(dbl) as this
+      if (dbl !== null) {
+        res[i] = res[i - 1].add(dbl) as this
+      }
     }
     return {
       wnd,

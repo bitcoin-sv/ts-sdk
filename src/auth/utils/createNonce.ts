@@ -3,7 +3,7 @@ import {
   Random,
   WalletInterface,
   WalletCounterparty
-} from '../../../mod'
+} from '../../../mod.js'
 
 /**
  * Creates a nonce derived from a wallet

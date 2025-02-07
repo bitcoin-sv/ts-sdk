@@ -1,4 +1,4 @@
-import { PeerSession } from './types'
+import { PeerSession } from './types.js'
 
 /**
  * Manages sessions for peers, allowing sessions to be added, retrieved, updated, and removed
@@ -17,16 +17,17 @@ export class SessionManager {
    * @param {PeerSession} session - The peer session to add.
    */
   addSession (session: PeerSession): void {
-    if (!session.sessionNonce && !session.peerIdentityKey) {
+    if ((session.sessionNonce === null || session.sessionNonce === undefined || session.sessionNonce === '') &&
+      (session.peerIdentityKey === null || session.peerIdentityKey === undefined || session.peerIdentityKey === '')) {
       throw new Error(
         'Invalid session: at least one of sessionNonce or peerIdentityKey is required.'
       )
     }
 
-    if (session.sessionNonce) {
+    if (session.sessionNonce !== null && session.sessionNonce !== undefined && session.sessionNonce !== '') {
       this.identifierToSession.set(session.sessionNonce, session)
     }
-    if (session.peerIdentityKey) {
+    if (session.peerIdentityKey !== null && session.peerIdentityKey !== undefined && session.peerIdentityKey !== '') {
       this.identifierToSession.set(session.peerIdentityKey, session)
     }
   }
@@ -57,8 +58,12 @@ export class SessionManager {
    * @param {PeerSession} session - The peer session to remove.
    */
   removeSession (session: PeerSession): void {
-    this.identifierToSession.delete(session.sessionNonce)
-    this.identifierToSession.delete(session.peerIdentityKey)
+    if (session.sessionNonce !== null && session.sessionNonce !== undefined && session.sessionNonce !== '') {
+      this.identifierToSession.delete(session.sessionNonce)
+    }
+    if (session.peerIdentityKey !== null && session.peerIdentityKey !== undefined && session.peerIdentityKey !== '') {
+      this.identifierToSession.delete(session.peerIdentityKey)
+    }
   }
 
   /**

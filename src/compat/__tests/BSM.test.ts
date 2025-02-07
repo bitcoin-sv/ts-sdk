@@ -16,16 +16,18 @@ describe('BSM', () => {
   describe('sign', () => {
     const messageBuf = toArray('this is my message', 'utf8')
     const privateKey = new PrivateKey(42)
+
     it('should return a signature', () => {
       const sig = sign(messageBuf, privateKey, 'raw')
 
-      if (typeof sig !== 'string' && sig.toDER) {
+      if (sig instanceof Signature) { // ✅ Explicitly check if `sig` is a Signature instance
         const derSignature = sig.toDER()
         expect(derSignature.length).toEqual(70)
       } else {
-        throw new Error('Expected a Signature object, but got a string')
+        throw new Error('Expected a Signature object, but got a different type')
       }
     })
+
     it('Creates the correct base64 signature', () => {
       const privateKey = PrivateKey.fromWif(
         'L211enC224G1kV8pyyq7bjVd9SxZebnRYEzzM3i7ZHCc1c5E7dQu'
@@ -71,10 +73,7 @@ describe('BSM', () => {
       const msgHash = new BigNumber(magicHash(message))
       const recovery = signature.CalculateRecoveryFactor(publicKey, msgHash)
       expect(recovery).toBe(1)
-      const recoveredPubkey = signature.RecoverPublicKey(
-        recovery,
-        msgHash
-      ) as PublicKey
+      const recoveredPubkey = signature.RecoverPublicKey(recovery, msgHash)
       expect(recoveredPubkey.toDER()).toEqual(publicKey.toDER())
     })
   })

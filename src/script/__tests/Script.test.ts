@@ -48,7 +48,7 @@ describe('Script', () => {
     it('should error when attempting to parse this strange Base58Check encoded string', () => {
       const priv = PrivateKey.fromRandom()
       const address = priv.toAddress([0x88])
-      function attemptToDeriveAddress() {
+      function attemptToDeriveAddress (): string {
         const script = new P2PKH().lock(address).toASM()
         return script
       }
@@ -257,12 +257,16 @@ describe('Script', () => {
       const asm =
         'OP_DUP OP_HASH160 f4c03610e60ad15100929cc23da2f3a799af1725 OP_EQUALVERIFY OP_CHECKSIG'
       const script = Script.fromASM(asm)
+
       expect(script.chunks[0].op).toEqual(OP.OP_DUP)
       expect(script.chunks[1].op).toEqual(OP.OP_HASH160)
       expect(script.chunks[2].op).toEqual(20)
-      expect(toHex(script.chunks[2].data)).toEqual(
+
+      // Ensure `data` is defined before calling `toHex`
+      expect(toHex(script.chunks[2].data ?? [])).toEqual(
         'f4c03610e60ad15100929cc23da2f3a799af1725'
       )
+
       expect(script.chunks[3].op).toEqual(OP.OP_EQUALVERIFY)
       expect(script.chunks[4].op).toEqual(OP.OP_CHECKSIG)
     })
@@ -276,7 +280,7 @@ describe('Script', () => {
     it('should know this is invalid hex', () => {
       const asm = 'OP_RETURN 026d02 0568656c6c6fzz'
 
-      const createScript = () => {
+      const createScript = (): string => {
         const script = Script.fromASM(asm)
         return script.toASM()
       }

@@ -1,5 +1,5 @@
-import { SHA256HMAC } from './Hash'
-import { toHex, toArray } from './utils'
+import { SHA256HMAC } from './Hash.js'
+import { toHex, toArray } from './utils.js'
 
 /**
  * This class behaves as a HMAC-based deterministic random bit generator (DRBG). It implements a deterministic random number generator using SHA256HMAC HASH function. It takes an initial entropy and nonce when instantiated for seeding purpose.
@@ -87,7 +87,7 @@ export default class DRBG {
    * const randomHex = drbg.generate(256);
    */
   generate (len: number): string {
-    let temp = []
+    let temp: number[] = []
     while (temp.length < len) {
       this.V = this.hmac().update(this.V).digest()
       temp = temp.concat(this.V)

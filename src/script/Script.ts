@@ -1,7 +1,7 @@
-import ScriptChunk from './ScriptChunk'
-import OP from './OP'
-import { encode, toHex, Reader, Writer, toArray } from '../primitives/utils'
-import BigNumber from '../primitives/BigNumber'
+import ScriptChunk from './ScriptChunk.js'
+import OP from './OP.js'
+import { encode, toHex, Reader, Writer, toArray } from '../primitives/utils.js'
+import BigNumber from '../primitives/BigNumber.js'
 
 /**
  * The Script class represents a script in a Bitcoin SV transaction,
@@ -28,7 +28,7 @@ export default class Script {
     while (i < tokens.length) {
       const token = tokens[i]
       let opCode
-      let opCodeNum: number
+      let opCodeNum: number = 0
       if (token.startsWith('OP_') && typeof OP[token] !== 'undefined') {
         opCode = token
         opCodeNum = OP[token]
@@ -107,7 +107,9 @@ export default class Script {
         'There is an uneven number of characters in the string which suggests it is not hex encoded.'
       )
     }
-    if (!/^[0-9a-fA-F]+$/.test(hex)) { throw new Error('Some elements in this string are not hex encoded.') }
+    if (!/^[0-9a-fA-F]+$/.test(hex)) {
+      throw new Error('Some elements in this string are not hex encoded.')
+    }
     return Script.fromBinary(toArray(hex, 'hex'))
   }
 
@@ -140,7 +142,7 @@ export default class Script {
         try {
           len = br.readUInt8()
           data = br.read(len)
-        } catch (err) {
+        } catch {
           br.read()
         }
         chunks.push({
@@ -151,7 +153,7 @@ export default class Script {
         try {
           len = br.readUInt16LE()
           data = br.read(len)
-        } catch (err) {
+        } catch {
           br.read()
         }
         chunks.push({
@@ -162,7 +164,7 @@ export default class Script {
         try {
           len = br.readUInt32LE()
           data = br.read(len)
-        } catch (err) {
+        } catch {
           br.read()
         }
         chunks.push({
@@ -223,7 +225,7 @@ export default class Script {
       const chunk = this.chunks[i]
       const op = chunk.op
       writer.writeUInt8(op)
-      if (chunk.data) {
+      if (chunk.data != null) {
         if (op < OP.OP_PUSHDATA1) {
           writer.write(chunk.data)
         } else if (op === OP.OP_PUSHDATA1) {
@@ -349,7 +351,7 @@ export default class Script {
    * @returns This script instance for chaining.
    */
   removeCodeseparators (): Script {
-    const chunks = []
+    const chunks: ScriptChunk[] = []
     for (let i = 0; i < this.chunks.length; i++) {
       if (this.chunks[i].op !== OP.OP_CODESEPARATOR) {
         chunks.push(this.chunks[i])

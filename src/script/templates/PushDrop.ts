@@ -1,14 +1,18 @@
-import { ScriptTemplate, LockingScript, UnlockingScript, OP } from "../index";
+import { ScriptTemplate, LockingScript, UnlockingScript, OP } from '../index.js'
 import {
   Utils,
   Hash,
   TransactionSignature,
   Signature,
-  PublicKey,
-} from "../../primitives/index";
-import { WalletInterface } from "../../wallet/Wallet.interfaces";
-import { Transaction } from "../../transaction/index";
-import { SecurityLevel } from "../../wallet/Wallet.interfaces";
+  PublicKey
+} from '../../primitives/index.js'
+import { WalletInterface, SecurityLevel } from '../../wallet/Wallet.interfaces.js'
+import { Transaction } from '../../transaction/index.js'
+
+function verifyTruthy<T>(v: T | undefined): T {
+  if (v == null) throw new Error('must have value')
+  return v
+}
 
 /**
  * For a given piece of data to push onto the stack in script, creates the correct minimally-encoded script chunk,
@@ -18,41 +22,41 @@ import { SecurityLevel } from "../../wallet/Wallet.interfaces";
  */
 const createMinimallyEncodedScriptChunk = (
   data: number[]
-): { op: number; data?: number[] } => {
+): { op: number, data?: number[] } => {
   if (data.length === 0) {
     // Could have used OP_0.
-    return { op: 0 };
+    return { op: 0 }
   }
   if (data.length === 1 && data[0] === 0) {
     // Could have used OP_0.
-    return { op: 0 };
+    return { op: 0 }
   }
   if (data.length === 1 && data[0] > 0 && data[0] <= 16) {
     // Could have used OP_0 .. OP_16.
-    return { op: 0x50 + data[0] };
+    return { op: 0x50 + data[0] }
   }
   if (data.length === 1 && data[0] === 0x81) {
     // Could have used OP_1NEGATE.
-    return { op: 0x4f };
+    return { op: 0x4f }
   }
   if (data.length <= 75) {
     // Could have used a direct push (opcode indicating number of bytes
     // pushed + those bytes).
-    return { op: data.length, data };
+    return { op: data.length, data }
   }
   if (data.length <= 255) {
     // Could have used OP_PUSHDATA.
-    return { op: 0x4c, data };
+    return { op: 0x4c, data }
   }
   if (data.length <= 65535) {
     // Could have used OP_PUSHDATA2.
-    return { op: 0x4d, data };
+    return { op: 0x4d, data }
   }
-  return { op: 0x4e, data };
-};
+  return { op: 0x4e, data }
+}
 
 export default class PushDrop implements ScriptTemplate {
-  wallet: WalletInterface;
+  wallet: WalletInterface
 
   /**
    * Decodes a PushDrop script back into its token fields and the locking public key. If a signature was present, it will be the last field returned.
@@ -61,37 +65,40 @@ export default class PushDrop implements ScriptTemplate {
    * @returns An object containing PushDrop token fields and the locking public key. If a signature was included, it will be the last field.
    */
   static decode(script: LockingScript): {
-    lockingPublicKey: PublicKey;
-    fields: number[][];
+    lockingPublicKey: PublicKey
+    fields: number[][]
   } {
     const lockingPublicKey = PublicKey.fromString(
-      Utils.toHex(script.chunks[0].data)
-    );
-    const fields = [];
+      Utils.toHex(verifyTruthy(script.chunks[0].data)) // ✅ Ensure not undefined
+    )
+
+    const fields: number[][] = []
     for (let i = 2; i < script.chunks.length; i++) {
-      const nextOpcode = script.chunks[i + 1].op;
-      let chunk = script.chunks[i].data;
-      if (!chunk) {
+      const nextOpcode = script.chunks[i + 1]?.op // ✅ Prevent accessing `op` from `undefined`
+      let chunk: number[] = script.chunks[i].data ?? [] // ✅ Ensure `chunk` is always `number[]`
+
+      if (chunk.length === 0) {
+        // ✅ Only modify `chunk` if it was empty
         if (script.chunks[i].op >= 80 && script.chunks[i].op <= 95) {
-          chunk = [script.chunks[i].op - 80];
+          chunk = [script.chunks[i].op - 80]
         } else if (script.chunks[i].op === 0) {
-          chunk = [0];
+          chunk = [0]
         } else if (script.chunks[i].op === 0x4f) {
-          chunk = [0x81];
+          chunk = [0x81]
         }
       }
-      fields.push(chunk);
+      fields.push(chunk)
 
       // If the next value is DROP or 2DROP then this is the final field
       if (nextOpcode === OP.OP_DROP || nextOpcode === OP.OP_2DROP) {
-        break;
+        break
       }
     }
 
     return {
       fields,
-      lockingPublicKey,
-    };
+      lockingPublicKey
+    }
   }
 
   /**
@@ -100,7 +107,7 @@ export default class PushDrop implements ScriptTemplate {
    * @param {WalletInterface} wallet - The wallet interface used for creating signatures and accessing public keys.
    */
   constructor(wallet: WalletInterface) {
-    this.wallet = wallet;
+    this.wallet = wallet
   }
 
   /**
@@ -121,46 +128,46 @@ export default class PushDrop implements ScriptTemplate {
     counterparty: string,
     forSelf = false,
     includeSignature = true,
-    lockPosition: "before" | "after" = "before"
+    lockPosition: 'before' | 'after' = 'before'
   ): Promise<LockingScript> {
     const { publicKey } = await this.wallet.getPublicKey({
       protocolID,
       keyID,
       counterparty,
-      forSelf,
-    });
-    const lockChunks: Array<{ op: number; data?: number[] }> = [];
-    const pushDropChunks: Array<{ op: number; data?: number[] }> = [];
+      forSelf
+    })
+    const lockChunks: Array<{ op: number, data?: number[] }> = []
+    const pushDropChunks: Array<{ op: number, data?: number[] }> = []
     lockChunks.push({
       op: publicKey.length / 2,
-      data: Utils.toArray(publicKey, "hex"),
-    });
-    lockChunks.push({ op: OP.OP_CHECKSIG });
+      data: Utils.toArray(publicKey, 'hex')
+    })
+    lockChunks.push({ op: OP.OP_CHECKSIG })
     if (includeSignature) {
-      const dataToSign = fields.reduce((a, e) => [...a, ...e], []);
+      const dataToSign = fields.reduce((a, e) => [...a, ...e], [])
       const { signature } = await this.wallet.createSignature({
         data: dataToSign,
         protocolID,
         keyID,
-        counterparty,
-      });
-      fields.push(signature);
+        counterparty
+      })
+      fields.push(signature)
     }
     for (const field of fields) {
-      pushDropChunks.push(createMinimallyEncodedScriptChunk(field));
+      pushDropChunks.push(createMinimallyEncodedScriptChunk(field))
     }
-    let notYetDropped = fields.length;
+    let notYetDropped = fields.length
     while (notYetDropped > 1) {
-      pushDropChunks.push({ op: OP.OP_2DROP });
-      notYetDropped -= 2;
+      pushDropChunks.push({ op: OP.OP_2DROP })
+      notYetDropped -= 2
     }
-    if (notYetDropped) {
-      pushDropChunks.push({ op: OP.OP_DROP });
+    if (notYetDropped !== 0) {
+      pushDropChunks.push({ op: OP.OP_DROP })
     }
-    if (lockPosition === "before") {
-      return new LockingScript([...lockChunks, ...pushDropChunks]);
+    if (lockPosition === 'before') {
+      return new LockingScript([...lockChunks, ...pushDropChunks])
     } else {
-      return new LockingScript([...pushDropChunks, ...lockChunks]);
+      return new LockingScript([...pushDropChunks, ...lockChunks])
     }
   }
 
@@ -181,95 +188,94 @@ export default class PushDrop implements ScriptTemplate {
     protocolID: [SecurityLevel, string],
     keyID: string,
     counterparty: string,
-    signOutputs: "all" | "none" | "single" = "all",
+    signOutputs: 'all' | 'none' | 'single' = 'all',
     anyoneCanPay = false,
     sourceSatoshis?: number,
     lockingScript?: LockingScript
   ): {
-    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-    estimateLength: () => Promise<73>;
+    sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
+    estimateLength: () => Promise<73>
   } {
     return {
       sign: async (
         tx: Transaction,
         inputIndex: number
       ): Promise<UnlockingScript> => {
-        let signatureScope = TransactionSignature.SIGHASH_FORKID;
-        if (signOutputs === "all") {
-          signatureScope |= TransactionSignature.SIGHASH_ALL;
+        let signatureScope = TransactionSignature.SIGHASH_FORKID
+        if (signOutputs === 'all') {
+          signatureScope |= TransactionSignature.SIGHASH_ALL
         }
-        if (signOutputs === "none") {
-          signatureScope |= TransactionSignature.SIGHASH_NONE;
+        if (signOutputs === 'none') {
+          signatureScope |= TransactionSignature.SIGHASH_NONE
         }
-        if (signOutputs === "single") {
-          signatureScope |= TransactionSignature.SIGHASH_SINGLE;
+        if (signOutputs === 'single') {
+          signatureScope |= TransactionSignature.SIGHASH_SINGLE
         }
         if (anyoneCanPay) {
-          signatureScope |= TransactionSignature.SIGHASH_ANYONECANPAY;
+          signatureScope |= TransactionSignature.SIGHASH_ANYONECANPAY
         }
 
-        const input = tx.inputs[inputIndex];
+        const input = tx.inputs[inputIndex]
 
         const otherInputs = tx.inputs.filter(
           (_, index) => index !== inputIndex
-        );
+        )
 
-        const sourceTXID = input.sourceTXID
-          ? input.sourceTXID
-          : input.sourceTransaction?.id("hex");
-        if (!sourceTXID) {
+        const sourceTXID = input.sourceTXID ?? input.sourceTransaction?.id('hex')
+        if (sourceTXID == null || sourceTXID === undefined) {
           throw new Error(
-            "The input sourceTXID or sourceTransaction is required for transaction signing."
-          );
+            'The input sourceTXID or sourceTransaction is required for transaction signing.'
+          )
         }
         sourceSatoshis ||=
-          input.sourceTransaction?.outputs[input.sourceOutputIndex].satoshis;
-        if (!sourceSatoshis) {
+          input.sourceTransaction?.outputs[input.sourceOutputIndex].satoshis
+        if (sourceSatoshis == null || sourceSatoshis === undefined) {
           throw new Error(
-            "The sourceSatoshis or input sourceTransaction is required for transaction signing."
-          );
+            'The sourceSatoshis or input sourceTransaction is required for transaction signing.'
+          )
         }
         lockingScript ||=
           input.sourceTransaction?.outputs[input.sourceOutputIndex]
-            .lockingScript;
-        if (!lockingScript) {
+            .lockingScript
+        if (lockingScript == null) {
           throw new Error(
-            "The lockingScript or input sourceTransaction is required for transaction signing."
-          );
+            'The lockingScript or input sourceTransaction is required for transaction signing.'
+          )
         }
 
         const preimage = TransactionSignature.format({
           sourceTXID,
-          sourceOutputIndex: input.sourceOutputIndex,
+          sourceOutputIndex: verifyTruthy(input.sourceOutputIndex),
           sourceSatoshis,
           transactionVersion: tx.version,
           otherInputs,
           inputIndex,
           outputs: tx.outputs,
-          inputSequence: input.sequence,
+          inputSequence: input.sequence ?? 0xffffffff,
           subscript: lockingScript,
           lockTime: tx.lockTime,
-          scope: signatureScope,
-        });
-        const preimageHash = Hash.sha256(preimage);
+          scope: signatureScope
+        })
+
+        const preimageHash = Hash.sha256(preimage)
         const { signature: bareSignature } = await this.wallet.createSignature({
           data: preimageHash,
           protocolID,
           keyID,
-          counterparty,
-        });
-        const signature = Signature.fromDER([...bareSignature]);
+          counterparty
+        })
+        const signature = Signature.fromDER([...bareSignature])
         const txSignature = new TransactionSignature(
           signature.r,
           signature.s,
           signatureScope
-        );
-        const sigForScript = txSignature.toChecksigFormat();
+        )
+        const sigForScript = txSignature.toChecksigFormat()
         return new UnlockingScript([
-          { op: sigForScript.length, data: sigForScript },
-        ]);
+          { op: sigForScript.length, data: sigForScript }
+        ])
       },
-      estimateLength: async () => 73,
-    };
+      estimateLength: async () => 73
+    }
   }
 }

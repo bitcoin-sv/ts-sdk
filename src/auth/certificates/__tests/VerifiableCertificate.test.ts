@@ -1,11 +1,6 @@
 import { VerifiableCertificate } from '../../../auth/certificates/VerifiableCertificate'
-import {
-  PrivateKey,
-  SymmetricKey,
-  Utils
-} from '../../../../mod'
+import { PrivateKey, Utils } from '../../../../mod'
 import { CompletedProtoWallet } from '../../../auth/certificates/__tests/CompletedProtoWallet'
-import { Certificate } from '../../../auth/certificates/index'
 import { MasterCertificate } from '../../../auth/certificates/MasterCertificate'
 import { ProtoWallet } from '../../../wallet/index'
 

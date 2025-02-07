@@ -1,565 +1,145 @@
 export default [
-  [
-    'Format is: [scriptSig, scriptPubKey, flags, ... comments]'
-  ],
+  ['Format is: [scriptSig, scriptPubKey, flags, ... comments]'],
   [
     'It is evaluated as if there was a crediting coinbase transaction with two 0'
   ],
-  [
-    'pushes as scriptSig, and one output of 0 satoshi and given scriptPubKey,'
-  ],
+  ['pushes as scriptSig, and one output of 0 satoshi and given scriptPubKey,'],
   [
     'followed by a spending transaction which spends this output as only input (and'
   ],
   [
     'correct prevout hash), using the given scriptSig. All nLockTimes are 0, all'
   ],
-  [
-    'nSequences are max.'
-  ],
+  ['nSequences are max.'],
   [
     '',
     '74',
     'P2SH,STRICTENC',
     'Test the test: we should have an empty stack after scriptSig evaluation'
   ],
-  [
-    '',
-    '74',
-    'P2SH,STRICTENC',
-    'and multiple spaces should not change that.'
-  ],
-  [
-    '',
-    '74',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '',
-    '74',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '',
-    '',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '',
-    '61',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '',
-    '6174',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '74',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '61',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '6174',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '74',
-    '',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '4c00',
-    '0161',
-    'P2SH,STRICTENC',
-    'PUSHDATA1 with not enough bytes'
-  ],
-  [
-    '4d0100ff',
-    '0161',
-    'P2SH,STRICTENC',
-    'PUSHDATA2 with not enough bytes'
-  ],
+  ['', '74', 'P2SH,STRICTENC', 'and multiple spaces should not change that.'],
+  ['', '74', 'P2SH,STRICTENC'],
+  ['', '74', 'P2SH,STRICTENC'],
+  ['', '', 'P2SH,STRICTENC'],
+  ['', '61', 'P2SH,STRICTENC'],
+  ['', '6174', 'P2SH,STRICTENC'],
+  ['61', '', 'P2SH,STRICTENC'],
+  ['61', '74', 'P2SH,STRICTENC'],
+  ['61', '61', 'P2SH,STRICTENC'],
+  ['61', '6174', 'P2SH,STRICTENC'],
+  ['74', '', 'P2SH,STRICTENC'],
+  ['4c00', '0161', 'P2SH,STRICTENC', 'PUSHDATA1 with not enough bytes'],
+  ['4d0100ff', '0161', 'P2SH,STRICTENC', 'PUSHDATA2 with not enough bytes'],
   [
     '4e02000000ffff',
     '0161',
     'P2SH,STRICTENC',
     'PUSHDATA4 with not enough bytes'
   ],
-  [
-    '51',
-    '63506851',
-    'P2SH,STRICTENC',
-    '0x50 is reserved'
-  ],
+  ['51', '63506851', 'P2SH,STRICTENC', '0x50 is reserved'],
   [
     '52',
     '5f936087',
     'P2SH,STRICTENC',
     '0x51 through 0x60 push 1 through 16 onto stack'
   ],
-  [
-    '00',
-    '61',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '6362675168',
-    'P2SH,STRICTENC',
-    'VER non-functional'
-  ],
-  [
-    '00',
-    '6365675168',
-    'P2SH,STRICTENC',
-    'VERIF illegal everywhere'
-  ],
-  [
-    '00',
-    '636751676568',
-    'P2SH,STRICTENC',
-    'VERIF illegal everywhere'
-  ],
-  [
-    '00',
-    '6366675168',
-    'P2SH,STRICTENC',
-    'VERNOTIF illegal everywhere'
-  ],
-  [
-    '00',
-    '636751676668',
-    'P2SH,STRICTENC',
-    'VERNOTIF illegal everywhere'
-  ],
+  ['00', '61', 'P2SH,STRICTENC'],
+  ['51', '6362675168', 'P2SH,STRICTENC', 'VER non-functional'],
+  ['00', '6365675168', 'P2SH,STRICTENC', 'VERIF illegal everywhere'],
+  ['00', '636751676568', 'P2SH,STRICTENC', 'VERIF illegal everywhere'],
+  ['00', '6366675168', 'P2SH,STRICTENC', 'VERNOTIF illegal everywhere'],
+  ['00', '636751676668', 'P2SH,STRICTENC', 'VERNOTIF illegal everywhere'],
   [
     '5163',
     '5168',
     'P2SH,STRICTENC',
     "IF/ENDIF can't span scriptSig/scriptPubKey"
   ],
-  [
-    '51630068',
-    '5168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51670068',
-    '51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '0064',
-    '017b',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '00',
-    '766368',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '00',
-    '635168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '00',
-    '76636768',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '00',
-    '63516768',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '00',
-    '64675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '0051',
-    '63635167006868',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '0000',
-    '63635167006868',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '5100',
-    '63635167006867630067516868',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '0051',
-    '63635167006867630067516868',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '0000',
-    '64635167006868',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '0051',
-    '64635167006868',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '5151',
-    '64635167006867630067516868',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '0000',
-    '64635167006867630067516868',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '636a67675168',
-    'P2SH,STRICTENC',
-    'Multiple ELSEs'
-  ],
-  [
-    '51',
-    '635167676a68',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '68',
-    'P2SH,STRICTENC',
-    'Malformed IF/ELSE/ENDIF sequence'
-  ],
-  [
-    '51',
-    '6768',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '6867',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '686763',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63676867',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '6367686768',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '636868',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '6367676868',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '6a',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '76636a68',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '6a64617461',
-    'P2SH,STRICTENC',
-    'canonical prunable txout format'
-  ],
+  ['51630068', '5168', 'P2SH,STRICTENC'],
+  ['51670068', '51', 'P2SH,STRICTENC'],
+  ['0064', '017b', 'P2SH,STRICTENC'],
+  ['00', '766368', 'P2SH,STRICTENC'],
+  ['00', '635168', 'P2SH,STRICTENC'],
+  ['00', '76636768', 'P2SH,STRICTENC'],
+  ['00', '63516768', 'P2SH,STRICTENC'],
+  ['00', '64675168', 'P2SH,STRICTENC'],
+  ['0051', '63635167006868', 'P2SH,STRICTENC'],
+  ['0000', '63635167006868', 'P2SH,STRICTENC'],
+  ['5100', '63635167006867630067516868', 'P2SH,STRICTENC'],
+  ['0051', '63635167006867630067516868', 'P2SH,STRICTENC'],
+  ['0000', '64635167006868', 'P2SH,STRICTENC'],
+  ['0051', '64635167006868', 'P2SH,STRICTENC'],
+  ['5151', '64635167006867630067516868', 'P2SH,STRICTENC'],
+  ['0000', '64635167006867630067516868', 'P2SH,STRICTENC'],
+  ['51', '636a67675168', 'P2SH,STRICTENC', 'Multiple ELSEs'],
+  ['51', '635167676a68', 'P2SH,STRICTENC'],
+  ['51', '68', 'P2SH,STRICTENC', 'Malformed IF/ELSE/ENDIF sequence'],
+  ['51', '6768', 'P2SH,STRICTENC'],
+  ['51', '6867', 'P2SH,STRICTENC'],
+  ['51', '686763', 'P2SH,STRICTENC'],
+  ['51', '63676867', 'P2SH,STRICTENC'],
+  ['51', '6367686768', 'P2SH,STRICTENC'],
+  ['51', '636868', 'P2SH,STRICTENC'],
+  ['51', '6367676868', 'P2SH,STRICTENC'],
+  ['51', '6a', 'P2SH,STRICTENC'],
+  ['51', '76636a68', 'P2SH,STRICTENC'],
+  ['51', '6a64617461', 'P2SH,STRICTENC', 'canonical prunable txout format'],
   [
     '0063',
     '6a6851',
     'P2SH,STRICTENC',
     "still prunable because IF/ENDIF can't span scriptSig/scriptPubKey"
   ],
-  [
-    '00',
-    '6951',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '69',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '6900',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '516b',
-    '6c51',
-    'P2SH,STRICTENC',
-    'alt stack not shared between sig/pubkey'
-  ],
-  [
-    '73',
-    '740087',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '75',
-    '740087',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '76',
-    '740087',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '76519352880087',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '77',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '5177',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '510077',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '7851',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '78',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '0051',
-    '78745388',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '011301140115',
-    '79011388745287',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '0079',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '4f79',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '011301140115',
-    '0079011488745387',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '011301140115',
-    '5179011588745387',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '011301140115',
-    '5279011688745387',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '007a',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '4f7a',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '011301140115',
-    '007a011488745287',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '011301140115',
-    '517a011588745287',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '011301140115',
-    '527a011688745287',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '7b51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '517b51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '51527b51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '0051527b',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '7c51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '7c51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '0051',
-    '7c5188',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '7d51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '7d51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '5100',
-    '7d7453887c6d',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '6e51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '6e51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '6f51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '6f51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '5152',
-    '6f51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '7051',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '52537051',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '7251',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '52537251',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '6162635200',
-    '6380675168',
-    'P2SH,STRICTENC',
-    'LEFT disabled'
-  ],
-  [
-    '6162635200',
-    '6381675168',
-    'P2SH,STRICTENC',
-    'RIGHT disabled'
-  ],
-  [
-    '61',
-    '8251',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '616263',
-    '6383675168',
-    'P2SH,STRICTENC',
-    'INVERT disabled'
-  ],
-  [
-    '5200638d675168',
-    '61',
-    'P2SH,STRICTENC',
-    '2MUL disabled'
-  ],
-  [
-    '5200638e675168',
-    '61',
-    'P2SH,STRICTENC',
-    '2DIV disabled'
-  ],
+  ['00', '6951', 'P2SH,STRICTENC'],
+  ['51', '69', 'P2SH,STRICTENC'],
+  ['51', '6900', 'P2SH,STRICTENC'],
+  ['516b', '6c51', 'P2SH,STRICTENC', 'alt stack not shared between sig/pubkey'],
+  ['73', '740087', 'P2SH,STRICTENC'],
+  ['75', '740087', 'P2SH,STRICTENC'],
+  ['76', '740087', 'P2SH,STRICTENC'],
+  ['51', '76519352880087', 'P2SH,STRICTENC'],
+  ['61', '77', 'P2SH,STRICTENC'],
+  ['61', '5177', 'P2SH,STRICTENC'],
+  ['61', '510077', 'P2SH,STRICTENC'],
+  ['61', '7851', 'P2SH,STRICTENC'],
+  ['51', '78', 'P2SH,STRICTENC'],
+  ['0051', '78745388', 'P2SH,STRICTENC'],
+  ['011301140115', '79011388745287', 'P2SH,STRICTENC'],
+  ['61', '0079', 'P2SH,STRICTENC'],
+  ['51', '4f79', 'P2SH,STRICTENC'],
+  ['011301140115', '0079011488745387', 'P2SH,STRICTENC'],
+  ['011301140115', '5179011588745387', 'P2SH,STRICTENC'],
+  ['011301140115', '5279011688745387', 'P2SH,STRICTENC'],
+  ['61', '007a', 'P2SH,STRICTENC'],
+  ['51', '4f7a', 'P2SH,STRICTENC'],
+  ['011301140115', '007a011488745287', 'P2SH,STRICTENC'],
+  ['011301140115', '517a011588745287', 'P2SH,STRICTENC'],
+  ['011301140115', '527a011688745287', 'P2SH,STRICTENC'],
+  ['61', '7b51', 'P2SH,STRICTENC'],
+  ['61', '517b51', 'P2SH,STRICTENC'],
+  ['61', '51527b51', 'P2SH,STRICTENC'],
+  ['61', '0051527b', 'P2SH,STRICTENC'],
+  ['61', '7c51', 'P2SH,STRICTENC'],
+  ['51', '7c51', 'P2SH,STRICTENC'],
+  ['0051', '7c5188', 'P2SH,STRICTENC'],
+  ['61', '7d51', 'P2SH,STRICTENC'],
+  ['51', '7d51', 'P2SH,STRICTENC'],
+  ['5100', '7d7453887c6d', 'P2SH,STRICTENC'],
+  ['61', '6e51', 'P2SH,STRICTENC'],
+  ['51', '6e51', 'P2SH,STRICTENC'],
+  ['61', '6f51', 'P2SH,STRICTENC'],
+  ['51', '6f51', 'P2SH,STRICTENC'],
+  ['5152', '6f51', 'P2SH,STRICTENC'],
+  ['61', '7051', 'P2SH,STRICTENC'],
+  ['51', '52537051', 'P2SH,STRICTENC'],
+  ['61', '7251', 'P2SH,STRICTENC'],
+  ['51', '52537251', 'P2SH,STRICTENC'],
+  ['6162635200', '6380675168', 'P2SH,STRICTENC', 'LEFT disabled'],
+  ['6162635200', '6381675168', 'P2SH,STRICTENC', 'RIGHT disabled'],
+  ['61', '8251', 'P2SH,STRICTENC'],
+  ['616263', '6383675168', 'P2SH,STRICTENC', 'INVERT disabled'],
+  ['5200638d675168', '61', 'P2SH,STRICTENC', '2MUL disabled'],
+  ['5200638e675168', '61', 'P2SH,STRICTENC', '2DIV disabled'],
   [
     '',
     '8791',
@@ -572,21 +152,9 @@ export default [
     'P2SH,STRICTENC',
     'EQUAL must error when there are not 2 stack items'
   ],
-  [
-    '0051',
-    '87',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '515193',
-    '0087',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '5b51935c94',
-    '5b87',
-    'P2SH,STRICTENC'
-  ],
+  ['0051', '87', 'P2SH,STRICTENC'],
+  ['515193', '0087', 'P2SH,STRICTENC'],
+  ['5b51935c94', '5b87', 'P2SH,STRICTENC'],
   [
     '0500000080000093',
     '61',
@@ -605,87 +173,26 @@ export default [
     'P2SH,STRICTENC',
     'NUMEQUAL must be in numeric range'
   ],
-  [
-    '61626364656691',
-    '0087',
-    'P2SH,STRICTENC',
-    'NOT is an arithmetic operand'
-  ],
-  [
-    '528d',
-    '5487',
-    'P2SH,STRICTENC',
-    'disabled'
-  ],
-  [
-    '528e',
-    '5187',
-    'P2SH,STRICTENC',
-    'disabled'
-  ],
-  [
-    '51',
-    'b0b1b2b3b4b5b6b7b8b95287',
-    'P2SH,STRICTENC'
-  ],
+  ['61626364656691', '0087', 'P2SH,STRICTENC', 'NOT is an arithmetic operand'],
+  ['528d', '5487', 'P2SH,STRICTENC', 'disabled'],
+  ['528e', '5187', 'P2SH,STRICTENC', 'disabled'],
+  ['51', 'b0b1b2b3b4b5b6b7b8b95287', 'P2SH,STRICTENC'],
   [
     '4e060000005f746f5f3130b0b1b2b3b4b5b6b7b8b9',
     '4e060000005f746f5f313187',
     'P2SH,STRICTENC'
   ],
-  [
-    'Ensure 100% coverage of discouraged NOPS'
-  ],
-  [
-    '51',
-    'b0',
-    'P2SH,DISCOURAGE_UPGRADABLE_NOPS'
-  ],
-  [
-    '51',
-    'b1',
-    'P2SH,DISCOURAGE_UPGRADABLE_NOPS'
-  ],
-  [
-    '51',
-    'b2',
-    'P2SH,DISCOURAGE_UPGRADABLE_NOPS'
-  ],
-  [
-    '51',
-    'b3',
-    'P2SH,DISCOURAGE_UPGRADABLE_NOPS'
-  ],
-  [
-    '51',
-    'b4',
-    'P2SH,DISCOURAGE_UPGRADABLE_NOPS'
-  ],
-  [
-    '51',
-    'b5',
-    'P2SH,DISCOURAGE_UPGRADABLE_NOPS'
-  ],
-  [
-    '51',
-    'b6',
-    'P2SH,DISCOURAGE_UPGRADABLE_NOPS'
-  ],
-  [
-    '51',
-    'b7',
-    'P2SH,DISCOURAGE_UPGRADABLE_NOPS'
-  ],
-  [
-    '51',
-    'b8',
-    'P2SH,DISCOURAGE_UPGRADABLE_NOPS'
-  ],
-  [
-    '51',
-    'b9',
-    'P2SH,DISCOURAGE_UPGRADABLE_NOPS'
-  ],
+  ['Ensure 100% coverage of discouraged NOPS'],
+  ['51', 'b0', 'P2SH,DISCOURAGE_UPGRADABLE_NOPS'],
+  ['51', 'b1', 'P2SH,DISCOURAGE_UPGRADABLE_NOPS'],
+  ['51', 'b2', 'P2SH,DISCOURAGE_UPGRADABLE_NOPS'],
+  ['51', 'b3', 'P2SH,DISCOURAGE_UPGRADABLE_NOPS'],
+  ['51', 'b4', 'P2SH,DISCOURAGE_UPGRADABLE_NOPS'],
+  ['51', 'b5', 'P2SH,DISCOURAGE_UPGRADABLE_NOPS'],
+  ['51', 'b6', 'P2SH,DISCOURAGE_UPGRADABLE_NOPS'],
+  ['51', 'b7', 'P2SH,DISCOURAGE_UPGRADABLE_NOPS'],
+  ['51', 'b8', 'P2SH,DISCOURAGE_UPGRADABLE_NOPS'],
+  ['51', 'b9', 'P2SH,DISCOURAGE_UPGRADABLE_NOPS'],
   [
     'b9',
     '51',
@@ -698,394 +205,93 @@ export default [
     'P2SH,DISCOURAGE_UPGRADABLE_NOPS',
     'Discouraged NOP10 in redeemScript'
   ],
-  [
-    '50',
-    '51',
-    'P2SH,STRICTENC',
-    'opcode 0x50 is reserved'
-  ],
+  ['50', '51', 'P2SH,STRICTENC', 'opcode 0x50 is reserved'],
   [
     '51',
     '63ba675168',
     'P2SH,STRICTENC',
     'opcodes above NOP10 invalid if executed'
   ],
-  [
-    '51',
-    '63bb675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63bc675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63bd675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63be675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63bf675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63c0675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63c1675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63c2675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63c3675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63c4675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63c5675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63c6675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63c7675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63c8675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63c9675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63ca675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63cb675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63cc675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63cd675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63ce675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63cf675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63d0675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63d1675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63d2675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63d3675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63d4675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63d5675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63d6675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63d7675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63d8675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63d9675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63da675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63db675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63dc675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63dd675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63de675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63df675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63e0675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63e1675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63e2675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63e3675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63e4675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63e5675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63e6675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63e7675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63e8675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63e9675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63ea675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63eb675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63ec675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63ed675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63ee675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63ef675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63f0675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63f1675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63f2675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63f3675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63f4675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63f5675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63f6675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63f7675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63f8675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63f9675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63fa675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63fb675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63fc675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63fd675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63fe675168',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '63ff675168',
-    'P2SH,STRICTENC'
-  ],
+  ['51', '63bb675168', 'P2SH,STRICTENC'],
+  ['51', '63bc675168', 'P2SH,STRICTENC'],
+  ['51', '63bd675168', 'P2SH,STRICTENC'],
+  ['51', '63be675168', 'P2SH,STRICTENC'],
+  ['51', '63bf675168', 'P2SH,STRICTENC'],
+  ['51', '63c0675168', 'P2SH,STRICTENC'],
+  ['51', '63c1675168', 'P2SH,STRICTENC'],
+  ['51', '63c2675168', 'P2SH,STRICTENC'],
+  ['51', '63c3675168', 'P2SH,STRICTENC'],
+  ['51', '63c4675168', 'P2SH,STRICTENC'],
+  ['51', '63c5675168', 'P2SH,STRICTENC'],
+  ['51', '63c6675168', 'P2SH,STRICTENC'],
+  ['51', '63c7675168', 'P2SH,STRICTENC'],
+  ['51', '63c8675168', 'P2SH,STRICTENC'],
+  ['51', '63c9675168', 'P2SH,STRICTENC'],
+  ['51', '63ca675168', 'P2SH,STRICTENC'],
+  ['51', '63cb675168', 'P2SH,STRICTENC'],
+  ['51', '63cc675168', 'P2SH,STRICTENC'],
+  ['51', '63cd675168', 'P2SH,STRICTENC'],
+  ['51', '63ce675168', 'P2SH,STRICTENC'],
+  ['51', '63cf675168', 'P2SH,STRICTENC'],
+  ['51', '63d0675168', 'P2SH,STRICTENC'],
+  ['51', '63d1675168', 'P2SH,STRICTENC'],
+  ['51', '63d2675168', 'P2SH,STRICTENC'],
+  ['51', '63d3675168', 'P2SH,STRICTENC'],
+  ['51', '63d4675168', 'P2SH,STRICTENC'],
+  ['51', '63d5675168', 'P2SH,STRICTENC'],
+  ['51', '63d6675168', 'P2SH,STRICTENC'],
+  ['51', '63d7675168', 'P2SH,STRICTENC'],
+  ['51', '63d8675168', 'P2SH,STRICTENC'],
+  ['51', '63d9675168', 'P2SH,STRICTENC'],
+  ['51', '63da675168', 'P2SH,STRICTENC'],
+  ['51', '63db675168', 'P2SH,STRICTENC'],
+  ['51', '63dc675168', 'P2SH,STRICTENC'],
+  ['51', '63dd675168', 'P2SH,STRICTENC'],
+  ['51', '63de675168', 'P2SH,STRICTENC'],
+  ['51', '63df675168', 'P2SH,STRICTENC'],
+  ['51', '63e0675168', 'P2SH,STRICTENC'],
+  ['51', '63e1675168', 'P2SH,STRICTENC'],
+  ['51', '63e2675168', 'P2SH,STRICTENC'],
+  ['51', '63e3675168', 'P2SH,STRICTENC'],
+  ['51', '63e4675168', 'P2SH,STRICTENC'],
+  ['51', '63e5675168', 'P2SH,STRICTENC'],
+  ['51', '63e6675168', 'P2SH,STRICTENC'],
+  ['51', '63e7675168', 'P2SH,STRICTENC'],
+  ['51', '63e8675168', 'P2SH,STRICTENC'],
+  ['51', '63e9675168', 'P2SH,STRICTENC'],
+  ['51', '63ea675168', 'P2SH,STRICTENC'],
+  ['51', '63eb675168', 'P2SH,STRICTENC'],
+  ['51', '63ec675168', 'P2SH,STRICTENC'],
+  ['51', '63ed675168', 'P2SH,STRICTENC'],
+  ['51', '63ee675168', 'P2SH,STRICTENC'],
+  ['51', '63ef675168', 'P2SH,STRICTENC'],
+  ['51', '63f0675168', 'P2SH,STRICTENC'],
+  ['51', '63f1675168', 'P2SH,STRICTENC'],
+  ['51', '63f2675168', 'P2SH,STRICTENC'],
+  ['51', '63f3675168', 'P2SH,STRICTENC'],
+  ['51', '63f4675168', 'P2SH,STRICTENC'],
+  ['51', '63f5675168', 'P2SH,STRICTENC'],
+  ['51', '63f6675168', 'P2SH,STRICTENC'],
+  ['51', '63f7675168', 'P2SH,STRICTENC'],
+  ['51', '63f8675168', 'P2SH,STRICTENC'],
+  ['51', '63f9675168', 'P2SH,STRICTENC'],
+  ['51', '63fa675168', 'P2SH,STRICTENC'],
+  ['51', '63fb675168', 'P2SH,STRICTENC'],
+  ['51', '63fc675168', 'P2SH,STRICTENC'],
+  ['51', '63fd675168', 'P2SH,STRICTENC'],
+  ['51', '63fe675168', 'P2SH,STRICTENC'],
+  ['51', '63ff675168', 'P2SH,STRICTENC'],
   [
     '51635167',
     'ff68',
     'P2SH,STRICTENC',
     'invalid because scriptSig and scriptPubKey are processed separately'
   ],
-  [
-    '61',
-    'a6',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    'a7',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    'a8',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    'a9',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    'aa',
-    'P2SH,STRICTENC'
-  ],
+  ['61', 'a6', 'P2SH,STRICTENC'],
+  ['61', 'a7', 'P2SH,STRICTENC'],
+  ['61', 'a8', 'P2SH,STRICTENC'],
+  ['61', 'a9', 'P2SH,STRICTENC'],
+  ['61', 'aa', 'P2SH,STRICTENC'],
   [
     '61',
     '6262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262',
@@ -1128,53 +334,14 @@ export default [
     'P2SH,STRICTENC',
     '10,001-byte scriptPubKey'
   ],
-  [
-    'b0',
-    'b9',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '62',
-    'P2SH,STRICTENC',
-    'OP_VER is reserved'
-  ],
-  [
-    '51',
-    '65',
-    'P2SH,STRICTENC',
-    'OP_VERIF is reserved'
-  ],
-  [
-    '51',
-    '66',
-    'P2SH,STRICTENC',
-    'OP_VERNOTIF is reserved'
-  ],
-  [
-    '51',
-    '50',
-    'P2SH,STRICTENC',
-    'OP_RESERVED is reserved'
-  ],
-  [
-    '51',
-    '89',
-    'P2SH,STRICTENC',
-    'OP_RESERVED1 is reserved'
-  ],
-  [
-    '51',
-    '8a',
-    'P2SH,STRICTENC',
-    'OP_RESERVED2 is reserved'
-  ],
-  [
-    '51',
-    'ba',
-    'P2SH,STRICTENC',
-    '0xba == OP_NOP10 + 1'
-  ],
+  ['b0', 'b9', 'P2SH,STRICTENC'],
+  ['51', '62', 'P2SH,STRICTENC', 'OP_VER is reserved'],
+  ['51', '65', 'P2SH,STRICTENC', 'OP_VERIF is reserved'],
+  ['51', '66', 'P2SH,STRICTENC', 'OP_VERNOTIF is reserved'],
+  ['51', '50', 'P2SH,STRICTENC', 'OP_RESERVED is reserved'],
+  ['51', '89', 'P2SH,STRICTENC', 'OP_RESERVED1 is reserved'],
+  ['51', '8a', 'P2SH,STRICTENC', 'OP_RESERVED2 is reserved'],
+  ['51', 'ba', 'P2SH,STRICTENC', '0xba == OP_NOP10 + 1'],
   [
     '050000008000',
     '8b51',
@@ -1217,24 +384,9 @@ export default [
     'P2SH,STRICTENC',
     'We cannot do BOOLAND on 5-byte integers'
   ],
-  [
-    '51',
-    '5168',
-    'P2SH,STRICTENC',
-    'ENDIF without IF'
-  ],
-  [
-    '51',
-    '6351',
-    'P2SH,STRICTENC',
-    'IF without ENDIF'
-  ],
-  [
-    '516351',
-    '68',
-    'P2SH,STRICTENC',
-    "IFs don't carry over"
-  ],
+  ['51', '5168', 'P2SH,STRICTENC', 'ENDIF without IF'],
+  ['51', '6351', 'P2SH,STRICTENC', 'IF without ENDIF'],
+  ['516351', '68', 'P2SH,STRICTENC', "IFs don't carry over"],
   [
     '61',
     '635168',
@@ -1247,256 +399,56 @@ export default [
     'P2SH,STRICTENC',
     'They are here to catch copy-and-paste errors'
   ],
-  [
-    '61',
-    '6951',
-    'P2SH,STRICTENC',
-    'Most of them are duplicated elsewhere,'
-  ],
-  [
-    '61',
-    '6b51',
-    'P2SH,STRICTENC',
-    'but, hey, more is always better, right?'
-  ],
-  [
-    '51',
-    '6c',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '6d51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '6e',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '5151',
-    '6f',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '515151',
-    '70',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '5151515151',
-    '71',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '515151',
-    '72',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '7351',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '7551',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '7651',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '77',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '78',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51515153',
-    '79',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '00',
-    '7951',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51515153',
-    '7a',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '00',
-    '7a51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '5151',
-    '7b',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '7c',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '7d',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '8251',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '8751',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '8851',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '8b51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '8c51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '8f51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '9051',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '9151',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    '9251',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '93',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '94',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '9a',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '9b',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '9c',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '9d51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '9e',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    '9f',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    'a0',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    'a1',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    'a2',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    'a3',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '51',
-    'a4',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '5151',
-    'a5',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    'a651',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    'a751',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    'a851',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    'a951',
-    'P2SH,STRICTENC'
-  ],
-  [
-    '61',
-    'aa51',
-    'P2SH,STRICTENC'
-  ],
-  [
-    'Increase CHECKSIG and CHECKMULTISIG negative test coverage'
-  ],
+  ['61', '6951', 'P2SH,STRICTENC', 'Most of them are duplicated elsewhere,'],
+  ['61', '6b51', 'P2SH,STRICTENC', 'but, hey, more is always better, right?'],
+  ['51', '6c', 'P2SH,STRICTENC'],
+  ['51', '6d51', 'P2SH,STRICTENC'],
+  ['51', '6e', 'P2SH,STRICTENC'],
+  ['5151', '6f', 'P2SH,STRICTENC'],
+  ['515151', '70', 'P2SH,STRICTENC'],
+  ['5151515151', '71', 'P2SH,STRICTENC'],
+  ['515151', '72', 'P2SH,STRICTENC'],
+  ['61', '7351', 'P2SH,STRICTENC'],
+  ['61', '7551', 'P2SH,STRICTENC'],
+  ['61', '7651', 'P2SH,STRICTENC'],
+  ['51', '77', 'P2SH,STRICTENC'],
+  ['51', '78', 'P2SH,STRICTENC'],
+  ['51515153', '79', 'P2SH,STRICTENC'],
+  ['00', '7951', 'P2SH,STRICTENC'],
+  ['51515153', '7a', 'P2SH,STRICTENC'],
+  ['00', '7a51', 'P2SH,STRICTENC'],
+  ['5151', '7b', 'P2SH,STRICTENC'],
+  ['51', '7c', 'P2SH,STRICTENC'],
+  ['51', '7d', 'P2SH,STRICTENC'],
+  ['61', '8251', 'P2SH,STRICTENC'],
+  ['51', '8751', 'P2SH,STRICTENC'],
+  ['51', '8851', 'P2SH,STRICTENC'],
+  ['61', '8b51', 'P2SH,STRICTENC'],
+  ['61', '8c51', 'P2SH,STRICTENC'],
+  ['61', '8f51', 'P2SH,STRICTENC'],
+  ['61', '9051', 'P2SH,STRICTENC'],
+  ['61', '9151', 'P2SH,STRICTENC'],
+  ['61', '9251', 'P2SH,STRICTENC'],
+  ['51', '93', 'P2SH,STRICTENC'],
+  ['51', '94', 'P2SH,STRICTENC'],
+  ['51', '9a', 'P2SH,STRICTENC'],
+  ['51', '9b', 'P2SH,STRICTENC'],
+  ['51', '9c', 'P2SH,STRICTENC'],
+  ['51', '9d51', 'P2SH,STRICTENC'],
+  ['51', '9e', 'P2SH,STRICTENC'],
+  ['51', '9f', 'P2SH,STRICTENC'],
+  ['51', 'a0', 'P2SH,STRICTENC'],
+  ['51', 'a1', 'P2SH,STRICTENC'],
+  ['51', 'a2', 'P2SH,STRICTENC'],
+  ['51', 'a3', 'P2SH,STRICTENC'],
+  ['51', 'a4', 'P2SH,STRICTENC'],
+  ['5151', 'a5', 'P2SH,STRICTENC'],
+  ['61', 'a651', 'P2SH,STRICTENC'],
+  ['61', 'a751', 'P2SH,STRICTENC'],
+  ['61', 'a851', 'P2SH,STRICTENC'],
+  ['61', 'a951', 'P2SH,STRICTENC'],
+  ['61', 'aa51', 'P2SH,STRICTENC'],
+  ['Increase CHECKSIG and CHECKMULTISIG negative test coverage'],
   [
     '',
     'ac91',
@@ -1573,12 +525,7 @@ export default [
     'P2SH,STRICTENC',
     'nPubKeys > 20'
   ],
-  [
-    '007369675100',
-    'ae51',
-    'P2SH,STRICTENC',
-    'nSigs > nPubKeys'
-  ],
+  ['007369675100', 'ae51', 'P2SH,STRICTENC', 'nSigs > nPubKeys'],
   [
     '610151',
     'a914da1745e9b549bd0bfa1a569971c77eba30cd5a4b87',
@@ -1602,108 +549,31 @@ export default [
     'P2SH,STRICTENC',
     'OP_VER in P2SH should fail'
   ],
-  [
-    '00',
-    '303087',
-    'P2SH,STRICTENC',
-    'Basic OP_0 execution'
-  ],
-  [
-    'MINIMALDATA enforcement for PUSHDATAs'
-  ],
-  [
-    '4c00',
-    '7551',
-    'MINIMALDATA',
-    'Empty vector minimally represented by OP_0'
-  ],
-  [
-    '0181',
-    '7551',
-    'MINIMALDATA',
-    '-1 minimally represented by OP_1NEGATE'
-  ],
+  ['00', '303087', 'P2SH,STRICTENC', 'Basic OP_0 execution'],
+  ['MINIMALDATA enforcement for PUSHDATAs'],
+  ['4c00', '7551', 'MINIMALDATA', 'Empty vector minimally represented by OP_0'],
+  ['0181', '7551', 'MINIMALDATA', '-1 minimally represented by OP_1NEGATE'],
   [
     '0101',
     '7551',
     'MINIMALDATA',
     '1 to 16 minimally represented by OP_1 to OP_16'
   ],
-  [
-    '0102',
-    '7551',
-    'MINIMALDATA'
-  ],
-  [
-    '0103',
-    '7551',
-    'MINIMALDATA'
-  ],
-  [
-    '0104',
-    '7551',
-    'MINIMALDATA'
-  ],
-  [
-    '0105',
-    '7551',
-    'MINIMALDATA'
-  ],
-  [
-    '0106',
-    '7551',
-    'MINIMALDATA'
-  ],
-  [
-    '0107',
-    '7551',
-    'MINIMALDATA'
-  ],
-  [
-    '0108',
-    '7551',
-    'MINIMALDATA'
-  ],
-  [
-    '0109',
-    '7551',
-    'MINIMALDATA'
-  ],
-  [
-    '010a',
-    '7551',
-    'MINIMALDATA'
-  ],
-  [
-    '010b',
-    '7551',
-    'MINIMALDATA'
-  ],
-  [
-    '010c',
-    '7551',
-    'MINIMALDATA'
-  ],
-  [
-    '010d',
-    '7551',
-    'MINIMALDATA'
-  ],
-  [
-    '010e',
-    '7551',
-    'MINIMALDATA'
-  ],
-  [
-    '010f',
-    '7551',
-    'MINIMALDATA'
-  ],
-  [
-    '0110',
-    '7551',
-    'MINIMALDATA'
-  ],
+  ['0102', '7551', 'MINIMALDATA'],
+  ['0103', '7551', 'MINIMALDATA'],
+  ['0104', '7551', 'MINIMALDATA'],
+  ['0105', '7551', 'MINIMALDATA'],
+  ['0106', '7551', 'MINIMALDATA'],
+  ['0107', '7551', 'MINIMALDATA'],
+  ['0108', '7551', 'MINIMALDATA'],
+  ['0109', '7551', 'MINIMALDATA'],
+  ['010a', '7551', 'MINIMALDATA'],
+  ['010b', '7551', 'MINIMALDATA'],
+  ['010c', '7551', 'MINIMALDATA'],
+  ['010d', '7551', 'MINIMALDATA'],
+  ['010e', '7551', 'MINIMALDATA'],
+  ['010f', '7551', 'MINIMALDATA'],
+  ['0110', '7551', 'MINIMALDATA'],
   [
     '4c48111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111',
     '7551',
@@ -1722,303 +592,71 @@ export default [
     'MINIMALDATA',
     'PUSHDATA4 of 256 bytes minimally represented by PUSHDATA2'
   ],
-  [
-    'MINIMALDATA enforcement for numeric arguments'
-  ],
-  [
-    '0100',
-    '917551',
-    'MINIMALDATA',
-    'numequals 0'
-  ],
-  [
-    '020000',
-    '917551',
-    'MINIMALDATA',
-    'numequals 0'
-  ],
-  [
-    '0180',
-    '917551',
-    'MINIMALDATA',
-    '0x80 (negative zero) numequals 0'
-  ],
-  [
-    '020080',
-    '917551',
-    'MINIMALDATA',
-    'numequals 0'
-  ],
-  [
-    '020500',
-    '917551',
-    'MINIMALDATA',
-    'numequals 5'
-  ],
-  [
-    '03050000',
-    '917551',
-    'MINIMALDATA',
-    'numequals 5'
-  ],
-  [
-    '020580',
-    '917551',
-    'MINIMALDATA',
-    'numequals -5'
-  ],
-  [
-    '03050080',
-    '917551',
-    'MINIMALDATA',
-    'numequals -5'
-  ],
-  [
-    '03ff7f80',
-    '917551',
-    'MINIMALDATA',
-    'Minimal encoding is 0xffff'
-  ],
-  [
-    '03ff7f00',
-    '917551',
-    'MINIMALDATA',
-    'Minimal encoding is 0xff7f'
-  ],
-  [
-    '04ffff7f80',
-    '917551',
-    'MINIMALDATA',
-    'Minimal encoding is 0xffffff'
-  ],
-  [
-    '04ffff7f00',
-    '917551',
-    'MINIMALDATA',
-    'Minimal encoding is 0xffff7f'
-  ],
+  ['MINIMALDATA enforcement for numeric arguments'],
+  ['0100', '917551', 'MINIMALDATA', 'numequals 0'],
+  ['020000', '917551', 'MINIMALDATA', 'numequals 0'],
+  ['0180', '917551', 'MINIMALDATA', '0x80 (negative zero) numequals 0'],
+  ['020080', '917551', 'MINIMALDATA', 'numequals 0'],
+  ['020500', '917551', 'MINIMALDATA', 'numequals 5'],
+  ['03050000', '917551', 'MINIMALDATA', 'numequals 5'],
+  ['020580', '917551', 'MINIMALDATA', 'numequals -5'],
+  ['03050080', '917551', 'MINIMALDATA', 'numequals -5'],
+  ['03ff7f80', '917551', 'MINIMALDATA', 'Minimal encoding is 0xffff'],
+  ['03ff7f00', '917551', 'MINIMALDATA', 'Minimal encoding is 0xff7f'],
+  ['04ffff7f80', '917551', 'MINIMALDATA', 'Minimal encoding is 0xffffff'],
+  ['04ffff7f00', '917551', 'MINIMALDATA', 'Minimal encoding is 0xffff7f'],
   [
     'Test every numeric-accepting opcode for correct handling of the numeric minimal encoding rule'
   ],
-  [
-    '51020000',
-    '7975',
-    'MINIMALDATA'
-  ],
-  [
-    '51020000',
-    '7a7551',
-    'MINIMALDATA'
-  ],
-  [
-    '020000',
-    '8b7551',
-    'MINIMALDATA'
-  ],
-  [
-    '020000',
-    '8c7551',
-    'MINIMALDATA'
-  ],
-  [
-    '020000',
-    '8f7551',
-    'MINIMALDATA'
-  ],
-  [
-    '020000',
-    '907551',
-    'MINIMALDATA'
-  ],
-  [
-    '020000',
-    '917551',
-    'MINIMALDATA'
-  ],
-  [
-    '020000',
-    '927551',
-    'MINIMALDATA'
-  ],
-  [
-    '00020000',
-    '937551',
-    'MINIMALDATA'
-  ],
-  [
-    '02000000',
-    '937551',
-    'MINIMALDATA'
-  ],
-  [
-    '00020000',
-    '947551',
-    'MINIMALDATA'
-  ],
-  [
-    '02000000',
-    '947551',
-    'MINIMALDATA'
-  ],
-  [
-    '00020000',
-    '9a7551',
-    'MINIMALDATA'
-  ],
-  [
-    '02000000',
-    '9a7551',
-    'MINIMALDATA'
-  ],
-  [
-    '00020000',
-    '9b7551',
-    'MINIMALDATA'
-  ],
-  [
-    '02000000',
-    '9b7551',
-    'MINIMALDATA'
-  ],
-  [
-    '00020000',
-    '9c7551',
-    'MINIMALDATA'
-  ],
-  [
-    '02000051',
-    '9c7551',
-    'MINIMALDATA'
-  ],
-  [
-    '00020000',
-    '9d51',
-    'MINIMALDATA'
-  ],
-  [
-    '02000000',
-    '9d51',
-    'MINIMALDATA'
-  ],
-  [
-    '00020000',
-    '9e7551',
-    'MINIMALDATA'
-  ],
-  [
-    '02000000',
-    '9e7551',
-    'MINIMALDATA'
-  ],
-  [
-    '00020000',
-    '9f7551',
-    'MINIMALDATA'
-  ],
-  [
-    '02000000',
-    '9f7551',
-    'MINIMALDATA'
-  ],
-  [
-    '00020000',
-    'a07551',
-    'MINIMALDATA'
-  ],
-  [
-    '02000000',
-    'a07551',
-    'MINIMALDATA'
-  ],
-  [
-    '00020000',
-    'a17551',
-    'MINIMALDATA'
-  ],
-  [
-    '02000000',
-    'a17551',
-    'MINIMALDATA'
-  ],
-  [
-    '00020000',
-    'a27551',
-    'MINIMALDATA'
-  ],
-  [
-    '02000000',
-    'a27551',
-    'MINIMALDATA'
-  ],
-  [
-    '00020000',
-    'a37551',
-    'MINIMALDATA'
-  ],
-  [
-    '02000000',
-    'a37551',
-    'MINIMALDATA'
-  ],
-  [
-    '00020000',
-    'a47551',
-    'MINIMALDATA'
-  ],
-  [
-    '02000000',
-    'a47551',
-    'MINIMALDATA'
-  ],
-  [
-    '0200000000',
-    'a57551',
-    'MINIMALDATA'
-  ],
-  [
-    '0002000000',
-    'a57551',
-    'MINIMALDATA'
-  ],
-  [
-    '0000020000',
-    'a57551',
-    'MINIMALDATA'
-  ],
-  [
-    '0000020000',
-    'ae7551',
-    'MINIMALDATA'
-  ],
-  [
-    '0002000000',
-    'ae7551',
-    'MINIMALDATA'
-  ],
-  [
-    '000200000051',
-    'ae7551',
-    'MINIMALDATA'
-  ],
-  [
-    '0000020000',
-    'af51',
-    'MINIMALDATA'
-  ],
-  [
-    '0002000000',
-    'af51',
-    'MINIMALDATA'
-  ],
+  ['51020000', '7975', 'MINIMALDATA'],
+  ['51020000', '7a7551', 'MINIMALDATA'],
+  ['020000', '8b7551', 'MINIMALDATA'],
+  ['020000', '8c7551', 'MINIMALDATA'],
+  ['020000', '8f7551', 'MINIMALDATA'],
+  ['020000', '907551', 'MINIMALDATA'],
+  ['020000', '917551', 'MINIMALDATA'],
+  ['020000', '927551', 'MINIMALDATA'],
+  ['00020000', '937551', 'MINIMALDATA'],
+  ['02000000', '937551', 'MINIMALDATA'],
+  ['00020000', '947551', 'MINIMALDATA'],
+  ['02000000', '947551', 'MINIMALDATA'],
+  ['00020000', '9a7551', 'MINIMALDATA'],
+  ['02000000', '9a7551', 'MINIMALDATA'],
+  ['00020000', '9b7551', 'MINIMALDATA'],
+  ['02000000', '9b7551', 'MINIMALDATA'],
+  ['00020000', '9c7551', 'MINIMALDATA'],
+  ['02000051', '9c7551', 'MINIMALDATA'],
+  ['00020000', '9d51', 'MINIMALDATA'],
+  ['02000000', '9d51', 'MINIMALDATA'],
+  ['00020000', '9e7551', 'MINIMALDATA'],
+  ['02000000', '9e7551', 'MINIMALDATA'],
+  ['00020000', '9f7551', 'MINIMALDATA'],
+  ['02000000', '9f7551', 'MINIMALDATA'],
+  ['00020000', 'a07551', 'MINIMALDATA'],
+  ['02000000', 'a07551', 'MINIMALDATA'],
+  ['00020000', 'a17551', 'MINIMALDATA'],
+  ['02000000', 'a17551', 'MINIMALDATA'],
+  ['00020000', 'a27551', 'MINIMALDATA'],
+  ['02000000', 'a27551', 'MINIMALDATA'],
+  ['00020000', 'a37551', 'MINIMALDATA'],
+  ['02000000', 'a37551', 'MINIMALDATA'],
+  ['00020000', 'a47551', 'MINIMALDATA'],
+  ['02000000', 'a47551', 'MINIMALDATA'],
+  ['0200000000', 'a57551', 'MINIMALDATA'],
+  ['0002000000', 'a57551', 'MINIMALDATA'],
+  ['0000020000', 'a57551', 'MINIMALDATA'],
+  ['0000020000', 'ae7551', 'MINIMALDATA'],
+  ['0002000000', 'ae7551', 'MINIMALDATA'],
+  ['000200000051', 'ae7551', 'MINIMALDATA'],
+  ['0000020000', 'af51', 'MINIMALDATA'],
+  ['0002000000', 'af51', 'MINIMALDATA'],
   [
     'Order of CHECKMULTISIG evaluation tests, inverted by swapping the order of'
   ],
   [
     'pubkeys/signatures so they fail due to the STRICTENC rules on validly encoded'
   ],
-  [
-    'signatures and pubkeys.'
-  ],
+  ['signatures and pubkeys.'],
   [
     '00473044022044dc17b0887c161bb67ba9635bf758735bdde503e4b0a0987f587f14a4e1143d022009a215772d49a85dae40d8ca03955af26ad3978a0ff965faa12915e9586249a501473044022044dc17b0887c161bb67ba9635bf758735bdde503e4b0a0987f587f14a4e1143d022009a215772d49a85dae40d8ca03955af26ad3978a0ff965faa12915e9586249a501',
     '522102865c40293a680cb9c020e7b1e106d8c1916d3cef99aa431a56d253e69256dac00052ae91',
@@ -2031,9 +669,7 @@ export default [
     'STRICTENC',
     '2-of-2 CHECKMULTISIG NOT with both pubkeys valid, but first signature invalid.'
   ],
-  [
-    'Increase DERSIG test coverage'
-  ],
+  ['Increase DERSIG test coverage'],
   [
     '4a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
     '00ac91',
@@ -2082,9 +718,7 @@ export default [
     'DERSIG',
     'Negative S is incorrectly encoded for DERSIG'
   ],
-  [
-    'Automatically generated test cases'
-  ],
+  ['Automatically generated test cases'],
   [
     '47304402200a5c6163f07b8c3b013c4d1d6dba25e780b39658d79ba37af7057a3b7f15ffa102201fd9b4eaa9943f734928b99a83592c2e7bf342ea2680f6a2bb705167966b742001',
     '410479be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8ac',
@@ -2361,7 +995,5 @@ export default [
     'CLEANSTACK,P2SH',
     'P2SH with unnecessary input'
   ],
-  [
-    'The End'
-  ]
+  ['The End']
 ]

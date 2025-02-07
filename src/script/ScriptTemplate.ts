@@ -1,6 +1,6 @@
-import LockingScript from './LockingScript'
-import UnlockingScript from './UnlockingScript'
-import Transaction from '../transaction/Transaction'
+import LockingScript from './LockingScript.js'
+import UnlockingScript from './UnlockingScript.js'
+import Transaction from '../transaction/Transaction.js'
 
 /**
  * @interface
@@ -15,7 +15,7 @@ export default interface ScriptTemplate {
    * @param {...any} params - The parameters required to create the locking script.
    * @returns {LockingScript} - An instance of LockingScript, or a Promise for one.
    */
-  lock: (...params: any) => LockingScript | Promise<LockingScript>
+  lock: (...params: unknown[]) => LockingScript | Promise<LockingScript>
 
   /**
    * Creates a function that generates an unlocking script along with its signature and length estimation.
@@ -27,7 +27,7 @@ export default interface ScriptTemplate {
    * @param {...any} params - The parameters required to create the unlocking script.
    * @returns {Object} - An object containing the `sign` and `estimateLength` functions.
    */
-  unlock: (...params: any) => {
+  unlock: (...params: unknown[]) => {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>
     estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>
   }

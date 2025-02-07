@@ -1,4 +1,4 @@
-import { KeyDeriver, KeyDeriverApi } from './KeyDeriver'
+import { KeyDeriver, KeyDeriverApi } from './KeyDeriver.js'
 import {
   Hash,
   ECDSA,
@@ -8,17 +8,13 @@ import {
   PublicKey,
   Point,
   PrivateKey
-} from '../primitives/index'
+} from '../primitives/index.js'
 import {
-  AuthenticatedResult,
   CreateHmacArgs,
   CreateHmacResult,
   CreateSignatureArgs,
   CreateSignatureResult,
-  GetNetworkResult,
   GetPublicKeyArgs,
-  GetVersionResult,
-  OriginatorDomainNameStringUnder250Bytes,
   PubKeyHex,
   RevealCounterpartyKeyLinkageArgs,
   RevealCounterpartyKeyLinkageResult,
@@ -32,7 +28,7 @@ import {
   WalletDecryptResult,
   WalletEncryptArgs,
   WalletEncryptResult
-} from './Wallet.interfaces'
+} from './Wallet.interfaces.js'
 
 /**
  * A ProtoWallet is precursor to a full wallet, capable of performing all foundational cryptographic operations.
@@ -54,23 +50,30 @@ export class ProtoWallet {
   }
 
   async getPublicKey (
-    args: GetPublicKeyArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: GetPublicKeyArgs
   ): Promise<{ publicKey: PubKeyHex }> {
     if (args.identityKey) {
+      if (this.keyDeriver == null) {
+        throw new Error('keyDeriver is undefined')
+      }
       return { publicKey: this.keyDeriver.rootKey.toPublicKey().toString() }
     } else {
-      if (!args.protocolID || !args.keyID) {
+      if (args.protocolID == null || args.keyID == null || args.keyID === '') {
         throw new Error(
           'protocolID and keyID are required if identityKey is false or undefined.'
         )
       }
+      const keyDeriver =
+        this.keyDeriver ??
+        (() => {
+          throw new Error('keyDeriver is undefined')
+        })()
       return {
-        publicKey: this.keyDeriver
+        publicKey: keyDeriver
           .derivePublicKey(
             args.protocolID,
             args.keyID,
-            args.counterparty || 'self',
+            args.counterparty ?? 'self',
             args.forSelf
           )
           .toString()
@@ -79,12 +82,14 @@ export class ProtoWallet {
   }
 
   async revealCounterpartyKeyLinkage (
-    args: RevealCounterpartyKeyLinkageArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: RevealCounterpartyKeyLinkageArgs
   ): Promise<RevealCounterpartyKeyLinkageResult> {
     const { publicKey: identityKey } = await this.getPublicKey({
       identityKey: true
     })
+    if (this.keyDeriver == null) {
+      throw new Error('keyDeriver is undefined')
+    }
     const linkage = this.keyDeriver.revealCounterpartySecret(args.counterparty)
     const linkageProof = new Schnorr().generateProof(
       this.keyDeriver.rootKey,
@@ -121,12 +126,14 @@ export class ProtoWallet {
   }
 
   async revealSpecificKeyLinkage (
-    args: RevealSpecificKeyLinkageArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: RevealSpecificKeyLinkageArgs
   ): Promise<RevealSpecificKeyLinkageResult> {
     const { publicKey: identityKey } = await this.getPublicKey({
       identityKey: true
     })
+    if (this.keyDeriver == null) {
+      throw new Error('keyDeriver is undefined')
+    }
     const linkage = this.keyDeriver.revealSpecificSecret(
       args.counterparty,
       args.protocolID,
@@ -163,103 +170,129 @@ export class ProtoWallet {
   }
 
   async encrypt (
-    args: WalletEncryptArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: WalletEncryptArgs
   ): Promise<WalletEncryptResult> {
+    if (this.keyDeriver == null) {
+      throw new Error('keyDeriver is undefined')
+    }
     const key = this.keyDeriver.deriveSymmetricKey(
       args.protocolID,
       args.keyID,
-      args.counterparty || 'self'
+      args.counterparty ?? 'self'
     )
     return { ciphertext: key.encrypt(args.plaintext) as number[] }
   }
 
   async decrypt (
-    args: WalletDecryptArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: WalletDecryptArgs
   ): Promise<WalletDecryptResult> {
+    if (this.keyDeriver == null) {
+      throw new Error('keyDeriver is undefined')
+    }
     const key = this.keyDeriver.deriveSymmetricKey(
       args.protocolID,
       args.keyID,
-      args.counterparty || 'self'
+      args.counterparty ?? 'self'
     )
     return { plaintext: key.decrypt(args.ciphertext) as number[] }
   }
 
   async createHmac (
-    args: CreateHmacArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: CreateHmacArgs
   ): Promise<CreateHmacResult> {
+    if (this.keyDeriver == null) {
+      throw new Error('keyDeriver is undefined')
+    }
     const key = this.keyDeriver.deriveSymmetricKey(
       args.protocolID,
       args.keyID,
-      args.counterparty || 'self'
+      args.counterparty ?? 'self'
     )
     return { hmac: Hash.sha256hmac(key.toArray(), args.data) }
   }
 
   async verifyHmac (
-    args: VerifyHmacArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: VerifyHmacArgs
   ): Promise<VerifyHmacResult> {
+    if (this.keyDeriver == null) {
+      throw new Error('keyDeriver is undefined')
+    }
     const key = this.keyDeriver.deriveSymmetricKey(
       args.protocolID,
       args.keyID,
-      args.counterparty || 'self'
+      args.counterparty ?? 'self'
     )
     const valid =
       Hash.sha256hmac(key.toArray(), args.data).toString() ===
       args.hmac.toString()
     if (!valid) {
-      const e = new Error('HMAC is not valid')
-      ;(e as any).code = 'ERR_INVALID_HMAC'
+      const e = new Error('HMAC is not valid') as Error & { code: string }
+      e.code = 'ERR_INVALID_HMAC'
       throw e
     }
     return { valid }
   }
 
   async createSignature (
-    args: CreateSignatureArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: CreateSignatureArgs
   ): Promise<CreateSignatureResult> {
-    if (!args.hashToDirectlySign && !args.data) {
+    if ((args.hashToDirectlySign == null) && (args.data == null)) {
       throw new Error('args.data or args.hashToDirectlySign must be valid')
     }
-    const hash: number[] = args.hashToDirectlySign || Hash.sha256(args.data)
-    const key = this.keyDeriver.derivePrivateKey(
+
+    const hash: number[] =
+      args.hashToDirectlySign ?? Hash.sha256(args.data ?? [])
+    const keyDeriver =
+      this.keyDeriver ??
+      (() => {
+        throw new Error('keyDeriver is undefined')
+      })()
+
+    const key = keyDeriver.derivePrivateKey(
       args.protocolID,
       args.keyID,
-      args.counterparty || 'anyone'
+      args.counterparty ?? 'anyone'
     )
+
     return {
       signature: ECDSA.sign(new BigNumber(hash), key, true).toDER() as number[]
     }
   }
 
   async verifySignature (
-    args: VerifySignatureArgs,
-    originator?: OriginatorDomainNameStringUnder250Bytes
+    args: VerifySignatureArgs
   ): Promise<VerifySignatureResult> {
-    if (!args.hashToDirectlyVerify && !args.data) {
+    if ((args.hashToDirectlyVerify == null) && (args.data == null)) {
       throw new Error('args.data or args.hashToDirectlyVerify must be valid')
     }
-    const hash: number[] = args.hashToDirectlyVerify || Hash.sha256(args.data)
-    const key = this.keyDeriver.derivePublicKey(
+
+    const hash: number[] =
+      args.hashToDirectlyVerify ?? Hash.sha256(args.data ?? [])
+    const keyDeriver =
+      this.keyDeriver ??
+      (() => {
+        throw new Error('keyDeriver is undefined')
+      })()
+
+    const key = keyDeriver.derivePublicKey(
       args.protocolID,
       args.keyID,
-      args.counterparty || 'self',
+      args.counterparty ?? 'self',
       args.forSelf
     )
+
     const valid = ECDSA.verify(
       new BigNumber(hash),
       Signature.fromDER(args.signature),
       key
     )
+
     if (!valid) {
-      const e = new Error('Signature is not valid')
-      ;(e as any).code = 'ERR_INVALID_SIGNATURE'
+      const e = new Error('Signature is not valid') as Error & { code: string }
+      e.code = 'ERR_INVALID_SIGNATURE'
       throw e
     }
+
     return { valid }
   }
 }

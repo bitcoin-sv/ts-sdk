@@ -1,9 +1,12 @@
 {
   "compilerOptions": {
-    "lib": ["dom", "ESNext"],
-    "module": "CommonJS",
+    "lib": [
+      "dom",
+      "ESNext"
+    ],
+    "module": "NodeNext",
     "target": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "moduleDetection": "force",
     "rootDir": "./",
     "baseUrl": "./",
@@ -20,7 +23,14 @@
     "resolveJsonModule": true,
     "esModuleInterop": true
   },
-  "files": ["mod.ts"],
-  "include": ["src", "src/__tests__"],
-  "exclude": ["dist"]
+  "files": [
+    "mod.ts"
+  ],
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "dist",
+    "*/**/__tests"
+  ]
 }

@@ -1,19 +1,20 @@
-import TransactionInput from './TransactionInput'
-import TransactionOutput from './TransactionOutput'
-import UnlockingScript from '../script/UnlockingScript'
-import LockingScript from '../script/LockingScript'
-import { Reader, Writer, toHex, toArray } from '../primitives/utils'
-import { hash256 } from '../primitives/Hash'
-import FeeModel from './FeeModel'
-import SatoshisPerKilobyte from './fee-models/SatoshisPerKilobyte'
-import { Broadcaster, BroadcastResponse, BroadcastFailure } from './Broadcaster'
-import MerklePath from './MerklePath'
-import Spend from '../script/Spend'
-import ChainTracker from './ChainTracker'
-import { defaultBroadcaster } from './broadcasters/DefaultBroadcaster'
-import { defaultChainTracker } from './chaintrackers/DefaultChainTracker'
-import { Beef, BEEF_V1 } from './Beef'
-import P2PKH from '../script/templates/P2PKH'
+// @ts-nocheck
+import TransactionInput from './TransactionInput.js'
+import TransactionOutput from './TransactionOutput.js'
+import UnlockingScript from '../script/UnlockingScript.js'
+import LockingScript from '../script/LockingScript.js'
+import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
+import { hash256 } from '../primitives/Hash.js'
+import FeeModel from './FeeModel.js'
+import SatoshisPerKilobyte from './fee-models/SatoshisPerKilobyte.js'
+import { Broadcaster, BroadcastResponse, BroadcastFailure } from './Broadcaster.js'
+import MerklePath from './MerklePath.js'
+import Spend from '../script/Spend.js'
+import ChainTracker from './ChainTracker.js'
+import { defaultBroadcaster } from './broadcasters/DefaultBroadcaster.js'
+import { defaultChainTracker } from './chaintrackers/DefaultChainTracker.js'
+import { Beef, BEEF_V1 } from './Beef.js'
+import P2PKH from '../script/templates/P2PKH.js'
 
 /**
  * Represents a complete Bitcoin transaction. This class encapsulates all the details
@@ -60,14 +61,14 @@ export default class Transaction {
   private cachedHash?: number[]
 
   // Recursive function for adding merkle proofs or input transactions
-  private static addPathOrInputs(
+  private static addPathOrInputs (
     obj: { pathIndex?: number, tx: Transaction },
     transactions: Record<
-      string,
-      {
-        pathIndex?: number
-        tx: Transaction
-      }
+    string,
+    {
+      pathIndex?: number
+      tx: Transaction
+    }
     >,
     BUMPs: MerklePath[]
   ): void {
@@ -79,10 +80,13 @@ export default class Transaction {
       obj.tx.merklePath = path
     } else {
       for (const input of obj.tx.inputs) {
+        if (input.sourceTXID === undefined) {
+          throw new Error('Input sourceTXID is undefined')
+        }
         const sourceObj = transactions[input.sourceTXID]
         if (typeof sourceObj !== 'object') {
           throw new Error(
-            `Reference to unknown TXID in BEEF: ${input.sourceTXID}`
+            `Reference to unknown TXID in BEEF: ${input.sourceTXID ?? 'undefined'}`
           )
         }
         input.sourceTransaction = sourceObj.tx
@@ -100,7 +104,7 @@ export default class Transaction {
    * @param txid Optional TXID of the transaction to retrieve from the BEEF data.
    * @returns An anchored transaction, linked to its associated inputs populated with merkle paths.
    */
-  static fromBEEF(beef: number[], txid?: string): Transaction {
+  static fromBEEF (beef: number[], txid?: string): Transaction {
     const { tx } = Transaction.fromAnyBeef(beef, txid)
     return tx
   }
@@ -112,29 +116,23 @@ export default class Transaction {
    * @param beef A binary representation of an Atomic BEEF structure.
    * @returns The subject transaction, linked to its associated inputs populated with merkle paths.
    */
-  static fromAtomicBEEF(beef: number[]): Transaction {
+  static fromAtomicBEEF (beef: number[]): Transaction {
     const { tx, txid, beef: b } = Transaction.fromAnyBeef(beef)
     if (txid !== b.atomicTxid) {
-      if (b.atomicTxid)
-        throw new Error(`Transaction with TXID ${b.atomicTxid} not found in BEEF data.`)
-      else
-        throw new Error(`beef must conform to BRC-95 and must contain the subject txid.`)
+      if (b.atomicTxid) { throw new Error(`Transaction with TXID ${b.atomicTxid} not found in BEEF data.`) } else { throw new Error('beef must conform to BRC-95 and must contain the subject txid.') }
     }
     return tx
   }
 
-  private static fromAnyBeef(beef: number[], txid?: string): { tx: Transaction, beef: Beef, txid: string } {
+  private static fromAnyBeef (beef: number[], txid?: string): { tx: Transaction, beef: Beef, txid: string } {
     const b = Beef.fromBinary(beef)
     if (b.txs.length < 1) {
-      throw new Error(`beef must include at least one transaction.`)
+      throw new Error('beef must include at least one transaction.')
     }
     const target = txid || b.atomicTxid || b.txs.slice(-1)[0].txid
     const tx = b.findAtomicTransaction(target)
-    if (!tx) {
-      if (txid)
-        throw new Error(`Transaction with TXID ${target} not found in BEEF data.`)
-      else
-        throw new Error(`beef does not contain transaction for atomic txid.`)
+    if (tx == null) {
+      if (txid) { throw new Error(`Transaction with TXID ${target} not found in BEEF data.`) } else { throw new Error('beef does not contain transaction for atomic txid.') }
     }
     return { tx, beef: b, txid: target }
   }
@@ -144,7 +142,7 @@ export default class Transaction {
    * @param ef A binary representation of a transaction in EF format.
    * @returns An extended transaction, linked to its associated inputs by locking script and satoshis amounts only.
    */
-  static fromEF(ef: number[]): Transaction {
+  static fromEF (ef: number[]): Transaction {
     const br = new Reader(ef)
     const version = br.readUInt32LE()
     if (toHex(br.read(6)) !== '0000000000ef') { throw new Error('Invalid EF marker') }
@@ -161,7 +159,7 @@ export default class Transaction {
       const lockingScriptLength = br.readVarIntNum()
       const lockingScriptBin = br.read(lockingScriptLength)
       const lockingScript = LockingScript.fromBinary(lockingScriptBin)
-      const sourceTransaction = new Transaction(null, [], [], null)
+      const sourceTransaction = new Transaction(undefined, [], [], undefined)
       sourceTransaction.outputs = Array(sourceOutputIndex + 1).fill(null)
       sourceTransaction.outputs[sourceOutputIndex] = {
         satoshis,
@@ -206,7 +204,7 @@ export default class Transaction {
    *   outputs: { vout: number, offset: number, length: number }[]
    * }
    */
-  static parseScriptOffsets(bin: number[]): {
+  static parseScriptOffsets (bin: number[]): {
     inputs: Array<{ vin: number, offset: number, length: number }>
     outputs: Array<{ vout: number, offset: number, length: number }>
   } {
@@ -232,7 +230,7 @@ export default class Transaction {
     return { inputs, outputs }
   }
 
-  static fromReader(br: Reader): Transaction {
+  static fromReader (br: Reader): Transaction {
     const version = br.readUInt32LE()
     const inputsLength = br.readVarIntNum()
     const inputs: TransactionInput[] = []
@@ -273,7 +271,7 @@ export default class Transaction {
    * @param {number[]} bin - The binary array representation of the transaction.
    * @returns {Transaction} - A new Transaction instance.
    */
-  static fromBinary(bin: number[]): Transaction {
+  static fromBinary (bin: number[]): Transaction {
     const br = new Reader(bin)
     return Transaction.fromReader(br)
   }
@@ -285,7 +283,7 @@ export default class Transaction {
    * @param {string} hex - The hexadecimal string representation of the transaction.
    * @returns {Transaction} - A new Transaction instance.
    */
-  static fromHex(hex: string): Transaction {
+  static fromHex (hex: string): Transaction {
     return Transaction.fromBinary(toArray(hex, 'hex'))
   }
 
@@ -296,7 +294,7 @@ export default class Transaction {
    * @param {string} hex - The hexadecimal string representation of the transaction EF.
    * @returns {Transaction} - A new Transaction instance.
    */
-  static fromHexEF(hex: string): Transaction {
+  static fromHexEF (hex: string): Transaction {
     return Transaction.fromEF(toArray(hex, 'hex'))
   }
 
@@ -311,11 +309,11 @@ export default class Transaction {
    * @param {string} [txid] - Optional TXID of the transaction to retrieve from the BEEF data.
    * @returns {Transaction} - A new Transaction instance.
    */
-  static fromHexBEEF(hex: string, txid?: string): Transaction {
+  static fromHexBEEF (hex: string, txid?: string): Transaction {
     return Transaction.fromBEEF(toArray(hex, 'hex'), txid)
   }
 
-  constructor(
+  constructor (
     version: number = 1,
     inputs: TransactionInput[] = [],
     outputs: TransactionOutput[] = [],
@@ -337,7 +335,7 @@ export default class Transaction {
    * @param {TransactionInput} input - The TransactionInput object to add to the transaction.
    * @throws {Error} - If the input does not have a sourceTXID or sourceTransaction defined.
    */
-  addInput(input: TransactionInput): void {
+  addInput (input: TransactionInput): void {
     if (
       typeof input.sourceTXID === 'undefined' &&
       typeof input.sourceTransaction === 'undefined'
@@ -359,9 +357,9 @@ export default class Transaction {
    *
    * @param {TransactionOutput} output - The TransactionOutput object to add to the transaction.
    */
-  addOutput(output: TransactionOutput): void {
+  addOutput (output: TransactionOutput): void {
     this.cachedHash = undefined
-    if (!output.change) {
+    if (output.change !== true) {
       if (typeof output.satoshis === 'undefined') {
         throw new Error(
           'either satoshis must be defined or change must be set to true'
@@ -369,7 +367,7 @@ export default class Transaction {
       }
       if (output.satoshis < 0) { throw new Error('satoshis must be a positive integer or zero') }
     }
-    if (!output.lockingScript) throw new Error('lockingScript must be defined')
+    if (output.lockingScript == null) throw new Error('lockingScript must be defined')
     this.outputs.push(output)
   }
 
@@ -380,7 +378,7 @@ export default class Transaction {
    * @param {number} [satoshis] - The number of satoshis to send to the address - if not provided, the output is considered a change output.
    *
    */
-  addP2PKHOutput(address: number[] | string, satoshis?: number): void {
+  addP2PKHOutput (address: number[] | string, satoshis?: number): void {
     const lockingScript = new P2PKH().lock(address)
     if (typeof satoshis === 'undefined') {
       return this.addOutput({ lockingScript, change: true })
@@ -396,7 +394,7 @@ export default class Transaction {
    *
    * @param {Record<string, any>} metadata - The metadata object to merge into the existing metadata.
    */
-  updateMetadata(metadata: Record<string, any>): void {
+  updateMetadata (metadata: Record<string, any>): void {
     this.metadata = {
       ...this.metadata,
       ...metadata
@@ -413,7 +411,7 @@ export default class Transaction {
    * amongst the change outputs
    *
    */
-  async fee(
+  async fee (
     modelOrFee: FeeModel | number = new SatoshisPerKilobyte(10),
     changeDistribution: 'equal' | 'random' = 'equal'
   ): Promise<void> {
@@ -427,13 +425,13 @@ export default class Transaction {
     const fee = await modelOrFee.computeFee(this)
     const change = this.calculateChange(fee)
     if (change <= 0) {
-      this.outputs = this.outputs.filter((output) => !output.change)
+      this.outputs = this.outputs.filter((output) => output.change !== true)
       return
     }
     this.distributeChange(change, changeDistribution)
   }
 
-  private calculateChange(fee: number): number {
+  private calculateChange (fee: number): number {
     let change = 0
     for (const input of this.inputs) {
       if (typeof input.sourceTransaction !== 'object') {
@@ -442,18 +440,20 @@ export default class Transaction {
         )
       }
       change +=
-        input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
+        input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis ?? 0
     }
     change -= fee
     for (const out of this.outputs) {
-      if (!out.change) {
-        change -= out.satoshis
+      if (out.change !== true) {
+        if (out.satoshis !== undefined) {
+          change -= out.satoshis
+        }
       }
     }
     return change
   }
 
-  private distributeChange(
+  private distributeChange (
     change: number,
     changeDistribution: 'equal' | 'random'
   ): void {
@@ -465,12 +465,16 @@ export default class Transaction {
       distributedChange = this.distributeEqualChange(change, changeOutputs)
     }
     if (distributedChange < change) {
-      this.outputs[this.outputs.length - 1].satoshis +=
-        change - distributedChange
+      const lastOutput = this.outputs[this.outputs.length - 1]
+      if (lastOutput.satoshis !== undefined) {
+        lastOutput.satoshis += change - distributedChange
+      } else {
+        lastOutput.satoshis = change - distributedChange
+      }
     }
   }
 
-  private distributeRandomChange(
+  private distributeRandomChange (
     change: number,
     changeOutputs: TransactionOutput[]
   ): number {
@@ -480,18 +484,18 @@ export default class Transaction {
     changeToUse -= changeOutputs.length
     distributedChange += changeOutputs.length
     for (let i = 0; i < changeOutputs.length - 1; i++) {
-      const portion = this.benfordNumber(0, changeToUse)
-      benfordNumbers[i] += portion
+      const portion: number = this.benfordNumber(0, changeToUse)
+      benfordNumbers[i] = (benfordNumbers[i] as number) + portion
       distributedChange += portion
       changeToUse -= portion
     }
     for (const output of this.outputs) {
-      if (output.change) output.satoshis = benfordNumbers.shift()
+      if (output.change === true) output.satoshis = benfordNumbers.shift()
     }
     return distributedChange
   }
 
-  private distributeEqualChange(
+  private distributeEqualChange (
     change: number,
     changeOutputs: TransactionOutput[]
   ): number {
@@ -504,7 +508,7 @@ export default class Transaction {
     return distributedChange
   }
 
-  private benfordNumber(min: number, max: number): number {
+  private benfordNumber (min: number, max: number): number {
     const d = Math.floor(Math.random() * 9) + 1
     return Math.floor(
       min + ((max - min) * Math.log10(1 + 1 / d)) / Math.log10(10)
@@ -516,7 +520,7 @@ export default class Transaction {
    *
    * @returns The current transaction fee
    */
-  getFee(): number {
+  getFee (): number {
     let totalIn = 0
     for (const input of this.inputs) {
       if (typeof input.sourceTransaction !== 'object') {
@@ -525,11 +529,11 @@ export default class Transaction {
         )
       }
       totalIn +=
-        input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
+        input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis ?? 0
     }
     let totalOut = 0
     for (const output of this.outputs) {
-      totalOut += output.satoshis || 0
+      totalOut += output.satoshis ?? 0
     }
     return totalIn - totalOut
   }
@@ -537,11 +541,11 @@ export default class Transaction {
   /**
    * Signs a transaction, hydrating all its unlocking scripts based on the provided script templates where they are available.
    */
-  async sign(): Promise<void> {
+  async sign (): Promise<void> {
     this.cachedHash = undefined
     for (const out of this.outputs) {
       if (typeof out.satoshis === 'undefined') {
-        if (out.change) {
+        if (out.change === true) {
           throw new Error(
             'There are still change outputs with uncomputed amounts. Use the fee() method to compute the change amounts and transaction fees prior to signing.'
           )
@@ -555,7 +559,7 @@ export default class Transaction {
     const unlockingScripts = await Promise.all(
       this.inputs.map(async (x, i): Promise<UnlockingScript | undefined> => {
         if (typeof this.inputs[i].unlockingScriptTemplate === 'object') {
-          return await this.inputs[i].unlockingScriptTemplate.sign(this, i)
+          return await this.inputs[i]?.unlockingScriptTemplate?.sign(this, i)
         } else {
           return await Promise.resolve(undefined)
         }
@@ -574,7 +578,7 @@ export default class Transaction {
    * @param broadcaster The Broadcaster instance wwhere the transaction will be sent
    * @returns A BroadcastResponse or BroadcastFailure from the Broadcaster
    */
-  async broadcast(
+  async broadcast (
     broadcaster: Broadcaster = defaultBroadcaster()
   ): Promise<BroadcastResponse | BroadcastFailure> {
     return await broadcaster.broadcast(this)
@@ -585,25 +589,32 @@ export default class Transaction {
    *
    * @returns {number[]} - The binary array representation of the transaction.
    */
-  toBinary(): number[] {
+  toBinary (): number[] {
     const writer = new Writer()
     writer.writeUInt32LE(this.version)
     writer.writeVarIntNum(this.inputs.length)
     for (const i of this.inputs) {
       if (typeof i.sourceTXID === 'undefined') {
-        writer.write(i.sourceTransaction.hash() as number[])
+        if (i.sourceTransaction != null) {
+          writer.write(i.sourceTransaction.hash() as number[])
+        } else {
+          throw new Error('sourceTransaction is undefined')
+        }
       } else {
         writer.writeReverse(toArray(i.sourceTXID, 'hex'))
       }
       writer.writeUInt32LE(i.sourceOutputIndex)
+      if (i.unlockingScript == null) {
+        throw new Error('unlockingScript is undefined')
+      }
       const scriptBin = i.unlockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
       writer.write(scriptBin)
-      writer.writeUInt32LE(i.sequence)
+      writer.writeUInt32LE(i.sequence ?? 0)
     }
     writer.writeVarIntNum(this.outputs.length)
     for (const o of this.outputs) {
-      writer.writeUInt64LE(o.satoshis)
+      writer.writeUInt64LE(o.satoshis ?? 0)
       const scriptBin = o.lockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
       writer.write(scriptBin)
@@ -617,7 +628,7 @@ export default class Transaction {
    *
    * @returns {number[]} - The BRC-30 EF representation of the transaction.
    */
-  toEF(): number[] {
+  toEF (): number[] {
     const writer = new Writer()
     writer.writeUInt32LE(this.version)
     writer.write([0, 0, 0, 0, 0, 0xef])
@@ -634,12 +645,15 @@ export default class Transaction {
         writer.write(toArray(i.sourceTXID, 'hex').reverse() as number[])
       }
       writer.writeUInt32LE(i.sourceOutputIndex)
+      if (i.unlockingScript == null) {
+        throw new Error('unlockingScript is undefined')
+      }
       const scriptBin = i.unlockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
       writer.write(scriptBin)
-      writer.writeUInt32LE(i.sequence)
+      writer.writeUInt32LE(i.sequence ?? 0)
       writer.writeUInt64LE(
-        i.sourceTransaction.outputs[i.sourceOutputIndex].satoshis
+        i.sourceTransaction.outputs[i.sourceOutputIndex].satoshis ?? 0
       )
       const lockingScriptBin =
         i.sourceTransaction.outputs[
@@ -650,7 +664,7 @@ export default class Transaction {
     }
     writer.writeVarIntNum(this.outputs.length)
     for (const o of this.outputs) {
-      writer.writeUInt64LE(o.satoshis)
+      writer.writeUInt64LE(o.satoshis ?? 0)
       const scriptBin = o.lockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
       writer.write(scriptBin)
@@ -664,7 +678,7 @@ export default class Transaction {
    *
    * @returns {string} - The hexadecimal string representation of the transaction EF.
    */
-  toHexEF(): string {
+  toHexEF (): string {
     return toHex(this.toEF())
   }
 
@@ -673,7 +687,7 @@ export default class Transaction {
    *
    * @returns {string} - The hexadecimal string representation of the transaction.
    */
-  toHex(): string {
+  toHex (): string {
     return toHex(this.toBinary())
   }
 
@@ -682,7 +696,7 @@ export default class Transaction {
    *
    * @returns {string} - The hexadecimal string representation of the transaction BEEF.
    */
-  toHexBEEF(): string {
+  toHexBEEF (): string {
     return toHex(this.toBEEF())
   }
 
@@ -691,7 +705,7 @@ export default class Transaction {
    *
    * @returns {string} - The hexadecimal string representation of the transaction Atomic BEEF.
    */
-  toHexAtomicBEEF(): string {
+  toHexAtomicBEEF (): string {
     return toHex(this.toAtomicBEEF())
   }
 
@@ -701,9 +715,9 @@ export default class Transaction {
    * @param {'hex' | undefined} enc - The encoding to use for the hash. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
    * @returns {string | number[]} - The hash of the transaction in the specified format.
    */
-  hash(enc?: 'hex'): number[] | string {
+  hash (enc?: 'hex'): number[] | string {
     let hash
-    if (this.cachedHash) {
+    if (this.cachedHash != null) {
       hash = this.cachedHash
     } else {
       hash = hash256(this.toBinary())
@@ -720,21 +734,21 @@ export default class Transaction {
    *
    * @returns {number[]} - The ID of the transaction in the binary array format.
    */
-  id(): number[]
+  id (): number[]
   /**
    * Calculates the transaction's ID in hexadecimal format.
    *
    * @param {'hex'} enc - The encoding to use for the ID. If 'hex', returns a hexadecimal string.
    * @returns {string} - The ID of the transaction in the hex format.
    */
-  id(enc: 'hex'): string
+  id (enc: 'hex'): string
   /**
    * Calculates the transaction's ID.
    *
    * @param {'hex' | undefined} enc - The encoding to use for the ID. If 'hex', returns a hexadecimal string; otherwise returns a binary array.
    * @returns {string | number[]} - The ID of the transaction in the specified format.
    */
-  id(enc?: 'hex'): number[] | string {
+  id (enc?: 'hex'): number[] | string {
     const id = [...(this.hash() as number[])]
     id.reverse()
     if (enc === 'hex') {
@@ -752,7 +766,7 @@ export default class Transaction {
    *
    * @example tx.verify(new WhatsOnChain(), new SatoshisPerKilobyte(1))
    */
-  async verify(
+  async verify (
     chainTracker: ChainTracker | 'scripts only' = defaultChainTracker(),
     feeModel?: FeeModel
   ): Promise<boolean> {
@@ -761,15 +775,17 @@ export default class Transaction {
 
     while (txQueue.length > 0) {
       const tx = txQueue.shift()
-      const txid = tx.id('hex')
-      if (verifiedTxids.has(txid)) {
+      const txid = tx?.id('hex') ?? ''
+      if (txid != null && txid !== '' && verifiedTxids.has(txid)) {
         continue
       }
 
       // If the transaction has a valid merkle path, verification is complete.
-      if (typeof tx.merklePath === 'object') {
+      if (typeof tx?.merklePath === 'object') {
         if (chainTracker === 'scripts only') {
-          verifiedTxids.add(txid)
+          if (txid != null) {
+            verifiedTxids.add(txid)
+          }
           continue
         } else {
           const proofValid = await tx.merklePath.verify(txid, chainTracker)
@@ -783,6 +799,9 @@ export default class Transaction {
 
       // Verify fee if feeModel is provided
       if (typeof feeModel !== 'undefined') {
+        if (tx === undefined) {
+          throw new Error('Transaction is undefined')
+        }
         const cpTx = Transaction.fromEF(tx.toEF())
         delete cpTx.outputs[0].satoshis
         cpTx.outputs[0].change = true
@@ -797,6 +816,9 @@ export default class Transaction {
       // Verify each input transaction and evaluate the spend events.
       // Also, keep a total of the input amounts for later.
       let inputTotal = 0
+      if (tx === undefined) {
+        throw new Error('Transaction is undefined')
+      }
       for (let i = 0; i < tx.inputs.length; i++) {
         const input = tx.inputs[i]
         if (typeof input.sourceTransaction !== 'object') {
@@ -811,7 +833,7 @@ export default class Transaction {
         }
         const sourceOutput =
           input.sourceTransaction.outputs[input.sourceOutputIndex]
-        inputTotal += sourceOutput.satoshis
+        inputTotal += sourceOutput.satoshis ?? 0
 
         const sourceTxid = input.sourceTransaction.id('hex')
         if (!verifiedTxids.has(sourceTxid)) {
@@ -827,11 +849,11 @@ export default class Transaction {
           sourceTXID: input.sourceTXID,
           sourceOutputIndex: input.sourceOutputIndex,
           lockingScript: sourceOutput.lockingScript,
-          sourceSatoshis: sourceOutput.satoshis,
+          sourceSatoshis: sourceOutput.satoshis ?? 0,
           transactionVersion: tx.version,
           otherInputs,
           unlockingScript: input.unlockingScript,
-          inputSequence: input.sequence,
+          inputSequence: input.sequence ?? 0,
           inputIndex: i,
           outputs: tx.outputs,
           lockTime: tx.lockTime
@@ -872,7 +894,7 @@ export default class Transaction {
    * @returns The serialized BEEF structure
    * @throws Error if there are any missing sourceTransactions unless `allowPartial` is true.
    */
-  toBEEF(allowPartial?: boolean): number[] {
+  toBEEF (allowPartial?: boolean): number[] {
     const writer = new Writer()
     writer.writeUInt32LE(BEEF_V1)
     const BUMPs: MerklePath[] = []
@@ -892,7 +914,7 @@ export default class Transaction {
             added = true
             break
           }
-          if (BUMPs[i].blockHeight === tx.merklePath.blockHeight) {
+          if (tx.merklePath !== null && tx.merklePath !== undefined && BUMPs[i].blockHeight === tx.merklePath.blockHeight) {
             // Probably the same...
             const rootA = BUMPs[i].computeRoot()
             const rootB = tx.merklePath.computeRoot()
@@ -908,7 +930,9 @@ export default class Transaction {
         // Finally, if the proof is not yet added, add a new path.
         if (!added) {
           obj.pathIndex = BUMPs.length
-          BUMPs.push(tx.merklePath)
+          if (tx.merklePath !== null && tx.merklePath !== undefined) {
+            BUMPs.push(tx.merklePath)
+          }
         }
       }
       const duplicate = txs.some((x) => x.tx.id('hex') === tx.id('hex'))
@@ -920,7 +944,7 @@ export default class Transaction {
           const input = tx.inputs[i]
           if (typeof input.sourceTransaction === 'object') {
             addPathsAndInputs(input.sourceTransaction)
-          } else if (!allowPartial) {
+          } else if (allowPartial === false) {
             throw new Error('A required source transaction is missing!')
           }
         }
@@ -957,7 +981,7 @@ export default class Transaction {
    * @returns {number[]} - The serialized Atomic BEEF structure.
    * @throws Error if there are any missing sourceTransactions unless `allowPartial` is true.
    */
-  toAtomicBEEF(allowPartial?: boolean): number[] {
+  toAtomicBEEF (allowPartial?: boolean): number[] {
     const writer = new Writer()
     // Write the Atomic BEEF prefix
     writer.writeUInt32LE(0x01010101)

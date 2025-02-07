@@ -1,7 +1,7 @@
-import BigNumber from './BigNumber'
-import { AESGCM, AESGCMDecrypt } from './AESGCM'
-import Random from './Random'
-import { toArray, encode } from './utils'
+import BigNumber from './BigNumber.js'
+import { AESGCM, AESGCMDecrypt } from './AESGCM.js'
+import Random from './Random.js'
+import { toArray, encode } from './utils.js'
 
 /**
  * `SymmetricKey` is a class that extends the `BigNumber` class and implements symmetric encryption and decryption methods.
@@ -69,7 +69,7 @@ export default class SymmetricKey extends BigNumber {
    * @throws {Error} Will throw an error if the decryption fails, likely due to message tampering or incorrect decryption key.
    */
   decrypt (msg: number[] | string, enc?: 'hex' | 'utf8'): string | number[] {
-    msg = toArray(msg, enc) as number[]
+    msg = toArray(msg, enc)
     const iv = msg.slice(0, 32)
     const ciphertextWithTag = msg.slice(32)
     const messageTag = ciphertextWithTag.slice(-16)

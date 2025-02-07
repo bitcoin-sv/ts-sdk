@@ -13,7 +13,6 @@ import {
   ISOTimestampString,
   KeyIDStringUnder800Bytes,
   LabelStringUnder300Bytes,
-  OriginatorDomainNameStringUnder250Bytes,
   OutpointString,
   OutputTagStringUnder300Bytes,
   PositiveInteger,
@@ -27,10 +26,10 @@ import {
   TXIDHexString,
   VersionString7To30Bytes,
   WalletInterface
-} from '../Wallet.interfaces'
-import { Utils, Random } from '../../primitives/index'
-import { WalletError } from '../WalletError'
-import { CallType } from '../../../mod'
+} from '../Wallet.interfaces.js'
+import { Utils, Random } from '../../primitives/index.js'
+import { WalletError } from '../WalletError.js'
+import { CallType } from '../../../mod.js'
 
 /**
  * Facilitates wallet operations over cross-document messaging.
@@ -53,16 +52,16 @@ export default class XDMSubstrate implements WalletInterface {
   async invoke(call: CallType, args: any): Promise<any> {
     return await new Promise((resolve, reject) => {
       const id = Utils.toBase64(Random(12))
-      const listener = async e => {
+      const listener = (e: MessageEvent): void => {
         if (
           e.data.type !== 'CWI' ||
           !e.isTrusted ||
           e.data.id !== id ||
-          e.data.isInvocation
-        )
-          return
-        if (typeof window.removeEventListener === 'function')
+          e.data.isInvocation === true
+        ) { return }
+        if (typeof window.removeEventListener === 'function') {
           window.removeEventListener('message', listener)
+        }
         if (e.data.status === 'error') {
           const err = new WalletError(e.data.description, e.data.code)
           reject(err)
@@ -123,7 +122,7 @@ export default class XDMSubstrate implements WalletInterface {
       txid: TXIDHexString
       status: 'unproven' | 'sending' | 'failed'
     }>
-    signableTransaction?: { tx: BEEF; reference: Base64String }
+    signableTransaction?: { tx: BEEF, reference: Base64String }
   }> {
     return await this.invoke('createAction', args)
   }
@@ -131,7 +130,7 @@ export default class XDMSubstrate implements WalletInterface {
   async signAction(args: {
     spends: Record<
       PositiveIntegerOrZero,
-      { unlockingScript: HexString; sequenceNumber?: PositiveIntegerOrZero }
+      { unlockingScript: HexString, sequenceNumber?: PositiveIntegerOrZero }
     >
     reference: Base64String
     options?: {
@@ -176,13 +175,13 @@ export default class XDMSubstrate implements WalletInterface {
       txid: TXIDHexString
       satoshis: SatoshiValue
       status:
-        | 'completed'
-        | 'unprocessed'
-        | 'sending'
-        | 'unproven'
-        | 'unsigned'
-        | 'nosend'
-        | 'nonfinal'
+      | 'completed'
+      | 'unprocessed'
+      | 'sending'
+      | 'unproven'
+      | 'unsigned'
+      | 'nosend'
+      | 'nonfinal'
       isOutgoing: boolean
       description: DescriptionString5to50Bytes
       labels?: LabelStringUnder300Bytes[]

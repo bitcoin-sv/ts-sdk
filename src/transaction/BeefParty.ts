@@ -1,4 +1,4 @@
-import { Beef } from './Beef'
+import { Beef } from './Beef.js'
 
 /**
  * Extends `Beef` that is used to exchange transaction validity data with more than one external party.
@@ -34,7 +34,7 @@ export class BeefParty extends Beef {
    */
   constructor (parties?: string[]) {
     super()
-    if (parties) {
+    if (parties != null) {
       for (const party of parties) {
         this.addParty(party)
       }
@@ -45,7 +45,7 @@ export class BeefParty extends Beef {
    * @param party
    * @returns `true` if `party` has already been added to this `BeefParty`.
    */
-  isParty (party: string) {
+  isParty (party: string): boolean {
     const r = Object.keys(this.knownTo).includes(party)
     return r
   }
@@ -54,7 +54,7 @@ export class BeefParty extends Beef {
    * Adds a new unique party identifier to this `BeefParty`.
    * @param party
    */
-  addParty (party: string) {
+  addParty (party: string): void {
     if (this.isParty(party)) {
       throw new Error(`Party ${party} already exists.`)
     }
@@ -67,9 +67,11 @@ export class BeefParty extends Beef {
    */
   getKnownTxidsForParty (party: string): string[] {
     const knownTxids = this.knownTo[party]
-    if (!knownTxids) {
+
+    if (knownTxids === undefined) { // ✅ Explicitly check for undefined
       throw new Error(`Party ${party} is unknown.`)
     }
+
     return Object.keys(knownTxids)
   }
 
@@ -89,7 +91,7 @@ export class BeefParty extends Beef {
    * @param party unique identifier, added if new.
    * @param knownTxids
    */
-  addKnownTxidsForParty (party: string, knownTxids: string[]) {
+  addKnownTxidsForParty (party: string, knownTxids: string[]): void {
     if (!this.isParty(party)) {
       this.addParty(party)
     }
@@ -110,7 +112,7 @@ export class BeefParty extends Beef {
    * @param party
    * @param beef
    */
-  mergeBeefFromParty (party: string, beef: number[] | Beef) {
+  mergeBeefFromParty (party: string, beef: number[] | Beef): void {
     const b: Beef = Array.isArray(beef) ? Beef.fromBinary(beef) : beef
     const knownTxids = b.getValidTxids()
     this.mergeBeef(b)

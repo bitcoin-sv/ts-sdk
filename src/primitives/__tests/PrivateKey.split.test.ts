@@ -15,7 +15,7 @@ describe('PrivateKey', () => {
     expect(backup.length).toBe(totalShares)
 
     // Check that each share is a BigNumber
-    shares.points.forEach(share => {
+    shares.points.forEach((share) => {
       expect(share).toBeInstanceOf(PointInFiniteField)
     })
     expect(shares.threshold).toBe(threshold)
@@ -37,11 +37,11 @@ describe('PrivateKey', () => {
   it('should throw an error for invalid threshold or totalShares', () => {
     const k = PrivateKey.fromRandom()
 
-    expect(() => k.toKeyShares('invalid' as any, 14)).toThrow(
+    expect(() => k.toKeyShares('invalid' as unknown as number, 14)).toThrow(
       'threshold and totalShares must be numbers'
     )
 
-    expect(() => k.toKeyShares(4, undefined as any)).toThrow(
+    expect(() => k.toKeyShares(4, undefined as unknown as number)).toThrow(
       'threshold and totalShares must be numbers'
     )
   })
@@ -53,7 +53,9 @@ describe('PrivateKey', () => {
 
   it('should throw an error for invalid totalShares', () => {
     const k = PrivateKey.fromRandom()
-    expect(() => k.toKeyShares(2, -4)).toThrow('totalShares must be at least 2')
+    expect(() => k.toKeyShares(2, -4)).toThrow(
+      'totalShares must be at least 2'
+    )
   })
 
   it('should throw an error for totalShares being less than threshold', () => {

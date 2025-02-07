@@ -34,12 +34,12 @@ describe('getVerifiableCertificates', () => {
       revocationOutpoint: 'outpoint1',
       fields: { field1: 'encryptedData1', field2: 'encryptedData2' },
       signature: 'signature1'
-    }
+    };
 
-    ;(mockWallet.listCertificates as jest.Mock).mockResolvedValue({
+    (mockWallet.listCertificates as jest.Mock).mockResolvedValue({
       certificates: [mockCertificate]
-    })
-    ;(mockWallet.proveCertificate as jest.Mock).mockResolvedValue({
+    });
+    (mockWallet.proveCertificate as jest.Mock).mockResolvedValue({
       keyringForVerifier: { field1: 'key1', field2: 'key2' }
     })
 
@@ -75,7 +75,7 @@ describe('getVerifiableCertificates', () => {
   })
 
   it('returns an empty array when no matching certificates are found', async () => {
-    ;(mockWallet.listCertificates as jest.Mock).mockResolvedValue({
+    (mockWallet.listCertificates as jest.Mock).mockResolvedValue({
       certificates: []
     })
 
@@ -91,7 +91,7 @@ describe('getVerifiableCertificates', () => {
   })
 
   it('propagates errors from listCertificates', async () => {
-    ;(mockWallet.listCertificates as jest.Mock).mockRejectedValue(
+    (mockWallet.listCertificates as jest.Mock).mockRejectedValue(
       new Error('listCertificates failed')
     )
 
@@ -113,12 +113,12 @@ describe('getVerifiableCertificates', () => {
       revocationOutpoint: 'outpoint1',
       fields: { field1: 'encryptedData1', field2: 'encryptedData2' },
       signature: 'signature1'
-    }
+    };
 
-    ;(mockWallet.listCertificates as jest.Mock).mockResolvedValue({
+    (mockWallet.listCertificates as jest.Mock).mockResolvedValue({
       certificates: [mockCertificate]
-    })
-    ;(mockWallet.proveCertificate as jest.Mock).mockRejectedValue(
+    });
+    (mockWallet.proveCertificate as jest.Mock).mockRejectedValue(
       new Error('proveCertificate failed')
     )
 
@@ -132,8 +132,8 @@ describe('getVerifiableCertificates', () => {
   })
 
   it('handles empty requested certificates gracefully', async () => {
-    requestedCertificates = { certifiers: [], types: {} }
-    ;(mockWallet.listCertificates as jest.Mock).mockResolvedValue({
+    requestedCertificates = { certifiers: [], types: {} };
+    (mockWallet.listCertificates as jest.Mock).mockResolvedValue({
       certificates: []
     })
 

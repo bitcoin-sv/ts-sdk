@@ -60,9 +60,9 @@ describe('HD', () => {
   const vector2m02147483647h12147483646h2Private =
     'xprvA2nrNbFZABcdryreWet9Ea4LvTJcGsqrMzxHx98MMrotbir7yrKCEXw7nadnHM8Dq38EGfSh6dqA9QWTyefMLEcBYJUuekgW4BYPJcr9E7j'
 
-  it('should make a new a bip32', () => {
-    let bip32
-    bip32 = new HD()
+  it('should make a new bip32', () => {
+    const bip32 = new HD() // ✅ Use `const` instead of `let`
+
     expect(bip32).toBeDefined()
     expect(HD.fromString(vector1mPrivate).toString()).toEqual(vector1mPrivate)
     expect(
@@ -179,7 +179,9 @@ describe('HD', () => {
     const childPub = HD.fromString(child.toPublic().toString())
     const child2 = childPub.derive('m/1000000000')
     expect(child2).toBeDefined()
-    expect(child2.toPublic().toString()).toEqual(vector1m0h12h21000000000Public)
+    expect(child2.toPublic().toString()).toEqual(
+      vector1m0h12h21000000000Public
+    )
   })
 
   it('should initialize test vector 2 from the extended public key', () => {

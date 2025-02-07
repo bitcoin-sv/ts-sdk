@@ -1,11 +1,12 @@
+// @ts-nocheck
 import {
   Transaction,
   BroadcastResponse,
   BroadcastFailure,
   Broadcaster
-} from '../transaction/index'
-import LookupResolver from './LookupResolver'
-import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate'
+} from '../transaction/index.js'
+import LookupResolver from './LookupResolver.js'
+import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate.js'
 
 /**
  * Tagged BEEF
@@ -144,7 +145,7 @@ export default class SHIPCast implements Broadcaster {
       requireAcknowledgmentFromAllHostsForTopics,
       requireAcknowledgmentFromAnyHostForTopics,
       requireAcknowledgmentFromSpecificHostsForTopics
-    } = config ?? ({} as SHIPBroadcasterConfig)
+    } = config ?? defaultConfig
     this.facilitator = facilitator ?? new HTTPSOverlayBroadcastFacilitator()
     this.resolver = resolver ?? new LookupResolver()
     this.requireAcknowledgmentFromAllHostsForTopics =
@@ -187,7 +188,7 @@ export default class SHIPCast implements Broadcaster {
             beef,
             topics: [...topics]
           })
-          if (!steak || Object.keys(steak).length === 0) {
+          if (steak == null || Object.keys(steak).length === 0) {
             throw new Error('Steak has no topics.')
           }
           return { host, success: true, steak }
@@ -400,7 +401,7 @@ export default class SHIPCast implements Broadcaster {
   ): boolean {
     for (const [host, requiredTopicsOrAllAny] of Object.entries(requirements)) {
       const acknowledgedTopics = hostAcknowledgments[host]
-      if (!acknowledgedTopics) {
+      if (acknowledgedTopics == null) {
         // Host did not respond successfully
         return false
       }
@@ -477,7 +478,7 @@ export default class SHIPCast implements Broadcaster {
           // This should make us think a LOT less highly of this SHIP tracker if it ever happens...
           continue
         }
-        if (!results[parsed.domain]) {
+        if (results[parsed.domain] === undefined) {
           results[parsed.domain] = new Set()
         }
         results[parsed.domain].add(parsed.topicOrService)

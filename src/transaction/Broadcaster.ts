@@ -1,4 +1,4 @@
-import Transaction from './Transaction'
+import Transaction from './Transaction.js'
 
 /**
  * Defines the structure of a successful broadcast response.

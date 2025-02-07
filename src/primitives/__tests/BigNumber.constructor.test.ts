@@ -51,7 +51,9 @@ describe('BN.js/Constructor', () => {
 
     it('should accept base-16 with spaces', () => {
       const num = 'a89c e5af8724 c0a23e0e 0ff77500'
-      expect(new BigNumber(num, 16).toString(16)).toEqual(num.replace(/ /g, ''))
+      expect(new BigNumber(num, 16).toString(16)).toEqual(
+        num.replace(/ /g, '')
+      )
     })
 
     it('should accept long base-16', () => {
@@ -124,7 +126,7 @@ describe('BN.js/Constructor', () => {
     })
 
     it('should not accept non-hex characters', () => {
-      ;[
+      [
         '0000000z',
         '000000gg',
         '0000gg00',
@@ -154,7 +156,9 @@ describe('BN.js/Constructor', () => {
       expect(new BigNumber([1, 2, 3, 4, 5, 6, 7, 8]).toString(16)).toEqual(
         '102030405060708'
       )
-      expect(new BigNumber([1, 2, 3, 4]).toArray().join(',')).toEqual('1,2,3,4')
+      expect(new BigNumber([1, 2, 3, 4]).toArray().join(',')).toEqual(
+        '1,2,3,4'
+      )
       expect(
         new BigNumber([1, 2, 3, 4, 5, 6, 7, 8]).toArray().join(',')
       ).toEqual('1,2,3,4,5,6,7,8')
@@ -190,7 +194,7 @@ describe('BN.js/Constructor', () => {
   describe('with Buffer input', () => {
     it('should not fail on empty Buffer', () => {
       expect(
-        new BigNumber(Buffer.alloc(0).toString('hex') || '0').toString(16)
+        new BigNumber(Buffer.alloc(0).toString('hex') === '' ? '0' : Buffer.alloc(0).toString('hex')).toString(16)
       ).toEqual('0')
     })
 

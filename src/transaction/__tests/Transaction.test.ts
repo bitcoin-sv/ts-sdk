@@ -1,3 +1,4 @@
+
 import BigNumber from '../../primitives/BigNumber'
 import TransactionSignature from '../../primitives/TransactionSignature'
 import { toHex, toArray, Writer } from '../../primitives/utils'
@@ -25,18 +26,6 @@ const MerkleRootFromBEEF =
   'bb6f640cc4ee56bf38eb5a1969ac0c16caa2d3d202b22bf3735d10eec0ca6e00'
 
 describe('Transaction', () => {
-  const txIn = {
-    sourceTXID:
-      '0000000000000000000000000000000000000000000000000000000000000000',
-    sourceOutputIndex: 0,
-    unlockingScript: UnlockingScript.fromHex('ae'),
-    sequence: 0
-  }
-  const txOut = {
-    satoshis: BigNumber.fromHex('05000000000000', 'big').toNumber(),
-    lockingScript: LockingScript.fromHex('ae')
-  }
-  const tx = new Transaction(0, [txIn], [txOut], 0)
   const txhex =
     '000000000100000000000000000000000000000000000000000000000000000000000000000000000001ae0000000001050000000000000001ae00000000'
   const txbuf = toArray(txhex, 'hex')
@@ -175,7 +164,7 @@ describe('Transaction', () => {
     it('Signs unlocking script templates, hydrating the scripts', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -215,12 +204,12 @@ describe('Transaction', () => {
       await spendTx.sign()
       expect(spendTx.inputs[0].unlockingScript).toBeDefined()
       // P2PKH unlocking scripts have two chunks (the signature and public key)
-      expect(spendTx.inputs[0].unlockingScript.chunks.length).toBe(2)
+      expect(spendTx.inputs[0].unlockingScript?.chunks.length).toBe(2)
     })
     it('Signs a large number of unlocking script templates in a timely manner', async () => {
       const privateKey = new PrivateKey(134)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const spendCount = 30
       const output = {
@@ -270,7 +259,7 @@ describe('Transaction', () => {
       await spendTx.sign()
       expect(spendTx.inputs[0].unlockingScript).toBeDefined()
       // P2PKH unlocking scripts have two chunks (the signature and public key)
-      expect(spendTx.inputs[0].unlockingScript.chunks.length).toBe(2)
+      expect(spendTx.inputs[0].unlockingScript?.chunks.length).toBe(2)
     })
     it('Throws an Error if signing before the fee is computed', async () => {
       const privateKey = new PrivateKey(1)
@@ -321,7 +310,7 @@ describe('Transaction', () => {
     it('Computes fees with the default fee model', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -366,7 +355,7 @@ describe('Transaction', () => {
     it('Computes fees with a custom fee model', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -412,7 +401,7 @@ describe('Transaction', () => {
     it('Computes fee using FixedFee model', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -455,7 +444,7 @@ describe('Transaction', () => {
     it('Distributes change equally among multiple change outputs', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -521,7 +510,7 @@ describe('Transaction', () => {
     it('Distributes change randomly among multiple change outputs', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -589,12 +578,12 @@ describe('Transaction', () => {
         'random'
       )
       expect(spendTx.outputs[0].satoshis).toEqual(1)
-      expect(spendTx.outputs.reduce((a, b) => a + b.satoshis, 0)).toEqual(897)
+      expect(spendTx.outputs.reduce((a, b) => a + (b.satoshis ?? 0), 0)).toEqual(897)
     })
     it('Distributes change randomly among multiple change outputs, with one set output', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -661,12 +650,12 @@ describe('Transaction', () => {
         },
         'random'
       )
-      expect(spendTx.outputs.reduce((a, b) => a + b.satoshis, 0)).toEqual(8)
+      expect(spendTx.outputs.reduce((a, b) => a + (b.satoshis ?? 0), 0)).toEqual(8)
     })
     it('Distributes change randomly among multiple change outputs, thinnly spread', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
       const sourceTx = new Transaction(
         1,
@@ -703,7 +692,7 @@ describe('Transaction', () => {
         },
         'random'
       )
-      expect(spendTx.outputs.reduce((a, b) => a + b.satoshis, 0)).toEqual(45)
+      expect(spendTx.outputs.reduce((a, b) => a + (b.satoshis ?? 0), 0)).toEqual(45)
     })
     it('Calculates fee for utxo based transaction', async () => {
       const utxos = [
@@ -807,7 +796,7 @@ describe('Transaction', () => {
     describe('BEEF', () => {
       it('Serialization and deserialization', async () => {
         const tx = Transaction.fromBEEF(toArray(BRC62Hex, 'hex'))
-        expect(tx.inputs[0].sourceTransaction.merklePath.blockHeight).toEqual(
+        expect(tx.inputs[0].sourceTransaction?.merklePath?.blockHeight).toEqual(
           814435
         )
         const beef = toHex(tx.toBEEF())
@@ -933,7 +922,7 @@ describe('Transaction', () => {
           const otherInputs = [...tx.inputs]
           const [input] = otherInputs.splice(nIn, 1)
           const preimage = TransactionSignature.format({
-            sourceTXID: input.sourceTXID,
+            sourceTXID: input.sourceTXID ?? '',
             sourceOutputIndex: input.sourceOutputIndex,
             sourceSatoshis: valueBn,
             transactionVersion: tx.version,
@@ -941,11 +930,11 @@ describe('Transaction', () => {
             outputs: tx.outputs,
             inputIndex: nIn,
             subscript: subScript,
-            inputSequence: input.sequence,
+            inputSequence: input.sequence ?? 0xffffffff,
             lockTime: tx.lockTime,
             scope: nHashType
           })
-          const hash = hash256(preimage) as number[]
+          const hash = hash256(preimage)
           hash.reverse()
           expect(toHex(hash)).toEqual(toHex(sighashBuf))
         })
@@ -990,7 +979,7 @@ describe('Transaction', () => {
       it('should serialize a transaction to Atomic BEEF format correctly', async () => {
         const privateKey = new PrivateKey(1)
         const publicKey = new Curve().g.mul(privateKey)
-        const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+        const publicKeyHash = hash160(publicKey.encode(true))
         const p2pkh = new P2PKH()
 
         // Create a simple transaction

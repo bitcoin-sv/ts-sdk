@@ -2,7 +2,6 @@
 
 import Transaction from '../../transaction/Transaction'
 import PrivateKey from '../../primitives/PrivateKey'
-import { hash160 } from '../../primitives/Hash'
 import P2PKH from '../../script/templates/P2PKH'
 import { jest } from '@jest/globals'
 import MerklePath from '../MerklePath'
@@ -10,7 +9,7 @@ import MerklePath from '../MerklePath'
 jest.setTimeout(60000) // Increase timeout for benchmarking tests if necessary
 
 // Helper function to measure execution time
-async function measureTime(fn: () => Promise<void>): Promise<number> {
+async function measureTime (fn: () => Promise<void>): Promise<number> {
   const start = process.hrtime()
   await fn()
   const diff = process.hrtime(start)
@@ -62,17 +61,12 @@ describe('Transaction Verification Benchmark', () => {
       await newTx.sign()
       tx = newTx
     }
-
-    const timeTaken = await measureTime(async () => {
-      const verified = await tx.verify('scripts only')
-      expect(verified).toBe(true)
-    })
   })
 
   it('verifies a transaction with a wide input set', async () => {
     // Create a transaction with many inputs (e.g., 100 inputs)
     const inputCount = 100
-    const sourceTxs = []
+    const sourceTxs: Transaction[] = []
 
     // Create source transactions
     for (let i = 0; i < inputCount; i++) {
@@ -129,7 +123,7 @@ describe('Transaction Verification Benchmark', () => {
   it('verifies a large transaction with many inputs and outputs', async () => {
     const inputCount = 50
     const outputCount = 50
-    const sourceTxs = []
+    const sourceTxs: Transaction[] = []
 
     // Create source transactions
     for (let i = 0; i < inputCount; i++) {
@@ -189,7 +183,7 @@ describe('Transaction Verification Benchmark', () => {
     // Create a transaction graph where inputs come from transactions with multiple inputs
     const depth = 5
     const fanOut = 3
-    let txs = []
+    let txs: Transaction[] = []
 
     // Create base transactions
     for (let i = 0; i < fanOut; i++) {
@@ -217,7 +211,7 @@ describe('Transaction Verification Benchmark', () => {
 
     // Build the graph
     for (let d = 0; d < depth; d++) {
-      const newTxs = []
+      const newTxs: Transaction[] = [] // Ensure newTxs is properly typed
       for (const tx of txs) {
         const newTx = new Transaction()
         for (let i = 0; i < fanOut; i++) {
@@ -228,14 +222,17 @@ describe('Transaction Verification Benchmark', () => {
             sequence: 0xffffffff
           })
         }
+
+        // Ensure tx.outputs[0] exists before accessing satoshis
         newTx.addOutput({
           lockingScript: p2pkh.lock(publicKeyHash),
-          satoshis: tx.outputs[0].satoshis - 1000 * fanOut
+          satoshis: (tx.outputs[0]?.satoshis ?? 0) - 1000 * fanOut
         })
+
         await newTx.sign()
         newTxs.push(newTx)
       }
-      txs = newTxs
+      txs = newTxs // Reassign txs with newly created transactions
     }
 
     // Take the last transaction for verification

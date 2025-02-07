@@ -1,10 +1,10 @@
-import BigNumber from './BigNumber'
-import PublicKey from './PublicKey'
-import { verify } from './ECDSA'
-import { sha256 } from './Hash'
-import { toArray, toHex, toBase64 } from './utils'
-import Point from './Point'
-import Curve from './Curve'
+import BigNumber from './BigNumber.js'
+import PublicKey from './PublicKey.js'
+import { verify } from './ECDSA.js'
+import { sha256 } from './Hash.js'
+import { toArray, toHex, toBase64 } from './utils.js'
+import Point from './Point.js'
+import Curve from './Curve.js'
 
 /**
  * Represents a digital signature.
@@ -189,7 +189,7 @@ export default class Signature {
    * @example
    * const der = signature.toString('base64');
    */
-  toString (enc?: 'hex' | 'base64') {
+  toString (enc?: 'hex' | 'base64'): number[] | string {
     return this.toDER(enc)
   }
 
@@ -284,7 +284,9 @@ export default class Signature {
     enc?: 'hex' | 'base64'
   ): number[] | string {
     if (recovery < 0 || recovery > 3) throw new Error('Invalid recovery param')
-    if (typeof compressed !== 'boolean') { throw new Error('Invalid compressed param') }
+    if (typeof compressed !== 'boolean') {
+      throw new Error('Invalid compressed param')
+    }
     let compactByte = 27 + recovery
     if (compressed) {
       compactByte += 4
@@ -319,7 +321,7 @@ export default class Signature {
     const s = this.s
 
     // A set LSB signifies that the y-coordinate is odd
-    const isYOdd = !!(recovery & 1)
+    const isYOdd = (recovery & 1) !== 0
 
     // The more significant bit specifies whether we should use the
     // first or second candidate key.
@@ -330,7 +332,7 @@ export default class Signature {
     const G = curve.g
 
     // 1.1 LEt x = r + jn
-    const x = isSecondKey ? r.add(n) : r
+    const x = isSecondKey !== 0 ? r.add(n) : r
     const R = Point.fromX(x, isYOdd)
 
     // 1.4 Check that nR is at infinity
@@ -375,7 +377,7 @@ export default class Signature {
       let Qprime
       try {
         Qprime = this.RecoverPublicKey(recovery, msgHash)
-      } catch (e) {
+      } catch {
         continue
       }
       if (pubkey.eq(Qprime)) {
