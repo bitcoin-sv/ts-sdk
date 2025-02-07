@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import LockingScript from './LockingScript'
 import UnlockingScript from './UnlockingScript'
 import Script from './Script'
@@ -386,8 +386,7 @@ export default class Spend {
       bn3: BigNumber,
       bufSig: number[],
       bufPubkey: number[],
-      subscript,
-      bufHash: number[]
+      subscript
     let sig,
       pubkey,
       i: number,
@@ -601,10 +600,9 @@ export default class Spend {
         case OP.OP_TOALTSTACK:
           if (this.stack.length < 1) {
             this.scriptEvaluationError(
-              'OP_TOALTSTACK requires at oeast one item to be on the stack.'
-            )
+              'OP_TOALTSTACK requires at oeast one item to be on the stack.')
           }
-          this.altStack.push(this.stack.pop())
+          this.altStack.push(this.stack.pop() ?? [])
           break
 
         case OP.OP_FROMALTSTACK:
@@ -613,7 +611,7 @@ export default class Spend {
               'OP_FROMALTSTACK requires at least one item to be on the stack.'
             )
           }
-          this.stack.push(this.altStack.pop())
+          this.stack.push(this.altStack.pop() ?? [])
           break
 
         case OP.OP_2DROP:
@@ -1081,12 +1079,14 @@ export default class Spend {
         case OP.OP_SHA1:
         case OP.OP_SHA256:
         case OP.OP_HASH160:
-        case OP.OP_HASH256:
+        case OP.OP_HASH256: {
           if (this.stack.length < 1) {
             this.scriptEvaluationError(
               `${OP[currentOpcode] as string} requires at least one item to be on the stack.`
             )
           }
+
+          let bufHash: number[] = [] // ✅ Initialize bufHash to an empty array
           buf = this.stacktop(-1)
           if (currentOpcode === OP.OP_RIPEMD160) {
             bufHash = Hash.ripemd160(buf)
@@ -1099,9 +1099,11 @@ export default class Spend {
           } else if (currentOpcode === OP.OP_HASH256) {
             bufHash = Hash.hash256(buf)
           }
+
           this.stack.pop()
           this.stack.push(bufHash)
           break
+        }
 
         case OP.OP_CODESEPARATOR:
           this.lastCodeSeparator = this.programCounter
@@ -1131,11 +1133,11 @@ export default class Spend {
           // CScript scriptCode(pbegincodehash, pend);
           if (this.context === 'UnlockingScript') {
             subscript = new Script(
-              this.unlockingScript.chunks.slice(this.lastCodeSeparator)
+              this.unlockingScript.chunks.slice(this.lastCodeSeparator ?? 0)
             )
           } else {
             subscript = new Script(
-              this.lockingScript.chunks.slice(this.lastCodeSeparator)
+              this.lockingScript.chunks.slice(this.lastCodeSeparator ?? 0)
             )
           }
 
@@ -1227,11 +1229,11 @@ export default class Spend {
           // Subset of script starting at the most recent codeseparator
           if (this.context === 'UnlockingScript') {
             subscript = new Script(
-              this.unlockingScript.chunks.slice(this.lastCodeSeparator)
+              this.unlockingScript.chunks.slice(this.lastCodeSeparator ?? 0)
             )
           } else {
             subscript = new Script(
-              this.lockingScript.chunks.slice(this.lastCodeSeparator)
+              this.lockingScript.chunks.slice(this.lastCodeSeparator ?? 0)
             )
           }
 
