@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Reader, Writer, toHex, toArray } from '../primitives/utils'
 import { hash256 } from '../primitives/Hash'
 import ChainTracker from './ChainTracker'
@@ -59,10 +59,11 @@ export default class MerklePath {
   ): MerklePath {
     const blockHeight = reader.readVarIntNum()
     const treeHeight = reader.readUInt8()
-    const path = Array(treeHeight)
-      .fill(0)
+    // Explicitly define the type of path as an array of arrays of leaf objects
+    const path: Array<Array<{ offset: number, hash?: string, txid?: boolean, duplicate?: boolean }>> = Array(treeHeight)
+      .fill(null)
       .map(() => [])
-    let flags, offset, nLeavesAtThisHeight
+    let flags: number, offset: number, nLeavesAtThisHeight: number
     for (let level = 0; level < treeHeight; level++) {
       nLeavesAtThisHeight = reader.readVarIntNum()
       while (nLeavesAtThisHeight > 0) {
@@ -82,9 +83,14 @@ export default class MerklePath {
           }
           leaf.hash = toHex(reader.read(32).reverse())
         }
+        // Ensure path[level] exists before pushing
+        if (!Array.isArray(path[level]) || path[level].length === 0) {
+          path[level] = []
+        }
         path[level].push(leaf)
         nLeavesAtThisHeight--
       }
+      // Sort the array based on the offset property
       path[level].sort((a, b) => a.offset - b.offset)
     }
     return new MerklePath(blockHeight, path, legalOffsetsOnly)
@@ -216,7 +222,11 @@ export default class MerklePath {
 
   //
   private indexOf (txid: string): number {
-    return this.path[0].find((l) => l.hash === txid).offset
+    const leaf = this.path[0].find((l) => l.hash === txid)
+    if (leaf === null || leaf === undefined) {
+      throw new Error(`Transaction ID ${txid} not found in the Merkle Path`)
+    }
+    return leaf.offset
   }
 
   /**
@@ -228,9 +238,16 @@ export default class MerklePath {
    */
   computeRoot (txid?: string): string {
     if (typeof txid !== 'string') {
-      txid = this.path[0].find((leaf) => Boolean(leaf?.hash)).hash
+      const foundLeaf = this.path[0].find((leaf) => Boolean(leaf?.hash))
+      if (foundLeaf === null || foundLeaf === undefined) {
+        throw new Error('No valid leaf found in the Merkle Path')
+      }
+      txid = foundLeaf.hash
     }
     // Find the index of the txid at the lowest level of the Merkle tree
+    if (typeof txid !== 'string') {
+      throw new Error('Transaction ID is undefined')
+    }
     const index = this.indexOf(txid)
     if (typeof index !== 'number') {
       throw new Error(`This proof does not contain the txid: ${txid ?? 'undefined'}`)
@@ -347,7 +364,7 @@ export default class MerklePath {
         'You cannot combine paths which do not have the same root.'
       )
     }
-    const combinedPath = []
+    const combinedPath: Array<Array<{ offset: number, hash?: string, txid?: boolean, duplicate?: boolean }>> = []
     for (let h = 0; h < this.path.length; h++) {
       combinedPath.push([])
       for (let l = 0; l < this.path[h].length; l++) {
@@ -355,9 +372,9 @@ export default class MerklePath {
       }
       for (let l = 0; l < other.path[h].length; l++) {
         if (
-          !(combinedPath[h].find(
+          combinedPath[h].find(
             (leaf) => leaf.offset === other.path[h][l].offset
-          ) as boolean)
+          ) === undefined
         ) {
           combinedPath[h].push(other.path[h][l])
         } else {
@@ -366,7 +383,9 @@ export default class MerklePath {
             const target = combinedPath[h].find(
               (leaf) => leaf.offset === other.path[h][l].offset
             )
-            target.txid = true
+            if (target !== null && target !== undefined) {
+              target.txid = true
+            }
           }
         }
       }
