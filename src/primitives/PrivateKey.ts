@@ -134,7 +134,7 @@ export default class PrivateKey extends BigNumber {
    * @throws Will throw an error if the string is not a valid WIF.
    **/
   static fromWif (wif: string, prefixLength: number = 1): PrivateKey {
-    const decoded = fromBase58Check(wif, null, prefixLength)
+    const decoded = fromBase58Check(wif, undefined, prefixLength)
     if (decoded.data.length !== 33) {
       throw new Error('Invalid WIF length')
     }
@@ -221,7 +221,7 @@ export default class PrivateKey extends BigNumber {
     msg: number[] | string,
     enc?: 'hex' | 'utf8',
     forceLowS: boolean = true,
-    customK?: Function | BigNumber
+    customK?: ((iter: number) => BigNumber) | BigNumber
   ): Signature {
     const msgHash = new BigNumber(sha256(msg, enc), 16)
     return sign(msgHash, this, forceLowS, customK)
