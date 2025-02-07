@@ -33,15 +33,15 @@ export default abstract class BasePoint {
     curve: Curve;
     type: "affine" | "jacobian";
     precomputed: {
-        doubles: {
+        doubles?: {
             step: number;
-            points: any[];
-        } | undefined;
-        naf: {
-            wnd: any;
-            points: any[];
-        } | undefined;
-        beta: BasePoint | null | undefined;
+            points: BasePoint[];
+        };
+        naf?: {
+            wnd: number;
+            points: BasePoint[];
+        };
+        beta?: BasePoint | null;
     } | null;
     constructor(type: "affine" | "jacobian") 
 }
@@ -3547,13 +3547,20 @@ export default class Curve {
     tinv: BigNumber;
     zeroA: boolean;
     threeA: boolean;
-    endo: any;
-    _endoWnafT1: any[];
-    _endoWnafT2: any[];
-    _wnafT1: any[];
-    _wnafT2: any[];
-    _wnafT3: any[];
-    _wnafT4: any[];
+    endo: {
+        beta: BigNumber;
+        lambda: BigNumber;
+        basis: Array<{
+            a: BigNumber;
+            b: BigNumber;
+        }>;
+    } | undefined;
+    _endoWnafT1: BigNumber[];
+    _endoWnafT2: BigNumber[];
+    _wnafT1: BigNumber[];
+    _wnafT2: BigNumber[];
+    _wnafT3: BigNumber[];
+    _wnafT4: BigNumber[];
     _bitLength: number;
     static assert(expression: unknown, message: string = "Elliptic curve assertion failed"): void 
     getNAF(num: BigNumber, w: number, bits: number): number[] 
@@ -4149,7 +4156,7 @@ export class KeyShares {
     integrity: string;
     constructor(points: PointInFiniteField[], threshold: number, integrity: string) 
     static fromBackupFormat(shares: string[]): KeyShares 
-    toBackupFormat() 
+    toBackupFormat(): string[] 
 }
 ```
 
@@ -5248,7 +5255,7 @@ export default class PrivateKey extends BigNumber {
         modN: BigNumber;
     } 
     isValid(): boolean 
-    sign(msg: number[] | string, enc?: "hex" | "utf8", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
+    sign(msg: number[] | string, enc?: "hex" | "utf8", forceLowS: boolean = true, customK?: ((iter: number) => BigNumber) | BigNumber): Signature 
     verify(msg: number[] | string, sig: Signature, enc?: "hex"): boolean 
     toPublicKey(): PublicKey 
     toWif(prefix: number[] = [128]): string 
@@ -5286,7 +5293,7 @@ Argument Details
 + **endian**
   + The endianness provided. By default is 'big endian'. Ignored if number is BigNumber.
 + **modN**
-  + Optional. Default 'apply. If 'apply', apply modN to input to guarantee a valid PrivateKey. If 'error', if input is out of field throw Error('Input is out of field'). If 'nocheck', assumes input is in field.
+  + Optional. Default 'apply. If 'apply', apply modN to input to guarantee a valid PrivateKey. If 'error', if input is out of field throw new Error('Input is out of field'). If 'nocheck', assumes input is in field.
 
 Example
 
@@ -5506,7 +5513,7 @@ true if the PrivateKey's current BigNumber value lies in the field limited by cu
 Signs a message using the private key.
 
 ```ts
-sign(msg: number[] | string, enc?: "hex" | "utf8", forceLowS: boolean = true, customK?: Function | BigNumber): Signature 
+sign(msg: number[] | string, enc?: "hex" | "utf8", forceLowS: boolean = true, customK?: ((iter: number) => BigNumber) | BigNumber): Signature 
 ```
 See also: [BigNumber](./primitives.md#class-bignumber), [Signature](./primitives.md#class-signature)
 
@@ -6979,10 +6986,10 @@ export class SHA512 extends BaseHash {
     W: number[];
     k: number[];
     constructor() 
-    _prepareBlock(msg, start) 
-    _update(msg, start) 
-    _digest() 
-    _digestHex() 
+    _prepareBlock(msg: number[], start: number): void 
+    _update(msg: any, start: number): void 
+    _digest(): number[] 
+    _digestHex(): number[] 
 }
 ```
 
@@ -7301,7 +7308,7 @@ export default class Signature {
     static fromCompact(data: number[] | string, enc?: "hex" | "base64"): Signature 
     constructor(r: BigNumber, s: BigNumber) 
     verify(msg: number[] | string, key: PublicKey, enc?: "hex"): boolean 
-    toString(enc?: "hex" | "base64") 
+    toString(enc?: "hex" | "base64"): number[] | string 
     toDER(enc?: "hex" | "base64"): number[] | string 
     toCompact(recovery: number, compressed: boolean, enc?: "hex" | "base64"): number[] | string 
     RecoverPublicKey(recovery: number, e: BigNumber): PublicKey 
@@ -7522,7 +7529,7 @@ If 'base64', it will return a base64 string.
 Otherwise, it will return an array of numbers.
 
 ```ts
-toString(enc?: "hex" | "base64") 
+toString(enc?: "hex" | "base64"): number[] | string 
 ```
 
 Returns
@@ -7987,19 +7994,19 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 fromBase58 = (str: string): number[] => {
-    if (!str || typeof str !== "string") {
+    if (str === "" || typeof str !== "string") {
         throw new Error(`Expected base58 string but got “${str}”`);
     }
-    if (str.match(/[IOl0]/gmu)) {
-        throw new Error(`Invalid base58 character “${str.match(/[IOl0]/gmu)}”`);
+    const match: string[] | null = str.match(/[IOl0]/gmu);
+    if (match !== null) {
+        throw new Error(`Invalid base58 character “${match.join("")}”`);
     }
     const lz = str.match(/^1+/gmu);
-    const psz: number = lz ? lz[0].length : 0;
+    const psz: number = (lz !== null) ? lz[0].length : 0;
     const size = ((str.length - psz) * (Math.log(58) / Math.log(256)) + 1) >>> 0;
     const uint8 = new Uint8Array([
         ...new Uint8Array(psz),
-        ...str
-            .match(/./gmu)
+        ...(str.match(/./gmu) ?? [])
             .map((i) => base58chars.indexOf(i))
             .reduce((acc, i) => {
             acc = acc.map((j) => {
@@ -8022,7 +8029,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ### Variable: fromBase58Check
 
 ```ts
-fromBase58Check = (str: string, enc?: "hex", prefixLength: number = 1) => {
+fromBase58Check = (str: string, enc?: "hex", prefixLength: number = 1): any => {
     const bin = fromBase58(str);
     let prefix: string | number[] = bin.slice(0, prefixLength);
     let data: string | number[] = bin.slice(prefixLength, -4);
@@ -8281,7 +8288,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ### Variable: sign
 
 ```ts
-sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: BigNumber | Function): Signature => {
+sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: BigNumber | ((iter: number) => BigNumber)): Signature => {
     if (typeof BigInt === "function") {
         const zero = BigInt(0);
         const one = BigInt(1);
@@ -8324,19 +8331,19 @@ sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: Bi
                 return k;
             }
         }
-        function generateK(): bigint {
+        function generateK(customK?: BigNumber | ((iter: number) => BigNumber)): bigint {
             if (typeof customK === "function") {
-                const k_bn = customK(iter);
-                const k_str = k_bn.toString(16);
-                return BigInt("0x" + k_str);
+                const kbn = customK(iter);
+                const kstr = kbn.toString(16);
+                return BigInt("0x" + kstr);
             }
-            else if (BigNumber.isBN(customK)) {
-                const k_str = customK.toString(16);
-                return BigInt("0x" + k_str);
+            else if ((customK != null) && BigNumber.isBN(customK)) {
+                const kstr = customK.toString(16);
+                return BigInt("0x" + kstr);
             }
             else {
-                const k_hex = drbg.generate(bytes);
-                return BigInt("0x" + k_hex);
+                const khex = drbg.generate(bytes);
+                return BigInt("0x" + khex);
             }
         }
         function mod(a: bigint, m: bigint): bigint {
@@ -8399,21 +8406,30 @@ sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: Bi
         }): {
             x: bigint;
             y: bigint;
-        } | null {
+        } {
             let N = P;
-            let Q = null;
-            while (k > zero) {
-                if (k % two === one) {
-                    Q = pointAdd(Q, N);
+            let Q: {
+                x: bigint;
+                y: bigint;
+            } | null = null;
+            while (k > BigInt(0)) {
+                if (k % BigInt(2) === BigInt(1)) {
+                    Q = Q === null ? N : (pointAdd(Q, N) ?? Q);
                 }
-                N = pointAdd(N, N);
-                k >>= one;
+                N = pointAdd(N, N) ?? N;
+                k >>= BigInt(1);
+            }
+            if (Q === null) {
+                throw new Error("Scalar multiplication resulted in an invalid point.");
             }
             return Q;
         }
-        while (true) {
-            let k = generateK();
+        let validSignature = false;
+        while (!validSignature) {
             iter += 1;
+            validSignature = true;
+            iter += 1;
+            let k = generateK(customK);
             k = truncateToN(k, n, true);
             if (k <= one || k >= ns1) {
                 if (customK instanceof BigNumber) {
@@ -8455,9 +8471,9 @@ sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: Bi
             if (forceLowS && s > n / two) {
                 s = n - s;
             }
-            const r_bn = new BigNumber(r.toString(16), 16);
-            const s_bn = new BigNumber(s.toString(16), 16);
-            return new Signature(r_bn, s_bn);
+            const rbn = new BigNumber(r.toString(16), 16);
+            const sbn = new BigNumber(s.toString(16), 16);
+            return new Signature(rbn, sbn);
         }
     }
     else {
@@ -8474,7 +8490,12 @@ sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: Bi
                 : BigNumber.isBN(customK)
                     ? customK
                     : new BigNumber(drbg.generate(bytes), 16);
-            k = truncateToN(k, true);
+            if (k != null) {
+                k = truncateToN(k, true);
+            }
+            else {
+                throw new Error("k is undefined");
+            }
             if (k.cmpn(1) <= 0 || k.cmp(ns1) >= 0) {
                 if (BigNumber.isBN(customK)) {
                     throw new Error("Invalid fixed custom K value (must be more than 1 and less than N-1)");
@@ -8518,6 +8539,7 @@ sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: Bi
             return new Signature(r, s);
         }
     }
+    throw new Error("Failed to generate a valid signature");
 }
 ```
 
@@ -8532,7 +8554,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 toArray = (msg: any, enc?: "hex" | "utf8" | "base64"): any[] => {
     if (Array.isArray(msg))
         return msg.slice();
-    if (!msg)
+    if (msg === undefined)
         return [];
     if (typeof msg !== "string") {
         return Array.from(msg, (item: any) => item | 0);
@@ -8559,7 +8581,7 @@ toBase58 = (bin: number[]): string => {
     for (let i = 0; i < base58chars.length; ++i) {
         base58Map[base58chars.charCodeAt(i)] = i;
     }
-    const result = [];
+    const result: number[] = [];
     for (const byte of bin) {
         let carry = byte;
         for (let j = 0; j < result.length; ++j) {
@@ -8567,13 +8589,13 @@ toBase58 = (bin: number[]): string => {
             result[j] = base58chars.charCodeAt(x % 58);
             carry = (x / 58) | 0;
         }
-        while (carry) {
+        while (carry !== 0) {
             result.push(base58chars.charCodeAt(carry % 58));
             carry = (carry / 58) | 0;
         }
     }
     for (const byte of bin) {
-        if (byte)
+        if (byte !== 0)
             break;
         else
             result.push("1".charCodeAt(0));
@@ -8589,7 +8611,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ### Variable: toBase58Check
 
 ```ts
-toBase58Check = (bin: number[], prefix: number[] = [0]) => {
+toBase58Check = (bin: number[], prefix: number[] = [0]): string => {
     let hash = hash256([...prefix, ...bin]);
     hash = [...prefix, ...bin, ...hash.slice(0, 4)];
     return toBase58(hash);
@@ -8684,20 +8706,19 @@ verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
         };
         const mod = (a: bigint, m: bigint): bigint => ((a % m) + m) % m;
         const modInv = (a: bigint, m: bigint): bigint => {
-            let [old_r, r] = [a, m];
-            let [old_s, s] = [BigInt(1), BigInt(0)];
+            let [oldr, r] = [a, m];
+            let [olds, s] = [BigInt(1), BigInt(0)];
             while (r !== zero) {
-                const q = old_r / r;
-                [old_r, r] = [r, old_r - q * r];
-                [old_s, s] = [s, old_s - q * s];
+                const q = oldr / r;
+                [oldr, r] = [r, oldr - q * r];
+                [olds, s] = [s, olds - q * s];
             }
-            if (old_r > one)
+            if (oldr > one)
                 return zero;
-            return mod(old_s, m);
+            return mod(olds, m);
         };
         const modMul = (a: bigint, b: bigint, m: bigint): bigint => mod(a * b, m);
         const modSub = (a: bigint, b: bigint, m: bigint): bigint => mod(a - b, m);
-        const modAdd = (a: bigint, b: bigint, m: bigint): bigint => mod(a + b, m);
         const four = BigInt(4);
         const eight = BigInt(8);
         interface JacobianPoint {
@@ -8710,11 +8731,11 @@ verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
             if (Y1 === zero) {
                 return { X: zero, Y: one, Z: zero };
             }
-            const Y1_sq = modMul(Y1, Y1, p);
-            const S = modMul(four, modMul(X1, Y1_sq, p), p);
+            const Y1sq = modMul(Y1, Y1, p);
+            const S = modMul(four, modMul(X1, Y1sq, p), p);
             const M = modMul(three, modMul(X1, X1, p), p);
             const X3 = modSub(modMul(M, M, p), modMul(two, S, p), p);
-            const Y3 = modSub(modMul(M, modSub(S, X3, p), p), modMul(eight, modMul(Y1_sq, Y1_sq, p), p), p);
+            const Y3 = modSub(modMul(M, modSub(S, X3, p), p), modMul(eight, modMul(Y1sq, Y1sq, p), p), p);
             const Z3 = modMul(two, modMul(Y1, Z1, p), p);
             return { X: X3, Y: Y3, Z: Z3 };
         };
@@ -8791,11 +8812,14 @@ verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
                 return false;
             }
             const ZInv2 = modMul(ZInv, ZInv, p);
-            const x1_affine = modMul(R.X, ZInv2, p);
-            const v = mod(x1_affine, n);
+            const x1affine = modMul(R.X, ZInv2, p);
+            const v = mod(x1affine, n);
             return v === r;
         };
         const hash = BigInt("0x" + msg.toString(16));
+        if ((key.x == null) || (key.y == null)) {
+            throw new Error("Invalid public key: missing coordinates.");
+        }
         const publicKey = {
             x: BigInt("0x" + key.x.toString(16)),
             y: BigInt("0x" + key.y.toString(16))

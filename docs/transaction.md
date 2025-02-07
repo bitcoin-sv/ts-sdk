@@ -503,7 +503,7 @@ export default class ARC implements Broadcaster {
     constructor(URL: string, apiKey?: string);
     constructor(URL: string, config?: string | ArcConfig) 
     async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> 
-    async broadcastMany(txs: Transaction[]): Promise<Array<object>> 
+    async broadcastMany(txs: Transaction[]): Promise<object[]> 
 }
 ```
 
@@ -568,7 +568,7 @@ Broadcasts multiple transactions via ARC.
 Handles mixed responses where some transactions succeed and others fail.
 
 ```ts
-async broadcastMany(txs: Transaction[]): Promise<Array<object>> 
+async broadcastMany(txs: Transaction[]): Promise<object[]> 
 ```
 See also: [Transaction](./transaction.md#class-transaction)
 
@@ -603,15 +603,15 @@ export class Beef {
     mergeBump(bump: MerklePath): number 
     mergeRawTx(rawTx: number[], bumpIndex?: number): BeefTx 
     mergeTransaction(tx: Transaction): BeefTx 
-    removeExistingTxid(txid: string) 
+    removeExistingTxid(txid: string): void 
     mergeTxidOnly(txid: string): BeefTx 
     mergeBeefTx(btx: BeefTx): BeefTx 
-    mergeBeef(beef: number[] | Beef) 
+    mergeBeef(beef: number[] | Beef): void 
     isValid(allowTxidOnly?: boolean): boolean 
     async verify(chainTracker: ChainTracker, allowTxidOnly?: boolean): Promise<boolean> 
-    toWriter(writer: Writer) 
+    toWriter(writer: Writer): void 
     toBinary(): number[] 
-    toBinaryAtomic(txid: string) 
+    toBinaryAtomic(txid: string): number[] 
     toHex(): string 
     static fromReader(br: Reader): Beef 
     static fromBinary(bin: number[]): Beef 
@@ -624,10 +624,10 @@ export class Beef {
         txidOnly: string[];
     } 
     clone(): Beef 
-    trimKnownTxids(knownTxids: string[]) 
+    trimKnownTxids(knownTxids: string[]): void 
     getValidTxids(): string[] 
     toLogString(): string 
-    addComputedLeaves() 
+    addComputedLeaves(): void 
 }
 ```
 
@@ -639,11 +639,11 @@ See also: [BEEF_V2](./transaction.md#variable-beef_v2), [BeefTx](./transaction.m
 
 #### Method addComputedLeaves
 
-In some circumstances it may be helpful for the BUMP MerkePaths to include
+In some circumstances it may be helpful for the BUMP MerklePaths to include
 leaves that can be computed from row zero.
 
 ```ts
-addComputedLeaves() 
+addComputedLeaves(): void 
 ```
 
 #### Method clone
@@ -868,7 +868,7 @@ txid of tx
 Removes an existing transaction from the BEEF, given its TXID
 
 ```ts
-removeExistingTxid(txid: string) 
+removeExistingTxid(txid: string): void 
 ```
 
 Argument Details
@@ -920,7 +920,7 @@ Serialize this Beef as AtomicBEEF.
 after sorting, if txid is not last txid, creates a clone and removes newer txs
 
 ```ts
-toBinaryAtomic(txid: string) 
+toBinaryAtomic(txid: string): number[] 
 ```
 
 Returns
@@ -954,7 +954,7 @@ Summary of `Beef` contents as multi-line string.
 Serializes this data to `writer`
 
 ```ts
-toWriter(writer: Writer) 
+toWriter(writer: Writer): void 
 ```
 See also: [Writer](./primitives.md#class-writer)
 
@@ -963,7 +963,7 @@ See also: [Writer](./primitives.md#class-writer)
 Ensure that all the txids in `knownTxids` are txidOnly
 
 ```ts
-trimKnownTxids(knownTxids: string[]) 
+trimKnownTxids(knownTxids: string[]): void 
 ```
 
 #### Method verify
@@ -1020,12 +1020,12 @@ The size and redundancy of these Beefs becomes a problem when chained transactio
 export class BeefParty extends Beef {
     knownTo: Record<string, Record<string, boolean>> = {};
     constructor(parties?: string[]) 
-    isParty(party: string) 
-    addParty(party: string) 
+    isParty(party: string): boolean 
+    addParty(party: string): void 
     getKnownTxidsForParty(party: string): string[] 
     getTrimmedBeefForParty(party: string): Beef 
-    addKnownTxidsForParty(party: string, knownTxids: string[]) 
-    mergeBeefFromParty(party: string, beef: number[] | Beef) 
+    addKnownTxidsForParty(party: string, knownTxids: string[]): void 
+    mergeBeefFromParty(party: string, beef: number[] | Beef): void 
 }
 ```
 
@@ -1060,7 +1060,7 @@ knownTo: Record<string, Record<string, boolean>> = {}
 Make note of additional txids "known" to `party`.
 
 ```ts
-addKnownTxidsForParty(party: string, knownTxids: string[]) 
+addKnownTxidsForParty(party: string, knownTxids: string[]): void 
 ```
 
 Argument Details
@@ -1073,7 +1073,7 @@ Argument Details
 Adds a new unique party identifier to this `BeefParty`.
 
 ```ts
-addParty(party: string) 
+addParty(party: string): void 
 ```
 
 #### Method getKnownTxidsForParty
@@ -1100,7 +1100,7 @@ trimmed beef of unknown transactions and proofs for `party`
 #### Method isParty
 
 ```ts
-isParty(party: string) 
+isParty(party: string): boolean 
 ```
 
 Returns
@@ -1116,7 +1116,7 @@ corresponding to transactions for which `party`
 has raw transaction and validity proof data.
 
 ```ts
-mergeBeefFromParty(party: string, beef: number[] | Beef) 
+mergeBeefFromParty(party: string, beef: number[] | Beef): void 
 ```
 See also: [Beef](./transaction.md#class-beef)
 
@@ -1147,9 +1147,9 @@ export default class BeefTx {
     set bumpIndex(v: number | undefined) 
     get hasProof(): boolean 
     get isTxidOnly(): boolean 
-    get txid() 
-    get tx() 
-    get rawTx() 
+    get txid(): string 
+    get tx(): Transaction | undefined 
+    get rawTx(): number[] | undefined 
     constructor(tx: Transaction | number[] | string, bumpIndex?: number) 
     static fromTx(tx: Transaction, bumpIndex?: number): BeefTx 
     static fromRawTx(rawTx: number[], bumpIndex?: number): BeefTx 
@@ -1249,7 +1249,7 @@ export default class MerklePath {
     findOrComputeLeaf(height: number, offset: number): MerklePathLeaf | undefined 
     async verify(txid: string, chainTracker: ChainTracker): Promise<boolean> 
     combine(other: MerklePath): void 
-    trim() 
+    trim(): void 
 }
 ```
 
@@ -1394,7 +1394,7 @@ Assumes that at least all required nodes are present.
 Leaves all levels sorted by increasing offset.
 
 ```ts
-trim() 
+trim(): void 
 ```
 
 #### Method verify

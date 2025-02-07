@@ -31,8 +31,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export default interface ScriptTemplate {
-    lock: (...params: any) => LockingScript | Promise<LockingScript>;
-    unlock: (...params: any) => {
+    lock: (...params: unknown[]) => LockingScript | Promise<LockingScript>;
+    unlock: (...params: unknown[]) => {
         sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
         estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
     };
@@ -50,7 +50,7 @@ See also: [LockingScript](./script.md#class-lockingscript), [Transaction](./tran
 Creates a locking script with the given parameters.
 
 ```ts
-lock: (...params: any) => LockingScript | Promise<LockingScript>
+lock: (...params: unknown[]) => LockingScript | Promise<LockingScript>
 ```
 See also: [LockingScript](./script.md#class-lockingscript)
 
@@ -63,7 +63,7 @@ This method returns an object containing two functions:
 2. `estimateLength` - A function that returns the estimated length of the unlocking script in bytes.
 
 ```ts
-unlock: (...params: any) => {
+unlock: (...params: unknown[]) => {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
     estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
 }

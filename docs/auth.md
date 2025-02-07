@@ -416,33 +416,34 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export class CompletedProtoWallet extends ProtoWallet implements WalletInterface {
+    keyDeriver: KeyDeriver;
     constructor(rootKeyOrKeyDeriver: PrivateKey | "anyone" | KeyDeriverApi) 
-    isAuthenticated(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AuthenticatedResult> 
-    waitForAuthentication(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AuthenticatedResult> 
-    getNetwork(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetNetworkResult> 
-    getVersion(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetVersionResult> 
-    async getPublicKey(args: GetPublicKeyArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+    async isAuthenticated(): Promise<AuthenticatedResult> 
+    async waitForAuthentication(): Promise<AuthenticatedResult> 
+    async getNetwork(): Promise<GetNetworkResult> 
+    async getVersion(): Promise<GetVersionResult> 
+    async getPublicKey(args: GetPublicKeyArgs): Promise<{
         publicKey: PubKeyHex;
     }> 
-    async createAction(args: CreateActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<CreateActionResult> 
-    async signAction(args: SignActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<SignActionResult> 
-    async abortAction(args: AbortActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AbortActionResult> 
-    async listActions(args: ListActionsArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ListActionsResult> 
-    async internalizeAction(args: InternalizeActionArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<InternalizeActionResult> 
-    async listOutputs(args: ListOutputsArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ListOutputsResult> 
-    async relinquishOutput(args: RelinquishOutputArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<RelinquishOutputResult> 
-    async acquireCertificate(args: AcquireCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<AcquireCertificateResult> 
-    async listCertificates(args: ListCertificatesArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ListCertificatesResult> 
-    async proveCertificate(args: ProveCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<ProveCertificateResult> 
-    async relinquishCertificate(args: RelinquishCertificateArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<RelinquishCertificateResult> 
-    async discoverByIdentityKey(args: DiscoverByIdentityKeyArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<DiscoverCertificatesResult> 
-    async discoverByAttributes(args: DiscoverByAttributesArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<DiscoverCertificatesResult> 
-    async getHeight(args: {}, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetHeightResult> 
-    async getHeaderForHeight(args: GetHeaderArgs, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<GetHeaderResult> 
+    async createAction(): Promise<CreateActionResult> 
+    async signAction(): Promise<SignActionResult> 
+    async abortAction(): Promise<AbortActionResult> 
+    async listActions(): Promise<ListActionsResult> 
+    async internalizeAction(): Promise<InternalizeActionResult> 
+    async listOutputs(): Promise<ListOutputsResult> 
+    async relinquishOutput(): Promise<RelinquishOutputResult> 
+    async acquireCertificate(): Promise<AcquireCertificateResult> 
+    async listCertificates(): Promise<ListCertificatesResult> 
+    async proveCertificate(): Promise<ProveCertificateResult> 
+    async relinquishCertificate(): Promise<RelinquishCertificateResult> 
+    async discoverByIdentityKey(): Promise<DiscoverCertificatesResult> 
+    async discoverByAttributes(): Promise<DiscoverCertificatesResult> 
+    async getHeight(): Promise<GetHeightResult> 
+    async getHeaderForHeight(): Promise<GetHeaderResult> 
 }
 ```
 
-See also: [AbortActionArgs](./wallet.md#interface-abortactionargs), [AbortActionResult](./wallet.md#interface-abortactionresult), [AcquireCertificateArgs](./wallet.md#interface-acquirecertificateargs), [AcquireCertificateResult](./wallet.md#interface-acquirecertificateresult), [AuthenticatedResult](./wallet.md#interface-authenticatedresult), [CreateActionArgs](./wallet.md#interface-createactionargs), [CreateActionResult](./wallet.md#interface-createactionresult), [DiscoverByAttributesArgs](./wallet.md#interface-discoverbyattributesargs), [DiscoverByIdentityKeyArgs](./wallet.md#interface-discoverbyidentitykeyargs), [DiscoverCertificatesResult](./wallet.md#interface-discovercertificatesresult), [GetHeaderArgs](./wallet.md#interface-getheaderargs), [GetHeaderResult](./wallet.md#interface-getheaderresult), [GetHeightResult](./wallet.md#interface-getheightresult), [GetNetworkResult](./wallet.md#interface-getnetworkresult), [GetPublicKeyArgs](./wallet.md#interface-getpublickeyargs), [GetVersionResult](./wallet.md#interface-getversionresult), [InternalizeActionArgs](./wallet.md#interface-internalizeactionargs), [InternalizeActionResult](./wallet.md#interface-internalizeactionresult), [KeyDeriverApi](./wallet.md#interface-keyderiverapi), [ListActionsArgs](./wallet.md#interface-listactionsargs), [ListActionsResult](./wallet.md#interface-listactionsresult), [ListCertificatesArgs](./wallet.md#interface-listcertificatesargs), [ListCertificatesResult](./wallet.md#interface-listcertificatesresult), [ListOutputsArgs](./wallet.md#interface-listoutputsargs), [ListOutputsResult](./wallet.md#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [PrivateKey](./primitives.md#class-privatekey), [ProtoWallet](./wallet.md#class-protowallet), [ProveCertificateArgs](./wallet.md#interface-provecertificateargs), [ProveCertificateResult](./wallet.md#interface-provecertificateresult), [PubKeyHex](./wallet.md#type-pubkeyhex), [RelinquishCertificateArgs](./wallet.md#interface-relinquishcertificateargs), [RelinquishCertificateResult](./wallet.md#interface-relinquishcertificateresult), [RelinquishOutputArgs](./wallet.md#interface-relinquishoutputargs), [RelinquishOutputResult](./wallet.md#interface-relinquishoutputresult), [SignActionArgs](./wallet.md#interface-signactionargs), [SignActionResult](./wallet.md#interface-signactionresult), [WalletInterface](./wallet.md#interface-walletinterface)
+See also: [AbortActionResult](./wallet.md#interface-abortactionresult), [AcquireCertificateResult](./wallet.md#type-acquirecertificateresult), [AuthenticatedResult](./wallet.md#interface-authenticatedresult), [CreateActionResult](./wallet.md#interface-createactionresult), [DiscoverCertificatesResult](./wallet.md#interface-discovercertificatesresult), [GetHeaderResult](./wallet.md#interface-getheaderresult), [GetHeightResult](./wallet.md#interface-getheightresult), [GetNetworkResult](./wallet.md#interface-getnetworkresult), [GetPublicKeyArgs](./wallet.md#interface-getpublickeyargs), [GetVersionResult](./wallet.md#interface-getversionresult), [InternalizeActionResult](./wallet.md#interface-internalizeactionresult), [KeyDeriver](./wallet.md#class-keyderiver), [KeyDeriverApi](./wallet.md#interface-keyderiverapi), [ListActionsResult](./wallet.md#interface-listactionsresult), [ListCertificatesResult](./wallet.md#interface-listcertificatesresult), [ListOutputsResult](./wallet.md#interface-listoutputsresult), [PrivateKey](./primitives.md#class-privatekey), [ProtoWallet](./wallet.md#class-protowallet), [ProveCertificateResult](./wallet.md#interface-provecertificateresult), [PubKeyHex](./wallet.md#type-pubkeyhex), [RelinquishCertificateResult](./wallet.md#interface-relinquishcertificateresult), [RelinquishOutputResult](./wallet.md#interface-relinquishoutputresult), [SignActionResult](./wallet.md#interface-signactionresult), [WalletInterface](./wallet.md#interface-walletinterface)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -466,20 +467,21 @@ export class MasterCertificate extends Certificate {
     declare signature?: HexString;
     masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
     constructor(type: Base64String, serialNumber: Base64String, subject: PubKeyHex, certifier: PubKeyHex, revocationOutpoint: OutpointString, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, signature?: HexString) 
-    static async createCertificateFields(creatorWallet: ProtoWallet, certifierOrSubject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<CreateCertificateFieldsResult> 
-    static async createKeyringForVerifier(subjectWallet: ProtoWallet, certifier: WalletCounterparty, verifier: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldsToReveal: string[], masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, serialNumber: Base64String, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
-    static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => {
+    static async createCertificateFields(creatorWallet: ProtoWallet, certifierOrSubject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>): Promise<CreateCertificateFieldsResult> 
+    static async createKeyringForVerifier(subjectWallet: ProtoWallet, certifier: WalletCounterparty, verifier: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldsToReveal: string[], masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, serialNumber: Base64String): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+    static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (_serial: string): Promise<string> => {
+        void _serial;
         return "Certificate revocation not tracked.";
     }, serialNumber?: string): Promise<MasterCertificate> 
     static async decryptFields(subjectOrCertifierWallet: ProtoWallet, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, counterparty: WalletCounterparty): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
-    static async decryptField(subjectOrCertifierWallet: ProtoWallet, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldName: Base64String, fieldValue: Base64String, counterparty: WalletCounterparty, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
+    static async decryptField(subjectOrCertifierWallet: ProtoWallet, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldName: Base64String, fieldValue: Base64String, counterparty: WalletCounterparty): Promise<{
         fieldRevelationKey: number[];
         decryptedFieldValue: string;
     }> 
 }
 ```
 
-See also: [Base64String](./wallet.md#type-base64string), [Certificate](./auth.md#class-certificate), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [HexString](./wallet.md#type-hexstring), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [OutpointString](./wallet.md#type-outpointstring), [ProtoWallet](./wallet.md#class-protowallet), [PubKeyHex](./wallet.md#type-pubkeyhex), [WalletCounterparty](./wallet.md#type-walletcounterparty)
+See also: [Base64String](./wallet.md#type-base64string), [Certificate](./auth.md#class-certificate), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [HexString](./wallet.md#type-hexstring), [OutpointString](./wallet.md#type-outpointstring), [ProtoWallet](./wallet.md#class-protowallet), [PubKeyHex](./wallet.md#type-pubkeyhex), [WalletCounterparty](./wallet.md#type-walletcounterparty)
 
 <details>
 
@@ -492,9 +494,9 @@ This method returns a master keyring tied to a specific certifier or subject who
 and sign off on the fields, along with the encrypted certificate fields.
 
 ```ts
-static async createCertificateFields(creatorWallet: ProtoWallet, certifierOrSubject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<CreateCertificateFieldsResult> 
+static async createCertificateFields(creatorWallet: ProtoWallet, certifierOrSubject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>): Promise<CreateCertificateFieldsResult> 
 ```
-See also: [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [ProtoWallet](./wallet.md#class-protowallet), [WalletCounterparty](./wallet.md#type-walletcounterparty)
+See also: [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [ProtoWallet](./wallet.md#class-protowallet), [WalletCounterparty](./wallet.md#type-walletcounterparty)
 
 Returns
 
@@ -521,9 +523,9 @@ for the verifier's identity key. The result is a keyring containing the keys nec
 for the verifier to access the designated fields.
 
 ```ts
-static async createKeyringForVerifier(subjectWallet: ProtoWallet, certifier: WalletCounterparty, verifier: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldsToReveal: string[], masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, serialNumber: Base64String, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+static async createKeyringForVerifier(subjectWallet: ProtoWallet, certifier: WalletCounterparty, verifier: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldsToReveal: string[], masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, serialNumber: Base64String): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 ```
-See also: [Base64String](./wallet.md#type-base64string), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [ProtoWallet](./wallet.md#class-protowallet), [WalletCounterparty](./wallet.md#type-walletcounterparty)
+See also: [Base64String](./wallet.md#type-base64string), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [ProtoWallet](./wallet.md#class-protowallet), [WalletCounterparty](./wallet.md#type-walletcounterparty)
 
 Returns
 
@@ -591,7 +593,8 @@ generated symmetric key, which is then encrypted for the subject. The certificat
 can also includes a revocation outpoint to manage potential revocation.
 
 ```ts
-static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => {
+static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (_serial: string): Promise<string> => {
+    void _serial;
     return "Certificate revocation not tracked.";
 }, serialNumber?: string): Promise<MasterCertificate> 
 ```
@@ -646,8 +649,8 @@ export class Peer {
     stopListeningForCertificatesReceived(callbackID: number): void 
     listenForCertificatesRequested(callback: (senderPublicKey: string, requestedCertificates: RequestedCertificateSet) => void): number 
     stopListeningForCertificatesRequested(callbackID: number): void 
-    async processInitialRequest(message: AuthMessage) 
-    async sendCertificateResponse(verifierIdentityKey: string, certificates: VerifiableCertificate[]) 
+    async processInitialRequest(message: AuthMessage): Promise<void> 
+    async sendCertificateResponse(verifierIdentityKey: string, certificates: VerifiableCertificate[]): Promise<void> 
 }
 ```
 
@@ -764,7 +767,7 @@ Argument Details
 Processes an initial request message from a peer.
 
 ```ts
-async processInitialRequest(message: AuthMessage) 
+async processInitialRequest(message: AuthMessage): Promise<void> 
 ```
 See also: [AuthMessage](./auth.md#interface-authmessage)
 
@@ -806,7 +809,7 @@ Will throw an error if the peer session is not authenticated or if sending the r
 Sends a certificate response message containing the specified certificates to a peer.
 
 ```ts
-async sendCertificateResponse(verifierIdentityKey: string, certificates: VerifiableCertificate[]) 
+async sendCertificateResponse(verifierIdentityKey: string, certificates: VerifiableCertificate[]): Promise<void> 
 ```
 See also: [VerifiableCertificate](./auth.md#class-verifiablecertificate)
 
@@ -1274,6 +1277,9 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 validateCertificates = async (verifierWallet: WalletInterface, message: AuthMessage, certificatesRequested?: RequestedCertificateSet): Promise<void> => {
+    if ((message.certificates == null) || message.certificates.length === 0) {
+        throw new Error("No certificates were provided in the AuthMessage.");
+    }
     await Promise.all(message.certificates.map(async (incomingCert: VerifiableCertificate) => {
         if (incomingCert.subject !== message.identityKey) {
             throw new Error(`The subject of one of your certificates ("${incomingCert.subject}") is not the same as the request sender ("${message.identityKey}").`);
@@ -1283,13 +1289,13 @@ validateCertificates = async (verifierWallet: WalletInterface, message: AuthMess
         if (!isValidCert) {
             throw new Error(`The signature for the certificate with serial number ${certToVerify.serialNumber} is invalid!`);
         }
-        if (certificatesRequested) {
+        if (certificatesRequested != null) {
             const { certifiers, types } = certificatesRequested;
             if (!certifiers.includes(certToVerify.certifier)) {
                 throw new Error(`Certificate with serial number ${certToVerify.serialNumber} has an unrequested certifier: ${certToVerify.certifier}`);
             }
             const requestedFields = types[certToVerify.type];
-            if (!requestedFields) {
+            if (requestedFields == null) {
                 throw new Error(`Certificate with type ${certToVerify.type} was not requested`);
             }
         }
