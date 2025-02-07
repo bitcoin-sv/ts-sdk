@@ -18,8 +18,8 @@
  *     // Implementation to check if the Merkle root is valid for the specified block height.
  *   }
  *  currentHeight: async () => {
-*     // Implementation to get the current block height.
-*   }
+ *     // Implementation to get the current block height.
+ *   }
  * };
  */
 export default interface ChainTracker {

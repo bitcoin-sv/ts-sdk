@@ -1,11 +1,15 @@
-import { HttpClient, HttpClientRequestOptions, HttpClientResponse } from './HttpClient.js'
+import {
+  HttpClient,
+  HttpClientRequestOptions,
+  HttpClientResponse
+} from './HttpClient'
 
 /** fetch function interface limited to options needed by ts-sdk */
 /**
-   * Makes a request to the server.
-   * @param url The URL to make the request to.
-   * @param options The request configuration.
-   */
+ * Makes a request to the server.
+ * @param url The URL to make the request to.
+ * @param options The request configuration.
+ */
 export type Fetch = (url: string, options: FetchOptions) => Promise<Response>
 
 /**
@@ -22,12 +26,15 @@ export interface FetchOptions {
 }
 
 /**
- * Adapter for Node.js Https module to be used as HttpClient
+ * Adapter for Node Https module to be used as HttpClient
  */
 export class FetchHttpClient implements HttpClient {
-  constructor (private readonly fetch: Fetch) {}
+  constructor(private readonly fetch: Fetch) {}
 
-  async request<D>(url: string, options: HttpClientRequestOptions): Promise<HttpClientResponse<D>> {
+  async request<D>(
+    url: string,
+    options: HttpClientRequestOptions
+  ): Promise<HttpClientResponse<D>> {
     const fetchOptions: FetchOptions = {
       method: options.method,
       headers: options.headers,
@@ -36,7 +43,9 @@ export class FetchHttpClient implements HttpClient {
 
     const res = await this.fetch(url, fetchOptions)
     const mediaType = res.headers.get('Content-Type')
-    const data = mediaType.startsWith('application/json') ? await res.json() : await res.text()
+    const data = mediaType.startsWith('application/json')
+      ? await res.json()
+      : await res.text()
 
     return {
       ok: res.ok,

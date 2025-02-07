@@ -1,14 +1,20 @@
-import { MasterCertificate } from '../../../../dist/cjs/src/auth/certificates/MasterCertificate.js'
-import { VerifiableCertificate } from '../../../../dist/cjs/src/auth/certificates/VerifiableCertificate.js'
-import { PrivateKey, SymmetricKey, Utils, Random } from '../../../../dist/cjs/src/primitives/index.js'
-import { CompletedProtoWallet } from '../../../../dist/cjs/src/auth/certificates/__tests/CompletedProtoWallet.js'
+import { MasterCertificate } from '../../../auth/certificates/MasterCertificate'
+import { VerifiableCertificate } from '../../../auth/certificates/VerifiableCertificate'
+import {
+  PrivateKey,
+  SymmetricKey,
+  Utils,
+  Random
+} from '../../../../mod'
+import { CompletedProtoWallet } from '../../../auth/certificates/__tests/CompletedProtoWallet'
 
 describe('MasterCertificate', () => {
   const subjectPrivateKey = PrivateKey.fromRandom()
   const certifierPrivateKey = PrivateKey.fromRandom()
 
   // A mock revocation outpoint for testing
-  const mockRevocationOutpoint = 'deadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000.1'
+  const mockRevocationOutpoint =
+    'deadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000.1'
 
   // Arbitrary certificate data (in plaintext)
   const plaintextFields = {
@@ -23,8 +29,12 @@ describe('MasterCertificate', () => {
   let certifierIdentityKey: string
 
   beforeAll(async () => {
-    subjectIdentityKey = (await subjectWallet.getPublicKey({ identityKey: true })).publicKey
-    certifierIdentityKey = (await certifierWallet.getPublicKey({ identityKey: true })).publicKey
+    subjectIdentityKey = (
+      await subjectWallet.getPublicKey({ identityKey: true })
+    ).publicKey
+    certifierIdentityKey = (
+      await certifierWallet.getPublicKey({ identityKey: true })
+    ).publicKey
   })
 
   describe('constructor', () => {
@@ -97,15 +107,20 @@ describe('MasterCertificate', () => {
 
     it('should throw if masterKeyring is empty or invalid', async () => {
       // Manually create a MasterCertificate with an empty masterKeyring
-      expect(() => new MasterCertificate(
-        Utils.toBase64(Random(16)),
-        Utils.toBase64(Random(16)),
-        subjectIdentityKey,
-        certifierIdentityKey,
-        mockRevocationOutpoint,
-        { name: Utils.toBase64([1, 2, 3]) },
-        {}
-      )).toThrow("Master keyring must contain a value for every field. Missing key for field: \"name\"");
+      expect(
+        () =>
+          new MasterCertificate(
+            Utils.toBase64(Random(16)),
+            Utils.toBase64(Random(16)),
+            subjectIdentityKey,
+            certifierIdentityKey,
+            mockRevocationOutpoint,
+            { name: Utils.toBase64([1, 2, 3]) },
+            {}
+          )
+      ).toThrow(
+        'Master keyring must contain a value for every field. Missing key for field: "name"'
+      )
     })
 
     it('should throw if decryption fails for any field', async () => {
@@ -118,7 +133,11 @@ describe('MasterCertificate', () => {
         certifierIdentityKey,
         mockRevocationOutpoint,
         {
-          name: Utils.toBase64(SymmetricKey.fromRandom().encrypt(Utils.toArray('Alice', 'utf8')) as number[])
+          name: Utils.toBase64(
+            SymmetricKey.fromRandom().encrypt(
+              Utils.toArray('Alice', 'utf8')
+            ) as number[]
+          )
         },
         { name: badKeyMasterKeyring }
       )
@@ -142,7 +161,9 @@ describe('MasterCertificate', () => {
     let issuedCert: MasterCertificate
 
     beforeAll(async () => {
-      verifierIdentityKey = (await verifierWallet.getPublicKey({ identityKey: true })).publicKey
+      verifierIdentityKey = (
+        await verifierWallet.getPublicKey({ identityKey: true })
+      ).publicKey
       // Issue a certificate to reuse in tests
       issuedCert = await MasterCertificate.issueCertificateForSubject(
         certifierWallet,
@@ -156,15 +177,16 @@ describe('MasterCertificate', () => {
       // We only want to share "name" with the verifier
       const fieldsToReveal = ['name']
 
-      const keyringForVerifier = await MasterCertificate.createKeyringForVerifier(
-        subjectWallet,
-        issuedCert.certifier, // the original certifier
-        verifierIdentityKey,       // the new verifier
-        issuedCert.fields,    // encrypted fields
-        fieldsToReveal,
-        issuedCert.masterKeyring,
-        issuedCert.serialNumber
-      )
+      const keyringForVerifier =
+        await MasterCertificate.createKeyringForVerifier(
+          subjectWallet,
+          issuedCert.certifier, // the original certifier
+          verifierIdentityKey, // the new verifier
+          issuedCert.fields, // encrypted fields
+          fieldsToReveal,
+          issuedCert.masterKeyring,
+          issuedCert.serialNumber
+        )
 
       // The new keyring should only contain "name"
       expect(Object.keys(keyringForVerifier)).toHaveLength(1)
@@ -195,7 +217,8 @@ describe('MasterCertificate', () => {
           verifierIdentityKey,
           issuedCert.fields,
           ['nonexistent_field'],
-          issuedCert.masterKeyring
+          issuedCert.masterKeyring,
+          issuedCert.serialNumber
         )
       ).rejects.toThrow(
         /Fields to reveal must be a subset of the certificate fields\. Missing the "nonexistent_field" field\./
@@ -235,16 +258,17 @@ describe('MasterCertificate', () => {
 
     it('should support optional originator parameter', async () => {
       const fieldsToReveal = ['name']
-      const keyringForVerifier = await MasterCertificate.createKeyringForVerifier(
-        subjectWallet,
-        issuedCert.certifier,
-        verifierIdentityKey,
-        issuedCert.fields,
-        fieldsToReveal,
-        issuedCert.masterKeyring,
-        issuedCert.serialNumber,
-        'my-originator'
-      )
+      const keyringForVerifier =
+        await MasterCertificate.createKeyringForVerifier(
+          subjectWallet,
+          issuedCert.certifier,
+          verifierIdentityKey,
+          issuedCert.fields,
+          fieldsToReveal,
+          issuedCert.masterKeyring,
+          issuedCert.serialNumber,
+          'my-originator'
+        )
       expect(keyringForVerifier).toHaveProperty('name')
     })
 
@@ -321,8 +345,8 @@ describe('MasterCertificate', () => {
         subjectIdentityKey,
         newPlaintextFields,
         'TEST_CERT',
-        undefined,     // No custom revocation function
-        customSerialNumber   // Pass our custom serial number
+        undefined, // No custom revocation function
+        customSerialNumber // Pass our custom serial number
       )
 
       expect(newCert).toBeInstanceOf(MasterCertificate)
@@ -344,7 +368,7 @@ describe('MasterCertificate', () => {
 
       // Issue the certificate for "self"
       const selfSignedCert = await MasterCertificate.issueCertificateForSubject(
-        subjectWallet,   // act as certifier
+        subjectWallet, // act as certifier
         'self',
         selfSignedFields,
         'SELF_SIGNED_TEST'

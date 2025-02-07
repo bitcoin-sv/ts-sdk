@@ -30,7 +30,9 @@ decrypt = (message: number[], recipient: PrivateKey): number[] => {
     }
     const sender = PublicKey.fromString(toHex(reader.read(33)));
     const expectedRecipientDER = toHex(reader.read(33));
-    const actualRecipientDER = recipient.toPublicKey().encode(true, "hex") as string;
+    const actualRecipientDER = recipient
+        .toPublicKey()
+        .encode(true, "hex") as string;
     if (expectedRecipientDER !== actualRecipientDER) {
         throw new Error(`The encrypted message expects a recipient public key of ${expectedRecipientDER}, but the provided key is ${actualRecipientDER}`);
     }

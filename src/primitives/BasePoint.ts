@@ -1,4 +1,4 @@
-import Curve from './Curve.js'
+import Curve from './Curve'
 
 /**
  * Base class for Point (affine coordinates) and JacobianPoint classes,

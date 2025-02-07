@@ -1,5 +1,5 @@
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
-import { Reader, Writer, encode } from '../../../dist/cjs/src/primitives/utils'
+import BigNumber from '../../primitives/BigNumber'
+import { Reader, Writer, encode } from '../../primitives/utils'
 
 describe('Writer', () => {
   it('should create a new buffer writer', () => {
@@ -8,10 +8,10 @@ describe('Writer', () => {
   })
 
   describe('#getLength', () => {
-    it('should compute length correctly of two 2 byte buffers', () => {
+    it('should compute length correctly of two 2-byte buffers', () => {
       const buf1 = Buffer.from('0000', 'hex')
       const buf2 = Buffer.from('0000', 'hex')
-      const bw = new Writer().write(buf1).write(buf2)
+      const bw = new Writer().write([...buf1]).write([...buf2])
       expect(bw.getLength()).toEqual(4)
     })
   })
@@ -54,9 +54,7 @@ describe('Writer', () => {
     it('should write 1', () => {
       const bw = new Writer()
       expect(encode(bw.writeInt8(1).toArray(), 'hex')).toEqual('01')
-      expect(
-        encode(new Writer().writeInt8(-1).toArray(), 'hex')
-      ).toEqual('ff')
+      expect(encode(new Writer().writeInt8(-1).toArray(), 'hex')).toEqual('ff')
     })
   })
 
@@ -71,7 +69,9 @@ describe('Writer', () => {
     it('should write 1', () => {
       const bw = new Writer()
       expect(encode(bw.writeInt16BE(1).toArray(), 'hex')).toEqual('0001')
-      expect(encode(new Writer().writeInt16BE(-1).toArray(), 'hex')).toEqual('ffff')
+      expect(encode(new Writer().writeInt16BE(-1).toArray(), 'hex')).toEqual(
+        'ffff'
+      )
     })
   })
 
@@ -86,7 +86,9 @@ describe('Writer', () => {
     it('should write 1', () => {
       const bw = new Writer()
       expect(encode(bw.writeInt16LE(1).toArray(), 'hex')).toEqual('0100')
-      expect(encode(new Writer().writeInt16LE(-1).toArray(), 'hex')).toEqual('ffff')
+      expect(encode(new Writer().writeInt16LE(-1).toArray(), 'hex')).toEqual(
+        'ffff'
+      )
     })
   })
 
@@ -101,7 +103,9 @@ describe('Writer', () => {
     it('should write 1', () => {
       const bw = new Writer()
       expect(encode(bw.writeInt32BE(1).toArray(), 'hex')).toEqual('00000001')
-      expect(encode(new Writer().writeInt32BE(-1).toArray(), 'hex')).toEqual('ffffffff')
+      expect(encode(new Writer().writeInt32BE(-1).toArray(), 'hex')).toEqual(
+        'ffffffff'
+      )
     })
   })
 
@@ -116,21 +120,27 @@ describe('Writer', () => {
     it('should write 1', () => {
       const bw = new Writer()
       expect(encode(bw.writeInt32LE(1).toArray(), 'hex')).toEqual('01000000')
-      expect(encode(new Writer().writeInt32LE(-1).toArray(), 'hex')).toEqual('ffffffff')
+      expect(encode(new Writer().writeInt32LE(-1).toArray(), 'hex')).toEqual(
+        'ffffffff'
+      )
     })
   })
 
   describe('#writeUInt64BEBn', () => {
     it('should write 1', () => {
       const bw = new Writer()
-      expect(encode(bw.writeUInt64BEBn(new BigNumber(1)).toArray(), 'hex')).toEqual('0000000000000001')
+      expect(
+        encode(bw.writeUInt64BEBn(new BigNumber(1)).toArray(), 'hex')
+      ).toEqual('0000000000000001')
     })
   })
 
   describe('#writeUInt64LEBn', () => {
     it('should write 1', () => {
       const bw = new Writer()
-      expect(encode(bw.writeUInt64LEBn(new BigNumber(1)).toArray(), 'hex')).toEqual('0100000000000000')
+      expect(
+        encode(bw.writeUInt64LEBn(new BigNumber(1)).toArray(), 'hex')
+      ).toEqual('0100000000000000')
     })
   })
 

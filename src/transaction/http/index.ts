@@ -1,6 +1,10 @@
-export type { HttpClient, HttpClientResponse, HttpClientRequestOptions } from './HttpClient.js'
-export { defaultHttpClient } from './DefaultHttpClient.js'
-export { NodejsHttpClient } from './NodejsHttpClient.js'
-export { FetchHttpClient } from './FetchHttpClient.js'
-export type { Fetch, FetchOptions } from './FetchHttpClient.js'
-export type { HttpsNodejs, NodejsHttpClientRequest } from './NodejsHttpClient.js'
+export type {
+  HttpClient,
+  HttpClientResponse,
+  HttpClientRequestOptions,
+} from "./HttpClient";
+export { defaultHttpClient } from "./DefaultHttpClient";
+export { NodejsHttpClient } from "./NodejsHttpClient";
+export { FetchHttpClient } from "./FetchHttpClient";
+export type { Fetch, FetchOptions } from "./FetchHttpClient";
+export type { HttpsNodejs, NodejsHttpClientRequest } from "./NodejsHttpClient";

@@ -1,9 +1,9 @@
-import PublicKey from '../primitives/PublicKey.js'
-import PrivateKey from '../primitives/PrivateKey.js'
-import Signature from '../primitives/Signature.js'
-import Curve from '../primitives/Curve.js'
-import Random from '../primitives/Random.js'
-import { toBase64, toArray, Reader, toHex } from '../primitives/utils.js'
+import PublicKey from '../primitives/PublicKey'
+import PrivateKey from '../primitives/PrivateKey'
+import Signature from '../primitives/Signature'
+import Curve from '../primitives/Curve'
+import Random from '../primitives/Random'
+import { toBase64, toArray, Reader, toHex } from '../primitives/utils'
 
 const VERSION = '42423301'
 
@@ -25,10 +25,7 @@ export const sign = (
     const curve = new Curve()
     const anyone = new PrivateKey(1)
     const anyonePoint = curve.g.mul(anyone)
-    verifier = new PublicKey(
-      anyonePoint.x,
-      anyonePoint.y
-    )
+    verifier = new PublicKey(anyonePoint.x, anyonePoint.y)
   }
   const keyID = Random(32)
   const keyIDBase64 = toBase64(keyID)
@@ -54,12 +51,16 @@ export const sign = (
  *
  * @returns True if the message is verified.
  */
-export const verify = (message: number[], sig: number[], recipient?: PrivateKey): boolean => {
+export const verify = (
+  message: number[],
+  sig: number[],
+  recipient?: PrivateKey
+): boolean => {
   const reader = new Reader(sig)
   const messageVersion = toHex(reader.read(4))
   if (messageVersion !== VERSION) {
     throw new Error(
-        `Message version mismatch: Expected ${VERSION}, received ${messageVersion}`
+      `Message version mismatch: Expected ${VERSION}, received ${messageVersion}`
     )
   }
   const signer = PublicKey.fromString(toHex(reader.read(33)))
@@ -70,11 +71,15 @@ export const verify = (message: number[], sig: number[], recipient?: PrivateKey)
     const verifierRest = reader.read(32)
     const verifierDER = toHex([verifierFirst, ...verifierRest])
     if (typeof recipient !== 'object') {
-      throw new Error(`This signature can only be verified with knowledge of a specific private key. The associated public key is: ${verifierDER}`)
+      throw new Error(
+        `This signature can only be verified with knowledge of a specific private key. The associated public key is: ${verifierDER}`
+      )
     }
     const recipientDER = recipient.toPublicKey().encode(true, 'hex') as string
     if (verifierDER !== recipientDER) {
-      throw new Error(`The recipient public key is ${recipientDER} but the signature requres the recipient to have public key ${verifierDER}`)
+      throw new Error(
+        `The recipient public key is ${recipientDER} but the signature requres the recipient to have public key ${verifierDER}`
+      )
     }
   }
   const keyID = toBase64(reader.read(32))

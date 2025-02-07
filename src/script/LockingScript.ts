@@ -1,4 +1,4 @@
-import Script from './Script.js'
+import Script from './Script'
 
 /**
  * The LockingScript class represents a locking script in a Bitcoin SV transaction.

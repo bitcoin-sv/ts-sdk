@@ -1,8 +1,8 @@
-import PublicKey from '../primitives/PublicKey.js'
-import PrivateKey from '../primitives/PrivateKey.js'
-import SymmetricKey from '../primitives/SymmetricKey.js'
-import Random from '../primitives/Random.js'
-import { toBase64, toArray, Reader, toHex } from '../primitives/utils.js'
+import PublicKey from '../primitives/PublicKey'
+import PrivateKey from '../primitives/PrivateKey'
+import SymmetricKey from '../primitives/SymmetricKey'
+import Random from '../primitives/Random'
+import { toBase64, toArray, Reader, toHex } from '../primitives/utils'
 
 const VERSION = '42421033'
 
@@ -55,9 +55,13 @@ export const decrypt = (message: number[], recipient: PrivateKey): number[] => {
   }
   const sender = PublicKey.fromString(toHex(reader.read(33)))
   const expectedRecipientDER = toHex(reader.read(33))
-  const actualRecipientDER = recipient.toPublicKey().encode(true, 'hex') as string
+  const actualRecipientDER = recipient
+    .toPublicKey()
+    .encode(true, 'hex') as string
   if (expectedRecipientDER !== actualRecipientDER) {
-    throw new Error(`The encrypted message expects a recipient public key of ${expectedRecipientDER}, but the provided key is ${actualRecipientDER}`)
+    throw new Error(
+      `The encrypted message expects a recipient public key of ${expectedRecipientDER}, but the provided key is ${actualRecipientDER}`
+    )
   }
   const keyID = toBase64(reader.read(32))
   const encrypted = reader.read(reader.bin.length - reader.pos)

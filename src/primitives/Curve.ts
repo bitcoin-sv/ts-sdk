@@ -1,8 +1,8 @@
-import BigNumber from './BigNumber.js'
-import ReductionContext from './ReductionContext.js'
-import MontgomoryMethod from './MontgomoryMethod.js'
-import Point from './Point.js'
-import { toArray } from './utils.js'
+import BigNumber from './BigNumber'
+import ReductionContext from './ReductionContext'
+import MontgomoryMethod from './MontgomoryMethod'
+import Point from './Point'
+import { toArray } from './utils'
 
 // This ensures that only one curve is ever created, enhancing performance.
 // This assumes there is never a need to have multiple distinct Curve instances.
@@ -53,7 +53,11 @@ export default class Curve {
       let z
       const mod = k.andln(ws - 1)
       if (k.isOdd()) {
-        if (mod > (ws >> 1) - 1) { z = (ws >> 1) - mod } else { z = mod }
+        if (mod > (ws >> 1) - 1) {
+          z = (ws >> 1) - mod
+        } else {
+          z = mod
+        }
         k.isubn(z)
       } else {
         z = 0
@@ -68,10 +72,7 @@ export default class Curve {
 
   // Represent k1, k2 in a Joint Sparse Form
   getJSF (k1: BigNumber, k2: BigNumber): number[][] {
-    const jsf: any[][] = [
-      [],
-      []
-    ]
+    const jsf: any[][] = [[], []]
 
     k1 = k1.clone()
     k2 = k2.clone()
@@ -81,8 +82,12 @@ export default class Curve {
       // First phase
       let m14 = (k1.andln(3) + d1) & 3
       let m24 = (k2.andln(3) + d2) & 3
-      if (m14 === 3) { m14 = -1 }
-      if (m24 === 3) { m24 = -1 }
+      if (m14 === 3) {
+        m14 = -1
+      }
+      if (m24 === 3) {
+        m24 = -1
+      }
       let u1: number
       if ((m14 & 1) === 0) {
         u1 = 0
@@ -101,13 +106,21 @@ export default class Curve {
         u2 = 0
       } else {
         const m8 = (k2.andln(7) + d2) & 7
-        if ((m8 === 3 || m8 === 5) && m14 === 2) { u2 = -m24 } else { u2 = m24 }
+        if ((m8 === 3 || m8 === 5) && m14 === 2) {
+          u2 = -m24
+        } else {
+          u2 = m24
+        }
       }
       jsf[1].push(u2)
 
       // Second phase
-      if (2 * d1 === u1 + 1) { d1 = 1 - d1 }
-      if (2 * d2 === u2 + 1) { d2 = 1 - d2 }
+      if (2 * d1 === u1 + 1) {
+        d1 = 1 - d1
+      }
+      if (2 * d2 === u2 + 1) {
+        d2 = 1 - d2
+      }
       k1.iushrn(1)
       k2.iushrn(1)
     }
@@ -118,17 +131,14 @@ export default class Curve {
   static cachedProperty (obj, name: string, computer): void {
     const key = '_' + name
     obj.prototype[name] = function cachedProperty () {
-      const r = this[key] !== undefined
-        ? this[key]
-        : this[key] = computer.call(this)
+      const r =
+        this[key] !== undefined ? this[key] : (this[key] = computer.call(this))
       return r
     }
   }
 
   static parseBytes (bytes: string | number[]): number[] {
-    return typeof bytes === 'string'
-      ? toArray(bytes, 'hex')
-      : bytes
+    return typeof bytes === 'string' ? toArray(bytes, 'hex') : bytes
   }
 
   static intFromLE (bytes: number[]): BigNumber {
@@ -933,7 +943,8 @@ export default class Curve {
 
       // Precomputed endomorphism
       beta: '7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c28719501ee',
-      lambda: '5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72',
+      lambda:
+        '5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72',
       basis: [
         {
           a: '3086d221a7d46bcde86c90e49284eb15',
@@ -988,13 +999,17 @@ export default class Curve {
     this._endoWnafT2 = new Array(4)
   }
 
-  _getEndomorphism (conf): {
+  _getEndomorphism (conf):
+  | {
     beta: BigNumber
     lambda: BigNumber
     basis: Array<{ a: BigNumber, b: BigNumber }>
-  } | undefined {
+  }
+  | undefined {
     // No efficient endomorphism
-    if (!this.zeroA || this.p.modrn(3) !== 1) { return }
+    if (!this.zeroA || this.p.modrn(3) !== 1) {
+      return
+    }
 
     // Compute beta and lambda, that lambda * P = (beta * Px; Py)
     let beta: BigNumber
@@ -1038,7 +1053,7 @@ export default class Curve {
       lambda,
       basis
     }
-  };
+  }
 
   _getEndoRoots (num: BigNumber): [BigNumber, BigNumber] {
     // Find roots of for x^2 + x + 1 in F
@@ -1053,9 +1068,11 @@ export default class Curve {
     const l1 = ntinv.redAdd(s).fromRed()
     const l2 = ntinv.redSub(s).fromRed()
     return [l1, l2]
-  };
+  }
 
-  _getEndoBasis (lambda: BigNumber): [{ a: BigNumber, b: BigNumber }, { a: BigNumber, b: BigNumber }] {
+  _getEndoBasis (
+    lambda: BigNumber
+  ): [{ a: BigNumber, b: BigNumber }, { a: BigNumber, b: BigNumber }] {
     // aprxSqrt >= sqrt(this.n)
     const aprxSqrt = this.n.ushrn(Math.floor(this.n.bitLength() / 2))
 
@@ -1151,7 +1168,9 @@ export default class Curve {
   }
 
   validate (point: Point): boolean {
-    if (point.inf) { return true }
+    if (point.inf) {
+      return true
+    }
 
     const x = point.x
     const y = point.y
@@ -1159,5 +1178,5 @@ export default class Curve {
     const ax = this.a.redMul(x)
     const rhs = x.redSqr().redMul(x).redIAdd(ax).redIAdd(this.b)
     return y.redSqr().redISub(rhs).cmpn(0) === 0
-  };
+  }
 }

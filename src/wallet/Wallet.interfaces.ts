@@ -201,7 +201,7 @@ export type WalletNetwork = 'mainnet' | 'testnet'
 export enum SecurityLevels {
   Silent = 0,
   App = 1,
-  Counterparty = 2
+  Counterparty = 2,
 }
 
 /**
@@ -222,7 +222,14 @@ export type AcquisitionProtocol = 'direct' | 'issuance'
 
 export type KeyringRevealer = PubKeyHex | 'certifier'
 
-export type ActionStatus = | 'completed' | 'unprocessed' | 'sending' | 'unproven' | 'unsigned' | 'nosend' | 'nonfinal'
+export type ActionStatus =
+  | 'completed'
+  | 'unprocessed'
+  | 'sending'
+  | 'unproven'
+  | 'unsigned'
+  | 'nosend'
+  | 'nonfinal'
 
 /**
  * Controls behavior of input BEEF validation.
@@ -234,11 +241,11 @@ export type ActionStatus = | 'completed' | 'unprocessed' | 'sending' | 'unproven
 export type TrustSelf = 'known'
 
 /**
-   * @param {OutpointString} outpoint - The outpoint being consumed.
-   * @param {DescriptionString5to50Bytes} inputDescription - A description of this input for contextual understanding of what it consumes.
-   * @param {HexString} unlockingScript - Optional. The unlocking script needed to release the specified UTXO.
-   * @param {PositiveInteger} unlockingScriptLength - Optional. Length of the unlocking script, in case it will be provided later using `signAction`.
-   * @param {PositiveIntegerOrZero} sequenceNumber - Optional. The sequence number applied to the input.
+ * @param {OutpointString} outpoint - The outpoint being consumed.
+ * @param {DescriptionString5to50Bytes} inputDescription - A description of this input for contextual understanding of what it consumes.
+ * @param {HexString} unlockingScript - Optional. The unlocking script needed to release the specified UTXO.
+ * @param {PositiveInteger} unlockingScriptLength - Optional. Length of the unlocking script, in case it will be provided later using `signAction`.
+ * @param {PositiveIntegerOrZero} sequenceNumber - Optional. The sequence number applied to the input.
  */
 export interface CreateActionInput {
   outpoint: OutpointString
@@ -249,12 +256,12 @@ export interface CreateActionInput {
 }
 
 /**
-   * @param {HexString} lockingScript - The locking script that dictates how the output can later be spent.
-   * @param {SatoshiValue} satoshis - Number of Satoshis that constitute this output.
-   * @param {DescriptionString5to50Bytes} outputDescription - Description of what this output represents.
-   * @param {BasketStringUnder300Bytes} [basket] - Name of the basket where this UTXO will be held, if tracking is desired.
-   * @param {string} [customInstructions] - Custom instructions attached onto this UTXO, often utilized within application logic to provide necessary unlocking context or track token histories.
-   * @param {OutputTagStringUnder300Bytes[]} [tags] - Tags assigned to the output for sorting or filtering.
+ * @param {HexString} lockingScript - The locking script that dictates how the output can later be spent.
+ * @param {SatoshiValue} satoshis - Number of Satoshis that constitute this output.
+ * @param {DescriptionString5to50Bytes} outputDescription - Description of what this output represents.
+ * @param {BasketStringUnder300Bytes} [basket] - Name of the basket where this UTXO will be held, if tracking is desired.
+ * @param {string} [customInstructions] - Custom instructions attached onto this UTXO, often utilized within application logic to provide necessary unlocking context or track token histories.
+ * @param {OutputTagStringUnder300Bytes[]} [tags] - Tags assigned to the output for sorting or filtering.
  */
 export interface CreateActionOutput {
   lockingScript: HexString
@@ -266,15 +273,15 @@ export interface CreateActionOutput {
 }
 
 /**
-   * @param {BooleanDefaultTrue} [signAndProcess] - Optional. If true and all inputs have unlockingScripts, the new transaction will be signed and handed off for processing by the network; result `txid` and `tx` are valid and `signableTransaciton` is undefined. If false or an input has an unlockingScriptLength, result `txid` and `tx` are undefined and `signableTransaction` is valid.
-   * @param {BooleanDefaultTrue} [acceptDelayedBroadcast] - Optional. If true, the transaction will be sent to the network by a background process; use `noSend` and `sendWith` options to batch chained transactions. If false, the transaction will be broadcast to the network and any errors returned in result; note that rapidly sent chained transactions may still fail due to network propagation delays.
-   * @param {'known'} [trustSelf] - Optional. If `known`, input transactions may omit supporting validity proof data for TXIDs known to this wallet.
-   * @param {TXIDHexString[]} [knownTxids] - Optional. When working with large chained transactions using `noSend` and `sendWith` options, include TXIDs of inputs that may be assumed to be valid even if not already known by this wallet.
-   * @param {BooleanDefaultFalse} [returnTXIDOnly] - Optional. If true, only a TXID will be returned instead of a transaction.
-   * @param {BooleanDefaultFalse} [noSend] - Optional. If true, the transaction will be constructed but not sent to the network. Supports the creation of chained batches of transactions using the `sendWith` option.
-   * @param {OutPoint[]} [noSendChange] - Optional. Valid when `noSend` is true. May contain `noSendChange` outpoints previously returned by prior `noSend` actions in the same batch of chained actions.
-   * @param {TXIDHexString[]} [sendWith] - Optional. Sends a batch of actions previously created as `noSend` actions to the network; either synchronously if `acceptDelayedBroadcast` is true or by a background process.
-   * @param {BooleanDefaultTrue} [randomizeOutputs] — optional. When set to false, the wallet will avoid randomizing the order of outputs within the transaction.
+ * @param {BooleanDefaultTrue} [signAndProcess] - Optional. If true and all inputs have unlockingScripts, the new transaction will be signed and handed off for processing by the network; result `txid` and `tx` are valid and `signableTransaciton` is undefined. If false or an input has an unlockingScriptLength, result `txid` and `tx` are undefined and `signableTransaction` is valid.
+ * @param {BooleanDefaultTrue} [acceptDelayedBroadcast] - Optional. If true, the transaction will be sent to the network by a background process; use `noSend` and `sendWith` options to batch chained transactions. If false, the transaction will be broadcast to the network and any errors returned in result; note that rapidly sent chained transactions may still fail due to network propagation delays.
+ * @param {'known'} [trustSelf] - Optional. If `known`, input transactions may omit supporting validity proof data for TXIDs known to this wallet.
+ * @param {TXIDHexString[]} [knownTxids] - Optional. When working with large chained transactions using `noSend` and `sendWith` options, include TXIDs of inputs that may be assumed to be valid even if not already known by this wallet.
+ * @param {BooleanDefaultFalse} [returnTXIDOnly] - Optional. If true, only a TXID will be returned instead of a transaction.
+ * @param {BooleanDefaultFalse} [noSend] - Optional. If true, the transaction will be constructed but not sent to the network. Supports the creation of chained batches of transactions using the `sendWith` option.
+ * @param {OutPoint[]} [noSendChange] - Optional. Valid when `noSend` is true. May contain `noSendChange` outpoints previously returned by prior `noSend` actions in the same batch of chained actions.
+ * @param {TXIDHexString[]} [sendWith] - Optional. Sends a batch of actions previously created as `noSend` actions to the network; either synchronously if `acceptDelayedBroadcast` is true or by a background process.
+ * @param {BooleanDefaultTrue} [randomizeOutputs] — optional. When set to false, the wallet will avoid randomizing the order of outputs within the transaction.
  */
 export interface CreateActionOptions {
   signAndProcess?: BooleanDefaultTrue
@@ -309,14 +316,14 @@ export interface CreateActionResult {
 }
 
 /**
-   * @param {DescriptionString5to50Bytes} description - A human-readable description of the action represented by this transaction.
-   * @param {BEEF} [inputBEEF] - BEEF data associated with the set of input transactions from which UTXOs will be consumed.
-   * @param {CreateActionInput[]} [inputs] - An optional array of input objects used in the transaction.
-   * @param {CreateActionOutput[]} [outputs] - An optional array of output objects for the transaction.
-   * @param {PositiveIntegerOrZero} [lockTime] - Optional lock time for the transaction.
-   * @param {PositiveInteger} [version] - Optional transaction version specifier.
-   * @param {LabelStringUnder300Bytes[]} [labels] - Optional labels providing additional categorization for the transaction.
-   * @param {CreateActionOptions} [options] - Optional settings modifying transaction processing behavior.
+ * @param {DescriptionString5to50Bytes} description - A human-readable description of the action represented by this transaction.
+ * @param {BEEF} [inputBEEF] - BEEF data associated with the set of input transactions from which UTXOs will be consumed.
+ * @param {CreateActionInput[]} [inputs] - An optional array of input objects used in the transaction.
+ * @param {CreateActionOutput[]} [outputs] - An optional array of output objects for the transaction.
+ * @param {PositiveIntegerOrZero} [lockTime] - Optional lock time for the transaction.
+ * @param {PositiveInteger} [version] - Optional transaction version specifier.
+ * @param {LabelStringUnder300Bytes[]} [labels] - Optional labels providing additional categorization for the transaction.
+ * @param {CreateActionOptions} [options] - Optional settings modifying transaction processing behavior.
  */
 export interface CreateActionArgs {
   description: DescriptionString5to50Bytes
@@ -330,8 +337,8 @@ export interface CreateActionArgs {
 }
 
 /**
-   * @param {HexString} unlockingScript - The unlocking script for the corresponding input.
-   * @param {PositiveIntegerOrZero} [sequenceNumber] - The sequence number of the input.
+ * @param {HexString} unlockingScript - The unlocking script for the corresponding input.
+ * @param {PositiveIntegerOrZero} [sequenceNumber] - The sequence number of the input.
  */
 export interface SignActionSpend {
   unlockingScript: HexString
@@ -339,12 +346,12 @@ export interface SignActionSpend {
 }
 
 /**
-   * @param {BooleanDefaultTrue} [acceptDelayedBroadcast] - Optional. If true, transaction will be sent to the network by a background process; use `noSend` and `sendWith` options to batch chained transactions. If false, transaction will be broadcast to the network and any errors returned in result; note that rapidly sent chained transactions may still fail due to network propagation delays.
-   * @param {'known'} [trustSelf] - Optional. If `known`, input transactions may omit supporting validity proof data for TXIDs known to this wallet or included in `knownTxids`.
-   * @param {TXIDHexString[]} [knownTxids] - Optional. When working with large chained transactions using `noSend` and `sendWith` options, include TXIDs of inputs that may be assumed to be valid even if not already known by this wallet.
-   * @param {BooleanDefaultFalse} [returnTXIDOnly] - Optional. If true, only a TXID will be returned instead of a transaction.
-   * @param {BooleanDefaultFalse} [noSend] - Optional. If true, the transaction will be constructed but not sent to the network. Supports the creation of chained batches of transactions using the `sendWith` option.
-   * @param {TXIDHexString[]} [sendWith] - Optional. Sends a batch of actions previously created as `noSend` actions to the network; either synchronously if `acceptDelayedBroadcast` is true or by a background process.
+ * @param {BooleanDefaultTrue} [acceptDelayedBroadcast] - Optional. If true, transaction will be sent to the network by a background process; use `noSend` and `sendWith` options to batch chained transactions. If false, transaction will be broadcast to the network and any errors returned in result; note that rapidly sent chained transactions may still fail due to network propagation delays.
+ * @param {'known'} [trustSelf] - Optional. If `known`, input transactions may omit supporting validity proof data for TXIDs known to this wallet or included in `knownTxids`.
+ * @param {TXIDHexString[]} [knownTxids] - Optional. When working with large chained transactions using `noSend` and `sendWith` options, include TXIDs of inputs that may be assumed to be valid even if not already known by this wallet.
+ * @param {BooleanDefaultFalse} [returnTXIDOnly] - Optional. If true, only a TXID will be returned instead of a transaction.
+ * @param {BooleanDefaultFalse} [noSend] - Optional. If true, the transaction will be constructed but not sent to the network. Supports the creation of chained batches of transactions using the `sendWith` option.
+ * @param {TXIDHexString[]} [sendWith] - Optional. Sends a batch of actions previously created as `noSend` actions to the network; either synchronously if `acceptDelayedBroadcast` is true or by a background process.
  */
 export interface SignActionOptions {
   acceptDelayedBroadcast?: BooleanDefaultTrue
@@ -354,9 +361,9 @@ export interface SignActionOptions {
 }
 
 /**
-   * @param {Record<PositiveIntegerOrZero, SignActionSpend>} spends - Map of input indexes to the corresponding unlocking script and optional sequence number.
-   * @param {Base64String} reference - Reference number returned from the call to `createAction`.
-   * @param {SignActionOptions} [options] - Optional settings modifying transaction processing behavior.
+ * @param {Record<PositiveIntegerOrZero, SignActionSpend>} spends - Map of input indexes to the corresponding unlocking script and optional sequence number.
+ * @param {Base64String} reference - Reference number returned from the call to `createAction`.
+ * @param {SignActionOptions} [options] - Optional settings modifying transaction processing behavior.
  */
 export interface SignActionArgs {
   spends: Record<PositiveIntegerOrZero, SignActionSpend>
@@ -374,7 +381,7 @@ export interface SignActionResult {
 }
 
 /**
-   * @param {Base64String} reference - Reference number for the transaction to abort.
+ * @param {Base64String} reference - Reference number for the transaction to abort.
  */
 export interface AbortActionArgs {
   reference: Base64String
@@ -385,17 +392,17 @@ export interface AbortActionResult {
 }
 
 /**
-   * @param {LabelStringUnder300Bytes[]} labels - An array of labels used to filter actions.
-   * @param {'any' | 'all'} [labelQueryMode] - Specifies how to match labels (default is any which matches any of the labels).
-   * @param {BooleanDefaultFalse} [includeLabels] - Whether to include transaction labels in the result set.
-   * @param {BooleanDefaultFalse} [includeInputs] - Whether to include input details in the result set.
-   * @param {BooleanDefaultFalse} [includeInputSourceLockingScripts] - Whether to include input source locking scripts in the result set.
-   * @param {BooleanDefaultFalse} [includeInputUnlockingScripts] - Whether to include input unlocking scripts in the result set.
-   * @param {BooleanDefaultFalse} [includeOutputs] - Whether to include output details in the result set.
-   * @param {BooleanDefaultFalse} [includeOutputLockingScripts] - Whether to include output locking scripts in the result set.
-   * @param {PositiveIntegerDefault10Max10000} [limit] - The maximum number of transactions to retrieve.
-   * @param {PositiveIntegerOrZero} [offset] - Number of transactions to skip before starting to return the results.
-   * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
+ * @param {LabelStringUnder300Bytes[]} labels - An array of labels used to filter actions.
+ * @param {'any' | 'all'} [labelQueryMode] - Specifies how to match labels (default is any which matches any of the labels).
+ * @param {BooleanDefaultFalse} [includeLabels] - Whether to include transaction labels in the result set.
+ * @param {BooleanDefaultFalse} [includeInputs] - Whether to include input details in the result set.
+ * @param {BooleanDefaultFalse} [includeInputSourceLockingScripts] - Whether to include input source locking scripts in the result set.
+ * @param {BooleanDefaultFalse} [includeInputUnlockingScripts] - Whether to include input unlocking scripts in the result set.
+ * @param {BooleanDefaultFalse} [includeOutputs] - Whether to include output details in the result set.
+ * @param {BooleanDefaultFalse} [includeOutputLockingScripts] - Whether to include output locking scripts in the result set.
+ * @param {PositiveIntegerDefault10Max10000} [limit] - The maximum number of transactions to retrieve.
+ * @param {PositiveIntegerOrZero} [offset] - Number of transactions to skip before starting to return the results.
+ * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
  */
 export interface ListActionsArgs {
   labels: LabelStringUnder300Bytes[]
@@ -466,9 +473,9 @@ export interface ListActionsResult {
 }
 
 /**
-   * @param {Base64String} derivationPrefix - Payment-level derivation prefix used by the sender for key derivation (for payments).
-   * @param {Base64String} derivationSuffix - Specific output-level derivation suffix used by the sender for key derivation (for payments).
-   * @param {PubKeyHex} senderIdentityKey - Public identity key of the sender (for payments).
+ * @param {Base64String} derivationPrefix - Payment-level derivation prefix used by the sender for key derivation (for payments).
+ * @param {Base64String} derivationSuffix - Specific output-level derivation suffix used by the sender for key derivation (for payments).
+ * @param {PubKeyHex} senderIdentityKey - Public identity key of the sender (for payments).
  */
 export interface WalletPayment {
   derivationPrefix: Base64String
@@ -477,9 +484,9 @@ export interface WalletPayment {
 }
 
 /**
-   * @param {BasketStringUnder300Bytes} basket - Basket in which to place the output (for insertions).
-   * @param {string} [customInstructions] - Optionally provided custom instructions attached to the output (for insertions).
-   * @param {OutputTagStringUnder300Bytes[]} [tags] - Tags attached to the output (for insertions).
+ * @param {BasketStringUnder300Bytes} basket - Basket in which to place the output (for insertions).
+ * @param {string} [customInstructions] - Optionally provided custom instructions attached to the output (for insertions).
+ * @param {OutputTagStringUnder300Bytes[]} [tags] - Tags attached to the output (for insertions).
  */
 export interface BasketInsertion {
   basket: BasketStringUnder300Bytes
@@ -488,10 +495,10 @@ export interface BasketInsertion {
 }
 
 /**
-   * @param {PositiveIntegerOrZero} outputIndex - Index of the output within the transaction.
-   * @param {'payment' | 'insert'} protocol - Specifies whether the output is a payment (to be received into the wallet balance) or an insert operation (into a particular basket).
-   * @param {WalletPayment} [paymentRemittance] - Optional. Remittance data, structured accordingly for the payment operation.
-   * @param {BasketInsertion} [insertionRemittance] - Optional. Remittance data, structured accordingly for the insertion operation.
+ * @param {PositiveIntegerOrZero} outputIndex - Index of the output within the transaction.
+ * @param {'payment' | 'insert'} protocol - Specifies whether the output is a payment (to be received into the wallet balance) or an insert operation (into a particular basket).
+ * @param {WalletPayment} [paymentRemittance] - Optional. Remittance data, structured accordingly for the payment operation.
+ * @param {BasketInsertion} [insertionRemittance] - Optional. Remittance data, structured accordingly for the insertion operation.
  */
 export interface InternalizeOutput {
   outputIndex: PositiveIntegerOrZero
@@ -501,11 +508,11 @@ export interface InternalizeOutput {
 }
 
 /**
-   * @param {BEEF} tx - Atomic BEEF-formatted transaction to internalize.
-   * @param {InternalizeOutput[]} outputs - Metadata about outputs, processed differently based on payment or insertion types.
-   * @param {DescriptionString5to50Bytes} description - Human-readable description of the transaction being internalized.
-   * @param {LabelStringUnder300Bytes[]} [labels] - Optional labels associated with this transaction.
-   * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
+ * @param {BEEF} tx - Atomic BEEF-formatted transaction to internalize.
+ * @param {InternalizeOutput[]} outputs - Metadata about outputs, processed differently based on payment or insertion types.
+ * @param {DescriptionString5to50Bytes} description - Human-readable description of the transaction being internalized.
+ * @param {LabelStringUnder300Bytes[]} [labels] - Optional labels associated with this transaction.
+ * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
  */
 export interface InternalizeActionArgs {
   tx: AtomicBEEF
@@ -520,17 +527,17 @@ export interface InternalizeActionResult {
 }
 
 /**
-   * @param {BasketStringUnder300Bytes} basket - The associated basket name whose outputs should be listed.
-   * @param {OutputTagStringUnder300Bytes[]} [tags] - Filter outputs based on these tags.
-   * @param {'all' | 'any'} [tagQueryMode] - Filter mode, defining whether all or any of the tags must match. By default, any tag can match.
-   * @param {'locking scripts' | 'entire transactions'} [include] - Whether to include locking scripts (with each output) or entire transactions (as aggregated BEEF, at the top level) in the result. By default, unless specified, neither are returned.
-   * @param {BooleanDefaultFalse} [includeEntireTransactions] - Whether to include the entire transaction(s) in the result.
-   * @param {BooleanDefaultFalse} [includeCustomInstructions] - Whether custom instructions should be returned in the result.
-   * @param {BooleanDefaultFalse} [includeTags] - Whether the tags associated with the output should be returned.
-   * @param {BooleanDefaultFalse} [includeLabels] - Whether the labels associated with the transaction containing the output should be returned.
-   * @param {PositiveIntegerDefault10Max10000} [limit] - Optional limit on the number of outputs to return.
-   * @param {PositiveIntegerOrZero} [offset] - Number of outputs to skip before starting to return results.
-   * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
+ * @param {BasketStringUnder300Bytes} basket - The associated basket name whose outputs should be listed.
+ * @param {OutputTagStringUnder300Bytes[]} [tags] - Filter outputs based on these tags.
+ * @param {'all' | 'any'} [tagQueryMode] - Filter mode, defining whether all or any of the tags must match. By default, any tag can match.
+ * @param {'locking scripts' | 'entire transactions'} [include] - Whether to include locking scripts (with each output) or entire transactions (as aggregated BEEF, at the top level) in the result. By default, unless specified, neither are returned.
+ * @param {BooleanDefaultFalse} [includeEntireTransactions] - Whether to include the entire transaction(s) in the result.
+ * @param {BooleanDefaultFalse} [includeCustomInstructions] - Whether custom instructions should be returned in the result.
+ * @param {BooleanDefaultFalse} [includeTags] - Whether the tags associated with the output should be returned.
+ * @param {BooleanDefaultFalse} [includeLabels] - Whether the labels associated with the transaction containing the output should be returned.
+ * @param {PositiveIntegerDefault10Max10000} [limit] - Optional limit on the number of outputs to return.
+ * @param {PositiveIntegerOrZero} [offset] - Number of outputs to skip before starting to return results.
+ * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
  */
 export interface ListOutputsArgs {
   basket: BasketStringUnder300Bytes
@@ -561,12 +568,12 @@ export interface RelinquishOutputResult {
 }
 
 /**
-   * @param {WalletProtocol} protocolID - The security level and protocol string under which the data should be encrypted.
-   * @param {KeyIDStringUnder800Bytes} keyID - Key ID under which the encryption will be performed.
-   * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
-   * @param {WalletCounterparty} [counterparty] - Public key of the counterparty (if two-party encryption is desired).
-   * @param {BooleanDefaultFalse} [privileged] - Whether this is a privileged request.
-   * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
+ * @param {WalletProtocol} protocolID - The security level and protocol string under which the data should be encrypted.
+ * @param {KeyIDStringUnder800Bytes} keyID - Key ID under which the encryption will be performed.
+ * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
+ * @param {WalletCounterparty} [counterparty] - Public key of the counterparty (if two-party encryption is desired).
+ * @param {BooleanDefaultFalse} [privileged] - Whether this is a privileged request.
+ * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
  */
 export interface WalletEncryptionArgs {
   protocolID: WalletProtocol
@@ -578,12 +585,12 @@ export interface WalletEncryptionArgs {
 }
 
 /**
-   * When `identityKey` is true, `WalletEncryptionArgs` are not used.
-   *
-   * When `identityKey` is undefined, `WalletEncryptionArgs` are required.
-   *
-   * @param {BooleanDefaultFalse|true} [identityKey] - Use true to retrieve the current user's own identity key, overriding any protocol ID, key ID, or counterparty specified.
-   * @param {BooleanDefaultFalse} [forSelf] - Whether to return the public key derived from the current user's own identity (as opposed to the counterparty's identity).
+ * When `identityKey` is true, `WalletEncryptionArgs` are not used.
+ *
+ * When `identityKey` is undefined, `WalletEncryptionArgs` are required.
+ *
+ * @param {BooleanDefaultFalse|true} [identityKey] - Use true to retrieve the current user's own identity key, overriding any protocol ID, key ID, or counterparty specified.
+ * @param {BooleanDefaultFalse} [forSelf] - Whether to return the public key derived from the current user's own identity (as opposed to the counterparty's identity).
  */
 export interface GetPublicKeyArgs extends Partial<WalletEncryptionArgs> {
   identityKey?: true
@@ -591,10 +598,10 @@ export interface GetPublicKeyArgs extends Partial<WalletEncryptionArgs> {
 }
 
 /**
-   * @param {PubKeyHex} counterparty - The public key of the counterparty involved in the linkage.
-   * @param {PubKeyHex} verifier - The public key of the verifier requesting the linkage information.
-   * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
-   * @param {BooleanDefaultFalse} [privileged] - Whether this is a privileged request.
+ * @param {PubKeyHex} counterparty - The public key of the counterparty involved in the linkage.
+ * @param {PubKeyHex} verifier - The public key of the verifier requesting the linkage information.
+ * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
+ * @param {BooleanDefaultFalse} [privileged] - Whether this is a privileged request.
  */
 export interface RevealCounterpartyKeyLinkageArgs {
   counterparty: PubKeyHex
@@ -604,12 +611,12 @@ export interface RevealCounterpartyKeyLinkageArgs {
 }
 
 /**
-   * @param {PubKeyHex} counterparty - The public key of the counterparty involved in the linkage.
-   * @param {PubKeyHex} verifier - The public key of the verifier requesting the linkage information.
-   * @param {WalletProtocol} protocolID - The security level and protocol string associated with the linkage information to reveal.
-   * @param {KeyIDStringUnder800Bytes} keyID - The key ID associated with the linkage information to reveal.
-   * @param {DescriptionString5to50Bytes} [privilegedReason] - Optional. Reason provided for privileged access, required if this is a privileged operation.
-   * @param {BooleanDefaultFalse} [privileged] - Optional. Whether this is a privileged request.
+ * @param {PubKeyHex} counterparty - The public key of the counterparty involved in the linkage.
+ * @param {PubKeyHex} verifier - The public key of the verifier requesting the linkage information.
+ * @param {WalletProtocol} protocolID - The security level and protocol string associated with the linkage information to reveal.
+ * @param {KeyIDStringUnder800Bytes} keyID - The key ID associated with the linkage information to reveal.
+ * @param {DescriptionString5to50Bytes} [privilegedReason] - Optional. Reason provided for privileged access, required if this is a privileged operation.
+ * @param {BooleanDefaultFalse} [privileged] - Optional. Whether this is a privileged request.
  */
 export interface RevealSpecificKeyLinkageArgs {
   counterparty: WalletCounterparty
@@ -645,7 +652,7 @@ export interface RevealSpecificKeyLinkageResult extends KeyLinkageResult {
 }
 
 /**
-   * @param {Byte[]} plaintext - Array of bytes constituting the plaintext data to be encrypted.
+ * @param {Byte[]} plaintext - Array of bytes constituting the plaintext data to be encrypted.
  */
 export interface WalletEncryptArgs extends WalletEncryptionArgs {
   plaintext: Byte[]
@@ -656,7 +663,7 @@ export interface WalletEncryptResult {
 }
 
 /**
-   * @param {Byte[]} ciphertext - Encrypted bytes, including the initialization vector, for decryption.
+ * @param {Byte[]} ciphertext - Encrypted bytes, including the initialization vector, for decryption.
  */
 export interface WalletDecryptArgs extends WalletEncryptionArgs {
   ciphertext: Byte[]
@@ -667,7 +674,7 @@ export interface WalletDecryptResult {
 }
 
 /**
-   * @param {Byte[]} data - Input data (in bytes) for which the HMAC needs to be created.
+ * @param {Byte[]} data - Input data (in bytes) for which the HMAC needs to be created.
  */
 export interface CreateHmacArgs extends WalletEncryptionArgs {
   data: Byte[]
@@ -678,8 +685,8 @@ export interface CreateHmacResult {
 }
 
 /**
-   * @param {Byte[]} data - The input data whose HMAC is to be verified.
-   * @param {Byte[]} hmac - Byte array representing the HMAC value to be verified.
+ * @param {Byte[]} data - The input data whose HMAC is to be verified.
+ * @param {Byte[]} hmac - Byte array representing the HMAC value to be verified.
  */
 export interface VerifyHmacArgs extends WalletEncryptionArgs {
   data: Byte[]
@@ -691,8 +698,8 @@ export interface VerifyHmacResult {
 }
 
 /**
-   * @param {Byte[]} [data] - Data to be signed using the derived private key with ECDSA. Required unless directly signing a hash.
-   * @param {Byte[]} [hashToDirectlySign] - Sign a pre-hashed value in situations where data can't or shouldn't be revealed, whether due to its size or for privacy.
+ * @param {Byte[]} [data] - Data to be signed using the derived private key with ECDSA. Required unless directly signing a hash.
+ * @param {Byte[]} [hashToDirectlySign] - Sign a pre-hashed value in situations where data can't or shouldn't be revealed, whether due to its size or for privacy.
  */
 export interface CreateSignatureArgs extends WalletEncryptionArgs {
   data?: Byte[]
@@ -704,10 +711,10 @@ export interface CreateSignatureResult {
 }
 
 /**
-   * @param {Byte[]} [args.data] - The data originally signed, which is required for verification unless directly verifying a hash.
-   * @param {Byte[]} [args.hashToDirectlyVerify] - Optional field to verify the signature against a precomputed hash instead of data.
-   * @param {Byte[]} args.signature - The DER-encoded ECDSA signature to validate.
-   * @param {BooleanDefaultFalse} [args.forSelf] - Whether the signature to be verified was created by this user rather than the counterparty.
+ * @param {Byte[]} [args.data] - The data originally signed, which is required for verification unless directly verifying a hash.
+ * @param {Byte[]} [args.hashToDirectlyVerify] - Optional field to verify the signature against a precomputed hash instead of data.
+ * @param {Byte[]} args.signature - The DER-encoded ECDSA signature to validate.
+ * @param {BooleanDefaultFalse} [args.forSelf] - Whether the signature to be verified was created by this user rather than the counterparty.
  */
 export interface VerifySignatureArgs extends WalletEncryptionArgs {
   data?: Byte[]
@@ -721,18 +728,18 @@ export interface VerifySignatureResult {
 }
 
 /**
-   * @param {Base64String} type - Type identifier for the certificate.
-   * @param {PubKeyHex} certifier - The public identity key of the certifier.
-   * @param {AcquisitionProtocol} acquisitionProtocol - Specifies the acquisition process, set to either 'issuance' or 'direct'.
-   * @param {Record<CertificateFieldNameUnder50Bytes, string>} fields - The fields included within the certificate.
-   * @param {Base64String} [serialNumber] - Serial number of the certificate to acquire (required when the acquisition protocol is direct).
-   * @param {string} [revocationOutpoint] - Reference for an outpoint comprising a Bitcoin token that, if ever spent, marks the certificate as invalid (required when the acquisition protocol is direct).
-   * @param {HexString} [signature] - Signature over the certificate (required when the acquisition protocol is direct).
-   * @param {string} [certifierUrl] - URL of the certifier where certificate acquisition requests will be sent (required when the acquisition protocol is issuance).
-   * @param {KeyringRevealer} [keyringRevealer] - The public identity key of the entity revealing the keyring to the user, if different from the certifier (required when the acquisition protocol is direct).
-   * @param {Record<CertificateFieldNameUnder50Bytes, Base64String>} [keyringForSubject] - Keyring revealing all certificate fields to the subject (required when the acquisition protocol is direct).
-   * @param {BooleanDefaultFalse} [privileged] - Whether this is a privileged request.
-   * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
+ * @param {Base64String} type - Type identifier for the certificate.
+ * @param {PubKeyHex} certifier - The public identity key of the certifier.
+ * @param {AcquisitionProtocol} acquisitionProtocol - Specifies the acquisition process, set to either 'issuance' or 'direct'.
+ * @param {Record<CertificateFieldNameUnder50Bytes, string>} fields - The fields included within the certificate.
+ * @param {Base64String} [serialNumber] - Serial number of the certificate to acquire (required when the acquisition protocol is direct).
+ * @param {string} [revocationOutpoint] - Reference for an outpoint comprising a Bitcoin token that, if ever spent, marks the certificate as invalid (required when the acquisition protocol is direct).
+ * @param {HexString} [signature] - Signature over the certificate (required when the acquisition protocol is direct).
+ * @param {string} [certifierUrl] - URL of the certifier where certificate acquisition requests will be sent (required when the acquisition protocol is issuance).
+ * @param {KeyringRevealer} [keyringRevealer] - The public identity key of the entity revealing the keyring to the user, if different from the certifier (required when the acquisition protocol is direct).
+ * @param {Record<CertificateFieldNameUnder50Bytes, Base64String>} [keyringForSubject] - Keyring revealing all certificate fields to the subject (required when the acquisition protocol is direct).
+ * @param {BooleanDefaultFalse} [privileged] - Whether this is a privileged request.
+ * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
  */
 export interface AcquireCertificateArgs {
   type: Base64String
@@ -768,20 +775,22 @@ export interface IdentityCertifier {
 
 export interface IdentityCertificate extends WalletCertificate {
   certifierInfo: IdentityCertifier
-  publiclyRevealedKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>
+  publiclyRevealedKeyring: Record<
+  CertificateFieldNameUnder50Bytes,
+  Base64String
+  >
   decryptedFields: Record<CertificateFieldNameUnder50Bytes, string>
 }
 
-export interface AcquireCertificateResult extends WalletCertificate {
-}
+export interface AcquireCertificateResult extends WalletCertificate {}
 
 /**
-   * @param {PubKeyHex[]} certifiers - An array of public keys for specific certifiers (filters by these certifiers).
-   * @param {Base64String[]} types - An array of certificate types issued by any of the specified certifiers, which should be returned.
-   * @param {PositiveIntegerDefault10Max10000} [limit] - Maximum number of certificates to return.
-   * @param {PositiveIntegerOrZero} [offset] - Number of records to skip before starting to return results.
-   * @param {BooleanDefaultFalse} [privileged] - Whether this is a privileged request.
-   * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
+ * @param {PubKeyHex[]} certifiers - An array of public keys for specific certifiers (filters by these certifiers).
+ * @param {Base64String[]} types - An array of certificate types issued by any of the specified certifiers, which should be returned.
+ * @param {PositiveIntegerDefault10Max10000} [limit] - Maximum number of certificates to return.
+ * @param {PositiveIntegerOrZero} [offset] - Number of records to skip before starting to return results.
+ * @param {BooleanDefaultFalse} [privileged] - Whether this is a privileged request.
+ * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
  */
 export interface ListCertificatesArgs {
   certifiers: PubKeyHex[]
@@ -803,11 +812,11 @@ export interface ListCertificatesResult {
 }
 
 /**
-   * @param {WalletCertificate} certificate - The specific identity certificate being proven.
-   * @param {CertificateFieldNameUnder50Bytes[]} fieldsToReveal - Array of field names that need to be revealed to the verifier.
-   * @param {PubKeyHex} verifier - Public key of the verifier, to whom the key revelations will be made.
-   * @param {BooleanDefaultFalse} [privileged] - Whether this is a privileged request.
-   * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
+ * @param {WalletCertificate} certificate - The specific identity certificate being proven.
+ * @param {CertificateFieldNameUnder50Bytes[]} fieldsToReveal - Array of field names that need to be revealed to the verifier.
+ * @param {PubKeyHex} verifier - Public key of the verifier, to whom the key revelations will be made.
+ * @param {BooleanDefaultFalse} [privileged] - Whether this is a privileged request.
+ * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
  */
 export interface ProveCertificateArgs {
   certificate: Partial<WalletCertificate>
@@ -824,9 +833,9 @@ export interface ProveCertificateResult {
 }
 
 /**
-   * @param {Base64String} type - Type identifier for the certificate.
-   * @param {PubKeyHex} certifier - The public identity key of the certifier.
-   * @param {Base64String} serialNumber - Serial number of the certificate to relinquish.
+ * @param {Base64String} type - Type identifier for the certificate.
+ * @param {PubKeyHex} certifier - The public identity key of the certifier.
+ * @param {Base64String} serialNumber - Serial number of the certificate to relinquish.
  */
 export interface RelinquishCertificateArgs {
   type: Base64String
@@ -866,10 +875,10 @@ export interface GetVersionResult {
 }
 
 /**
-   * @param {PubKeyHex} identityKey - Identity key used to filter and discover certificates.
-   * @param {PositiveIntegerDefault10Max10000} [limit] - Maximum number of certificates to return in the response.
-   * @param {PositiveIntegerOrZero} [offset] - Skip this number of records before starting to provide results.
-   * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
+ * @param {PubKeyHex} identityKey - Identity key used to filter and discover certificates.
+ * @param {PositiveIntegerDefault10Max10000} [limit] - Maximum number of certificates to return in the response.
+ * @param {PositiveIntegerOrZero} [offset] - Skip this number of records before starting to provide results.
+ * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
  */
 export interface DiscoverByIdentityKeyArgs {
   identityKey: PubKeyHex
@@ -886,10 +895,10 @@ export interface DiscoverCertificatesResult {
 }
 
 /**
-   * @param {Record<CertificateFieldNameUnder50Bytes, string>} attributes - The attributes used to discover the certificates.
-   * @param {PositiveIntegerDefault10Max10000} [limit] - Optional limit on the number of results returned.
-   * @param {PositiveIntegerOrZero} [offset] - Starts retrieval of results after the specified number of records.
-   * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
+ * @param {Record<CertificateFieldNameUnder50Bytes, string>} attributes - The attributes used to discover the certificates.
+ * @param {PositiveIntegerDefault10Max10000} [limit] - Optional limit on the number of results returned.
+ * @param {PositiveIntegerOrZero} [offset] - Starts retrieval of results after the specified number of records.
+ * @param {BooleanDefaultTrue} [seekPermission] — Whether to seek permission from the user for this operation if required. Default true, will return an error rather than proceed if set to false.
  */
 export interface DiscoverByAttributesArgs {
   attributes: Record<CertificateFieldNameUnder50Bytes, string>

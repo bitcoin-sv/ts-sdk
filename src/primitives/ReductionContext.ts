@@ -1,6 +1,6 @@
-import BigNumber from './BigNumber.js'
-import K256 from './K256.js'
-import Mersenne from './Mersenne.js'
+import BigNumber from './BigNumber'
+import K256 from './K256'
+import Mersenne from './Mersenne'
 
 /**
  * A base reduction engine that provides several arithmetic operations over
@@ -89,7 +89,7 @@ export default class ReductionContext {
       'red works only with positives'
     )
     this.assert(
-      (a.red != null) && a.red === b.red,
+      a.red != null && a.red === b.red,
       'red works only with red numbers'
     )
   }

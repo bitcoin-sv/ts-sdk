@@ -468,7 +468,9 @@ export class MasterCertificate extends Certificate {
     constructor(type: Base64String, serialNumber: Base64String, subject: PubKeyHex, certifier: PubKeyHex, revocationOutpoint: OutpointString, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, signature?: HexString) 
     static async createCertificateFields(creatorWallet: ProtoWallet, certifierOrSubject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<CreateCertificateFieldsResult> 
     static async createKeyringForVerifier(subjectWallet: ProtoWallet, certifier: WalletCounterparty, verifier: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldsToReveal: string[], masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, serialNumber: Base64String, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
-    static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => { return "Certificate revocation not tracked."; }, serialNumber?: string): Promise<MasterCertificate> 
+    static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => {
+        return "Certificate revocation not tracked.";
+    }, serialNumber?: string): Promise<MasterCertificate> 
     static async decryptFields(subjectOrCertifierWallet: ProtoWallet, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, counterparty: WalletCounterparty): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
     static async decryptField(subjectOrCertifierWallet: ProtoWallet, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldName: Base64String, fieldValue: Base64String, counterparty: WalletCounterparty, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<{
         fieldRevelationKey: number[];
@@ -589,7 +591,9 @@ generated symmetric key, which is then encrypted for the subject. The certificat
 can also includes a revocation outpoint to manage potential revocation.
 
 ```ts
-static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => { return "Certificate revocation not tracked."; }, serialNumber?: string): Promise<MasterCertificate> 
+static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (serialNumber: string): Promise<string> => {
+    return "Certificate revocation not tracked.";
+}, serialNumber?: string): Promise<MasterCertificate> 
 ```
 See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [MasterCertificate](#class-mastercertificate), [ProtoWallet](#class-protowallet), [WalletCounterparty](#type-walletcounterparty)
 
@@ -608,7 +612,7 @@ Argument Details
 + **certificateType**
   + The type of certificate being issued.
 + **getRevocationOutpoint**
-  + 
+  + -
 Optional function to obtain a revocation outpoint for the certificate. Defaults to a placeholder.
 + **updateProgress**
   + Optional callback for reporting progress updates during the operation. Defaults to a no-op.
@@ -1057,7 +1061,7 @@ Argument Details
 
 #### Method onData
 
-Registers a callback to handle incoming messages. 
+Registers a callback to handle incoming messages.
 This must be called before sending any messages to ensure responses can be processed.
 
 ```ts

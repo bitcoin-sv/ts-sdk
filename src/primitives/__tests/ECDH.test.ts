@@ -1,7 +1,7 @@
 /* eslint-env jest */
-import PublicKey from '../../../dist/cjs/src/primitives/PublicKey'
-import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
-import BigNumber from '../../../dist/cjs/src/primitives/BigNumber'
+import PublicKey from '../../primitives/PublicKey'
+import PrivateKey from '../../primitives/PrivateKey'
+import BigNumber from '../../primitives/BigNumber'
 
 describe('ECDH', function () {
   it('should work with secp256k1', function () {
@@ -10,8 +10,17 @@ describe('ECDH', function () {
     let sh1 = s1.deriveSharedSecret(s2.toPublicKey())
     let sh2 = s2.deriveSharedSecret(s1.toPublicKey())
     expect(sh1.toString()).toEqual(sh2.toString())
-    sh1 = s1.deriveSharedSecret(PublicKey.fromString(s2.toPublicKey().toDER()))
-    sh2 = s2.deriveSharedSecret(PublicKey.fromString(s1.toPublicKey().toDER()))
+    sh1 = s1.deriveSharedSecret(
+      PublicKey.fromString(
+        Buffer.from(s2.toPublicKey().toDER()).toString('hex')
+      )
+    )
+    sh2 = s2.deriveSharedSecret(
+      PublicKey.fromString(
+        Buffer.from(s1.toPublicKey().toDER()).toString('hex')
+      )
+    )
+
     expect(sh1.toString()).toEqual(sh2.toString())
     sh1 = s1.deriveSharedSecret(PublicKey.fromPrivateKey(s2))
     sh2 = s2.deriveSharedSecret(PublicKey.fromPrivateKey(s1))
@@ -24,8 +33,6 @@ describe('ECDH', function () {
     const mallory = new PublicKey(new BigNumber(14), new BigNumber(16))
     expect(() => {
       bob.deriveSharedSecret(mallory)
-    }).toThrow(new Error(
-      'Public key not valid for ECDH secret derivation'
-    ))
+    }).toThrow(new Error('Public key not valid for ECDH secret derivation'))
   })
 })

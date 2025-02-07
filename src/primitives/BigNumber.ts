@@ -1,4 +1,4 @@
-import ReductionContext from './ReductionContext.js'
+import ReductionContext from './ReductionContext'
 
 /**
  * JavaScript numbers are only precise up to 53 bits. Since Bitcoin relies on
@@ -44,24 +44,19 @@ export default class BigNumber {
    * @privateinitializer
    */
   static readonly groupSizes: number[] = [
-    0, 0,
-    25, 16, 12, 11, 10, 9, 8,
-    8, 7, 7, 7, 7, 6, 6,
-    6, 6, 6, 6, 6, 5, 5,
-    5, 5, 5, 5, 5, 5, 5,
-    5, 5, 5, 5, 5, 5, 5
+    0, 0, 25, 16, 12, 11, 10, 9, 8, 8, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5,
+    5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
   ]
 
   /**
    * @privateinitializer
    */
   static readonly groupBases: number[] = [
-    0, 0,
-    33554432, 43046721, 16777216, 48828125, 60466176, 40353607, 16777216,
+    0, 0, 33554432, 43046721, 16777216, 48828125, 60466176, 40353607, 16777216,
     43046721, 10000000, 19487171, 35831808, 62748517, 7529536, 11390625,
-    16777216, 24137569, 34012224, 47045881, 64000000, 4084101, 5153632,
-    6436343, 7962624, 9765625, 11881376, 14348907, 17210368, 20511149,
-    24300000, 28629151, 33554432, 39135393, 45435424, 52521875, 60466176
+    16777216, 24137569, 34012224, 47045881, 64000000, 4084101, 5153632, 6436343,
+    7962624, 9765625, 11881376, 14348907, 17210368, 20511149, 24300000,
+    28629151, 33554432, 39135393, 45435424, 52521875, 60466176
   ]
 
   /**
@@ -135,9 +130,12 @@ export default class BigNumber {
       return true
     }
 
-    return num !== null && typeof num === 'object' &&
+    return (
+      num !== null &&
+      typeof num === 'object' &&
       num.constructor.wordSize === BigNumber.wordSize &&
       Array.isArray(num.words)
+    )
   }
 
   /**
@@ -274,21 +272,14 @@ export default class BigNumber {
       this.words = [number & 0x3ffffff]
       this.length = 1
     } else if (number < 0x10000000000000) {
-      this.words = [
-        number & 0x3ffffff,
-        (number / 0x4000000) & 0x3ffffff
-      ]
+      this.words = [number & 0x3ffffff, (number / 0x4000000) & 0x3ffffff]
       this.length = 2
     } else {
       this.assert(
-        number <= 0x1FFFFFFFFFFFFF,
+        number <= 0x1fffffffffffff,
         'The number is larger than 2 ^ 53 (unsafe)'
       )
-      this.words = [
-        number & 0x3ffffff,
-        (number / 0x4000000) & 0x3ffffff,
-        1
-      ]
+      this.words = [number & 0x3ffffff, (number / 0x4000000) & 0x3ffffff, 1]
       this.length = 3
     }
 
@@ -369,10 +360,10 @@ export default class BigNumber {
     // '0' - '9'
     if (c >= 48 && c <= 57) {
       return c - 48
-    // 'A' - 'F'
+      // 'A' - 'F'
     } else if (c >= 65 && c <= 70) {
       return c - 55
-    // 'a' - 'f'
+      // 'a' - 'f'
     } else if (c >= 97 && c <= 102) {
       return c - 87
     } else {
@@ -391,7 +382,9 @@ export default class BigNumber {
    * @return The decimal value corresponding to the two hexadecimal characters.
    */
   private parseHexByte (
-    string: string, lowerBound: number, index: number
+    string: string,
+    lowerBound: number,
+    index: number
   ): number {
     let r = this.parseHex4Bits(string, index)
     if (index - 1 >= lowerBound) {
@@ -410,7 +403,11 @@ export default class BigNumber {
    * @param endian - The endianness ('be', 'le').
    * @return The current BigNumber instance.
    */
-  private parseHex (number: string, start: number, endian: 'be' | 'le'): BigNumber {
+  private parseHex (
+    number: string,
+    start: number,
+    endian: 'be' | 'le'
+  ): BigNumber {
     // Initialize the words array
     this.length = Math.ceil((number.length - start) / 6)
     this.words = new Array(this.length).fill(0)
@@ -437,7 +434,11 @@ export default class BigNumber {
       }
     } else {
       const parseLength = number.length - start
-      for (let i = parseLength % 2 === 0 ? start + 1 : start; i < number.length; i += 2) {
+      for (
+        let i = parseLength % 2 === 0 ? start + 1 : start;
+        i < number.length;
+        i += 2
+      ) {
         processHexByte(i)
       }
     }
@@ -469,11 +470,11 @@ export default class BigNumber {
       if (c >= 49) {
         b = c - 49 + 0xa
 
-      // 'A'
+        // 'A'
       } else if (c >= 17) {
         b = c - 17 + 0xa
 
-      // '0' - '9'
+        // '0' - '9'
       } else {
         b = c
       }
@@ -775,11 +776,11 @@ export default class BigNumber {
       ret += this.words[1] * 0x4000000
     } else if (this.length === 3 && this.words[2] === 0x01) {
       // NOTE: at this stage it is known that the top bit is set
-      ret += 0x10000000000000 + (this.words[1] * 0x4000000)
+      ret += 0x10000000000000 + this.words[1] * 0x4000000
     } else if (this.length > 2) {
       throw new Error('Number can only safely store up to 53 bits')
     }
-    return (this.negative !== 0) ? -ret : ret
+    return this.negative !== 0 ? -ret : ret
   }
 
   /**
@@ -903,7 +904,10 @@ export default class BigNumber {
 
     const byteLength = this.byteLength()
     const reqLength = length ?? Math.max(1, byteLength)
-    this.assert(byteLength <= reqLength, 'byte array longer than desired length')
+    this.assert(
+      byteLength <= reqLength,
+      'byte array longer than desired length'
+    )
     this.assert(reqLength > 0, 'Requested array length <= 0')
 
     const res = new Array(reqLength)
@@ -1523,7 +1527,7 @@ export default class BigNumber {
       this.negative ^= 1
       return this.normSign()
 
-    // positive + negative
+      // positive + negative
     } else if (this.negative === 0 && num.negative !== 0) {
       num.negative = 0
       r = this.isub(num)
@@ -1560,7 +1564,7 @@ export default class BigNumber {
     if (carry !== 0) {
       this.words[this.length] = carry
       this.length++
-    // Copy the rest of the words
+      // Copy the rest of the words
     } else if (a !== this) {
       for (; i < a.length; i++) {
         this.words[i] = a.words[i]
@@ -1622,7 +1626,7 @@ export default class BigNumber {
       num.negative = 1
       return r.normSign()
 
-    // -this - num = -(this + num)
+      // -this - num = -(this + num)
     } else if (this.negative !== 0) {
       this.negative = 0
       this.iadd(num)
@@ -1699,7 +1703,9 @@ export default class BigNumber {
   }
 
   private smallMulTo (
-    self: BigNumber, num: BigNumber, out: BigNumber
+    self: BigNumber,
+    num: BigNumber,
+    out: BigNumber
   ): BigNumber {
     out.negative = num.negative ^ self.negative
     let len = (self.length + num.length) | 0
@@ -2664,7 +2670,7 @@ export default class BigNumber {
     }
 
     // Push carried bits as a mask
-    if ((maskedWords != null) && carry !== 0) {
+    if (maskedWords != null && carry !== 0) {
       maskedWords.words[maskedWords.length++] = carry
     }
 
@@ -3083,7 +3089,8 @@ export default class BigNumber {
     }
 
     for (let j = m - 1; j >= 0; j--) {
-      let qj = (a.words[b.length + j] | 0) * 0x4000000 +
+      let qj =
+        (a.words[b.length + j] | 0) * 0x4000000 +
         (a.words[b.length + j - 1] | 0)
 
       // NOTE: (qj / bhi) is (0x3ffffff * 0x4000000 + 0x3ffffff) / 0x2000000 max
@@ -3292,16 +3299,14 @@ export default class BigNumber {
    * const quotient = bigNum1.divRound(bigNum2); // quotient here would be '2'
    */
   divRound (num: BigNumber): BigNumber {
-    const dm: { div: BigNumber, mod: BigNumber } = (
-      this.divmod(num) as unknown as { div: BigNumber, mod: BigNumber }
-    )
+    const dm: { div: BigNumber, mod: BigNumber } = this.divmod(
+      num
+    ) as unknown as { div: BigNumber, mod: BigNumber }
 
     // Fast case - exact division
     if (dm.mod.isZero()) return dm.div
 
-    const mod = dm.div.negative !== 0
-      ? dm.mod.isub(num)
-      : dm.mod
+    const mod = dm.div.negative !== 0 ? dm.mod.isub(num) : dm.mod
 
     const half = num.ushrn(1)
     const r2: number = num.andln(1)
@@ -4022,7 +4027,7 @@ export default class BigNumber {
       this.red,
       'fromRed works only with numbers in reduction context'
     )
-    return (this.red).convertFrom(this)
+    return this.red.convertFrom(this)
   }
 
   /**
@@ -4059,7 +4064,7 @@ export default class BigNumber {
    */
   redAdd (num: BigNumber): BigNumber {
     this.assert(this.red, 'redAdd works only with red numbers')
-    return (this.red).add(this, num)
+    return this.red.add(this, num)
   }
 
   /**
@@ -4078,7 +4083,7 @@ export default class BigNumber {
    */
   redIAdd (num: BigNumber): BigNumber {
     this.assert(this.red, 'redIAdd works only with red numbers')
-    return (this.red).iadd(this, num)
+    return this.red.iadd(this, num)
   }
 
   /**
@@ -4097,7 +4102,7 @@ export default class BigNumber {
    */
   redSub (num: BigNumber): BigNumber {
     this.assert(this.red, 'redSub works only with red numbers')
-    return (this.red).sub(this, num)
+    return this.red.sub(this, num)
   }
 
   /**
@@ -4116,7 +4121,7 @@ export default class BigNumber {
    */
   redISub (num: BigNumber): BigNumber {
     this.assert(this.red, 'redISub works only with red numbers')
-    return (this.red).isub(this, num)
+    return this.red.isub(this, num)
   }
 
   /**
@@ -4135,7 +4140,7 @@ export default class BigNumber {
    */
   redShl (num: number): BigNumber {
     this.assert(this.red, 'redShl works only with red numbers')
-    return (this.red).shl(this, num)
+    return this.red.shl(this, num)
   }
 
   /**
@@ -4154,8 +4159,8 @@ export default class BigNumber {
    */
   redMul (num: BigNumber): BigNumber {
     this.assert(this.red, 'redMul works only with red numbers')
-    ; (this.red).verify2(this, num)
-    return (this.red).mul(this, num)
+    this.red.verify2(this, num)
+    return this.red.mul(this, num)
   }
 
   /**
@@ -4173,8 +4178,8 @@ export default class BigNumber {
    */
   redIMul (num: BigNumber): BigNumber {
     this.assert(this.red, 'redMul works only with red numbers')
-    ; (this.red).verify2(this, num)
-    return (this.red).imul(this, num)
+    this.red.verify2(this, num)
+    return this.red.imul(this, num)
   }
 
   /**
@@ -4194,8 +4199,8 @@ export default class BigNumber {
    */
   redSqr (): BigNumber {
     this.assert(this.red, 'redSqr works only with red numbers')
-    ; (this.red).verify1(this)
-    return (this.red).sqr(this)
+    this.red.verify1(this)
+    return this.red.sqr(this)
   }
 
   /**
@@ -4215,8 +4220,8 @@ export default class BigNumber {
    */
   redISqr (): BigNumber {
     this.assert(this.red, 'redISqr works only with red numbers')
-    ; (this.red).verify1(this)
-    return (this.red).isqr(this)
+    this.red.verify1(this)
+    return this.red.isqr(this)
   }
 
   /**
@@ -4237,8 +4242,8 @@ export default class BigNumber {
    */
   redSqrt (): BigNumber {
     this.assert(this.red, 'redSqrt works only with red numbers')
-    ; (this.red).verify1(this)
-    return (this.red).sqrt(this)
+    this.red.verify1(this)
+    return this.red.sqrt(this)
   }
 
   /**
@@ -4256,8 +4261,8 @@ export default class BigNumber {
    */
   redInvm (): BigNumber {
     this.assert(this.red, 'redInvm works only with red numbers')
-    ; (this.red).verify1(this)
-    return (this.red).invm(this)
+    this.red.verify1(this)
+    return this.red.invm(this)
   }
 
   /**
@@ -4275,8 +4280,8 @@ export default class BigNumber {
    */
   redNeg (): BigNumber {
     this.assert(this.red, 'redNeg works only with red numbers')
-    ; (this.red).verify1(this)
-    return (this.red).neg(this)
+    this.red.verify1(this)
+    return this.red.neg(this)
   }
 
   /**
@@ -4295,9 +4300,9 @@ export default class BigNumber {
    * let result = a.redPow(b);  // equivalent to (a^b) mod red
    */
   redPow (num: BigNumber): BigNumber {
-    this.assert((this.red != null) && (num.red == null), 'redPow(normalNum)')
-    ; (this.red).verify1(this)
-    return (this.red).pow(this, num)
+    this.assert(this.red != null && num.red == null, 'redPow(normalNum)')
+    this.red.verify1(this)
+    return this.red.pow(this, num)
   }
 
   /**
@@ -4471,7 +4476,7 @@ export default class BigNumber {
    */
   static fromBits (bits: number, strict: boolean = false): BigNumber {
     // Convert to signed 32-bit value manually without using Buffer
-    bits = (bits & 0x80000000) ? bits - 0x100000000 : bits
+    bits = bits & 0x80000000 ? bits - 0x100000000 : bits
     if (strict && (bits & 0x00800000) !== 0) {
       throw new Error('negative bit set')
     }
@@ -4480,10 +4485,10 @@ export default class BigNumber {
 
     // Manually create the byte array (similar to the original buffer)
     let bytes = [
-      (nword >> 24) & 0xFF,
-      (nword >> 16) & 0xFF,
-      (nword >> 8) & 0xFF,
-      nword & 0xFF
+      (nword >> 24) & 0xff,
+      (nword >> 16) & 0xff,
+      (nword >> 8) & 0xff,
+      nword & 0xff
     ]
 
     if (nsize <= 3) {
@@ -4527,7 +4532,7 @@ export default class BigNumber {
     }
 
     // For the case where byteArray represents '00', the bits should be 0x00000000
-    if (byteArray.every(byte => byte === 0)) {
+    if (byteArray.every((byte) => byte === 0)) {
       return 0x00000000
     }
 
@@ -4540,7 +4545,7 @@ export default class BigNumber {
 
     // We're interested in the first three bytes for the "nword"
     // or in smaller cases, what's available
-    let nword = byteArray.slice(0, 3).reduce((acc, val) => (acc * 256) + val, 0)
+    let nword = byteArray.slice(0, 3).reduce((acc, val) => acc * 256 + val, 0)
 
     // Ensure we don't have the sign bit set initially
     if ((nword & 0x800000) !== 0) {
@@ -4577,7 +4582,9 @@ export default class BigNumber {
    * const bigNumber = BigNumber.fromScriptNum(num, true, 5)
    */
   static fromScriptNum (
-    num: number[], requireMinimal?: boolean, maxNumSize?: number
+    num: number[],
+    requireMinimal?: boolean,
+    maxNumSize?: number
   ): BigNumber {
     if (maxNumSize === undefined) {
       maxNumSize = Number.MAX_SAFE_INTEGER
@@ -4586,18 +4593,18 @@ export default class BigNumber {
       throw new Error('script number overflow')
     }
     if (requireMinimal && num.length > 0) {
-    // Check that the number is encoded with the minimum possible
-    // number of bytes.
-    //
-    // If the most-significant-byte - excluding the sign bit - is zero
-    // then we're not minimal. Note how this test also rejects the
-    // negative-zero encoding, 0x80.
+      // Check that the number is encoded with the minimum possible
+      // number of bytes.
+      //
+      // If the most-significant-byte - excluding the sign bit - is zero
+      // then we're not minimal. Note how this test also rejects the
+      // negative-zero encoding, 0x80.
       if ((num[num.length - 1] & 0x7f) === 0) {
-      // One exception: if there's more than one byte and the most
-      // significant bit of the second-most-significant-byte is set
-      // it would conflict with the sign bit. An example of this case
-      // is +-255, which encode to 0xff00 and 0xff80 respectively.
-      // (big-endian).
+        // One exception: if there's more than one byte and the most
+        // significant bit of the second-most-significant-byte is set
+        // it would conflict with the sign bit. An example of this case
+        // is +-255, which encode to 0xff00 and 0xff80 respectively.
+        // (big-endian).
         if (num.length <= 1 || (num[num.length - 2] & 0x80) === 0) {
           throw new Error('non-minimally encoded script number')
         }

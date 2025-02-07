@@ -50,7 +50,10 @@ abstract class BaseHash {
   hmacStrength: number
 
   constructor (
-    blockSize: number, outSize: number, hmacStrength: number, padLength: number
+    blockSize: number,
+    outSize: number,
+    hmacStrength: number,
+    padLength: number
   ) {
     this.pending = null
     this.pendingTotal = 0
@@ -106,7 +109,9 @@ abstract class BaseHash {
       // Process pending data in blocks
       const r = msg.length % this._delta8
       this.pending = msg.slice(msg.length - r, msg.length)
-      if (this.pending.length === 0) { this.pending = null }
+      if (this.pending.length === 0) {
+        this.pending = null
+      }
 
       msg = join32(msg, 0, msg.length - r, this.endian)
       for (let i = 0; i < msg.length; i += this._delta32) {
@@ -132,7 +137,7 @@ abstract class BaseHash {
     assert(this.pending === null)
 
     return this._digest()
-  };
+  }
 
   /**
    * Finalizes the hash computation and returns the hash value/result as a hex string.
@@ -149,7 +154,7 @@ abstract class BaseHash {
     assert(this.pending === null)
 
     return this._digestHex()
-  };
+  }
 
   /**
    * [Private Method] Used internally to prepare the padding for the final stage of the hash computation.
@@ -159,20 +164,25 @@ abstract class BaseHash {
    *
    * @returns Returns an array denoting the padding.
    */
-  private _pad (): number[] { //
+  private _pad (): number[] {
+    //
     let len = this.pendingTotal
     const bytes = this._delta8
     const k = bytes - ((len + this.padLength) % bytes)
     const res = new Array(k + this.padLength)
     res[0] = 0x80
     let i
-    for (i = 1; i < k; i++) { res[i] = 0 }
+    for (i = 1; i < k; i++) {
+      res[i] = 0
+    }
 
     // Append length
     len <<= 3
     let t
     if (this.endian === 'big') {
-      for (t = 8; t < this.padLength; t++) { res[i++] = 0 }
+      for (t = 8; t < this.padLength; t++) {
+        res[i++] = 0
+      }
 
       res[i++] = 0
       res[i++] = 0
@@ -192,7 +202,9 @@ abstract class BaseHash {
       res[i++] = 0
       res[i++] = 0
 
-      for (t = 8; t < this.padLength; t++) { res[i++] = 0 }
+      for (t = 8; t < this.padLength; t++) {
+        res[i++] = 0
+      }
     }
 
     return res
@@ -200,13 +212,13 @@ abstract class BaseHash {
 }
 
 function isSurrogatePair (msg: string, i: number): boolean {
-  if ((msg.charCodeAt(i) & 0xFC00) !== 0xD800) {
+  if ((msg.charCodeAt(i) & 0xfc00) !== 0xd800) {
     return false
   }
   if (i < 0 || i + 1 >= msg.length) {
     return false
   }
-  return (msg.charCodeAt(i + 1) & 0xFC00) === 0xDC00
+  return (msg.charCodeAt(i + 1) & 0xfc00) === 0xdc00
 }
 
 /**
@@ -215,14 +227,21 @@ function isSurrogatePair (msg: string, i: number): boolean {
  * @param enc Optional. Encoding to use if msg is string. Default is 'utf8'.
  * @returns array of byte values from msg. If msg is an array, a copy is returned.
  */
-export function toArray (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] {
-  if (Array.isArray(msg)) { return msg.slice() }
-  if (!(msg as unknown as boolean)) { return [] }
+export function toArray (
+  msg: number[] | string,
+  enc?: 'hex' | 'utf8'
+): number[] {
+  if (Array.isArray(msg)) {
+    return msg.slice()
+  }
+  if (!(msg as unknown as boolean)) {
+    return []
+  }
   const res = []
   if (typeof msg === 'string') {
     if (enc !== 'hex') {
       // Inspired by stringToUtf8ByteArray() in closure-library by Google
-      // https://github.com/google/closure-library/blob/8598d87242af59aac233270742c8984e2b2bdbe0/closure/goog/crypt/crypt.js#L117-L143
+      // https://github.com/google/closure-library/blob/8598d87242af59aac233270742c8984e2b2bdbe0/closure/goog/crypt/crypt#L117-L143
       // Apache License 2.0
       // https://github.com/google/closure-library/blob/master/LICENSE
       let p = 0
@@ -234,7 +253,7 @@ export function toArray (msg: number[] | string, enc?: 'hex' | 'utf8'): number[]
           res[p++] = (c >> 6) | 192
           res[p++] = (c & 63) | 128
         } else if (isSurrogatePair(msg, i)) {
-          c = 0x10000 + ((c & 0x03FF) << 10) + (msg.charCodeAt(++i) & 0x03FF)
+          c = 0x10000 + ((c & 0x03ff) << 10) + (msg.charCodeAt(++i) & 0x03ff)
           res[p++] = (c >> 18) | 240
           res[p++] = ((c >> 12) & 63) | 128
           res[p++] = ((c >> 6) & 63) | 128
@@ -246,7 +265,7 @@ export function toArray (msg: number[] | string, enc?: 'hex' | 'utf8'): number[]
         }
       }
     } else {
-      msg = msg.replace(/[^a-z0-9]+/ig, '')
+      msg = msg.replace(/[^a-z0-9]+/gi, '')
       if (msg.length % 2 !== 0) {
         msg = '0' + msg
       }
@@ -256,13 +275,16 @@ export function toArray (msg: number[] | string, enc?: 'hex' | 'utf8'): number[]
     }
   } else {
     msg = msg as number[]
-    for (let i = 0; i < msg.length; i++) { res[i] = msg[i] | 0 }
+    for (let i = 0; i < msg.length; i++) {
+      res[i] = msg[i] | 0
+    }
   }
   return res
 }
 
 function htonl (w: number): number {
-  const res = (w >>> 24) |
+  const res =
+    (w >>> 24) |
     ((w >>> 8) & 0xff00) |
     ((w << 8) & 0xff0000) |
     ((w & 0xff) << 24)
@@ -273,7 +295,9 @@ function toHex32 (msg: number[], endian?: 'little' | 'big'): string {
   let res = ''
   for (let i = 0; i < msg.length; i++) {
     let w = msg[i]
-    if (endian === 'little') { w = htonl(w) }
+    if (endian === 'little') {
+      w = htonl(w)
+    }
     res += zero8(w.toString(16))
   }
   return res
@@ -355,19 +379,29 @@ function SUM32_4 (a: number, b: number, c: number, d: number): number {
 }
 
 function SUM32_5 (
-  a: number, b: number, c: number, d: number, e: number
+  a: number,
+  b: number,
+  c: number,
+  d: number,
+  e: number
 ): number {
   return (a + b + c + d + e) >>> 0
 }
 
 function FT_1 (s, x, y, z): number {
-  if (s === 0) { return ch32(x, y, z) }
-  if (s === 1 || s === 3) { return p32(x, y, z) }
-  if (s === 2) { return maj32(x, y, z) }
+  if (s === 0) {
+    return ch32(x, y, z)
+  }
+  if (s === 1 || s === 3) {
+    return p32(x, y, z)
+  }
+  if (s === 2) {
+    return maj32(x, y, z)
+  }
 }
 
 function ch32 (x, y, z): number {
-  return (x & y) ^ ((~x) & z)
+  return (x & y) ^ (~x & z)
 }
 
 function maj32 (x, y, z): number {
@@ -395,47 +429,73 @@ function G1_256 (x): number {
 }
 
 const r = [
-  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-  7, 4, 13, 1, 10, 6, 15, 3, 12, 0, 9, 5, 2, 14, 11, 8,
-  3, 10, 14, 4, 9, 15, 8, 1, 2, 7, 0, 6, 13, 11, 5, 12,
-  1, 9, 11, 10, 0, 8, 12, 4, 13, 3, 7, 15, 14, 5, 6, 2,
-  4, 0, 5, 9, 7, 12, 2, 10, 14, 1, 3, 8, 11, 6, 15, 13
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 7, 4, 13, 1, 10, 6, 15,
+  3, 12, 0, 9, 5, 2, 14, 11, 8, 3, 10, 14, 4, 9, 15, 8, 1, 2, 7, 0, 6, 13, 11,
+  5, 12, 1, 9, 11, 10, 0, 8, 12, 4, 13, 3, 7, 15, 14, 5, 6, 2, 4, 0, 5, 9, 7,
+  12, 2, 10, 14, 1, 3, 8, 11, 6, 15, 13
 ]
 
 const rh = [
-  5, 14, 7, 0, 9, 2, 11, 4, 13, 6, 15, 8, 1, 10, 3, 12,
-  6, 11, 3, 7, 0, 13, 5, 10, 14, 15, 8, 12, 4, 9, 1, 2,
-  15, 5, 1, 3, 7, 14, 6, 9, 11, 8, 12, 2, 10, 0, 4, 13,
-  8, 6, 4, 1, 3, 11, 15, 0, 5, 12, 2, 13, 9, 7, 10, 14,
-  12, 15, 10, 4, 1, 5, 8, 7, 6, 2, 13, 14, 0, 3, 9, 11
+  5, 14, 7, 0, 9, 2, 11, 4, 13, 6, 15, 8, 1, 10, 3, 12, 6, 11, 3, 7, 0, 13, 5,
+  10, 14, 15, 8, 12, 4, 9, 1, 2, 15, 5, 1, 3, 7, 14, 6, 9, 11, 8, 12, 2, 10, 0,
+  4, 13, 8, 6, 4, 1, 3, 11, 15, 0, 5, 12, 2, 13, 9, 7, 10, 14, 12, 15, 10, 4, 1,
+  5, 8, 7, 6, 2, 13, 14, 0, 3, 9, 11
 ]
 
 const s = [
-  11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8,
-  7, 6, 8, 13, 11, 9, 7, 15, 7, 12, 15, 9, 11, 7, 13, 12,
-  11, 13, 6, 7, 14, 9, 13, 15, 14, 8, 13, 6, 5, 12, 7, 5,
-  11, 12, 14, 15, 14, 15, 9, 8, 9, 14, 5, 6, 8, 6, 5, 12,
-  9, 15, 5, 11, 6, 8, 13, 12, 5, 12, 13, 14, 11, 8, 5, 6
+  11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8, 7, 6, 8, 13, 11, 9, 7,
+  15, 7, 12, 15, 9, 11, 7, 13, 12, 11, 13, 6, 7, 14, 9, 13, 15, 14, 8, 13, 6, 5,
+  12, 7, 5, 11, 12, 14, 15, 14, 15, 9, 8, 9, 14, 5, 6, 8, 6, 5, 12, 9, 15, 5,
+  11, 6, 8, 13, 12, 5, 12, 13, 14, 11, 8, 5, 6
 ]
 
 const sh = [
-  8, 9, 9, 11, 13, 15, 15, 5, 7, 7, 8, 11, 14, 14, 12, 6,
-  9, 13, 15, 7, 12, 8, 9, 11, 7, 7, 12, 7, 6, 15, 13, 11,
-  9, 7, 15, 11, 8, 6, 6, 14, 12, 13, 5, 14, 13, 13, 7, 5,
-  15, 5, 8, 11, 14, 14, 6, 14, 6, 9, 12, 9, 12, 5, 15, 8,
-  8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11
+  8, 9, 9, 11, 13, 15, 15, 5, 7, 7, 8, 11, 14, 14, 12, 6, 9, 13, 15, 7, 12, 8,
+  9, 11, 7, 7, 12, 7, 6, 15, 13, 11, 9, 7, 15, 11, 8, 6, 6, 14, 12, 13, 5, 14,
+  13, 13, 7, 5, 15, 5, 8, 11, 14, 14, 6, 14, 6, 9, 12, 9, 12, 5, 15, 8, 8, 5,
+  12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11
 ]
 
 function f (j, x, y, z): number {
-  if (j <= 15) { return x ^ y ^ z } else if (j <= 31) { return (x & y) | ((~x) & z) } else if (j <= 47) { return (x | (~y)) ^ z } else if (j <= 63) { return (x & z) | (y & (~z)) } else { return x ^ (y | (~z)) }
+  if (j <= 15) {
+    return x ^ y ^ z
+  } else if (j <= 31) {
+    return (x & y) | (~x & z)
+  } else if (j <= 47) {
+    return (x | ~y) ^ z
+  } else if (j <= 63) {
+    return (x & z) | (y & ~z)
+  } else {
+    return x ^ (y | ~z)
+  }
 }
 
 function K (j): number {
-  if (j <= 15) { return 0x00000000 } else if (j <= 31) { return 0x5a827999 } else if (j <= 47) { return 0x6ed9eba1 } else if (j <= 63) { return 0x8f1bbcdc } else { return 0xa953fd4e }
+  if (j <= 15) {
+    return 0x00000000
+  } else if (j <= 31) {
+    return 0x5a827999
+  } else if (j <= 47) {
+    return 0x6ed9eba1
+  } else if (j <= 63) {
+    return 0x8f1bbcdc
+  } else {
+    return 0xa953fd4e
+  }
 }
 
 function Kh (j): number {
-  if (j <= 15) { return 0x50a28be6 } else if (j <= 31) { return 0x5c4dd124 } else if (j <= 47) { return 0x6d703ef3 } else if (j <= 63) { return 0x7a6d76e9 } else { return 0x00000000 }
+  if (j <= 15) {
+    return 0x50a28be6
+  } else if (j <= 31) {
+    return 0x5c4dd124
+  } else if (j <= 47) {
+    return 0x6d703ef3
+  } else if (j <= 63) {
+    return 0x7a6d76e9
+  } else {
+    return 0x00000000
+  }
 }
 
 function sum64 (buf, pos, ah, al) {
@@ -561,10 +621,9 @@ export class RIPEMD160 extends BaseHash {
     let T
     for (let j = 0; j < 80; j++) {
       T = sum32(
-        rotl32(
-          SUM32_4(A, f(j, B, C, D), msg[r[j] + start], K(j)),
-          s[j]),
-        E)
+        rotl32(SUM32_4(A, f(j, B, C, D), msg[r[j] + start], K(j)), s[j]),
+        E
+      )
       A = E
       E = D
       D = rotl32(C, 10)
@@ -573,8 +632,10 @@ export class RIPEMD160 extends BaseHash {
       T = sum32(
         rotl32(
           SUM32_4(Ah, f(79 - j, Bh, Ch, Dh), msg[rh[j] + start], Kh(j)),
-          sh[j]),
-        Eh)
+          sh[j]
+        ),
+        Eh
+      )
       Ah = Eh
       Eh = Dh
       Dh = rotl32(Ch, 10)
@@ -625,25 +686,20 @@ export class SHA256 extends BaseHash {
   constructor () {
     super(512, 256, 192, 64)
     this.h = [
-      0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-      0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+      0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c,
+      0x1f83d9ab, 0x5be0cd19
     ]
     this.k = [
-      0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
-      0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
-      0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
-      0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
-      0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc,
-      0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
-      0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
-      0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-      0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
-      0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
-      0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3,
-      0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-      0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5,
-      0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-      0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
+      0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1,
+      0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
+      0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786,
+      0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+      0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147,
+      0x06ca6351, 0x14292967, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
+      0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b,
+      0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+      0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a,
+      0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
       0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
     ]
     this.W = new Array(64)
@@ -691,7 +747,7 @@ export class SHA256 extends BaseHash {
     this.h[5] = sum32(this.h[5], f)
     this.h[6] = sum32(this.h[6], g)
     this.h[7] = sum32(this.h[7], h)
-  };
+  }
 
   _digest (): number[] {
     return split32(this.h, 'big')
@@ -728,13 +784,8 @@ export class SHA1 extends BaseHash {
 
   constructor () {
     super(512, 160, 80, 64)
-    this.k = [
-      0x5A827999, 0x6ED9EBA1,
-      0x8F1BBCDC, 0xCA62C1D6
-    ]
-    this.h = [
-      0x67452301, 0xefcdab89, 0x98badcfe,
-      0x10325476, 0xc3d2e1f0]
+    this.k = [0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6]
+    this.h = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0]
     this.W = new Array(80)
   }
 
@@ -742,7 +793,9 @@ export class SHA1 extends BaseHash {
     const W = this.W
 
     let i: number
-    for (i = 0; i < 16; i++) { W[i] = msg[start + i] }
+    for (i = 0; i < 16; i++) {
+      W[i] = msg[start + i]
+    }
 
     for (; i < W.length; i++) {
       W[i] = rotl32(W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16], 1)
@@ -807,54 +860,37 @@ export class SHA512 extends BaseHash {
   constructor () {
     super(1024, 512, 192, 128)
     this.h = [
-      0x6a09e667, 0xf3bcc908,
-      0xbb67ae85, 0x84caa73b,
-      0x3c6ef372, 0xfe94f82b,
-      0xa54ff53a, 0x5f1d36f1,
-      0x510e527f, 0xade682d1,
-      0x9b05688c, 0x2b3e6c1f,
-      0x1f83d9ab, 0xfb41bd6b,
-      0x5be0cd19, 0x137e2179]
+      0x6a09e667, 0xf3bcc908, 0xbb67ae85, 0x84caa73b, 0x3c6ef372, 0xfe94f82b,
+      0xa54ff53a, 0x5f1d36f1, 0x510e527f, 0xade682d1, 0x9b05688c, 0x2b3e6c1f,
+      0x1f83d9ab, 0xfb41bd6b, 0x5be0cd19, 0x137e2179
+    ]
     this.k = [
-      0x428a2f98, 0xd728ae22, 0x71374491, 0x23ef65cd,
-      0xb5c0fbcf, 0xec4d3b2f, 0xe9b5dba5, 0x8189dbbc,
-      0x3956c25b, 0xf348b538, 0x59f111f1, 0xb605d019,
-      0x923f82a4, 0xaf194f9b, 0xab1c5ed5, 0xda6d8118,
-      0xd807aa98, 0xa3030242, 0x12835b01, 0x45706fbe,
-      0x243185be, 0x4ee4b28c, 0x550c7dc3, 0xd5ffb4e2,
-      0x72be5d74, 0xf27b896f, 0x80deb1fe, 0x3b1696b1,
-      0x9bdc06a7, 0x25c71235, 0xc19bf174, 0xcf692694,
-      0xe49b69c1, 0x9ef14ad2, 0xefbe4786, 0x384f25e3,
-      0x0fc19dc6, 0x8b8cd5b5, 0x240ca1cc, 0x77ac9c65,
-      0x2de92c6f, 0x592b0275, 0x4a7484aa, 0x6ea6e483,
-      0x5cb0a9dc, 0xbd41fbd4, 0x76f988da, 0x831153b5,
-      0x983e5152, 0xee66dfab, 0xa831c66d, 0x2db43210,
-      0xb00327c8, 0x98fb213f, 0xbf597fc7, 0xbeef0ee4,
-      0xc6e00bf3, 0x3da88fc2, 0xd5a79147, 0x930aa725,
-      0x06ca6351, 0xe003826f, 0x14292967, 0x0a0e6e70,
-      0x27b70a85, 0x46d22ffc, 0x2e1b2138, 0x5c26c926,
-      0x4d2c6dfc, 0x5ac42aed, 0x53380d13, 0x9d95b3df,
-      0x650a7354, 0x8baf63de, 0x766a0abb, 0x3c77b2a8,
-      0x81c2c92e, 0x47edaee6, 0x92722c85, 0x1482353b,
-      0xa2bfe8a1, 0x4cf10364, 0xa81a664b, 0xbc423001,
-      0xc24b8b70, 0xd0f89791, 0xc76c51a3, 0x0654be30,
-      0xd192e819, 0xd6ef5218, 0xd6990624, 0x5565a910,
-      0xf40e3585, 0x5771202a, 0x106aa070, 0x32bbd1b8,
-      0x19a4c116, 0xb8d2d0c8, 0x1e376c08, 0x5141ab53,
-      0x2748774c, 0xdf8eeb99, 0x34b0bcb5, 0xe19b48a8,
-      0x391c0cb3, 0xc5c95a63, 0x4ed8aa4a, 0xe3418acb,
-      0x5b9cca4f, 0x7763e373, 0x682e6ff3, 0xd6b2b8a3,
-      0x748f82ee, 0x5defb2fc, 0x78a5636f, 0x43172f60,
-      0x84c87814, 0xa1f0ab72, 0x8cc70208, 0x1a6439ec,
-      0x90befffa, 0x23631e28, 0xa4506ceb, 0xde82bde9,
-      0xbef9a3f7, 0xb2c67915, 0xc67178f2, 0xe372532b,
-      0xca273ece, 0xea26619c, 0xd186b8c7, 0x21c0c207,
-      0xeada7dd6, 0xcde0eb1e, 0xf57d4f7f, 0xee6ed178,
-      0x06f067aa, 0x72176fba, 0x0a637dc5, 0xa2c898a6,
-      0x113f9804, 0xbef90dae, 0x1b710b35, 0x131c471b,
-      0x28db77f5, 0x23047d84, 0x32caab7b, 0x40c72493,
-      0x3c9ebe0a, 0x15c9bebc, 0x431d67c4, 0x9c100d4c,
-      0x4cc5d4be, 0xcb3e42b6, 0x597f299c, 0xfc657e2a,
+      0x428a2f98, 0xd728ae22, 0x71374491, 0x23ef65cd, 0xb5c0fbcf, 0xec4d3b2f,
+      0xe9b5dba5, 0x8189dbbc, 0x3956c25b, 0xf348b538, 0x59f111f1, 0xb605d019,
+      0x923f82a4, 0xaf194f9b, 0xab1c5ed5, 0xda6d8118, 0xd807aa98, 0xa3030242,
+      0x12835b01, 0x45706fbe, 0x243185be, 0x4ee4b28c, 0x550c7dc3, 0xd5ffb4e2,
+      0x72be5d74, 0xf27b896f, 0x80deb1fe, 0x3b1696b1, 0x9bdc06a7, 0x25c71235,
+      0xc19bf174, 0xcf692694, 0xe49b69c1, 0x9ef14ad2, 0xefbe4786, 0x384f25e3,
+      0x0fc19dc6, 0x8b8cd5b5, 0x240ca1cc, 0x77ac9c65, 0x2de92c6f, 0x592b0275,
+      0x4a7484aa, 0x6ea6e483, 0x5cb0a9dc, 0xbd41fbd4, 0x76f988da, 0x831153b5,
+      0x983e5152, 0xee66dfab, 0xa831c66d, 0x2db43210, 0xb00327c8, 0x98fb213f,
+      0xbf597fc7, 0xbeef0ee4, 0xc6e00bf3, 0x3da88fc2, 0xd5a79147, 0x930aa725,
+      0x06ca6351, 0xe003826f, 0x14292967, 0x0a0e6e70, 0x27b70a85, 0x46d22ffc,
+      0x2e1b2138, 0x5c26c926, 0x4d2c6dfc, 0x5ac42aed, 0x53380d13, 0x9d95b3df,
+      0x650a7354, 0x8baf63de, 0x766a0abb, 0x3c77b2a8, 0x81c2c92e, 0x47edaee6,
+      0x92722c85, 0x1482353b, 0xa2bfe8a1, 0x4cf10364, 0xa81a664b, 0xbc423001,
+      0xc24b8b70, 0xd0f89791, 0xc76c51a3, 0x0654be30, 0xd192e819, 0xd6ef5218,
+      0xd6990624, 0x5565a910, 0xf40e3585, 0x5771202a, 0x106aa070, 0x32bbd1b8,
+      0x19a4c116, 0xb8d2d0c8, 0x1e376c08, 0x5141ab53, 0x2748774c, 0xdf8eeb99,
+      0x34b0bcb5, 0xe19b48a8, 0x391c0cb3, 0xc5c95a63, 0x4ed8aa4a, 0xe3418acb,
+      0x5b9cca4f, 0x7763e373, 0x682e6ff3, 0xd6b2b8a3, 0x748f82ee, 0x5defb2fc,
+      0x78a5636f, 0x43172f60, 0x84c87814, 0xa1f0ab72, 0x8cc70208, 0x1a6439ec,
+      0x90befffa, 0x23631e28, 0xa4506ceb, 0xde82bde9, 0xbef9a3f7, 0xb2c67915,
+      0xc67178f2, 0xe372532b, 0xca273ece, 0xea26619c, 0xd186b8c7, 0x21c0c207,
+      0xeada7dd6, 0xcde0eb1e, 0xf57d4f7f, 0xee6ed178, 0x06f067aa, 0x72176fba,
+      0x0a637dc5, 0xa2c898a6, 0x113f9804, 0xbef90dae, 0x1b710b35, 0x131c471b,
+      0x28db77f5, 0x23047d84, 0x32caab7b, 0x40c72493, 0x3c9ebe0a, 0x15c9bebc,
+      0x431d67c4, 0x9c100d4c, 0x4cc5d4be, 0xcb3e42b6, 0x597f299c, 0xfc657e2a,
       0x5fcb6fab, 0x3ad6faec, 0x6c44198c, 0x4a475817
     ]
     this.W = new Array(160)
@@ -865,7 +901,9 @@ export class SHA512 extends BaseHash {
 
     // 32 x 32bit words
     let i
-    for (i = 0; i < 32; i++) { W[i] = msg[start + i] }
+    for (i = 0; i < 32; i++) {
+      W[i] = msg[start + i]
+    }
     for (; i < W.length; i += 2) {
       const c0_hi = g1_512_hi(W[i - 4], W[i - 3]) // i - 2
       const c0_lo = g1_512_lo(W[i - 4], W[i - 3])
@@ -876,16 +914,17 @@ export class SHA512 extends BaseHash {
       const c3_hi = W[i - 32] // i - 16
       const c3_lo = W[i - 31]
 
-      W[i] = sum64_4_hi(
-        c0_hi, c0_lo,
-        c1_hi, c1_lo,
-        c2_hi, c2_lo,
-        c3_hi, c3_lo)
+      W[i] = sum64_4_hi(c0_hi, c0_lo, c1_hi, c1_lo, c2_hi, c2_lo, c3_hi, c3_lo)
       W[i + 1] = sum64_4_lo(
-        c0_hi, c0_lo,
-        c1_hi, c1_lo,
-        c2_hi, c2_lo,
-        c3_hi, c3_lo)
+        c0_hi,
+        c0_lo,
+        c1_hi,
+        c1_lo,
+        c2_hi,
+        c2_lo,
+        c3_hi,
+        c3_lo
+      )
     }
   }
 
@@ -925,17 +964,29 @@ export class SHA512 extends BaseHash {
       const c4_lo = W[i + 1]
 
       const T1_hi = sum64_5_hi(
-        c0_hi, c0_lo,
-        c1_hi, c1_lo,
-        c2_hi, c2_lo,
-        c3_hi, c3_lo,
-        c4_hi, c4_lo)
+        c0_hi,
+        c0_lo,
+        c1_hi,
+        c1_lo,
+        c2_hi,
+        c2_lo,
+        c3_hi,
+        c3_lo,
+        c4_hi,
+        c4_lo
+      )
       const T1_lo = sum64_5_lo(
-        c0_hi, c0_lo,
-        c1_hi, c1_lo,
-        c2_hi, c2_lo,
-        c3_hi, c3_lo,
-        c4_hi, c4_lo)
+        c0_hi,
+        c0_lo,
+        c1_hi,
+        c1_lo,
+        c2_hi,
+        c2_lo,
+        c3_hi,
+        c3_lo,
+        c4_hi,
+        c4_lo
+      )
 
       c0_hi = s0_512_hi(ah, al)
       c0_lo = s0_512_lo(ah, al)
@@ -990,26 +1041,34 @@ export class SHA512 extends BaseHash {
 }
 
 function ch64_hi (xh, xl, yh, yl, zh, zl) {
-  let r = (xh & yh) ^ ((~xh) & zh)
-  if (r < 0) { r += 0x100000000 }
+  let r = (xh & yh) ^ (~xh & zh)
+  if (r < 0) {
+    r += 0x100000000
+  }
   return r
 }
 
 function ch64_lo (xh, xl, yh, yl, zh, zl) {
-  let r = (xl & yl) ^ ((~xl) & zl)
-  if (r < 0) { r += 0x100000000 }
+  let r = (xl & yl) ^ (~xl & zl)
+  if (r < 0) {
+    r += 0x100000000
+  }
   return r
 }
 
 function maj64_hi (xh, xl, yh, yl, zh, zl) {
   let r = (xh & yh) ^ (xh & zh) ^ (yh & zh)
-  if (r < 0) { r += 0x100000000 }
+  if (r < 0) {
+    r += 0x100000000
+  }
   return r
 }
 
 function maj64_lo (xh, xl, yh, yl, zh, zl) {
   let r = (xl & yl) ^ (xl & zl) ^ (yl & zl)
-  if (r < 0) { r += 0x100000000 }
+  if (r < 0) {
+    r += 0x100000000
+  }
   return r
 }
 
@@ -1019,7 +1078,9 @@ function s0_512_hi (xh, xl) {
   const c2_hi = rotr64_hi(xl, xh, 7) // 39
 
   let r = c0_hi ^ c1_hi ^ c2_hi
-  if (r < 0) { r += 0x100000000 }
+  if (r < 0) {
+    r += 0x100000000
+  }
   return r
 }
 
@@ -1029,7 +1090,9 @@ function s0_512_lo (xh, xl) {
   const c2_lo = rotr64_lo(xl, xh, 7) // 39
 
   let r = c0_lo ^ c1_lo ^ c2_lo
-  if (r < 0) { r += 0x100000000 }
+  if (r < 0) {
+    r += 0x100000000
+  }
   return r
 }
 
@@ -1039,7 +1102,9 @@ function s1_512_hi (xh, xl) {
   const c2_hi = rotr64_hi(xl, xh, 9) // 41
 
   let r = c0_hi ^ c1_hi ^ c2_hi
-  if (r < 0) { r += 0x100000000 }
+  if (r < 0) {
+    r += 0x100000000
+  }
   return r
 }
 
@@ -1049,7 +1114,9 @@ function s1_512_lo (xh, xl) {
   const c2_lo = rotr64_lo(xl, xh, 9) // 41
 
   let r = c0_lo ^ c1_lo ^ c2_lo
-  if (r < 0) { r += 0x100000000 }
+  if (r < 0) {
+    r += 0x100000000
+  }
   return r
 }
 
@@ -1059,7 +1126,9 @@ function g0_512_hi (xh, xl) {
   const c2_hi = shr64_hi(xh, xl, 7)
 
   let r = c0_hi ^ c1_hi ^ c2_hi
-  if (r < 0) { r += 0x100000000 }
+  if (r < 0) {
+    r += 0x100000000
+  }
   return r
 }
 
@@ -1069,7 +1138,9 @@ function g0_512_lo (xh, xl) {
   const c2_lo = shr64_lo(xh, xl, 7)
 
   let r = c0_lo ^ c1_lo ^ c2_lo
-  if (r < 0) { r += 0x100000000 }
+  if (r < 0) {
+    r += 0x100000000
+  }
   return r
 }
 
@@ -1079,7 +1150,9 @@ function g1_512_hi (xh, xl) {
   const c2_hi = shr64_hi(xh, xl, 6)
 
   let r = c0_hi ^ c1_hi ^ c2_hi
-  if (r < 0) { r += 0x100000000 }
+  if (r < 0) {
+    r += 0x100000000
+  }
   return r
 }
 
@@ -1089,7 +1162,9 @@ function g1_512_lo (xh, xl) {
   const c2_lo = shr64_lo(xh, xl, 6)
 
   let r = c0_lo ^ c1_lo ^ c2_lo
-  if (r < 0) { r += 0x100000000 }
+  if (r < 0) {
+    r += 0x100000000
+  }
   return r
 }
 
@@ -1134,13 +1209,19 @@ export class SHA256HMAC {
 
     // Add padding to key
     let i
-    for (i = key.length; i < this.blockSize; i++) { key.push(0) }
+    for (i = key.length; i < this.blockSize; i++) {
+      key.push(0)
+    }
 
-    for (i = 0; i < key.length; i++) { key[i] ^= 0x36 }
+    for (i = 0; i < key.length; i++) {
+      key[i] ^= 0x36
+    }
     this.inner = new SHA256().update(key)
 
     // 0x36 ^ 0x5c = 0x6a
-    for (i = 0; i < key.length; i++) { key[i] ^= 0x6a }
+    for (i = 0; i < key.length; i++) {
+      key[i] ^= 0x6a
+    }
     this.outer = new SHA256().update(key)
   }
 
@@ -1276,13 +1357,19 @@ export class SHA512HMAC {
 
     // Add padding to key
     let i
-    for (i = key.length; i < this.blockSize; i++) { key.push(0) }
+    for (i = key.length; i < this.blockSize; i++) {
+      key.push(0)
+    }
 
-    for (i = 0; i < key.length; i++) { key[i] ^= 0x36 }
+    for (i = 0; i < key.length; i++) {
+      key[i] ^= 0x36
+    }
     this.inner = new SHA512().update(key)
 
     // 0x36 ^ 0x5c = 0x6a
-    for (i = 0; i < key.length; i++) { key[i] ^= 0x6a }
+    for (i = 0; i < key.length; i++) {
+      key[i] ^= 0x6a
+    }
     this.outer = new SHA512().update(key)
   }
 
@@ -1342,7 +1429,10 @@ export class SHA512HMAC {
  * @example
  * const digest = ripemd160('Hello, world!');
  */
-export const ripemd160 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] => {
+export const ripemd160 = (
+  msg: number[] | string,
+  enc?: 'hex' | 'utf8'
+): number[] => {
   return new RIPEMD160().update(msg, enc).digest()
 }
 
@@ -1357,7 +1447,10 @@ export const ripemd160 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[
  * @example
  * const digest = sha1('Hello, world!');
  */
-export const sha1 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] => {
+export const sha1 = (
+  msg: number[] | string,
+  enc?: 'hex' | 'utf8'
+): number[] => {
   return new SHA1().update(msg, enc).digest()
 }
 
@@ -1372,7 +1465,10 @@ export const sha1 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] => 
  * @example
  * const digest = sha256('Hello, world!');
  */
-export const sha256 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] => {
+export const sha256 = (
+  msg: number[] | string,
+  enc?: 'hex' | 'utf8'
+): number[] => {
   return new SHA256().update(msg, enc).digest()
 }
 
@@ -1387,7 +1483,10 @@ export const sha256 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] =
  * @example
  * const digest = sha512('Hello, world!');
  */
-export const sha512 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] => {
+export const sha512 = (
+  msg: number[] | string,
+  enc?: 'hex' | 'utf8'
+): number[] => {
   return new SHA512().update(msg, enc).digest()
 }
 
@@ -1404,7 +1503,10 @@ export const sha512 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] =
  * @example
  * const doubleHash = hash256('Hello, world!');
  */
-export const hash256 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] => {
+export const hash256 = (
+  msg: number[] | string,
+  enc?: 'hex' | 'utf8'
+): number[] => {
   const first = new SHA256().update(msg, enc).digest()
   return new SHA256().update(first).digest()
 }
@@ -1421,7 +1523,10 @@ export const hash256 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] 
  * @example
  * const hash = hash160('Hello, world!');
  */
-export const hash160 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] => {
+export const hash160 = (
+  msg: number[] | string,
+  enc?: 'hex' | 'utf8'
+): number[] => {
   const first = new SHA256().update(msg, enc).digest()
   return new RIPEMD160().update(first).digest()
 }
@@ -1438,7 +1543,11 @@ export const hash160 = (msg: number[] | string, enc?: 'hex' | 'utf8'): number[] 
  * @example
  * const digest = sha256hmac('deadbeef', 'ffff001d');
  */
-export const sha256hmac = (key: number[] | string, msg: number[] | string, enc?: 'hex'): number[] => {
+export const sha256hmac = (
+  key: number[] | string,
+  msg: number[] | string,
+  enc?: 'hex'
+): number[] => {
   return new SHA256HMAC(key).update(msg, enc).digest()
 }
 
@@ -1454,7 +1563,11 @@ export const sha256hmac = (key: number[] | string, msg: number[] | string, enc?:
  * @example
  * const digest = sha512hmac('deadbeef', 'ffff001d');
  */
-export const sha512hmac = (key: number[] | string, msg: number[] | string, enc?: 'hex'): number[] => {
+export const sha512hmac = (
+  key: number[] | string,
+  msg: number[] | string,
+  enc?: 'hex'
+): number[] => {
   return new SHA512HMAC(key).update(msg, enc).digest()
 }
 
@@ -1469,7 +1582,13 @@ export const sha512hmac = (key: number[] | string, msg: number[] | string, enc?:
  *
  * @returns The computed key
  */
-export function pbkdf2 (password: number[], salt: number[], iterations: number, keylen: number, digest = 'sha512'): number[] {
+export function pbkdf2 (
+  password: number[],
+  salt: number[],
+  iterations: number,
+  keylen: number,
+  digest = 'sha512'
+): number[] {
   if (digest !== 'sha512') {
     throw new Error('Only sha512 is supported in this PBKDF2 implementation')
   }
@@ -1481,10 +1600,10 @@ export function pbkdf2 (password: number[], salt: number[], iterations: number, 
   const l = Math.ceil(keylen / hLen)
 
   for (let i = 1; i <= l; i++) {
-    block1[salt.length] = (i >> 24) & 0xFF // MSB
-    block1[salt.length + 1] = (i >> 16) & 0xFF
-    block1[salt.length + 2] = (i >> 8) & 0xFF
-    block1[salt.length + 3] = i & 0xFF // LSB
+    block1[salt.length] = (i >> 24) & 0xff // MSB
+    block1[salt.length + 1] = (i >> 16) & 0xff
+    block1[salt.length + 2] = (i >> 8) & 0xff
+    block1[salt.length + 3] = i & 0xff // LSB
 
     const T = sha512hmac(password, block1)
     let U = T

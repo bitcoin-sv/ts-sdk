@@ -1,8 +1,8 @@
-import BigNumber from './BigNumber.js'
-import Signature from './Signature.js'
-import Curve from './Curve.js'
-import Point from './Point.js'
-import DRBG from './DRBG.js'
+import BigNumber from './BigNumber'
+import Signature from './Signature'
+import Curve from './Curve'
+import Point from './Point'
+import DRBG from './DRBG'
 
 /**
  * Truncates a BigNumber message to the length of the curve order n, in the context of the Elliptic Curve Digital Signature Algorithm (ECDSA).
@@ -23,9 +23,15 @@ import DRBG from './DRBG.js'
  * let msg = new BigNumber('1234567890abcdef', 16);
  * let truncatedMsg = truncateToN(msg);
  */
-function truncateToN (msg: BigNumber, truncOnly?: boolean, curve = new Curve()): BigNumber {
+function truncateToN (
+  msg: BigNumber,
+  truncOnly?: boolean,
+  curve = new Curve()
+): BigNumber {
   const delta = msg.byteLength() * 8 - curve.n.bitLength()
-  if (delta > 0) { msg.iushrn(delta) }
+  if (delta > 0) {
+    msg.iushrn(delta)
+  }
   if (!truncOnly && msg.cmp(curve.n) >= 0) {
     return msg.sub(curve.n)
   } else {
@@ -48,7 +54,12 @@ function truncateToN (msg: BigNumber, truncOnly?: boolean, curve = new Curve()):
  * const key = new BigNumber('123456')
  * const signature = sign(msg, key)
  */
-export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false, customK?: BigNumber | Function): Signature => {
+export const sign = (
+  msg: BigNumber,
+  key: BigNumber,
+  forceLowS: boolean = false,
+  customK?: BigNumber | Function
+): Signature => {
   if (typeof BigInt === 'function') {
     // Curve parameters for secp256k1
     const zero = BigInt(0)
@@ -103,7 +114,11 @@ export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false,
     let iter = 0
 
     // Truncate to N function for BigInt
-    function truncateToN (k: bigint, n: bigint, truncOnly: boolean = true): bigint {
+    function truncateToN (
+      k: bigint,
+      n: bigint,
+      truncOnly: boolean = true
+    ): bigint {
       const kBitLength = k.toString(2).length
       const nBitLength = n.toString(2).length
       const delta = kBitLength - nBitLength
@@ -287,15 +302,18 @@ export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false,
 
     for (let iter = 0; ; iter++) {
       // Compute the k-value
-      let k = typeof customK === 'function'
-        ? customK(iter)
-        : BigNumber.isBN(customK)
-          ? customK
-          : new BigNumber(drbg.generate(bytes), 16)
+      let k =
+        typeof customK === 'function'
+          ? customK(iter)
+          : BigNumber.isBN(customK)
+            ? customK
+            : new BigNumber(drbg.generate(bytes), 16)
       k = truncateToN(k, true)
       if (k.cmpn(1) <= 0 || k.cmp(ns1) >= 0) {
         if (BigNumber.isBN(customK)) {
-          throw new Error('Invalid fixed custom K value (must be more than 1 and less than N-1)')
+          throw new Error(
+            'Invalid fixed custom K value (must be more than 1 and less than N-1)'
+          )
         } else {
           continue
         }
@@ -304,7 +322,9 @@ export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false,
       const kp = curve.g.mul(k)
       if (kp.isInfinity()) {
         if (BigNumber.isBN(customK)) {
-          throw new Error('Invalid fixed custom K value (must not create a point at infinity when multiplied by the generator point)')
+          throw new Error(
+            'Invalid fixed custom K value (must not create a point at infinity when multiplied by the generator point)'
+          )
         } else {
           continue
         }
@@ -314,7 +334,9 @@ export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false,
       const r = kpX.umod(curve.n)
       if (r.cmpn(0) === 0) {
         if (BigNumber.isBN(customK)) {
-          throw new Error('Invalid fixed custom K value (when multiplied by G, the resulting x coordinate mod N must not be zero)')
+          throw new Error(
+            'Invalid fixed custom K value (when multiplied by G, the resulting x coordinate mod N must not be zero)'
+          )
         } else {
           continue
         }
@@ -324,7 +346,9 @@ export const sign = (msg: BigNumber, key: BigNumber, forceLowS: boolean = false,
       s = s.umod(curve.n)
       if (s.cmpn(0) === 0) {
         if (BigNumber.isBN(customK)) {
-          throw new Error('Invalid fixed custom K value (when used with the key, it cannot create a zero value for S)')
+          throw new Error(
+            'Invalid fixed custom K value (when used with the key, it cannot create a zero value for S)'
+          )
         } else {
           continue
         }
@@ -394,12 +418,9 @@ export const verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
       if (old_r > one) return zero // No inverse
       return mod(old_s, m)
     }
-    const modMul = (a: bigint, b: bigint, m: bigint): bigint =>
-      mod(a * b, m)
-    const modSub = (a: bigint, b: bigint, m: bigint): bigint =>
-      mod(a - b, m)
-    const modAdd = (a: bigint, b: bigint, m: bigint): bigint =>
-      mod(a + b, m)
+    const modMul = (a: bigint, b: bigint, m: bigint): bigint => mod(a * b, m)
+    const modSub = (a: bigint, b: bigint, m: bigint): bigint => mod(a - b, m)
+    const modAdd = (a: bigint, b: bigint, m: bigint): bigint => mod(a + b, m)
 
     // Define constants
     const four = BigInt(4)
@@ -464,18 +485,17 @@ export const verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
       const V = modMul(U1, HH, p)
 
       const X3 = modSub(modSub(modMul(r, r, p), HHH, p), modMul(two, V, p), p)
-      const Y3 = modSub(
-        modMul(r, modSub(V, X3, p), p),
-        modMul(S1, HHH, p),
-        p
-      )
+      const Y3 = modSub(modMul(r, modSub(V, X3, p), p), modMul(S1, HHH, p), p)
       const Z3 = modMul(H, modMul(P.Z, Q.Z, p), p)
 
       return { X: X3, Y: Y3, Z: Z3 }
     }
 
     // Scalar Multiplication
-    const scalarMultiply = (k: bigint, P: { x: bigint, y: bigint }): JacobianPoint => {
+    const scalarMultiply = (
+      k: bigint,
+      P: { x: bigint, y: bigint }
+    ): JacobianPoint => {
       const N: JacobianPoint = { X: P.x, Y: P.y, Z: one }
       let Q: JacobianPoint = { X: zero, Y: one, Z: zero } // Point at infinity
 
@@ -553,8 +573,12 @@ export const verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
     // Perform primitive values validation
     const r = sig.r
     const s = sig.s
-    if (r.cmpn(1) < 0 || r.cmp(curve.n) >= 0) { return false }
-    if (s.cmpn(1) < 0 || s.cmp(curve.n) >= 0) { return false }
+    if (r.cmpn(1) < 0 || r.cmp(curve.n) >= 0) {
+      return false
+    }
+    if (s.cmpn(1) < 0 || s.cmp(curve.n) >= 0) {
+      return false
+    }
 
     // Validate signature
     const sinv = s.invm(curve.n)
@@ -564,7 +588,9 @@ export const verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
     // NOTE: Greg Maxwell's trick, inspired by:
     // https://git.io/vad3K
     const p = curve.g.jmulAdd(u1, key, u2)
-    if (p.isInfinity()) { return false }
+    if (p.isInfinity()) {
+      return false
+    }
 
     // Compare `p.x` of Jacobian point with `r`,
     // this will do `p.x == r * p.z^2` instead of multiplying `p.x` by the

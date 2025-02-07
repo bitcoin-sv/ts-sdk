@@ -1,6 +1,11 @@
-import { Transaction, BroadcastResponse, BroadcastFailure, Broadcaster } from '../transaction/index.js'
-import LookupResolver from './LookupResolver.js'
-import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate.js'
+import {
+  Transaction,
+  BroadcastResponse,
+  BroadcastFailure,
+  Broadcaster
+} from '../transaction/index'
+import LookupResolver from './LookupResolver'
+import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate'
 
 /**
  * Tagged BEEF
@@ -54,7 +59,10 @@ export interface SHIPBroadcasterConfig {
   /** Determines which topics (all, any, or a specific list) must be present within STEAK received from at least one host for the broadcast to be considered a success. */
   requireAcknowledgmentFromAnyHostForTopics?: 'all' | 'any' | string[]
   /** Determines a mapping whose keys are specific hosts and whose values are the topics (all, any, or a specific list) that must be present within the STEAK received by the given hosts, in order for the broadcast to be considered a success. */
-  requireAcknowledgmentFromSpecificHostsForTopics?: Record<string, 'all' | 'any' | string[]>
+  requireAcknowledgmentFromSpecificHostsForTopics?: Record<
+  string,
+  'all' | 'any' | string[]
+  >
 }
 
 /** Facilitates transaction broadcasts that return STEAK. */
@@ -64,7 +72,8 @@ export interface OverlayBroadcastFacilitator {
 
 const MAX_SHIP_QUERY_TIMEOUT = 1000
 
-export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilitator {
+export class HTTPSOverlayBroadcastFacilitator
+implements OverlayBroadcastFacilitator {
   httpClient: typeof fetch
 
   constructor (httpClient = fetch) {
@@ -73,7 +82,9 @@ export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilit
 
   async send (url: string, taggedBEEF: TaggedBEEF): Promise<STEAK> {
     if (!url.startsWith('https:')) {
-      throw new Error('HTTPS facilitator can only use URLs that start with "https:"')
+      throw new Error(
+        'HTTPS facilitator can only use URLs that start with "https:"'
+      )
     }
     const response = await fetch(`${url}/submit`, {
       method: 'POST',
@@ -98,49 +109,68 @@ export default class SHIPCast implements Broadcaster {
   private readonly topics: string[]
   private readonly facilitator: OverlayBroadcastFacilitator
   private readonly resolver: LookupResolver
-  private readonly requireAcknowledgmentFromAllHostsForTopics: 'all' | 'any' | string[]
-  private readonly requireAcknowledgmentFromAnyHostForTopics: 'all' | 'any' | string[]
-  private readonly requireAcknowledgmentFromSpecificHostsForTopics: Record<string, 'all' | 'any' | string[]>
+  private readonly requireAcknowledgmentFromAllHostsForTopics:
+  | 'all'
+  | 'any'
+  | string[]
+
+  private readonly requireAcknowledgmentFromAnyHostForTopics:
+  | 'all'
+  | 'any'
+  | string[]
+
+  private readonly requireAcknowledgmentFromSpecificHostsForTopics: Record<
+  string,
+  'all' | 'any' | string[]
+  >
 
   /**
-     * Constructs an instance of the SHIP broadcaster.
-     *
-     * @param {string[]} topics - The list of SHIP topic names where transactions are to be sent.
-     * @param {SHIPBroadcasterConfig} config - Configuration options for the SHIP broadcaster.
-     */
+   * Constructs an instance of the SHIP broadcaster.
+   *
+   * @param {string[]} topics - The list of SHIP topic names where transactions are to be sent.
+   * @param {SHIPBroadcasterConfig} config - Configuration options for the SHIP broadcaster.
+   */
   constructor (topics: string[], config?: SHIPBroadcasterConfig) {
     if (topics.length === 0) {
       throw new Error('At least one topic is required for broadcast.')
     }
-    if (topics.some(x => !x.startsWith('tm_'))) {
+    if (topics.some((x) => !x.startsWith('tm_'))) {
       throw new Error('Every topic must start with "tm_".')
     }
     this.topics = topics
     const {
-      facilitator, resolver,
+      facilitator,
+      resolver,
       requireAcknowledgmentFromAllHostsForTopics,
       requireAcknowledgmentFromAnyHostForTopics,
       requireAcknowledgmentFromSpecificHostsForTopics
-    } = config ?? {} as SHIPBroadcasterConfig
+    } = config ?? ({} as SHIPBroadcasterConfig)
     this.facilitator = facilitator ?? new HTTPSOverlayBroadcastFacilitator()
     this.resolver = resolver ?? new LookupResolver()
-    this.requireAcknowledgmentFromAllHostsForTopics = requireAcknowledgmentFromAllHostsForTopics ?? []
-    this.requireAcknowledgmentFromAnyHostForTopics = requireAcknowledgmentFromAnyHostForTopics ?? 'all'
-    this.requireAcknowledgmentFromSpecificHostsForTopics = requireAcknowledgmentFromSpecificHostsForTopics ?? {}
+    this.requireAcknowledgmentFromAllHostsForTopics =
+      requireAcknowledgmentFromAllHostsForTopics ?? []
+    this.requireAcknowledgmentFromAnyHostForTopics =
+      requireAcknowledgmentFromAnyHostForTopics ?? 'all'
+    this.requireAcknowledgmentFromSpecificHostsForTopics =
+      requireAcknowledgmentFromSpecificHostsForTopics ?? {}
   }
 
   /**
-     * Broadcasts a transaction to Overlay Services via SHIP.
-     *
-     * @param {Transaction} tx - The transaction to be sent.
-     * @returns {Promise<BroadcastResponse | BroadcastFailure>} A promise that resolves to either a success or failure response.
-     */
-  async broadcast (tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> {
+   * Broadcasts a transaction to Overlay Services via SHIP.
+   *
+   * @param {Transaction} tx - The transaction to be sent.
+   * @returns {Promise<BroadcastResponse | BroadcastFailure>} A promise that resolves to either a success or failure response.
+   */
+  async broadcast (
+    tx: Transaction
+  ): Promise<BroadcastResponse | BroadcastFailure> {
     let beef: number[]
     try {
       beef = tx.toBEEF()
     } catch (error) {
-      throw new Error('Transactions sent via SHIP to Overlay Services must be serializable to BEEF format.')
+      throw new Error(
+        'Transactions sent via SHIP to Overlay Services must be serializable to BEEF format.'
+      )
     }
     const interestedHosts = await this.findInterestedHosts()
     if (Object.keys(interestedHosts).length === 0) {
@@ -150,21 +180,26 @@ export default class SHIPCast implements Broadcaster {
         description: 'No hosts are interested in receiving this transaction.'
       }
     }
-    const hostPromises = Object.entries(interestedHosts).map(async ([host, topics]) => {
-      try {
-        const steak = await this.facilitator.send(host, { beef, topics: [...topics] })
-        if (!steak || Object.keys(steak).length === 0) {
-          throw new Error('Steak has no topics.')
+    const hostPromises = Object.entries(interestedHosts).map(
+      async ([host, topics]) => {
+        try {
+          const steak = await this.facilitator.send(host, {
+            beef,
+            topics: [...topics]
+          })
+          if (!steak || Object.keys(steak).length === 0) {
+            throw new Error('Steak has no topics.')
+          }
+          return { host, success: true, steak }
+        } catch (error) {
+          // Log error if needed
+          return { host, success: false, error }
         }
-        return { host, success: true, steak }
-      } catch (error) {
-        // Log error if needed
-        return { host, success: false, error }
       }
-    })
+    )
 
     const results = await Promise.all(hostPromises)
-    const successfulHosts = results.filter(result => result.success)
+    const successfulHosts = results.filter((result) => result.success)
 
     if (successfulHosts.length === 0) {
       return {
@@ -188,7 +223,11 @@ export default class SHIPCast implements Broadcaster {
         const coinsToRetain = instructions.coinsToRetain
         const coinsRemoved = instructions.coinsRemoved
 
-        if ((outputsToAdmit?.length > 0) || (coinsToRetain?.length > 0) || (coinsRemoved?.length > 0)) {
+        if (
+          outputsToAdmit?.length > 0 ||
+          coinsToRetain?.length > 0 ||
+          coinsRemoved?.length > 0
+        ) {
           acknowledgedTopics.add(topic)
         }
       }
@@ -218,7 +257,11 @@ export default class SHIPCast implements Broadcaster {
     }
 
     if (requiredTopicsAllHosts.length > 0) {
-      const allHostsAcknowledged = this.checkAcknowledgmentFromAllHosts(hostAcknowledgments, requiredTopicsAllHosts, requireAllHosts)
+      const allHostsAcknowledged = this.checkAcknowledgmentFromAllHosts(
+        hostAcknowledgments,
+        requiredTopicsAllHosts,
+        requireAllHosts
+      )
       if (!allHostsAcknowledged) {
         return {
           status: 'error',
@@ -248,7 +291,11 @@ export default class SHIPCast implements Broadcaster {
     }
 
     if (requiredTopicsAnyHost.length > 0) {
-      const anyHostAcknowledged = this.checkAcknowledgmentFromAnyHost(hostAcknowledgments, requiredTopicsAnyHost, requireAnyHost)
+      const anyHostAcknowledged = this.checkAcknowledgmentFromAnyHost(
+        hostAcknowledgments,
+        requiredTopicsAnyHost,
+        requireAnyHost
+      )
       if (!anyHostAcknowledged) {
         return {
           status: 'error',
@@ -259,13 +306,21 @@ export default class SHIPCast implements Broadcaster {
     }
 
     // Check requireAcknowledgmentFromSpecificHostsForTopics
-    if (Object.keys(this.requireAcknowledgmentFromSpecificHostsForTopics).length > 0) {
-      const specificHostsAcknowledged = this.checkAcknowledgmentFromSpecificHosts(hostAcknowledgments, this.requireAcknowledgmentFromSpecificHostsForTopics)
+    if (
+      Object.keys(this.requireAcknowledgmentFromSpecificHostsForTopics).length >
+      0
+    ) {
+      const specificHostsAcknowledged =
+        this.checkAcknowledgmentFromSpecificHosts(
+          hostAcknowledgments,
+          this.requireAcknowledgmentFromSpecificHostsForTopics
+        )
       if (!specificHostsAcknowledged) {
         return {
           status: 'error',
           code: 'ERR_REQUIRE_ACK_FROM_SPECIFIC_HOSTS_FAILED',
-          description: 'Specific hosts did not acknowledge the required topics.'
+          description:
+            'Specific hosts did not acknowledge the required topics.'
         }
       }
     }
@@ -278,7 +333,11 @@ export default class SHIPCast implements Broadcaster {
     }
   }
 
-  private checkAcknowledgmentFromAllHosts (hostAcknowledgments: Record<string, Set<string>>, requiredTopics: string[], require: 'all' | 'any'): boolean {
+  private checkAcknowledgmentFromAllHosts (
+    hostAcknowledgments: Record<string, Set<string>>,
+    requiredTopics: string[],
+    require: 'all' | 'any'
+  ): boolean {
     for (const acknowledgedTopics of Object.values(hostAcknowledgments)) {
       if (require === 'all') {
         for (const topic of requiredTopics) {
@@ -302,7 +361,11 @@ export default class SHIPCast implements Broadcaster {
     return true
   }
 
-  private checkAcknowledgmentFromAnyHost (hostAcknowledgments: Record<string, Set<string>>, requiredTopics: string[], require: 'all' | 'any'): boolean {
+  private checkAcknowledgmentFromAnyHost (
+    hostAcknowledgments: Record<string, Set<string>>,
+    requiredTopics: string[],
+    require: 'all' | 'any'
+  ): boolean {
     if (require === 'all') {
       // All required topics must be acknowledged by at least one host
       for (const acknowledgedTopics of Object.values(hostAcknowledgments)) {
@@ -331,7 +394,10 @@ export default class SHIPCast implements Broadcaster {
     }
   }
 
-  private checkAcknowledgmentFromSpecificHosts (hostAcknowledgments: Record<string, Set<string>>, requirements: Record<string, 'all' | 'any' | string[]>): boolean {
+  private checkAcknowledgmentFromSpecificHosts (
+    hostAcknowledgments: Record<string, Set<string>>,
+    requirements: Record<string, 'all' | 'any' | string[]>
+  ): boolean {
     for (const [host, requiredTopicsOrAllAny] of Object.entries(requirements)) {
       const acknowledgedTopics = hostAcknowledgments[host]
       if (!acknowledgedTopics) {
@@ -340,7 +406,10 @@ export default class SHIPCast implements Broadcaster {
       }
       let requiredTopics: string[]
       let require: 'all' | 'any'
-      if (requiredTopicsOrAllAny === 'all' || requiredTopicsOrAllAny === 'any') {
+      if (
+        requiredTopicsOrAllAny === 'all' ||
+        requiredTopicsOrAllAny === 'any'
+      ) {
         require = requiredTopicsOrAllAny
         requiredTopics = this.topics
       } else if (Array.isArray(requiredTopicsOrAllAny)) {
@@ -373,10 +442,10 @@ export default class SHIPCast implements Broadcaster {
   }
 
   /**
-     * Finds which hosts are interested in transactions tagged with the given set of topics.
-     *
-     * @returns A mapping of URLs for hosts interested in this transaction. Keys are URLs, values are which of our topics the specific host cares about.
-     */
+   * Finds which hosts are interested in transactions tagged with the given set of topics.
+   *
+   * @returns A mapping of URLs for hosts interested in this transaction. Keys are URLs, values are which of our topics the specific host cares about.
+   */
   private async findInterestedHosts (): Promise<Record<string, Set<string>>> {
     // TODO: cache the list of interested hosts to avoid spamming SHIP trackers.
     // TODO: Monetize the operation of the SHIP tracker system.
@@ -384,12 +453,15 @@ export default class SHIPCast implements Broadcaster {
 
     // Find all SHIP advertisements for the topics we care about
     const results: Record<string, Set<string>> = {}
-    const answer = await this.resolver.query({
-      service: 'ls_ship',
-      query: {
-        topics: this.topics
-      }
-    }, MAX_SHIP_QUERY_TIMEOUT)
+    const answer = await this.resolver.query(
+      {
+        service: 'ls_ship',
+        query: {
+          topics: this.topics
+        }
+      },
+      MAX_SHIP_QUERY_TIMEOUT
+    )
     if (answer.type !== 'output-list') {
       throw new Error('SHIP answer is not an output list.')
     }
@@ -398,7 +470,10 @@ export default class SHIPCast implements Broadcaster {
         const tx = Transaction.fromBEEF(output.beef)
         const script = tx.outputs[output.outputIndex].lockingScript
         const parsed = OverlayAdminTokenTemplate.decode(script)
-        if (!this.topics.includes(parsed.topicOrService) || parsed.protocol !== 'SHIP') {
+        if (
+          !this.topics.includes(parsed.topicOrService) ||
+          parsed.protocol !== 'SHIP'
+        ) {
           // This should make us think a LOT less highly of this SHIP tracker if it ever happens...
           continue
         }

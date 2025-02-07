@@ -1,4 +1,4 @@
-import { Beef } from './Beef.js'
+import { Beef } from './Beef'
 
 /**
  * Extends `Beef` that is used to exchange transaction validity data with more than one external party.
@@ -23,54 +23,60 @@ import { Beef } from './Beef.js'
  */
 export class BeefParty extends Beef {
   /**
-     * keys are party identifiers.
-     * values are records of txids with truthy value for which the party already has validity proof.
-     */
+   * keys are party identifiers.
+   * values are records of txids with truthy value for which the party already has validity proof.
+   */
   knownTo: Record<string, Record<string, boolean>> = {}
 
   /**
-     *
-     * @param parties Optional array of initial unique party identifiers.
-     */
+   *
+   * @param parties Optional array of initial unique party identifiers.
+   */
   constructor (parties?: string[]) {
     super()
     if (parties) {
-      for (const party of parties) { this.addParty(party) }
+      for (const party of parties) {
+        this.addParty(party)
+      }
     }
   }
 
   /**
-     * @param party
-     * @returns `true` if `party` has already been added to this `BeefParty`.
-     */
+   * @param party
+   * @returns `true` if `party` has already been added to this `BeefParty`.
+   */
   isParty (party: string) {
     const r = Object.keys(this.knownTo).includes(party)
     return r
   }
 
   /**
-     * Adds a new unique party identifier to this `BeefParty`.
-     * @param party
-     */
+   * Adds a new unique party identifier to this `BeefParty`.
+   * @param party
+   */
   addParty (party: string) {
-    if (this.isParty(party)) { throw new Error(`Party ${party} already exists.`) }
+    if (this.isParty(party)) {
+      throw new Error(`Party ${party} already exists.`)
+    }
     this.knownTo[party] = {}
   }
 
   /**
-     * @param party
-     * @returns Array of txids "known" to `party`.
-     */
+   * @param party
+   * @returns Array of txids "known" to `party`.
+   */
   getKnownTxidsForParty (party: string): string[] {
     const knownTxids = this.knownTo[party]
-    if (!knownTxids) { throw new Error(`Party ${party} is unknown.`) }
+    if (!knownTxids) {
+      throw new Error(`Party ${party} is unknown.`)
+    }
     return Object.keys(knownTxids)
   }
 
   /**
-     * @param party
-     * @returns trimmed beef of unknown transactions and proofs for `party`
-     */
+   * @param party
+   * @returns trimmed beef of unknown transactions and proofs for `party`
+   */
   getTrimmedBeefForParty (party: string): Beef {
     const knownTxids = this.getKnownTxidsForParty(party)
     const prunedBeef = this.clone()
@@ -79,12 +85,14 @@ export class BeefParty extends Beef {
   }
 
   /**
-     * Make note of additional txids "known" to `party`.
-     * @param party unique identifier, added if new.
-     * @param knownTxids
-     */
+   * Make note of additional txids "known" to `party`.
+   * @param party unique identifier, added if new.
+   * @param knownTxids
+   */
   addKnownTxidsForParty (party: string, knownTxids: string[]) {
-    if (!this.isParty(party)) { this.addParty(party) }
+    if (!this.isParty(party)) {
+      this.addParty(party)
+    }
     const kts = this.knownTo[party]
     for (const txid of knownTxids) {
       kts[txid] = true

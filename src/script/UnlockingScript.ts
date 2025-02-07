@@ -1,4 +1,4 @@
-import Script from './Script.js'
+import Script from './Script'
 
 /**
  * The UnlockingScript class represents an unlocking script in a Bitcoin SV transaction.

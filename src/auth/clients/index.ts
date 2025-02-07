@@ -1,1 +1,1 @@
-export * from './AuthFetch.js'
+export * from "./AuthFetch";

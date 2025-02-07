@@ -1,10 +1,10 @@
-import BigNumber from '../primitives/BigNumber.js'
-import { Writer, toArray } from '../primitives/utils.js'
-import * as ECDSA from '../primitives/ECDSA.js'
-import * as Hash from '../primitives/Hash.js'
-import PrivateKey from '../primitives/PrivateKey.js'
-import PublicKey from '../primitives/PublicKey.js'
-import Signature from '../primitives/Signature.js'
+import BigNumber from '../primitives/BigNumber'
+import { Writer, toArray } from '../primitives/utils'
+import * as ECDSA from '../primitives/ECDSA'
+import * as Hash from '../primitives/Hash'
+import PrivateKey from '../primitives/PrivateKey'
+import PublicKey from '../primitives/PublicKey'
+import Signature from '../primitives/Signature'
 
 const prefix = 'Bitcoin Signed Message:\n'
 
@@ -33,7 +33,11 @@ export const magicHash = (messageBuf: number[]): number[] => {
  * @param mode The mode of operation. When "base64", the BSM format signature is returned. When "raw", a Signature object is returned. Default: "base64".
  * @returns The signature object when in raw mode, or the BSM base64 string when in base64 mode.
  */
-export const sign = (message: number[], privateKey: PrivateKey, mode: 'raw' | 'base64' = 'base64'): Signature | string => {
+export const sign = (
+  message: number[],
+  privateKey: PrivateKey,
+  mode: 'raw' | 'base64' = 'base64'
+): Signature | string => {
   const hashBuf = magicHash(message)
   const sig = ECDSA.sign(new BigNumber(hashBuf), privateKey, true)
   if (mode === 'raw') {
@@ -52,7 +56,11 @@ export const sign = (message: number[], privateKey: PrivateKey, mode: 'raw' | 'b
  * @param pubKey The public key for verification.
  * @returns True if the signature is valid, false otherwise.
  */
-export const verify = (message: number[], sig: Signature, pubKey: PublicKey): boolean => {
+export const verify = (
+  message: number[],
+  sig: Signature,
+  pubKey: PublicKey
+): boolean => {
   const hashBuf = magicHash(message)
   return ECDSA.verify(new BigNumber(hashBuf), sig, pubKey)
 }

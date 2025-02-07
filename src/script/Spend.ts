@@ -1,16 +1,16 @@
-import LockingScript from './LockingScript.js'
-import UnlockingScript from './UnlockingScript.js'
-import Script from './Script.js'
-import BigNumber from '../primitives/BigNumber.js'
-import OP from './OP.js'
-import ScriptChunk from './ScriptChunk.js'
-import { toHex, minimallyEncode } from '../primitives/utils.js'
-import * as Hash from '../primitives/Hash.js'
-import TransactionSignature from '../primitives/TransactionSignature.js'
-import PublicKey from '../primitives/PublicKey.js'
-import { verify } from '../primitives/ECDSA.js'
-import TransactionInput from '../transaction/TransactionInput.js'
-import TransactionOutput from '../transaction/TransactionOutput.js'
+import LockingScript from './LockingScript'
+import UnlockingScript from './UnlockingScript'
+import Script from './Script'
+import BigNumber from '../primitives/BigNumber'
+import OP from './OP'
+import ScriptChunk from './ScriptChunk'
+import { toHex, minimallyEncode } from '../primitives/utils'
+import * as Hash from '../primitives/Hash'
+import TransactionSignature from '../primitives/TransactionSignature'
+import PublicKey from '../primitives/PublicKey'
+import { verify } from '../primitives/ECDSA'
+import TransactionInput from '../transaction/TransactionInput'
+import TransactionOutput from '../transaction/TransactionOutput'
 
 // These constants control the current behavior of the interpreter.
 // In the future, all of them will go away.
@@ -144,11 +144,13 @@ export default class Spend {
     }
 
     const isOpcodeDisabled = (op: number): boolean => {
-      return op === OP.OP_2MUL ||
+      return (
+        op === OP.OP_2MUL ||
         op === OP.OP_2DIV ||
         op === OP.OP_VERIF ||
         op === OP.OP_VERNOTIF ||
         op === OP.OP_VER
+      )
     }
 
     const isChunkMinimal = (chunk: ScriptChunk): boolean => {
@@ -179,8 +181,11 @@ export default class Spend {
       return true
     }
 
-    // Following example from sCrypt now using Number.MAX_SAFE_INTEGER (bsv/lib/transaction/input/input.js).
-    const isMinimallyEncoded = (buf: number[], maxNumSize: number = Number.MAX_SAFE_INTEGER): boolean => {
+    // Following example from sCrypt now using Number.MAX_SAFE_INTEGER (bsv/lib/transaction/input/input).
+    const isMinimallyEncoded = (
+      buf: number[],
+      maxNumSize: number = Number.MAX_SAFE_INTEGER
+    ): boolean => {
       if (buf.length > maxNumSize) {
         return false
       }
@@ -316,15 +321,21 @@ export default class Spend {
 
     const checkPublicKeyEncoding = (buf: number[]): boolean => {
       if (buf.length < 33) {
-        this.scriptEvaluationError('The public key is too short, it must be at least 33 bytes.')
+        this.scriptEvaluationError(
+          'The public key is too short, it must be at least 33 bytes.'
+        )
       }
       if (buf[0] === 0x04) {
         if (buf.length !== 65) {
-          this.scriptEvaluationError('The non-compressed public key must be 65 bytes.')
+          this.scriptEvaluationError(
+            'The non-compressed public key must be 65 bytes.'
+          )
         }
-      } else if ((buf[0] === 0x02 || buf[0] === 0x03)) {
+      } else if (buf[0] === 0x02 || buf[0] === 0x03) {
         if (buf.length !== 33) {
-          this.scriptEvaluationError('The compressed public key must be 33 bytes.')
+          this.scriptEvaluationError(
+            'The compressed public key must be 33 bytes.'
+          )
         }
       } else {
         this.scriptEvaluationError('The public key is in an unknown format.')
@@ -355,20 +366,52 @@ export default class Spend {
     }
 
     const isScriptExecuting = !this.ifStack.includes(false)
-    let buf: number[], buf1: number[], buf2: number[], buf3: number[], spliced: number[][], n: number, size: number, rawnum: number[], num: number[], signbit: number, x1: number[], x2: number[], x3: number[], bn: BigNumber, bn1: BigNumber, bn2: BigNumber, bn3: BigNumber, bufSig: number[], bufPubkey: number[], subscript, bufHash: number[]
-    let sig, pubkey, i: number, fOk: boolean, nKeysCount: number, ikey: number, ikey2: number, nSigsCount: number, isig: number
+    let buf: number[],
+      buf1: number[],
+      buf2: number[],
+      buf3: number[],
+      spliced: number[][],
+      n: number,
+      size: number,
+      rawnum: number[],
+      num: number[],
+      signbit: number,
+      x1: number[],
+      x2: number[],
+      x3: number[],
+      bn: BigNumber,
+      bn1: BigNumber,
+      bn2: BigNumber,
+      bn3: BigNumber,
+      bufSig: number[],
+      bufPubkey: number[],
+      subscript,
+      bufHash: number[]
+    let sig,
+      pubkey,
+      i: number,
+      fOk: boolean,
+      nKeysCount: number,
+      ikey: number,
+      ikey2: number,
+      nSigsCount: number,
+      isig: number
     let fValue: boolean, fEqual: boolean, fSuccess: boolean
 
     // Read instruction
     const currentOpcode = operation.op
     if (typeof currentOpcode === 'undefined') {
-      this.scriptEvaluationError(`An opcode is missing in this chunk of the ${this.context}!`)
+      this.scriptEvaluationError(
+        `An opcode is missing in this chunk of the ${this.context}!`
+      )
     }
     if (
       Array.isArray(operation.data) &&
       operation.data.length > maxScriptElementSize
     ) {
-      this.scriptEvaluationError(`It's not currently possible to push data larger than ${maxScriptElementSize} bytes.`)
+      this.scriptEvaluationError(
+        `It's not currently possible to push data larger than ${maxScriptElementSize} bytes.`
+      )
     }
 
     if (isScriptExecuting && isOpcodeDisabled(currentOpcode)) {
@@ -376,7 +419,8 @@ export default class Spend {
     }
 
     if (
-      isScriptExecuting && currentOpcode >= 0 &&
+      isScriptExecuting &&
+      currentOpcode >= 0 &&
       currentOpcode <= OP.OP_PUSHDATA4
     ) {
       if (requireMinimalPush && !isChunkMinimal(operation)) {
@@ -388,7 +432,10 @@ export default class Spend {
       } else {
         this.stack.push(operation.data)
       }
-    } else if (isScriptExecuting || (OP.OP_IF <= currentOpcode && currentOpcode <= OP.OP_ENDIF)) {
+    } else if (
+      isScriptExecuting ||
+      (OP.OP_IF <= currentOpcode && currentOpcode <= OP.OP_ENDIF)
+    ) {
       switch (currentOpcode) {
         case OP.OP_1NEGATE:
         case OP.OP_1:
@@ -494,7 +541,9 @@ export default class Spend {
           fValue = false
           if (isScriptExecuting) {
             if (this.stack.length < 1) {
-              this.scriptEvaluationError('OP_IF and OP_NOTIF require at least one item on the stack when they are used!')
+              this.scriptEvaluationError(
+                'OP_IF and OP_NOTIF require at least one item on the stack when they are used!'
+              )
             }
             buf = this.stacktop(-1)
 
@@ -511,7 +560,8 @@ export default class Spend {
           if (this.ifStack.length === 0) {
             this.scriptEvaluationError('OP_ELSE requires a preceeding OP_IF.')
           }
-          this.ifStack[this.ifStack.length - 1] = !this.ifStack[this.ifStack.length - 1]
+          this.ifStack[this.ifStack.length - 1] =
+            !this.ifStack[this.ifStack.length - 1]
           break
 
         case OP.OP_ENDIF:
@@ -523,14 +573,18 @@ export default class Spend {
 
         case OP.OP_VERIFY:
           if (this.stack.length < 1) {
-            this.scriptEvaluationError('OP_VERIFY requires at least one item to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_VERIFY requires at least one item to be on the stack.'
+            )
           }
           buf = this.stacktop(-1)
           fValue = this.castToBool(buf)
           if (fValue) {
             this.stack.pop()
           } else {
-            this.scriptEvaluationError('OP_VERIFY requires the top stack value to be truthy.')
+            this.scriptEvaluationError(
+              'OP_VERIFY requires the top stack value to be truthy.'
+            )
           }
           break
 
@@ -545,21 +599,27 @@ export default class Spend {
 
         case OP.OP_TOALTSTACK:
           if (this.stack.length < 1) {
-            this.scriptEvaluationError('OP_TOALTSTACK requires at oeast one item to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_TOALTSTACK requires at oeast one item to be on the stack.'
+            )
           }
           this.altStack.push(this.stack.pop())
           break
 
         case OP.OP_FROMALTSTACK:
           if (this.altStack.length < 1) {
-            this.scriptEvaluationError('OP_FROMALTSTACK requires at least one item to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_FROMALTSTACK requires at least one item to be on the stack.'
+            )
           }
           this.stack.push(this.altStack.pop())
           break
 
         case OP.OP_2DROP:
           if (this.stack.length < 2) {
-            this.scriptEvaluationError('OP_2DROP requires at least two items to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_2DROP requires at least two items to be on the stack.'
+            )
           }
           this.stack.pop()
           this.stack.pop()
@@ -567,7 +627,9 @@ export default class Spend {
 
         case OP.OP_2DUP:
           if (this.stack.length < 2) {
-            this.scriptEvaluationError('OP_2DUP requires at least two items to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_2DUP requires at least two items to be on the stack.'
+            )
           }
           buf1 = this.stacktop(-2)
           buf2 = this.stacktop(-1)
@@ -577,7 +639,9 @@ export default class Spend {
 
         case OP.OP_3DUP:
           if (this.stack.length < 3) {
-            this.scriptEvaluationError('OP_3DUP requires at least three items to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_3DUP requires at least three items to be on the stack.'
+            )
           }
           buf1 = this.stacktop(-3)
           buf2 = this.stacktop(-2)
@@ -589,7 +653,9 @@ export default class Spend {
 
         case OP.OP_2OVER:
           if (this.stack.length < 4) {
-            this.scriptEvaluationError('OP_2OVER requires at least four items to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_2OVER requires at least four items to be on the stack.'
+            )
           }
           buf1 = this.stacktop(-4)
           buf2 = this.stacktop(-3)
@@ -599,7 +665,9 @@ export default class Spend {
 
         case OP.OP_2ROT:
           if (this.stack.length < 6) {
-            this.scriptEvaluationError('OP_2ROT requires at least six items to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_2ROT requires at least six items to be on the stack.'
+            )
           }
           spliced = this.stack.splice(this.stack.length - 6, 2)
           this.stack.push(spliced[0])
@@ -608,7 +676,9 @@ export default class Spend {
 
         case OP.OP_2SWAP:
           if (this.stack.length < 4) {
-            this.scriptEvaluationError('OP_2SWAP requires at least four items to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_2SWAP requires at least four items to be on the stack.'
+            )
           }
           spliced = this.stack.splice(this.stack.length - 4, 2)
           this.stack.push(spliced[0])
@@ -617,7 +687,9 @@ export default class Spend {
 
         case OP.OP_IFDUP:
           if (this.stack.length < 1) {
-            this.scriptEvaluationError('OP_IFDUP requires at least one item to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_IFDUP requires at least one item to be on the stack.'
+            )
           }
           buf = this.stacktop(-1)
           fValue = this.castToBool(buf)
@@ -633,28 +705,36 @@ export default class Spend {
 
         case OP.OP_DROP:
           if (this.stack.length < 1) {
-            this.scriptEvaluationError('OP_DROP requires at least one item to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_DROP requires at least one item to be on the stack.'
+            )
           }
           this.stack.pop()
           break
 
         case OP.OP_DUP:
           if (this.stack.length < 1) {
-            this.scriptEvaluationError('OP_DUP requires at least one item to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_DUP requires at least one item to be on the stack.'
+            )
           }
           this.stack.push([...this.stacktop(-1)])
           break
 
         case OP.OP_NIP:
           if (this.stack.length < 2) {
-            this.scriptEvaluationError('OP_NIP requires at least two items to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_NIP requires at least two items to be on the stack.'
+            )
           }
           this.stack.splice(this.stack.length - 2, 1)
           break
 
         case OP.OP_OVER:
           if (this.stack.length < 2) {
-            this.scriptEvaluationError('OP_OVER requires at least two items to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_OVER requires at least two items to be on the stack.'
+            )
           }
           this.stack.push([...this.stacktop(-2)])
           break
@@ -662,14 +742,18 @@ export default class Spend {
         case OP.OP_PICK:
         case OP.OP_ROLL:
           if (this.stack.length < 2) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least two items to be on the stack.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires at least two items to be on the stack.`
+            )
           }
           buf = this.stacktop(-1)
           bn = BigNumber.fromScriptNum(buf, requireMinimalPush)
           n = bn.toNumber()
           this.stack.pop()
           if (n < 0 || n >= this.stack.length) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the top stack element to be 0 or a positive number less than the current size of the stack.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires the top stack element to be 0 or a positive number less than the current size of the stack.`
+            )
           }
           buf = this.stacktop(-n - 1)
           if (currentOpcode === OP.OP_ROLL) {
@@ -680,7 +764,9 @@ export default class Spend {
 
         case OP.OP_ROT:
           if (this.stack.length < 3) {
-            this.scriptEvaluationError('OP_ROT requires at least three items to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_ROT requires at least three items to be on the stack.'
+            )
           }
           x1 = this.stacktop(-3)
           x2 = this.stacktop(-2)
@@ -692,7 +778,9 @@ export default class Spend {
 
         case OP.OP_SWAP:
           if (this.stack.length < 2) {
-            this.scriptEvaluationError('OP_SWAP requires at least two items to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_SWAP requires at least two items to be on the stack.'
+            )
           }
           x1 = this.stacktop(-2)
           x2 = this.stacktop(-1)
@@ -702,14 +790,18 @@ export default class Spend {
 
         case OP.OP_TUCK:
           if (this.stack.length < 2) {
-            this.scriptEvaluationError('OP_TUCK requires at least two items to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_TUCK requires at least two items to be on the stack.'
+            )
           }
           this.stack.splice(this.stack.length - 2, 0, [...this.stacktop(-1)])
           break
 
         case OP.OP_SIZE:
           if (this.stack.length < 1) {
-            this.scriptEvaluationError('OP_SIZE requires at least one item to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_SIZE requires at least one item to be on the stack.'
+            )
           }
           bn = new BigNumber(this.stacktop(-1).length)
           this.stack.push(bn.toScriptNum())
@@ -719,13 +811,17 @@ export default class Spend {
         case OP.OP_OR:
         case OP.OP_XOR:
           if (this.stack.length < 2) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least one item to be on the stack.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires at least one item to be on the stack.`
+            )
           }
           buf1 = this.stacktop(-2)
           buf2 = this.stacktop(-1)
 
           if (buf1.length !== buf2.length) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the top two stack items to be the same size.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires the top two stack items to be the same size.`
+            )
           }
 
           switch (currentOpcode) {
@@ -752,7 +848,9 @@ export default class Spend {
 
         case OP.OP_INVERT:
           if (this.stack.length < 1) {
-            this.scriptEvaluationError('OP_INVERT requires at least one item to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_INVERT requires at least one item to be on the stack.'
+            )
           }
           buf = this.stacktop(-1)
           for (let i = 0; i < buf.length; i++) {
@@ -763,17 +861,24 @@ export default class Spend {
         case OP.OP_LSHIFT:
         case OP.OP_RSHIFT:
           if (this.stack.length < 2) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least two items to be on the stack.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires at least two items to be on the stack.`
+            )
           }
           buf1 = this.stacktop(-2)
           if (buf1.length === 0) {
             this.stack.pop()
           } else {
             bn1 = new BigNumber(buf1)
-            bn2 = BigNumber.fromScriptNum(this.stacktop(-1), requireMinimalPush)
+            bn2 = BigNumber.fromScriptNum(
+              this.stacktop(-1),
+              requireMinimalPush
+            )
             n = bn2.toNumber()
             if (n < 0) {
-              this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the top item on the stack not to be negative.`)
+              this.scriptEvaluationError(
+                `${OP[currentOpcode] as string} requires the top item on the stack not to be negative.`
+              )
             }
             this.stack.pop()
             this.stack.pop()
@@ -795,7 +900,9 @@ export default class Spend {
         case OP.OP_EQUAL:
         case OP.OP_EQUALVERIFY:
           if (this.stack.length < 2) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least two items to be on the stack.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires at least two items to be on the stack.`
+            )
           }
           buf1 = this.stacktop(-2)
           buf2 = this.stacktop(-1)
@@ -807,7 +914,9 @@ export default class Spend {
             if (fEqual) {
               this.stack.pop()
             } else {
-              this.scriptEvaluationError('OP_EQUALVERIFY requires the top two stack items to be equal.')
+              this.scriptEvaluationError(
+                'OP_EQUALVERIFY requires the top two stack items to be equal.'
+              )
             }
           }
           break
@@ -819,7 +928,9 @@ export default class Spend {
         case OP.OP_NOT:
         case OP.OP_0NOTEQUAL:
           if (this.stack.length < 1) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least one items to be on the stack.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires at least one items to be on the stack.`
+            )
           }
           buf = this.stacktop(-1)
           bn = BigNumber.fromScriptNum(buf, requireMinimalPush)
@@ -839,10 +950,10 @@ export default class Spend {
               }
               break
             case OP.OP_NOT:
-              bn = new BigNumber((bn.cmpn(0) === 0) ? 1 : 0 + 0)
+              bn = new BigNumber(bn.cmpn(0) === 0 ? 1 : 0 + 0)
               break
             case OP.OP_0NOTEQUAL:
-              bn = new BigNumber((bn.cmpn(0) !== 0) ? 1 : 0 + 0)
+              bn = new BigNumber(bn.cmpn(0) !== 0 ? 1 : 0 + 0)
               break
           }
           this.stack.pop()
@@ -866,7 +977,9 @@ export default class Spend {
         case OP.OP_MIN:
         case OP.OP_MAX:
           if (this.stack.length < 2) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least two items to be on the stack.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires at least two items to be on the stack.`
+            )
           }
           bn1 = BigNumber.fromScriptNum(this.stacktop(-2), requireMinimalPush)
           bn2 = BigNumber.fromScriptNum(this.stacktop(-1), requireMinimalPush)
@@ -896,40 +1009,40 @@ export default class Spend {
               break
             case OP.OP_BOOLAND:
               bn = new BigNumber(
-                ((bn1.cmpn(0) !== 0) && (bn2.cmpn(0) !== 0)) ? 1 : 0 + 0
+                bn1.cmpn(0) !== 0 && bn2.cmpn(0) !== 0 ? 1 : 0 + 0
               )
               break
             case OP.OP_BOOLOR:
               bn = new BigNumber(
-                ((bn1.cmpn(0) !== 0) || (bn2.cmpn(0) !== 0)) ? 1 : 0 + 0
+                bn1.cmpn(0) !== 0 || bn2.cmpn(0) !== 0 ? 1 : 0 + 0
               )
               break
             case OP.OP_NUMEQUAL:
-              bn = new BigNumber((bn1.cmp(bn2) === 0) ? 1 : 0 + 0)
+              bn = new BigNumber(bn1.cmp(bn2) === 0 ? 1 : 0 + 0)
               break
             case OP.OP_NUMEQUALVERIFY:
-              bn = new BigNumber((bn1.cmp(bn2) === 0) ? 1 : 0 + 0)
+              bn = new BigNumber(bn1.cmp(bn2) === 0 ? 1 : 0 + 0)
               break
             case OP.OP_NUMNOTEQUAL:
-              bn = new BigNumber((bn1.cmp(bn2) !== 0) ? 1 : 0 + 0)
+              bn = new BigNumber(bn1.cmp(bn2) !== 0 ? 1 : 0 + 0)
               break
             case OP.OP_LESSTHAN:
-              bn = new BigNumber((bn1.cmp(bn2) < 0) ? 1 : 0 + 0)
+              bn = new BigNumber(bn1.cmp(bn2) < 0 ? 1 : 0 + 0)
               break
             case OP.OP_GREATERTHAN:
-              bn = new BigNumber((bn1.cmp(bn2) > 0) ? 1 : 0 + 0)
+              bn = new BigNumber(bn1.cmp(bn2) > 0 ? 1 : 0 + 0)
               break
             case OP.OP_LESSTHANOREQUAL:
-              bn = new BigNumber((bn1.cmp(bn2) <= 0) ? 1 : 0 + 0)
+              bn = new BigNumber(bn1.cmp(bn2) <= 0 ? 1 : 0 + 0)
               break
             case OP.OP_GREATERTHANOREQUAL:
-              bn = new BigNumber((bn1.cmp(bn2) >= 0) ? 1 : 0 + 0)
+              bn = new BigNumber(bn1.cmp(bn2) >= 0 ? 1 : 0 + 0)
               break
             case OP.OP_MIN:
-              bn = (bn1.cmp(bn2) < 0 ? bn1 : bn2)
+              bn = bn1.cmp(bn2) < 0 ? bn1 : bn2
               break
             case OP.OP_MAX:
-              bn = (bn1.cmp(bn2) > 0 ? bn1 : bn2)
+              bn = bn1.cmp(bn2) > 0 ? bn1 : bn2
               break
           }
           this.stack.pop()
@@ -940,19 +1053,23 @@ export default class Spend {
             if (this.castToBool(this.stacktop(-1))) {
               this.stack.pop()
             } else {
-              this.scriptEvaluationError('OP_NUMEQUALVERIFY requires the top stack item to be truthy.')
+              this.scriptEvaluationError(
+                'OP_NUMEQUALVERIFY requires the top stack item to be truthy.'
+              )
             }
           }
           break
 
         case OP.OP_WITHIN:
           if (this.stack.length < 3) {
-            this.scriptEvaluationError('OP_WITHIN requires at least three items to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_WITHIN requires at least three items to be on the stack.'
+            )
           }
           bn1 = BigNumber.fromScriptNum(this.stacktop(-3), requireMinimalPush)
           bn2 = BigNumber.fromScriptNum(this.stacktop(-2), requireMinimalPush)
           bn3 = BigNumber.fromScriptNum(this.stacktop(-1), requireMinimalPush)
-          fValue = (bn2.cmp(bn1) <= 0) && (bn1.cmp(bn3) < 0)
+          fValue = bn2.cmp(bn1) <= 0 && bn1.cmp(bn3) < 0
           this.stack.pop()
           this.stack.pop()
           this.stack.pop()
@@ -965,7 +1082,9 @@ export default class Spend {
         case OP.OP_HASH160:
         case OP.OP_HASH256:
           if (this.stack.length < 1) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least one item to be on the stack.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires at least one item to be on the stack.`
+            )
           }
           buf = this.stacktop(-1)
           if (currentOpcode === OP.OP_RIPEMD160) {
@@ -990,7 +1109,9 @@ export default class Spend {
         case OP.OP_CHECKSIG:
         case OP.OP_CHECKSIGVERIFY:
           if (this.stack.length < 2) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least two items to be on the stack.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires at least two items to be on the stack.`
+            )
           }
 
           bufSig = this.stacktop(-2)
@@ -1000,15 +1121,21 @@ export default class Spend {
             !checkSignatureEncoding(bufSig) ||
             !checkPublicKeyEncoding(bufPubkey)
           ) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires correct encoding for the public key and signature.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires correct encoding for the public key and signature.`
+            )
           }
 
           // Subset of script starting at the most recent codeseparator
           // CScript scriptCode(pbegincodehash, pend);
           if (this.context === 'UnlockingScript') {
-            subscript = new Script(this.unlockingScript.chunks.slice(this.lastCodeSeparator))
+            subscript = new Script(
+              this.unlockingScript.chunks.slice(this.lastCodeSeparator)
+            )
           } else {
-            subscript = new Script(this.lockingScript.chunks.slice(this.lastCodeSeparator))
+            subscript = new Script(
+              this.lockingScript.chunks.slice(this.lastCodeSeparator)
+            )
           }
 
           // Drop the signature, since there's no way for a signature to sign itself
@@ -1024,7 +1151,9 @@ export default class Spend {
           }
 
           if (!fSuccess && bufSig.length > 0) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} failed to verify the signature, and requires an empty signature when verification fails.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} failed to verify the signature, and requires an empty signature when verification fails.`
+            )
           }
 
           this.stack.pop()
@@ -1036,23 +1165,31 @@ export default class Spend {
             if (fSuccess) {
               this.stack.pop()
             } else {
-              this.scriptEvaluationError('OP_CHECKSIGVERIFY requires that a valid signature is provided.')
+              this.scriptEvaluationError(
+                'OP_CHECKSIGVERIFY requires that a valid signature is provided.'
+              )
             }
           }
           break
 
         case OP.OP_CHECKMULTISIG:
         case OP.OP_CHECKMULTISIGVERIFY:
-
           i = 1
           if (this.stack.length < i) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least 1 item to be on the stack.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires at least 1 item to be on the stack.`
+            )
           }
 
-          nKeysCount = BigNumber.fromScriptNum(this.stacktop(-i), requireMinimalPush).toNumber()
+          nKeysCount = BigNumber.fromScriptNum(
+            this.stacktop(-i),
+            requireMinimalPush
+          ).toNumber()
           // TODO: Keys and opcount are parameterized in client. No magic numbers!
           if (nKeysCount < 0 || nKeysCount > maxMultisigKeyCount) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires a key count between 0 and ${maxMultisigKeyCount}.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires a key count between 0 and ${maxMultisigKeyCount}.`
+            )
           }
           ikey = ++i
           i += nKeysCount
@@ -1064,24 +1201,37 @@ export default class Spend {
           ikey2 = nKeysCount + 2
 
           if (this.stack.length < i) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the number of stack items not to be less than the number of keys used.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires the number of stack items not to be less than the number of keys used.`
+            )
           }
 
-          nSigsCount = BigNumber.fromScriptNum(this.stacktop(-i), requireMinimalPush).toNumber()
+          nSigsCount = BigNumber.fromScriptNum(
+            this.stacktop(-i),
+            requireMinimalPush
+          ).toNumber()
           if (nSigsCount < 0 || nSigsCount > nKeysCount) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the number of signatures to be no greater than the number of keys.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires the number of signatures to be no greater than the number of keys.`
+            )
           }
           isig = ++i
           i += nSigsCount
           if (this.stack.length < i) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the number of stack items not to be less than the number of signatures provided.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires the number of stack items not to be less than the number of signatures provided.`
+            )
           }
 
           // Subset of script starting at the most recent codeseparator
           if (this.context === 'UnlockingScript') {
-            subscript = new Script(this.unlockingScript.chunks.slice(this.lastCodeSeparator))
+            subscript = new Script(
+              this.unlockingScript.chunks.slice(this.lastCodeSeparator)
+            )
           } else {
-            subscript = new Script(this.lockingScript.chunks.slice(this.lastCodeSeparator))
+            subscript = new Script(
+              this.lockingScript.chunks.slice(this.lastCodeSeparator)
+            )
           }
 
           // Drop the signatures, since there's no way for a signature to sign itself
@@ -1101,7 +1251,9 @@ export default class Spend {
               !checkSignatureEncoding(bufSig) ||
               !checkPublicKeyEncoding(bufPubkey)
             ) {
-              this.scriptEvaluationError(`${OP[currentOpcode] as string} requires correct encoding for the public key and signature.`)
+              this.scriptEvaluationError(
+                `${OP[currentOpcode] as string} requires correct encoding for the public key and signature.`
+              )
             }
 
             try {
@@ -1129,10 +1281,10 @@ export default class Spend {
 
           // Clean up stack of actual arguments
           while (i-- > 1) {
-            if (
-              !fSuccess && !ikey2 && (this.stacktop(-1).length > 0)
-            ) {
-              this.scriptEvaluationError(`${OP[currentOpcode] as string} failed to verify a signature, and requires an empty signature when verification fails.`)
+            if (!fSuccess && !ikey2 && this.stacktop(-1).length > 0) {
+              this.scriptEvaluationError(
+                `${OP[currentOpcode] as string} failed to verify a signature, and requires an empty signature when verification fails.`
+              )
             }
 
             if (ikey2 > 0) {
@@ -1149,10 +1301,15 @@ export default class Spend {
           // so optionally verify it is exactly equal to zero prior
           // to removing it from the stack.
           if (this.stack.length < 1) {
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires an extra item to be on the stack.`)
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires an extra item to be on the stack.`
+            )
           }
-          if (this.stacktop(-1).length > 0) { // NOTE: Is this necessary? We don't care about malleability.
-            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the extra stack item to be empty.`)
+          if (this.stacktop(-1).length > 0) {
+            // NOTE: Is this necessary? We don't care about malleability.
+            this.scriptEvaluationError(
+              `${OP[currentOpcode] as string} requires the extra stack item to be empty.`
+            )
           }
           this.stack.pop()
 
@@ -1162,20 +1319,26 @@ export default class Spend {
             if (fSuccess) {
               this.stack.pop()
             } else {
-              this.scriptEvaluationError('OP_CHECKMULTISIGVERIFY requires that a sufficient number of valid signatures are provided.')
+              this.scriptEvaluationError(
+                'OP_CHECKMULTISIGVERIFY requires that a sufficient number of valid signatures are provided.'
+              )
             }
           }
           break
 
         case OP.OP_CAT:
           if (this.stack.length < 2) {
-            this.scriptEvaluationError('OP_CAT requires at least two items to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_CAT requires at least two items to be on the stack.'
+            )
           }
 
           buf1 = this.stacktop(-2)
           buf2 = this.stacktop(-1)
           if (buf1.length + buf2.length > maxScriptElementSize) {
-            this.scriptEvaluationError(`It's not currently possible to push data larger than ${maxScriptElementSize} bytes.`)
+            this.scriptEvaluationError(
+              `It's not currently possible to push data larger than ${maxScriptElementSize} bytes.`
+            )
           }
           this.stack[this.stack.length - 2] = [...buf1, ...buf2]
           this.stack.pop()
@@ -1183,14 +1346,21 @@ export default class Spend {
 
         case OP.OP_SPLIT:
           if (this.stack.length < 2) {
-            this.scriptEvaluationError('OP_SPLIT requires at least two items to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_SPLIT requires at least two items to be on the stack.'
+            )
           }
           buf1 = this.stacktop(-2)
 
           // Make sure the split point is apropriate.
-          n = BigNumber.fromScriptNum(this.stacktop(-1), requireMinimalPush).toNumber()
+          n = BigNumber.fromScriptNum(
+            this.stacktop(-1),
+            requireMinimalPush
+          ).toNumber()
           if (n < 0 || n > buf1.length) {
-            this.scriptEvaluationError('OP_SPLIT requires the first stack item to be a non-negative number less than or equal to the size of the second-from-top stack item.')
+            this.scriptEvaluationError(
+              'OP_SPLIT requires the first stack item to be a non-negative number less than or equal to the size of the second-from-top stack item.'
+            )
           }
 
           // Prepare the results in their own buffer as `data`
@@ -1205,12 +1375,19 @@ export default class Spend {
 
         case OP.OP_NUM2BIN:
           if (this.stack.length < 2) {
-            this.scriptEvaluationError('OP_NUM2BIN requires at least two items to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_NUM2BIN requires at least two items to be on the stack.'
+            )
           }
 
-          size = BigNumber.fromScriptNum(this.stacktop(-1), requireMinimalPush).toNumber()
+          size = BigNumber.fromScriptNum(
+            this.stacktop(-1),
+            requireMinimalPush
+          ).toNumber()
           if (size > maxScriptElementSize) {
-            this.scriptEvaluationError(`It's not currently possible to push data larger than ${maxScriptElementSize} bytes.`)
+            this.scriptEvaluationError(
+              `It's not currently possible to push data larger than ${maxScriptElementSize} bytes.`
+            )
           }
 
           this.stack.pop()
@@ -1221,7 +1398,9 @@ export default class Spend {
           rawnum = minimallyEncode(rawnum)
 
           if (rawnum.length > size) {
-            this.scriptEvaluationError('OP_NUM2BIN requires that the size expressed in the top stack item is large enough to hold the value expressed in the second-from-top stack item.')
+            this.scriptEvaluationError(
+              'OP_NUM2BIN requires that the size expressed in the top stack item is large enough to hold the value expressed in the second-from-top stack item.'
+            )
           }
 
           // We already have an element of the right size, we
@@ -1254,7 +1433,9 @@ export default class Spend {
 
         case OP.OP_BIN2NUM:
           if (this.stack.length < 1) {
-            this.scriptEvaluationError('OP_BIN2NUM requires at least one item to be on the stack.')
+            this.scriptEvaluationError(
+              'OP_BIN2NUM requires at least one item to be on the stack.'
+            )
           }
 
           buf1 = this.stacktop(-1)
@@ -1264,7 +1445,9 @@ export default class Spend {
 
           // The resulting number must be a valid number.
           if (!isMinimallyEncoded(buf2)) {
-            this.scriptEvaluationError('OP_BIN2NUM requires that the resulting number is valid.')
+            this.scriptEvaluationError(
+              'OP_BIN2NUM requires that the resulting number is valid.'
+            )
           }
           break
 
@@ -1290,24 +1473,35 @@ export default class Spend {
    */
   validate (): boolean {
     if (requirePushOnlyUnlockingScripts && !this.unlockingScript.isPushOnly()) {
-      this.scriptEvaluationError('Unlocking scripts can only contain push operations, and no other opcodes.')
+      this.scriptEvaluationError(
+        'Unlocking scripts can only contain push operations, and no other opcodes.'
+      )
     }
     while (true) {
       this.step()
-      if (this.context === 'LockingScript' && this.programCounter >= this.lockingScript.chunks.length) {
+      if (
+        this.context === 'LockingScript' &&
+        this.programCounter >= this.lockingScript.chunks.length
+      ) {
         break
       }
     }
     if (this.ifStack.length > 0) {
-      this.scriptEvaluationError('Every OP_IF must be terminated prior to the end of the script.')
+      this.scriptEvaluationError(
+        'Every OP_IF must be terminated prior to the end of the script.'
+      )
     }
     if (requireCleanStack) {
       if (this.stack.length !== 1) {
-        this.scriptEvaluationError('The clean stack rule requires exactly one item to be on the stack after script execution.')
+        this.scriptEvaluationError(
+          'The clean stack rule requires exactly one item to be on the stack after script execution.'
+        )
       }
     }
     if (!this.castToBool(this.stacktop(-1))) {
-      this.scriptEvaluationError('The top stack element must be truthy after script evaluation.')
+      this.scriptEvaluationError(
+        'The top stack element must be truthy after script evaluation.'
+      )
     }
     return true
   }
@@ -1330,6 +1524,8 @@ export default class Spend {
   }
 
   private scriptEvaluationError (str: string): void {
-    throw new Error(`Script evaluation error: ${str}\n\nSource TXID: ${this.sourceTXID}\nSource output index: ${this.sourceOutputIndex}\nContext: ${this.context}\nProgram counter: ${this.programCounter}\nStack size: ${this.stack.length}\nAlt stack size: ${this.altStack.length}`)
+    throw new Error(
+      `Script evaluation error: ${str}\n\nSource TXID: ${this.sourceTXID}\nSource output index: ${this.sourceOutputIndex}\nContext: ${this.context}\nProgram counter: ${this.programCounter}\nStack size: ${this.stack.length}\nAlt stack size: ${this.altStack.length}`
+    )
   }
 }

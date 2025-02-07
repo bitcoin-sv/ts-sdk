@@ -1,5 +1,5 @@
-import { SHA1HMAC, SHA256HMAC, SHA512HMAC } from '../primitives/Hash.js'
-import BigNumber from '../primitives/BigNumber.js'
+import { SHA1HMAC, SHA256HMAC, SHA512HMAC } from '../primitives/Hash'
+import BigNumber from '../primitives/BigNumber'
 
 export type TOTPAlgorithm = 'SHA-1' | 'SHA-256' | 'SHA-512'
 

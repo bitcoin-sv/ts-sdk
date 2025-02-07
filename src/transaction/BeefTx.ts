@@ -1,7 +1,7 @@
-import { hash256 } from '../primitives/Hash.js'
-import { Reader, Writer, toHex, toArray } from '../primitives/utils.js'
-import Transaction from './Transaction.js'
-import { BEEF_V2, TX_DATA_FORMAT } from './Beef.js'
+import { hash256 } from '../primitives/Hash'
+import { Reader, Writer, toHex, toArray } from '../primitives/utils'
+import Transaction from './Transaction'
+import { BEEF_V2, TX_DATA_FORMAT } from './Beef'
 
 /**
  * A single bitcoin transaction associated with a `Beef` validity proof set.
@@ -25,7 +25,9 @@ export default class BeefTx {
    */
   isValid?: boolean = undefined
 
-  get bumpIndex (): number | undefined { return this._bumpIndex }
+  get bumpIndex (): number | undefined {
+    return this._bumpIndex
+  }
 
   set bumpIndex (v: number | undefined) {
     this._bumpIndex = v
@@ -72,9 +74,9 @@ export default class BeefTx {
   }
 
   /**
-     * @param tx If string, must be a valid txid. If `number[]` must be a valid serialized transaction.
-     * @param bumpIndex If transaction already has a proof in the beef to which it will be added.
-     */
+   * @param tx If string, must be a valid txid. If `number[]` must be a valid serialized transaction.
+   * @param bumpIndex If transaction already has a proof in the beef to which it will be added.
+   */
   constructor (tx: Transaction | number[] | string, bumpIndex?: number) {
     if (typeof tx === 'string') {
       this._txid = tx
@@ -105,7 +107,9 @@ export default class BeefTx {
       this.inputTxids = []
     } else {
       const inputTxids = {}
-      for (const input of this.tx.inputs) { inputTxids[input.sourceTXID] = true }
+      for (const input of this.tx.inputs) {
+        inputTxids[input.sourceTXID] = true
+      }
       this.inputTxids = Object.keys(inputTxids)
     }
   }

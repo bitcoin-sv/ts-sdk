@@ -1,4 +1,4 @@
-import { VerifiableCertificate } from './certificates/VerifiableCertificate.js'
+import { VerifiableCertificate } from './certificates/VerifiableCertificate'
 
 export interface RequestedCertificateTypeIDAndFieldList {
   [certificateTypeID: string]: string[]

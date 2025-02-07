@@ -1,7 +1,7 @@
-import ScriptChunk from './ScriptChunk.js'
-import OP from './OP.js'
-import { encode, toHex, Reader, Writer, toArray } from '../primitives/utils.js'
-import BigNumber from '../primitives/BigNumber.js'
+import ScriptChunk from './ScriptChunk'
+import OP from './OP'
+import { encode, toHex, Reader, Writer, toArray } from '../primitives/utils'
+import BigNumber from '../primitives/BigNumber'
 
 /**
  * The Script class represents a script in a Bitcoin SV transaction,
@@ -102,8 +102,12 @@ export default class Script {
    */
   static fromHex (hex: string): Script {
     if (hex.length === 0) return Script.fromBinary([])
-    if (hex.length % 2 !== 0) throw new Error('There is an uneven number of characters in the string which suggests it is not hex encoded.')
-    if (!/^[0-9a-fA-F]+$/.test(hex)) throw new Error('Some elements in this string are not hex encoded.')
+    if (hex.length % 2 !== 0) {
+      throw new Error(
+        'There is an uneven number of characters in the string which suggests it is not hex encoded.'
+      )
+    }
+    if (!/^[0-9a-fA-F]+$/.test(hex)) { throw new Error('Some elements in this string are not hex encoded.') }
     return Script.fromBinary(toArray(hex, 'hex'))
   }
 
@@ -274,9 +278,9 @@ export default class Script {
 
   /**
    * @method writeBn
-  * Appends a BigNumber to the script as an opcode.
-  * @param bn - The BigNumber to append.
-  * @returns This script instance for chaining.
+   * Appends a BigNumber to the script as an opcode.
+   * @param bn - The BigNumber to append.
+   * @returns This script instance for chaining.
    */
   writeBn (bn: BigNumber): Script {
     if (bn.cmpn(0) === OP.OP_0) {
@@ -419,7 +423,7 @@ export default class Script {
     const op = chunk.op
     let str = ''
     if (typeof chunk.data === 'undefined') {
-      const val = (OP[op] as string)
+      const val = OP[op] as string
       str = `${str} ${val}`
     } else {
       str = `${str} ${toHex(chunk.data)}`

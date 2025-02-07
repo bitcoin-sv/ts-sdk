@@ -1,11 +1,11 @@
-import Point from './Point.js'
-import PrivateKey from './PrivateKey.js'
-import Curve from './Curve.js'
-import { verify } from './ECDSA.js'
-import BigNumber from './BigNumber.js'
-import { sha256, sha256hmac, hash160 } from './Hash.js'
-import Signature from './Signature.js'
-import { toArray, toBase58Check, toHex } from './utils.js'
+import Point from './Point'
+import PrivateKey from './PrivateKey'
+import Curve from './Curve'
+import { verify } from './ECDSA'
+import BigNumber from './BigNumber'
+import { sha256, sha256hmac, hash160 } from './Hash'
+import Signature from './Signature'
+import { toArray, toBase58Check, toHex } from './utils'
 
 /**
  * The PublicKey class extends the Point class. It is used in public-key cryptography to derive shared secret, verify message signatures, and encode the public key in the DER format.
@@ -87,7 +87,9 @@ export default class PublicKey extends Point {
       // Common gotcha: constructing PublicKey with a DER value when you should use .fromString()
       if (y === null && isRed && typeof x === 'string') {
         if (x.length === 66 || x.length === 130) {
-          throw new Error('You are using the "new PublicKey()" constructor with a DER hex string. You need to use "PublicKey.fromString()" instead.')
+          throw new Error(
+            'You are using the "new PublicKey()" constructor with a DER hex string. You need to use "PublicKey.fromString()" instead.'
+          )
         }
       }
       super(x, y, isRed)
@@ -129,7 +131,11 @@ export default class PublicKey extends Point {
    * const mySignature = new Signature(...)
    * const isVerified = myPubKey.verify(myMessage, mySignature)
    */
-  verify (msg: number[] | string, sig: Signature, enc?: 'hex' | 'utf8'): boolean {
+  verify (
+    msg: number[] | string,
+    sig: Signature,
+    enc?: 'hex' | 'utf8'
+  ): boolean {
     const msgHash = new BigNumber(sha256(msg, enc), 16)
     return verify(msgHash, sig, this)
   }
@@ -225,7 +231,11 @@ export default class PublicKey extends Point {
    * @example
    * const publicKey = Signature.fromMsgHashAndCompactSignature(msgHash, 'IMOl2mVKfDgsSsHT4uIYBNN4e...', 'base64');
    */
-  static fromMsgHashAndCompactSignature (msgHash: BigNumber, signature: number[] | string, enc?: 'hex' | 'base64'): PublicKey {
+  static fromMsgHashAndCompactSignature (
+    msgHash: BigNumber,
+    signature: number[] | string,
+    enc?: 'hex' | 'base64'
+  ): PublicKey {
     const data = toArray(signature, enc)
     if (data.length !== 65) {
       throw new Error('Invalid Compact Signature')
