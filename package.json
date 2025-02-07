@@ -238,8 +238,7 @@
   "ts-standard": {
     "project": "tsconfig.eslint.json",
     "ignore": [
-      "dist",
-      "src/**/*.ts"
+      "dist"
     ]
   }
 }
