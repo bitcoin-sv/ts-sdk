@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import {
   Transaction,
   BroadcastResponse,
@@ -145,7 +145,12 @@ export default class SHIPCast implements Broadcaster {
       requireAcknowledgmentFromAllHostsForTopics,
       requireAcknowledgmentFromAnyHostForTopics,
       requireAcknowledgmentFromSpecificHostsForTopics
-    } = config ?? defaultConfig
+    } = config ?? {
+      resolver: new LookupResolver(),
+      requireAcknowledgmentFromAllHostsForTopics: 'all',
+      requireAcknowledgmentFromAnyHostForTopics: 'all',
+      requireAcknowledgmentFromSpecificHostsForTopics: {}
+    }
     this.facilitator = facilitator ?? new HTTPSOverlayBroadcastFacilitator()
     this.resolver = resolver ?? new LookupResolver()
     this.requireAcknowledgmentFromAllHostsForTopics =
@@ -219,6 +224,9 @@ export default class SHIPCast implements Broadcaster {
 
       const acknowledgedTopics = new Set<string>()
 
+      if (steak === null || steak === undefined) {
+        throw new Error('Steak is undefined.')
+      }
       for (const [topic, instructions] of Object.entries(steak)) {
         const outputsToAdmit = instructions.outputsToAdmit
         const coinsToRetain = instructions.coinsToRetain
@@ -227,7 +235,7 @@ export default class SHIPCast implements Broadcaster {
         if (
           outputsToAdmit?.length > 0 ||
           coinsToRetain?.length > 0 ||
-          coinsRemoved?.length > 0
+          (coinsRemoved?.length ?? 0) > 0
         ) {
           acknowledgedTopics.add(topic)
         }
