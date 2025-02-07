@@ -43,7 +43,7 @@ export class NodejsHttpClient implements HttpClient {
           const ok = res.statusCode >= 200 && res.statusCode <= 299
           const mediaType = res.headers['content-type']
           const data =
-            body && mediaType.startsWith('application/json')
+            body !== '' && typeof mediaType === 'string' && mediaType.startsWith('application/json')
               ? JSON.parse(body)
               : body
           resolve({
@@ -59,7 +59,7 @@ export class NodejsHttpClient implements HttpClient {
         reject(error)
       })
 
-      if (requestOptions.data) {
+      if (requestOptions.data !== null && requestOptions.data !== undefined) {
         req.write(JSON.stringify(requestOptions.data))
       }
       req.end()
