@@ -1,4 +1,3 @@
-// @ts-nocheck
 import TransactionInput from './TransactionInput'
 import TransactionOutput from './TransactionOutput'
 import UnlockingScript from '../script/UnlockingScript'
@@ -84,10 +83,13 @@ export default class Transaction {
       obj.tx.merklePath = path
     } else {
       for (const input of obj.tx.inputs) {
+        if (input.sourceTXID === undefined) {
+          throw new Error('Input sourceTXID is undefined')
+        }
         const sourceObj = transactions[input.sourceTXID]
         if (typeof sourceObj !== 'object') {
           throw new Error(
-            `Reference to unknown TXID in BEEF: ${input.sourceTXID}`
+            `Reference to unknown TXID in BEEF: ${input.sourceTXID ?? 'undefined'}`
           )
         }
         input.sourceTransaction = sourceObj.tx
@@ -112,9 +114,9 @@ export default class Transaction {
     // The last transaction in the BEEF data can be used if txid is not provided
     const txids = Object.keys(transactions)
     const lastTXID = txids[txids.length - 1]
-    const targetTXID = txid || lastTXID
+    const targetTXID = txid != null && txid !== '' ? txid : lastTXID
 
-    if (!transactions[targetTXID]) {
+    if (transactions[targetTXID] == null) {
       throw new Error(
         `Transaction with TXID ${targetTXID} not found in BEEF data.`
       )
@@ -153,7 +155,7 @@ export default class Transaction {
     const { transactions, BUMPs } = Transaction.parseBEEFData(beefReader)
 
     // Ensure that the subject transaction exists
-    if (!transactions[subjectTXID]) {
+    if (transactions[subjectTXID] == null) {
       throw new Error(
         `Subject transaction with TXID ${subjectTXID} not found in Atomic BEEF data.`
       )
@@ -164,7 +166,7 @@ export default class Transaction {
     // All BUMP level 0 hashes are valid.
     for (const bump of BUMPs) {
       for (const n of bump.path[0]) {
-        if (n.hash) {
+        if (n.hash != null && n.hash !== '') {
           validTxids.add(n.hash)
         }
       }
@@ -173,7 +175,7 @@ export default class Transaction {
     const unusedTxTxids = new Set<string>()
     for (const txid of Object.keys(transactions)) unusedTxTxids.add(txid)
 
-    const traverseDependencies = (txid: string) => {
+    const traverseDependencies = (txid: string): void => {
       unusedTxTxids.delete(txid)
       if (validTxids.has(txid)) {
         return
@@ -182,9 +184,9 @@ export default class Transaction {
       const tx = transactions[txid].tx
       for (const input of tx.inputs) {
         const inputTxid = input.sourceTXID
-        if (!transactions[inputTxid]) {
+        if (inputTxid === undefined || transactions[inputTxid] === undefined) {
           throw new Error(
-            `Input transaction with TXID ${inputTxid} is missing in Atomic BEEF data.`
+            `Input transaction with TXID ${inputTxid ?? 'undefined'} is missing in Atomic BEEF data.`
           )
         }
         traverseDependencies(inputTxid)
@@ -194,9 +196,10 @@ export default class Transaction {
     traverseDependencies(subjectTXID)
 
     // Check for any unrelated transactions
-    for (const txid of unusedTxTxids) {
+    if (unusedTxTxids.size > 0) {
+      const txid = Array.from(unusedTxTxids)[0]
       throw new Error(
-        `Unrelated transaction with TXID ${txid} found in Atomic BEEF data.`
+        `Unrelated transaction with TXID ${String(txid)} found in Atomic BEEF data.`
       )
     }
 
@@ -225,7 +228,7 @@ export default class Transaction {
 
     // Read the BUMPs
     const numberOfBUMPs = reader.readVarIntNum()
-    const BUMPs = []
+    const BUMPs: MerklePath[] = []
     for (let i = 0; i < numberOfBUMPs; i++) {
       BUMPs.push(MerklePath.fromReader(reader))
     }
@@ -273,7 +276,7 @@ export default class Transaction {
       const lockingScriptLength = br.readVarIntNum()
       const lockingScriptBin = br.read(lockingScriptLength)
       const lockingScript = LockingScript.fromBinary(lockingScriptBin)
-      const sourceTransaction = new Transaction(null, [], [], null)
+      const sourceTransaction = new Transaction(undefined, [], [], undefined)
       sourceTransaction.outputs = Array(sourceOutputIndex + 1).fill(null)
       sourceTransaction.outputs[sourceOutputIndex] = {
         satoshis,
@@ -473,7 +476,7 @@ export default class Transaction {
    */
   addOutput (output: TransactionOutput): void {
     this.cachedHash = undefined
-    if (!output.change) {
+    if (output.change !== true) {
       if (typeof output.satoshis === 'undefined') {
         throw new Error(
           'either satoshis must be defined or change must be set to true'
@@ -481,7 +484,7 @@ export default class Transaction {
       }
       if (output.satoshis < 0) { throw new Error('satoshis must be a positive integer or zero') }
     }
-    if (!output.lockingScript) throw new Error('lockingScript must be defined')
+    if (output.lockingScript == null) throw new Error('lockingScript must be defined')
     this.outputs.push(output)
   }
 
@@ -539,7 +542,7 @@ export default class Transaction {
     const fee = await modelOrFee.computeFee(this)
     const change = this.calculateChange(fee)
     if (change <= 0) {
-      this.outputs = this.outputs.filter((output) => !output.change)
+      this.outputs = this.outputs.filter((output) => output.change !== true)
       return
     }
     this.distributeChange(change, changeDistribution)
@@ -554,12 +557,14 @@ export default class Transaction {
         )
       }
       change +=
-        input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
+        input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis ?? 0
     }
     change -= fee
     for (const out of this.outputs) {
-      if (!out.change) {
-        change -= out.satoshis
+      if (out.change !== true) {
+        if (out.satoshis !== undefined) {
+          change -= out.satoshis
+        }
       }
     }
     return change
@@ -577,8 +582,12 @@ export default class Transaction {
       distributedChange = this.distributeEqualChange(change, changeOutputs)
     }
     if (distributedChange < change) {
-      this.outputs[this.outputs.length - 1].satoshis +=
-        change - distributedChange
+      const lastOutput = this.outputs[this.outputs.length - 1]
+      if (lastOutput.satoshis !== undefined) {
+        lastOutput.satoshis += change - distributedChange
+      } else {
+        lastOutput.satoshis = change - distributedChange
+      }
     }
   }
 
@@ -592,13 +601,13 @@ export default class Transaction {
     changeToUse -= changeOutputs.length
     distributedChange += changeOutputs.length
     for (let i = 0; i < changeOutputs.length - 1; i++) {
-      const portion = this.benfordNumber(0, changeToUse)
-      benfordNumbers[i] += portion
+      const portion: number = this.benfordNumber(0, changeToUse)
+      benfordNumbers[i] = (benfordNumbers[i] as number) + portion
       distributedChange += portion
       changeToUse -= portion
     }
     for (const output of this.outputs) {
-      if (output.change) output.satoshis = benfordNumbers.shift()
+      if (output.change === true) output.satoshis = benfordNumbers.shift()
     }
     return distributedChange
   }
@@ -637,11 +646,11 @@ export default class Transaction {
         )
       }
       totalIn +=
-        input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis
+        input.sourceTransaction.outputs[input.sourceOutputIndex].satoshis ?? 0
     }
     let totalOut = 0
     for (const output of this.outputs) {
-      totalOut += output.satoshis || 0
+      totalOut += output.satoshis ?? 0
     }
     return totalIn - totalOut
   }
@@ -653,7 +662,7 @@ export default class Transaction {
     this.cachedHash = undefined
     for (const out of this.outputs) {
       if (typeof out.satoshis === 'undefined') {
-        if (out.change) {
+        if (out.change === true) {
           throw new Error(
             'There are still change outputs with uncomputed amounts. Use the fee() method to compute the change amounts and transaction fees prior to signing.'
           )
@@ -667,7 +676,7 @@ export default class Transaction {
     const unlockingScripts = await Promise.all(
       this.inputs.map(async (x, i): Promise<UnlockingScript | undefined> => {
         if (typeof this.inputs[i].unlockingScriptTemplate === 'object') {
-          return await this.inputs[i].unlockingScriptTemplate.sign(this, i)
+          return await this.inputs[i]?.unlockingScriptTemplate?.sign(this, i)
         } else {
           return await Promise.resolve(undefined)
         }
@@ -703,19 +712,26 @@ export default class Transaction {
     writer.writeVarIntNum(this.inputs.length)
     for (const i of this.inputs) {
       if (typeof i.sourceTXID === 'undefined') {
-        writer.write(i.sourceTransaction.hash() as number[])
+        if (i.sourceTransaction != null) {
+          writer.write(i.sourceTransaction.hash() as number[])
+        } else {
+          throw new Error('sourceTransaction is undefined')
+        }
       } else {
         writer.writeReverse(toArray(i.sourceTXID, 'hex'))
       }
       writer.writeUInt32LE(i.sourceOutputIndex)
+      if (i.unlockingScript == null) {
+        throw new Error('unlockingScript is undefined')
+      }
       const scriptBin = i.unlockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
       writer.write(scriptBin)
-      writer.writeUInt32LE(i.sequence)
+      writer.writeUInt32LE(i.sequence ?? 0)
     }
     writer.writeVarIntNum(this.outputs.length)
     for (const o of this.outputs) {
-      writer.writeUInt64LE(o.satoshis)
+      writer.writeUInt64LE(o.satoshis ?? 0)
       const scriptBin = o.lockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
       writer.write(scriptBin)
@@ -746,12 +762,15 @@ export default class Transaction {
         writer.write(toArray(i.sourceTXID, 'hex').reverse() as number[])
       }
       writer.writeUInt32LE(i.sourceOutputIndex)
+      if (i.unlockingScript == null) {
+        throw new Error('unlockingScript is undefined')
+      }
       const scriptBin = i.unlockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
       writer.write(scriptBin)
-      writer.writeUInt32LE(i.sequence)
+      writer.writeUInt32LE(i.sequence ?? 0)
       writer.writeUInt64LE(
-        i.sourceTransaction.outputs[i.sourceOutputIndex].satoshis
+        i.sourceTransaction.outputs[i.sourceOutputIndex].satoshis ?? 0
       )
       const lockingScriptBin =
         i.sourceTransaction.outputs[
@@ -762,7 +781,7 @@ export default class Transaction {
     }
     writer.writeVarIntNum(this.outputs.length)
     for (const o of this.outputs) {
-      writer.writeUInt64LE(o.satoshis)
+      writer.writeUInt64LE(o.satoshis ?? 0)
       const scriptBin = o.lockingScript.toBinary()
       writer.writeVarIntNum(scriptBin.length)
       writer.write(scriptBin)
@@ -873,15 +892,17 @@ export default class Transaction {
 
     while (txQueue.length > 0) {
       const tx = txQueue.shift()
-      const txid = tx.id('hex')
-      if (verifiedTxids.has(txid)) {
+      const txid = tx?.id('hex') ?? ''
+      if (txid != null && txid !== '' && verifiedTxids.has(txid)) {
         continue
       }
 
       // If the transaction has a valid merkle path, verification is complete.
-      if (typeof tx.merklePath === 'object') {
+      if (typeof tx?.merklePath === 'object') {
         if (chainTracker === 'scripts only') {
-          verifiedTxids.add(txid)
+          if (txid != null) {
+            verifiedTxids.add(txid)
+          }
           continue
         } else {
           const proofValid = await tx.merklePath.verify(txid, chainTracker)
@@ -895,6 +916,9 @@ export default class Transaction {
 
       // Verify fee if feeModel is provided
       if (typeof feeModel !== 'undefined') {
+        if (tx === undefined) {
+          throw new Error('Transaction is undefined')
+        }
         const cpTx = Transaction.fromEF(tx.toEF())
         delete cpTx.outputs[0].satoshis
         cpTx.outputs[0].change = true
@@ -909,6 +933,9 @@ export default class Transaction {
       // Verify each input transaction and evaluate the spend events.
       // Also, keep a total of the input amounts for later.
       let inputTotal = 0
+      if (tx === undefined) {
+        throw new Error('Transaction is undefined')
+      }
       for (let i = 0; i < tx.inputs.length; i++) {
         const input = tx.inputs[i]
         if (typeof input.sourceTransaction !== 'object') {
@@ -923,7 +950,7 @@ export default class Transaction {
         }
         const sourceOutput =
           input.sourceTransaction.outputs[input.sourceOutputIndex]
-        inputTotal += sourceOutput.satoshis
+        inputTotal += sourceOutput.satoshis ?? 0
 
         const sourceTxid = input.sourceTransaction.id('hex')
         if (!verifiedTxids.has(sourceTxid)) {
@@ -939,11 +966,11 @@ export default class Transaction {
           sourceTXID: input.sourceTXID,
           sourceOutputIndex: input.sourceOutputIndex,
           lockingScript: sourceOutput.lockingScript,
-          sourceSatoshis: sourceOutput.satoshis,
+          sourceSatoshis: sourceOutput.satoshis ?? 0,
           transactionVersion: tx.version,
           otherInputs,
           unlockingScript: input.unlockingScript,
-          inputSequence: input.sequence,
+          inputSequence: input.sequence ?? 0,
           inputIndex: i,
           outputs: tx.outputs,
           lockTime: tx.lockTime
@@ -1004,7 +1031,7 @@ export default class Transaction {
             added = true
             break
           }
-          if (BUMPs[i].blockHeight === tx.merklePath.blockHeight) {
+          if (tx.merklePath !== null && tx.merklePath !== undefined && BUMPs[i].blockHeight === tx.merklePath.blockHeight) {
             // Probably the same...
             const rootA = BUMPs[i].computeRoot()
             const rootB = tx.merklePath.computeRoot()
@@ -1020,7 +1047,9 @@ export default class Transaction {
         // Finally, if the proof is not yet added, add a new path.
         if (!added) {
           obj.pathIndex = BUMPs.length
-          BUMPs.push(tx.merklePath)
+          if (tx.merklePath !== null && tx.merklePath !== undefined) {
+            BUMPs.push(tx.merklePath)
+          }
         }
       }
       const duplicate = txs.some((x) => x.tx.id('hex') === tx.id('hex'))
@@ -1032,7 +1061,7 @@ export default class Transaction {
           const input = tx.inputs[i]
           if (typeof input.sourceTransaction === 'object') {
             addPathsAndInputs(input.sourceTransaction)
-          } else if (!allowPartial) {
+          } else if (allowPartial === false) {
             throw new Error('A required source transaction is missing!')
           }
         }
