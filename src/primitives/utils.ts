@@ -192,7 +192,7 @@ export const encode = (
  * const bytes = [72, 101, 108, 108, 111]; // Represents the string "Hello"
  * console.log(toBase64(bytes)); // Outputs: SGVsbG8=
  */
-export function toBase64(byteArray: number[]): string {
+export function toBase64 (byteArray: number[]): string {
   const base64Chars =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
   let result = ''
@@ -340,11 +340,11 @@ export const fromBase58Check = (
 export class Writer {
   public bufs: number[][]
 
-  constructor(bufs?: number[][]) {
+  constructor (bufs?: number[][]) {
     this.bufs = bufs !== undefined ? bufs : []
   }
 
-  getLength(): number {
+  getLength (): number {
     let len = 0
     for (const buf of this.bufs) {
       len = len + buf.length
@@ -352,7 +352,7 @@ export class Writer {
     return len
   }
 
-  toArray(): number[] {
+  toArray (): number[] {
     const totalLength = this.getLength()
     const ret = new Array(totalLength)
     let offset = 0
@@ -364,12 +364,12 @@ export class Writer {
     return ret
   }
 
-  write(buf: number[]): this {
+  write (buf: number[]): this {
     this.bufs.push(buf)
     return this
   }
 
-  writeReverse(buf: number[]): this {
+  writeReverse (buf: number[]): this {
     const buf2: number[] = new Array(buf.length)
     for (let i = 0; i < buf2.length; i++) {
       buf2[i] = buf[buf.length - 1 - i]
@@ -378,21 +378,21 @@ export class Writer {
     return this
   }
 
-  writeUInt8(n: number): this {
+  writeUInt8 (n: number): this {
     const buf = new Array(1)
     buf[0] = n
     this.write(buf)
     return this
   }
 
-  writeInt8(n: number): this {
+  writeInt8 (n: number): this {
     const buf = new Array(1)
     buf[0] = n & 0xff
     this.write(buf)
     return this
   }
 
-  writeUInt16BE(n: number): this {
+  writeUInt16BE (n: number): this {
     this.bufs.push([
       (n >> 8) & 0xff, // shift right 8 bits to get the high byte
       n & 0xff // low byte is just the last 8 bits
@@ -400,11 +400,11 @@ export class Writer {
     return this
   }
 
-  writeInt16BE(n: number): this {
+  writeInt16BE (n: number): this {
     return this.writeUInt16BE(n & 0xffff) // Mask with 0xFFFF to get the lower 16 bits
   }
 
-  writeUInt16LE(n: number): this {
+  writeUInt16LE (n: number): this {
     this.bufs.push([
       n & 0xff, // low byte is just the last 8 bits
       (n >> 8) & 0xff // shift right 8 bits to get the high byte
@@ -412,11 +412,11 @@ export class Writer {
     return this
   }
 
-  writeInt16LE(n: number): this {
+  writeInt16LE (n: number): this {
     return this.writeUInt16LE(n & 0xffff) // Mask with 0xFFFF to get the lower 16 bits
   }
 
-  writeUInt32BE(n: number): this {
+  writeUInt32BE (n: number): this {
     this.bufs.push([
       (n >> 24) & 0xff, // highest byte
       (n >> 16) & 0xff,
@@ -426,11 +426,11 @@ export class Writer {
     return this
   }
 
-  writeInt32BE(n: number): this {
+  writeInt32BE (n: number): this {
     return this.writeUInt32BE(n >>> 0) // Using unsigned right shift to handle negative numbers
   }
 
-  writeUInt32LE(n: number): this {
+  writeUInt32LE (n: number): this {
     this.bufs.push([
       n & 0xff, // lowest byte
       (n >> 8) & 0xff,
@@ -440,41 +440,41 @@ export class Writer {
     return this
   }
 
-  writeInt32LE(n: number): this {
+  writeInt32LE (n: number): this {
     return this.writeUInt32LE(n >>> 0) // Using unsigned right shift to handle negative numbers
   }
 
-  writeUInt64BEBn(bn: BigNumber): this {
+  writeUInt64BEBn (bn: BigNumber): this {
     const buf = bn.toArray('be', 8)
     this.write(buf)
     return this
   }
 
-  writeUInt64LEBn(bn: BigNumber): this {
+  writeUInt64LEBn (bn: BigNumber): this {
     const buf = bn.toArray('be', 8)
     this.writeReverse(buf)
     return this
   }
 
-  writeUInt64LE(n: number): this {
+  writeUInt64LE (n: number): this {
     const buf = new BigNumber(n).toArray('be', 8)
     this.writeReverse(buf)
     return this
   }
 
-  writeVarIntNum(n: number): this {
+  writeVarIntNum (n: number): this {
     const buf = Writer.varIntNum(n)
     this.write(buf)
     return this
   }
 
-  writeVarIntBn(bn: BigNumber): this {
+  writeVarIntBn (bn: BigNumber): this {
     const buf = Writer.varIntBn(bn)
     this.write(buf)
     return this
   }
 
-  static varIntNum(n: number): number[] {
+  static varIntNum (n: number): number[] {
     let buf: number[]
     if (n < 253) {
       buf = [n] // 1 byte
@@ -514,7 +514,7 @@ export class Writer {
     return buf
   }
 
-  static varIntBn(bn: BigNumber): number[] {
+  static varIntBn (bn: BigNumber): number[] {
     let buf: number[]
     if (bn.ltn(253)) {
       const n = bn.toNumber()
@@ -548,23 +548,23 @@ export class Reader {
   public bin: number[]
   public pos: number
 
-  constructor(bin: number[] = [], pos: number = 0) {
+  constructor (bin: number[] = [], pos: number = 0) {
     this.bin = bin
     this.pos = pos
   }
 
-  public eof(): boolean {
+  public eof (): boolean {
     return this.pos >= this.bin.length
   }
 
-  public read(len = this.bin.length): number[] {
+  public read (len = this.bin.length): number[] {
     const start = this.pos
     const end = this.pos + len
     this.pos = end
     return this.bin.slice(start, end)
   }
 
-  public readReverse(len = this.bin.length): number[] {
+  public readReverse (len = this.bin.length): number[] {
     const buf2 = new Array(len)
     for (let i = 0; i < len; i++) {
       buf2[i] = this.bin[this.pos + len - 1 - i]
@@ -573,45 +573,45 @@ export class Reader {
     return buf2
   }
 
-  public readUInt8(): number {
+  public readUInt8 (): number {
     const val = this.bin[this.pos]
     this.pos += 1
     return val
   }
 
-  public readInt8(): number {
+  public readInt8 (): number {
     const val = this.bin[this.pos]
     this.pos += 1
     // If the sign bit is set, convert to negative value
     return (val & 0x80) !== 0 ? val - 0x100 : val
   }
 
-  public readUInt16BE(): number {
+  public readUInt16BE (): number {
     const val = (this.bin[this.pos] << 8) | this.bin[this.pos + 1]
     this.pos += 2
     return val
   }
 
-  public readInt16BE(): number {
+  public readInt16BE (): number {
     const val = this.readUInt16BE()
     // If the sign bit is set, convert to negative value
     return (val & 0x8000) !== 0 ? val - 0x10000 : val
   }
 
-  public readUInt16LE(): number {
+  public readUInt16LE (): number {
     const val = this.bin[this.pos] | (this.bin[this.pos + 1] << 8)
     this.pos += 2
     return val
   }
 
-  public readInt16LE(): number {
+  public readInt16LE (): number {
     const val = this.readUInt16LE()
     // If the sign bit is set, convert to negative value
     const x = (val & 0x8000) !== 0 ? val - 0x10000 : val
     return x
   }
 
-  public readUInt32BE(): number {
+  public readUInt32BE (): number {
     const val =
       this.bin[this.pos] * 0x1000000 + // Shift the first byte by 24 bits
       ((this.bin[this.pos + 1] << 16) | // Shift the second byte by 16 bits
@@ -621,13 +621,13 @@ export class Reader {
     return val
   }
 
-  public readInt32BE(): number {
+  public readInt32BE (): number {
     const val = this.readUInt32BE()
     // If the sign bit is set, convert to negative value
     return (val & 0x80000000) !== 0 ? val - 0x100000000 : val
   }
 
-  public readUInt32LE(): number {
+  public readUInt32LE (): number {
     const val =
       (this.bin[this.pos] |
         (this.bin[this.pos + 1] << 8) |
@@ -638,26 +638,26 @@ export class Reader {
     return val
   }
 
-  public readInt32LE(): number {
+  public readInt32LE (): number {
     const val = this.readUInt32LE()
     // Explicitly check if the sign bit is set and then convert to a negative value
     return (val & 0x80000000) !== 0 ? val - 0x100000000 : val
   }
 
-  public readUInt64BEBn(): BigNumber {
+  public readUInt64BEBn (): BigNumber {
     const bin = this.bin.slice(this.pos, this.pos + 8)
     const bn = new BigNumber(bin)
     this.pos = this.pos + 8
     return bn
   }
 
-  public readUInt64LEBn(): BigNumber {
+  public readUInt64LEBn (): BigNumber {
     const bin = this.readReverse(8)
     const bn = new BigNumber(bin)
     return bn
   }
 
-  public readVarIntNum(): number {
+  public readVarIntNum (): number {
     const first = this.readUInt8()
     let bn: BigNumber
     let n: number
@@ -680,7 +680,7 @@ export class Reader {
     }
   }
 
-  public readVarInt(): number[] {
+  public readVarInt (): number[] {
     const first = this.bin[this.pos]
     switch (first) {
       case 0xfd:
@@ -694,7 +694,7 @@ export class Reader {
     }
   }
 
-  public readVarIntBn(): BigNumber {
+  public readVarIntBn (): BigNumber {
     const first = this.readUInt8()
     switch (first) {
       case 0xfd:
