@@ -688,6 +688,7 @@ export class Beef {
    */
   clone (): Beef {
     const c = new Beef()
+    c.version = this.version
     c.bumps = Array.from(this.bumps)
     c.txs = Array.from(this.txs)
     return c

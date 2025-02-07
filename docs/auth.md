@@ -33,7 +33,7 @@ export interface AuthMessage {
 }
 ```
 
-See also: [RequestedCertificateSet](#interface-requestedcertificateset), [VerifiableCertificate](#class-verifiablecertificate)
+See also: [RequestedCertificateSet](./auth.md#interface-requestedcertificateset), [VerifiableCertificate](./auth.md#class-verifiablecertificate)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -61,7 +61,7 @@ export interface RequestedCertificateSet {
 }
 ```
 
-See also: [RequestedCertificateTypeIDAndFieldList](#interface-requestedcertificatetypeidandfieldlist)
+See also: [RequestedCertificateTypeIDAndFieldList](./auth.md#interface-requestedcertificatetypeidandfieldlist)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -86,7 +86,7 @@ export interface Transport {
 }
 ```
 
-See also: [AuthMessage](#interface-authmessage)
+See also: [AuthMessage](./auth.md#interface-authmessage)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -127,7 +127,7 @@ export class AuthFetch {
 }
 ```
 
-See also: [RequestedCertificateSet](#interface-requestedcertificateset), [SessionManager](#class-sessionmanager), [VerifiableCertificate](#class-verifiablecertificate), [WalletInterface](#interface-walletinterface)
+See also: [RequestedCertificateSet](./auth.md#interface-requestedcertificateset), [SessionManager](./auth.md#class-sessionmanager), [VerifiableCertificate](./auth.md#class-verifiablecertificate), [WalletInterface](./wallet.md#interface-walletinterface)
 
 <details>
 
@@ -140,7 +140,7 @@ Constructs a new AuthFetch instance.
 ```ts
 constructor(wallet: WalletInterface, requestedCertificates?: RequestedCertificateSet, sessionManager?: SessionManager) 
 ```
-See also: [RequestedCertificateSet](#interface-requestedcertificateset), [SessionManager](#class-sessionmanager), [WalletInterface](#interface-walletinterface)
+See also: [RequestedCertificateSet](./auth.md#interface-requestedcertificateset), [SessionManager](./auth.md#class-sessionmanager), [WalletInterface](./wallet.md#interface-walletinterface)
 
 Argument Details
 
@@ -156,7 +156,7 @@ Return any certificates we've collected thus far, then clear them out.
 ```ts
 public consumeReceivedCertificates(): VerifiableCertificate[] 
 ```
-See also: [VerifiableCertificate](#class-verifiablecertificate)
+See also: [VerifiableCertificate](./auth.md#class-verifiablecertificate)
 
 #### Method fetch
 
@@ -192,7 +192,7 @@ Request Certificates from a Peer
 ```ts
 async sendCertificateRequest(baseUrl: string, certificatesToRequest: RequestedCertificateSet): Promise<VerifiableCertificate[]> 
 ```
-See also: [RequestedCertificateSet](#interface-requestedcertificateset), [VerifiableCertificate](#class-verifiablecertificate)
+See also: [RequestedCertificateSet](./auth.md#interface-requestedcertificateset), [VerifiableCertificate](./auth.md#class-verifiablecertificate)
 
 </details>
 
@@ -226,7 +226,7 @@ export default class Certificate {
 }
 ```
 
-See also: [Base64String](#type-base64string), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [ProtoWallet](#class-protowallet), [PubKeyHex](#type-pubkeyhex), [WalletProtocol](#type-walletprotocol), [sign](#variable-sign), [verify](#variable-verify)
+See also: [Base64String](./wallet.md#type-base64string), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [HexString](./wallet.md#type-hexstring), [OutpointString](./wallet.md#type-outpointstring), [ProtoWallet](./wallet.md#class-protowallet), [PubKeyHex](./wallet.md#type-pubkeyhex), [WalletProtocol](./wallet.md#type-walletprotocol), [sign](./compat.md#variable-sign), [verify](./compat.md#variable-verify)
 
 <details>
 
@@ -239,7 +239,7 @@ Constructs a new Certificate.
 ```ts
 constructor(type: Base64String, serialNumber: Base64String, subject: PubKeyHex, certifier: PubKeyHex, revocationOutpoint: OutpointString, fields: Record<CertificateFieldNameUnder50Bytes, string>, signature?: HexString) 
 ```
-See also: [Base64String](#type-base64string), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [PubKeyHex](#type-pubkeyhex)
+See also: [Base64String](./wallet.md#type-base64string), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [HexString](./wallet.md#type-hexstring), [OutpointString](./wallet.md#type-outpointstring), [PubKeyHex](./wallet.md#type-pubkeyhex)
 
 Argument Details
 
@@ -265,7 +265,7 @@ Public key of the certifier who issued the certificate, compressed public key he
 ```ts
 certifier: PubKeyHex
 ```
-See also: [PubKeyHex](#type-pubkeyhex)
+See also: [PubKeyHex](./wallet.md#type-pubkeyhex)
 
 #### Property fields
 
@@ -274,7 +274,7 @@ All the fields present in the certificate, with field names as keys and encrypte
 ```ts
 fields: Record<CertificateFieldNameUnder50Bytes, Base64String>
 ```
-See also: [Base64String](#type-base64string), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes)
+See also: [Base64String](./wallet.md#type-base64string), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes)
 
 #### Property revocationOutpoint
 
@@ -283,7 +283,7 @@ The outpoint used to confirm that the certificate has not been revoked (TXID.Out
 ```ts
 revocationOutpoint: OutpointString
 ```
-See also: [OutpointString](#type-outpointstring)
+See also: [OutpointString](./wallet.md#type-outpointstring)
 
 #### Property serialNumber
 
@@ -292,7 +292,7 @@ Unique serial number of the certificate, base64 encoded string, 32 bytes.
 ```ts
 serialNumber: Base64String
 ```
-See also: [Base64String](#type-base64string)
+See also: [Base64String](./wallet.md#type-base64string)
 
 #### Property signature
 
@@ -301,7 +301,7 @@ Certificate signature by the certifier's private key, DER encoded hex string.
 ```ts
 signature?: HexString
 ```
-See also: [HexString](#type-hexstring)
+See also: [HexString](./wallet.md#type-hexstring)
 
 #### Property subject
 
@@ -310,7 +310,7 @@ The public key belonging to the certificate's subject, compressed public key hex
 ```ts
 subject: PubKeyHex
 ```
-See also: [PubKeyHex](#type-pubkeyhex)
+See also: [PubKeyHex](./wallet.md#type-pubkeyhex)
 
 #### Property type
 
@@ -319,7 +319,7 @@ Type identifier for the certificate, base64 encoded string, 32 bytes.
 ```ts
 type: Base64String
 ```
-See also: [Base64String](#type-base64string)
+See also: [Base64String](./wallet.md#type-base64string)
 
 #### Method fromBinary
 
@@ -328,7 +328,7 @@ Deserializes a certificate from binary format.
 ```ts
 static fromBinary(bin: number[]): Certificate 
 ```
-See also: [Certificate](#class-certificate)
+See also: [Certificate](./auth.md#class-certificate)
 
 Returns
 
@@ -349,7 +349,7 @@ static getCertificateFieldEncryptionDetails(fieldName: string, serialNumber?: st
     keyID: string;
 } 
 ```
-See also: [WalletProtocol](#type-walletprotocol)
+See also: [WalletProtocol](./wallet.md#type-walletprotocol)
 
 Returns
 
@@ -371,7 +371,7 @@ Signs the certificate using the provided certifier wallet.
 ```ts
 async sign(certifierWallet: ProtoWallet): Promise<void> 
 ```
-See also: [ProtoWallet](#class-protowallet)
+See also: [ProtoWallet](./wallet.md#class-protowallet)
 
 Argument Details
 
@@ -442,7 +442,7 @@ export class CompletedProtoWallet extends ProtoWallet implements WalletInterface
 }
 ```
 
-See also: [AbortActionArgs](#interface-abortactionargs), [AbortActionResult](#interface-abortactionresult), [AcquireCertificateArgs](#interface-acquirecertificateargs), [AcquireCertificateResult](#interface-acquirecertificateresult), [AuthenticatedResult](#interface-authenticatedresult), [CreateActionArgs](#interface-createactionargs), [CreateActionResult](#interface-createactionresult), [DiscoverByAttributesArgs](#interface-discoverbyattributesargs), [DiscoverByIdentityKeyArgs](#interface-discoverbyidentitykeyargs), [DiscoverCertificatesResult](#interface-discovercertificatesresult), [GetHeaderArgs](#interface-getheaderargs), [GetHeaderResult](#interface-getheaderresult), [GetHeightResult](#interface-getheightresult), [GetNetworkResult](#interface-getnetworkresult), [GetPublicKeyArgs](#interface-getpublickeyargs), [GetVersionResult](#interface-getversionresult), [InternalizeActionArgs](#interface-internalizeactionargs), [InternalizeActionResult](#interface-internalizeactionresult), [KeyDeriverApi](#interface-keyderiverapi), [ListActionsArgs](#interface-listactionsargs), [ListActionsResult](#interface-listactionsresult), [ListCertificatesArgs](#interface-listcertificatesargs), [ListCertificatesResult](#interface-listcertificatesresult), [ListOutputsArgs](#interface-listoutputsargs), [ListOutputsResult](#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [PrivateKey](#class-privatekey), [ProtoWallet](#class-protowallet), [ProveCertificateArgs](#interface-provecertificateargs), [ProveCertificateResult](#interface-provecertificateresult), [PubKeyHex](#type-pubkeyhex), [RelinquishCertificateArgs](#interface-relinquishcertificateargs), [RelinquishCertificateResult](#interface-relinquishcertificateresult), [RelinquishOutputArgs](#interface-relinquishoutputargs), [RelinquishOutputResult](#interface-relinquishoutputresult), [SignActionArgs](#interface-signactionargs), [SignActionResult](#interface-signactionresult), [WalletInterface](#interface-walletinterface)
+See also: [AbortActionArgs](./wallet.md#interface-abortactionargs), [AbortActionResult](./wallet.md#interface-abortactionresult), [AcquireCertificateArgs](./wallet.md#interface-acquirecertificateargs), [AcquireCertificateResult](./wallet.md#interface-acquirecertificateresult), [AuthenticatedResult](./wallet.md#interface-authenticatedresult), [CreateActionArgs](./wallet.md#interface-createactionargs), [CreateActionResult](./wallet.md#interface-createactionresult), [DiscoverByAttributesArgs](./wallet.md#interface-discoverbyattributesargs), [DiscoverByIdentityKeyArgs](./wallet.md#interface-discoverbyidentitykeyargs), [DiscoverCertificatesResult](./wallet.md#interface-discovercertificatesresult), [GetHeaderArgs](./wallet.md#interface-getheaderargs), [GetHeaderResult](./wallet.md#interface-getheaderresult), [GetHeightResult](./wallet.md#interface-getheightresult), [GetNetworkResult](./wallet.md#interface-getnetworkresult), [GetPublicKeyArgs](./wallet.md#interface-getpublickeyargs), [GetVersionResult](./wallet.md#interface-getversionresult), [InternalizeActionArgs](./wallet.md#interface-internalizeactionargs), [InternalizeActionResult](./wallet.md#interface-internalizeactionresult), [KeyDeriverApi](./wallet.md#interface-keyderiverapi), [ListActionsArgs](./wallet.md#interface-listactionsargs), [ListActionsResult](./wallet.md#interface-listactionsresult), [ListCertificatesArgs](./wallet.md#interface-listcertificatesargs), [ListCertificatesResult](./wallet.md#interface-listcertificatesresult), [ListOutputsArgs](./wallet.md#interface-listoutputsargs), [ListOutputsResult](./wallet.md#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [PrivateKey](./primitives.md#class-privatekey), [ProtoWallet](./wallet.md#class-protowallet), [ProveCertificateArgs](./wallet.md#interface-provecertificateargs), [ProveCertificateResult](./wallet.md#interface-provecertificateresult), [PubKeyHex](./wallet.md#type-pubkeyhex), [RelinquishCertificateArgs](./wallet.md#interface-relinquishcertificateargs), [RelinquishCertificateResult](./wallet.md#interface-relinquishcertificateresult), [RelinquishOutputArgs](./wallet.md#interface-relinquishoutputargs), [RelinquishOutputResult](./wallet.md#interface-relinquishoutputresult), [SignActionArgs](./wallet.md#interface-signactionargs), [SignActionResult](./wallet.md#interface-signactionresult), [WalletInterface](./wallet.md#interface-walletinterface)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -479,7 +479,7 @@ export class MasterCertificate extends Certificate {
 }
 ```
 
-See also: [Base64String](#type-base64string), [Certificate](#class-certificate), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [OutpointString](#type-outpointstring), [ProtoWallet](#class-protowallet), [PubKeyHex](#type-pubkeyhex), [WalletCounterparty](#type-walletcounterparty)
+See also: [Base64String](./wallet.md#type-base64string), [Certificate](./auth.md#class-certificate), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [HexString](./wallet.md#type-hexstring), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [OutpointString](./wallet.md#type-outpointstring), [ProtoWallet](./wallet.md#class-protowallet), [PubKeyHex](./wallet.md#type-pubkeyhex), [WalletCounterparty](./wallet.md#type-walletcounterparty)
 
 <details>
 
@@ -494,7 +494,7 @@ and sign off on the fields, along with the encrypted certificate fields.
 ```ts
 static async createCertificateFields(creatorWallet: ProtoWallet, certifierOrSubject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<CreateCertificateFieldsResult> 
 ```
-See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [ProtoWallet](#class-protowallet), [WalletCounterparty](#type-walletcounterparty)
+See also: [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [ProtoWallet](./wallet.md#class-protowallet), [WalletCounterparty](./wallet.md#type-walletcounterparty)
 
 Returns
 
@@ -523,7 +523,7 @@ for the verifier to access the designated fields.
 ```ts
 static async createKeyringForVerifier(subjectWallet: ProtoWallet, certifier: WalletCounterparty, verifier: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldsToReveal: string[], masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, serialNumber: Base64String, originator?: OriginatorDomainNameStringUnder250Bytes): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 ```
-See also: [Base64String](#type-base64string), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [ProtoWallet](#class-protowallet), [WalletCounterparty](#type-walletcounterparty)
+See also: [Base64String](./wallet.md#type-base64string), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [ProtoWallet](./wallet.md#class-protowallet), [WalletCounterparty](./wallet.md#type-walletcounterparty)
 
 Returns
 
@@ -560,7 +560,7 @@ The counterparty used for decryption depends on how the certificate fields were 
 ```ts
 static async decryptFields(subjectOrCertifierWallet: ProtoWallet, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, counterparty: WalletCounterparty): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 ```
-See also: [Base64String](#type-base64string), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [ProtoWallet](#class-protowallet), [WalletCounterparty](#type-walletcounterparty)
+See also: [Base64String](./wallet.md#type-base64string), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [ProtoWallet](./wallet.md#class-protowallet), [WalletCounterparty](./wallet.md#type-walletcounterparty)
 
 Returns
 
@@ -595,7 +595,7 @@ static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: W
     return "Certificate revocation not tracked.";
 }, serialNumber?: string): Promise<MasterCertificate> 
 ```
-See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [MasterCertificate](#class-mastercertificate), [ProtoWallet](#class-protowallet), [WalletCounterparty](#type-walletcounterparty)
+See also: [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [MasterCertificate](./auth.md#class-mastercertificate), [ProtoWallet](./wallet.md#class-protowallet), [WalletCounterparty](./wallet.md#type-walletcounterparty)
 
 Returns
 
@@ -651,7 +651,7 @@ export class Peer {
 }
 ```
 
-See also: [AuthMessage](#interface-authmessage), [PeerSession](#interface-peersession), [RequestedCertificateSet](#interface-requestedcertificateset), [SessionManager](#class-sessionmanager), [Transport](#interface-transport), [VerifiableCertificate](#class-verifiablecertificate), [WalletInterface](#interface-walletinterface)
+See also: [AuthMessage](./auth.md#interface-authmessage), [PeerSession](./auth.md#interface-peersession), [RequestedCertificateSet](./auth.md#interface-requestedcertificateset), [SessionManager](./auth.md#class-sessionmanager), [Transport](./auth.md#interface-transport), [VerifiableCertificate](./auth.md#class-verifiablecertificate), [WalletInterface](./wallet.md#interface-walletinterface)
 
 <details>
 
@@ -664,7 +664,7 @@ Creates a new Peer instance
 ```ts
 constructor(wallet: WalletInterface, transport: Transport, certificatesToRequest?: RequestedCertificateSet, sessionManager?: SessionManager, autoPersistLastSession?: boolean) 
 ```
-See also: [RequestedCertificateSet](#interface-requestedcertificateset), [SessionManager](#class-sessionmanager), [Transport](#interface-transport), [WalletInterface](#interface-walletinterface)
+See also: [RequestedCertificateSet](./auth.md#interface-requestedcertificateset), [SessionManager](./auth.md#class-sessionmanager), [Transport](./auth.md#interface-transport), [WalletInterface](./wallet.md#interface-walletinterface)
 
 Argument Details
 
@@ -687,7 +687,7 @@ or the session is not authenticated, initiates a handshake to create or authenti
 ```ts
 async getAuthenticatedSession(identityKey?: string, maxWaitTime?: number): Promise<PeerSession> 
 ```
-See also: [PeerSession](#interface-peersession)
+See also: [PeerSession](./auth.md#interface-peersession)
 
 Returns
 
@@ -713,7 +713,7 @@ Registers a callback to listen for certificates received from peers.
 ```ts
 listenForCertificatesReceived(callback: (senderPublicKey: string, certs: VerifiableCertificate[]) => void): number 
 ```
-See also: [VerifiableCertificate](#class-verifiablecertificate)
+See also: [VerifiableCertificate](./auth.md#class-verifiablecertificate)
 
 Returns
 
@@ -731,7 +731,7 @@ Registers a callback to listen for certificates requested from peers.
 ```ts
 listenForCertificatesRequested(callback: (senderPublicKey: string, requestedCertificates: RequestedCertificateSet) => void): number 
 ```
-See also: [RequestedCertificateSet](#interface-requestedcertificateset)
+See also: [RequestedCertificateSet](./auth.md#interface-requestedcertificateset)
 
 Returns
 
@@ -766,7 +766,7 @@ Processes an initial request message from a peer.
 ```ts
 async processInitialRequest(message: AuthMessage) 
 ```
-See also: [AuthMessage](#interface-authmessage)
+See also: [AuthMessage](./auth.md#interface-authmessage)
 
 Argument Details
 
@@ -782,7 +782,7 @@ an initial handshake or message has been exchanged.
 ```ts
 async requestCertificates(certificatesToRequest: RequestedCertificateSet, identityKey?: string, maxWaitTime = 10000): Promise<void> 
 ```
-See also: [RequestedCertificateSet](#interface-requestedcertificateset)
+See also: [RequestedCertificateSet](./auth.md#interface-requestedcertificateset)
 
 Returns
 
@@ -808,7 +808,7 @@ Sends a certificate response message containing the specified certificates to a 
 ```ts
 async sendCertificateResponse(verifierIdentityKey: string, certificates: VerifiableCertificate[]) 
 ```
-See also: [VerifiableCertificate](#class-verifiablecertificate)
+See also: [VerifiableCertificate](./auth.md#class-verifiablecertificate)
 
 Returns
 
@@ -904,7 +904,7 @@ export class SessionManager {
 }
 ```
 
-See also: [PeerSession](#interface-peersession)
+See also: [PeerSession](./auth.md#interface-peersession)
 
 <details>
 
@@ -917,7 +917,7 @@ Adds a session to the manager, associating it with relevant identifiers for retr
 ```ts
 addSession(session: PeerSession): void 
 ```
-See also: [PeerSession](#interface-peersession)
+See also: [PeerSession](./auth.md#interface-peersession)
 
 Argument Details
 
@@ -931,7 +931,7 @@ Retrieves a session based on a given identifier.
 ```ts
 getSession(identifier: string): PeerSession | undefined 
 ```
-See also: [PeerSession](#interface-peersession)
+See also: [PeerSession](./auth.md#interface-peersession)
 
 Returns
 
@@ -966,7 +966,7 @@ Removes a session from the manager by clearing all associated identifiers.
 ```ts
 removeSession(session: PeerSession): void 
 ```
-See also: [PeerSession](#interface-peersession)
+See also: [PeerSession](./auth.md#interface-peersession)
 
 Argument Details
 
@@ -980,7 +980,7 @@ Updates a session in the manager, ensuring that all identifiers are correctly as
 ```ts
 updateSession(session: PeerSession): void 
 ```
-See also: [PeerSession](#interface-peersession)
+See also: [PeerSession](./auth.md#interface-peersession)
 
 Argument Details
 
@@ -1014,7 +1014,7 @@ export class SimplifiedFetchTransport implements Transport {
 }
 ```
 
-See also: [AuthMessage](#interface-authmessage), [Transport](#interface-transport)
+See also: [AuthMessage](./auth.md#interface-authmessage), [Transport](./auth.md#interface-transport)
 
 <details>
 
@@ -1067,7 +1067,7 @@ This must be called before sending any messages to ensure responses can be proce
 ```ts
 async onData(callback: (message: AuthMessage) => Promise<void>): Promise<void> 
 ```
-See also: [AuthMessage](#interface-authmessage)
+See also: [AuthMessage](./auth.md#interface-authmessage)
 
 Returns
 
@@ -1088,7 +1088,7 @@ the message is sent as a POST request to the `/auth` endpoint.
 ```ts
 async send(message: AuthMessage): Promise<void> 
 ```
-See also: [AuthMessage](#interface-authmessage)
+See also: [AuthMessage](./auth.md#interface-authmessage)
 
 Returns
 
@@ -1129,7 +1129,7 @@ export class VerifiableCertificate extends Certificate {
 }
 ```
 
-See also: [Base64String](#type-base64string), [Certificate](#class-certificate), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [ProtoWallet](#class-protowallet), [PubKeyHex](#type-pubkeyhex)
+See also: [Base64String](./wallet.md#type-base64string), [Certificate](./auth.md#class-certificate), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [HexString](./wallet.md#type-hexstring), [OutpointString](./wallet.md#type-outpointstring), [ProtoWallet](./wallet.md#class-protowallet), [PubKeyHex](./wallet.md#type-pubkeyhex)
 
 <details>
 
@@ -1142,7 +1142,7 @@ Decrypts selectively revealed certificate fields using the provided keyring and 
 ```ts
 async decryptFields(verifierWallet: ProtoWallet): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 ```
-See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [ProtoWallet](#class-protowallet)
+See also: [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [ProtoWallet](./wallet.md#class-protowallet)
 
 Returns
 
@@ -1181,7 +1181,7 @@ Creates a nonce derived from a wallet
 export async function createNonce(wallet: WalletInterface, counterparty: WalletCounterparty = "self"): Promise<string> 
 ```
 
-See also: [WalletCounterparty](#type-walletcounterparty), [WalletInterface](#interface-walletinterface)
+See also: [WalletCounterparty](./wallet.md#type-walletcounterparty), [WalletInterface](./wallet.md#interface-walletinterface)
 
 <details>
 
@@ -1209,7 +1209,7 @@ Verifies a nonce derived from a wallet
 export async function verifyNonce(nonce: string, wallet: WalletInterface, counterparty: WalletCounterparty = "self"): Promise<boolean> 
 ```
 
-See also: [WalletCounterparty](#type-walletcounterparty), [WalletInterface](#interface-walletinterface)
+See also: [WalletCounterparty](./wallet.md#type-walletcounterparty), [WalletInterface](./wallet.md#interface-walletinterface)
 
 <details>
 
@@ -1265,7 +1265,7 @@ getVerifiableCertificates = async (wallet: WalletInterface, requestedCertificate
 }
 ```
 
-See also: [RequestedCertificateSet](#interface-requestedcertificateset), [VerifiableCertificate](#class-verifiablecertificate), [WalletInterface](#interface-walletinterface)
+See also: [RequestedCertificateSet](./auth.md#interface-requestedcertificateset), [VerifiableCertificate](./auth.md#class-verifiablecertificate), [WalletInterface](./wallet.md#interface-walletinterface)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -1298,7 +1298,7 @@ validateCertificates = async (verifierWallet: WalletInterface, message: AuthMess
 }
 ```
 
-See also: [AuthMessage](#interface-authmessage), [Certificate](#class-certificate), [RequestedCertificateSet](#interface-requestedcertificateset), [VerifiableCertificate](#class-verifiablecertificate), [WalletInterface](#interface-walletinterface), [verify](#variable-verify)
+See also: [AuthMessage](./auth.md#interface-authmessage), [Certificate](./auth.md#class-certificate), [RequestedCertificateSet](./auth.md#interface-requestedcertificateset), [VerifiableCertificate](./auth.md#class-verifiablecertificate), [WalletInterface](./wallet.md#interface-walletinterface), [verify](./compat.md#variable-verify)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
