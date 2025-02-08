@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
-- [1.3.14- 2025-02-07](#139---2025-02-07)
+- [1.3.15- 2025-02-07](#1315---2025-02-07)
+- [1.3.14- 2025-02-07](#1314---2025-02-07)
 - [1.3.12 - 2025-01-29](#139---2025-01-29)
 - [1.3.11 - 2025-01-28](#139---2025-01-28)
 - [1.3.10 - 2025-01-27](#139---2025-01-27)
@@ -78,6 +79,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.3.15] - 2025-02-07
+
+### Fixed
+
+- Hot fix for SimplifiedFetchTransport due to a bug introduced with linting fixes.
 
 ---
 
