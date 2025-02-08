@@ -239,7 +239,8 @@
     "project": "tsconfig.eslint.json",
     "ignore": [
       "dist",
-      "src/transaction/Transaction.ts"
+      "src/transaction/Transaction.ts",
+      "src/auth/transports/SimplifiedFetchTransport.ts"
     ]
   }
 }
