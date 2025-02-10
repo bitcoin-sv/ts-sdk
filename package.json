@@ -239,6 +239,7 @@
     "project": "tsconfig.eslint.json",
     "ignore": [
       "dist",
+      "src/script/ScriptTemplate.ts",
       "src/transaction/Transaction.ts",
       "src/auth/transports/SimplifiedFetchTransport.ts"
     ]
