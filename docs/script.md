@@ -8,6 +8,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | --- |
 | [ScriptChunk](#interface-scriptchunk) |
 | [ScriptTemplate](#interface-scripttemplate) |
+| [ScriptTemplateUnlock](#interface-scripttemplateunlock) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -31,15 +32,12 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export default interface ScriptTemplate {
-    lock: (...params: unknown[]) => LockingScript | Promise<LockingScript>;
-    unlock: (...params: unknown[]) => {
-        sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-        estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
-    };
+    lock: (...params: any[]) => LockingScript | Promise<LockingScript>;
+    unlock: (...params: any[]) => ScriptTemplateUnlock;
 }
 ```
 
-See also: [LockingScript](./script.md#class-lockingscript), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
+See also: [LockingScript](./script.md#class-lockingscript), [ScriptTemplateUnlock](./script.md#interface-scripttemplateunlock)
 
 <details>
 
@@ -50,7 +48,7 @@ See also: [LockingScript](./script.md#class-lockingscript), [Transaction](./tran
 Creates a locking script with the given parameters.
 
 ```ts
-lock: (...params: unknown[]) => LockingScript | Promise<LockingScript>
+lock: (...params: any[]) => LockingScript | Promise<LockingScript>
 ```
 See also: [LockingScript](./script.md#class-lockingscript)
 
@@ -63,14 +61,25 @@ This method returns an object containing two functions:
 2. `estimateLength` - A function that returns the estimated length of the unlocking script in bytes.
 
 ```ts
-unlock: (...params: unknown[]) => {
+unlock: (...params: any[]) => ScriptTemplateUnlock
+```
+See also: [ScriptTemplateUnlock](./script.md#interface-scripttemplateunlock)
+
+</details>
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
+### Interface: ScriptTemplateUnlock
+
+```ts
+export default interface ScriptTemplateUnlock {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
     estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
 }
 ```
-See also: [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
 
-</details>
+See also: [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
