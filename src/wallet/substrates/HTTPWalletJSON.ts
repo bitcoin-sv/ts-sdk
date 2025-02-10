@@ -64,6 +64,9 @@ export default class HTTPWalletJSON implements WalletInterface {
             body: JSON.stringify(args)
           })
         ).json()
+        if (!response.ok) {
+          throw new Error(response.josn().message || `HTTP Client error ${response.status}`)
+        }
         return response
       } catch (error) {
         console.log({ HTTPWalletJSON: { call, args, error } })
