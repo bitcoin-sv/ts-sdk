@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
-- [1.3.16- 2025-02-11](#1316---2025-02-11)
+- [1.3.17- 2025-02-11](#1316---2025-02-17)
 - [1.3.15- 2025-02-07](#1315---2025-02-07)
 - [1.3.14- 2025-02-07](#1314---2025-02-07)
 - [1.3.12 - 2025-01-29](#139---2025-01-29)
@@ -83,7 +83,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-## [1.3.16] - 2025-02-11
+## [1.3.17] - 2025-02-11
 
 ### Fixed
 
