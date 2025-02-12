@@ -34,10 +34,6 @@ export default class ECIES {
 
 See also: [PrivateKey](./primitives.md#class-privatekey), [PublicKey](./primitives.md#class-publickey)
 
-<details>
-
-<summary>Class ECIES Details</summary>
-
 #### Method bitcoreDecrypt
 
 Decrypts a message encrypted using the Bitcore variant of ECIES.
@@ -153,8 +149,6 @@ Argument Details
 + **pubKey**
   + The receiver's public key.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -192,10 +186,6 @@ export default class HD {
 ```
 
 See also: [PrivateKey](./primitives.md#class-privatekey), [PublicKey](./primitives.md#class-publickey)
-
-<details>
-
-<summary>Class HD Details</summary>
 
 #### Constructor
 
@@ -455,8 +445,6 @@ Returns
 
 A base58 encoded string of the HD wallet.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -490,10 +478,6 @@ export default class Mnemonic {
 ```
 
 See also: [wordList](./compat.md#variable-wordlist)
-
-<details>
-
-<summary>Class Mnemonic Details</summary>
 
 #### Constructor
 
@@ -794,8 +778,6 @@ Returns
 
 The mnemonic phrase as a string.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -825,18 +807,12 @@ export default function fromUtxo(utxo: jsonUtxo, unlockingScriptTemplate: {
 
 See also: [Transaction](./transaction.md#class-transaction), [TransactionInput](./transaction.md#interface-transactioninput), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
 
-<details>
-
-<summary>Function fromUtxo Details</summary>
-
 Argument Details
 
 + **utxo**
   + : jsonUtxo
 + **unlockingScriptTemplate**
   + : { sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>, estimateLength: (tx: Transaction, inputIndex: number) => Promise<number> }
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 

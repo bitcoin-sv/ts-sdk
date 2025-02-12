@@ -39,10 +39,6 @@ export default interface ScriptTemplate {
 
 See also: [LockingScript](./script.md#class-lockingscript), [ScriptTemplateUnlock](./script.md#interface-scripttemplateunlock)
 
-<details>
-
-<summary>Interface ScriptTemplate Details</summary>
-
 #### Property lock
 
 Creates a locking script with the given parameters.
@@ -64,8 +60,6 @@ This method returns an object containing two functions:
 unlock: (...params: any[]) => ScriptTemplateUnlock
 ```
 See also: [ScriptTemplateUnlock](./script.md#interface-scripttemplateunlock)
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -116,10 +110,6 @@ export default class LockingScript extends Script {
 
 See also: [Script](./script.md#class-script)
 
-<details>
-
-<summary>Class LockingScript Details</summary>
-
 #### Method isLockingScript
 
 ```ts
@@ -139,8 +129,6 @@ isUnlockingScript(): boolean
 Returns
 
 Always returns false for a LockingScript instance.
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -162,10 +150,6 @@ export default class P2PKH implements ScriptTemplate {
 ```
 
 See also: [LockingScript](./script.md#class-lockingscript), [PrivateKey](./primitives.md#class-privatekey), [Script](./script.md#class-script), [ScriptTemplate](./script.md#interface-scripttemplate), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
-
-<details>
-
-<summary>Class P2PKH Details</summary>
 
 #### Method lock
 
@@ -219,8 +203,6 @@ Argument Details
 + **lockingScript**
   + Optional. The lockinScript. Otherwise the input.sourceTransaction is required.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -249,10 +231,6 @@ export default class PushDrop implements ScriptTemplate {
 ```
 
 See also: [LockingScript](./script.md#class-lockingscript), [PublicKey](./primitives.md#class-publickey), [ScriptTemplate](./script.md#interface-scripttemplate), [SecurityLevel](./wallet.md#type-securitylevel), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [WalletInterface](./wallet.md#interface-walletinterface), [sign](./compat.md#variable-sign)
-
-<details>
-
-<summary>Class PushDrop Details</summary>
 
 #### Constructor
 
@@ -359,8 +337,6 @@ Argument Details
 + **anyoneCanPay**
   + Specifies if the anyone-can-pay flag is set.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -383,10 +359,6 @@ export default class RPuzzle implements ScriptTemplate {
 ```
 
 See also: [BigNumber](./primitives.md#class-bignumber), [LockingScript](./script.md#class-lockingscript), [PrivateKey](./primitives.md#class-privatekey), [ScriptTemplate](./script.md#interface-scripttemplate), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
-
-<details>
-
-<summary>Class RPuzzle Details</summary>
 
 #### Constructor
 
@@ -449,8 +421,6 @@ Argument Details
 + **anyoneCanPay**
   + Flag indicating if the signature allows for other inputs to be added later.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -485,10 +455,6 @@ export default class Script {
 ```
 
 See also: [BigNumber](./primitives.md#class-bignumber), [ScriptChunk](./script.md#interface-scriptchunk), [toHex](./primitives.md#variable-tohex)
-
-<details>
-
-<summary>Class Script Details</summary>
 
 #### Constructor
 
@@ -759,8 +725,6 @@ Argument Details
 + **script**
   + The script to append.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -809,10 +773,6 @@ export default class Spend {
 ```
 
 See also: [LockingScript](./script.md#class-lockingscript), [TransactionInput](./transaction.md#interface-transactioninput), [TransactionOutput](./transaction.md#interface-transactionoutput), [UnlockingScript](./script.md#class-unlockingscript)
-
-<details>
-
-<summary>Class Spend Details</summary>
 
 #### Constructor
 
@@ -897,8 +857,6 @@ if (spend.validate()) {
 }
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -917,10 +875,6 @@ export default class UnlockingScript extends Script {
 ```
 
 See also: [Script](./script.md#class-script)
-
-<details>
-
-<summary>Class UnlockingScript Details</summary>
 
 #### Method isLockingScript
 
@@ -941,8 +895,6 @@ isUnlockingScript(): boolean
 Returns
 
 Always returns true for an UnlockingScript instance.
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 

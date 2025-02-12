@@ -36,10 +36,6 @@ export interface ArcConfig {
 
 See also: [HttpClient](./transaction.md#interface-httpclient)
 
-<details>
-
-<summary>Interface ArcConfig Details</summary>
-
 #### Property apiKey
 
 Authentication token for the ARC API
@@ -88,8 +84,6 @@ The HTTP client used to make requests to the ARC API.
 httpClient?: HttpClient
 ```
 See also: [HttpClient](./transaction.md#interface-httpclient)
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -205,10 +199,6 @@ export interface FetchOptions {
 }
 ```
 
-<details>
-
-<summary>Interface FetchOptions Details</summary>
-
 #### Property body
 
 An object or null to set request's body.
@@ -233,8 +223,6 @@ A string to set request's method.
 method?: string
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -250,10 +238,6 @@ export interface HttpClient {
 
 See also: [HttpClientRequestOptions](./transaction.md#interface-httpclientrequestoptions), [HttpClientResponse](./transaction.md#type-httpclientresponse)
 
-<details>
-
-<summary>Interface HttpClient Details</summary>
-
 #### Property request
 
 Makes a request to the server.
@@ -262,8 +246,6 @@ Makes a request to the server.
 request: <T = any, D = any>(url: string, options: HttpClientRequestOptions<D>) => Promise<HttpClientResponse<T>>
 ```
 See also: [HttpClientRequestOptions](./transaction.md#interface-httpclientrequestoptions), [HttpClientResponse](./transaction.md#type-httpclientresponse)
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -279,10 +261,6 @@ export interface HttpClientRequestOptions<Data = any> {
     data?: Data;
 }
 ```
-
-<details>
-
-<summary>Interface HttpClientRequestOptions Details</summary>
 
 #### Property data
 
@@ -307,8 +285,6 @@ A string to set request's method.
 ```ts
 method?: string
 ```
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -442,10 +418,6 @@ export interface WhatsOnChainConfig {
 
 See also: [HttpClient](./transaction.md#interface-httpclient)
 
-<details>
-
-<summary>Interface WhatsOnChainConfig Details</summary>
-
 #### Property apiKey
 
 Authentication token for the WhatsOnChain API
@@ -462,8 +434,6 @@ The HTTP client used to make requests to the API.
 httpClient?: HttpClient
 ```
 See also: [HttpClient](./transaction.md#interface-httpclient)
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -508,10 +478,6 @@ export default class ARC implements Broadcaster {
 ```
 
 See also: [ArcConfig](./transaction.md#interface-arcconfig), [BroadcastFailure](./transaction.md#interface-broadcastfailure), [BroadcastResponse](./transaction.md#interface-broadcastresponse), [Broadcaster](./transaction.md#interface-broadcaster), [Transaction](./transaction.md#class-transaction)
-
-<details>
-
-<summary>Class ARC Details</summary>
 
 #### Constructor
 
@@ -581,8 +547,6 @@ Argument Details
 + **txs**
   + Array of transactions to be broadcasted.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -632,10 +596,6 @@ export class Beef {
 ```
 
 See also: [BEEF_V2](./transaction.md#variable-beef_v2), [BeefTx](./transaction.md#class-beeftx), [ChainTracker](./transaction.md#interface-chaintracker), [MerklePath](./transaction.md#class-merklepath), [Reader](./primitives.md#class-reader), [Transaction](./transaction.md#class-transaction), [Writer](./primitives.md#class-writer), [toHex](./primitives.md#variable-tohex), [verify](./compat.md#variable-verify)
-
-<details>
-
-<summary>Class Beef Details</summary>
 
 #### Method addComputedLeaves
 
@@ -990,8 +950,6 @@ Argument Details
 + **allowTxidOnly**
   + optional. If true, transaction txid is assumed valid
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -1030,10 +988,6 @@ export class BeefParty extends Beef {
 ```
 
 See also: [Beef](./transaction.md#class-beef)
-
-<details>
-
-<summary>Class BeefParty Details</summary>
 
 #### Constructor
 
@@ -1120,8 +1074,6 @@ mergeBeefFromParty(party: string, beef: number[] | Beef): void
 ```
 See also: [Beef](./transaction.md#class-beef)
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -1161,10 +1113,6 @@ export default class BeefTx {
 
 See also: [Reader](./primitives.md#class-reader), [Transaction](./transaction.md#class-transaction), [Writer](./primitives.md#class-writer)
 
-<details>
-
-<summary>Class BeefTx Details</summary>
-
 #### Constructor
 
 ```ts
@@ -1188,8 +1136,6 @@ Typically set by sorting transactions by proven dependency chains.
 ```ts
 isValid?: boolean = undefined
 ```
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -1254,10 +1200,6 @@ export default class MerklePath {
 ```
 
 See also: [ChainTracker](./transaction.md#interface-chaintracker), [MerklePathLeaf](./transaction.md#interface-merklepathleaf), [Reader](./primitives.md#class-reader), [toHex](./primitives.md#variable-tohex), [verify](./compat.md#variable-verify)
-
-<details>
-
-<summary>Class MerklePath Details</summary>
 
 #### Method combine
 
@@ -1417,8 +1359,6 @@ Argument Details
 + **chainTracker**
   + The ChainTracker instance used to verify the Merkle root.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -1452,10 +1392,6 @@ export default class SatoshisPerKilobyte implements FeeModel {
 
 See also: [FeeModel](./transaction.md#interface-feemodel), [Transaction](./transaction.md#class-transaction)
 
-<details>
-
-<summary>Class SatoshisPerKilobyte Details</summary>
-
 #### Constructor
 
 Constructs an instance of the sat/kb fee model.
@@ -1486,8 +1422,6 @@ Argument Details
 
 + **tx**
   + The transaction for which a fee is to be computed.
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -1564,10 +1498,6 @@ export default class Transaction {
 ```
 
 See also: [BroadcastFailure](./transaction.md#interface-broadcastfailure), [BroadcastResponse](./transaction.md#interface-broadcastresponse), [Broadcaster](./transaction.md#interface-broadcaster), [ChainTracker](./transaction.md#interface-chaintracker), [FeeModel](./transaction.md#interface-feemodel), [MerklePath](./transaction.md#class-merklepath), [Reader](./primitives.md#class-reader), [SatoshisPerKilobyte](./transaction.md#class-satoshisperkilobyte), [TransactionInput](./transaction.md#interface-transactioninput), [TransactionOutput](./transaction.md#interface-transactionoutput), [defaultBroadcaster](./transaction.md#function-defaultbroadcaster), [defaultChainTracker](./transaction.md#function-defaultchaintracker), [sign](./compat.md#variable-sign), [toHex](./primitives.md#variable-tohex), [verify](./compat.md#variable-verify)
-
-<details>
-
-<summary>Class Transaction Details</summary>
 
 #### Method addInput
 
@@ -2063,8 +1993,6 @@ Example
 tx.verify(new WhatsOnChain(), new SatoshisPerKilobyte(1))
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -2084,10 +2012,6 @@ export default class WhatsOnChain implements ChainTracker {
 
 See also: [ChainTracker](./transaction.md#interface-chaintracker), [WhatsOnChainConfig](./transaction.md#interface-whatsonchainconfig)
 
-<details>
-
-<summary>Class WhatsOnChain Details</summary>
-
 #### Constructor
 
 Constructs an instance of the WhatsOnChain ChainTracker.
@@ -2103,8 +2027,6 @@ Argument Details
   + The BSV network to use when calling the WhatsOnChain API.
 + **config**
   + Configuration options for the WhatsOnChain ChainTracker.
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 

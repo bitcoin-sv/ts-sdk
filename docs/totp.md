@@ -35,10 +35,6 @@ export class TOTP {
 
 See also: [TOTPOptions](./totp.md#interface-totpoptions), [TOTPValidateOptions](./totp.md#type-totpvalidateoptions)
 
-<details>
-
-<summary>Class TOTP Details</summary>
-
 #### Method generate
 
 Generates a Time-based One-Time Password (TOTP).
@@ -80,8 +76,6 @@ Argument Details
   + The passcode to validate.
 + **options**
   + Optional parameters for TOTP validation.
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Variables](#variables)
 

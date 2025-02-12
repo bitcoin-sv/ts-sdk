@@ -83,6 +83,14 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.3.18] - 2025-02-12
+
+### Fixed
+
+- Avoid collapsing doc details. Not supported by github pages.
+
+---
+
 ## [1.3.17] - 2025-02-11
 
 ### Fixed
