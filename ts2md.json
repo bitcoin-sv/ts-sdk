@@ -4,60 +4,70 @@
       "inputFilename": "src/auth/index.ts",
       "outputFilename": "docs/auth.md",
       "firstHeadingLevel": 1,
+      "noDetailsSummary": true,
       "filenameSubString": "auth"
     },
     {
       "inputFilename": "src/compat/index.ts",
       "outputFilename": "docs/compat.md",
       "firstHeadingLevel": 1,
+      "noDetailsSummary": true,
       "filenameSubString": "compat"
     },
     {
       "inputFilename": "src/messages/index.ts",
       "outputFilename": "docs/messages.md",
       "firstHeadingLevel": 1,
+      "noDetailsSummary": true,
       "filenameSubString": "messages"
     },
     {
       "inputFilename": "src/overlay-tools/index.ts",
       "outputFilename": "docs/overlay-tools.md",
       "firstHeadingLevel": 1,
+      "noDetailsSummary": true,
       "filenameSubString": "overlay-tools"
     },
     {
       "inputFilename": "src/primitives/index.ts",
       "outputFilename": "docs/primitives.md",
       "firstHeadingLevel": 1,
+      "noDetailsSummary": true,
       "filenameSubString": "primitives"
     },
     {
       "inputFilename": "src/script/index.ts",
       "outputFilename": "docs/script.md",
       "firstHeadingLevel": 1,
+      "noDetailsSummary": true,
       "filenameSubString": "script"
     },
     {
       "inputFilename": "src/totp/index.ts",
       "outputFilename": "docs/totp.md",
       "firstHeadingLevel": 1,
+      "noDetailsSummary": true,
       "filenameSubString": "totp"
     },
     {
       "inputFilename": "src/transaction/index.ts",
       "outputFilename": "docs/transaction.md",
       "firstHeadingLevel": 1,
+      "noDetailsSummary": true,
       "filenameSubString": "transaction"
     },
     {
       "inputFilename": "src/wallet/index.ts",
       "outputFilename": "docs/wallet.md",
       "firstHeadingLevel": 1,
+      "noDetailsSummary": true,
       "filenameSubString": "wallet"
     },
     {
       "inputFilename": "src/wallet/substrates/index.ts",
       "outputFilename": "docs/wallet-substrates.md",
       "firstHeadingLevel": 1,
+      "noDetailsSummary": true,
       "filenameSubString": "wallet/substrates"
     }
   ]

@@ -129,10 +129,6 @@ export class AuthFetch {
 
 See also: [RequestedCertificateSet](./auth.md#interface-requestedcertificateset), [SessionManager](./auth.md#class-sessionmanager), [VerifiableCertificate](./auth.md#class-verifiablecertificate), [WalletInterface](./wallet.md#interface-walletinterface)
 
-<details>
-
-<summary>Class AuthFetch Details</summary>
-
 #### Constructor
 
 Constructs a new AuthFetch instance.
@@ -194,8 +190,6 @@ async sendCertificateRequest(baseUrl: string, certificatesToRequest: RequestedCe
 ```
 See also: [RequestedCertificateSet](./auth.md#interface-requestedcertificateset), [VerifiableCertificate](./auth.md#class-verifiablecertificate)
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -227,10 +221,6 @@ export default class Certificate {
 ```
 
 See also: [Base64String](./wallet.md#type-base64string), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [HexString](./wallet.md#type-hexstring), [OutpointString](./wallet.md#type-outpointstring), [ProtoWallet](./wallet.md#class-protowallet), [PubKeyHex](./wallet.md#type-pubkeyhex), [WalletProtocol](./wallet.md#type-walletprotocol), [sign](./compat.md#variable-sign), [verify](./compat.md#variable-verify)
-
-<details>
-
-<summary>Class Certificate Details</summary>
 
 #### Constructor
 
@@ -407,8 +397,6 @@ Returns
 
 - A promise that resolves to true if the signature is valid.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -482,10 +470,6 @@ export class MasterCertificate extends Certificate {
 ```
 
 See also: [Base64String](./wallet.md#type-base64string), [Certificate](./auth.md#class-certificate), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [HexString](./wallet.md#type-hexstring), [OutpointString](./wallet.md#type-outpointstring), [ProtoWallet](./wallet.md#class-protowallet), [PubKeyHex](./wallet.md#type-pubkeyhex), [WalletCounterparty](./wallet.md#type-walletcounterparty)
-
-<details>
-
-<summary>Class MasterCertificate Details</summary>
 
 #### Method createCertificateFields
 
@@ -624,8 +608,6 @@ Throws
 
 Throws an error if any operation (e.g., encryption, signing) fails during certificate issuance.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -655,10 +637,6 @@ export class Peer {
 ```
 
 See also: [AuthMessage](./auth.md#interface-authmessage), [PeerSession](./auth.md#interface-peersession), [RequestedCertificateSet](./auth.md#interface-requestedcertificateset), [SessionManager](./auth.md#class-sessionmanager), [Transport](./auth.md#interface-transport), [VerifiableCertificate](./auth.md#class-verifiablecertificate), [WalletInterface](./wallet.md#interface-walletinterface)
-
-<details>
-
-<summary>Class Peer Details</summary>
 
 #### Constructor
 
@@ -886,8 +864,6 @@ Throws
 
 Will throw an error if the message fails to send.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -908,10 +884,6 @@ export class SessionManager {
 ```
 
 See also: [PeerSession](./auth.md#interface-peersession)
-
-<details>
-
-<summary>Class SessionManager Details</summary>
 
 #### Method addSession
 
@@ -990,8 +962,6 @@ Argument Details
 + **session**
   + The peer session to update.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -1018,10 +988,6 @@ export class SimplifiedFetchTransport implements Transport {
 ```
 
 See also: [AuthMessage](./auth.md#interface-authmessage), [Transport](./auth.md#interface-transport)
-
-<details>
-
-<summary>Class SimplifiedFetchTransport Details</summary>
 
 #### Constructor
 
@@ -1106,8 +1072,6 @@ Throws
 
 Will throw an error if no listener has been registered via `onData`.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -1134,10 +1098,6 @@ export class VerifiableCertificate extends Certificate {
 
 See also: [Base64String](./wallet.md#type-base64string), [Certificate](./auth.md#class-certificate), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [HexString](./wallet.md#type-hexstring), [OutpointString](./wallet.md#type-outpointstring), [ProtoWallet](./wallet.md#class-protowallet), [PubKeyHex](./wallet.md#type-pubkeyhex)
 
-<details>
-
-<summary>Class VerifiableCertificate Details</summary>
-
 #### Method decryptFields
 
 Decrypts selectively revealed certificate fields using the provided keyring and verifier wallet
@@ -1159,8 +1119,6 @@ Argument Details
 Throws
 
 Throws an error if any of the decryption operations fail, with a message indicating the failure context.
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -1186,10 +1144,6 @@ export async function createNonce(wallet: WalletInterface, counterparty: WalletC
 
 See also: [WalletCounterparty](./wallet.md#type-walletcounterparty), [WalletInterface](./wallet.md#interface-walletinterface)
 
-<details>
-
-<summary>Function createNonce Details</summary>
-
 Returns
 
 A random nonce derived with a wallet
@@ -1198,8 +1152,6 @@ Argument Details
 
 + **counterparty**
   + The counterparty to the nonce creation. Defaults to 'self'.
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -1214,10 +1166,6 @@ export async function verifyNonce(nonce: string, wallet: WalletInterface, counte
 
 See also: [WalletCounterparty](./wallet.md#type-walletcounterparty), [WalletInterface](./wallet.md#interface-walletinterface)
 
-<details>
-
-<summary>Function verifyNonce Details</summary>
-
 Returns
 
 The status of the validation
@@ -1228,8 +1176,6 @@ Argument Details
   + A nonce to verify as a base64 string.
 + **counterparty**
   + The counterparty to the nonce creation. Defaults to 'self'.
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 

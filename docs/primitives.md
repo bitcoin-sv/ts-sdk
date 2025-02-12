@@ -205,10 +205,6 @@ export default class BigNumber {
 
 See also: [ReductionContext](./primitives.md#class-reductioncontext), [toArray](./primitives.md#variable-toarray), [toHex](./primitives.md#variable-tohex)
 
-<details>
-
-<summary>Class BigNumber Details</summary>
-
 #### Constructor
 
 ```ts
@@ -3525,8 +3521,6 @@ const bn = new BigNumber('8'); // binary: 1000
 const zeroBits = bn.zeroBits(); // 3
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -3627,10 +3621,6 @@ export default class DRBG {
 
 See also: [SHA256HMAC](./primitives.md#class-sha256hmac)
 
-<details>
-
-<summary>Class DRBG Details</summary>
-
 #### Method generate
 
 Generates deterministic random hexadecimal string of given length.
@@ -3698,8 +3688,6 @@ Example
 drbg.update('e13af...');
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -3737,10 +3725,6 @@ export default class JacobianPoint extends BasePoint {
 ```
 
 See also: [BasePoint](./primitives.md#class-basepoint), [BigNumber](./primitives.md#class-bignumber), [Point](./primitives.md#class-point)
-
-<details>
-
-<summary>Class JacobianPoint Details</summary>
 
 #### Constructor
 
@@ -4039,8 +4023,6 @@ const pointJ = new JacobianPoint('3', '4', '1');
 const pointP = pointJ.toP();  // The point in affine coordinates.
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -4065,10 +4047,6 @@ export default class K256 extends Mersenne {
 ```
 
 See also: [BigNumber](./primitives.md#class-bignumber), [Mersenne](./primitives.md#class-mersenne)
-
-<details>
-
-<summary>Class K256 Details</summary>
 
 #### Constructor
 
@@ -4136,8 +4114,6 @@ const output = new BigNumber(0);
 k256.split(input, output);
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -4184,10 +4160,6 @@ export default class Mersenne {
 ```
 
 See also: [BigNumber](./primitives.md#class-bignumber)
-
-<details>
-
-<summary>Class Mersenne Details</summary>
 
 #### Constructor
 
@@ -4314,8 +4286,6 @@ Example
 mersenne.split(new BigNumber('2345', 16), new BigNumber());
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -4347,10 +4317,6 @@ export default class MontgomoryMethod extends ReductionContext {
 ```
 
 See also: [BigNumber](./primitives.md#class-bignumber), [ReductionContext](./primitives.md#class-reductioncontext)
-
-<details>
-
-<summary>Class MontgomoryMethod Details</summary>
 
 #### Constructor
 
@@ -4537,8 +4503,6 @@ const montMethod = new MontgomoryMethod(m);
 const product = montMethod.mul(a, b);
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -4593,10 +4557,6 @@ export default class Point extends BasePoint {
 ```
 
 See also: [BasePoint](./primitives.md#class-basepoint), [BigNumber](./primitives.md#class-bignumber), [encode](./primitives.md#variable-encode)
-
-<details>
-
-<summary>Class Point Details</summary>
 
 #### Constructor
 
@@ -5170,8 +5130,6 @@ const aPoint = new Point(x, y);
 const isValid = aPoint.validate();
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -5189,10 +5147,6 @@ export class PointInFiniteField {
 
 See also: [BigNumber](./primitives.md#class-bignumber)
 
-<details>
-
-<summary>Class PointInFiniteField Details</summary>
-
 #### Method toString
 
 function toString() { [native code] }
@@ -5200,8 +5154,6 @@ function toString() { [native code] }
 ```ts
 toString(): string 
 ```
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -5272,10 +5224,6 @@ export default class PrivateKey extends BigNumber {
 ```
 
 See also: [BigNumber](./primitives.md#class-bignumber), [KeyShares](./primitives.md#class-keyshares), [Point](./primitives.md#class-point), [PublicKey](./primitives.md#class-publickey), [Signature](./primitives.md#class-signature), [sign](./compat.md#variable-sign), [toHex](./primitives.md#variable-tohex), [verify](./compat.md#variable-verify)
-
-<details>
-
-<summary>Class PrivateKey Details</summary>
 
 #### Constructor
 
@@ -5737,8 +5685,6 @@ const signature = privateKey.sign('Hello, World!');
 const isSignatureValid = privateKey.verify('Hello, World!', signature);
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -5764,10 +5710,6 @@ export default class PublicKey extends Point {
 ```
 
 See also: [BigNumber](./primitives.md#class-bignumber), [Point](./primitives.md#class-point), [PrivateKey](./primitives.md#class-privatekey), [Signature](./primitives.md#class-signature), [verify](./compat.md#variable-verify)
-
-<details>
-
-<summary>Class PublicKey Details</summary>
 
 #### Constructor
 
@@ -6047,8 +5989,6 @@ const mySignature = new Signature(...)
 const isVerified = myPubKey.verify(myMessage, mySignature)
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -6075,10 +6015,6 @@ export class RIPEMD160 extends BaseHash {
 }
 ```
 
-<details>
-
-<summary>Class RIPEMD160 Details</summary>
-
 #### Property h
 
 Array that is updated iteratively as part of hashing computation.
@@ -6086,8 +6022,6 @@ Array that is updated iteratively as part of hashing computation.
 ```ts
 h: number[]
 ```
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -6158,10 +6092,6 @@ export default class ReductionContext {
 ```
 
 See also: [BigNumber](./primitives.md#class-bignumber), [Mersenne](./primitives.md#class-mersenne)
-
-<details>
-
-<summary>Class ReductionContext Details</summary>
 
 #### Constructor
 
@@ -6676,8 +6606,6 @@ this.verify2(new BigNumber(-10).toRed(this), new BigNumber(20).toRed(this)); //t
 this.verify2(new BigNumber(10).toRed(this), new BigNumber(20)); //throws an Error
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -6706,10 +6634,6 @@ export class SHA1 extends BaseHash {
 }
 ```
 
-<details>
-
-<summary>Class SHA1 Details</summary>
-
 #### Property W
 
 Provides a way to recycle usage of the array memory.
@@ -6733,8 +6657,6 @@ The round constants used for each round of SHA-1.
 ```ts
 k: number[]
 ```
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -6783,10 +6705,6 @@ export class SHA256 extends BaseHash {
 }
 ```
 
-<details>
-
-<summary>Class SHA256 Details</summary>
-
 #### Property W
 
 Provides a way to recycle usage of the array memory.
@@ -6810,8 +6728,6 @@ The round constants used for each round of SHA-256
 ```ts
 k: number[]
 ```
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -6838,10 +6754,6 @@ export class SHA256HMAC {
 ```
 
 See also: [SHA256](./primitives.md#class-sha256)
-
-<details>
-
-<summary>Class SHA256HMAC Details</summary>
 
 #### Constructor
 
@@ -6962,8 +6874,6 @@ Example
 myHMAC.update('deadbeef', 'hex');
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -6993,10 +6903,6 @@ export class SHA512 extends BaseHash {
 }
 ```
 
-<details>
-
-<summary>Class SHA512 Details</summary>
-
 #### Property W
 
 Provides a way to recycle usage of the array memory.
@@ -7020,8 +6926,6 @@ The round constants used for each round of SHA-512.
 ```ts
 k: number[]
 ```
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -7048,10 +6952,6 @@ export class SHA512HMAC {
 ```
 
 See also: [SHA512](./primitives.md#class-sha512)
-
-<details>
-
-<summary>Class SHA512HMAC Details</summary>
 
 #### Constructor
 
@@ -7172,8 +7072,6 @@ Example
 myHMAC.update('deadbeef', 'hex');
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -7225,10 +7123,6 @@ export default class Schnorr {
 ```
 
 See also: [BigNumber](./primitives.md#class-bignumber), [Point](./primitives.md#class-point), [PrivateKey](./primitives.md#class-privatekey), [PublicKey](./primitives.md#class-publickey)
-
-<details>
-
-<summary>Class Schnorr Details</summary>
 
 #### Method generateProof
 
@@ -7286,8 +7180,6 @@ Argument Details
 + **proof**
   + Proof (R, S', z)
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -7317,10 +7209,6 @@ export default class Signature {
 ```
 
 See also: [BigNumber](./primitives.md#class-bignumber), [PublicKey](./primitives.md#class-publickey), [verify](./compat.md#variable-verify)
-
-<details>
-
-<summary>Class Signature Details</summary>
 
 #### Constructor
 
@@ -7580,8 +7468,6 @@ const publicKey = PublicKey.fromString('04188ca1050...');
 const isVerified = signature.verify(msg, publicKey);
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -7600,10 +7486,6 @@ export default class SymmetricKey extends BigNumber {
 ```
 
 See also: [BigNumber](./primitives.md#class-bignumber), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
-
-<details>
-
-<summary>Class SymmetricKey Details</summary>
 
 #### Method decrypt
 
@@ -7684,8 +7566,6 @@ Example
 const symmetricKey = SymmetricKey.fromRandom();
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -7721,10 +7601,6 @@ export default class TransactionSignature extends Signature {
 
 See also: [BigNumber](./primitives.md#class-bignumber), [Script](./script.md#class-script), [Signature](./primitives.md#class-signature), [TransactionInput](./transaction.md#interface-transactioninput), [TransactionOutput](./transaction.md#interface-transactionoutput)
 
-<details>
-
-<summary>Class TransactionSignature Details</summary>
-
 #### Method hasLowS
 
 Compares to bitcoind's IsLowDERSignature
@@ -7734,8 +7610,6 @@ See also Bip 62, "low S values in signatures"
 ```ts
 public hasLowS(): boolean 
 ```
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -7838,10 +7712,6 @@ Limited SHA-512-only PBKDF2 function for use in deprecated BIP39 code.
 export function pbkdf2(password: number[], salt: number[], iterations: number, keylen: number, digest = "sha512"): number[] 
 ```
 
-<details>
-
-<summary>Function pbkdf2 Details</summary>
-
 Returns
 
 The computed key
@@ -7859,8 +7729,6 @@ Argument Details
 + **digest**
   + The digest (must be sha512 for this implementation)
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -7870,10 +7738,6 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export function toArray(msg: number[] | string, enc?: "hex" | "utf8"): number[] 
 ```
 
-<details>
-
-<summary>Function toArray Details</summary>
-
 Returns
 
 array of byte values from msg. If msg is an array, a copy is returned.
@@ -7882,8 +7746,6 @@ Argument Details
 
 + **enc**
   + Optional. Encoding to use if msg is string. Default is 'utf8'.
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -7903,10 +7765,6 @@ console.log(toBase64(bytes)); // Outputs: SGVsbG8=
 export function toBase64(byteArray: number[]): string 
 ```
 
-<details>
-
-<summary>Function toBase64 Details</summary>
-
 Returns
 
 The base64 encoded string.
@@ -7915,8 +7773,6 @@ Argument Details
 
 + **byteArray**
   + An array of numbers where each number is a byte (0-255).
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
