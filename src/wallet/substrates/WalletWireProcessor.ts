@@ -10,18 +10,18 @@ import Certificate from '../../auth/certificates/Certificate.js'
 export default class WalletWireProcessor implements WalletWire {
   wallet: WalletInterface
 
-  constructor(wallet: WalletInterface) {
+  constructor (wallet: WalletInterface) {
     this.wallet = wallet
   }
 
-  private decodeOutpoint(reader: Utils.Reader): string {
+  private decodeOutpoint (reader: Utils.Reader): string {
     const txidBytes = reader.read(32)
     const txid = Utils.toHex(txidBytes)
     const index = reader.readVarIntNum()
     return `${txid}.${index}`
   }
 
-  private encodeOutpoint(outpoint: string): number[] {
+  private encodeOutpoint (outpoint: string): number[] {
     const writer = new Utils.Writer()
     const [txid, index] = outpoint.split('.')
     writer.write(Utils.toArray(txid, 'hex'))
@@ -29,7 +29,7 @@ export default class WalletWireProcessor implements WalletWire {
     return writer.toArray()
   }
 
-  async transmitToWallet(message: number[]): Promise<number[]> {
+  async transmitToWallet (message: number[]): Promise<number[]> {
     const messageReader = new Utils.Reader(message)
     try {
       // Read call code
@@ -2045,7 +2045,7 @@ export default class WalletWireProcessor implements WalletWire {
     }
   }
 
-  private decodeProtocolID(reader: Utils.Reader): [SecurityLevel, string] {
+  private decodeProtocolID (reader: Utils.Reader): [SecurityLevel, string] {
     const securityLevel = reader.readUInt8() as SecurityLevel
     const protocolLength = reader.readVarIntNum()
     const protocolBytes = reader.read(protocolLength)
@@ -2053,13 +2053,13 @@ export default class WalletWireProcessor implements WalletWire {
     return [securityLevel, protocolString]
   }
 
-  private decodeString(reader: Utils.Reader): string {
+  private decodeString (reader: Utils.Reader): string {
     const length = reader.readVarIntNum()
     const bytes = reader.read(length)
     return Utils.toUTF8(bytes)
   }
 
-  private decodeCounterparty(
+  private decodeCounterparty (
     reader: Utils.Reader
   ): string | 'self' | 'anyone' | undefined {
     const counterpartyFlag = reader.readUInt8()
@@ -2075,7 +2075,7 @@ export default class WalletWireProcessor implements WalletWire {
     }
   }
 
-  private serializeDiscoveryResult(discoverResult: any): number[] {
+  private serializeDiscoveryResult (discoverResult: any): number[] {
     const resultWriter = new Utils.Writer()
 
     // totalCertificates
@@ -2147,7 +2147,7 @@ export default class WalletWireProcessor implements WalletWire {
     return resultWriter.toArray()
   }
 
-  private decodeKeyRelatedParams(paramsReader: Utils.Reader): any {
+  private decodeKeyRelatedParams (paramsReader: Utils.Reader): any {
     const args: any = {}
 
     // Read protocolID

@@ -740,7 +740,7 @@ describe('Transaction', () => {
         status: 200,
         statusText: 'OK',
         headers: {
-          get(key: string) {
+          get (key: string) {
             if (key === 'Content-Type') {
               return 'application/json'
             }
@@ -841,7 +841,7 @@ describe('Transaction', () => {
         status: 200,
         statusText: 'OK',
         headers: {
-          get(key: string) {
+          get (key: string) {
             if (key === 'Content-Type') {
               return 'application/json'
             }
@@ -1066,7 +1066,7 @@ describe('Transaction', () => {
         // Create two transactions, one depending on the other
         const privateKey = new PrivateKey(1)
         const publicKey = new Curve().g.mul(privateKey)
-        const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+        const publicKeyHash = hash160(publicKey.encode(true))
         const p2pkh = new P2PKH()
 
         const sourceTx = new Transaction(
@@ -1159,7 +1159,7 @@ describe('Transaction', () => {
     it('should serialize a transaction to Atomic BEEF format correctly', async () => {
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
 
       // Create a simple transaction
@@ -1230,7 +1230,7 @@ describe('Transaction', () => {
       // Create two transactions, one depending on the other
       const privateKey = new PrivateKey(1)
       const publicKey = new Curve().g.mul(privateKey)
-      const publicKeyHash = hash160(publicKey.encode(true)) as number[]
+      const publicKeyHash = hash160(publicKey.encode(true))
       const p2pkh = new P2PKH()
 
       const sourceTx = new Transaction(1, [], [{
@@ -1289,7 +1289,7 @@ describe('Transaction', () => {
       tx.addInput({
         sourceTXID: '00'.repeat(32),
         sourceOutputIndex: 0,
-        unlockingScriptTemplate: new P2PKH().unlock(privateKey),
+        unlockingScriptTemplate: new P2PKH().unlock(privateKey)
       })
     })
   })

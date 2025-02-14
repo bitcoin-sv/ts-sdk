@@ -7,13 +7,13 @@ import { RequestedCertificateSet } from '../types.js'
 import { VerifiableCertificate } from '../certificates/VerifiableCertificate.js'
 import { Writer } from '../../primitives/utils.js'
 
-type SimplifiedFetchRequestOptions = {
-  method?: string,
-  headers?: Record<string, string>,
-  body?: any,
+interface SimplifiedFetchRequestOptions {
+  method?: string
+  headers?: Record<string, string>
+  body?: any
   retryCounter?: number
 }
-type AuthPeer = { peer: Peer, identityKey?: string, supportsMutualAuth?: boolean }
+interface AuthPeer { peer: Peer, identityKey?: string, supportsMutualAuth?: boolean }
 
 const PAYMENT_VERSION = '1.0'
 
@@ -21,16 +21,16 @@ const PAYMENT_VERSION = '1.0'
  * AuthFetch provides a lightweight fetch client for interacting with servers
  * over a simplified HTTP transport mechanism. It integrates session management, peer communication,
  * and certificate handling to enable secure and mutually-authenticated requests.
- * 
+ *
  * Additionally, it automatically handles 402 Payment Required responses by creating
  * and sending BSV payment transactions when necessary.
  */
 export class AuthFetch {
-  private sessionManager: SessionManager
-  private wallet: WalletInterface
+  private readonly sessionManager: SessionManager
+  private readonly wallet: WalletInterface
   private callbacks: Record<string, { resolve: Function, reject: Function }> = {}
-  private certificatesReceived: VerifiableCertificate[] = []
-  private requestedCertificates?: RequestedCertificateSet
+  private readonly certificatesReceived: VerifiableCertificate[] = []
+  private readonly requestedCertificates?: RequestedCertificateSet
   peers: Record<string, AuthPeer> = {}
 
   /**
@@ -38,26 +38,26 @@ export class AuthFetch {
   * @param wallet - The wallet instance for signing and authentication.
   * @param requestedCertificates - Optional set of certificates to request from peers.
   */
-  constructor(wallet: WalletInterface, requestedCertificates?: RequestedCertificateSet, sessionManager?: SessionManager) {
+  constructor (wallet: WalletInterface, requestedCertificates?: RequestedCertificateSet, sessionManager?: SessionManager) {
     this.wallet = wallet
     this.requestedCertificates = requestedCertificates
-    this.sessionManager = sessionManager || new SessionManager()
-  }
+    this.sessionManager = (sessionManager != null) || new SessionManager()
+  };
 
   /**
    * Mutually authenticates and sends a HTTP request to a server.
-   * 
+   *
    * 1) Attempt the request.
    * 2) If 402 Payment Required, automatically create and send payment.
    * 3) Return the final response.
-   * 
+   *
    * @param url - The URL to send the request to.
    * @param config - Configuration options for the request, including method, headers, and body.
    * @returns A promise that resolves with the server's response, structured as a Response-like object.
-   * 
+   *
    * @throws Will throw an error if unsupported headers are used or other validation fails.
    */
-  async fetch(url: string, config: SimplifiedFetchRequestOptions = {}): Promise<Response> {
+  async fetch (url: string, config: SimplifiedFetchRequestOptions = {}): Promise<Response> {
     if (config.retryCounter) {
       if (config.retryCounter <= 0) {
         throw new Error('Request failed after maximum number of retries.')
@@ -156,11 +156,11 @@ export class AuthFetch {
 
             // Create the Response object
             const responseValue = new Response(
-              responseBody ? new Uint8Array(responseBody) : null, {
-              status: statusCode,
-              statusText: `${statusCode}`,
-              headers: new Headers(responseHeaders)
-            })
+              (responseBody != null) ? new Uint8Array(responseBody) : null, {
+                status: statusCode,
+                statusText: `${statusCode}`,
+                headers: new Headers(responseHeaders)
+              })
 
             // Resolve or reject the correct request with the response data
             this.callbacks[requestNonceAsBase64].resolve(responseValue)
@@ -199,14 +199,14 @@ export class AuthFetch {
 
   /**
    * Request Certificates from a Peer
-   * @param baseUrl 
-   * @param certificatesToRequest 
+   * @param baseUrl
+   * @param certificatesToRequest
    */
-  async sendCertificateRequest(baseUrl: string, certificatesToRequest: RequestedCertificateSet): Promise<VerifiableCertificate[]> {
+  async sendCertificateRequest (baseUrl: string, certificatesToRequest: RequestedCertificateSet): Promise<VerifiableCertificate[]> {
     const parsedUrl = new URL(baseUrl)
     const baseURL = parsedUrl.origin
 
-    let peerToUse: { peer: Peer; identityKey?: string }
+    let peerToUse: { peer: Peer, identityKey?: string }
     if (this.peers[baseURL]) {
       peerToUse = { peer: this.peers[baseURL].peer }
     } else {
@@ -223,7 +223,7 @@ export class AuthFetch {
     }
 
     // Return a promise that resolves when certificates are received
-    return new Promise<VerifiableCertificate[]>(async (resolve, reject) => {
+    return await new Promise<VerifiableCertificate[]>(async (resolve, reject) => {
       // Set up the listener before making the request
       const callbackId = peerToUse.peer.listenForCertificatesReceived((_senderPublicKey: string, certs: VerifiableCertificate[]) => {
         peerToUse.peer.stopListeningForCertificatesReceived(callbackId)
@@ -244,7 +244,7 @@ export class AuthFetch {
   /**
    * Return any certificates we've collected thus far, then clear them out.
    */
-  public consumeReceivedCertificates(): VerifiableCertificate[] {
+  public consumeReceivedCertificates (): VerifiableCertificate[] {
     return this.certificatesReceived.splice(0)
   }
 
@@ -260,7 +260,7 @@ export class AuthFetch {
    *
    * @throws Will throw an error if unsupported headers are used or serialization fails.
    */
-  private async serializeRequest(
+  private async serializeRequest (
     method: string,
     headers: Record<string, string>,
     body: any,
@@ -301,7 +301,7 @@ export class AuthFetch {
     // - Custom headers prefixed with x-bsv are included
     // - x-bsv-auth headers are not allowed
     // - content-type and authorization are signed by client
-    const includedHeaders: [string, string][] = []
+    const includedHeaders: Array<[string, string]> = []
     for (let [k, v] of Object.entries(headers)) {
       k = k.toLowerCase() // We will always sign lower-case header keys
       if (k.startsWith('x-bsv-') || k === 'content-type' || k === 'authorization') {
@@ -340,10 +340,10 @@ export class AuthFetch {
     return writer
   }
 
-  /** 
+  /**
    * Handles a non-authenticated fetch requests and validates that the server is not claiming to be authenticated.
    */
-  private async handleFetchAndValidate(url: string, config: RequestInit, peerToUse: AuthPeer): Promise<Response> {
+  private async handleFetchAndValidate (url: string, config: RequestInit, peerToUse: AuthPeer): Promise<Response> {
     const response = await fetch(url, config)
     response.headers.forEach(header => {
       if (header.toLocaleLowerCase().startsWith('x-bsv')) {
@@ -363,7 +363,7 @@ export class AuthFetch {
    * If we get 402 Payment Required, we build a transaction via wallet.createAction()
    * and re-attempt the request with an x-bsv-payment header.
    */
-  private async handlePaymentAndRetry(
+  private async handlePaymentAndRetry (
     url: string,
     config: SimplifiedFetchRequestOptions = {},
     originalResponse: Response
@@ -418,7 +418,7 @@ export class AuthFetch {
     })
 
     // Attach the payment to the request headers
-    config.headers = config.headers || {}
+    config.headers = (config.headers != null) || {}
     config.headers['x-bsv-payment'] = JSON.stringify({
       derivationPrefix,
       transaction: Utils.toBase64(tx)
@@ -426,10 +426,10 @@ export class AuthFetch {
     config.retryCounter ??= 3
 
     // Re-attempt request with payment attached
-    return this.fetch(url, config)
+    return await this.fetch(url, config)
   }
 
-  private async normalizeBodyToNumberArray(body: BodyInit | null | undefined): Promise<number[]> {
+  private async normalizeBodyToNumberArray (body: BodyInit | null | undefined): Promise<number[]> {
     // 1. Null / undefined
     if (body == null) {
       return []
@@ -459,7 +459,7 @@ export class AuthFetch {
 
     // 6. FormData
     if (body instanceof FormData) {
-      const entries: [string, string][] = []
+      const entries: Array<[string, string]> = []
       body.forEach((value, key) => {
         entries.push([key, value.toString()])
       })

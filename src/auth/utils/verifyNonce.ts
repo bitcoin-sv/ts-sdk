@@ -7,7 +7,7 @@ import { Utils, WalletInterface, WalletCounterparty } from '../../../mod.js'
  * @param counterparty - The counterparty to the nonce creation. Defaults to 'self'.
  * @returns The status of the validation
  */
-export async function verifyNonce(
+export async function verifyNonce (
   nonce: string,
   wallet: WalletInterface,
   counterparty: WalletCounterparty = 'self'

@@ -26,7 +26,7 @@ export class VerifiableCertificate extends Certificate {
   keyring: Record<CertificateFieldNameUnder50Bytes, string>
   decryptedFields?: Record<CertificateFieldNameUnder50Bytes, Base64String>
 
-  constructor(
+  constructor (
     type: Base64String,
     serialNumber: Base64String,
     subject: PubKeyHex,
@@ -56,7 +56,7 @@ export class VerifiableCertificate extends Certificate {
    * @returns {Promise<Record<CertificateFieldNameUnder50Bytes, string>>} - A promise that resolves to an object where each key is a field name and each value is the decrypted field value as a string.
    * @throws {Error} Throws an error if any of the decryption operations fail, with a message indicating the failure context.
    */
-  async decryptFields(
+  async decryptFields (
     verifierWallet: ProtoWallet
   ): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
     if (this.keyring == null || Object.keys(this.keyring).length === 0) { // ✅ Explicitly check null and empty object

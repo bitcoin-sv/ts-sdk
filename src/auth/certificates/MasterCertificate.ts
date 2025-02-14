@@ -36,7 +36,7 @@ export class MasterCertificate extends Certificate {
 
   masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>
 
-  constructor(
+  constructor (
     type: Base64String,
     serialNumber: Base64String,
     subject: PubKeyHex,
@@ -82,18 +82,18 @@ export class MasterCertificate extends Certificate {
    *   - `masterKeyring` {Record<CertificateFieldNameUnder50Bytes, Base64String>}:
    *     The master keyring containing encrypted revelation keys for each field.
    */
-  static async createCertificateFields(
+  static async createCertificateFields (
     creatorWallet: ProtoWallet,
     certifierOrSubject: WalletCounterparty,
     fields: Record<CertificateFieldNameUnder50Bytes, string>
   ): Promise<CreateCertificateFieldsResult> {
     const certificateFields: Record<
-      CertificateFieldNameUnder50Bytes,
-      Base64String
+    CertificateFieldNameUnder50Bytes,
+    Base64String
     > = {}
     const masterKeyring: Record<
-      CertificateFieldNameUnder50Bytes,
-      Base64String
+    CertificateFieldNameUnder50Bytes,
+    Base64String
     > = {}
     for (const [fieldName, fieldValue] of Object.entries(fields)) {
       const fieldSymmetricKey = SymmetricKey.fromRandom()
@@ -137,7 +137,7 @@ export class MasterCertificate extends Certificate {
    *   - A field in `fieldsToReveal` does not exist in the certificate.
    *   - The decrypted master field key fails to decrypt the corresponding field (indicating an invalid key).
    */
-  static async createKeyringForVerifier(
+  static async createKeyringForVerifier (
     subjectWallet: ProtoWallet,
     certifier: WalletCounterparty,
     verifier: WalletCounterparty,
@@ -211,7 +211,7 @@ export class MasterCertificate extends Certificate {
    *
    * @throws {Error} Throws an error if any operation (e.g., encryption, signing) fails during certificate issuance.
    */
-  static async issueCertificateForSubject(
+  static async issueCertificateForSubject (
     certifierWallet: ProtoWallet,
     subject: WalletCounterparty,
     fields: Record<CertificateFieldNameUnder50Bytes, string>,
@@ -265,7 +265,7 @@ export class MasterCertificate extends Certificate {
    *
    * @throws {Error} Throws an error if the `masterKeyring` is invalid or if decryption fails for any field.
    */
-  static async decryptFields(
+  static async decryptFields (
     subjectOrCertifierWallet: ProtoWallet,
     masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>,
     fields: Record<CertificateFieldNameUnder50Bytes, Base64String>,
@@ -295,7 +295,7 @@ export class MasterCertificate extends Certificate {
     }
   }
 
-  static async decryptField(
+  static async decryptField (
     subjectOrCertifierWallet: ProtoWallet,
     masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>,
     fieldName: Base64String,
