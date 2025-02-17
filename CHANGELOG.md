@@ -83,6 +83,14 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.3.19] - 2025-02-16
+
+### Change
+
+- Make URL, httpClient, getHttpHeaders protected instead of private to support extending WhatsOnChain class.
+
+---
+
 ## [1.3.18] - 2025-02-12
 
 ### Fixed
