@@ -21,8 +21,8 @@ interface WhatsOnChainBlockHeader {
 export default class WhatsOnChain implements ChainTracker {
   readonly network: string
   readonly apiKey: string
-  private readonly URL: string
-  private readonly httpClient: HttpClient
+  protected readonly URL: string
+  protected readonly httpClient: HttpClient
 
   /**
    * Constructs an instance of the WhatsOnChain ChainTracker.
@@ -88,7 +88,7 @@ export default class WhatsOnChain implements ChainTracker {
     }
   }
 
-  private getHttpHeaders(): Record<string, string> {
+  protected getHttpHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       Accept: 'application/json'
     }
