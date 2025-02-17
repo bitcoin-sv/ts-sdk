@@ -1034,7 +1034,7 @@ describe('Transaction', () => {
         // Verify that the Atomic BEEF starts with the correct prefix and TXID
         const expectedPrefix = [0x01, 0x01, 0x01, 0x01]
         expect(atomicBEEF.slice(0, 4)).toEqual(expectedPrefix)
-        const txid = spendTx.id()
+        const txid = spendTx.hash()
         expect(atomicBEEF.slice(4, 36)).toEqual(txid)
 
         // Deserialize from Atomic BEEF
@@ -1049,7 +1049,7 @@ describe('Transaction', () => {
         writer.writeUInt32LE(0x01010101)
         // Write subject TXID
         const fakeTXID = toArray('00'.repeat(32), 'hex')
-        writer.write(fakeTXID)
+        writer.writeReverse(fakeTXID)
         // Write empty BEEF data
         writer.writeUInt32LE(BEEF_V1) // BEEF version
         writer.writeVarIntNum(0) // No BUMPs
@@ -1198,7 +1198,7 @@ describe('Transaction', () => {
       // Verify that the Atomic BEEF starts with the correct prefix and TXID
       const expectedPrefix = [0x01, 0x01, 0x01, 0x01]
       expect(atomicBEEF.slice(0, 4)).toEqual(expectedPrefix)
-      const txid = spendTx.id()
+      const txid = spendTx.hash()
       expect(atomicBEEF.slice(4, 36)).toEqual(txid)
 
       // Deserialize from Atomic BEEF
@@ -1213,7 +1213,7 @@ describe('Transaction', () => {
       writer.writeUInt32LE(0x01010101)
       // Write subject TXID
       const fakeTXID = toArray('00'.repeat(32), 'hex')
-      writer.write(fakeTXID)
+      writer.writeReverse(fakeTXID)
       // Write empty BEEF data
       writer.writeUInt32LE(BEEF_V1) // BEEF version
       writer.writeVarIntNum(0) // No BUMPs
