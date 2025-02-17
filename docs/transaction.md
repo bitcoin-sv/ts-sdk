@@ -2004,13 +2004,16 @@ Represents a chain tracker based on What's On Chain .
 export default class WhatsOnChain implements ChainTracker {
     readonly network: string;
     readonly apiKey: string;
+    protected readonly URL: string;
+    protected readonly httpClient: HttpClient;
     constructor(network: "main" | "test" | "stn" = "main", config: WhatsOnChainConfig = {}) 
     async isValidRootForHeight(root: string, height: number): Promise<boolean> 
     async currentHeight(): Promise<number> 
+    protected getHttpHeaders(): Record<string, string> 
 }
 ```
 
-See also: [ChainTracker](./transaction.md#interface-chaintracker), [WhatsOnChainConfig](./transaction.md#interface-whatsonchainconfig)
+See also: [ChainTracker](./transaction.md#interface-chaintracker), [HttpClient](./transaction.md#interface-httpclient), [WhatsOnChainConfig](./transaction.md#interface-whatsonchainconfig)
 
 #### Constructor
 
