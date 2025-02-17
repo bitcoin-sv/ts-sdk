@@ -504,7 +504,7 @@ export class Beef {
 
     const writer = new Writer()
     writer.writeUInt32LE(ATOMIC_BEEF)
-    writer.write(toArray(txid, 'hex'))
+    writer.writeReverse(toArray(txid, 'hex'))
     beef.toWriter(writer)
 
     return writer.toArray()
@@ -523,7 +523,7 @@ export class Beef {
     let atomicTxid: string | undefined
     if (version === ATOMIC_BEEF) {
       // Skip the txid and re-read the BEEF version
-      atomicTxid = toHex(br.read(32))
+      atomicTxid = toHex(br.readReverse(32))
       version = br.readUInt32LE()
     }
     if (version !== BEEF_V1 && version !== BEEF_V2) {
