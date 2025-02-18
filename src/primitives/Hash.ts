@@ -1087,7 +1087,7 @@ export class SHA512 extends BaseHash {
     return split32(this.h, 'big')
   }
 
-  _digestHex (): number[] {
+  _digestHex (): string {
     return toHex32(this.h, 'big')
   }
 }
