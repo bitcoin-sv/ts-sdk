@@ -6899,7 +6899,7 @@ export class SHA512 extends BaseHash {
     _prepareBlock(msg: number[], start: number): void 
     _update(msg: any, start: number): void 
     _digest(): number[] 
-    _digestHex(): number[] 
+    _digestHex(): string 
 }
 ```
 

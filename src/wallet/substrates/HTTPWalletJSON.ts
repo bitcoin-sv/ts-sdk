@@ -52,30 +52,30 @@ export default class HTTPWalletJSON implements WalletInterface {
     this.httpClient = httpClient
 
     this.api = async (call: string, args: object) => {
-      try {
-        const response = await (
-          await httpClient(`${this.baseUrl}/${call}`, {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-              Originator: this.originator ?? '' // ✅ Fix: Explicitly handle nullish `originator`
-            },
-            body: JSON.stringify(args)
-          })
-        ).json()
-        if (!response.ok) {
-          const err = {
-            call,
-            args,
-            message: response.message || `HTTP Client error ${response.status}`
-          }
-          throw new Error(JSON.stringify(err))
+      const res = await (
+        await httpClient(`${this.baseUrl}/${call}`, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Originator: this.originator ?? ''
+          },
+          body: JSON.stringify(args)
+        })
+      )
+
+      const data = await res.json()
+
+      // Check the HTTP status on the original response
+      if (!res.ok) {
+        const err = {
+          call,
+          args,
+          message: data.message ?? `HTTP Client error ${res.status}`
         }
-        return response
-      } catch (error) {
-        throw error
+        throw new Error(JSON.stringify(err))
       }
+      return data
     }
   }
 
