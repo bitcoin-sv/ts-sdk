@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   Transaction,
   BroadcastResponse,
@@ -60,10 +59,7 @@ export interface SHIPBroadcasterConfig {
   /** Determines which topics (all, any, or a specific list) must be present within STEAK received from at least one host for the broadcast to be considered a success. */
   requireAcknowledgmentFromAnyHostForTopics?: 'all' | 'any' | string[]
   /** Determines a mapping whose keys are specific hosts and whose values are the topics (all, any, or a specific list) that must be present within the STEAK received by the given hosts, in order for the broadcast to be considered a success. */
-  requireAcknowledgmentFromSpecificHostsForTopics?: Record<
-  string,
-  'all' | 'any' | string[]
-  >
+  requireAcknowledgmentFromSpecificHostsForTopics?: Record<string, 'all' | 'any' | string[]>
 }
 
 /** Facilitates transaction broadcasts that return STEAK. */
@@ -73,8 +69,7 @@ export interface OverlayBroadcastFacilitator {
 
 const MAX_SHIP_QUERY_TIMEOUT = 1000
 
-export class HTTPSOverlayBroadcastFacilitator
-implements OverlayBroadcastFacilitator {
+export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilitator {
   httpClient: typeof fetch
 
   constructor (httpClient = fetch) {
@@ -106,24 +101,13 @@ implements OverlayBroadcastFacilitator {
 /**
  * Represents a SHIP transaction broadcaster.
  */
-export default class SHIPCast implements Broadcaster {
+export default class SHIPBroadcaster implements Broadcaster {
   private readonly topics: string[]
   private readonly facilitator: OverlayBroadcastFacilitator
   private readonly resolver: LookupResolver
-  private readonly requireAcknowledgmentFromAllHostsForTopics:
-  | 'all'
-  | 'any'
-  | string[]
-
-  private readonly requireAcknowledgmentFromAnyHostForTopics:
-  | 'all'
-  | 'any'
-  | string[]
-
-  private readonly requireAcknowledgmentFromSpecificHostsForTopics: Record<
-  string,
-  'all' | 'any' | string[]
-  >
+  private readonly requireAcknowledgmentFromAllHostsForTopics: | 'all' | 'any' | string[]
+  private readonly requireAcknowledgmentFromAnyHostForTopics: | 'all' | 'any' | string[]
+  private readonly requireAcknowledgmentFromSpecificHostsForTopics: Record<string, 'all' | 'any' | string[]>
 
   /**
    * Constructs an instance of the SHIP broadcaster.
@@ -145,7 +129,7 @@ export default class SHIPCast implements Broadcaster {
       requireAcknowledgmentFromAllHostsForTopics,
       requireAcknowledgmentFromAnyHostForTopics,
       requireAcknowledgmentFromSpecificHostsForTopics
-    } = config ?? defaultConfig
+    } = config ?? {}
     this.facilitator = facilitator ?? new HTTPSOverlayBroadcastFacilitator()
     this.resolver = resolver ?? new LookupResolver()
     this.requireAcknowledgmentFromAllHostsForTopics =
@@ -215,14 +199,14 @@ export default class SHIPCast implements Broadcaster {
 
     for (const result of successfulHosts) {
       const host = result.host
-      const steak = result.steak
+      const steak = result.steak as STEAK
 
       const acknowledgedTopics = new Set<string>()
 
       for (const [topic, instructions] of Object.entries(steak)) {
         const outputsToAdmit = instructions.outputsToAdmit
         const coinsToRetain = instructions.coinsToRetain
-        const coinsRemoved = instructions.coinsRemoved
+        const coinsRemoved = instructions.coinsRemoved as number[]
 
         if (
           outputsToAdmit?.length > 0 ||

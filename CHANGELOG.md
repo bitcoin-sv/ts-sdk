@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
-- [1.3.22 - 2025-02-19](#1321---2025-02-19)
+- [1.3.23 - 2025-02-19](#1323---2025-02-21)
+- [1.3.22 - 2025-02-19](#1322---2025-02-19)
 - [1.3.21 - 2025-02-17](#1321---2025-02-17)
 - [1.3.20- 2025-02-11](#1320---2025-02-17)
 - [1.3.19 - 2025-02-16](#1319---2025-02-16)
@@ -87,6 +88,13 @@ All notable changes to this project will be documented in this file. The format 
 ### Security
 
 ---
+
+## [1.3.23] - 2025-02-21
+
+### Fixed
+
+- Fixed a bug with SHIPCast's default configuration.
+
 
 ## [1.3.22] - 2025-02-19
 
