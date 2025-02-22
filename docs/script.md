@@ -211,11 +211,12 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export default class PushDrop implements ScriptTemplate {
     wallet: WalletInterface;
+    originator?: string;
     static decode(script: LockingScript): {
         lockingPublicKey: PublicKey;
         fields: number[][];
     } 
-    constructor(wallet: WalletInterface) 
+    constructor(wallet: WalletInterface, originator?: string) 
     async lock(fields: number[][], protocolID: [
         SecurityLevel,
         string
@@ -237,7 +238,7 @@ See also: [LockingScript](./script.md#class-lockingscript), [PublicKey](./primit
 Constructs a new instance of the PushDrop class.
 
 ```ts
-constructor(wallet: WalletInterface) 
+constructor(wallet: WalletInterface, originator?: string) 
 ```
 See also: [WalletInterface](./wallet.md#interface-walletinterface)
 
@@ -245,6 +246,8 @@ Argument Details
 
 + **wallet**
   + The wallet interface used for creating signatures and accessing public keys.
++ **originator**
+  + — The originator to use with Wallet requests
 
 #### Method decode
 

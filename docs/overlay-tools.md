@@ -262,7 +262,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [HTTPSOverlayLookupFacilitator](#class-httpsoverlaylookupfacilitator) |
 | [LookupResolver](#class-lookupresolver) |
 | [OverlayAdminTokenTemplate](#class-overlayadmintokentemplate) |
-| [SHIPCast](#class-shipcast) |
+| [SHIPBroadcaster](#class-shipbroadcaster) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -430,12 +430,12 @@ Argument Details
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
-### Class: SHIPCast
+### Class: SHIPBroadcaster
 
 Represents a SHIP transaction broadcaster.
 
 ```ts
-export default class SHIPCast implements Broadcaster {
+export default class SHIPBroadcaster implements Broadcaster {
     constructor(topics: string[], config?: SHIPBroadcasterConfig) 
     async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> 
 }
