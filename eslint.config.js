@@ -9,7 +9,7 @@ export default [
 
   {
     // Add ignorePatterns at the top level for ESLint
-    ignorePatterns: ['src/primitives/Point.ts'],
+    ignorePatterns: ['src/primitives/Point.ts', 'docs/swagger/*'],
 
     files: ['src/**/*.ts', '**/*.{js,mjs,cjs,ts,jsx,tsx}'], // ✅ Ensure TS files are included
     languageOptions: {
