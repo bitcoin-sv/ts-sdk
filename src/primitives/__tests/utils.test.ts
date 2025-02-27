@@ -15,7 +15,8 @@ describe('utils', () => {
     expect(toArray('1234', 'hex')).toEqual([0x12, 0x34])
     expect(toArray('1234')).toEqual([49, 50, 51, 52])
     expect(toArray('1234', 'utf8')).toEqual([49, 50, 51, 52])
-    expect(toArray('\u1234234')).toEqual([18, 52, 50, 51, 52])
+    expect(toArray('\u1234', 'utf8')).toEqual([225, 136, 180])
+    expect(toArray('\u1234' + '234', 'utf8')).toEqual([225, 136, 180, 50, 51, 52])
     expect(toArray([1, 2, 3, 4])).toEqual([1, 2, 3, 4])
   })
 
@@ -155,5 +156,54 @@ describe('utils', () => {
         data: dataHex
       })
     })
+  })
+
+  test('should return an empty array for an empty string', () => {
+    expect(toArray("")).toEqual([])
+  })
+
+  test('should encode ASCII characters correctly', () => {
+    const input = "Hello, World!"
+    const expected = [72, 101, 108, 108, 111, 44, 32, 87, 111, 114, 108, 100, 33]
+    expect(toArray(input)).toEqual(expected)
+  })
+
+  test('should encode 2-byte characters correctly', () => {
+    // "é" (U+00E9) should encode to [0xC3, 0xA9]
+    expect(toArray("é")).toEqual([0xC3, 0xA9])
+  })
+
+  test('should encode 3-byte characters correctly', () => {
+    // "€" (U+20AC) should encode to [0xE2, 0x82, 0xAC]
+    expect(toArray("€")).toEqual([0xE2, 0x82, 0xAC])
+  })
+
+  test('should encode 4-byte characters correctly', () => {
+    // "😃" (U+1F603) should encode to [0xF0, 0x9F, 0x98, 0x83]
+    expect(toArray("😃")).toEqual([0xF0, 0x9F, 0x98, 0x83])
+  })
+
+  test('should encode mixed content correctly', () => {
+    // "Hello, 😃! €" contains ASCII, an emoji, and a 3-byte character.
+    const input = "Hello, 😃! €"
+    const expected = [
+      // "Hello, " => ASCII bytes:
+      72, 101, 108, 108, 111, 44, 32,
+      // "😃" => 4-byte sequence:
+      0xF0, 0x9F, 0x98, 0x83,
+      // "!" => ASCII, then space:
+      33, 32,
+      // "€" => 3-byte sequence:
+      0xE2, 0x82, 0xAC
+    ]
+    expect(toArray(input)).toEqual(expected)
+  })
+
+  test('should replace lone surrogates with the replacement character', () => {
+    // An unpaired high surrogate "\uD800" should be replaced with U+FFFD,
+    // which is encoded in UTF-8 as [0xEF, 0xBF, 0xBD]
+    const input = "\uD800"
+    const expected = [0xEF, 0xBF, 0xBD]
+    expect(toArray(input)).toEqual(expected)
   })
 })
