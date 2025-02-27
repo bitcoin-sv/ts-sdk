@@ -95,7 +95,7 @@ function utf8ToArray (str: string): number[] {
   const result: number[] = []
 
   for (let i = 0; i < str.length; i++) {
-    let codePoint = str.codePointAt(i)!
+    let codePoint = str.codePointAt(i)
 
     if (codePoint > 0xFFFF) {
       // Valid surrogate pair => skip the next code unit because codePointAt
