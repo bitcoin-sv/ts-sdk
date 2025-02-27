@@ -95,7 +95,12 @@ function utf8ToArray (str: string): number[] {
   const result: number[] = []
 
   for (let i = 0; i < str.length; i++) {
-    let codePoint = str.codePointAt(i)
+    const cp = str.codePointAt(i)
+    if (cp === undefined) {
+      // Should never be out of range.
+      throw new Error(`Index out of range: ${i}`)
+    }
+    let codePoint = cp
 
     if (codePoint > 0xFFFF) {
       // Valid surrogate pair => skip the next code unit because codePointAt
