@@ -99,6 +99,14 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.3.25] - 2025-02-27
+
+### Fixed
+
+- Previously, the function split each character’s 16-bit code unit into two bytes (if the high byte was non-zero), which only worked for ASCII and failed on non-ASCII/multi-byte characters. Now emojis can be encoded correctly!
+
+---
+
 ## [1.3.24] - 2025-02-22
 
 ### Added
