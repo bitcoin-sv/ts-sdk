@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
-- [1.3.25 - 2025-02-27](#1324---2025-02-27)
+- [1.3.27 - 2025-02-28](#1327---2025-02-28)
+- [1.3.26 - 2025-02-28](#1326---2025-02-28)
+- [1.3.25 - 2025-02-27](#1325---2025-02-27)
 - [1.3.24 - 2025-02-22](#1324---2025-02-22)
 - [1.3.23 - 2025-02-21](#1323---2025-02-21)
 - [1.3.22 - 2025-02-19](#1322---2025-02-19)
@@ -88,6 +90,15 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.3.27] - 2025-02-28
+
+### Fixed
+
+- Added defaults for undefined AuthFetch request body (specifically for content-type of application/json).
+- This prevents signature verification errors due to express defaults for requests with undefined body.
 
 ---
 
