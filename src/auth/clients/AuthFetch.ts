@@ -397,7 +397,7 @@ export class AuthFetch {
     }
 
     // Create a random suffix for the derivation path
-    const derivationSuffix = Utils.toBase64(Random(10))
+    const derivationSuffix = await createNonce(this.wallet)
 
     // Derive the script hex from the server identity key
     const { publicKey: derivedPublicKey } = await this.wallet.getPublicKey({
@@ -421,6 +421,7 @@ export class AuthFetch {
     config.headers = config.headers || {}
     config.headers['x-bsv-payment'] = JSON.stringify({
       derivationPrefix,
+      derivationSuffix,
       transaction: Utils.toBase64(tx)
     })
     config.retryCounter ??= 3
