@@ -91,11 +91,12 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-## [1.3.25] - 2025-02-27
+## [1.3.26] - 2025-02-28
 
 ### Fixed
 
-- Previously, the function split each character’s 16-bit code unit into two bytes (if the high byte was non-zero), which only worked for ASCII and failed on non-ASCII/multi-byte characters. Now emojis can be encoded correctly!
+- Fixed a bug with AuthFetch where when responding to error 402, the derivationSuffix was not sent to the server. 
+- Updated used createNonce for the derivationSuffix creation to link it to the sender.
 
 ---
 
