@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.3.25 - 2025-02-27](#1324---2025-02-27)
 - [1.3.24 - 2025-02-22](#1324---2025-02-22)
 - [1.3.23 - 2025-02-21](#1323---2025-02-21)
 - [1.3.22 - 2025-02-19](#1322---2025-02-19)
@@ -87,6 +88,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.3.25] - 2025-02-27
+
+### Fixed
+
+- Previously, the function split each character’s 16-bit code unit into two bytes (if the high byte was non-zero), which only worked for ASCII and failed on non-ASCII/multi-byte characters. Now emojis can be encoded correctly!
 
 ---
 

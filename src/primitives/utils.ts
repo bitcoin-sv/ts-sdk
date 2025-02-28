@@ -84,19 +84,61 @@ const base64ToArray = (msg: string): number[] => {
   return result
 }
 
-const utf8ToArray = (msg: string): number[] => {
-  const res: number[] = []
-  for (let i = 0; i < msg.length; i++) {
-    const c = msg.charCodeAt(i)
-    const hi = c >> 8
-    const lo = c & 0xff
-    if (hi !== 0) {
-      res.push(hi, lo)
+/**
+ * Encodes a string into an array of bytes representing its UTF-8 encoding.
+ * Any lone surrogates are replaced with the Unicode replacement character (U+FFFD).
+ *
+ * @param str - The string to encode.
+ * @returns An array of numbers, each representing a byte in the UTF-8 encoded string.
+ */
+function utf8ToArray (str: string): number[] {
+  const result: number[] = []
+
+  for (let i = 0; i < str.length; i++) {
+    const cp = str.codePointAt(i)
+    if (cp === undefined) {
+      // Should never be out of range.
+      throw new Error(`Index out of range: ${i}`)
+    }
+    let codePoint = cp
+
+    if (codePoint > 0xFFFF) {
+      // Valid surrogate pair => skip the next code unit because codePointAt
+      // has already combined them into a single code point.
+      i++
     } else {
-      res.push(lo)
+      // Check if codePoint is a lone (unpaired) high surrogate or low surrogate.
+      if (codePoint >= 0xD800 && codePoint <= 0xDFFF) {
+        // Replace with the replacement character (U+FFFD).
+        codePoint = 0xFFFD
+      }
+    }
+
+    // Encode according to the UTF-8 standard
+    if (codePoint <= 0x7F) {
+      result.push(codePoint)
+    } else if (codePoint <= 0x7FF) {
+      result.push(
+        0xC0 | (codePoint >> 6),
+        0x80 | (codePoint & 0x3F)
+      )
+    } else if (codePoint <= 0xFFFF) {
+      result.push(
+        0xE0 | (codePoint >> 12),
+        0x80 | ((codePoint >> 6) & 0x3F),
+        0x80 | (codePoint & 0x3F)
+      )
+    } else {
+      result.push(
+        0xF0 | (codePoint >> 18),
+        0x80 | ((codePoint >> 12) & 0x3F),
+        0x80 | ((codePoint >> 6) & 0x3F),
+        0x80 | (codePoint & 0x3F)
+      )
     }
   }
-  return res
+
+  return result
 }
 
 /**
