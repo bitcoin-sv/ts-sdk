@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Utils, Random, P2PKH, PublicKey, WalletInterface } from '../../../mod.js'
+import { Utils, Random, P2PKH, PublicKey, WalletInterface, createNonce } from '../../../mod.js'
 import { Peer } from '../Peer.js'
 import { SimplifiedFetchTransport } from '../transports/SimplifiedFetchTransport.js'
 import { SessionManager } from '../SessionManager.js'
@@ -397,15 +397,15 @@ export class AuthFetch {
     }
 
     // Create a random suffix for the derivation path
-    const derivationSuffix = Utils.toBase64(Random(10))
+    const derivationSuffix = await createNonce(this.wallet)
 
     // Derive the script hex from the server identity key
     const { publicKey: derivedPublicKey } = await this.wallet.getPublicKey({
-      protocolID: [2, 'wallet payment'],
+      protocolID: [2, '3241645161d8'], // wallet payment protocol
       keyID: `${derivationPrefix} ${derivationSuffix}`,
       counterparty: serverIdentityKey
     })
-    const lockingScript = new P2PKH().lock(PublicKey.fromString(derivedPublicKey).toHash()).toHex()
+    const lockingScript = new P2PKH().lock(PublicKey.fromString(derivedPublicKey).toAddress()).toHex()
 
     // Create the payment transaction using createAction
     const { tx } = await this.wallet.createAction({
@@ -421,6 +421,7 @@ export class AuthFetch {
     config.headers = config.headers || {}
     config.headers['x-bsv-payment'] = JSON.stringify({
       derivationPrefix,
+      derivationSuffix,
       transaction: Utils.toBase64(tx)
     })
     config.retryCounter ??= 3

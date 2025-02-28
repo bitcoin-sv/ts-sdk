@@ -91,6 +91,15 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.3.26] - 2025-02-28
+
+### Fixed
+
+- Fixed a bug with AuthFetch where when responding to error 402, the derivationSuffix was not sent to the server. 
+- Updated used createNonce for the derivationSuffix creation to link it to the sender.
+
+---
+
 ## [1.3.25] - 2025-02-27
 
 ### Fixed
