@@ -329,6 +329,19 @@ export class AuthFetch {
       writer.write(headerValueAsArray)
     }
 
+    // If method typically carries a body and body is undefined, default it
+    // This prevents signature verification errors due to mismatch default body types with express
+    const methodsThatTypicallyHaveBody = ['POST', 'PUT', 'PATCH', 'DELETE']
+    if (methodsThatTypicallyHaveBody.includes(method.toUpperCase()) && body === undefined) {
+      // Check if content-type is application/json
+      const contentTypeHeader = includedHeaders.find(([k]) => k === 'content-type')
+      if (contentTypeHeader && contentTypeHeader[1].includes('application/json')) {
+        body = '{}'
+      } else {
+        body = ''
+      }
+    }
+
     // Handle body
     if (body) {
       const reqBody = await this.normalizeBodyToNumberArray(body) // Use the utility function
@@ -431,9 +444,14 @@ export class AuthFetch {
   }
 
   private async normalizeBodyToNumberArray(body: BodyInit | null | undefined): Promise<number[]> {
-    // 1. Null / undefined
+    // 0. Null / undefined
     if (body == null) {
       return []
+    }
+
+    // 1. object
+    if (typeof body === 'object') {
+      return Utils.toArray(JSON.stringify(body, 'utf8'))
     }
 
     // 2. number[]
