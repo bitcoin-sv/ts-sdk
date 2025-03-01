@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.3.28 - 2025-02-28](#1328---2025-02-28)
 - [1.3.27 - 2025-02-28](#1327---2025-02-28)
 - [1.3.26 - 2025-02-28](#1326---2025-02-28)
 - [1.3.25 - 2025-02-27](#1325---2025-02-27)
@@ -90,6 +91,15 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.3.28] - 2025-02-28
+
+### Fixed
+
+- Persisted payee derivation information in AuthFetch
+- Use the first output index for AuthFetch payments
 
 ---
 
