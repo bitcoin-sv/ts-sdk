@@ -1139,10 +1139,10 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 Creates a nonce derived from a wallet
 
 ```ts
-export async function createNonce(wallet: WalletInterface, counterparty: WalletCounterparty = "self"): Promise<string> 
+export async function createNonce(wallet: WalletInterface, counterparty: WalletCounterparty = "self"): Promise<Base64String> 
 ```
 
-See also: [WalletCounterparty](./wallet.md#type-walletcounterparty), [WalletInterface](./wallet.md#interface-walletinterface)
+See also: [Base64String](./wallet.md#type-base64string), [WalletCounterparty](./wallet.md#type-walletcounterparty), [WalletInterface](./wallet.md#interface-walletinterface)
 
 Returns
 
@@ -1161,10 +1161,10 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 Verifies a nonce derived from a wallet
 
 ```ts
-export async function verifyNonce(nonce: string, wallet: WalletInterface, counterparty: WalletCounterparty = "self"): Promise<boolean> 
+export async function verifyNonce(nonce: Base64String, wallet: WalletInterface, counterparty: WalletCounterparty = "self"): Promise<boolean> 
 ```
 
-See also: [WalletCounterparty](./wallet.md#type-walletcounterparty), [WalletInterface](./wallet.md#interface-walletinterface)
+See also: [Base64String](./wallet.md#type-base64string), [WalletCounterparty](./wallet.md#type-walletcounterparty), [WalletInterface](./wallet.md#interface-walletinterface)
 
 Returns
 
