@@ -405,7 +405,7 @@ export class AuthFetch {
     }
 
     const derivationPrefix = originalResponse.headers.get('x-bsv-payment-derivation-prefix')
-    if (!derivationPrefix) {
+    if (typeof derivationPrefix !== 'string' || derivationPrefix.length < 1) {
       throw new Error('Missing x-bsv-payment-derivation-prefix response header.')
     }
 
@@ -426,8 +426,12 @@ export class AuthFetch {
       outputs: [{
         satoshis: satoshisRequired,
         lockingScript,
+        customInstructions: JSON.stringify({ derivationPrefix, derivationSuffix, payee: serverIdentityKey }),
         outputDescription: 'HTTP request payment'
-      }]
+      }],
+      options: {
+        randomizeOutputs: false
+      }
     })
 
     // Attach the payment to the request headers
