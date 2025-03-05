@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.3.29 - 2025-02-28](#1329---2025-03-5)
 - [1.3.28 - 2025-02-28](#1328---2025-02-28)
 - [1.3.27 - 2025-02-28](#1327---2025-02-28)
 - [1.3.26 - 2025-02-28](#1326---2025-02-28)
@@ -91,6 +92,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.3.29] - 2025-03-5
+
+### Added
+
+- Concurrent session management for the same peer across devices
 
 ---
 
