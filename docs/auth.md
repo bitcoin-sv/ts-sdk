@@ -46,6 +46,7 @@ export interface PeerSession {
     sessionNonce?: string;
     peerNonce?: string;
     peerIdentityKey?: string;
+    lastUpdate: number;
 }
 ```
 
@@ -617,6 +618,8 @@ Represents a peer capable of performing mutual authentication.
 Manages sessions, handles authentication handshakes, certificate requests and responses,
 and sending and receiving general messages over a transport layer.
 
+This version supports multiple concurrent sessions per peer identityKey.
+
 ```ts
 export class Peer {
     public sessionManager: SessionManager;
@@ -631,12 +634,11 @@ export class Peer {
     stopListeningForCertificatesReceived(callbackID: number): void 
     listenForCertificatesRequested(callback: (senderPublicKey: string, requestedCertificates: RequestedCertificateSet) => void): number 
     stopListeningForCertificatesRequested(callbackID: number): void 
-    async processInitialRequest(message: AuthMessage): Promise<void> 
     async sendCertificateResponse(verifierIdentityKey: string, certificates: VerifiableCertificate[]): Promise<void> 
 }
 ```
 
-See also: [AuthMessage](./auth.md#interface-authmessage), [PeerSession](./auth.md#interface-peersession), [RequestedCertificateSet](./auth.md#interface-requestedcertificateset), [SessionManager](./auth.md#class-sessionmanager), [Transport](./auth.md#interface-transport), [VerifiableCertificate](./auth.md#class-verifiablecertificate), [WalletInterface](./wallet.md#interface-walletinterface)
+See also: [PeerSession](./auth.md#interface-peersession), [RequestedCertificateSet](./auth.md#interface-requestedcertificateset), [SessionManager](./auth.md#class-sessionmanager), [Transport](./auth.md#interface-transport), [VerifiableCertificate](./auth.md#class-verifiablecertificate), [WalletInterface](./wallet.md#interface-walletinterface)
 
 #### Constructor
 
@@ -665,6 +667,10 @@ Argument Details
 Retrieves an authenticated session for a given peer identity. If no session exists
 or the session is not authenticated, initiates a handshake to create or authenticate the session.
 
+- If `identityKey` is provided, we look up any existing session for that identity key.
+- If none is found or not authenticated, we do a new handshake.
+- If `identityKey` is not provided, but we have a `lastInteractedWithPeer`, we try that key.
+
 ```ts
 async getAuthenticatedSession(identityKey?: string, maxWaitTime?: number): Promise<PeerSession> 
 ```
@@ -677,15 +683,9 @@ Returns
 Argument Details
 
 + **identityKey**
-  + The identity public key of the peer. If provided, it attempts
-to retrieve an existing session associated with this identity.
+  + The identity public key of the peer.
 + **maxWaitTime**
-  + The maximum time in milliseconds to wait for the handshake
-to complete if a new session is required. Defaults to a pre-defined timeout if not specified.
-
-Throws
-
-- Throws an error if the transport is not connected or if the handshake fails.
+  + The maximum time in milliseconds to wait for the handshake.
 
 #### Method listenForCertificatesReceived
 
@@ -740,20 +740,6 @@ Argument Details
 + **callback**
   + The function to call when a general message is received.
 
-#### Method processInitialRequest
-
-Processes an initial request message from a peer.
-
-```ts
-async processInitialRequest(message: AuthMessage): Promise<void> 
-```
-See also: [AuthMessage](./auth.md#interface-authmessage)
-
-Argument Details
-
-+ **message**
-  + The incoming initial request message.
-
 #### Method requestCertificates
 
 Sends a request for certificates to a peer.
@@ -774,7 +760,7 @@ Argument Details
 + **certificatesToRequest**
   + Specifies the certifiers and types of certificates required from the peer.
 + **identityKey**
-  + The identity public key of the peer. If not provided, the current session identity is used.
+  + The identity public key of the peer. If not provided, the current or last session identity is used.
 + **maxWaitTime**
   + Maximum time in milliseconds to wait for the peer session to be authenticated.
 
@@ -791,20 +777,16 @@ async sendCertificateResponse(verifierIdentityKey: string, certificates: Verifia
 ```
 See also: [VerifiableCertificate](./auth.md#class-verifiablecertificate)
 
-Returns
-
-- A promise that resolves once the certificate response has been sent successfully.
-
 Argument Details
 
 + **verifierIdentityKey**
   + The identity key of the peer requesting the certificates.
 + **certificates**
-  + The list of certificates to be included in the response.
+  + The list of certificates to include in the response.
 
 Throws
 
-Throws an error if the peer session could not be authenticated or if message signing fails.
+Will throw an error if the transport fails to send the message.
 
 #### Method stopListeningForCertificatesReceived
 
@@ -858,7 +840,9 @@ Argument Details
 + **message**
   + The message payload to send.
 + **identityKey**
-  + The identity public key of the peer. If not provided, a handshake will be initiated.
+  + The identity public key of the peer. If not provided, uses lastInteractedWithPeer (if any).
++ **maxWaitTime**
+  + optional max wait time in ms
 
 Throws
 
@@ -869,8 +853,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ### Class: SessionManager
 
-Manages sessions for peers, allowing sessions to be added, retrieved, updated, and removed
-by relevant identifiers (sessionNonce and peerIdentityKey).
+Manages sessions for peers, allowing multiple concurrent sessions
+per identity key. Primary lookup is always by `sessionNonce`.
 
 ```ts
 export class SessionManager {
@@ -887,7 +871,11 @@ See also: [PeerSession](./auth.md#interface-peersession)
 
 #### Method addSession
 
-Adds a session to the manager, associating it with relevant identifiers for retrieval.
+Adds a session to the manager, associating it with its sessionNonce,
+and also with its peerIdentityKey (if any).
+
+This does NOT overwrite existing sessions for the same peerIdentityKey,
+allowing multiple concurrent sessions for the same peer.
 
 ```ts
 addSession(session: PeerSession): void 
@@ -901,7 +889,13 @@ Argument Details
 
 #### Method getSession
 
-Retrieves a session based on a given identifier.
+Retrieves a session based on a given identifier, which can be:
+ - A sessionNonce, or
+ - A peerIdentityKey.
+
+If it is a `sessionNonce`, returns that exact session.
+If it is a `peerIdentityKey`, returns the "best" (e.g. most recently updated,
+authenticated) session associated with that peer, if any.
 
 ```ts
 getSession(identifier: string): PeerSession | undefined 
@@ -919,7 +913,7 @@ Argument Details
 
 #### Method hasSession
 
-Checks if a session exists based on a given identifier.
+Checks if a session exists for a given identifier (either sessionNonce or identityKey).
 
 ```ts
 hasSession(identifier: string): boolean 
@@ -950,7 +944,8 @@ Argument Details
 
 #### Method updateSession
 
-Updates a session in the manager, ensuring that all identifiers are correctly associated.
+Updates a session in the manager (primarily by re-adding it),
+ensuring we record the latest data (e.g., isAuthenticated, lastUpdate, etc.).
 
 ```ts
 updateSession(session: PeerSession): void 
