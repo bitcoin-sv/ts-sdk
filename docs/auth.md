@@ -784,6 +784,10 @@ Argument Details
 + **certificates**
   + The list of certificates to include in the response.
 
+Throws
+
+Will throw an error if the transport fails to send the message.
+
 #### Method stopListeningForCertificatesReceived
 
 Cancels and unsubscribes a certificatesReceived listener.

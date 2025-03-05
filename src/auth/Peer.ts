@@ -691,6 +691,7 @@ export class Peer {
    *
    * @param {string} verifierIdentityKey - The identity key of the peer requesting the certificates.
    * @param {VerifiableCertificate[]} certificates - The list of certificates to include in the response.
+   * @throws Will throw an error if the transport fails to send the message.
    */
   async sendCertificateResponse(
     verifierIdentityKey: string,
