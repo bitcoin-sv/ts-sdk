@@ -20,6 +20,8 @@ const AUTH_VERSION = '0.1'
  * Represents a peer capable of performing mutual authentication.
  * Manages sessions, handles authentication handshakes, certificate requests and responses,
  * and sending and receiving general messages over a transport layer.
+ *
+ * This version supports multiple concurrent sessions per peer identityKey.
  */
 export class Peer {
   public sessionManager: SessionManager
@@ -27,26 +29,26 @@ export class Peer {
   private readonly wallet: WalletInterface
   certificatesToRequest: RequestedCertificateSet
   private readonly onGeneralMessageReceivedCallbacks: Map<
-    number,
-    (senderPublicKey: string, payload: number[]) => void
+  number,
+  (senderPublicKey: string, payload: number[]) => void
   > = new Map()
 
   private readonly onCertificatesReceivedCallbacks: Map<
-    number,
-    (senderPublicKey: string, certs: VerifiableCertificate[]) => void
+  number,
+  (senderPublicKey: string, certs: VerifiableCertificate[]) => void
   > = new Map()
 
   private readonly onCertificateRequestReceivedCallbacks: Map<
-    number,
-    (
-      senderPublicKey: string,
-      requestedCertificates: RequestedCertificateSet
-    ) => void
+  number,
+  (
+    senderPublicKey: string,
+    requestedCertificates: RequestedCertificateSet
+  ) => void
   > = new Map()
 
   private readonly onInitialResponseReceivedCallbacks: Map<
-    number,
-    { callback: (sessionNonce: string) => void, sessionNonce: string }
+  number,
+  { callback: (sessionNonce: string) => void, sessionNonce: string }
   > = new Map()
 
   // Single shared counter for all callback types
@@ -55,7 +57,7 @@ export class Peer {
   // Whether to auto-persist the session with the last-interacted-with peer
   private readonly autoPersistLastSession: boolean = true
 
-  // Last-interacted-with peer identity key
+  // Last-interacted-with peer identity key (if the user calls toPeer with no identityKey)
   private lastInteractedWithPeer: string | undefined
 
   /**
@@ -67,7 +69,7 @@ export class Peer {
    * @param {SessionManager} [sessionManager] - Optional SessionManager to be used for managing peer sessions.
    * @param {boolean} [autoPersistLastSession] - Whether to auto-persist the session with the last-interacted-with peer. Defaults to true.
    */
-  constructor(
+  constructor (
     wallet: WalletInterface,
     transport: Transport,
     certificatesToRequest?: RequestedCertificateSet,
@@ -81,7 +83,8 @@ export class Peer {
       types: {}
     }
     this.transport.onData(this.handleIncomingMessage.bind(this)).catch(console.error)
-    this.sessionManager = sessionManager != null ? sessionManager : new SessionManager()
+    this.sessionManager =
+      sessionManager != null ? sessionManager : new SessionManager()
     if (autoPersistLastSession === false) {
       this.autoPersistLastSession = false
     } else {
@@ -93,27 +96,25 @@ export class Peer {
    * Sends a general message to a peer, and initiates a handshake if necessary.
    *
    * @param {number[]} message - The message payload to send.
-   * @param {string} [identityKey] - The identity public key of the peer. If not provided, a handshake will be initiated.
+   * @param {string} [identityKey] - The identity public key of the peer. If not provided, uses lastInteractedWithPeer (if any).
+   * @param {number} [maxWaitTime] - optional max wait time in ms
    * @returns {Promise<void>}
    * @throws Will throw an error if the message fails to send.
    */
-  async toPeer(
+  async toPeer (
     message: number[],
     identityKey?: string,
     maxWaitTime?: number
   ): Promise<void> {
     if (
       this.autoPersistLastSession &&
-      this.lastInteractedWithPeer !== undefined &&
-      this.lastInteractedWithPeer !== null &&
+      typeof this.lastInteractedWithPeer === 'string' &&
       typeof identityKey !== 'string'
     ) {
       identityKey = this.lastInteractedWithPeer
     }
-    const peerSession = await this.getAuthenticatedSession(
-      identityKey,
-      maxWaitTime
-    )
+
+    const peerSession = await this.getAuthenticatedSession(identityKey, maxWaitTime)
 
     // Prepare the general message
     const requestNonce = Utils.toBase64(Random(32))
@@ -130,16 +131,21 @@ export class Peer {
       identityKey: (await this.wallet.getPublicKey({ identityKey: true }))
         .publicKey,
       nonce: requestNonce,
-      yourNonce: peerSession.peerNonce,
+      yourNonce: peerSession.peerNonce, // or sessionNonce for the other side
       payload: message,
       signature
     }
 
+    // Optional: update last-used timestamp
+    peerSession.lastUpdate = Date.now()
+    this.sessionManager.updateSession(peerSession)
+
     try {
       await this.transport.send(generalMessage)
-    } catch (error) {
+    } catch (error: any) {
       const e = new Error(
-        `Failed to send message to peer ${peerSession.peerIdentityKey ?? 'unknown'}: ${String(error.message)}`
+        `Failed to send message to peer ${peerSession.peerIdentityKey ?? 'unknown'
+        }: ${String(error.message)}`
       )
       e.stack = error.stack
       throw e
@@ -152,22 +158,30 @@ export class Peer {
    * an initial handshake or message has been exchanged.
    *
    * @param {RequestedCertificateSet} certificatesToRequest - Specifies the certifiers and types of certificates required from the peer.
-   * @param {string} [identityKey] - The identity public key of the peer. If not provided, the current session identity is used.
+   * @param {string} [identityKey] - The identity public key of the peer. If not provided, the current or last session identity is used.
    * @param {number} [maxWaitTime=10000] - Maximum time in milliseconds to wait for the peer session to be authenticated.
    * @returns {Promise<void>} Resolves if the certificate request message is successfully sent.
    * @throws Will throw an error if the peer session is not authenticated or if sending the request fails.
    */
-  async requestCertificates(
+  async requestCertificates (
     certificatesToRequest: RequestedCertificateSet,
     identityKey?: string,
     maxWaitTime = 10000
   ): Promise<void> {
+    if (
+      this.autoPersistLastSession &&
+      typeof this.lastInteractedWithPeer === 'string' &&
+      typeof identityKey !== 'string'
+    ) {
+      identityKey = this.lastInteractedWithPeer
+    }
+
     const peerSession = await this.getAuthenticatedSession(
       identityKey,
       maxWaitTime
     )
 
-    // Prepare the general message
+    // Prepare the message
     const requestNonce = Utils.toBase64(Random(32))
     const { signature } = await this.wallet.createSignature({
       data: Utils.toArray(JSON.stringify(certificatesToRequest), 'utf8'),
@@ -188,11 +202,16 @@ export class Peer {
       signature
     }
 
+    // Update last-used timestamp
+    peerSession.lastUpdate = Date.now()
+    this.sessionManager.updateSession(peerSession)
+
     try {
       await this.transport.send(certRequestMessage)
     } catch (error: any) {
       throw new Error(
-        `Failed to send certificate request message to peer ${peerSession.peerIdentityKey ?? 'unknown'}: ${String(error.message)}`
+        `Failed to send certificate request message to peer ${peerSession.peerIdentityKey ?? 'unknown'
+        }: ${String(error.message)}`
       )
     }
   }
@@ -201,14 +220,15 @@ export class Peer {
    * Retrieves an authenticated session for a given peer identity. If no session exists
    * or the session is not authenticated, initiates a handshake to create or authenticate the session.
    *
-   * @param {string} [identityKey] - The identity public key of the peer. If provided, it attempts
-   * to retrieve an existing session associated with this identity.
-   * @param {number} [maxWaitTime] - The maximum time in milliseconds to wait for the handshake
-   * to complete if a new session is required. Defaults to a pre-defined timeout if not specified.
+   * - If `identityKey` is provided, we look up any existing session for that identity key.
+   * - If none is found or not authenticated, we do a new handshake.
+   * - If `identityKey` is not provided, but we have a `lastInteractedWithPeer`, we try that key.
+   *
+   * @param {string} [identityKey] - The identity public key of the peer.
+   * @param {number} [maxWaitTime] - The maximum time in milliseconds to wait for the handshake.
    * @returns {Promise<PeerSession>} - A promise that resolves with an authenticated `PeerSession`.
-   * @throws {Error} - Throws an error if the transport is not connected or if the handshake fails.
    */
-  async getAuthenticatedSession(
+  async getAuthenticatedSession (
     identityKey?: string,
     maxWaitTime?: number
   ): Promise<PeerSession> {
@@ -216,16 +236,18 @@ export class Peer {
       throw new Error('Peer transport is not connected!')
     }
 
-    let peerSession = identityKey !== undefined && identityKey !== ''
-      ? this.sessionManager.getSession(identityKey)
-      : undefined
-    if (peerSession === undefined || !peerSession?.isAuthenticated) {
-      const sessionNonce = await this.initiateHandshake(
-        identityKey,
-        maxWaitTime
-      )
-      peerSession = this.sessionManager.getSession(identityKey !== undefined && identityKey !== '' ? identityKey : sessionNonce)
-      if (peerSession === undefined || !peerSession.isAuthenticated) {
+    let peerSession: PeerSession | undefined
+    if (typeof identityKey === 'string') {
+      peerSession = this.sessionManager.getSession(identityKey)
+    }
+
+    // If that session doesn't exist or isn't authenticated, initiate handshake
+    if ((peerSession == null) || !peerSession.isAuthenticated) {
+      // This will create a brand-new session
+      const sessionNonce = await this.initiateHandshake(identityKey, maxWaitTime)
+      // Now retrieve it by the sessionNonce
+      peerSession = this.sessionManager.getSession(sessionNonce)
+      if ((peerSession == null) || !peerSession.isAuthenticated) {
         throw new Error('Unable to establish mutual authentication with peer!')
       }
     }
@@ -239,7 +261,7 @@ export class Peer {
    * @param {(senderPublicKey: string, payload: number[]) => void} callback - The function to call when a general message is received.
    * @returns {number} The ID of the callback listener.
    */
-  listenForGeneralMessages(
+  listenForGeneralMessages (
     callback: (senderPublicKey: string, payload: number[]) => void
   ): number {
     const callbackID = this.callbackIdCounter++
@@ -252,17 +274,17 @@ export class Peer {
    *
    * @param {number} callbackID - The ID of the callback to remove.
    */
-  stopListeningForGeneralMessages(callbackID: number): void {
+  stopListeningForGeneralMessages (callbackID: number): void {
     this.onGeneralMessageReceivedCallbacks.delete(callbackID)
   }
 
   /**
    * Registers a callback to listen for certificates received from peers.
    *
-   * @param {(certs: VerifiableCertificate[]) => void} callback - The function to call when certificates are received.
+   * @param {(senderPublicKey: string, certs: VerifiableCertificate[]) => void} callback - The function to call when certificates are received.
    * @returns {number} The ID of the callback listener.
    */
-  listenForCertificatesReceived(
+  listenForCertificatesReceived (
     callback: (senderPublicKey: string, certs: VerifiableCertificate[]) => void
   ): number {
     const callbackID = this.callbackIdCounter++
@@ -275,7 +297,7 @@ export class Peer {
    *
    * @param {number} callbackID - The ID of the certificates received callback to cancel.
    */
-  stopListeningForCertificatesReceived(callbackID: number): void {
+  stopListeningForCertificatesReceived (callbackID: number): void {
     this.onCertificatesReceivedCallbacks.delete(callbackID)
   }
 
@@ -285,7 +307,7 @@ export class Peer {
    * @param {(requestedCertificates: RequestedCertificateSet) => void} callback - The function to call when a certificate request is received
    * @returns {number} The ID of the callback listener.
    */
-  listenForCertificatesRequested(
+  listenForCertificatesRequested (
     callback: (
       senderPublicKey: string,
       requestedCertificates: RequestedCertificateSet
@@ -301,7 +323,7 @@ export class Peer {
    *
    * @param {number} callbackID - The ID of the requested certificates callback to cancel.
    */
-  stopListeningForCertificatesRequested(callbackID: number): void {
+  stopListeningForCertificatesRequested (callbackID: number): void {
     this.onCertificateRequestReceivedCallbacks.delete(callbackID)
   }
 
@@ -310,17 +332,22 @@ export class Peer {
    *
    * @private
    * @param {string} [identityKey] - The identity public key of the peer.
+   * @param {number} [maxWaitTime=10000] - how long to wait for handshake
    * @returns {Promise<string>} A promise that resolves to the session nonce.
    */
-  private async initiateHandshake(
+  private async initiateHandshake (
     identityKey?: string,
     maxWaitTime = 10000
   ): Promise<string> {
     const sessionNonce = await createNonce(this.wallet) // Initial request nonce
+
+    // Create the preliminary session (not yet authenticated)
+    const now = Date.now()
     this.sessionManager.addSession({
       isAuthenticated: false,
       sessionNonce,
-      peerIdentityKey: identityKey
+      peerIdentityKey: identityKey,
+      lastUpdate: now
     })
 
     const initialRequest: AuthMessage = {
@@ -342,19 +369,16 @@ export class Peer {
    * @param {string} sessionNonce - The session nonce created in the initial request.
    * @returns {Promise<string>} A promise that resolves with the session nonce when the initial response is received.
    */
-  private async waitForInitialResponse(
+  private async waitForInitialResponse (
     sessionNonce: string,
     maxWaitTime = 10000
   ): Promise<string> {
     return await new Promise((resolve, reject) => {
-      const callbackID = this.listenForInitialResponse(
-        sessionNonce,
-        sessionNonce => {
-          clearTimeout(timeoutHandle)
-          this.stopListeningForInitialResponses(callbackID)
-          resolve(sessionNonce)
-        }
-      )
+      const callbackID = this.listenForInitialResponse(sessionNonce, nonce => {
+        clearTimeout(timeoutHandle)
+        this.stopListeningForInitialResponses(callbackID)
+        resolve(nonce)
+      })
 
       const timeoutHandle = setTimeout(() => {
         this.stopListeningForInitialResponses(callbackID)
@@ -371,7 +395,7 @@ export class Peer {
    * @param {(sessionNonce: string) => void} callback - The callback to invoke when the initial response is received.
    * @returns {number} The ID of the callback listener.
    */
-  private listenForInitialResponse(
+  private listenForInitialResponse (
     sessionNonce: string,
     callback: (sessionNonce: string) => void
   ): number {
@@ -389,7 +413,7 @@ export class Peer {
    * @private
    * @param {number} callbackID - The ID of the callback to remove.
    */
-  private stopListeningForInitialResponses(callbackID: number): void {
+  private stopListeningForInitialResponses (callbackID: number): void {
     this.onInitialResponseReceivedCallbacks.delete(callbackID)
   }
 
@@ -399,10 +423,10 @@ export class Peer {
    * @param {AuthMessage} message - The incoming message to process.
    * @returns {Promise<void>}
    */
-  private async handleIncomingMessage(message: AuthMessage): Promise<void> {
-    if (message.version === undefined || message.version === '' || message.version !== AUTH_VERSION) {
+  private async handleIncomingMessage (message: AuthMessage): Promise<void> {
+    if (typeof message.version !== 'string' || message.version !== AUTH_VERSION) {
       console.error(
-        `Invalid message auth version! Received: ${message.version}, expected: ${AUTH_VERSION}`
+        `Invalid or unsupported message auth version! Received: ${message.version}, expected: ${AUTH_VERSION}`
       )
       return
     }
@@ -425,7 +449,9 @@ export class Peer {
         break
       default:
         console.error(
-          `Unknown message type of ${String(message.messageType)} from ${String(message.identityKey)}`
+          `Unknown message type of ${String(message.messageType)} from ${String(
+            message.identityKey
+          )}`
         )
     }
   }
@@ -434,32 +460,43 @@ export class Peer {
    * Processes an initial request message from a peer.
    *
    * @param {AuthMessage} message - The incoming initial request message.
-   * @returns {Promise<void>}
    */
-  async processInitialRequest(message: AuthMessage): Promise<void> {
-    if (message.identityKey === undefined || message.identityKey === '' || message.initialNonce === undefined || message.initialNonce === '') {
-      throw new Error('Missing required fields in initialResponse message.')
+  private async processInitialRequest (message: AuthMessage): Promise<void> {
+    if (
+      typeof message.identityKey !== 'string' ||
+      typeof message.initialNonce !== 'string' ||
+      message.initialNonce === ''
+    ) {
+      throw new Error('Missing required fields in initialRequest message.')
     }
 
-    // Create an initial session nonce
+    // Create a new sessionNonce for our side
     const sessionNonce = await createNonce(this.wallet)
+    const now = Date.now()
+
+    // We'll treat this as fully authenticated from *our* perspective (the responding side).
     this.sessionManager.addSession({
       isAuthenticated: true,
       sessionNonce,
       peerNonce: message.initialNonce,
-      peerIdentityKey: message.identityKey
+      peerIdentityKey: message.identityKey,
+      lastUpdate: now
     })
 
-    // Handle initial certificate requests
-    let certificatesToInclude
-    if (message.requestedCertificates !== undefined && Array.isArray(message.requestedCertificates?.certifiers) && message.requestedCertificates?.certifiers?.length > 0) {
+    // Possibly handle the peer's requested certs
+    let certificatesToInclude: VerifiableCertificate[] | undefined
+    if (
+      (message.requestedCertificates != null) &&
+      Array.isArray(message.requestedCertificates.certifiers) &&
+      message.requestedCertificates.certifiers.length > 0
+    ) {
       if (this.onCertificateRequestReceivedCallbacks.size > 0) {
-        // The application wants to handle certificate requests
-        this.onCertificateRequestReceivedCallbacks.forEach(callback => {
-          callback(message.identityKey, message.requestedCertificates as RequestedCertificateSet)
+        // Let the application handle it
+        this.onCertificateRequestReceivedCallbacks.forEach(cb => {
+          cb(message.identityKey, message.requestedCertificates as RequestedCertificateSet)
         })
       } else {
-        // Attempt to find exact matching certificates to return automatically to save round trips
+        // Attempt to find automatically
         certificatesToInclude = await getVerifiableCertificates(
           this.wallet,
           message.requestedCertificates,
@@ -468,7 +505,7 @@ export class Peer {
       }
     }
 
-    // Create the signature for the message
+    // Create signature
     const { signature } = await this.wallet.createSignature({
       data: Utils.toArray(message.initialNonce + sessionNonce, 'base64'),
       protocolID: [2, 'auth message signature'],
@@ -482,17 +519,18 @@ export class Peer {
       identityKey: (await this.wallet.getPublicKey({ identityKey: true }))
         .publicKey,
       initialNonce: sessionNonce,
-      yourNonce: message.initialNonce,
+      yourNonce: message.initialNonce, // mirrors the caller's nonce
       certificates: certificatesToInclude,
       requestedCertificates: this.certificatesToRequest,
       signature
     }
 
-    // For security, only set the last-interacted-with peer here if this is the first peer we've interacted with.
-    if (this.lastInteractedWithPeer === undefined || this.lastInteractedWithPeer === null) {
+    // If we haven't interacted with a peer yet, store this identity as "lastInteracted"
+    if (this.lastInteractedWithPeer === undefined) {
       this.lastInteractedWithPeer = message.identityKey
     }
 
+    // Send the response
     await this.transport.send(initialResponseMessage)
   }
 
@@ -501,10 +539,9 @@ export class Peer {
    *
    * @private
    * @param {AuthMessage} message - The incoming initial response message.
-   * @returns {Promise<void>}
-   * @throws Will throw an error if nonce verification or signature verification fails.
+   * @throws Will throw an error if nonce or signature verification fails.
    */
-  private async processInitialResponse(message: AuthMessage): Promise<void> {
+  private async processInitialResponse (message: AuthMessage): Promise<void> {
     const validNonce = await verifyNonce(message.yourNonce as string, this.wallet)
     if (!validNonce) {
       throw new Error(
@@ -512,17 +549,19 @@ export class Peer {
       )
     }
 
+    // This is the session we previously created by calling initiateHandshake
     const peerSession = this.sessionManager.getSession(message.yourNonce as string)
-    if (peerSession === null || peerSession === undefined) {
+    if (peerSession == null) {
       throw new Error(`Peer session not found for peer: ${message.identityKey}`)
     }
 
     // Validate message signature
+    const dataToVerify = Utils.toArray(
+      (peerSession.sessionNonce ?? '') + (message.initialNonce ?? ''),
+      'base64'
+    )
     const { valid } = await this.wallet.verifySignature({
-      data: Utils.toArray(
-        (peerSession.sessionNonce ?? '') + (message.initialNonce ?? ''),
-        'base64'
-      ),
+      data: dataToVerify,
       signature: message.signature as number[],
       protocolID: [2, 'auth message signature'],
       keyID: `${peerSession.sessionNonce ?? ''} ${message.initialNonce ?? ''}`,
@@ -534,51 +573,49 @@ export class Peer {
       )
     }
 
-    // After signature and nonce verification is complete, the peer is considered authenticated
-    // Save the peer's identity key and initial nonce
-    // This allows future requests to be linked to the same session
+    // Now mark the session as authenticated
     peerSession.peerNonce = message.initialNonce
     peerSession.peerIdentityKey = message.identityKey
     peerSession.isAuthenticated = true
-    // Run update to ensure lookup is available by both peerIdentityKey and sessionNonce
+    peerSession.lastUpdate = Date.now()
     this.sessionManager.updateSession(peerSession)
 
-    // Process certificates received
+    // If the handshake had requested certificates, validate them
     if (
-      (this.certificatesToRequest?.certifiers?.length ?? 0) > 0 &&
-      (message.certificates !== null && message.certificates !== undefined && message.certificates.length > 0)
+      this.certificatesToRequest?.certifiers?.length > 0 &&
+      message.certificates?.length as number > 0
     ) {
-      await validateCertificates(
-        this.wallet,
-        message,
-        this.certificatesToRequest
-      )
+      await validateCertificates(this.wallet, message, this.certificatesToRequest)
 
-      const messageCertificates = message.certificates
-      if (message.certificates !== undefined) {
-        this.onCertificatesReceivedCallbacks.forEach(callback =>
-          callback(message.identityKey, messageCertificates)
-        )
-      }
+      // Notify listeners
+      this.onCertificatesReceivedCallbacks.forEach(cb =>
+        cb(message.identityKey, message.certificates as VerifiableCertificate[])
+      )
     }
 
+    // Update lastInteractedWithPeer
     this.lastInteractedWithPeer = message.identityKey
 
+    // Let the handshake wait-latch know we got our response
     this.onInitialResponseReceivedCallbacks.forEach(entry => {
-      if (entry?.sessionNonce === peerSession.sessionNonce) {
+      if (entry.sessionNonce === peerSession.sessionNonce) {
         entry.callback(peerSession.sessionNonce)
       }
     })
 
-    // Check if the peer requested certificates from us
-    if (message.requestedCertificates !== undefined && Array.isArray(message.requestedCertificates?.certifiers) && message.requestedCertificates?.certifiers?.length > 0) {
+    // The peer might also request certificates from us
+    if (
+      (message.requestedCertificates != null) &&
+      Array.isArray(message.requestedCertificates.certifiers) &&
+      message.requestedCertificates.certifiers.length > 0
+    ) {
       if (this.onCertificateRequestReceivedCallbacks.size > 0) {
-        // Application wants to handle certificate requests
-        this.onCertificateRequestReceivedCallbacks.forEach(callback => {
-          callback(message.identityKey, message.requestedCertificates as RequestedCertificateSet)
+        // Let the application handle it
+        this.onCertificateRequestReceivedCallbacks.forEach(cb => {
+          cb(message.identityKey, message.requestedCertificates as RequestedCertificateSet)
         })
       } else {
-        // Attempt to find exact matching certificates to respond automatically and save round trips
+        // Attempt auto
         const verifiableCertificates = await getVerifiableCertificates(
           this.wallet,
           message.requestedCertificates,
@@ -594,13 +631,12 @@ export class Peer {
 
   /**
    * Processes an incoming certificate request message from a peer.
-   * Verifies the nonce and signature to ensure the authenticity of the request,
-   * then initiates a response with any requested certificates that are available.
+   * Verifies nonce/signature and then possibly sends a certificateResponse.
    *
    * @param {AuthMessage} message - The certificate request message received from the peer.
-   * @throws {Error} Throws an error if nonce verification fails, or the message signature is invalid.
+   * @throws {Error} if nonce or signature is invalid.
    */
-  private async processCertificateRequest(message: AuthMessage): Promise<void> {
+  private async processCertificateRequest (message: AuthMessage): Promise<void> {
     const validNonce = await verifyNonce(message.yourNonce as string, this.wallet)
     if (!validNonce) {
       throw new Error(
@@ -608,41 +644,45 @@ export class Peer {
       )
     }
     const peerSession = this.sessionManager.getSession(message.yourNonce as string)
+    if (peerSession == null) {
+      throw new Error(`Session not found for nonce: ${message.yourNonce as string}`)
+    }
 
     const { valid } = await this.wallet.verifySignature({
-      data: Utils.toArray(
-        JSON.stringify(message.requestedCertificates),
-        'utf8'
-      ),
+      data: Utils.toArray(JSON.stringify(message.requestedCertificates), 'utf8'),
       signature: message.signature as number[],
       protocolID: [2, 'auth message signature'],
-      keyID: `${message.nonce ?? ''} ${peerSession?.sessionNonce ?? ''}`,
-      counterparty: peerSession?.peerIdentityKey
+      keyID: `${message.nonce ?? ''} ${peerSession.sessionNonce ?? ''}`,
+      counterparty: peerSession.peerIdentityKey
     })
-
     if (!valid) {
       throw new Error(
-        `Invalid signature in certificate request message from ${peerSession?.peerIdentityKey ?? 'unknown'}`
+        `Invalid signature in certificate request message from ${peerSession.peerIdentityKey as string}`
       )
     }
 
-    if (message.requestedCertificates !== undefined && Array.isArray(message.requestedCertificates?.certifiers) && message.requestedCertificates?.certifiers?.length > 0) {
+    // Update usage
+    peerSession.lastUpdate = Date.now()
+    this.sessionManager.updateSession(peerSession)
+
+    if (
+      (message.requestedCertificates != null) &&
+      Array.isArray(message.requestedCertificates.certifiers) &&
+      message.requestedCertificates.certifiers.length > 0
+    ) {
       if (this.onCertificateRequestReceivedCallbacks.size > 0) {
-        // Application wants to handle certificate requests
-        this.onCertificateRequestReceivedCallbacks.forEach(callback => {
-          callback(message.identityKey, message.requestedCertificates as RequestedCertificateSet)
+        // Let the application handle it
+        this.onCertificateRequestReceivedCallbacks.forEach(cb => {
+          cb(message.identityKey, message.requestedCertificates as RequestedCertificateSet)
         })
       } else {
-        // Attempt to find exact matching certificates to respond automatically and save round trips
+        // Attempt auto
         const verifiableCertificates = await getVerifiableCertificates(
           this.wallet,
           message.requestedCertificates,
           message.identityKey
         )
-        await this.sendCertificateResponse(
-          message.identityKey,
-          verifiableCertificates
-        )
+        await this.sendCertificateResponse(message.identityKey, verifiableCertificates)
       }
     }
   }
@@ -651,12 +691,9 @@ export class Peer {
    * Sends a certificate response message containing the specified certificates to a peer.
    *
    * @param {string} verifierIdentityKey - The identity key of the peer requesting the certificates.
-   * @param {VerifiableCertificate[]} certificates - The list of certificates to be included in the response.
-   * @returns {Promise<void>} - A promise that resolves once the certificate response has been sent successfully.
-   *
-   * @throws {Error} Throws an error if the peer session could not be authenticated or if message signing fails.
+   * @param {VerifiableCertificate[]} certificates - The list of certificates to include in the response.
    */
-  async sendCertificateResponse(
+  async sendCertificateResponse (
     verifierIdentityKey: string,
     certificates: VerifiableCertificate[]
   ): Promise<void> {
@@ -681,12 +718,17 @@ export class Peer {
       signature
     }
 
+    // Update usage
+    peerSession.lastUpdate = Date.now()
+    this.sessionManager.updateSession(peerSession)
+
     try {
       await this.transport.send(certificateResponse)
     } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : String(error)
       throw new Error(
-        `Failed to send certificate response message to peer ${peerSession.peerIdentityKey ?? 'unknown'}: ${errorMessage}`
+        `Failed to send certificate response message to peer ${peerSession.peerIdentityKey ?? 'unknown'
+        }: ${errorMessage}`
       )
     }
   }
@@ -696,43 +738,49 @@ export class Peer {
    *
    * @private
    * @param {AuthMessage} message - The incoming certificate response message.
-   * @returns {Promise<void>}
    * @throws Will throw an error if nonce verification or signature verification fails.
    */
-  private async processCertificateResponse(message: AuthMessage): Promise<void> {
+  private async processCertificateResponse (message: AuthMessage): Promise<void> {
     const validNonce = await verifyNonce(message.yourNonce as string, this.wallet)
     if (!validNonce) {
       throw new Error(
-        `Unable to verify nonce for certificate response from: ${message.identityKey}!`
+        `Unable to verify nonce for certificate response from: ${message.identityKey}`
       )
     }
+
     const peerSession = this.sessionManager.getSession(message.yourNonce as string)
+    if (peerSession == null) {
+      throw new Error(`Session not found for nonce: ${message.yourNonce as string}`)
+    }
 
     // Validate message signature
     const { valid } = await this.wallet.verifySignature({
       data: Utils.toArray(JSON.stringify(message.certificates), 'utf8'),
       signature: message.signature as number[],
       protocolID: [2, 'auth message signature'],
-      keyID: `${message.nonce ?? ''} ${peerSession?.sessionNonce ?? ''}`,
+      keyID: `${message.nonce ?? ''} ${peerSession.sessionNonce ?? ''}`,
       counterparty: message.identityKey
     })
-
     if (!valid) {
       throw new Error(
         `Unable to verify certificate response signature for peer: ${message.identityKey}`
       )
     }
 
-    // Process and verify any certificates received
+    // We also handle optional validation if there's a requestedCertificates field
     await validateCertificates(
       this.wallet,
       message,
       message.requestedCertificates
     )
 
-    this.onCertificatesReceivedCallbacks.forEach(callback => {
-      callback(message.identityKey, message.certificates as VerifiableCertificate[])
+    // Notify any listeners
+    this.onCertificatesReceivedCallbacks.forEach(cb => {
+      cb(message.identityKey, message.certificates ?? [])
     })
+
+    peerSession.lastUpdate = Date.now()
+    this.sessionManager.updateSession(peerSession)
   }
 
   /**
@@ -740,36 +788,44 @@ export class Peer {
    *
    * @private
    * @param {AuthMessage} message - The incoming general message.
-   * @returns {Promise<void>}
-   * @throws Will throw an error if nonce verification or signature verification fails.
+   * @throws Will throw an error if nonce or signature verification fails.
    */
-  private async processGeneralMessage(message: AuthMessage): Promise<void> {
+  private async processGeneralMessage (message: AuthMessage): Promise<void> {
     const validNonce = await verifyNonce(message.yourNonce as string, this.wallet)
     if (!validNonce) {
       throw new Error(
         `Unable to verify nonce for general message from: ${message.identityKey}`
       )
     }
+
     const peerSession = this.sessionManager.getSession(message.yourNonce as string)
+    if (peerSession == null) {
+      throw new Error(`Session not found for nonce: ${message.yourNonce as string}`)
+    }
 
     const { valid } = await this.wallet.verifySignature({
       data: message.payload,
       signature: message.signature as number[],
       protocolID: [2, 'auth message signature'],
-      keyID: `${message.nonce ?? ''} ${peerSession?.sessionNonce ?? ''}`,
-      counterparty: peerSession?.peerIdentityKey
+      keyID: `${message.nonce ?? ''} ${peerSession.sessionNonce ?? ''}`,
+      counterparty: peerSession.peerIdentityKey
     })
-
     if (!valid) {
       throw new Error(
-        `Invalid signature in generalMessage from ${peerSession?.peerIdentityKey ?? 'unknown'}`
+        `Invalid signature in generalMessage from ${peerSession.peerIdentityKey as string}`
       )
     }
 
+    // Mark last usage
+    peerSession.lastUpdate = Date.now()
+    this.sessionManager.updateSession(peerSession)
+
+    // Update lastInteractedWithPeer
     this.lastInteractedWithPeer = message.identityKey
 
-    this.onGeneralMessageReceivedCallbacks.forEach(callback => {
-      callback(message.identityKey, message.payload as number[])
+    // Dispatch callbacks
+    this.onGeneralMessageReceivedCallbacks.forEach(cb => {
+      cb(message.identityKey, message.payload ?? [])
     })
   }
 }

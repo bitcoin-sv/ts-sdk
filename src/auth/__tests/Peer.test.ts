@@ -294,9 +294,9 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     await aliceReceivedGeneralMessageOnOtherDevice
     transportA1.connect(transportB)
     await aliceFirstDevice.toPeer(Utils.toArray('Back on my first device now, Bob! Can you still hear me?'))
-    await new Promise(r => setTimeout(r, 5000))
-    expect(alice1MessageHandler.mock.calls).toEqual([])
-  })
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    expect(alice1MessageHandler.mock.calls.length).toEqual(2)
+  }, 15000)
 
   it('Bob requests certificates from Alice, Alice does not request any from Bob', async () => {
     const alicePubKey = (await walletA.getPublicKey({ identityKey: true }))
