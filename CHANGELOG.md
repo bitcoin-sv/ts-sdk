@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.3.30 - 2025-02-28](#1330---2025-03-5)
+- [1.3.29 - 2025-03-05](#1329---2025-03-5)
+- [1.3.28 - 2025-02-28](#1328---2025-02-28)
+- [1.3.27 - 2025-02-28](#1327---2025-02-28)
+- [1.3.26 - 2025-02-28](#1326---2025-02-28)
+- [1.3.25 - 2025-02-27](#1325---2025-02-27)
 - [1.3.24 - 2025-02-22](#1324---2025-02-22)
 - [1.3.23 - 2025-02-21](#1323---2025-02-21)
 - [1.3.22 - 2025-02-19](#1322---2025-02-19)
@@ -87,6 +93,57 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.3.30] - 2025-03-5
+
+### Fixed
+
+- Re-handshake in AuthFetch if a server forgets about a session that the client maintained
+
+---
+
+## [1.3.29] - 2025-03-5
+
+### Added
+
+- Concurrent session management for the same peer across devices
+
+---
+
+## [1.3.28] - 2025-02-28
+
+### Fixed
+
+- Persisted payee derivation information in AuthFetch
+- Use the first output index for AuthFetch payments
+
+---
+
+## [1.3.27] - 2025-02-28
+
+### Fixed
+
+- Added defaults for undefined AuthFetch request body (specifically for content-type of application/json).
+- This prevents signature verification errors due to express defaults for requests with undefined body.
+
+---
+
+## [1.3.26] - 2025-02-28
+
+### Fixed
+
+- Fixed a bug with AuthFetch where when responding to error 402, the derivationSuffix was not sent to the server. 
+- Updated used createNonce for the derivationSuffix creation to link it to the sender.
+
+---
+
+## [1.3.25] - 2025-02-27
+
+### Fixed
+
+- Previously, the function split each character’s 16-bit code unit into two bytes (if the high byte was non-zero), which only worked for ASCII and failed on non-ASCII/multi-byte characters. Now emojis can be encoded correctly!
 
 ---
 

@@ -10,7 +10,8 @@ describe('SessionManager', () => {
     validSession = {
       isAuthenticated: false,
       sessionNonce: 'testSessionNonce',
-      peerIdentityKey: 'testPeerIdentityKey'
+      peerIdentityKey: 'testPeerIdentityKey',
+      lastUpdate: 1
     }
   })
 
@@ -39,7 +40,7 @@ describe('SessionManager', () => {
       }
 
       expect(() => sessionManager.addSession(invalidSession)).toThrow(
-        'Invalid session: at least one of sessionNonce or peerIdentityKey is required.'
+        'Invalid session: sessionNonce is required to add a session.'
       )
     })
 

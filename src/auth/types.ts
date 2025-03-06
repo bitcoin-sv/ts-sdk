@@ -38,4 +38,5 @@ export interface PeerSession {
   sessionNonce?: string
   peerNonce?: string
   peerIdentityKey?: string
+  lastUpdate: number
 }
