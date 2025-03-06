@@ -400,7 +400,7 @@ export class Beef {
       roots: {}
     }
 
-    this.sortTxs()
+    const sr = this.sortTxs()
 
     // valid txids: only txids if allowed, bump txids, then txids with input's in txids
     const txids: Record<string, boolean> = {}
@@ -434,6 +434,15 @@ export class Beef {
             return r
           }
         }
+      }
+    }
+
+    // All txs with a bumpIndex have matching txid leaf at level zero of BUMP.
+    for (const t of this.txs) {
+      if (t.bumpIndex !== undefined) {
+        const leaf = this.bumps[t.bumpIndex].path[0].find(l => l.hash === t.txid)
+        if (!leaf)
+          return r
       }
     }
 
