@@ -463,14 +463,14 @@ export class MasterCertificate extends Certificate {
     declare signature?: HexString;
     masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>;
     constructor(type: Base64String, serialNumber: Base64String, subject: PubKeyHex, certifier: PubKeyHex, revocationOutpoint: OutpointString, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, signature?: HexString) 
-    static async createCertificateFields(creatorWallet: ProtoWallet, certifierOrSubject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>): Promise<CreateCertificateFieldsResult> 
-    static async createKeyringForVerifier(subjectWallet: ProtoWallet, certifier: WalletCounterparty, verifier: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldsToReveal: string[], masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, serialNumber: Base64String): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+    static async createCertificateFields(creatorWallet: ProtoWallet, certifierOrSubject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, privileged?: boolean, privilegedReason?: string): Promise<CreateCertificateFieldsResult> 
+    static async createKeyringForVerifier(subjectWallet: ProtoWallet, certifier: WalletCounterparty, verifier: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldsToReveal: string[], masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, serialNumber: Base64String, privileged?: boolean, privilegedReason?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
     static async issueCertificateForSubject(certifierWallet: ProtoWallet, subject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, certificateType: string, getRevocationOutpoint = async (_serial: string): Promise<string> => {
         void _serial;
         return "Certificate revocation not tracked.";
     }, serialNumber?: string): Promise<MasterCertificate> 
-    static async decryptFields(subjectOrCertifierWallet: ProtoWallet, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, counterparty: WalletCounterparty): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
-    static async decryptField(subjectOrCertifierWallet: ProtoWallet, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldName: Base64String, fieldValue: Base64String, counterparty: WalletCounterparty): Promise<{
+    static async decryptFields(subjectOrCertifierWallet: ProtoWallet, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, counterparty: WalletCounterparty, privileged?: boolean, privilegedReason?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+    static async decryptField(subjectOrCertifierWallet: ProtoWallet, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldName: Base64String, fieldValue: Base64String, counterparty: WalletCounterparty, privileged?: boolean, privilegedReason?: string): Promise<{
         fieldRevelationKey: number[];
         decryptedFieldValue: string;
     }> 
@@ -486,7 +486,7 @@ This method returns a master keyring tied to a specific certifier or subject who
 and sign off on the fields, along with the encrypted certificate fields.
 
 ```ts
-static async createCertificateFields(creatorWallet: ProtoWallet, certifierOrSubject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>): Promise<CreateCertificateFieldsResult> 
+static async createCertificateFields(creatorWallet: ProtoWallet, certifierOrSubject: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, string>, privileged?: boolean, privilegedReason?: string): Promise<CreateCertificateFieldsResult> 
 ```
 See also: [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [ProtoWallet](./wallet.md#class-protowallet), [WalletCounterparty](./wallet.md#type-walletcounterparty)
 
@@ -506,6 +506,10 @@ Argument Details
   + The certifier or subject who will validate the certificate fields.
 + **fields**
   + A record of certificate field names (under 50 bytes) mapped to their values.
++ **privileged**
+  + Whether this is a privileged request.
++ **privilegedReason**
+  + Reason provided for privileged access, required if this is a privileged operation.   *
 
 #### Method createKeyringForVerifier
 
@@ -515,7 +519,7 @@ for the verifier's identity key. The result is a keyring containing the keys nec
 for the verifier to access the designated fields.
 
 ```ts
-static async createKeyringForVerifier(subjectWallet: ProtoWallet, certifier: WalletCounterparty, verifier: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldsToReveal: string[], masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, serialNumber: Base64String): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+static async createKeyringForVerifier(subjectWallet: ProtoWallet, certifier: WalletCounterparty, verifier: WalletCounterparty, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, fieldsToReveal: string[], masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, serialNumber: Base64String, privileged?: boolean, privilegedReason?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 ```
 See also: [Base64String](./wallet.md#type-base64string), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [ProtoWallet](./wallet.md#class-protowallet), [WalletCounterparty](./wallet.md#type-walletcounterparty)
 
@@ -533,6 +537,10 @@ Argument Details
   + An array of field names to be revealed to the verifier. Must be a subset of the certificate's fields.
 + **originator**
   + Optional originator identifier, used if additional context is needed for decryption and encryption operations.
++ **privileged**
+  + Whether this is a privileged request.
++ **privilegedReason**
+  + Reason provided for privileged access, required if this is a privileged operation.   *
 
 Throws
 
@@ -552,7 +560,7 @@ The counterparty used for decryption depends on how the certificate fields were 
 - Otherwise, the counterparty should always be the other party involved in the certificate issuance process (the subject or certifier).
 
 ```ts
-static async decryptFields(subjectOrCertifierWallet: ProtoWallet, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, counterparty: WalletCounterparty): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+static async decryptFields(subjectOrCertifierWallet: ProtoWallet, masterKeyring: Record<CertificateFieldNameUnder50Bytes, Base64String>, fields: Record<CertificateFieldNameUnder50Bytes, Base64String>, counterparty: WalletCounterparty, privileged?: boolean, privilegedReason?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 ```
 See also: [Base64String](./wallet.md#type-base64string), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [ProtoWallet](./wallet.md#class-protowallet), [WalletCounterparty](./wallet.md#type-walletcounterparty)
 
@@ -570,6 +578,10 @@ Argument Details
   + A record of encrypted field names and their values.
 + **counterparty**
   + The counterparty responsible for creating or signing the certificate. For self-signed certificates, use 'self'.
++ **privileged**
+  + Whether this is a privileged request.
++ **privilegedReason**
+  + Reason provided for privileged access, required if this is a privileged operation.
 
 Throws
 
@@ -1094,7 +1106,7 @@ export class VerifiableCertificate extends Certificate {
     keyring: Record<CertificateFieldNameUnder50Bytes, string>;
     decryptedFields?: Record<CertificateFieldNameUnder50Bytes, Base64String>;
     constructor(type: Base64String, serialNumber: Base64String, subject: PubKeyHex, certifier: PubKeyHex, revocationOutpoint: OutpointString, fields: Record<CertificateFieldNameUnder50Bytes, string>, keyring: Record<CertificateFieldNameUnder50Bytes, string>, signature?: HexString, decryptedFields?: Record<CertificateFieldNameUnder50Bytes, Base64String>) 
-    async decryptFields(verifierWallet: ProtoWallet): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+    async decryptFields(verifierWallet: ProtoWallet, privileged?: boolean, privilegedReason?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 }
 ```
 
@@ -1105,7 +1117,7 @@ See also: [Base64String](./wallet.md#type-base64string), [Certificate](./auth.md
 Decrypts selectively revealed certificate fields using the provided keyring and verifier wallet
 
 ```ts
-async decryptFields(verifierWallet: ProtoWallet): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
+async decryptFields(verifierWallet: ProtoWallet, privileged?: boolean, privilegedReason?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 ```
 See also: [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [ProtoWallet](./wallet.md#class-protowallet)
 
@@ -1117,6 +1129,10 @@ Argument Details
 
 + **verifierWallet**
   + The wallet instance of the certificate's verifier, used to decrypt field keys.
++ **privileged**
+  + Whether this is a privileged request.
++ **privilegedReason**
+  + Reason provided for privileged access, required if this is a privileged operation.
 
 Throws
 

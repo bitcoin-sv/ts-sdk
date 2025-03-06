@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
-- [1.3.32 - 2025-03-06](#1331---2025-03-6)
+- [1.3.33 - 2025-03-06](#1333---2025-03-6)
+- [1.3.32 - 2025-03-06](#1332---2025-03-6)
 - [1.3.30 - 2025-03-05](#1330---2025-03-5)
 - [1.3.29 - 2025-03-05](#1329---2025-03-5)
 - [1.3.28 - 2025-02-28](#1328---2025-02-28)
@@ -94,6 +95,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.3.33] - 2025-03-6
+
+### Fixed
+
+- Add support for privileged certificates in MasterCertificate and VerifiableCertificate classes.
 
 ---
 
