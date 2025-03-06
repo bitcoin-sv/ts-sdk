@@ -401,6 +401,11 @@ export class Beef {
     }
 
     const sr = this.sortTxs()
+    if (sr.missingInputs.length > 0 ||
+      sr.notValid.length > 0 ||
+      (sr.txidOnly.length > 0 && allowTxidOnly !== true) ||
+      sr.withMissingInputs.length > 0
+    ) { return r }
 
     // valid txids: only txids if allowed, bump txids, then txids with input's in txids
     const txids: Record<string, boolean> = {}
@@ -441,8 +446,7 @@ export class Beef {
     for (const t of this.txs) {
       if (t.bumpIndex !== undefined) {
         const leaf = this.bumps[t.bumpIndex].path[0].find(l => l.hash === t.txid)
-        if (!leaf)
-          return r
+        if (leaf == null) { return r }
       }
     }
 
