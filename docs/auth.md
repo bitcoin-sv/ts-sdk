@@ -334,6 +334,12 @@ Argument Details
 
 Helper function which retrieves the protocol ID and key ID for certificate field encryption.
 
+For master certificate creation, no serial number is provided because entropy is required
+from both the client and the certifier. In this case, the `keyID` is simply the `fieldName`.
+
+For VerifiableCertificates verifier keyring creation, both the serial number and field name are available,
+so the `keyID` is formed by concatenating the `serialNumber` and `fieldName`.
+
 ```ts
 static getCertificateFieldEncryptionDetails(fieldName: string, serialNumber?: string): {
     protocolID: WalletProtocol;
@@ -344,16 +350,17 @@ See also: [WalletProtocol](./wallet.md#type-walletprotocol)
 
 Returns
 
-An object containing the protocol ID and key ID:
+An object containing:
 - `protocolID` (WalletProtocol): The protocol ID for certificate field encryption.
-- `keyID` (string): A unique key identifier derived from the serial number and field name.
+- `keyID` (string): A unique key identifier. It is the `fieldName` if `serialNumber` is undefined,
+otherwise it is a combination of `serialNumber` and `fieldName`.
 
 Argument Details
 
-+ **serialNumber**
-  + The serial number of the certificate.
 + **fieldName**
   + The name of the field within the certificate to be encrypted.
++ **serialNumber**
+  + (Optional) The serial number of the certificate.
 
 #### Method sign
 
