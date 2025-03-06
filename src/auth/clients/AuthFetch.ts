@@ -64,7 +64,7 @@ export class AuthFetch {
       }
       config.retryCounter--
     }
-    const response = await new Promise<Response>(async (resolve, reject) => {
+    const response = await new Promise<Response>((async (resolve, reject) => {
       try {
         // Apply defaults
         const { method = 'GET', headers = {}, body } = config
@@ -75,7 +75,7 @@ export class AuthFetch {
 
         // Create a new transport for this base url if needed
         let peerToUse: AuthPeer
-        if (!this.peers[baseURL]) {
+        if (typeof this.peers[baseURL] === 'undefined') {
           // Create a peer for the request
           const newTransport = new SimplifiedFetchTransport(baseURL)
           peerToUse = {
@@ -96,6 +96,7 @@ export class AuthFetch {
             } catch (error) {
               reject(error)
             }
+            return
           }
           peerToUse = this.peers[baseURL]
         }
@@ -119,59 +120,68 @@ export class AuthFetch {
           const responseReader = new Utils.Reader(payload)
           // Deserialize first 32 bytes of payload
           const responseNonceAsBase64 = Utils.toBase64(responseReader.read(32))
-          if (responseNonceAsBase64 === requestNonceAsBase64) {
-            peerToUse.peer.stopListeningForGeneralMessages(listenerId)
+          if (responseNonceAsBase64 !== requestNonceAsBase64) {
+            return
+          }
+          peerToUse.peer.stopListeningForGeneralMessages(listenerId)
 
-            // Save the identity key for the peer for future requests, since we have it here.
-            this.peers[baseURL].identityKey = senderPublicKey
-            this.peers[baseURL].supportsMutualAuth = true
+          // Save the identity key for the peer for future requests, since we have it here.
+          this.peers[baseURL].identityKey = senderPublicKey
+          this.peers[baseURL].supportsMutualAuth = true
 
-            // Status code
-            const statusCode = responseReader.readVarIntNum()
+          // Status code
+          const statusCode = responseReader.readVarIntNum()
 
-            // Headers
-            const responseHeaders = {}
-            const nHeaders = responseReader.readVarIntNum()
-            if (nHeaders > 0) {
-              for (let i = 0; i < nHeaders; i++) {
-                const nHeaderKeyBytes = responseReader.readVarIntNum()
-                const headerKeyBytes = responseReader.read(nHeaderKeyBytes)
-                const headerKey = Utils.toUTF8(headerKeyBytes)
-                const nHeaderValueBytes = responseReader.readVarIntNum()
-                const headerValueBytes = responseReader.read(nHeaderValueBytes)
-                const headerValue = Utils.toUTF8(headerValueBytes)
-                responseHeaders[headerKey] = headerValue
-              }
+          // Headers
+          const responseHeaders = {}
+          const nHeaders = responseReader.readVarIntNum()
+          if (nHeaders > 0) {
+            for (let i = 0; i < nHeaders; i++) {
+              const nHeaderKeyBytes = responseReader.readVarIntNum()
+              const headerKeyBytes = responseReader.read(nHeaderKeyBytes)
+              const headerKey = Utils.toUTF8(headerKeyBytes)
+              const nHeaderValueBytes = responseReader.readVarIntNum()
+              const headerValueBytes = responseReader.read(nHeaderValueBytes)
+              const headerValue = Utils.toUTF8(headerValueBytes)
+              responseHeaders[headerKey] = headerValue
             }
+          }
 
-            // Add back the server identity key header
-            responseHeaders['x-bsv-auth-identity-key'] = senderPublicKey
+          // Add back the server identity key header
+          responseHeaders['x-bsv-auth-identity-key'] = senderPublicKey
 
-            // Body
-            let responseBody
-            const responseBodyBytes = responseReader.readVarIntNum()
-            if (responseBodyBytes > 0) {
-              responseBody = responseReader.read(responseBodyBytes)
-            }
+          // Body
+          let responseBody
+          const responseBodyBytes = responseReader.readVarIntNum()
+          if (responseBodyBytes > 0) {
+            responseBody = responseReader.read(responseBodyBytes)
+          }
 
-            // Create the Response object
-            const responseValue = new Response(
-              responseBody ? new Uint8Array(responseBody) : null, {
+          // Create the Response object
+          const responseValue = new Response(
+            responseBody ? new Uint8Array(responseBody) : null,
+            {
               status: statusCode,
               statusText: `${statusCode}`,
               headers: new Headers(responseHeaders)
-            })
+            }
+          )
 
-            // Resolve or reject the correct request with the response data
-            this.callbacks[requestNonceAsBase64].resolve(responseValue)
+          // Resolve or reject the correct request with the response data
+          this.callbacks[requestNonceAsBase64].resolve(responseValue)
 
-            // Clean up
-            delete this.callbacks[requestNonceAsBase64]
-          }
+          // Clean up
+          delete this.callbacks[requestNonceAsBase64]
         })
 
         // Send the request, now that all listeners are set up
         await peerToUse.peer.toPeer(writer.toArray(), peerToUse.identityKey).catch(async error => {
+          if (error.message.includes('Session not found for nonce')) {
+            delete this.peers[baseURL]
+            config.retryCounter ??= 3
+            const response = await this.fetch(url, config)
+            resolve(response)
+          }
           if (error.message.includes('HTTP server failed to authenticate')) {
             try {
               const response = await this.handleFetchAndValidate(url, config, peerToUse)
@@ -186,7 +196,7 @@ export class AuthFetch {
       } catch (e) {
         reject(e)
       }
-    })
+    }) as Function)
 
     // Check if server requires payment to access the requested route
     if (response.status === 402) {
