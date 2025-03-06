@@ -96,6 +96,14 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.3.31] - 2025-03-6
+
+### Fixed
+
+- Beef verify now checks that BUMPs contain required txids.
+
+---
+
 ## [1.3.30] - 2025-03-5
 
 ### Fixed
