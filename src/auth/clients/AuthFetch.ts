@@ -179,7 +179,8 @@ export class AuthFetch {
           if (error.message.includes('Session not found for nonce')) {
             delete this.peers[baseURL]
             config.retryCounter ??= 3
-            return await this.fetch(url, config)
+            const response = await this.fetch(url, config)
+            resolve(response)
           }
           if (error.message.includes('HTTP server failed to authenticate')) {
             try {
