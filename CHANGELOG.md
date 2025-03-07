@@ -99,6 +99,14 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.3.35] - 2025-03-7
+
+### Fixed
+
+- Beef toBinary was missing a sortTxs() call.
+
+---
+
 ## [1.3.34] - 2025-03-6
 
 ### Added
