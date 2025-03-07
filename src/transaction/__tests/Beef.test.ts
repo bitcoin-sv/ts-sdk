@@ -56,9 +56,7 @@ describe('Beef tests', () => {
     beef.txs[0]._txid = undefined
 
     expect(() => beef.txs[0].txid).toThrow('Internal')
-    expect(() => beef.toBinary()).toThrow(
-      'a valid serialized Transaction is expected'
-    )
+    expect(() => beef.toBinary()).toThrow('Internal')
 
     beef.txs[0] = btx // Restore the original transaction
 
