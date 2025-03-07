@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.3.34 - 2025-03-06](#1334---2025-03-6)
 - [1.3.33 - 2025-03-06](#1333---2025-03-6)
 - [1.3.32 - 2025-03-06](#1332---2025-03-6)
 - [1.3.30 - 2025-03-05](#1330---2025-03-5)
@@ -95,6 +96,15 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.3.34] - 2025-03-6
+
+### Added
+
+- Support for the Babbage testnet SLAP tracker
+- Support for overlay network presets for mainnet, testnet, or local
 
 ---
 
