@@ -485,6 +485,8 @@ export class Beef {
    * @returns A binary array representing the BEEF
    */
   toBinary (): number[] {
+    // Always serialize in dependency sorted order.
+    this.sortTxs()
     const writer = new Writer()
     this.toWriter(writer)
     return writer.toArray()
