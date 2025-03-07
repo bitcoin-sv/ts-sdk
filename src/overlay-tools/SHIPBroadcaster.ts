@@ -50,10 +50,17 @@ export type STEAK = Record<string, AdmittanceInstructions>
 
 /** Configuration options for the SHIP broadcaster. */
 export interface SHIPBroadcasterConfig {
+  /**
+   * The network preset to use, unless other options override it.
+   * - mainnet: use mainnet resolver and HTTPS facilitator
+   * - testnet: use testnet resolver and HTTPS facilitator
+   * - local: directly send to localhost:8080 and a facilitator that permits plain HTTP
+   */
+  networkPreset?: 'mainnet' | 'testnet' | 'local'
   /** The facilitator used to make requests to Overlay Services hosts. */
   facilitator?: OverlayBroadcastFacilitator
   /** The resolver used to locate suitable hosts with SHIP */
-  resolver: LookupResolver
+  resolver?: LookupResolver
   /** Determines which topics (all, any, or a specific list) must be present within all STEAKs received from every host for the broadcast to be considered a success. By default, all hosts must acknowledge all topics. */
   requireAcknowledgmentFromAllHostsForTopics?: 'all' | 'any' | string[]
   /** Determines which topics (all, any, or a specific list) must be present within STEAK received from at least one host for the broadcast to be considered a success. */
@@ -71,13 +78,15 @@ const MAX_SHIP_QUERY_TIMEOUT = 1000
 
 export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilitator {
   httpClient: typeof fetch
+  allowHTTP: boolean
 
-  constructor (httpClient = fetch) {
+  constructor (httpClient = fetch, allowHTTP: boolean = false) {
     this.httpClient = httpClient
+    this.allowHTTP = false
   }
 
   async send (url: string, taggedBEEF: TaggedBEEF): Promise<STEAK> {
-    if (!url.startsWith('https:')) {
+    if (!url.startsWith('https:') && !this.allowHTTP) {
       throw new Error(
         'HTTPS facilitator can only use URLs that start with "https:"'
       )
@@ -99,15 +108,16 @@ export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilit
 }
 
 /**
- * Represents a SHIP transaction broadcaster.
+ * Broadcasts transactions to one or more overlay topics.
  */
-export default class SHIPBroadcaster implements Broadcaster {
+export default class TopicBroadcaster implements Broadcaster {
   private readonly topics: string[]
   private readonly facilitator: OverlayBroadcastFacilitator
   private readonly resolver: LookupResolver
   private readonly requireAcknowledgmentFromAllHostsForTopics: | 'all' | 'any' | string[]
   private readonly requireAcknowledgmentFromAnyHostForTopics: | 'all' | 'any' | string[]
   private readonly requireAcknowledgmentFromSpecificHostsForTopics: Record<string, 'all' | 'any' | string[]>
+  private readonly networkPreset: 'mainnet' | 'testnet' | 'local'
 
   /**
    * Constructs an instance of the SHIP broadcaster.
@@ -115,7 +125,7 @@ export default class SHIPBroadcaster implements Broadcaster {
    * @param {string[]} topics - The list of SHIP topic names where transactions are to be sent.
    * @param {SHIPBroadcasterConfig} config - Configuration options for the SHIP broadcaster.
    */
-  constructor (topics: string[], config?: SHIPBroadcasterConfig) {
+  constructor (topics: string[], config: SHIPBroadcasterConfig = {}) {
     if (topics.length === 0) {
       throw new Error('At least one topic is required for broadcast.')
     }
@@ -123,21 +133,15 @@ export default class SHIPBroadcaster implements Broadcaster {
       throw new Error('Every topic must start with "tm_".')
     }
     this.topics = topics
-    const {
-      facilitator,
-      resolver,
-      requireAcknowledgmentFromAllHostsForTopics,
-      requireAcknowledgmentFromAnyHostForTopics,
-      requireAcknowledgmentFromSpecificHostsForTopics
-    } = config ?? {}
-    this.facilitator = facilitator ?? new HTTPSOverlayBroadcastFacilitator()
-    this.resolver = resolver ?? new LookupResolver()
+    this.networkPreset = config.networkPreset ?? 'mainnet'
+    this.facilitator = config.facilitator ?? new HTTPSOverlayBroadcastFacilitator(undefined, this.networkPreset === 'local')
+    this.resolver = config.resolver ?? new LookupResolver({ networkPreset: this.networkPreset })
     this.requireAcknowledgmentFromAllHostsForTopics =
-      requireAcknowledgmentFromAllHostsForTopics ?? []
+      config.requireAcknowledgmentFromAllHostsForTopics ?? []
     this.requireAcknowledgmentFromAnyHostForTopics =
-      requireAcknowledgmentFromAnyHostForTopics ?? 'all'
+      config.requireAcknowledgmentFromAnyHostForTopics ?? 'all'
     this.requireAcknowledgmentFromSpecificHostsForTopics =
-      requireAcknowledgmentFromSpecificHostsForTopics ?? {}
+      config.requireAcknowledgmentFromSpecificHostsForTopics ?? {}
   }
 
   /**
@@ -157,12 +161,12 @@ export default class SHIPBroadcaster implements Broadcaster {
         'Transactions sent via SHIP to Overlay Services must be serializable to BEEF format.'
       )
     }
-    const interestedHosts = await this.findInterestedHosts()
+    const interestedHosts = this.networkPreset === 'local' ? ['http://localhost:8080'] : await this.findInterestedHosts()
     if (Object.keys(interestedHosts).length === 0) {
       return {
         status: 'error',
         code: 'ERR_NO_HOSTS_INTERESTED',
-        description: 'No hosts are interested in receiving this transaction.'
+        description: `No ${this.networkPreset} hosts are interested in receiving this transaction.`
       }
     }
     const hostPromises = Object.entries(interestedHosts).map(
@@ -190,7 +194,7 @@ export default class SHIPBroadcaster implements Broadcaster {
       return {
         status: 'error',
         code: 'ERR_ALL_HOSTS_REJECTED',
-        description: 'All SHIP hosts have rejected the transaction.'
+        description: `All ${this.networkPreset} topical hosts have rejected the transaction.`
       }
     }
 
