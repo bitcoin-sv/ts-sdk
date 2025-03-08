@@ -444,6 +444,8 @@ export class AuthFetch {
       }
     })
 
+    // Build queue and wait for cert queue before responding
+
     // Attach the payment to the request headers
     config.headers = config.headers || {}
     config.headers['x-bsv-payment'] = JSON.stringify({
