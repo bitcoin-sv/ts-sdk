@@ -104,7 +104,7 @@ export class AuthFetch {
               await this.peers[baseURL].peer.sendCertificateResponse(verifier, certificatesToInclude)
             } finally {
               // Give the backend 500 ms to process the certificates we just sent, before releasing the queue entry
-              await new Promise(r => setTimeout(r, 500))
+              await new Promise(resolve => setTimeout(resolve, 500))
               this.peers[baseURL].pendingCertificateRequests.shift()
             }
           }) as Function)
