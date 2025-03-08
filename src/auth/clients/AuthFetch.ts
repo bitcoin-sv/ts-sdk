@@ -98,8 +98,8 @@ export class AuthFetch {
               this.peers[baseURL].pendingCertificateRequests.push(true)
               const certificatesToInclude = await getVerifiableCertificates(
                 this.wallet,
-                message.requestedCertificates,
-                message.identityKey
+                requestedCertificates,
+                verifier
               )
               await this.peers[baseURL].peer.sendCertificateResponse(verifier, certificatesToInclude)
             } finally {
