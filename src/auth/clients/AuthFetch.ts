@@ -6,14 +6,21 @@ import { SessionManager } from '../SessionManager.js'
 import { RequestedCertificateSet } from '../types.js'
 import { VerifiableCertificate } from '../certificates/VerifiableCertificate.js'
 import { Writer } from '../../primitives/utils.js'
+import { getVerifiableCertificates } from '../utils/index.js'
 
-type SimplifiedFetchRequestOptions = {
-  method?: string,
-  headers?: Record<string, string>,
-  body?: any,
+interface SimplifiedFetchRequestOptions {
+  method?: string
+  headers?: Record<string, string>
+  body?: any
   retryCounter?: number
 }
-type AuthPeer = { peer: Peer, identityKey?: string, supportsMutualAuth?: boolean }
+
+interface AuthPeer {
+  peer: Peer
+  identityKey?: string
+  supportsMutualAuth?: boolean
+  pendingCertificateRequests: Array<true>
+}
 
 const PAYMENT_VERSION = '1.0'
 
@@ -26,11 +33,11 @@ const PAYMENT_VERSION = '1.0'
  * and sending BSV payment transactions when necessary.
  */
 export class AuthFetch {
-  private sessionManager: SessionManager
-  private wallet: WalletInterface
+  private readonly sessionManager: SessionManager
+  private readonly wallet: WalletInterface
   private callbacks: Record<string, { resolve: Function, reject: Function }> = {}
-  private certificatesReceived: VerifiableCertificate[] = []
-  private requestedCertificates?: RequestedCertificateSet
+  private readonly certificatesReceived: VerifiableCertificate[] = []
+  private readonly requestedCertificates?: RequestedCertificateSet
   peers: Record<string, AuthPeer> = {}
 
   /**
@@ -58,7 +65,7 @@ export class AuthFetch {
    * @throws Will throw an error if unsupported headers are used or other validation fails.
    */
   async fetch(url: string, config: SimplifiedFetchRequestOptions = {}): Promise<Response> {
-    if (config.retryCounter) {
+    if (typeof config.retryCounter === 'number') {
       if (config.retryCounter <= 0) {
         throw new Error('Request failed after maximum number of retries.')
       }
@@ -79,13 +86,28 @@ export class AuthFetch {
           // Create a peer for the request
           const newTransport = new SimplifiedFetchTransport(baseURL)
           peerToUse = {
-            peer: new Peer(this.wallet, newTransport, this.requestedCertificates, this.sessionManager)
+            peer: new Peer(this.wallet, newTransport, this.requestedCertificates, this.sessionManager),
+            pendingCertificateRequests: []
           }
           this.peers[baseURL] = peerToUse
-          const callbackId = this.peers[baseURL].peer.listenForCertificatesReceived((senderPublicKey: string, certs: VerifiableCertificate[]) => {
+          this.peers[baseURL].peer.listenForCertificatesReceived((senderPublicKey: string, certs: VerifiableCertificate[]) => {
             this.certificatesReceived.push(...certs)
-            // peerToUse.peer.stopListeningForCertificatesReceived()
           })
+          this.peers[baseURL].peer.listenForCertificatesRequested((async (verifier: string, requestedCertificates: RequestedCertificateSet) => {
+            try {
+              this.peers[baseURL].pendingCertificateRequests.push(true)
+              const certificatesToInclude = await getVerifiableCertificates(
+                this.wallet,
+                requestedCertificates,
+                verifier
+              )
+              await this.peers[baseURL].peer.sendCertificateResponse(verifier, certificatesToInclude)
+            } finally {
+              // Give the backend 500 ms to process the certificates we just sent, before releasing the queue entry
+              await new Promise(resolve => setTimeout(resolve, 500))
+              this.peers[baseURL].pendingCertificateRequests.shift()
+            }
+          }) as Function)
         } else {
           // Check if there's a session associated with this baseURL
           if (this.peers[baseURL].supportsMutualAuth === false) {
@@ -174,6 +196,20 @@ export class AuthFetch {
           delete this.callbacks[requestNonceAsBase64]
         })
 
+        // Before sending general messages to the peer, ensure that no certificate requests are pending.
+        // This way, the user would need to choose to either allow or reject the certificate request first.
+        // If the server has a resource that requires certificates to be sent before access would be granted,
+        // this makes sure the user has a chance to send the certificates before the resource is requested.
+        if (peerToUse.pendingCertificateRequests.length > 0) {
+          await new Promise(resolve => {
+            setInterval(() => {
+              if (peerToUse.pendingCertificateRequests.length === 0) {
+                resolve()
+              }
+            }, 100) // Check every 100 ms for the user to finish responding
+          })
+        }
+
         // Send the request, now that all listeners are set up
         await peerToUse.peer.toPeer(writer.toArray(), peerToUse.identityKey).catch(async error => {
           if (error.message.includes('Session not found for nonce')) {
@@ -217,7 +253,7 @@ export class AuthFetch {
     const baseURL = parsedUrl.origin
 
     let peerToUse: { peer: Peer; identityKey?: string }
-    if (this.peers[baseURL]) {
+    if (typeof this.peers[baseURL] !== 'undefined') {
       peerToUse = { peer: this.peers[baseURL].peer }
     } else {
       const newTransport = new SimplifiedFetchTransport(baseURL)
@@ -233,7 +269,7 @@ export class AuthFetch {
     }
 
     // Return a promise that resolves when certificates are received
-    return new Promise<VerifiableCertificate[]>(async (resolve, reject) => {
+    return await new Promise<VerifiableCertificate[]>((async (resolve, reject) => {
       // Set up the listener before making the request
       const callbackId = peerToUse.peer.listenForCertificatesReceived((_senderPublicKey: string, certs: VerifiableCertificate[]) => {
         peerToUse.peer.stopListeningForCertificatesReceived(callbackId)
@@ -248,7 +284,7 @@ export class AuthFetch {
         peerToUse.peer.stopListeningForCertificatesReceived(callbackId)
         reject(err)
       }
-    })
+    }) as Function)
   }
 
   /**

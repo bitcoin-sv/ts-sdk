@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.3.36 - 2025-03-07](#1335---2025-03-7)
+- [1.3.35 - 2025-03-07](#1335---2025-03-7)
 - [1.3.34 - 2025-03-06](#1334---2025-03-6)
 - [1.3.33 - 2025-03-06](#1333---2025-03-6)
 - [1.3.32 - 2025-03-06](#1332---2025-03-6)
@@ -96,6 +98,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.3.36] - 2025-03-7
+
+### Fixed
+
+- AuthFetch waits for pending certificate requests before exchanging data
 
 ---
 

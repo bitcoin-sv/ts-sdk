@@ -211,15 +211,13 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     const bobReceivedGeneralMessage = new Promise<void>((resolve) => {
       bob.listenForGeneralMessages((senderPublicKey, payload) => {
         (async () => {
-          console.log('Bob received message:', Utils.toUTF8(payload))
           await bob.toPeer(Utils.toArray('Hello Alice!'), senderPublicKey)
           resolve()
-        })().catch(e => console.log(e))
+        })().catch(e => { })
       })
     })
     const aliceReceivedGeneralMessage = new Promise<void>((resolve) => {
       alice.listenForGeneralMessages((senderPublicKey, payload) => {
-        console.log('Alice received message:', Utils.toUTF8(payload))
         resolve()
       })
     })
@@ -260,29 +258,26 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     const bobReceivedGeneralMessage = new Promise<void>((resolve) => {
       bob.listenForGeneralMessages((senderPublicKey, payload) => {
         (async () => {
-          console.log('Bob 1 received message:', Utils.toUTF8(payload))
           await bob.toPeer(Utils.toArray('Hello Alice!'), senderPublicKey)
           resolve()
           bobMessageHandler(senderPublicKey, payload)
-        })().catch(e => console.log(e))
+        })().catch(e => { })
       })
     })
     let aliceReceivedGeneralMessageOnFirstDevice = new Promise<void>((resolve) => {
       aliceFirstDevice.listenForGeneralMessages((senderPublicKey, payload) => {
         (async () => {
-          console.log('Alice 1 received message:', Utils.toUTF8(payload))
           resolve()
           alice1MessageHandler(senderPublicKey, payload)
-        })().catch(e => console.log(e))
+        })().catch(e => { })
       })
     })
     const aliceReceivedGeneralMessageOnOtherDevice = new Promise<void>((resolve) => {
       aliceOtherDevice.listenForGeneralMessages((senderPublicKey, payload) => {
         (async () => {
-          console.log('Alice 2 received message:', Utils.toUTF8(payload))
           resolve()
           alice2MessageHandler(senderPublicKey, payload)
-        })().catch(e => console.log(e))
+        })().catch(e => { })
       })
     })
 
@@ -333,10 +328,10 @@ describe('Peer class mutual authentication and certificate exchange', () => {
             // Use a for...of loop instead of forEach with an async callback.
             for (const cert of certificatesReceivedByBob) {
               // Decrypt to ensure it has the correct fields.
-              const decryptedFields = await cert.decryptFields(walletB)
+              // const decryptedFields = await cert.decryptFields(walletB)
               if (cert.certifier !== 'bob') {
-                console.log('Bob accepted the message:', Utils.toUTF8(payload))
-                console.log('Decrypted fields:', decryptedFields)
+                // console.log('Bob accepted the message:', Utils.toUTF8(payload))
+                // console.log('Decrypted fields:', decryptedFields)
               }
             }
           }
@@ -640,7 +635,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
               resolve()
             }
           }
-        })().catch(e => console.log(e))
+        })().catch(e => { })
       }
       )
     })
@@ -658,7 +653,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
               resolve()
             }
           }
-        })().catch(e => console.log(e))
+        })().catch(e => { })
       }
       )
     })
@@ -672,7 +667,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
             senderPublicKey
           )
           resolve()
-        })().catch(e => console.log(e))
+        })().catch(e => { })
       })
     })
 
@@ -766,7 +761,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
               resolve()
             }
           }
-        })().catch(e => console.log(e))
+        })().catch(e => { })
       })
     })
 
@@ -783,7 +778,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
               resolve()
             }
           }
-        })().catch(e => console.log(e))
+        })().catch(e => { })
       })
     })
 
