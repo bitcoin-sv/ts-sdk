@@ -29,5 +29,8 @@ export default {
   },
   optimization: {
     minimize: true
+  },
+  performance: {
+    hints: false
   }
 }

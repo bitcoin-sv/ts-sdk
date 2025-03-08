@@ -9,7 +9,7 @@ import MerklePath from '../MerklePath'
 jest.setTimeout(60000) // Increase timeout for benchmarking tests if necessary
 
 // Helper function to measure execution time
-async function measureTime (fn: () => Promise<void>): Promise<number> {
+async function measureTime(fn: () => Promise<void>): Promise<number> {
   const start = process.hrtime()
   await fn()
   const diff = process.hrtime(start)
@@ -113,11 +113,6 @@ describe('Transaction Verification Benchmark', () => {
       const verified = await tx.verify('scripts only')
       expect(verified).toBe(true)
     })
-    console.log(
-      `Verification time for wide transaction with ${inputCount} inputs: ${timeTaken.toFixed(
-        2
-      )} ms`
-    )
   })
 
   it('verifies a large transaction with many inputs and outputs', async () => {
@@ -172,11 +167,6 @@ describe('Transaction Verification Benchmark', () => {
       const verified = await tx.verify('scripts only')
       expect(verified).toBe(true)
     })
-    console.log(
-      `Verification time for large transaction with ${inputCount} inputs and ${outputCount} outputs: ${timeTaken.toFixed(
-        2
-      )} ms`
-    )
   })
 
   it('verifies a transaction with nested inputs (complex graph)', async () => {
@@ -243,10 +233,5 @@ describe('Transaction Verification Benchmark', () => {
       const verified = await finalTx.verify('scripts only')
       expect(verified).toBe(true)
     })
-    console.log(
-      `Verification time for nested inputs with depth ${depth} and fan-out ${fanOut}: ${timeTaken.toFixed(
-        2
-      )} ms`
-    )
   })
 })
