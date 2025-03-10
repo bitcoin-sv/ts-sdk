@@ -12,7 +12,6 @@ describe('StorageUploader Tests', () => {
   let globalFetchSpy: jest.SpiedFunction<typeof global.fetch>
 
   beforeEach(() => {
-    // Use a real or mock WalletClient
     walletClient = new WalletClient('json-api', 'non-admin.com')
 
     uploader = new StorageUploader({
@@ -20,7 +19,6 @@ describe('StorageUploader Tests', () => {
       wallet: walletClient
     })
 
-    // Spy on global.fetch to simulate network requests
     globalFetchSpy = jest
       .spyOn(global, 'fetch')
       .mockResolvedValue(new Response(null, { status: 200 }))
@@ -31,8 +29,6 @@ describe('StorageUploader Tests', () => {
   })
 
   it('should upload a file, produce a valid UHRP URL, and decode it to the known SHA-256', async () => {
-    // Suppose we want "Hello, world!" as data
-    // SHA-256("Hello, world!") starts with "b94d27b9..."
     const data = stringToUtf8Array('Hello, world!')
 
     // Mock out getUploadInfo so we can control the returned upload/public URLs
@@ -46,7 +42,7 @@ describe('StorageUploader Tests', () => {
         data,
         type: 'text/plain'
       },
-      retentionPeriod: 7 // days or whatever your system uses
+      retentionPeriod: 7 
     })
 
     // We expect exactly one PUT request
@@ -56,8 +52,6 @@ describe('StorageUploader Tests', () => {
     expect(result.publicURL).toBe('https://example.com/public/hello')
     expect(result.published).toBe(true)
 
-    // For additional assurance, we can parse the hash and compare
-    // the first 4 hex bytes to "b94d27b9"
     const rawHash = StorageUtils.getHashFromURL(result.hash)
     const firstFour = rawHash.slice(0, 4).map(b => b.toString(16).padStart(2, '0')).join('')
     expect(firstFour).toHaveLength(8)
