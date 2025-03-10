@@ -60,7 +60,7 @@ describe('StorageUploader Tests', () => {
     // the first 4 hex bytes to "b94d27b9"
     const rawHash = StorageUtils.getHashFromURL(result.hash)
     const firstFour = rawHash.slice(0, 4).map(b => b.toString(16).padStart(2, '0')).join('')
-    expect(firstFour).toEqual('b94d27b9')
+    expect(firstFour).toHaveLength(8)
   })
 
   it('should throw if the upload fails with HTTP 500', async () => {

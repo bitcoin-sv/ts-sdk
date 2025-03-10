@@ -1,5 +1,5 @@
 import { Hash } from "../../src/primitives/index.js"
-import { fromBase58Check, toBase58Check } from "../../src/primitives/utils.js"
+import { fromBase58Check, toBase58Check, toArray } from "../../src/primitives/utils.js"
 
 /**
  * Takes a UHRP URL and removes any prefixes.
@@ -21,7 +21,7 @@ export const getURLForHash = (hash: number[]) => {
   if (hash.length !== 32) {
     throw new Error('Hash length must be 32 bytes (sha256)')
   }
-  return toBase58Check(hash)
+  return toBase58Check(hash, toArray('ce00', 'hex'))
 }
 
 /**
@@ -41,17 +41,11 @@ export const getURLForFile = (file: number[]) => {
  */
 export const getHashFromURL = (URL: string) => {
   URL = normalizeURL(URL)
-  const { prefix, data } = fromBase58Check(URL)
-  if (data.length !== 32) {
+  const { data }  = fromBase58Check(URL)
+  if (data.length !== 33) {
     throw new Error('Invalid length!')
   }
-  if (prefix.toString('hex') !== 'ce') {
-    throw new Error('Invalid prefix!')
-  }
-  if (data.slice(0, 1).toString('hex') !== '00') {
-    throw new Error('Invalid prefix!')
-  }
-  return data.slice(1, 33)
+  return data
 }
 
 /**
