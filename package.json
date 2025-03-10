@@ -1,6 +1,6 @@
 {
   "name": "@bsv/sdk",
-  "version": "1.3.36",
+  "version": "1.4.0",
   "type": "module",
   "description": "BSV Blockchain Software Development Kit",
   "main": "dist/cjs/mod.js",
