@@ -15,7 +15,7 @@ describe('StorageUploader Tests', () => {
     walletClient = new WalletClient('json-api', 'non-admin.com')
 
     uploader = new StorageUploader({
-      nanostoreURL: 'https://nanostore.babbage.systems', // TODO update to new nanostore url
+      storageURL: 'https://example.test.system',
       wallet: walletClient
     })
 
@@ -34,7 +34,6 @@ describe('StorageUploader Tests', () => {
     // Mock out getUploadInfo so we can control the returned upload/public URLs
     jest.spyOn(uploader as any, 'getUploadInfo').mockResolvedValue({
       uploadURL: 'https://example-upload.com/put',
-      publicURL: 'https://example.com/public/hello'
     })
 
     const result = await uploader.publishFile({
@@ -48,12 +47,11 @@ describe('StorageUploader Tests', () => {
     // We expect exactly one PUT request
     expect(globalFetchSpy).toHaveBeenCalledTimes(1)
     // Check the result
-    expect(StorageUtils.isValidURL(result.hash)).toBe(true)
-    expect(result.publicURL).toBe('https://example.com/public/hello')
+    expect(StorageUtils.isValidURL(result.uhrpURL)).toBe(true)
     expect(result.published).toBe(true)
 
-    const rawHash = StorageUtils.getHashFromURL(result.hash)
-    const firstFour = rawHash.slice(0, 4).map(b => b.toString(16).padStart(2, '0')).join('')
+    const url = StorageUtils.getHashFromURL(result.uhrpURL)
+    const firstFour = url.slice(0, 4).map(b => b.toString(16).padStart(2, '0')).join('')
     expect(firstFour).toHaveLength(8)
   })
 
@@ -64,7 +62,6 @@ describe('StorageUploader Tests', () => {
     // Also mock getUploadInfo
     jest.spyOn(uploader as any, 'getUploadInfo').mockResolvedValue({
       uploadURL: 'https://example-upload.com/put',
-      publicURL: 'https://example.com/public/fail'
     })
 
     const failingData = stringToUtf8Array('failing data')

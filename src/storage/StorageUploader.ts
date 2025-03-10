@@ -3,19 +3,18 @@ import { WalletInterface } from '../wallet/index.js'
 import { StorageUtils } from '../storage/index.js'
 
 export interface UploaderConfig {
-    nanostoreURL: string
+    storageURL: string
     wallet: WalletInterface
 }
 
 export interface UploadableFile {
     data: number[]
-    type?: string //Todo add default
+    type: string
 }
 
 export interface UploadFileResult {
     published: boolean
-    hash: string
-    publicURL: string
+    uhrpURL: string
 }
 
 export class StorageUploader {
@@ -23,7 +22,7 @@ export class StorageUploader {
     private baseURL: string
 
     constructor(config: UploaderConfig) {
-        this.baseURL = config.nanostoreURL
+        this.baseURL = config.storageURL
         this.authFetch = new AuthFetch(config.wallet)
     }
 
@@ -32,7 +31,6 @@ export class StorageUploader {
         retentionPeriod: number
     ): Promise<{
         uploadURL: string
-        publicURL: string
         amount?: number
     }> {
         const url = `${this.baseURL}/upload`
@@ -40,7 +38,7 @@ export class StorageUploader {
 
         const response = await this.authFetch.fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         })
         if (!response.ok) {
@@ -49,7 +47,6 @@ export class StorageUploader {
         const data = await response.json() as {
             status: string,
             uploadURL: string
-            publicURL: string,
             amount?: number
         }
         if (data.status === 'error') {
@@ -57,36 +54,47 @@ export class StorageUploader {
         }
         return {
             uploadURL: data.uploadURL,
-            publicURL: data.publicURL,
             amount: data.amount
         }
     }
 
     private async uploadFile(
         uploadURL: string,
-        publicURL: string,
         file: UploadableFile
     ): Promise<UploadFileResult> {
-
-        // START OF OLD UPLOAD TODO
         const body = Uint8Array.from(file.data)
 
         const response = await fetch(uploadURL, {
             method: 'PUT',
-            body: body
+            body: body,
+            headers: { 'Content-Type': file.type }
         })
         if (!response.ok) {
             throw new Error(`File upload failed: HTTP ${response.status}`)
         }
 
-        const fileHash = await StorageUtils.getURLForFile(file.data)
+        const uhrpURL = await StorageUtils.getURLForFile(file.data)
         return {
             published: true,
-            hash: fileHash,
-            publicURL
+            uhrpURL,
         }
     }
 
+    /**
+     * Publishes a file to the storage server with the specified retention period.
+     *
+     * This will:
+     * 1. Request an upload URL from the server.
+     * 2. Perform an HTTP PUT to upload the file’s raw bytes.
+     * 3. Return a UHRP URL referencing the file once published.
+     *
+     * @param params.file - An object describing the file’s data (number[] array of bytes) and mime type.
+     * @param params.retentionPeriod - Number of minutes to keep the file hosted.
+     *
+     * @returns An object indicating whether the file was published successfully and the resulting UHRP URL.
+     *
+     * @throws If either the upload info request or the subsequent file upload request fails (non-OK HTTP status).
+     */
     public async publishFile(params: {
         file: UploadableFile
         retentionPeriod: number
@@ -94,8 +102,8 @@ export class StorageUploader {
         const { file, retentionPeriod } = params
         const fileSize = file.data.length
 
-        const { uploadURL, publicURL, amount } = await this.getUploadInfo(fileSize, retentionPeriod)
-        return this.uploadFile(uploadURL, publicURL, file)
+        const { uploadURL, amount } = await this.getUploadInfo(fileSize, retentionPeriod)
+        return this.uploadFile(uploadURL, file)
     }
 }
 
