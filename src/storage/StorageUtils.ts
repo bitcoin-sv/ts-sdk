@@ -1,5 +1,5 @@
-import { Hash } from "../../src/primitives/index.js"
-import { fromBase58Check, toBase58Check, toArray } from "../../src/primitives/utils.js"
+import { Hash } from '../../src/primitives/index.js'
+import { fromBase58Check, toBase58Check, toArray } from '../../src/primitives/utils.js'
 
 /**
  * Takes a UHRP URL and removes any prefixes.
@@ -41,7 +41,7 @@ export const getURLForFile = (file: number[]) => {
  */
 export const getHashFromURL = (URL: string) => {
   URL = normalizeURL(URL)
-  const { data }  = fromBase58Check(URL)
+  const { data } = fromBase58Check(URL)
   if (data.length !== 33) {
     throw new Error('Invalid length!')
   }

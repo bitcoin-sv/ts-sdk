@@ -1,4 +1,6 @@
-import { AuthFetch, WalletInterface, StorageUtils } from '../../mod.js'
+import { AuthFetch } from '../auth/clients/AuthFetch.js'
+import { WalletInterface } from '../wallet/index.js'
+import { StorageUtils } from '../storage/index.js'
 
 export interface UploaderConfig {
     nanostoreURL: string
@@ -7,7 +9,7 @@ export interface UploaderConfig {
 
 export interface UploadableFile {
     data: number[]
-    type?: string
+    type?: string //Todo add default
 }
 
 export interface UploadFileResult {
@@ -77,7 +79,7 @@ export class StorageUploader {
             throw new Error(`File upload failed: HTTP ${response.status}`)
         }
 
-        const fileHash = StorageUtils.getURLForFile(file.data)
+        const fileHash = await StorageUtils.getURLForFile(file.data)
         return {
             published: true,
             hash: fileHash,
