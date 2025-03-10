@@ -13,14 +13,14 @@ jest.mock('@bsv/sdk', () => ({
   }))
 }))
 
-// ✅ Properly mock AuthSocketClient to return a fake WebSocket instance
+// Properly mock AuthSocketClient to return a fake WebSocket instance
 const mockSocket = {
   on: jest.fn(),
   emit: jest.fn()
 }
 
 jest.mock('@bsv/authsocket', () => ({
-  AuthSocketClient: jest.fn(() => mockSocket) // ✅ Returns our mock socket
+  AuthSocketClient: jest.fn(() => mockSocket) // Returns our mock socket
 }))
 
 describe('MessageBoxClient', () => {
@@ -28,7 +28,7 @@ describe('MessageBoxClient', () => {
 
   beforeEach(() => {
     mockWalletClient = new WalletClient()
-    jest.clearAllMocks() // ✅ Reset all mocks to prevent test interference
+    jest.clearAllMocks() // Reset all mocks to prevent test interference
   })
 
   const VALID_SEND_RESULT = {
@@ -74,7 +74,7 @@ describe('MessageBoxClient', () => {
   it('Throws an error when WebSocket connection is not initialized', async () => {
     const messageBoxClient = new MessageBoxClient({ walletClient: mockWalletClient })
 
-    // 🔹 Mock `initializeConnection` so it doesn't set up `this.socket`
+    // Mock `initializeConnection` so it doesn't set up `this.socket`
     jest.spyOn(messageBoxClient, 'initializeConnection').mockImplementation(async () => {})
 
     await expect(messageBoxClient.sendLiveMessage({
@@ -211,22 +211,22 @@ describe('MessageBoxClient', () => {
   it('Initializes WebSocket connection only once', async () => {
     const messageBoxClient = new MessageBoxClient({ walletClient: mockWalletClient })
 
-    // ✅ Ensure `getPublicKey` always returns a valid identity key
+    // Ensure `getPublicKey` always returns a valid identity key
     jest.spyOn(mockWalletClient, 'getPublicKey').mockResolvedValue({ publicKey: 'mockIdentityKey' })
 
-    // ✅ Directly mock `AuthSocketClient` correctly
+    // Directly mock `AuthSocketClient` correctly
     const authSocketMock = { on: jest.fn(), emit: jest.fn() }
     ;(AuthSocketClient as jest.Mock).mockReturnValue(authSocketMock)
 
     await messageBoxClient.initializeConnection()
 
-    // ✅ Ensure WebSocket connection initializes once
+    // Ensure WebSocket connection initializes once
     expect(AuthSocketClient).toHaveBeenCalledTimes(1)
 
-    // 🔥 Call `initializeConnection` again (should NOT create another socket)
+    // Call `initializeConnection` again (should NOT create another socket)
     await messageBoxClient.initializeConnection()
 
-    // ✅ Ensure it's still only called once
+    // Ensure it's still only called once
     expect(AuthSocketClient).toHaveBeenCalledTimes(1)
   })
 
@@ -271,13 +271,13 @@ describe('MessageBoxClient', () => {
       messageBox: 'test_inbox'
     })
 
-    // ✅ Ensure `joinRoom` event was emitted with the correct identity key
+    // Ensure `joinRoom` event was emitted with the correct identity key
     expect(mockSocket.emit).toHaveBeenCalledWith('joinRoom', 'mockIdentityKey-test_inbox')
 
     // Simulate receiving a message
     const receivedMessage = { text: 'Hello, world!' }
 
-    // ✅ Extract & invoke the callback function stored in `on`
+    // Extract & invoke the callback function stored in `on`
     const sendMessageCallback = mockSocket.on.mock.calls.find(
       ([eventName]) => eventName === 'sendMessage-mockIdentityKey-test_inbox'
     )?.[1] // Extract the callback function
@@ -286,7 +286,7 @@ describe('MessageBoxClient', () => {
       sendMessageCallback(receivedMessage)
     }
 
-    // ✅ Ensure `onMessage` was called with the received message
+    // Ensure `onMessage` was called with the received message
     expect(onMessageMock).toHaveBeenCalledWith(receivedMessage)
   })
 

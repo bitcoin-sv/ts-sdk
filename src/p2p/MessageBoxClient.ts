@@ -1,4 +1,6 @@
-import { WalletClient, AuthFetch } from '@bsv/sdk'
+// import { WalletClient, AuthFetch } from '@bsv/sdk'
+import { WalletClient } from '../wallet/index.js'
+import { AuthFetch } from 'mod.js'
 import { AuthSocketClient } from '@bsv/authsocket'
 
 /**
@@ -97,14 +99,14 @@ class MessageBoxClient {
   * Establish an initial WebSocket connection (optional)
   */
   async initializeConnection (): Promise<void> {
-    console.log('[CLIENT] initializeConnection() STARTED') // 🔹 Confirm function is called
+    console.log('[CLIENT] initializeConnection() STARTED') // Confirm function is called
 
     if (this.myIdentityKey == null || this.myIdentityKey.trim() === '') {
       console.log('[CLIENT] Fetching identity key...')
       try {
         const keyResult = await this.walletClient.getPublicKey({ identityKey: true })
         this.myIdentityKey = keyResult.publicKey
-        console.log(`[CLIENT] Identity key fetched successfully: ${this.myIdentityKey}`)
+        console.log(`[CLIENT] Identity key fetched successfully: ${this.myIdentityKey ?? 'undefined'}`)
       } catch (error) {
         console.error('[CLIENT ERROR] Failed to fetch identity key:', error)
         throw new Error('Identity key retrieval failed')
@@ -271,7 +273,7 @@ class MessageBoxClient {
         keyID: '1',
         counterparty: recipient
       })
-      messageId = Array.from(hmac.hmac).map(b => b.toString(16).padStart(2, '0')).join('')
+      messageId = Array.from(hmac.hmac).map(b => b.toString().padStart(2, '0')).join('')
     } catch (error) {
       console.error('[CLIENT ERROR] Failed to generate HMAC:', error)
       throw new Error('Failed to generate message identifier.')
@@ -324,7 +326,7 @@ class MessageBoxClient {
     console.log(`[CLIENT] Leaving WebSocket room: ${roomId}`)
     this.socket.emit('leaveRoom', roomId)
 
-    // ✅ Ensure the room is removed from tracking
+    // Ensure the room is removed from tracking
     this.joinedRooms.delete(roomId)
   }
 
@@ -368,7 +370,7 @@ class MessageBoxClient {
         keyID: '1',
         counterparty: message.recipient
       })
-      messageId = message.messageId ?? Array.from(hmac.hmac).map(b => b.toString(16).padStart(2, '0')).join('')
+      messageId = message.messageId ?? Array.from(hmac.hmac).map(b => b.toString().padStart(2, '0')).join('')
     } catch (error) {
       console.error('[CLIENT ERROR] Failed to generate HMAC:', error)
       throw new Error('Failed to generate message identifier.')
@@ -384,17 +386,12 @@ class MessageBoxClient {
       console.log('[CLIENT] Sending HTTP request to:', `${this.peerServHost}/sendMessage`)
       console.log('[CLIENT] Request Body:', JSON.stringify(requestBody, null, 2))
 
-      // Set a manual timeout using Promise.race()
-      // const timeoutPromise = new Promise<Response>((_resolve, reject) =>
-      //   setTimeout(() => reject(new Error('[CLIENT ERROR] Request timed out!')), 10000)
-      // )
-
       // Ensure the identity key is fetched before sending
       if (this.myIdentityKey == null || this.myIdentityKey === '') {
         try {
           const keyResult = await this.walletClient.getPublicKey({ identityKey: true })
           this.myIdentityKey = keyResult.publicKey
-          console.log(`[CLIENT] Fetched identity key before sending request: ${this.myIdentityKey}`)
+          console.log(`[CLIENT] Fetched identity key before sending request: ${this.myIdentityKey ?? 'undefined'}`)
         } catch (error) {
           console.error('[CLIENT ERROR] Failed to fetch identity key:', error)
           throw new Error('Identity key retrieval failed')
@@ -419,16 +416,16 @@ class MessageBoxClient {
       console.log('[CLIENT] Response Body Used?', response.bodyUsed)
 
       // Read body only if it's not already consumed
-      if (response.bodyUsed) {
+      if (response.bodyUsed === true) {
         throw new Error('[CLIENT ERROR] Response body has already been used!')
       }
 
       const parsedResponse = await response.json()
       console.log('[CLIENT] Raw Response Body:', parsedResponse)
 
-      if (!response.ok) {
-        console.error(`[CLIENT ERROR] Failed to send message. HTTP ${response.status}: ${response.statusText}`)
-        throw new Error(`Message sending failed: HTTP ${response.status} - ${response.statusText}`)
+      if (response.ok !== true) {
+        console.error(`[CLIENT ERROR] Failed to send message. HTTP ${String(response.status)}: ${String(response.statusText)}`)
+        throw new Error(`Message sending failed: HTTP ${String(response.status)} - ${String(response.statusText)}`)
       }
 
       if (parsedResponse.status !== 'success') {
