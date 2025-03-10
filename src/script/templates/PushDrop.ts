@@ -108,7 +108,7 @@ export default class PushDrop implements ScriptTemplate {
    * @param {WalletInterface} wallet - The wallet interface used for creating signatures and accessing public keys.
    * @param {string} originator — The originator to use with Wallet requests
    */
-  constructor(wallet: WalletInterface, originator?: string) {
+  constructor (wallet: WalletInterface, originator?: string) {
     this.wallet = wallet
     this.originator = originator
   }

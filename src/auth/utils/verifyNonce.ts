@@ -7,7 +7,7 @@ import { Utils, WalletInterface, WalletCounterparty, Base64String } from '../../
  * @param counterparty - The counterparty to the nonce creation. Defaults to 'self'.
  * @returns The status of the validation
  */
-export async function verifyNonce(
+export async function verifyNonce (
   nonce: Base64String,
   wallet: WalletInterface,
   counterparty: WalletCounterparty = 'self'

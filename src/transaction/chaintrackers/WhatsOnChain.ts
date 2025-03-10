@@ -88,7 +88,7 @@ export default class WhatsOnChain implements ChainTracker {
     }
   }
 
-  protected getHttpHeaders(): Record<string, string> {
+  protected getHttpHeaders (): Record<string, string> {
     const headers: Record<string, string> = {
       Accept: 'application/json'
     }

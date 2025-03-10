@@ -32,7 +32,11 @@ export default class ECIES {
 }
 ```
 
-See also: [PrivateKey](./primitives.md#class-privatekey), [PublicKey](./primitives.md#class-publickey)
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
+
+<details>
+
+<summary>Class ECIES Details</summary>
 
 #### Method bitcoreDecrypt
 
@@ -41,7 +45,7 @@ Decrypts a message encrypted using the Bitcore variant of ECIES.
 ```ts
 public static bitcoreDecrypt(encBuf: number[], toPrivateKey: PrivateKey): number[] 
 ```
-See also: [PrivateKey](./primitives.md#class-privatekey)
+See also: [PrivateKey](#class-privatekey)
 
 Returns
 
@@ -61,7 +65,7 @@ Encrypts a given message using the Bitcore variant of ECIES.
 ```ts
 public static bitcoreEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, ivBuf?: number[]): number[] 
 ```
-See also: [PrivateKey](./primitives.md#class-privatekey), [PublicKey](./primitives.md#class-publickey)
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
 
 Returns
 
@@ -85,7 +89,7 @@ Decrypts a message encrypted using the Electrum ECIES method.
 ```ts
 public static electrumDecrypt(encBuf: number[], toPrivateKey: PrivateKey, fromPublicKey?: PublicKey): number[] 
 ```
-See also: [PrivateKey](./primitives.md#class-privatekey), [PublicKey](./primitives.md#class-publickey)
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
 
 Returns
 
@@ -107,7 +111,7 @@ Encrypts a given message using the Electrum ECIES method.
 ```ts
 public static electrumEncrypt(messageBuf: number[], toPublicKey: PublicKey, fromPrivateKey?: PrivateKey, noKey = false): number[] 
 ```
-See also: [PrivateKey](./primitives.md#class-privatekey), [PublicKey](./primitives.md#class-publickey)
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
 
 Returns
 
@@ -136,7 +140,7 @@ public static ivkEkM(privKey: PrivateKey, pubKey: PublicKey): {
     kM: number[];
 } 
 ```
-See also: [PrivateKey](./primitives.md#class-privatekey), [PublicKey](./primitives.md#class-publickey)
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
 
 Returns
 
@@ -148,6 +152,8 @@ Argument Details
   + The sender's private key.
 + **pubKey**
   + The receiver's public key.
+
+</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -185,7 +191,11 @@ export default class HD {
 }
 ```
 
-See also: [PrivateKey](./primitives.md#class-privatekey), [PublicKey](./primitives.md#class-publickey)
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
+
+<details>
+
+<summary>Class HD Details</summary>
 
 #### Constructor
 
@@ -195,7 +205,7 @@ Initializes an HD wallet with optional parameters for version bytes, depth, pare
 ```ts
 constructor(versionBytesNum?: number, depth?: number, parentFingerPrint?: number[], childIndex?: number, chainCode?: number[], privKey?: PrivateKey, pubKey?: PublicKey) 
 ```
-See also: [PrivateKey](./primitives.md#class-privatekey), [PublicKey](./primitives.md#class-publickey)
+See also: [PrivateKey](#class-privatekey), [PublicKey](#class-publickey)
 
 Argument Details
 
@@ -222,7 +232,7 @@ The path specifies the hierarchy of the child key to be derived.
 ```ts
 public derive(path: string): HD 
 ```
-See also: [HD](./compat.md#class-hd)
+See also: [HD](#class-hd)
 
 Returns
 
@@ -241,7 +251,7 @@ This method generates either a private or public child key depending on the curr
 ```ts
 public deriveChild(i: number): HD 
 ```
-See also: [HD](./compat.md#class-hd)
+See also: [HD](#class-hd)
 
 Returns
 
@@ -260,7 +270,7 @@ Parses a binary buffer to set up the wallet's properties.
 ```ts
 public static fromBinary(buf: number[]): HD 
 ```
-See also: [HD](./compat.md#class-hd)
+See also: [HD](#class-hd)
 
 Returns
 
@@ -310,7 +320,7 @@ This method creates a root HD wallet with randomly generated private and public 
 ```ts
 public static fromRandom(): HD 
 ```
-See also: [HD](./compat.md#class-hd)
+See also: [HD](#class-hd)
 
 Returns
 
@@ -324,7 +334,7 @@ This method generates keys and other properties from a given seed, conforming to
 ```ts
 public static fromSeed(bytes: number[]): HD 
 ```
-See also: [HD](./compat.md#class-hd)
+See also: [HD](#class-hd)
 
 Returns
 
@@ -361,7 +371,7 @@ This method decodes a provided string to set up the HD wallet's properties.
 ```ts
 public static fromString(str: string): HD 
 ```
-See also: [HD](./compat.md#class-hd)
+See also: [HD](#class-hd)
 
 Returns
 
@@ -424,7 +434,7 @@ This method strips away the private key information, leaving only the public par
 ```ts
 public toPublic(): HD 
 ```
-See also: [HD](./compat.md#class-hd)
+See also: [HD](#class-hd)
 
 Returns
 
@@ -444,6 +454,8 @@ public toString(): string
 Returns
 
 A base58 encoded string of the HD wallet.
+
+</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -477,7 +489,11 @@ export default class Mnemonic {
 }
 ```
 
-See also: [wordList](./compat.md#variable-wordlist)
+See also: [wordList](#variable-wordlist)
+
+<details>
+
+<summary>Class Mnemonic Details</summary>
 
 #### Constructor
 
@@ -486,7 +502,7 @@ Constructs a Mnemonic object.
 ```ts
 constructor(mnemonic?: string, seed?: number[], wordlist = wordList) 
 ```
-See also: [wordList](./compat.md#variable-wordlist)
+See also: [wordList](#variable-wordlist)
 
 Argument Details
 
@@ -584,7 +600,7 @@ Static method to create a Mnemonic instance from a given entropy.
 ```ts
 public static fromEntropy(buf: number[]): Mnemonic 
 ```
-See also: [Mnemonic](./compat.md#class-mnemonic)
+See also: [Mnemonic](#class-mnemonic)
 
 Returns
 
@@ -623,7 +639,7 @@ Static method to generate a Mnemonic instance with a random mnemonic.
 ```ts
 public static fromRandom(bits?: number): Mnemonic 
 ```
-See also: [Mnemonic](./compat.md#class-mnemonic)
+See also: [Mnemonic](#class-mnemonic)
 
 Returns
 
@@ -658,7 +674,7 @@ Static method to create a Mnemonic instance from a mnemonic string.
 ```ts
 public static fromString(str: string): Mnemonic 
 ```
-See also: [Mnemonic](./compat.md#class-mnemonic)
+See also: [Mnemonic](#class-mnemonic)
 
 Returns
 
@@ -778,6 +794,8 @@ Returns
 
 The mnemonic phrase as a string.
 
+</details>
+
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -805,7 +823,11 @@ export default function fromUtxo(utxo: jsonUtxo, unlockingScriptTemplate: {
 }): TransactionInput 
 ```
 
-See also: [Transaction](./transaction.md#class-transaction), [TransactionInput](./transaction.md#interface-transactioninput), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
+See also: [Transaction](#class-transaction), [TransactionInput](#interface-transactioninput), [UnlockingScript](#class-unlockingscript), [sign](#variable-sign)
+
+<details>
+
+<summary>Function fromUtxo Details</summary>
 
 Argument Details
 
@@ -813,6 +835,8 @@ Argument Details
   + : jsonUtxo
 + **unlockingScriptTemplate**
   + : { sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>, estimateLength: (tx: Transaction, inputIndex: number) => Promise<number> }
+
+</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -849,7 +873,7 @@ magicHash = (messageBuf: number[]): number[] => {
 }
 ```
 
-See also: [Writer](./primitives.md#class-writer), [hash256](./primitives.md#variable-hash256), [toArray](./primitives.md#variable-toarray)
+See also: [Writer](#class-writer), [hash256](#variable-hash256), [toArray](#variable-toarray)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -869,7 +893,7 @@ sign = (message: number[], privateKey: PrivateKey, mode: "raw" | "base64" = "bas
 }
 ```
 
-See also: [BigNumber](./primitives.md#class-bignumber), [PrivateKey](./primitives.md#class-privatekey), [Signature](./primitives.md#class-signature), [magicHash](./compat.md#variable-magichash)
+See also: [BigNumber](#class-bignumber), [PrivateKey](#class-privatekey), [Signature](#class-signature), [magicHash](#variable-magichash)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -883,7 +907,7 @@ verify = (message: number[], sig: Signature, pubKey: PublicKey): boolean => {
 }
 ```
 
-See also: [BigNumber](./primitives.md#class-bignumber), [PublicKey](./primitives.md#class-publickey), [Signature](./primitives.md#class-signature), [magicHash](./compat.md#variable-magichash)
+See also: [BigNumber](#class-bignumber), [PublicKey](#class-publickey), [Signature](#class-signature), [magicHash](#variable-magichash)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 

@@ -77,7 +77,7 @@ export class MasterCertificate extends Certificate {
    * @param {WalletCounterparty} certifierOrSubject - The certifier or subject who will validate the certificate fields.
    * @param {Record<CertificateFieldNameUnder50Bytes, string>} fields - A record of certificate field names (under 50 bytes) mapped to their values.
    * @param {BooleanDefaultFalse} [privileged] - Whether this is a privileged request.
-   * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.   * 
+   * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.   *
    * @returns {Promise<CreateCertificateFieldsResult>} A promise resolving to an object containing:
    *   - `certificateFields` {Record<CertificateFieldNameUnder50Bytes, Base64String>}:
    *     The encrypted certificate fields.
@@ -139,7 +139,7 @@ export class MasterCertificate extends Certificate {
    * @param {string} [originator] - Optional originator identifier, used if additional context is needed for decryption and encryption operations.
    * @returns {Promise<Record<CertificateFieldNameUnder50Bytes, string>>} - A keyring mapping field names to encrypted field revelation keys, allowing the verifier to decrypt specified fields.
    * @param {BooleanDefaultFalse} [privileged] - Whether this is a privileged request.
-   * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.   * 
+   * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.   *
    * @throws {Error} Throws an error if:
    *   - fieldsToReveal is not an array of strings.
    *   - A field in `fieldsToReveal` does not exist in the certificate.

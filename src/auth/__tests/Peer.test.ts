@@ -264,7 +264,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
         })().catch(e => { })
       })
     })
-    let aliceReceivedGeneralMessageOnFirstDevice = new Promise<void>((resolve) => {
+    const aliceReceivedGeneralMessageOnFirstDevice = new Promise<void>((resolve) => {
       aliceFirstDevice.listenForGeneralMessages((senderPublicKey, payload) => {
         (async () => {
           resolve()

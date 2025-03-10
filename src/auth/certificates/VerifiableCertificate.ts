@@ -58,7 +58,7 @@ export class VerifiableCertificate extends Certificate {
    * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
    * @throws {Error} Throws an error if any of the decryption operations fail, with a message indicating the failure context.
    */
-  async decryptFields(
+  async decryptFields (
     verifierWallet: ProtoWallet,
     privileged?: boolean,
     privilegedReason?: string

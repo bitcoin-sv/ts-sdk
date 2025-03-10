@@ -9,7 +9,7 @@ import MerklePath from '../MerklePath'
 jest.setTimeout(60000) // Increase timeout for benchmarking tests if necessary
 
 // Helper function to measure execution time
-async function measureTime(fn: () => Promise<void>): Promise<number> {
+async function measureTime (fn: () => Promise<void>): Promise<number> {
   const start = process.hrtime()
   await fn()
   const diff = process.hrtime(start)

@@ -98,7 +98,6 @@ describe('MessageBoxClient WebSocket Integration Tests', () => {
     expect(received.sender).toBe(recipientKey)
   }, 1500000)
 
-
   /** TEST 4: Leave a WebSocket Room **/
   test('should leave a WebSocket room successfully', async () => {
     await messageBoxClient.leaveRoom(messageBox)
