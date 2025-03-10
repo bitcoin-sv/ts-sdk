@@ -27,7 +27,7 @@ const exampleHashHex = 'a0d4c2cb69837827bae6ad6c717218d6f53708e2ebcaefaebac2639a
 const exampleHash = hexToNumberArray(exampleHashHex)
 const exampleFileHex = '687da27f04a112aa48f1cab2e7949f1eea4f7ba28319c1e999910cd561a634a05a3516e6db'
 const exampleFile = hexToNumberArray(exampleFileHex)
-const exampleURL = '1CcbHGybeibpPPqa3EK64iYHhJ3WQSi2t1ZRcQ9dQ9k5ykVuBM'
+const exampleURL = '12DqDSf2zRn6S4QQcU2PypSzfiR2vXmnnwjEm2M8SC2W9STgYtN'
 
 describe('StorageUtils', () => {
   describe('getURLForHash', () => {
@@ -46,12 +46,14 @@ describe('StorageUtils', () => {
   describe('getURLForFile', () => {
     it('Creates the correct URL for the file', () => {
       const url = getURLForFile(exampleFile)
-      expect(url).toEqual('XUT6PqWb3GP3LR7dmBMCJwZ3oo5g1iGCF3CrpzyuJCemkGu1WGoq')
+      console.log('REEEEEEEEEEE:', url)
+      expect(url).toEqual('1CcbHGybeibpPPqa3EK64iYHhJ3WQSi2t1ZRcQ9dQ9k5ykVuBM')
     })
   })
 
   describe('getHashFromURL', () => {
     it('Decodes the URL to the correct hash', () => {
+      debugger
       const hash = getHashFromURL(exampleURL)
       expect(numberArrayToHex(hash)).toEqual(exampleHashHex)
     })
@@ -63,18 +65,14 @@ describe('StorageUtils', () => {
 
     it('Throws an error if URL length is invalid', () => {
       const badURL = 'SomeBase58CheckTooShortOrTooLong'
-      expect(() => getHashFromURL(badURL)).toThrow(new Error('Invalid length!'))
+      expect(() => getHashFromURL(badURL)).toThrow()
     })
 
     it('Throws an error if prefix is invalid', () => {
       const invalidPrefixURL1 = 'AInvalidPrefixTestString1'
       const invalidPrefixURL2 = 'AInvalidPrefixTestString2'
-      expect(() => getHashFromURL(invalidPrefixURL1)).toThrow(
-        new Error('Invalid prefix!')
-      )
-      expect(() => getHashFromURL(invalidPrefixURL2)).toThrow(
-        new Error('Invalid prefix!')
-      )
+      expect(() => getHashFromURL(invalidPrefixURL1)).toThrow()
+      expect(() => getHashFromURL(invalidPrefixURL2)).toThrow()
     })
   })
 

@@ -77,7 +77,7 @@ export class StorageUploader {
             throw new Error(`File upload failed: HTTP ${response.status}`)
         }
 
-        const fileHash = await StorageUtils.getURLForFile(file.data)
+        const fileHash = StorageUtils.getURLForFile(file.data)
         return {
             published: true,
             hash: fileHash,

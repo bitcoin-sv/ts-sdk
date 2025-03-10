@@ -42,7 +42,7 @@ export const getURLForFile = (file: number[]) => {
 export const getHashFromURL = (URL: string) => {
   URL = normalizeURL(URL)
   const { prefix, data } = fromBase58Check(URL)
-  if (data.byteLength !== 33) {
+  if (data.length !== 32) {
     throw new Error('Invalid length!')
   }
   if (prefix.toString('hex') !== 'ce') {

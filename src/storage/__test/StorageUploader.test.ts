@@ -16,7 +16,7 @@ describe('StorageUploader Tests', () => {
     walletClient = new WalletClient('json-api', 'non-admin.com')
 
     uploader = new StorageUploader({
-      nanostoreURL: 'https://nanostore.babbage.systems',
+      nanostoreURL: 'https://nanostore.babbage.systems', // TODO update to new nanostore url
       wallet: walletClient
     })
 
