@@ -54,10 +54,14 @@ export class VerifiableCertificate extends Certificate {
    * Decrypts selectively revealed certificate fields using the provided keyring and verifier wallet
    * @param {ProtoWallet} verifierWallet - The wallet instance of the certificate's verifier, used to decrypt field keys.
    * @returns {Promise<Record<CertificateFieldNameUnder50Bytes, string>>} - A promise that resolves to an object where each key is a field name and each value is the decrypted field value as a string.
+   * @param {BooleanDefaultFalse} [privileged] - Whether this is a privileged request.
+   * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
    * @throws {Error} Throws an error if any of the decryption operations fail, with a message indicating the failure context.
    */
-  async decryptFields (
-    verifierWallet: ProtoWallet
+  async decryptFields(
+    verifierWallet: ProtoWallet,
+    privileged?: boolean,
+    privilegedReason?: string
   ): Promise<Record<CertificateFieldNameUnder50Bytes, string>> {
     if (this.keyring == null || Object.keys(this.keyring).length === 0) { // ✅ Explicitly check null and empty object
       throw new Error(
@@ -75,7 +79,9 @@ export class VerifiableCertificate extends Certificate {
             fieldName,
             this.serialNumber
           ),
-          counterparty: this.subject
+          counterparty: this.subject,
+          privileged,
+          privilegedReason
         })
 
         const fieldValue = new SymmetricKey(fieldRevelationKey).decrypt(

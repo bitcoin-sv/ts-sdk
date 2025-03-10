@@ -211,15 +211,13 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     const bobReceivedGeneralMessage = new Promise<void>((resolve) => {
       bob.listenForGeneralMessages((senderPublicKey, payload) => {
         (async () => {
-          console.log('Bob received message:', Utils.toUTF8(payload))
           await bob.toPeer(Utils.toArray('Hello Alice!'), senderPublicKey)
           resolve()
-        })().catch(e => console.log(e))
+        })().catch(e => { })
       })
     })
     const aliceReceivedGeneralMessage = new Promise<void>((resolve) => {
       alice.listenForGeneralMessages((senderPublicKey, payload) => {
-        console.log('Alice received message:', Utils.toUTF8(payload))
         resolve()
       })
     })
@@ -231,6 +229,69 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     expect(certificatesReceivedByAlice).toEqual([])
     expect(certificatesReceivedByBob).toEqual([])
   }, 15000)
+
+  it('Alice talks to Bob across two devices, Bob can respond across both sessions', async () => {
+    const transportA1 = new LocalTransport()
+    const transportA2 = new LocalTransport()
+    const transportB = new LocalTransport()
+    transportA1.connect(transportB)
+    const aliceKey = PrivateKey.fromRandom()
+    const walletA1 = new CompletedProtoWallet(aliceKey)
+    const walletA2 = new CompletedProtoWallet(aliceKey)
+    const walletB = new CompletedProtoWallet(PrivateKey.fromRandom())
+    const aliceFirstDevice = new Peer(
+      walletA1,
+      transportA1
+    )
+    const aliceOtherDevice = new Peer(
+      walletA2,
+      transportA2
+    )
+    const bob = new Peer(
+      walletB,
+      transportB
+    )
+    const alice1MessageHandler = jest.fn()
+    const alice2MessageHandler = jest.fn()
+    const bobMessageHandler = jest.fn()
+
+    const bobReceivedGeneralMessage = new Promise<void>((resolve) => {
+      bob.listenForGeneralMessages((senderPublicKey, payload) => {
+        (async () => {
+          await bob.toPeer(Utils.toArray('Hello Alice!'), senderPublicKey)
+          resolve()
+          bobMessageHandler(senderPublicKey, payload)
+        })().catch(e => { })
+      })
+    })
+    let aliceReceivedGeneralMessageOnFirstDevice = new Promise<void>((resolve) => {
+      aliceFirstDevice.listenForGeneralMessages((senderPublicKey, payload) => {
+        (async () => {
+          resolve()
+          alice1MessageHandler(senderPublicKey, payload)
+        })().catch(e => { })
+      })
+    })
+    const aliceReceivedGeneralMessageOnOtherDevice = new Promise<void>((resolve) => {
+      aliceOtherDevice.listenForGeneralMessages((senderPublicKey, payload) => {
+        (async () => {
+          resolve()
+          alice2MessageHandler(senderPublicKey, payload)
+        })().catch(e => { })
+      })
+    })
+
+    await aliceFirstDevice.toPeer(Utils.toArray('Hello Bob!'))
+    await bobReceivedGeneralMessage
+    await aliceReceivedGeneralMessageOnFirstDevice
+    transportA2.connect(transportB)
+    await aliceOtherDevice.toPeer(Utils.toArray('Hello Bob from my other device!'))
+    await aliceReceivedGeneralMessageOnOtherDevice
+    transportA1.connect(transportB)
+    await aliceFirstDevice.toPeer(Utils.toArray('Back on my first device now, Bob! Can you still hear me?'))
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    expect(alice1MessageHandler.mock.calls.length).toEqual(2)
+  }, 30000)
 
   it('Bob requests certificates from Alice, Alice does not request any from Bob', async () => {
     const alicePubKey = (await walletA.getPublicKey({ identityKey: true }))
@@ -267,10 +328,10 @@ describe('Peer class mutual authentication and certificate exchange', () => {
             // Use a for...of loop instead of forEach with an async callback.
             for (const cert of certificatesReceivedByBob) {
               // Decrypt to ensure it has the correct fields.
-              const decryptedFields = await cert.decryptFields(walletB)
+              // const decryptedFields = await cert.decryptFields(walletB)
               if (cert.certifier !== 'bob') {
-                console.log('Bob accepted the message:', Utils.toUTF8(payload))
-                console.log('Decrypted fields:', decryptedFields)
+                // console.log('Bob accepted the message:', Utils.toUTF8(payload))
+                // console.log('Decrypted fields:', decryptedFields)
               }
             }
           }
@@ -574,7 +635,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
               resolve()
             }
           }
-        })().catch(e => console.log(e))
+        })().catch(e => { })
       }
       )
     })
@@ -592,7 +653,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
               resolve()
             }
           }
-        })().catch(e => console.log(e))
+        })().catch(e => { })
       }
       )
     })
@@ -606,7 +667,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
             senderPublicKey
           )
           resolve()
-        })().catch(e => console.log(e))
+        })().catch(e => { })
       })
     })
 
@@ -700,7 +761,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
               resolve()
             }
           }
-        })().catch(e => console.log(e))
+        })().catch(e => { })
       })
     })
 
@@ -717,7 +778,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
               resolve()
             }
           }
-        })().catch(e => console.log(e))
+        })().catch(e => { })
       })
     })
 

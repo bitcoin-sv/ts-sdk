@@ -57,6 +57,7 @@ const createMinimallyEncodedScriptChunk = (
 
 export default class PushDrop implements ScriptTemplate {
   wallet: WalletInterface
+  originator?: string
 
   /**
    * Decodes a PushDrop script back into its token fields and the locking public key. If a signature was present, it will be the last field returned.
@@ -105,9 +106,11 @@ export default class PushDrop implements ScriptTemplate {
    * Constructs a new instance of the PushDrop class.
    *
    * @param {WalletInterface} wallet - The wallet interface used for creating signatures and accessing public keys.
+   * @param {string} originator — The originator to use with Wallet requests
    */
-  constructor (wallet: WalletInterface) {
+  constructor(wallet: WalletInterface, originator?: string) {
     this.wallet = wallet
+    this.originator = originator
   }
 
   /**
@@ -135,7 +138,7 @@ export default class PushDrop implements ScriptTemplate {
       keyID,
       counterparty,
       forSelf
-    })
+    }, this.originator)
     const lockChunks: Array<{ op: number, data?: number[] }> = []
     const pushDropChunks: Array<{ op: number, data?: number[] }> = []
     lockChunks.push({
@@ -150,7 +153,7 @@ export default class PushDrop implements ScriptTemplate {
         protocolID,
         keyID,
         counterparty
-      })
+      }, this.originator)
       fields.push(signature)
     }
     for (const field of fields) {
@@ -263,7 +266,7 @@ export default class PushDrop implements ScriptTemplate {
           protocolID,
           keyID,
           counterparty
-        })
+        }, this.originator)
         const signature = Signature.fromDER([...bareSignature])
         const txSignature = new TransactionSignature(
           signature.r,

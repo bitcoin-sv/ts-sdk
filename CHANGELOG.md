@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.3.36 - 2025-03-07](#1335---2025-03-7)
+- [1.3.35 - 2025-03-07](#1335---2025-03-7)
+- [1.3.34 - 2025-03-06](#1334---2025-03-6)
+- [1.3.33 - 2025-03-06](#1333---2025-03-6)
+- [1.3.32 - 2025-03-06](#1332---2025-03-6)
+- [1.3.30 - 2025-03-05](#1330---2025-03-5)
+- [1.3.29 - 2025-03-05](#1329---2025-03-5)
+- [1.3.28 - 2025-02-28](#1328---2025-02-28)
+- [1.3.27 - 2025-02-28](#1327---2025-02-28)
+- [1.3.26 - 2025-02-28](#1326---2025-02-28)
+- [1.3.25 - 2025-02-27](#1325---2025-02-27)
+- [1.3.24 - 2025-02-22](#1324---2025-02-22)
+- [1.3.23 - 2025-02-21](#1323---2025-02-21)
+- [1.3.22 - 2025-02-19](#1322---2025-02-19)
+- [1.3.21 - 2025-02-17](#1321---2025-02-17)
+- [1.3.20- 2025-02-11](#1320---2025-02-17)
+- [1.3.19 - 2025-02-16](#1319---2025-02-16)
+- [1.3.18 - 2025-02-12](#1318---2025-02-12)
+- [1.3.17- 2025-02-11](#1317---2025-02-11)
 - [1.3.15- 2025-02-07](#1315---2025-02-07)
 - [1.3.14- 2025-02-07](#1314---2025-02-07)
 - [1.3.12 - 2025-01-29](#139---2025-01-29)
@@ -79,6 +98,170 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.3.36] - 2025-03-7
+
+### Fixed
+
+- AuthFetch waits for pending certificate requests before exchanging data
+
+---
+
+## [1.3.35] - 2025-03-7
+
+### Fixed
+
+- Beef toBinary was missing a sortTxs() call.
+
+---
+
+## [1.3.34] - 2025-03-6
+
+### Added
+
+- Support for the Babbage testnet SLAP tracker
+- Support for overlay network presets for mainnet, testnet, or local
+
+---
+
+## [1.3.33] - 2025-03-6
+
+### Fixed
+
+- Add support for privileged certificates in MasterCertificate and VerifiableCertificate classes.
+
+---
+
+## [1.3.32] - 2025-03-6
+
+### Fixed
+
+- Removed ambiguity with the keyID used in master and verifiable certificate field encryption.
+
+---
+
+## [1.3.31] - 2025-03-6
+
+### Fixed
+
+- Beef verify now checks that BUMPs contain required txids.
+
+---
+
+## [1.3.30] - 2025-03-5
+
+### Fixed
+
+- Re-handshake in AuthFetch if a server forgets about a session that the client maintained
+
+---
+
+## [1.3.29] - 2025-03-5
+
+### Added
+
+- Concurrent session management for the same peer across devices
+
+---
+
+## [1.3.28] - 2025-02-28
+
+### Fixed
+
+- Persisted payee derivation information in AuthFetch
+- Use the first output index for AuthFetch payments
+
+---
+
+## [1.3.27] - 2025-02-28
+
+### Fixed
+
+- Added defaults for undefined AuthFetch request body (specifically for content-type of application/json).
+- This prevents signature verification errors due to express defaults for requests with undefined body.
+
+---
+
+## [1.3.26] - 2025-02-28
+
+### Fixed
+
+- Fixed a bug with AuthFetch where when responding to error 402, the derivationSuffix was not sent to the server. 
+- Updated used createNonce for the derivationSuffix creation to link it to the sender.
+
+---
+
+## [1.3.25] - 2025-02-27
+
+### Fixed
+
+- Previously, the function split each character’s 16-bit code unit into two bytes (if the high byte was non-zero), which only worked for ASCII and failed on non-ASCII/multi-byte characters. Now emojis can be encoded correctly!
+
+---
+
+## [1.3.24] - 2025-02-22
+
+### Added
+
+- Originator support to PushDrop template
+
+---
+
+## [1.3.23] - 2025-02-21
+
+### Fixed
+
+- Fixed a bug with SHIPCast's default configuration.
+
+---
+
+## [1.3.22] - 2025-02-19
+
+### Fixed
+
+- Fixed a bug with how the HTTPWalletJSON response was parsed to check for errors.
+
+---
+
+## [1.3.21] - 2025-02-17
+
+### Fixed
+
+- Update type returned in Hash.SHA512._digestHex method so that it doesn't fail tsc builds.
+
+---
+
+## [1.3.20] - 2025-02-17
+
+### Fixed
+
+- ATOMIC BEEF should use little endian encoding of the txid, rather than big endian.
+
+---
+
+## [1.3.19] - 2025-02-16
+
+### Change
+
+- Make URL, httpClient, getHttpHeaders protected instead of private to support extending WhatsOnChain class.
+
+---
+
+## [1.3.18] - 2025-02-12
+
+### Fixed
+
+- Avoid collapsing doc details. Not supported by github pages.
+
+---
+
+## [1.3.17] - 2025-02-11
+
+### Fixed
+
+- Added error handling to HTTPWalletJSON
 
 ---
 

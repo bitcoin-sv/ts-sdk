@@ -141,8 +141,6 @@ describe('verifyNonce', () => {
       counterparty: (await serverWallet.getPublicKey({ identityKey: true }))
         .publicKey
     })
-
-    console.log(Utils.toBase64(serialNumber))
     expect(valid).toEqual(true)
   })
 })

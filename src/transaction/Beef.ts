@@ -400,7 +400,12 @@ export class Beef {
       roots: {}
     }
 
-    this.sortTxs()
+    const sr = this.sortTxs()
+    if (sr.missingInputs.length > 0 ||
+      sr.notValid.length > 0 ||
+      (sr.txidOnly.length > 0 && allowTxidOnly !== true) ||
+      sr.withMissingInputs.length > 0
+    ) { return r }
 
     // valid txids: only txids if allowed, bump txids, then txids with input's in txids
     const txids: Record<string, boolean> = {}
@@ -434,6 +439,14 @@ export class Beef {
             return r
           }
         }
+      }
+    }
+
+    // All txs with a bumpIndex have matching txid leaf at level zero of BUMP.
+    for (const t of this.txs) {
+      if (t.bumpIndex !== undefined) {
+        const leaf = this.bumps[t.bumpIndex].path[0].find(l => l.hash === t.txid)
+        if (leaf == null) { return r }
       }
     }
 
@@ -472,6 +485,8 @@ export class Beef {
    * @returns A binary array representing the BEEF
    */
   toBinary (): number[] {
+    // Always serialize in dependency sorted order.
+    this.sortTxs()
     const writer = new Writer()
     this.toWriter(writer)
     return writer.toArray()
@@ -504,7 +519,7 @@ export class Beef {
 
     const writer = new Writer()
     writer.writeUInt32LE(ATOMIC_BEEF)
-    writer.write(toArray(txid, 'hex'))
+    writer.writeReverse(toArray(txid, 'hex'))
     beef.toWriter(writer)
 
     return writer.toArray()
@@ -523,7 +538,7 @@ export class Beef {
     let atomicTxid: string | undefined
     if (version === ATOMIC_BEEF) {
       // Skip the txid and re-read the BEEF version
-      atomicTxid = toHex(br.read(32))
+      atomicTxid = toHex(br.readReverse(32))
       version = br.readUInt32LE()
     }
     if (version !== BEEF_V1 && version !== BEEF_V2) {

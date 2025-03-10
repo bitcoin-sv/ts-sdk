@@ -1,4 +1,4 @@
-import { Utils, WalletInterface, WalletCounterparty } from '../../../mod.js'
+import { Utils, WalletInterface, WalletCounterparty, Base64String } from '../../../mod.js'
 
 /**
  * Verifies a nonce derived from a wallet
@@ -7,8 +7,8 @@ import { Utils, WalletInterface, WalletCounterparty } from '../../../mod.js'
  * @param counterparty - The counterparty to the nonce creation. Defaults to 'self'.
  * @returns The status of the validation
  */
-export async function verifyNonce (
-  nonce: string,
+export async function verifyNonce(
+  nonce: Base64String,
   wallet: WalletInterface,
   counterparty: WalletCounterparty = 'self'
 ): Promise<boolean> {
