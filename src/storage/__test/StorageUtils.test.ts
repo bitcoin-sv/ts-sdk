@@ -1,4 +1,4 @@
-import { StorageUtils } from '../../storage/index.js'
+import { StorageUtils } from '../index.js'
 import * as Utils from '../../primitives/utils.js'
 import * as Hash from '../..//primitives/Hash.js'
 

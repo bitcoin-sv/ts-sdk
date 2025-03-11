@@ -1,6 +1,6 @@
 import { AuthFetch } from '../auth/clients/AuthFetch.js'
-import { WalletInterface } from '../wallet/index.js'
-import { StorageUtils } from '../storage/index.js'
+import { WalletInterface } from '../wallet/Wallet.interfaces.js'
+import * as StorageUtils from './StorageUtils.js'
 
 export interface UploaderConfig {
   storageURL: string
@@ -21,18 +21,18 @@ export class StorageUploader {
   private readonly authFetch: AuthFetch
   private readonly baseURL: string
 
-  constructor (config: UploaderConfig) {
+  constructor(config: UploaderConfig) {
     this.baseURL = config.storageURL
     this.authFetch = new AuthFetch(config.wallet)
   }
 
-  private async getUploadInfo (
+  private async getUploadInfo(
     fileSize: number,
     retentionPeriod: number
   ): Promise<{
-      uploadURL: string
-      amount?: number
-    }> {
+    uploadURL: string
+    amount?: number
+  }> {
     const url = `${this.baseURL}/upload`
     const body = { fileSize, retentionPeriod }
 
@@ -58,7 +58,7 @@ export class StorageUploader {
     }
   }
 
-  private async uploadFile (
+  private async uploadFile(
     uploadURL: string,
     file: UploadableFile
   ): Promise<UploadFileResult> {
@@ -95,7 +95,7 @@ export class StorageUploader {
      *
      * @throws If either the upload info request or the subsequent file upload request fails (non-OK HTTP status).
      */
-  public async publishFile (params: {
+  public async publishFile(params: {
     file: UploadableFile
     retentionPeriod: number
   }): Promise<UploadFileResult> {
