@@ -1,4 +1,5 @@
-import { Utils, WalletInterface, WalletCounterparty, Base64String } from '../../../mod.js'
+import * as Utils from '../../primitives/utils.js'
+import { WalletInterface, WalletCounterparty, Base64String } from '../../wallet/Wallet.interfaces.js'
 
 /**
  * Verifies a nonce derived from a wallet

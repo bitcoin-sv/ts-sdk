@@ -7885,7 +7885,10 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ### Variable: fromBase58Check
 
 ```ts
-fromBase58Check = (str: string, enc?: "hex", prefixLength: number = 1): any => {
+fromBase58Check = (str: string, enc?: "hex", prefixLength: number = 1): {
+    data: number[] | string;
+    prefix: number[] | string;
+} => {
     const bin = fromBase58(str);
     let prefix: string | number[] = bin.slice(0, prefixLength);
     let data: string | number[] = bin.slice(prefixLength, -4);
