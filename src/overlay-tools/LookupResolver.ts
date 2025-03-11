@@ -94,12 +94,12 @@ export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
   fetchClient: typeof fetch
   allowHTTP: boolean
 
-  constructor (httpClient = fetch, allowHTTP: boolean = false) {
+  constructor(httpClient = fetch, allowHTTP: boolean = false) {
     this.fetchClient = httpClient
     this.allowHTTP = allowHTTP
   }
 
-  async lookup (
+  async lookup(
     url: string,
     question: LookupQuestion,
     timeout: number = 5000
@@ -147,7 +147,7 @@ export default class LookupResolver {
   private readonly additionalHosts: Record<string, string[]>
   private readonly networkPreset: 'mainnet' | 'testnet' | 'local'
 
-  constructor (config: LookupResolverConfig = {}) {
+  constructor(config: LookupResolverConfig = {}) {
     this.networkPreset = config.networkPreset ?? 'mainnet'
     this.facilitator = config.facilitator ?? new HTTPSOverlayLookupFacilitator(undefined, this.networkPreset === 'local')
     this.slapTrackers = config.slapTrackers ?? (this.networkPreset === 'mainnet' ? DEFAULT_SLAP_TRACKERS : DEFAULT_TESTNET_SLAP_TRACKERS)
@@ -158,7 +158,7 @@ export default class LookupResolver {
   /**
    * Given a LookupQuestion, returns a LookupAnswer. Aggregates across multiple services and supports resiliency.
    */
-  async query (
+  async query(
     question: LookupQuestion,
     timeout?: number
   ): Promise<LookupAnswer> {
@@ -227,8 +227,8 @@ export default class LookupResolver {
             continue
           }
         }
-      } catch (error) {
-        console.error('Error processing response outputs:', error)
+      } catch (_) {
+        // Error processing output, proceed.
       }
     }
     return {
@@ -242,7 +242,7 @@ export default class LookupResolver {
    * @param service Service for which competent hosts are to be returned
    * @returns Array of hosts competent for resolving queries
    */
-  private async findCompetentHosts (service: string): Promise<string[]> {
+  private async findCompetentHosts(service: string): Promise<string[]> {
     const query: LookupQuestion = {
       service: 'ls_slap',
       query: {
