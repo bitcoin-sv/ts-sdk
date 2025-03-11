@@ -1,6 +1,6 @@
 import WalletWire from './WalletWire.js'
 import WalletWireCalls from './WalletWireCalls.js'
-import * as Utils from '../../primitives/Utils.js'
+import * as Utils from '../../primitives/tils.js'
 
 export default class HTTPWalletWire implements WalletWire {
   baseUrl: string
