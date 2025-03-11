@@ -3,84 +3,84 @@ import { WalletInterface } from '../wallet/index.js'
 import { StorageUtils } from '../storage/index.js'
 
 export interface UploaderConfig {
-    storageURL: string
-    wallet: WalletInterface
+  storageURL: string
+  wallet: WalletInterface
 }
 
 export interface UploadableFile {
-    data: number[]
-    type: string
+  data: number[]
+  type: string
 }
 
 export interface UploadFileResult {
-    published: boolean
-    uhrpURL: string
+  published: boolean
+  uhrpURL: string
 }
 
 export class StorageUploader {
-    private authFetch: AuthFetch
-    private baseURL: string
+  private readonly authFetch: AuthFetch
+  private readonly baseURL: string
 
-    constructor(config: UploaderConfig) {
-        this.baseURL = config.storageURL
-        this.authFetch = new AuthFetch(config.wallet)
-    }
+  constructor (config: UploaderConfig) {
+    this.baseURL = config.storageURL
+    this.authFetch = new AuthFetch(config.wallet)
+  }
 
-    private async getUploadInfo(
-        fileSize: number,
-        retentionPeriod: number
-    ): Promise<{
-        uploadURL: string
-        amount?: number
+  private async getUploadInfo (
+    fileSize: number,
+    retentionPeriod: number
+  ): Promise<{
+      uploadURL: string
+      amount?: number
     }> {
-        const url = `${this.baseURL}/upload`
-        const body = { fileSize, retentionPeriod }
+    const url = `${this.baseURL}/upload`
+    const body = { fileSize, retentionPeriod }
 
-        const response = await this.authFetch.fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        })
-        if (!response.ok) {
-            throw new Error(`Upload info request failed: HTTP ${response.status}`)
-        }
-        const data = await response.json() as {
-            status: string,
-            uploadURL: string
-            amount?: number
-        }
-        if (data.status === 'error') {
-            throw new Error('Upload route returned an error.')
-        }
-        return {
-            uploadURL: data.uploadURL,
-            amount: data.amount
-        }
+    const response = await this.authFetch.fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+    if (!response.ok) {
+      throw new Error(`Upload info request failed: HTTP ${response.status}`)
+    }
+    const data = await response.json() as {
+      status: string
+      uploadURL: string
+      amount?: number
+    }
+    if (data.status === 'error') {
+      throw new Error('Upload route returned an error.')
+    }
+    return {
+      uploadURL: data.uploadURL,
+      amount: data.amount
+    }
+  }
+
+  private async uploadFile (
+    uploadURL: string,
+    file: UploadableFile
+  ): Promise<UploadFileResult> {
+    const body = Uint8Array.from(file.data)
+
+    const response = await fetch(uploadURL, {
+      method: 'PUT',
+      body,
+      headers: { 'Content-Type': file.type }
+    })
+    if (!response.ok) {
+      throw new Error(`File upload failed: HTTP ${response.status}`)
     }
 
-    private async uploadFile(
-        uploadURL: string,
-        file: UploadableFile
-    ): Promise<UploadFileResult> {
-        const body = Uint8Array.from(file.data)
-
-        const response = await fetch(uploadURL, {
-            method: 'PUT',
-            body: body,
-            headers: { 'Content-Type': file.type }
-        })
-        if (!response.ok) {
-            throw new Error(`File upload failed: HTTP ${response.status}`)
-        }
-
-        const uhrpURL = await StorageUtils.getURLForFile(file.data)
-        return {
-            published: true,
-            uhrpURL,
-        }
+    const uhrpURL = await StorageUtils.getURLForFile(file.data)
+    return {
+      published: true,
+      uhrpURL
     }
+  }
 
-    /**
+  /**
      * Publishes a file to the storage server with the specified retention period.
      *
      * This will:
@@ -95,15 +95,14 @@ export class StorageUploader {
      *
      * @throws If either the upload info request or the subsequent file upload request fails (non-OK HTTP status).
      */
-    public async publishFile(params: {
-        file: UploadableFile
-        retentionPeriod: number
-    }): Promise<UploadFileResult> {
-        const { file, retentionPeriod } = params
-        const fileSize = file.data.length
+  public async publishFile (params: {
+    file: UploadableFile
+    retentionPeriod: number
+  }): Promise<UploadFileResult> {
+    const { file, retentionPeriod } = params
+    const fileSize = file.data.length
 
-        const { uploadURL, amount } = await this.getUploadInfo(fileSize, retentionPeriod)
-        return this.uploadFile(uploadURL, file)
-    }
+    const { uploadURL } = await this.getUploadInfo(fileSize, retentionPeriod)
+    return await this.uploadFile(uploadURL, file)
+  }
 }
-
