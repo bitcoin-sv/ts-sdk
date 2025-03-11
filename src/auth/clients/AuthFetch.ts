@@ -69,7 +69,7 @@ export class AuthFetch {
    *
    * @throws Will throw an error if unsupported headers are used or other validation fails.
    */
-  async fetch (url: string, config: SimplifiedFetchRequestOptions = {}): Promise<Response> {
+  async fetch(url: string, config: SimplifiedFetchRequestOptions = {}): Promise<Response> {
     if (typeof config.retryCounter === 'number') {
       if (config.retryCounter <= 0) {
         throw new Error('Request failed after maximum number of retries.')
@@ -257,7 +257,7 @@ export class AuthFetch {
     const parsedUrl = new URL(baseUrl)
     const baseURL = parsedUrl.origin
 
-    let peerToUse: { peer: Peer, identityKey?: string }
+    let peerToUse: { peer: Peer; identityKey?: string }
     if (typeof this.peers[baseURL] !== 'undefined') {
       peerToUse = { peer: this.peers[baseURL].peer }
     } else {
@@ -498,7 +498,7 @@ export class AuthFetch {
     return await this.fetch(url, config)
   }
 
-  private async normalizeBodyToNumberArray (body: BodyInit | null | undefined): Promise<number[]> {
+  private async normalizeBodyToNumberArray(body: BodyInit | null | undefined): Promise<number[]> {
     // 0. Null / undefined
     if (body == null) {
       return []

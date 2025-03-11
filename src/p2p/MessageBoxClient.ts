@@ -1,6 +1,6 @@
 // import { WalletClient, AuthFetch } from '@bsv/sdk'
 import { WalletClient } from '../wallet/index.js'
-import { AuthFetch } from 'mod.js'
+import { AuthFetch } from '@bsv/sdk'
 import { AuthSocketClient } from '@bsv/authsocket'
 
 /**

@@ -3,9 +3,6 @@ import MessageBoxClient from '../../MessageBoxClient.js'
 import { WalletClient } from '@bsv/sdk'
 import { webcrypto } from 'crypto'
 
-// Ensure Jest doesn't mock WalletClient
-jest.unmock('@bsv/sdk');
-
 (global as any).self = { crypto: webcrypto }
 
 // Explicitly initialize WalletClient with Meta Net Client (MNC)
@@ -13,7 +10,7 @@ const walletClient = new WalletClient('json-api', 'localhost')
 
 // Initialize MessageBoxClient for HTTP-Only Testing
 const messageBoxClient = new MessageBoxClient({
-  peerServHost: 'http://localhost:8080',
+  peerServHost: 'https://messagebox.babbage.systems',
   walletClient
 })
 

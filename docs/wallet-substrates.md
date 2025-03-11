@@ -31,233 +31,6 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ---
 
-<<<<<<< HEAD
-### Class: HTTPWalletJSON
-
-```ts
-export default class HTTPWalletJSON implements WalletInterface {
-    baseUrl: string;
-    httpClient: typeof fetch;
-    originator: OriginatorDomainNameStringUnder250Bytes | undefined;
-    api: (call: string, args: object) => Promise<unknown>;
-    constructor(originator: OriginatorDomainNameStringUnder250Bytes | undefined, baseUrl: string = "http://localhost:3321", httpClient = fetch) 
-    async createAction(args: CreateActionArgs): Promise<CreateActionResult> 
-    async signAction(args: SignActionArgs): Promise<SignActionResult> 
-    async abortAction(args: {
-        reference: Base64String;
-    }): Promise<{
-        aborted: true;
-    }> 
-    async listActions(args: ListActionsArgs): Promise<ListActionsResult> 
-    async internalizeAction(args: InternalizeActionArgs): Promise<{
-        accepted: true;
-    }> 
-    async listOutputs(args: ListOutputsArgs): Promise<ListOutputsResult> 
-    async relinquishOutput(args: {
-        basket: BasketStringUnder300Bytes;
-        output: OutpointString;
-    }): Promise<{
-        relinquished: true;
-    }> 
-    async getPublicKey(args: {
-        seekPermission?: BooleanDefaultTrue;
-        identityKey?: true;
-        protocolID?: [
-            SecurityLevel,
-            ProtocolString5To400Bytes
-        ];
-        keyID?: KeyIDStringUnder800Bytes;
-        privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Bytes;
-        counterparty?: PubKeyHex | "self" | "anyone";
-        forSelf?: BooleanDefaultFalse;
-    }): Promise<{
-        publicKey: PubKeyHex;
-    }> 
-    async revealCounterpartyKeyLinkage(args: {
-        counterparty: PubKeyHex;
-        verifier: PubKeyHex;
-        privilegedReason?: DescriptionString5to50Bytes;
-        privileged?: BooleanDefaultFalse;
-    }): Promise<{
-        prover: PubKeyHex;
-        verifier: PubKeyHex;
-        counterparty: PubKeyHex;
-        revelationTime: ISOTimestampString;
-        encryptedLinkage: Byte[];
-        encryptedLinkageProof: number[];
-    }> 
-    async revealSpecificKeyLinkage(args: {
-        counterparty: PubKeyHex;
-        verifier: PubKeyHex;
-        protocolID: [
-            SecurityLevel,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        privilegedReason?: DescriptionString5to50Bytes;
-        privileged?: BooleanDefaultFalse;
-    }): Promise<{
-        prover: PubKeyHex;
-        verifier: PubKeyHex;
-        counterparty: PubKeyHex;
-        protocolID: [
-            SecurityLevel,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        encryptedLinkage: Byte[];
-        encryptedLinkageProof: Byte[];
-        proofType: Byte;
-    }> 
-    async encrypt(args: {
-        seekPermission?: BooleanDefaultTrue;
-        plaintext: Byte[];
-        protocolID: [
-            SecurityLevel,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        privilegedReason?: DescriptionString5to50Bytes;
-        counterparty?: PubKeyHex | "self" | "anyone";
-        privileged?: BooleanDefaultFalse;
-    }): Promise<{
-        ciphertext: Byte[];
-    }> 
-    async decrypt(args: {
-        seekPermission?: BooleanDefaultTrue;
-        ciphertext: Byte[];
-        protocolID: [
-            SecurityLevel,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        privilegedReason?: DescriptionString5to50Bytes;
-        counterparty?: PubKeyHex | "self" | "anyone";
-        privileged?: BooleanDefaultFalse;
-    }): Promise<{
-        plaintext: Byte[];
-    }> 
-    async createHmac(args: {
-        seekPermission?: BooleanDefaultTrue;
-        data: Byte[];
-        protocolID: [
-            SecurityLevel,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        privilegedReason?: DescriptionString5to50Bytes;
-        counterparty?: PubKeyHex | "self" | "anyone";
-        privileged?: BooleanDefaultFalse;
-    }): Promise<{
-        hmac: Byte[];
-    }> 
-    async verifyHmac(args: {
-        seekPermission?: BooleanDefaultTrue;
-        data: Byte[];
-        hmac: Byte[];
-        protocolID: [
-            SecurityLevel,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        privilegedReason?: DescriptionString5to50Bytes;
-        counterparty?: PubKeyHex | "self" | "anyone";
-        privileged?: BooleanDefaultFalse;
-    }): Promise<{
-        valid: true;
-    }> 
-    async createSignature(args: {
-        seekPermission?: BooleanDefaultTrue;
-        data?: Byte[];
-        hashToDirectlySign?: Byte[];
-        protocolID: [
-            SecurityLevel,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        privilegedReason?: DescriptionString5to50Bytes;
-        counterparty?: PubKeyHex | "self" | "anyone";
-        privileged?: BooleanDefaultFalse;
-    }): Promise<{
-        signature: Byte[];
-    }> 
-    async verifySignature(args: {
-        seekPermission?: BooleanDefaultTrue;
-        data?: Byte[];
-        hashToDirectlyVerify?: Byte[];
-        signature: Byte[];
-        protocolID: [
-            SecurityLevel,
-            ProtocolString5To400Bytes
-        ];
-        keyID: KeyIDStringUnder800Bytes;
-        privilegedReason?: DescriptionString5to50Bytes;
-        counterparty?: PubKeyHex | "self" | "anyone";
-        forSelf?: BooleanDefaultFalse;
-        privileged?: BooleanDefaultFalse;
-    }): Promise<{
-        valid: true;
-    }> 
-    async acquireCertificate(args: AcquireCertificateArgs): Promise<AcquireCertificateResult> 
-    async listCertificates(args: {
-        certifiers: PubKeyHex[];
-        types: Base64String[];
-        limit?: PositiveIntegerDefault10Max10000;
-        offset?: PositiveIntegerOrZero;
-        privileged?: BooleanDefaultFalse;
-        privilegedReason?: DescriptionString5to50Bytes;
-    }): Promise<ListCertificatesResult> 
-    async proveCertificate(args: ProveCertificateArgs): Promise<ProveCertificateResult> 
-    async relinquishCertificate(args: {
-        type: Base64String;
-        serialNumber: Base64String;
-        certifier: PubKeyHex;
-    }): Promise<{
-        relinquished: true;
-    }> 
-    async discoverByIdentityKey(args: {
-        seekPermission?: BooleanDefaultTrue;
-        identityKey: PubKeyHex;
-        limit?: PositiveIntegerDefault10Max10000;
-        offset?: PositiveIntegerOrZero;
-    }): Promise<DiscoverCertificatesResult> 
-    async discoverByAttributes(args: {
-        seekPermission?: BooleanDefaultTrue;
-        attributes: Record<CertificateFieldNameUnder50Bytes, string>;
-        limit?: PositiveIntegerDefault10Max10000;
-        offset?: PositiveIntegerOrZero;
-    }): Promise<DiscoverCertificatesResult> 
-    async isAuthenticated(args: object): Promise<{
-        authenticated: true;
-    }> 
-    async waitForAuthentication(args: object): Promise<{
-        authenticated: true;
-    }> 
-    async getHeight(args: object): Promise<{
-        height: PositiveInteger;
-    }> 
-    async getHeaderForHeight(args: {
-        height: PositiveInteger;
-    }): Promise<{
-        header: HexString;
-    }> 
-    async getNetwork(args: object): Promise<{
-        network: "mainnet" | "testnet";
-    }> 
-    async getVersion(args: object): Promise<{
-        version: VersionString7To30Bytes;
-    }> 
-}
-```
-
-See also: [AcquireCertificateArgs](#interface-acquirecertificateargs), [AcquireCertificateResult](#type-acquirecertificateresult), [Base64String](#type-base64string), [BasketStringUnder300Bytes](#type-basketstringunder300bytes), [BooleanDefaultFalse](#type-booleandefaultfalse), [BooleanDefaultTrue](#type-booleandefaulttrue), [Byte](#type-byte), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [CreateActionArgs](#interface-createactionargs), [CreateActionResult](#interface-createactionresult), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [DiscoverCertificatesResult](#interface-discovercertificatesresult), [HexString](#type-hexstring), [ISOTimestampString](#type-isotimestampstring), [InternalizeActionArgs](#interface-internalizeactionargs), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [ListActionsArgs](#interface-listactionsargs), [ListActionsResult](#interface-listactionsresult), [ListCertificatesResult](#interface-listcertificatesresult), [ListOutputsArgs](#interface-listoutputsargs), [ListOutputsResult](#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [OutpointString](#type-outpointstring), [PositiveInteger](#type-positiveinteger), [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000), [PositiveIntegerOrZero](#type-positiveintegerorzero), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [ProveCertificateArgs](#interface-provecertificateargs), [ProveCertificateResult](#interface-provecertificateresult), [PubKeyHex](#type-pubkeyhex), [SecurityLevel](#type-securitylevel), [SignActionArgs](#interface-signactionargs), [SignActionResult](#interface-signactionresult), [VersionString7To30Bytes](#type-versionstring7to30bytes), [WalletInterface](#interface-walletinterface), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
-
-Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
-
----
-=======
->>>>>>> f93ec6361aba352721adcf71ec8697d02e0f257d
 ### Class: HTTPWalletWire
 
 ```ts
@@ -270,7 +43,7 @@ export default class HTTPWalletWire implements WalletWire {
 }
 ```
 
-See also: [WalletWire](#interface-walletwire)
+See also: [WalletWire](./wallet.md#interface-walletwire)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -287,7 +60,7 @@ export default class WalletWireProcessor implements WalletWire {
 }
 ```
 
-See also: [WalletInterface](#interface-walletinterface), [WalletWire](#interface-walletwire)
+See also: [WalletInterface](./wallet.md#interface-walletinterface), [WalletWire](./wallet.md#interface-walletwire)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -510,7 +283,7 @@ export default class WalletWireTransceiver implements WalletInterface {
 }
 ```
 
-See also: [AcquireCertificateArgs](#interface-acquirecertificateargs), [AcquireCertificateResult](#type-acquirecertificateresult), [Base64String](#type-base64string), [BasketStringUnder300Bytes](#type-basketstringunder300bytes), [BooleanDefaultFalse](#type-booleandefaultfalse), [BooleanDefaultTrue](#type-booleandefaulttrue), [Byte](#type-byte), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [CreateActionArgs](#interface-createactionargs), [CreateActionResult](#interface-createactionresult), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [DiscoverCertificatesResult](#interface-discovercertificatesresult), [HexString](#type-hexstring), [ISOTimestampString](#type-isotimestampstring), [InternalizeActionArgs](#interface-internalizeactionargs), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [ListActionsArgs](#interface-listactionsargs), [ListActionsResult](#interface-listactionsresult), [ListCertificatesResult](#interface-listcertificatesresult), [ListOutputsArgs](#interface-listoutputsargs), [ListOutputsResult](#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [OutpointString](#type-outpointstring), [PositiveInteger](#type-positiveinteger), [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000), [PositiveIntegerOrZero](#type-positiveintegerorzero), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [ProveCertificateArgs](#interface-provecertificateargs), [ProveCertificateResult](#interface-provecertificateresult), [PubKeyHex](#type-pubkeyhex), [SecurityLevel](#type-securitylevel), [SignActionArgs](#interface-signactionargs), [SignActionResult](#interface-signactionresult), [VersionString7To30Bytes](#type-versionstring7to30bytes), [WalletInterface](#interface-walletinterface), [WalletWire](#interface-walletwire), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
+See also: [AcquireCertificateArgs](./wallet.md#interface-acquirecertificateargs), [AcquireCertificateResult](./wallet.md#type-acquirecertificateresult), [Base64String](./wallet.md#type-base64string), [BasketStringUnder300Bytes](./wallet.md#type-basketstringunder300bytes), [BooleanDefaultFalse](./wallet.md#type-booleandefaultfalse), [BooleanDefaultTrue](./wallet.md#type-booleandefaulttrue), [Byte](./wallet.md#type-byte), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [CreateActionArgs](./wallet.md#interface-createactionargs), [CreateActionResult](./wallet.md#interface-createactionresult), [DescriptionString5to50Bytes](./wallet.md#type-descriptionstring5to50bytes), [DiscoverCertificatesResult](./wallet.md#interface-discovercertificatesresult), [HexString](./wallet.md#type-hexstring), [ISOTimestampString](./wallet.md#type-isotimestampstring), [InternalizeActionArgs](./wallet.md#interface-internalizeactionargs), [KeyIDStringUnder800Bytes](./wallet.md#type-keyidstringunder800bytes), [ListActionsArgs](./wallet.md#interface-listactionsargs), [ListActionsResult](./wallet.md#interface-listactionsresult), [ListCertificatesResult](./wallet.md#interface-listcertificatesresult), [ListOutputsArgs](./wallet.md#interface-listoutputsargs), [ListOutputsResult](./wallet.md#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [OutpointString](./wallet.md#type-outpointstring), [PositiveInteger](./wallet.md#type-positiveinteger), [PositiveIntegerDefault10Max10000](./wallet.md#type-positiveintegerdefault10max10000), [PositiveIntegerOrZero](./wallet.md#type-positiveintegerorzero), [ProtocolString5To400Bytes](./wallet.md#type-protocolstring5to400bytes), [ProveCertificateArgs](./wallet.md#interface-provecertificateargs), [ProveCertificateResult](./wallet.md#interface-provecertificateresult), [PubKeyHex](./wallet.md#type-pubkeyhex), [SecurityLevel](./wallet.md#type-securitylevel), [SignActionArgs](./wallet.md#interface-signactionargs), [SignActionResult](./wallet.md#interface-signactionresult), [VersionString7To30Bytes](./wallet.md#type-versionstring7to30bytes), [WalletInterface](./wallet.md#interface-walletinterface), [WalletWire](./wallet.md#interface-walletwire), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -953,7 +726,7 @@ export default class WindowCWISubstrate implements WalletInterface {
 }
 ```
 
-See also: [BEEF](#type-beef), [Base64String](#type-base64string), [BasketStringUnder300Bytes](#type-basketstringunder300bytes), [BooleanDefaultFalse](#type-booleandefaultfalse), [BooleanDefaultTrue](#type-booleandefaulttrue), [Byte](#type-byte), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500bytes), [EntityNameStringMax100Bytes](#type-entitynamestringmax100bytes), [HexString](#type-hexstring), [ISOTimestampString](#type-isotimestampstring), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [LabelStringUnder300Bytes](#type-labelstringunder300bytes), [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes), [OutpointString](#type-outpointstring), [OutputTagStringUnder300Bytes](#type-outputtagstringunder300bytes), [PositiveInteger](#type-positiveinteger), [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000), [PositiveIntegerMax10](#type-positiveintegermax10), [PositiveIntegerOrZero](#type-positiveintegerorzero), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [PubKeyHex](#type-pubkeyhex), [SatoshiValue](#type-satoshivalue), [SecurityLevel](#type-securitylevel), [TXIDHexString](#type-txidhexstring), [VersionString7To30Bytes](#type-versionstring7to30bytes), [WalletInterface](#interface-walletinterface), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
+See also: [BEEF](./wallet.md#type-beef), [Base64String](./wallet.md#type-base64string), [BasketStringUnder300Bytes](./wallet.md#type-basketstringunder300bytes), [BooleanDefaultFalse](./wallet.md#type-booleandefaultfalse), [BooleanDefaultTrue](./wallet.md#type-booleandefaulttrue), [Byte](./wallet.md#type-byte), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [DescriptionString5to50Bytes](./wallet.md#type-descriptionstring5to50bytes), [EntityIconURLStringMax500Bytes](./wallet.md#type-entityiconurlstringmax500bytes), [EntityNameStringMax100Bytes](./wallet.md#type-entitynamestringmax100bytes), [HexString](./wallet.md#type-hexstring), [ISOTimestampString](./wallet.md#type-isotimestampstring), [KeyIDStringUnder800Bytes](./wallet.md#type-keyidstringunder800bytes), [LabelStringUnder300Bytes](./wallet.md#type-labelstringunder300bytes), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [OutpointString](./wallet.md#type-outpointstring), [OutputTagStringUnder300Bytes](./wallet.md#type-outputtagstringunder300bytes), [PositiveInteger](./wallet.md#type-positiveinteger), [PositiveIntegerDefault10Max10000](./wallet.md#type-positiveintegerdefault10max10000), [PositiveIntegerMax10](./wallet.md#type-positiveintegermax10), [PositiveIntegerOrZero](./wallet.md#type-positiveintegerorzero), [ProtocolString5To400Bytes](./wallet.md#type-protocolstring5to400bytes), [PubKeyHex](./wallet.md#type-pubkeyhex), [SatoshiValue](./wallet.md#type-satoshivalue), [SecurityLevel](./wallet.md#type-securitylevel), [TXIDHexString](./wallet.md#type-txidhexstring), [VersionString7To30Bytes](./wallet.md#type-versionstring7to30bytes), [WalletInterface](./wallet.md#interface-walletinterface), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -1397,7 +1170,7 @@ export default class XDMSubstrate implements WalletInterface {
 }
 ```
 
-See also: [BEEF](#type-beef), [Base64String](#type-base64string), [BasketStringUnder300Bytes](#type-basketstringunder300bytes), [BooleanDefaultFalse](#type-booleandefaultfalse), [BooleanDefaultTrue](#type-booleandefaulttrue), [Byte](#type-byte), [CallType](#type-calltype), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes), [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500bytes), [EntityNameStringMax100Bytes](#type-entitynamestringmax100bytes), [HexString](#type-hexstring), [ISOTimestampString](#type-isotimestampstring), [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes), [LabelStringUnder300Bytes](#type-labelstringunder300bytes), [OutpointString](#type-outpointstring), [OutputTagStringUnder300Bytes](#type-outputtagstringunder300bytes), [PositiveInteger](#type-positiveinteger), [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000), [PositiveIntegerMax10](#type-positiveintegermax10), [PositiveIntegerOrZero](#type-positiveintegerorzero), [ProtocolString5To400Bytes](#type-protocolstring5to400bytes), [PubKeyHex](#type-pubkeyhex), [SatoshiValue](#type-satoshivalue), [SecurityLevel](#type-securitylevel), [TXIDHexString](#type-txidhexstring), [VersionString7To30Bytes](#type-versionstring7to30bytes), [WalletInterface](#interface-walletinterface), [decrypt](#variable-decrypt), [encrypt](#variable-encrypt)
+See also: [BEEF](./wallet.md#type-beef), [Base64String](./wallet.md#type-base64string), [BasketStringUnder300Bytes](./wallet.md#type-basketstringunder300bytes), [BooleanDefaultFalse](./wallet.md#type-booleandefaultfalse), [BooleanDefaultTrue](./wallet.md#type-booleandefaulttrue), [Byte](./wallet.md#type-byte), [CallType](./wallet.md#type-calltype), [CertificateFieldNameUnder50Bytes](./wallet.md#type-certificatefieldnameunder50bytes), [DescriptionString5to50Bytes](./wallet.md#type-descriptionstring5to50bytes), [EntityIconURLStringMax500Bytes](./wallet.md#type-entityiconurlstringmax500bytes), [EntityNameStringMax100Bytes](./wallet.md#type-entitynamestringmax100bytes), [HexString](./wallet.md#type-hexstring), [ISOTimestampString](./wallet.md#type-isotimestampstring), [KeyIDStringUnder800Bytes](./wallet.md#type-keyidstringunder800bytes), [LabelStringUnder300Bytes](./wallet.md#type-labelstringunder300bytes), [OutpointString](./wallet.md#type-outpointstring), [OutputTagStringUnder300Bytes](./wallet.md#type-outputtagstringunder300bytes), [PositiveInteger](./wallet.md#type-positiveinteger), [PositiveIntegerDefault10Max10000](./wallet.md#type-positiveintegerdefault10max10000), [PositiveIntegerMax10](./wallet.md#type-positiveintegermax10), [PositiveIntegerOrZero](./wallet.md#type-positiveintegerorzero), [ProtocolString5To400Bytes](./wallet.md#type-protocolstring5to400bytes), [PubKeyHex](./wallet.md#type-pubkeyhex), [SatoshiValue](./wallet.md#type-satoshivalue), [SecurityLevel](./wallet.md#type-securitylevel), [TXIDHexString](./wallet.md#type-txidhexstring), [VersionString7To30Bytes](./wallet.md#type-versionstring7to30bytes), [WalletInterface](./wallet.md#interface-walletinterface), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
