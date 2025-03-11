@@ -1,7 +1,7 @@
 // @ts-nocheck
 // @ts-ignore
 import { AuthMessage, RequestedCertificateSet, Transport } from "../types.js"
-import { Utils } from '../../../mod.js'
+import * as Utils from '../../primitives/utils.js'
 
 const SUCCESS_STATUS_CODES = [200, 402]
 
