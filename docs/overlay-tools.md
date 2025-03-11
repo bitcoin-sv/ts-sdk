@@ -30,10 +30,6 @@ export interface AdmittanceInstructions {
 }
 ```
 
-<details>
-
-<summary>Interface AdmittanceInstructions Details</summary>
-
 #### Property coinsRemoved
 
 The indices of all inputs from the provided transaction which reference previously-admitted outputs,
@@ -59,8 +55,6 @@ The indices of all admissible outputs into the managed topic from the provided t
 outputsToAdmit: number[]
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -74,10 +68,6 @@ export interface LookupQuestion {
     query: unknown;
 }
 ```
-
-<details>
-
-<summary>Interface LookupQuestion Details</summary>
 
 #### Property query
 
@@ -96,8 +86,6 @@ The identifier for a Lookup Service which the person asking the question wishes 
 service: string
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -107,6 +95,7 @@ Configuration options for the Lookup resolver.
 
 ```ts
 export interface LookupResolverConfig {
+    networkPreset?: "mainnet" | "testnet" | "local";
     facilitator?: OverlayLookupFacilitator;
     slapTrackers?: string[];
     hostOverrides?: Record<string, string[]>;
@@ -115,10 +104,6 @@ export interface LookupResolverConfig {
 ```
 
 See also: [OverlayLookupFacilitator](./overlay-tools.md#interface-overlaylookupfacilitator)
-
-<details>
-
-<summary>Interface LookupResolverConfig Details</summary>
 
 #### Property additionalHosts
 
@@ -145,6 +130,17 @@ Map of lookup service names to arrays of hosts to use in place of resolving via 
 hostOverrides?: Record<string, string[]>
 ```
 
+#### Property networkPreset
+
+The network preset to use, unless other options override it.
+- mainnet: use mainnet SLAP trackers and HTTPS facilitator
+- testnet: use testnet SLAP trackers and HTTPS facilitator
+- local: directly query from localhost:8080 and a facilitator that permits plain HTTP
+
+```ts
+networkPreset?: "mainnet" | "testnet" | "local"
+```
+
 #### Property slapTrackers
 
 The list of SLAP trackers queried to resolve Overlay Services hosts for a given lookup service.
@@ -152,8 +148,6 @@ The list of SLAP trackers queried to resolve Overlay Services hosts for a given 
 ```ts
 slapTrackers?: string[]
 ```
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -185,10 +179,6 @@ export interface OverlayLookupFacilitator {
 
 See also: [LookupAnswer](./overlay-tools.md#type-lookupanswer), [LookupQuestion](./overlay-tools.md#interface-lookupquestion)
 
-<details>
-
-<summary>Interface OverlayLookupFacilitator Details</summary>
-
 #### Property lookup
 
 Returns a lookup answer for a lookup question
@@ -197,8 +187,6 @@ Returns a lookup answer for a lookup question
 lookup: (url: string, question: LookupQuestion, timeout?: number) => Promise<LookupAnswer>
 ```
 See also: [LookupAnswer](./overlay-tools.md#type-lookupanswer), [LookupQuestion](./overlay-tools.md#interface-lookupquestion)
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -209,8 +197,9 @@ Configuration options for the SHIP broadcaster.
 
 ```ts
 export interface SHIPBroadcasterConfig {
+    networkPreset?: "mainnet" | "testnet" | "local";
     facilitator?: OverlayBroadcastFacilitator;
-    resolver: LookupResolver;
+    resolver?: LookupResolver;
     requireAcknowledgmentFromAllHostsForTopics?: "all" | "any" | string[];
     requireAcknowledgmentFromAnyHostForTopics?: "all" | "any" | string[];
     requireAcknowledgmentFromSpecificHostsForTopics?: Record<string, "all" | "any" | string[]>;
@@ -218,10 +207,6 @@ export interface SHIPBroadcasterConfig {
 ```
 
 See also: [LookupResolver](./overlay-tools.md#class-lookupresolver), [OverlayBroadcastFacilitator](./overlay-tools.md#interface-overlaybroadcastfacilitator)
-
-<details>
-
-<summary>Interface SHIPBroadcasterConfig Details</summary>
 
 #### Property facilitator
 
@@ -231,6 +216,17 @@ The facilitator used to make requests to Overlay Services hosts.
 facilitator?: OverlayBroadcastFacilitator
 ```
 See also: [OverlayBroadcastFacilitator](./overlay-tools.md#interface-overlaybroadcastfacilitator)
+
+#### Property networkPreset
+
+The network preset to use, unless other options override it.
+- mainnet: use mainnet resolver and HTTPS facilitator
+- testnet: use testnet resolver and HTTPS facilitator
+- local: directly send to localhost:8080 and a facilitator that permits plain HTTP
+
+```ts
+networkPreset?: "mainnet" | "testnet" | "local"
+```
 
 #### Property requireAcknowledgmentFromAllHostsForTopics
 
@@ -261,11 +257,9 @@ requireAcknowledgmentFromSpecificHostsForTopics?: Record<string, "all" | "any" |
 The resolver used to locate suitable hosts with SHIP
 
 ```ts
-resolver: LookupResolver
+resolver?: LookupResolver
 ```
 See also: [LookupResolver](./overlay-tools.md#class-lookupresolver)
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -292,7 +286,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [HTTPSOverlayLookupFacilitator](#class-httpsoverlaylookupfacilitator) |
 | [LookupResolver](#class-lookupresolver) |
 | [OverlayAdminTokenTemplate](#class-overlayadmintokentemplate) |
-| [SHIPCast](#class-shipcast) |
+| [TopicBroadcaster](#class-topicbroadcaster) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -303,7 +297,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilitator {
     httpClient: typeof fetch;
-    constructor(httpClient = fetch) 
+    allowHTTP: boolean;
+    constructor(httpClient = fetch, allowHTTP: boolean = false) 
     async send(url: string, taggedBEEF: TaggedBEEF): Promise<STEAK> 
 }
 ```
@@ -318,7 +313,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
     fetchClient: typeof fetch;
-    constructor(httpClient = fetch) 
+    allowHTTP: boolean;
+    constructor(httpClient = fetch, allowHTTP: boolean = false) 
     async lookup(url: string, question: LookupQuestion, timeout: number = 5000): Promise<LookupAnswer> 
 }
 ```
@@ -334,16 +330,12 @@ Represents an SHIP transaction broadcaster.
 
 ```ts
 export default class LookupResolver {
-    constructor(config?: LookupResolverConfig) 
+    constructor(config: LookupResolverConfig = {}) 
     async query(question: LookupQuestion, timeout?: number): Promise<LookupAnswer> 
 }
 ```
 
 See also: [LookupAnswer](./overlay-tools.md#type-lookupanswer), [LookupQuestion](./overlay-tools.md#interface-lookupquestion), [LookupResolverConfig](./overlay-tools.md#interface-lookupresolverconfig)
-
-<details>
-
-<summary>Class LookupResolver Details</summary>
 
 #### Method query
 
@@ -353,8 +345,6 @@ Given a LookupQuestion, returns a LookupAnswer. Aggregates across multiple servi
 async query(question: LookupQuestion, timeout?: number): Promise<LookupAnswer> 
 ```
 See also: [LookupAnswer](./overlay-tools.md#type-lookupanswer), [LookupQuestion](./overlay-tools.md#interface-lookupquestion)
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -382,10 +372,6 @@ export default class OverlayAdminTokenTemplate implements ScriptTemplate {
 ```
 
 See also: [LockingScript](./script.md#class-lockingscript), [PushDrop](./script.md#class-pushdrop), [ScriptTemplate](./script.md#interface-scripttemplate), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [WalletInterface](./wallet.md#interface-walletinterface), [sign](./compat.md#variable-sign)
-
-<details>
-
-<summary>Class OverlayAdminTokenTemplate Details</summary>
 
 #### Constructor
 
@@ -467,34 +453,28 @@ Argument Details
 + **protocol**
   + SHIP or SLAP, depending on the token to unlock
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
-### Class: SHIPCast
+### Class: TopicBroadcaster
 
-Represents a SHIP transaction broadcaster.
+Broadcasts transactions to one or more overlay topics.
 
 ```ts
-export default class SHIPCast implements Broadcaster {
-    constructor(topics: string[], config?: SHIPBroadcasterConfig) 
+export default class TopicBroadcaster implements Broadcaster {
+    constructor(topics: string[], config: SHIPBroadcasterConfig = {}) 
     async broadcast(tx: Transaction): Promise<BroadcastResponse | BroadcastFailure> 
 }
 ```
 
 See also: [BroadcastFailure](./transaction.md#interface-broadcastfailure), [BroadcastResponse](./transaction.md#interface-broadcastresponse), [Broadcaster](./transaction.md#interface-broadcaster), [SHIPBroadcasterConfig](./overlay-tools.md#interface-shipbroadcasterconfig), [Transaction](./transaction.md#class-transaction)
 
-<details>
-
-<summary>Class SHIPCast Details</summary>
-
 #### Constructor
 
 Constructs an instance of the SHIP broadcaster.
 
 ```ts
-constructor(topics: string[], config?: SHIPBroadcasterConfig) 
+constructor(topics: string[], config: SHIPBroadcasterConfig = {}) 
 ```
 See also: [SHIPBroadcasterConfig](./overlay-tools.md#interface-shipbroadcasterconfig)
 
@@ -522,8 +502,6 @@ Argument Details
 
 + **tx**
   + The transaction to be sent.
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -579,13 +557,31 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ## Variables
 
+| |
+| --- |
+| [DEFAULT_SLAP_TRACKERS](#variable-default_slap_trackers) |
+| [DEFAULT_TESTNET_SLAP_TRACKERS](#variable-default_testnet_slap_trackers) |
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
+
 ### Variable: DEFAULT_SLAP_TRACKERS
 
 ```ts
 DEFAULT_SLAP_TRACKERS: string[] = [
-    "https://overlay.babbage.systems",
-    "https://overlay-example.babbage.systems",
-    "https://office.babbage.systems"
+    "https://users.bapp.dev"
+]
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
+### Variable: DEFAULT_TESTNET_SLAP_TRACKERS
+
+```ts
+DEFAULT_TESTNET_SLAP_TRACKERS: string[] = [
+    "https://testnet-users.bapp.dev"
 ]
 ```
 

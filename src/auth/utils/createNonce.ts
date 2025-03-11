@@ -1,9 +1,10 @@
 import {
-  Utils,
-  Random,
   WalletInterface,
-  WalletCounterparty
-} from '../../../mod.js'
+  WalletCounterparty,
+  Base64String
+} from '../../wallet/Wallet.interfaces.js'
+import * as Utils from '../../primitives/utils.js'
+import Random from '../../primitives/Random.js'
 
 /**
  * Creates a nonce derived from a wallet
@@ -14,7 +15,7 @@ import {
 export async function createNonce (
   wallet: WalletInterface,
   counterparty: WalletCounterparty = 'self'
-): Promise<string> {
+): Promise<Base64String> {
   // Generate 16 random bytes for the first half of the data
   const firstHalf = Random(16)
   // Create an sha256 HMAC

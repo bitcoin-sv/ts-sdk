@@ -279,7 +279,7 @@ describe('SHIPCast', () => {
     expect(result).toEqual({
       status: 'error',
       code: 'ERR_NO_HOSTS_INTERESTED',
-      description: 'No hosts are interested in receiving this transaction.'
+      description: 'No mainnet hosts are interested in receiving this transaction.'
     })
 
     expect(mockResolver.query).toHaveBeenCalledWith(
@@ -343,7 +343,7 @@ describe('SHIPCast', () => {
     expect(result).toEqual({
       status: 'error',
       code: 'ERR_ALL_HOSTS_REJECTED',
-      description: 'All SHIP hosts have rejected the transaction.'
+      description: 'All mainnet topical hosts have rejected the transaction.'
     })
 
     expect(mockFacilitator.send).toHaveBeenCalled()
@@ -1081,7 +1081,7 @@ describe('SHIPCast', () => {
     expect(response).toEqual({
       status: 'error',
       code: 'ERR_ALL_HOSTS_REJECTED',
-      description: 'All SHIP hosts have rejected the transaction.'
+      description: 'All mainnet topical hosts have rejected the transaction.'
     })
   })
   describe('SHIPCast private methods', () => {

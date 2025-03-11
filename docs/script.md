@@ -8,6 +8,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | --- |
 | [ScriptChunk](#interface-scriptchunk) |
 | [ScriptTemplate](#interface-scripttemplate) |
+| [ScriptTemplateUnlock](#interface-scripttemplateunlock) |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -31,26 +32,19 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export default interface ScriptTemplate {
-    lock: (...params: unknown[]) => LockingScript | Promise<LockingScript>;
-    unlock: (...params: unknown[]) => {
-        sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
-        estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
-    };
+    lock: (...params: any[]) => LockingScript | Promise<LockingScript>;
+    unlock: (...params: any[]) => ScriptTemplateUnlock;
 }
 ```
 
-See also: [LockingScript](./script.md#class-lockingscript), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
-
-<details>
-
-<summary>Interface ScriptTemplate Details</summary>
+See also: [LockingScript](./script.md#class-lockingscript), [ScriptTemplateUnlock](./script.md#interface-scripttemplateunlock)
 
 #### Property lock
 
 Creates a locking script with the given parameters.
 
 ```ts
-lock: (...params: unknown[]) => LockingScript | Promise<LockingScript>
+lock: (...params: any[]) => LockingScript | Promise<LockingScript>
 ```
 See also: [LockingScript](./script.md#class-lockingscript)
 
@@ -63,14 +57,23 @@ This method returns an object containing two functions:
 2. `estimateLength` - A function that returns the estimated length of the unlocking script in bytes.
 
 ```ts
-unlock: (...params: unknown[]) => {
+unlock: (...params: any[]) => ScriptTemplateUnlock
+```
+See also: [ScriptTemplateUnlock](./script.md#interface-scripttemplateunlock)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
+### Interface: ScriptTemplateUnlock
+
+```ts
+export default interface ScriptTemplateUnlock {
     sign: (tx: Transaction, inputIndex: number) => Promise<UnlockingScript>;
     estimateLength: (tx: Transaction, inputIndex: number) => Promise<number>;
 }
 ```
-See also: [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
 
-</details>
+See also: [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -107,10 +110,6 @@ export default class LockingScript extends Script {
 
 See also: [Script](./script.md#class-script)
 
-<details>
-
-<summary>Class LockingScript Details</summary>
-
 #### Method isLockingScript
 
 ```ts
@@ -130,8 +129,6 @@ isUnlockingScript(): boolean
 Returns
 
 Always returns false for a LockingScript instance.
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -153,10 +150,6 @@ export default class P2PKH implements ScriptTemplate {
 ```
 
 See also: [LockingScript](./script.md#class-lockingscript), [PrivateKey](./primitives.md#class-privatekey), [Script](./script.md#class-script), [ScriptTemplate](./script.md#interface-scripttemplate), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
-
-<details>
-
-<summary>Class P2PKH Details</summary>
 
 #### Method lock
 
@@ -210,8 +203,6 @@ Argument Details
 + **lockingScript**
   + Optional. The lockinScript. Otherwise the input.sourceTransaction is required.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -220,11 +211,12 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export default class PushDrop implements ScriptTemplate {
     wallet: WalletInterface;
+    originator?: string;
     static decode(script: LockingScript): {
         lockingPublicKey: PublicKey;
         fields: number[][];
     } 
-    constructor(wallet: WalletInterface) 
+    constructor(wallet: WalletInterface, originator?: string) 
     async lock(fields: number[][], protocolID: [
         SecurityLevel,
         string
@@ -241,16 +233,12 @@ export default class PushDrop implements ScriptTemplate {
 
 See also: [LockingScript](./script.md#class-lockingscript), [PublicKey](./primitives.md#class-publickey), [ScriptTemplate](./script.md#interface-scripttemplate), [SecurityLevel](./wallet.md#type-securitylevel), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [WalletInterface](./wallet.md#interface-walletinterface), [sign](./compat.md#variable-sign)
 
-<details>
-
-<summary>Class PushDrop Details</summary>
-
 #### Constructor
 
 Constructs a new instance of the PushDrop class.
 
 ```ts
-constructor(wallet: WalletInterface) 
+constructor(wallet: WalletInterface, originator?: string) 
 ```
 See also: [WalletInterface](./wallet.md#interface-walletinterface)
 
@@ -258,6 +246,8 @@ Argument Details
 
 + **wallet**
   + The wallet interface used for creating signatures and accessing public keys.
++ **originator**
+  + — The originator to use with Wallet requests
 
 #### Method decode
 
@@ -350,8 +340,6 @@ Argument Details
 + **anyoneCanPay**
   + Specifies if the anyone-can-pay flag is set.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -374,10 +362,6 @@ export default class RPuzzle implements ScriptTemplate {
 ```
 
 See also: [BigNumber](./primitives.md#class-bignumber), [LockingScript](./script.md#class-lockingscript), [PrivateKey](./primitives.md#class-privatekey), [ScriptTemplate](./script.md#interface-scripttemplate), [Transaction](./transaction.md#class-transaction), [UnlockingScript](./script.md#class-unlockingscript), [sign](./compat.md#variable-sign)
-
-<details>
-
-<summary>Class RPuzzle Details</summary>
 
 #### Constructor
 
@@ -440,8 +424,6 @@ Argument Details
 + **anyoneCanPay**
   + Flag indicating if the signature allows for other inputs to be added later.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -476,10 +458,6 @@ export default class Script {
 ```
 
 See also: [BigNumber](./primitives.md#class-bignumber), [ScriptChunk](./script.md#interface-scriptchunk), [toHex](./primitives.md#variable-tohex)
-
-<details>
-
-<summary>Class Script Details</summary>
 
 #### Constructor
 
@@ -750,8 +728,6 @@ Argument Details
 + **script**
   + The script to append.
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -800,10 +776,6 @@ export default class Spend {
 ```
 
 See also: [LockingScript](./script.md#class-lockingscript), [TransactionInput](./transaction.md#interface-transactioninput), [TransactionOutput](./transaction.md#interface-transactionoutput), [UnlockingScript](./script.md#class-unlockingscript)
-
-<details>
-
-<summary>Class Spend Details</summary>
 
 #### Constructor
 
@@ -888,8 +860,6 @@ if (spend.validate()) {
 }
 ```
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -908,10 +878,6 @@ export default class UnlockingScript extends Script {
 ```
 
 See also: [Script](./script.md#class-script)
-
-<details>
-
-<summary>Class UnlockingScript Details</summary>
 
 #### Method isLockingScript
 
@@ -932,8 +898,6 @@ isUnlockingScript(): boolean
 Returns
 
 Always returns true for an UnlockingScript instance.
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 

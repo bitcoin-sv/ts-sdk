@@ -1,7 +1,7 @@
 // @ts-nocheck
 // @ts-ignore
 import { AuthMessage, RequestedCertificateSet, Transport } from "../types.js"
-import { Utils } from '../../../mod.js'
+import * as Utils from '../../primitives/utils.js'
 
 const SUCCESS_STATUS_CODES = [200, 402]
 
@@ -42,25 +42,38 @@ export class SimplifiedFetchTransport implements Transport {
     if (!this.onDataCallback) {
       throw new Error('Listen before you start speaking. God gave you two ears and one mouth for a reason.')
     }
-
     if (message.messageType !== 'general') {
-      const response = await this.fetchClient(`${this.baseUrl}/.well-known/auth`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(message)
-      })
-      // Handle the response if data is received and callback is set
-      if (response.ok && this.onDataCallback) {
-        const responseMessage = await response.json()
-        if (responseMessage?.status !== 'certificate received') {
-          this.onDataCallback(responseMessage as AuthMessage)
+      return new Promise(async (resolve, reject) => {
+        try {
+          const responsePromise = this.fetchClient(`${this.baseUrl}/.well-known/auth`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(message)
+          })
+
+          if (message.messageType !== "initialRequest") {
+            resolve()
+          }
+          const response = await responsePromise
+
+          // Handle the response if data is received and callback is set
+          if (response.ok && this.onDataCallback) {
+            const responseMessage = await response.json()
+            this.onDataCallback(responseMessage as AuthMessage)
+          } else {
+            // Server may be a non authenticated server
+            throw new Error('HTTP server failed to authenticate')
+          }
+          if (message.messageType === "initialRequest") {
+            resolve()
+          }
+        } catch (e) {
+          reject(e)
+          return
         }
-      } else {
-        // Server may be a non authenticated server
-        throw new Error('HTTP server failed to authenticate')
-      }
+      })
     } else {
       // Parse message payload
       const httpRequest = this.deserializeRequestPayload(message.payload)
@@ -104,7 +117,6 @@ export class SimplifiedFetchTransport implements Transport {
           httpRequestWithAuthHeaders.body = new Uint8Array(httpRequestWithAuthHeaders.body);
         }
       }
-
 
       // Send the actual fetch request to the server
       const response = await this.fetchClient(url, {

@@ -1,6 +1,6 @@
 {
   "name": "@bsv/sdk",
-  "version": "1.3.15",
+  "version": "1.4.0",
   "type": "module",
   "description": "BSV Blockchain Software Development Kit",
   "main": "dist/cjs/mod.js",
@@ -184,6 +184,16 @@
       "require": "./dist/cjs/src/overlay-tools/*.js",
       "types": "./dist/types/src/overlay-tools/*.d.ts"
     },
+    "./storage": {
+      "import": "./dist/esm/src/storage/index.js",
+      "require": "./dist/cjs/src/storage/index.js",
+      "types": "./dist/types/src/storage/index.d.ts"
+    },
+    "./storage/*": {
+      "import": "./dist/esm/src/storage/*.js",
+      "require": "./dist/cjs/src/storage/*.js",
+      "types": "./dist/types/src/storage/*.d.ts"
+    },
     "./umd": {
       "import": "./dist/umd/bundle.js"
     }
@@ -239,6 +249,7 @@
     "project": "tsconfig.eslint.json",
     "ignore": [
       "dist",
+      "src/script/ScriptTemplate.ts",
       "src/transaction/Transaction.ts",
       "src/auth/transports/SimplifiedFetchTransport.ts"
     ]

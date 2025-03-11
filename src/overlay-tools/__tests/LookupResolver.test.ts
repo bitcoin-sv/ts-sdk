@@ -861,7 +861,7 @@ describe('LookupResolver', () => {
         query: { test: 1 }
       })
     ).rejects.toThrow(
-      'No competent hosts found by the SLAP trackers for lookup service: ls_foo'
+      'No competent mainnet hosts found by the SLAP trackers for lookup service: ls_foo'
     )
 
     expect(mockFacilitator.lookup.mock.calls).toEqual([
@@ -1054,7 +1054,7 @@ describe('LookupResolver', () => {
         query: { test: 1 }
       })
     ).rejects.toThrow(
-      'No competent hosts found by the SLAP trackers for lookup service: ls_foo'
+      'No competent mainnet hosts found by the SLAP trackers for lookup service: ls_foo'
     )
 
     expect(mockFacilitator.lookup.mock.calls).toEqual([
@@ -1628,7 +1628,7 @@ describe('LookupResolver', () => {
           query: { test: 1 }
         })
       ).rejects.toThrow(
-        'No competent hosts found by the SLAP trackers for lookup service: ls_foo'
+        'No competent mainnet hosts found by the SLAP trackers for lookup service: ls_foo'
       )
 
       expect(mockFacilitator.lookup.mock.calls.length).toBe(2)

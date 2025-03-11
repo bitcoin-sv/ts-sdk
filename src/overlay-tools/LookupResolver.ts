@@ -37,11 +37,7 @@ export type LookupAnswer =
 /** Default SLAP trackers */
 export const DEFAULT_SLAP_TRACKERS: string[] = [
   // Babbage primary overlay service
-  'https://overlay.babbage.systems',
-  // Babbage example overlay
-  'https://overlay-example.babbage.systems',
-  // The Babbage office building
-  'https://office.babbage.systems'
+  'https://users.bapp.dev'
 
   // NOTE: Other entities may submit pull requests to the library if they maintain SLAP overlay services.
   // Additional trackers run by different entities contribute to greater network resiliency.
@@ -51,10 +47,23 @@ export const DEFAULT_SLAP_TRACKERS: string[] = [
   // Trackers known to host invalid or illegal records will be removed at the discretion of the BSV Association.
 ]
 
+/** Default testnet SLAP trackers */
+export const DEFAULT_TESTNET_SLAP_TRACKERS: string[] = [
+  // Babbage primary testnet overlay service
+  'https://testnet-users.bapp.dev'
+]
+
 const MAX_TRACKER_WAIT_TIME = 1000
 
 /** Configuration options for the Lookup resolver. */
 export interface LookupResolverConfig {
+  /**
+   * The network preset to use, unless other options override it.
+   * - mainnet: use mainnet SLAP trackers and HTTPS facilitator
+   * - testnet: use testnet SLAP trackers and HTTPS facilitator
+   * - local: directly query from localhost:8080 and a facilitator that permits plain HTTP
+   */
+  networkPreset?: 'mainnet' | 'testnet' | 'local'
   /** The facilitator used to make requests to Overlay Services hosts. */
   facilitator?: OverlayLookupFacilitator
   /** The list of SLAP trackers queried to resolve Overlay Services hosts for a given lookup service. */
@@ -83,9 +92,11 @@ export interface OverlayLookupFacilitator {
 
 export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
   fetchClient: typeof fetch
+  allowHTTP: boolean
 
-  constructor (httpClient = fetch) {
+  constructor (httpClient = fetch, allowHTTP: boolean = false) {
     this.fetchClient = httpClient
+    this.allowHTTP = allowHTTP
   }
 
   async lookup (
@@ -93,7 +104,7 @@ export class HTTPSOverlayLookupFacilitator implements OverlayLookupFacilitator {
     question: LookupQuestion,
     timeout: number = 5000
   ): Promise<LookupAnswer> {
-    if (!url.startsWith('https:')) {
+    if (!url.startsWith('https:') && !this.allowHTTP) {
       throw new Error(
         'HTTPS facilitator can only use URLs that start with "https:"'
       )
@@ -134,26 +145,14 @@ export default class LookupResolver {
   private readonly slapTrackers: string[]
   private readonly hostOverrides: Record<string, string[]>
   private readonly additionalHosts: Record<string, string[]>
+  private readonly networkPreset: 'mainnet' | 'testnet' | 'local'
 
-  constructor (config?: LookupResolverConfig) {
-    const defaultConfig: LookupResolverConfig = {
-      facilitator: new HTTPSOverlayLookupFacilitator(),
-      slapTrackers: DEFAULT_SLAP_TRACKERS,
-      hostOverrides: {},
-      additionalHosts: {}
-    }
-
-    const {
-      facilitator = defaultConfig.facilitator,
-      slapTrackers = defaultConfig.slapTrackers,
-      hostOverrides = defaultConfig.hostOverrides,
-      additionalHosts = defaultConfig.additionalHosts
-    } = config ?? defaultConfig // ✅ Use a default object directly
-
-    this.facilitator = facilitator ?? new HTTPSOverlayLookupFacilitator()
-    this.slapTrackers = slapTrackers ?? []
-    this.hostOverrides = hostOverrides ?? {}
-    this.additionalHosts = additionalHosts ?? {}
+  constructor (config: LookupResolverConfig = {}) {
+    this.networkPreset = config.networkPreset ?? 'mainnet'
+    this.facilitator = config.facilitator ?? new HTTPSOverlayLookupFacilitator(undefined, this.networkPreset === 'local')
+    this.slapTrackers = config.slapTrackers ?? (this.networkPreset === 'mainnet' ? DEFAULT_SLAP_TRACKERS : DEFAULT_TESTNET_SLAP_TRACKERS)
+    this.hostOverrides = config.hostOverrides ?? {}
+    this.additionalHosts = config.additionalHosts ?? {}
   }
 
   /**
@@ -165,9 +164,11 @@ export default class LookupResolver {
   ): Promise<LookupAnswer> {
     let competentHosts: string[] = []
     if (question.service === 'ls_slap') {
-      competentHosts = this.slapTrackers
+      competentHosts = this.networkPreset === 'local' ? ['http://localhost:8080'] : this.slapTrackers
     } else if (this.hostOverrides[question.service] != null) {
       competentHosts = this.hostOverrides[question.service]
+    } else if (this.networkPreset === 'local') {
+      competentHosts = ['http://localhost:8080']
     } else {
       competentHosts = await this.findCompetentHosts(question.service)
     }
@@ -179,7 +180,7 @@ export default class LookupResolver {
     }
     if (competentHosts.length < 1) {
       throw new Error(
-        `No competent hosts found by the SLAP trackers for lookup service: ${question.service}`
+        `No competent ${this.networkPreset} hosts found by the SLAP trackers for lookup service: ${question.service}`
       )
     }
 
@@ -226,11 +227,10 @@ export default class LookupResolver {
             continue
           }
         }
-      } catch (error) {
-        console.error('Error processing response outputs:', error)
+      } catch (_) {
+        // Error processing output, proceed.
       }
     }
-    // ✅ Ensure function always returns a value
     return {
       type: 'output-list',
       outputs: Array.from(outputs.values())

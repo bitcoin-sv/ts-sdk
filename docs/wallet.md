@@ -502,10 +502,6 @@ export interface KeyDeriverApi {
 
 See also: [Counterparty](./wallet.md#type-counterparty), [PrivateKey](./primitives.md#class-privatekey), [PublicKey](./primitives.md#class-publickey), [SymmetricKey](./primitives.md#class-symmetrickey), [WalletProtocol](./wallet.md#type-walletprotocol)
 
-<details>
-
-<summary>Interface KeyDeriverApi Details</summary>
-
 #### Property derivePrivateKey
 
 Derives a private key based on protocol ID, key ID, and counterparty.
@@ -569,8 +565,6 @@ The root key from which all other keys are derived.
 rootKey: PrivateKey
 ```
 See also: [PrivateKey](./primitives.md#class-privatekey)
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -1197,10 +1191,6 @@ export interface WalletInterface {
 
 See also: [AbortActionArgs](./wallet.md#interface-abortactionargs), [AbortActionResult](./wallet.md#interface-abortactionresult), [AcquireCertificateArgs](./wallet.md#interface-acquirecertificateargs), [AuthenticatedResult](./wallet.md#interface-authenticatedresult), [CreateActionArgs](./wallet.md#interface-createactionargs), [CreateActionResult](./wallet.md#interface-createactionresult), [CreateHmacArgs](./wallet.md#interface-createhmacargs), [CreateHmacResult](./wallet.md#interface-createhmacresult), [CreateSignatureArgs](./wallet.md#interface-createsignatureargs), [CreateSignatureResult](./wallet.md#interface-createsignatureresult), [DiscoverByAttributesArgs](./wallet.md#interface-discoverbyattributesargs), [DiscoverByIdentityKeyArgs](./wallet.md#interface-discoverbyidentitykeyargs), [DiscoverCertificatesResult](./wallet.md#interface-discovercertificatesresult), [GetHeaderArgs](./wallet.md#interface-getheaderargs), [GetHeaderResult](./wallet.md#interface-getheaderresult), [GetHeightResult](./wallet.md#interface-getheightresult), [GetNetworkResult](./wallet.md#interface-getnetworkresult), [GetPublicKeyArgs](./wallet.md#interface-getpublickeyargs), [GetPublicKeyResult](./wallet.md#interface-getpublickeyresult), [GetVersionResult](./wallet.md#interface-getversionresult), [InternalizeActionArgs](./wallet.md#interface-internalizeactionargs), [InternalizeActionResult](./wallet.md#interface-internalizeactionresult), [ListActionsArgs](./wallet.md#interface-listactionsargs), [ListActionsResult](./wallet.md#interface-listactionsresult), [ListCertificatesArgs](./wallet.md#interface-listcertificatesargs), [ListCertificatesResult](./wallet.md#interface-listcertificatesresult), [ListOutputsArgs](./wallet.md#interface-listoutputsargs), [ListOutputsResult](./wallet.md#interface-listoutputsresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes), [ProveCertificateArgs](./wallet.md#interface-provecertificateargs), [ProveCertificateResult](./wallet.md#interface-provecertificateresult), [RelinquishCertificateArgs](./wallet.md#interface-relinquishcertificateargs), [RelinquishCertificateResult](./wallet.md#interface-relinquishcertificateresult), [RelinquishOutputArgs](./wallet.md#interface-relinquishoutputargs), [RelinquishOutputResult](./wallet.md#interface-relinquishoutputresult), [RevealCounterpartyKeyLinkageArgs](./wallet.md#interface-revealcounterpartykeylinkageargs), [RevealCounterpartyKeyLinkageResult](./wallet.md#interface-revealcounterpartykeylinkageresult), [RevealSpecificKeyLinkageArgs](./wallet.md#interface-revealspecifickeylinkageargs), [RevealSpecificKeyLinkageResult](./wallet.md#interface-revealspecifickeylinkageresult), [SignActionArgs](./wallet.md#interface-signactionargs), [SignActionResult](./wallet.md#interface-signactionresult), [VerifyHmacArgs](./wallet.md#interface-verifyhmacargs), [VerifyHmacResult](./wallet.md#interface-verifyhmacresult), [VerifySignatureArgs](./wallet.md#interface-verifysignatureargs), [VerifySignatureResult](./wallet.md#interface-verifysignatureresult), [WalletCertificate](./wallet.md#interface-walletcertificate), [WalletDecryptArgs](./wallet.md#interface-walletdecryptargs), [WalletDecryptResult](./wallet.md#interface-walletdecryptresult), [WalletEncryptArgs](./wallet.md#interface-walletencryptargs), [WalletEncryptResult](./wallet.md#interface-walletencryptresult), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
 
-<details>
-
-<summary>Interface WalletInterface Details</summary>
-
 #### Property abortAction
 
 Aborts a transaction that is in progress and has not yet been finalized or sent to the network.
@@ -1453,8 +1443,6 @@ waitForAuthentication: (args: object, originator?: OriginatorDomainNameStringUnd
 ```
 See also: [AuthenticatedResult](./wallet.md#interface-authenticatedresult), [OriginatorDomainNameStringUnder250Bytes](./wallet.md#type-originatordomainnamestringunder250bytes)
 
-</details>
-
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -1545,10 +1533,6 @@ export default class CachedKeyDeriver {
 ```
 
 See also: [Counterparty](./wallet.md#type-counterparty), [PrivateKey](./primitives.md#class-privatekey), [PublicKey](./primitives.md#class-publickey), [SymmetricKey](./primitives.md#class-symmetrickey), [WalletProtocol](./wallet.md#type-walletprotocol)
-
-<details>
-
-<summary>Class CachedKeyDeriver Details</summary>
 
 #### Constructor
 
@@ -1688,8 +1672,6 @@ Argument Details
   + The protocol ID including a security level and protocol name.
 + **keyID**
   + The key identifier.
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -1955,10 +1937,6 @@ export class KeyDeriver implements KeyDeriverApi {
 
 See also: [Counterparty](./wallet.md#type-counterparty), [KeyDeriverApi](./wallet.md#interface-keyderiverapi), [PrivateKey](./primitives.md#class-privatekey), [PublicKey](./primitives.md#class-publickey), [SymmetricKey](./primitives.md#class-symmetrickey), [WalletProtocol](./wallet.md#type-walletprotocol)
 
-<details>
-
-<summary>Class KeyDeriver Details</summary>
-
 #### Constructor
 
 Initializes the KeyDeriver instance with a root private key.
@@ -2086,8 +2064,6 @@ Argument Details
   + The protocol ID including a security level and protocol name.
 + **keyID**
   + The key identifier.
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 

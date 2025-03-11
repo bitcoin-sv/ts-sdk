@@ -1,14 +1,14 @@
 import {
-  Utils,
   Base64String,
   PubKeyHex,
   HexString,
   OutpointString,
   CertificateFieldNameUnder50Bytes,
-  Signature,
-  WalletProtocol,
-  ProtoWallet
-} from '../../../mod.js'
+  WalletProtocol
+} from '../../wallet/Wallet.interfaces.js'
+import * as Utils from '../../primitives/utils.js'
+import ProtoWallet from '../../wallet/ProtoWallet.js'
+import Signature from '../../primitives/Signature.js'
 
 /**
  * Represents an Identity Certificate as per the Wallet interface specifications.
@@ -258,11 +258,18 @@ export default class Certificate {
   /**
    * Helper function which retrieves the protocol ID and key ID for certificate field encryption.
    *
-   * @param serialNumber - The serial number of the certificate.
+   * For master certificate creation, no serial number is provided because entropy is required
+   * from both the client and the certifier. In this case, the `keyID` is simply the `fieldName`.
+   *
+   * For VerifiableCertificates verifier keyring creation, both the serial number and field name are available,
+   * so the `keyID` is formed by concatenating the `serialNumber` and `fieldName`.
+   *
    * @param fieldName - The name of the field within the certificate to be encrypted.
-   * @returns An object containing the protocol ID and key ID:
+   * @param serialNumber - (Optional) The serial number of the certificate.
+   * @returns An object containing:
    *   - `protocolID` (WalletProtocol): The protocol ID for certificate field encryption.
-   *   - `keyID` (string): A unique key identifier derived from the serial number and field name.
+   *   - `keyID` (string): A unique key identifier. It is the `fieldName` if `serialNumber` is undefined,
+   *     otherwise it is a combination of `serialNumber` and `fieldName`.
    */
   static getCertificateFieldEncryptionDetails (
     fieldName: string,
@@ -270,7 +277,7 @@ export default class Certificate {
   ): { protocolID: WalletProtocol, keyID: string } {
     return {
       protocolID: [2, 'certificate field encryption'],
-      keyID: `${serialNumber ?? 'unknown'} ${fieldName}`
+      keyID: serialNumber ? `${serialNumber} ${fieldName}` : fieldName
     }
   }
 }

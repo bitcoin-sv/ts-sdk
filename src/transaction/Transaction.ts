@@ -986,7 +986,7 @@ export default class Transaction {
     // Write the Atomic BEEF prefix
     writer.writeUInt32LE(0x01010101)
     // Write the subject TXID (big-endian)
-    writer.write(this.id())
+    writer.write(this.hash())
     // Append the BEEF data
     const beefData = this.toBEEF(allowPartial)
     writer.write(beefData)
