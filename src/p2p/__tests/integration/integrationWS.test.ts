@@ -1,4 +1,4 @@
-import MessageBoxClient, { PeerServMessage } from '../MessageBoxClient.js'
+import MessageBoxClient, { PeerServMessage } from '../../MessageBoxClient.js'
 import { WalletClient } from '@bsv/sdk'
 import { webcrypto } from 'crypto'
 
@@ -50,24 +50,24 @@ describe('MessageBoxClient WebSocket Integration Tests', () => {
 
   /** TEST 3: Send and Receive a Message via WebSocket **/
   test('should send and receive a message via WebSocket', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let receivedMessage: PeerServMessage | null = null
 
     // Create a promise that resolves when the message is received
     const messagePromise = new Promise<PeerServMessage>((resolve, reject) => {
       messageBoxClient.listenForLiveMessages({
         messageBox,
-        onMessage: async (message) => {
+        onMessage: (message) => { // Ensure this is a synchronous function
           try {
             receivedMessage = message
             console.log('[TEST] Received message:', JSON.stringify(message, null, 2))
-            // Optionally, add any additional async processing here before resolving.
             resolve(message)
           } catch (error) {
             console.error('Error processing message:', error)
             reject(error)
           }
         }
-      })
+      }).catch(reject) // Handle promise rejection explicitly
 
       // Timeout in case no message is received
       setTimeout(() => {
@@ -78,7 +78,12 @@ describe('MessageBoxClient WebSocket Integration Tests', () => {
     // Ensure WebSocket room is joined before sending
     await messageBoxClient.joinRoom(messageBox)
 
-    // ✅ Send message after listener is set up
+    // Wait for WebSocket listener to initialize fully
+    await messageBoxClient.listenForLiveMessages({
+      messageBox,
+      onMessage: () => {} // Empty callback since we're handling it separately
+    })
+
     console.log(`[TEST] Sending message to WebSocket room: ${messageBox}`)
     const response = await messageBoxClient.sendLiveMessage({
       recipient: recipientKey,

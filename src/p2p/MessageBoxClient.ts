@@ -95,6 +95,11 @@ class MessageBoxClient {
     return this.myIdentityKey
   }
 
+  // Add a getter for testing purposes
+  public get testSocket (): ReturnType<typeof AuthSocketClient> | undefined {
+    return this.socket
+  }
+
   /**
   * Establish an initial WebSocket connection (optional)
   */
