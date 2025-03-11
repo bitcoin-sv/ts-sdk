@@ -1,39 +1,23 @@
-import {
-  StorageUtils
-} from '../../storage/index.js'
-
-// Helpers
-function hexToNumberArray(hex: string): number[] {
-  if (hex.length % 2 !== 0) {
-    throw new Error('Invalid hex string!')
-  }
-  const result: number[] = []
-  for (let i = 0; i < hex.length; i += 2) {
-    const byte = parseInt(hex.substring(i, i + 2), 16)
-    result.push(byte)
-  }
-  return result
-}
-
-function numberArrayToHex(arr: number[]): string {
-  return arr.map(b => b.toString(16).padStart(2, '0')).join('')
-}
+import { StorageUtils } from '../../storage/index.js'
+import * as Utils from '../../primitives/utils.js'
+import * as Hash from '../..//primitives/Hash.js'
 
 // Example data
-const exampleHashHex = 'a0d4c2cb69837827bae6ad6c717218d6f53708e2ebcaefaebac2639ac27ccbb7'
-const exampleHash = hexToNumberArray(exampleHashHex)
+const exampleHashHex = '1a5ec49a3f32cd56d19732e89bde5d81755ddc0fd8515dc8b226d47654139dca'
+const exampleHash = Utils.toArray(exampleHashHex, 'hex')
 const exampleFileHex = '687da27f04a112aa48f1cab2e7949f1eea4f7ba28319c1e999910cd561a634a05a3516e6db'
-const exampleFile = hexToNumberArray(exampleFileHex)
+const exampleFile = Utils.toArray(exampleFileHex, 'hex')
 const exampleURL = 'XUT6PqWb3GP3LR7dmBMCJwZ3oo5g1iGCF3CrpzyuJCemkGu1WGoq'
 
 describe('StorageUtils', () => {
   describe('getURLForHash', () => {
     it('Creates the correct URL for the hash', () => {
-  const url = StorageUtils.getURLForHash(exampleHash)
-      expect(url).toHaveLength(52)
+      const url = StorageUtils.getURLForHash(exampleHash)
+      expect(url).toBe(exampleURL)
     })
 
     it('Throws an error if hash length is invalid', () => {
+      // Get the length of a FILE (not a hash — wrong length!)
       expect(() => StorageUtils.getURLForHash(exampleFile)).toThrow(
         new Error('Hash length must be 32 bytes (sha256)')
       )
@@ -43,14 +27,20 @@ describe('StorageUtils', () => {
   describe('getURLForFile', () => {
     it('Creates the correct URL for the file', () => {
       const url = StorageUtils.getURLForFile(exampleFile)
-      expect(url).toHaveLength(52)
+      expect(url).toEqual(exampleURL)
     })
   })
 
   describe('getHashFromURL', () => {
     it('Decodes the URL to the correct hash', () => {
       const hash = StorageUtils.getHashFromURL(exampleURL)
-      expect(numberArrayToHex(hash)).toHaveLength(66)
+      expect(Utils.toHex(hash)).toEqual(exampleHashHex)
+    })
+
+    it('Gets the same hash as getting one directly from the file', () => {
+      const hashA = StorageUtils.getHashFromURL(exampleURL)
+      const hashB = Hash.sha256(exampleFile)
+      expect(hashA).toEqual(hashB)
     })
 
     it('Throws an error if checksum is invalid', () => {

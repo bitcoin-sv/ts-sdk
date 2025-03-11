@@ -1,4 +1,4 @@
-import { Hash } from '../../src/primitives/index.js'
+import { Hash, Utils } from '../../src/primitives/index.js'
 import { fromBase58Check, toBase58Check, toArray } from '../../src/primitives/utils.js'
 
 /**
@@ -6,7 +6,7 @@ import { fromBase58Check, toBase58Check, toArray } from '../../src/primitives/ut
  * @param {string} URL - The UHRP URL.
  * @returns {string} - Normalized URL.
  */
-export const normalizeURL = (URL: string) => {
+export const normalizeURL = (URL: string): string => {
   if (URL.toLowerCase().startsWith('uhrp:')) URL = URL.slice(5)
   if (URL.startsWith('//')) URL = URL.slice(2)
   return URL
@@ -17,7 +17,7 @@ export const normalizeURL = (URL: string) => {
  * @param {number[]} hash - 32-byte SHA-256 hash.
  * @returns {string} - Base58Check encoded URL.
  */
-export const getURLForHash = (hash: number[]) => {
+export const getURLForHash = (hash: number[]): string => {
   if (hash.length !== 32) {
     throw new Error('Hash length must be 32 bytes (sha256)')
   }
@@ -29,7 +29,7 @@ export const getURLForHash = (hash: number[]) => {
  * @param {number[] | string} file - File content as number array or string.
  * @returns {string} - Base58Check encoded URL.
  */
-export const getURLForFile = (file: number[]) => {
+export const getURLForFile = (file: number[]): string => {
   const hash = Hash.sha256(file)
   return getURLForHash(hash)
 }
@@ -39,13 +39,16 @@ export const getURLForFile = (file: number[]) => {
  * @param {string} URL - UHRP URL.
  * @returns {number[]} - Extracted SHA-256 hash.
  */
-export const getHashFromURL = (URL: string) => {
+export const getHashFromURL = (URL: string): number[] => {
   URL = normalizeURL(URL)
-  const { data } = fromBase58Check(URL)
-  if (data.length !== 33) {
+  const { data, prefix } = fromBase58Check(URL, undefined, 2)
+  if (data.length !== 32) {
     throw new Error('Invalid length!')
   }
-  return data
+  if (Utils.toHex(prefix as number[]) !== 'ce00') {
+    throw new Error('Bad prefix')
+  }
+  return data as number[]
 }
 
 /**
@@ -53,7 +56,7 @@ export const getHashFromURL = (URL: string) => {
  * @param {string} URL - The URL to validate.
  * @returns {boolean} - True if valid, false otherwise.
  */
-export const isValidURL = (URL: string) => {
+export const isValidURL = (URL: string): boolean => {
   try {
     getHashFromURL(URL)
     return true
@@ -61,13 +64,3 @@ export const isValidURL = (URL: string) => {
     return false
   }
 }
-
-const StorageUtils = {
-  normalizeURL,
-  getURLForHash,
-  getURLForFile,
-  getHashFromURL,
-  isValidURL
-}
-
-export default StorageUtils
