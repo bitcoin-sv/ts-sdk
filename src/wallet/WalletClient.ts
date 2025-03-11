@@ -95,25 +95,25 @@ export default class WalletClient implements WalletInterface {
       await checkSub()
       this.substrate = sub
     } catch (e) {
-      console.error('XDMSubstrate initialization failed:', e) // Log the error
+      // XDM failed, try the next one...
       try {
         sub = new XDMSubstrate()
         await checkSub(MAX_XDM_RESPONSE_WAIT)
         this.substrate = sub
       } catch (e) {
-        console.error('WalletWireTransceiver initialization failed:', e)
+        // HTTP wire failed, move on...
         try {
           sub = new WalletWireTransceiver(new HTTPWalletWire(this.originator))
           await checkSub()
           this.substrate = sub
         } catch (e) {
-          console.error('HTTPWalletJSON initialization failed:', e)
+          // HTTP JSON failed, attempt the next...
           try {
             sub = new HTTPWalletJSON(this.originator)
             await checkSub()
             this.substrate = sub
           } catch (e) {
-            console.error('No wallet available:', e)
+            // No comms. Tell the user to install a BSV wallet.
             throw new Error(
               'No wallet available over any communication substrate. Install a BSV wallet today!'
             )

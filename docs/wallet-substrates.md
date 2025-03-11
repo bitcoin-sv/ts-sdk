@@ -21,7 +21,6 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | |
 | --- |
-| [HTTPWalletJSON](#class-httpwalletjson) |
 | [HTTPWalletWire](#class-httpwalletwire) |
 | [WalletWireProcessor](#class-walletwireprocessor) |
 | [WalletWireTransceiver](#class-walletwiretransceiver) |
@@ -32,6 +31,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ---
 
+<<<<<<< HEAD
 ### Class: HTTPWalletJSON
 
 ```ts
@@ -256,6 +256,8 @@ See also: [AcquireCertificateArgs](#interface-acquirecertificateargs), [AcquireC
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
+=======
+>>>>>>> f93ec6361aba352721adcf71ec8697d02e0f257d
 ### Class: HTTPWalletWire
 
 ```ts

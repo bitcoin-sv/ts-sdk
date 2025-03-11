@@ -1,14 +1,14 @@
 import {
-  Utils,
   Base64String,
   PubKeyHex,
   HexString,
   OutpointString,
   CertificateFieldNameUnder50Bytes,
-  Signature,
-  WalletProtocol,
-  ProtoWallet
-} from '../../../mod.js'
+  WalletProtocol
+} from '../../wallet/Wallet.interfaces.js'
+import * as Utils from '../../primitives/utils.js'
+import ProtoWallet from '../../wallet/ProtoWallet.js'
+import Signature from '../../primitives/Signature.js'
 
 /**
  * Represents an Identity Certificate as per the Wallet interface specifications.

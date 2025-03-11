@@ -27,9 +27,10 @@ import {
   VersionString7To30Bytes,
   WalletInterface
 } from '../Wallet.interfaces.js'
-import { Utils, Random } from '../../primitives/index.js'
+import Random from '../../primitives/Random.js'
+import * as Utils from '../../primitives/utils.js'
 import { WalletError } from '../WalletError.js'
-import { CallType } from '../../../mod.js'
+import { CallType } from './WalletWireCalls.js'
 
 /**
  * Facilitates wallet operations over cross-document messaging.

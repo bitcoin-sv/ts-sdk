@@ -1,16 +1,16 @@
 import {
-  SymmetricKey,
-  Utils,
   Base64String,
   CertificateFieldNameUnder50Bytes,
   HexString,
   OutpointString,
   PubKeyHex,
-  Random,
   WalletCounterparty,
-  ProtoWallet
-} from '../../../mod.js'
+} from '../../wallet/Wallet.interfaces.js'
 import Certificate from './Certificate.js'
+import * as Utils from '../../primitives/utils.js'
+import SymmetricKey from '../../primitives/SymmetricKey.js'
+import Random from '../../primitives/Random.js'
+import ProtoWallet from '../../wallet/ProtoWallet.js'
 
 interface CreateCertificateFieldsResult {
   certificateFields: Record<CertificateFieldNameUnder50Bytes, Base64String>

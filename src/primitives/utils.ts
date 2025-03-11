@@ -359,7 +359,7 @@ export const fromBase58Check = (
   str: string,
   enc?: 'hex',
   prefixLength: number = 1
-): any => {
+): { data: number[] | string, prefix: number[] | string } => {
   const bin = fromBase58(str)
   let prefix: string | number[] = bin.slice(0, prefixLength)
   let data: string | number[] = bin.slice(prefixLength, -4)

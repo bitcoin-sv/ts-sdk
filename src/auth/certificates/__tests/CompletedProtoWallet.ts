@@ -1,35 +1,21 @@
-// @ts-nocheck
-import { PrivateKey } from '../../../../mod.js'
+//@ts-nocheck
+import PrivateKey from '../../../primitives/PrivateKey.js'
 import {
   ProtoWallet,
   WalletInterface,
-
   CreateActionResult,
-
   SignActionResult,
-
   AbortActionResult,
-
   ListActionsResult,
-
   InternalizeActionResult,
-
   ListOutputsResult,
-
   RelinquishOutputResult,
-
   AcquireCertificateResult,
-
   ListCertificatesResult,
-
   ProveCertificateResult,
-
   RelinquishCertificateResult,
-
   DiscoverCertificatesResult,
-
   GetHeightResult,
-
   GetHeaderResult,
   KeyDeriverApi,
   KeyDeriver,

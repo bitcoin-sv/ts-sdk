@@ -1,10 +1,10 @@
 import {
-  Utils,
-  Random,
   WalletInterface,
   WalletCounterparty,
   Base64String
-} from '../../../mod.js'
+} from '../../wallet/Wallet.interfaces.js'
+import * as Utils from '../../primitives/utils.js'
+import Random from '../../primitives/Random.js'
 
 /**
  * Creates a nonce derived from a wallet

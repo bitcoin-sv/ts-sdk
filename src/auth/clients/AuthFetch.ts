@@ -1,5 +1,10 @@
 // @ts-nocheck
-import { Utils, Random, P2PKH, PublicKey, WalletInterface, createNonce } from '../../../mod.js'
+import * as Utils from '../../primitives/utils.js'
+import Random from '../../primitives/Random.js'
+import P2PKH from '../../script/templates/P2PKH.js'
+import PublicKey from '../../primitives/PublicKey.js'
+import { WalletInterface } from '../../wallet/Wallet.interfaces.js'
+import { createNonce } from '../utils/createNonce.js'
 import { Peer } from '../Peer.js'
 import { SimplifiedFetchTransport } from '../transports/SimplifiedFetchTransport.js'
 import { SessionManager } from '../SessionManager.js'

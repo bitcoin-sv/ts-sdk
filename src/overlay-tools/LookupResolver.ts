@@ -227,8 +227,8 @@ export default class LookupResolver {
             continue
           }
         }
-      } catch (error) {
-        console.error('Error processing response outputs:', error)
+      } catch (_) {
+        // Error processing output, proceed.
       }
     }
     return {

@@ -1,13 +1,13 @@
-import {
-  SymmetricKey,
-  Utils,
+import type {
+  PubKeyHex,
   Base64String,
   CertificateFieldNameUnder50Bytes,
   HexString,
   OutpointString,
-  PubKeyHex,
-  ProtoWallet
-} from '../../../mod.js'
+} from '../../wallet/Wallet.interfaces.js'
+import SymmetricKey from '../../primitives/SymmetricKey.js'
+import * as Utils from '../../primitives/utils.js'
+import ProtoWallet from '../../wallet/ProtoWallet.js'
 import Certificate from './Certificate.js'
 
 /**

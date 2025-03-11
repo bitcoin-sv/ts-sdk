@@ -1,5 +1,5 @@
 import { VerifiableCertificate } from '../certificates/VerifiableCertificate.js'
-import { WalletInterface } from '../../../mod.js'
+import { WalletInterface } from '../../wallet/Wallet.interfaces.js'
 import { RequestedCertificateSet } from '../types.js'
 
 /**
