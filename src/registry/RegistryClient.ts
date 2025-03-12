@@ -12,8 +12,8 @@ import {
   BroadcastFailure,
 } from '../transaction/index.js'
 import {
-  SHIPBroadcaster,
-  LookupResolver
+  LookupResolver,
+  TopicBroadcaster
 } from '../overlay-tools/index.js'
 import {
   PushDrop,
@@ -95,7 +95,12 @@ export class RegistryClient {
     }
 
     // Broadcast
-    const broadcaster = new SHIPBroadcaster([this.getBroadcastTopic(data.definitionType)])
+    const broadcaster = new TopicBroadcaster(
+      [this.getBroadcastTopic(data.definitionType)],
+      {
+        networkPreset: (await (this.wallet.getNetwork({}))).network
+      }
+    )
     return await broadcaster.broadcast(Transaction.fromAtomicBEEF(tx))
   }
 
@@ -165,14 +170,14 @@ export class RegistryClient {
         continue
       }
       try {
-        const record = await this.parseLockingScript(definitionType, LockingScript.fromHex(output.lockingScript))
+        const record = await this.parseLockingScript(definitionType, LockingScript.fromHex(output.lockingScript as string))
         const [txid, outputIndex] = output.outpoint.split('.')
         results.push({
           ...record,
           txid,
           outputIndex: Number(outputIndex),
           satoshis: output.satoshis,
-          lockingScript: output.lockingScript
+          lockingScript: output.lockingScript as string
         })
       } catch {
         // ignore parse errors
@@ -256,7 +261,12 @@ export class RegistryClient {
     }
 
     // Broadcast
-    const broadcaster = new SHIPBroadcaster([this.getBroadcastTopic(registryRecord.definitionType)])
+    const broadcaster = new TopicBroadcaster(
+      [this.getBroadcastTopic(registryRecord.definitionType)],
+      {
+        networkPreset: (await (this.wallet.getNetwork({}))).network
+      }
+    )
     return await broadcaster.broadcast(Transaction.fromAtomicBEEF(signedTx))
   }
 

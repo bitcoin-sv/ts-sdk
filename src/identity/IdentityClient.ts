@@ -100,11 +100,9 @@ export class IdentityClient {
 
     if (tx !== undefined) {
       // Submit the transaction to an overlay
-
       const broadcaster = new TopicBroadcaster(['tm_identity'], {
         networkPreset: (await (this.wallet.getNetwork({}))).network
       })
-      console.log(Transaction.fromAtomicBEEF(tx).toHexBEEF())
       return await broadcaster.broadcast(Transaction.fromAtomicBEEF(tx))
     }
     throw new Error('Public reveal failed: failed to create action!')
