@@ -96,10 +96,11 @@ export class RegistryClient {
     }
 
     // Broadcast
+
     const broadcaster = new TopicBroadcaster(
       [this.getBroadcastTopic(data.definitionType)],
       {
-        networkPreset: this.network ?? (await (this.wallet.getNetwork({}))).network
+        networkPreset: this.network ??= (await (this.wallet.getNetwork({}))).network
       }
     )
     return await broadcaster.broadcast(Transaction.fromAtomicBEEF(tx))
@@ -265,7 +266,7 @@ export class RegistryClient {
     const broadcaster = new TopicBroadcaster(
       [this.getBroadcastTopic(registryRecord.definitionType)],
       {
-        networkPreset: this.network ?? (await (this.wallet.getNetwork({}))).network
+        networkPreset: this.network ??= (await (this.wallet.getNetwork({}))).network
       }
     )
     return await broadcaster.broadcast(Transaction.fromAtomicBEEF(signedTx))
