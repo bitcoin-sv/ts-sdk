@@ -22,7 +22,7 @@ import { TopicBroadcaster } from '../overlay-tools/index.js'
 export class IdentityClient {
   private readonly authClient: AuthFetch
   private readonly wallet: WalletInterface
-  constructor(
+  constructor (
     wallet?: WalletInterface,
     private readonly options = DEFAULT_IDENTITY_CLIENT_OPTIONS,
     private readonly originator?: OriginatorDomainNameStringUnder250Bytes
@@ -41,7 +41,7 @@ export class IdentityClient {
    * @returns {Promise<object>} A promise that resolves with the broadcast result from the overlay network.
    * @throws {Error} Throws an error if the certificate is invalid, the fields cannot be revealed, or if the broadcast fails.
    */
-  async publiclyRevealAttributes(
+  async publiclyRevealAttributes (
     certificate: WalletCertificate,
     fieldsToReveal: CertificateFieldNameUnder50Bytes[]
   ): Promise<BroadcastResponse | BroadcastFailure> {
@@ -69,7 +69,7 @@ export class IdentityClient {
     // Given we already have a master certificate from a certifier,
     // create an anyone verifiable certificate with selectively revealed fields
     const { keyringForVerifier } = await this.wallet.proveCertificate({
-      certificate: certificate as WalletCertificate,
+      certificate,
       fieldsToReveal,
       verifier: new PrivateKey(1).toPublicKey().toString()
     })
@@ -114,7 +114,7 @@ export class IdentityClient {
   * @param {DiscoverByIdentityKeyArgs} args - Arguments for requesting the discovery based on the identity key.
   * @returns {Promise<DisplayableIdentity[]>} The promise resolves to displayable identities.
   */
-  async resolveByIdentityKey(
+  async resolveByIdentityKey (
     args: DiscoverByIdentityKeyArgs
   ): Promise<DisplayableIdentity[]> {
     const { certificates } = await this.wallet.discoverByIdentityKey(args, this.originator)
@@ -129,7 +129,7 @@ export class IdentityClient {
    * @param {DiscoverByAttributesArgs} args - Attributes and optional parameters used to discover certificates.
    * @returns {Promise<DisplayableIdentity[]>} The promise resolves to displayable identities.
    */
-  async resolveByAttributes(
+  async resolveByAttributes (
     args: DiscoverByAttributesArgs
   ): Promise<DisplayableIdentity[]> {
     const { certificates } = await this.wallet.discoverByAttributes(args, this.originator)
@@ -218,7 +218,7 @@ export class IdentityClient {
    * @param identityToParse - The Identity Certificate to parse
    * @returns - IdentityToDisplay
    */
-  static parseIdentity(identityToParse: IdentityCertificate): DisplayableIdentity {
+  static parseIdentity (identityToParse: IdentityCertificate): DisplayableIdentity {
     const { type, decryptedFields, certifierInfo } = identityToParse
     let name, avatarURL, badgeLabel, badgeIconURL, badgeClickURL
 
@@ -229,21 +229,21 @@ export class IdentityClient {
         avatarURL = decryptedFields.profilePhoto
         badgeLabel = `X account certified by ${certifierInfo.name}`
         badgeIconURL = certifierInfo.iconUrl
-        badgeClickURL = 'https://socialcert.net'  // TODO Make a specific page for this.
+        badgeClickURL = 'https://socialcert.net' // TODO Make a specific page for this.
         break
       case KNOWN_IDENTITY_TYPES.discordCert:
         name = decryptedFields.userName
         avatarURL = decryptedFields.profilePhoto
         badgeLabel = `Discord account certified by ${certifierInfo.name}`
         badgeIconURL = certifierInfo.iconUrl
-        badgeClickURL = 'https://socialcert.net'  // TODO Make a specific page for this.
+        badgeClickURL = 'https://socialcert.net' // TODO Make a specific page for this.
         break
       case KNOWN_IDENTITY_TYPES.emailCert:
         name = decryptedFields.email
         avatarURL = 'XUTZxep7BBghAJbSBwTjNfmcsDdRFs5EaGEgkESGSgjJVYgMEizu'
         badgeLabel = `Email certified by ${certifierInfo.name}`
         badgeIconURL = certifierInfo.iconUrl
-        badgeClickURL = 'https://socialcert.net'  // TODO Make a specific page for this.
+        badgeClickURL = 'https://socialcert.net' // TODO Make a specific page for this.
         break
       case KNOWN_IDENTITY_TYPES.phoneCert:
         name = decryptedFields.phoneNumber

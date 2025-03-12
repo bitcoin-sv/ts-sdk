@@ -2,6 +2,8 @@ import {
   WalletInterface,
   WalletProtocol,
   WalletClient
+  ,
+  PubKeyHex
 } from '../wallet/index.js'
 import {
   Utils
@@ -9,7 +11,7 @@ import {
 import {
   Transaction,
   BroadcastResponse,
-  BroadcastFailure,
+  BroadcastFailure
 } from '../transaction/index.js'
 import {
   LookupResolver,
@@ -19,9 +21,6 @@ import {
   PushDrop,
   LockingScript
 } from '../script/index.js'
-import {
-  PubKeyHex
-} from '../wallet/index.js'
 import {
   CertificateFieldDescriptor,
   DefinitionData,
@@ -49,7 +48,7 @@ const REGISTRANT_TOKEN_AMOUNT = 1
  */
 export class RegistryClient {
   private network: 'mainnet' | 'testnet'
-  constructor(
+  constructor (
     private readonly wallet: WalletInterface = new WalletClient()
   ) { }
 
@@ -63,7 +62,7 @@ export class RegistryClient {
    * @param data - The structured information needed to register an item of kind 'basket', 'protocol', or 'certificate'.
    * @returns A promise with the broadcast result or failure.
    */
-  async registerDefinition(data: DefinitionData): Promise<BroadcastResponse | BroadcastFailure> {
+  async registerDefinition (data: DefinitionData): Promise<BroadcastResponse | BroadcastFailure> {
     const registryOperator = (await this.wallet.getPublicKey({ identityKey: true })).publicKey
     const pushdrop = new PushDrop(this.wallet)
 
@@ -159,7 +158,7 @@ export class RegistryClient {
    * @param definitionType - The type of registry definition to list ('basket', 'protocol', or 'certificate').
    * @returns A promise that resolves to an array of RegistryRecord objects.
    */
-  async listOwnRegistryEntries(definitionType: DefinitionType): Promise<RegistryRecord[]> {
+  async listOwnRegistryEntries (definitionType: DefinitionType): Promise<RegistryRecord[]> {
     const relevantBasketName = this.getBasketName(definitionType)
     const { outputs } = await this.wallet.listOutputs({
       basket: relevantBasketName,
@@ -200,7 +199,7 @@ export class RegistryClient {
    * @returns A promise that resolves with either a BroadcastResponse upon success or a BroadcastFailure on error.
    * @throws If required fields are missing or if transaction creation/signing fails.
    */
-  async revokeOwnRegistryEntry(
+  async revokeOwnRegistryEntry (
     registryRecord: RegistryRecord
   ): Promise<BroadcastResponse | BroadcastFailure> {
     if (registryRecord.txid === undefined || typeof registryRecord.outputIndex === 'undefined' || registryRecord.lockingScript === undefined) {
@@ -276,7 +275,7 @@ export class RegistryClient {
   // INTERNAL HELPER METHODS
   // --------------------------------------------------------------------------
 
-  private buildPushDropFields(
+  private buildPushDropFields (
     data: DefinitionData,
     registryOperator: string
   ): number[][] {
@@ -326,7 +325,7 @@ export class RegistryClient {
    * Decodes a pushdrop locking script for a given registry kind,
    * returning a typed record with the appropriate fields.
    */
-  private async parseLockingScript(
+  private async parseLockingScript (
     definitionType: DefinitionType,
     lockingScript: LockingScript
   ): Promise<DefinitionData> {
@@ -431,7 +430,7 @@ export class RegistryClient {
   /**
    * Returns the (protocolID, keyID) used for pushdrop based on the registry kind.
    */
-  private getWalletProtocol(definitionType: DefinitionType): WalletProtocol {
+  private getWalletProtocol (definitionType: DefinitionType): WalletProtocol {
     switch (definitionType) {
       case 'basket':
         return [1, 'basketmap']
@@ -447,7 +446,7 @@ export class RegistryClient {
   /**
    * Returns the name of the basket used by the wallet
    */
-  private getBasketName(definitionType: DefinitionType): string {
+  private getBasketName (definitionType: DefinitionType): string {
     switch (definitionType) {
       case 'basket':
         return 'basketmap'
@@ -463,7 +462,7 @@ export class RegistryClient {
   /**
    * Returns the broadcast topic to be used with SHIPBroadcaster.
    */
-  private getBroadcastTopic(definitionType: DefinitionType): string {
+  private getBroadcastTopic (definitionType: DefinitionType): string {
     switch (definitionType) {
       case 'basket':
         return 'tm_basketmap'
@@ -479,7 +478,7 @@ export class RegistryClient {
   /**
    * Returns the lookup service name to use.
    */
-  private getServiceName(definitionType: DefinitionType): string {
+  private getServiceName (definitionType: DefinitionType): string {
     switch (definitionType) {
       case 'basket':
         return 'ls_basketmap'
