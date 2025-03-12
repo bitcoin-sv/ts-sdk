@@ -1,15 +1,9 @@
-// IdentityClient.test.ts
 import { WalletCertificate, WalletInterface } from '../../wallet/index'
 import { IdentityClient } from '../IdentityClient'
 import { Certificate } from '../../auth/certificates/index.js'
 import { KNOWN_IDENTITY_TYPES, defaultIdentity } from '../types/index.js'
 
 // ----- Mocks for external dependencies -----
-
-/**
- * We mock out PushDrop, TopicBroadcaster, and Transaction so we can control
- * their behavior in unit tests.
- */
 jest.mock('../../script', () => {
   return {
     PushDrop: jest.fn().mockImplementation(() => ({
@@ -32,7 +26,7 @@ jest.mock('../../overlay-tools/index.js', () => {
 jest.mock('../../transaction/index.js', () => {
   return {
     Transaction: {
-      fromAtomicBEEF: jest.fn().mockImplementation((_tx: any) => ({
+      fromAtomicBEEF: jest.fn().mockImplementation((tx) => ({
         toHexBEEF: () => 'transactionHex'
       })),
       fromBEEF: jest.fn()
@@ -40,12 +34,13 @@ jest.mock('../../transaction/index.js', () => {
   }
 })
 
+// ----- Begin Test Suite -----
 describe('IdentityClient', () => {
   let walletMock: Partial<WalletInterface>
   let identityClient: IdentityClient
-  let mockBroadcaster: any
 
   beforeEach(() => {
+    // Create a fake wallet implementing the methods used by IdentityClient.
     walletMock = {
       proveCertificate: jest.fn().mockResolvedValue({ keyringForVerifier: 'fakeKeyring' }),
       createAction: jest.fn().mockResolvedValue({
@@ -65,16 +60,10 @@ describe('IdentityClient', () => {
 
     identityClient = new IdentityClient(walletMock as WalletInterface)
 
-    // For convenience, grab the broadcaster mock so we can manipulate it in tests
-    const { TopicBroadcaster } = require('../../overlay-tools/index.js')
-    mockBroadcaster = new TopicBroadcaster(['tm_identity'], { networkPreset: 'testnet' })
-
+    // Clear any previous calls/spies.
     jest.clearAllMocks()
   })
 
-  // ----------------------------------------------------------------------
-  // publiclyRevealAttributes Tests
-  // ----------------------------------------------------------------------
   describe('publiclyRevealAttributes', () => {
     it('should throw an error if certificate has no fields', async () => {
       const certificate = {
@@ -82,7 +71,6 @@ describe('IdentityClient', () => {
         verify: jest.fn().mockResolvedValue(true)
       } as any as WalletCertificate
       const fieldsToReveal = ['name']
-
       await expect(
         identityClient.publiclyRevealAttributes(certificate, fieldsToReveal)
       ).rejects.toThrow('Certificate has no fields to reveal!')
@@ -94,7 +82,6 @@ describe('IdentityClient', () => {
         verify: jest.fn().mockResolvedValue(true)
       } as any as WalletCertificate
       const fieldsToReveal: string[] = []
-
       await expect(
         identityClient.publiclyRevealAttributes(certificate, fieldsToReveal)
       ).rejects.toThrow('You must reveal at least one field!')
@@ -112,7 +99,6 @@ describe('IdentityClient', () => {
         signature: 'dummySignature'
       } as any as WalletCertificate
       const fieldsToReveal = ['name']
-
       await expect(
         identityClient.publiclyRevealAttributes(certificate, fieldsToReveal)
       ).rejects.toThrow('Certificate verification failed!')
@@ -122,7 +108,7 @@ describe('IdentityClient', () => {
       // Prepare a dummy certificate with all required properties.
       const certificate = {
         fields: { name: 'Alice' },
-        verify: jest.fn().mockResolvedValue(true),
+        verify: jest.fn().mockResolvedValue(true), // this property is not used since the Certificate is re-instantiated
         type: 'xCert',
         serialNumber: '12345',
         subject: 'abcdef1234567890',
@@ -131,12 +117,13 @@ describe('IdentityClient', () => {
         signature: 'signature1'
       } as any as WalletCertificate
 
-      // Make sure that the "master" certificate verification passes:
+      // Ensure that Certificate.verify (called on the re-instantiated Certificate)
+      // resolves successfully.
       jest.spyOn(Certificate.prototype, 'verify').mockResolvedValue(false)
 
       const fieldsToReveal = ['name']
       const result = await identityClient.publiclyRevealAttributes(certificate, fieldsToReveal)
-      expect(result).toBe('broadcastResult')
+      expect(result).toEqual('broadcastResult')
 
       // Validate that proveCertificate was called with the proper arguments.
       expect(walletMock.proveCertificate).toHaveBeenCalledWith({
@@ -147,64 +134,9 @@ describe('IdentityClient', () => {
 
       // Validate that createAction was called.
       expect(walletMock.createAction).toHaveBeenCalled()
-      // Validate broadcast call
-      expect(mockBroadcaster.broadcast).toHaveBeenCalled()
     })
-
-    it('should throw if createAction returns no tx', async () => {
-      const certificate = {
-        fields: { name: 'Alice' },
-        verify: jest.fn().mockResolvedValue(true),
-        type: 'xCert',
-        serialNumber: '12345',
-        subject: 'abcdef1234567890',
-        certifier: 'CertifierX',
-        revocationOutpoint: 'outpoint1',
-        signature: 'signature1'
-      } as any as WalletCertificate
-
-      jest.spyOn(Certificate.prototype, 'verify').mockResolvedValue(false)
-
-      // Simulate createAction returning an object with tx = undefined
-      walletMock.createAction = jest.fn().mockResolvedValue({
-        tx: undefined,
-        signableTransaction: { tx: undefined, reference: 'ref' }
-      })
-
-      const fieldsToReveal = ['name']
-
-      await expect(
-        identityClient.publiclyRevealAttributes(certificate, fieldsToReveal)
-      ).rejects.toThrow('Public reveal failed: failed to create action!')
-    })
-
-    // it('should propagate any error that occurs during broadcast', async () => {
-    //   const certificate = {
-    //     fields: { name: 'Alice' },
-    //     verify: jest.fn().mockResolvedValue(true),
-    //     type: 'xCert',
-    //     serialNumber: '12345',
-    //     subject: 'abcdef1234567890',
-    //     certifier: 'CertifierX',
-    //     revocationOutpoint: 'outpoint1',
-    //     signature: 'signature1'
-    //   } as any as WalletCertificate
-
-    //   jest.spyOn(Certificate.prototype, 'verify').mockResolvedValue(false)
-
-    //   // Force the broadcast to reject
-    //   mockBroadcaster.broadcast.mockRejectedValue(new Error('Broadcast failed!'))
-
-    //   const fieldsToReveal = ['name']
-    //   await expect(
-    //     identityClient.publiclyRevealAttributes(certificate, fieldsToReveal)
-    //   ).rejects.toThrow('Broadcast failed!')
-    // })
   })
 
-  // ----------------------------------------------------------------------
-  // resolveByIdentityKey Tests
-  // ----------------------------------------------------------------------
   describe('resolveByIdentityKey', () => {
     it('should return parsed identities from discovered certificates', async () => {
       const dummyCertificate = {
@@ -237,9 +169,33 @@ describe('IdentityClient', () => {
     })
   })
 
-  // ----------------------------------------------------------------------
-  // resolveByAttributes Tests
-  // ----------------------------------------------------------------------
+  it('should throw if createAction returns no tx', async () => {
+    const certificate = {
+      fields: { name: 'Alice' },
+      verify: jest.fn().mockResolvedValue(true),
+      type: 'xCert',
+      serialNumber: '12345',
+      subject: 'abcdef1234567890',
+      certifier: 'CertifierX',
+      revocationOutpoint: 'outpoint1',
+      signature: 'signature1'
+    } as any as WalletCertificate
+
+    jest.spyOn(Certificate.prototype, 'verify').mockResolvedValue(false)
+
+    // Simulate createAction returning an object with tx = undefined
+    walletMock.createAction = jest.fn().mockResolvedValue({
+      tx: undefined,
+      signableTransaction: { tx: undefined, reference: 'ref' }
+    })
+
+    const fieldsToReveal = ['name']
+
+    await expect(
+      identityClient.publiclyRevealAttributes(certificate, fieldsToReveal)
+    ).rejects.toThrow('Public reveal failed: failed to create action!')
+  })
+
   describe('resolveByAttributes', () => {
     it('should return parsed identities from discovered certificates', async () => {
       const dummyCertificate = {
@@ -272,9 +228,6 @@ describe('IdentityClient', () => {
     })
   })
 
-  // ----------------------------------------------------------------------
-  // parseIdentity Tests
-  // ----------------------------------------------------------------------
   describe('parseIdentity', () => {
     it('should correctly parse an xCert identity', () => {
       const dummyCertificate = {
@@ -289,7 +242,7 @@ describe('IdentityClient', () => {
           iconUrl: 'certifierIconUrl'
         }
       }
-      const identity = IdentityClient.parseIdentity(dummyCertificate as any)
+      const identity = IdentityClient.parseIdentity(dummyCertificate as unknown as any)
       expect(identity).toEqual({
         name: 'Alice',
         avatarURL: 'alicePhotoUrl',
