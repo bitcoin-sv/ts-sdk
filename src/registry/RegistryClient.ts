@@ -48,6 +48,7 @@ const REGISTRANT_TOKEN_AMOUNT = 1
  * canonical references for baskets, protocols, and certificates types.
  */
 export class RegistryClient {
+  private network: 'mainnet' | 'testnet'
   constructor(
     private readonly wallet: WalletInterface = new WalletClient()
   ) { }
@@ -98,7 +99,7 @@ export class RegistryClient {
     const broadcaster = new TopicBroadcaster(
       [this.getBroadcastTopic(data.definitionType)],
       {
-        networkPreset: (await (this.wallet.getNetwork({}))).network
+        networkPreset: this.network ?? (await (this.wallet.getNetwork({}))).network
       }
     )
     return await broadcaster.broadcast(Transaction.fromAtomicBEEF(tx))
@@ -264,7 +265,7 @@ export class RegistryClient {
     const broadcaster = new TopicBroadcaster(
       [this.getBroadcastTopic(registryRecord.definitionType)],
       {
-        networkPreset: (await (this.wallet.getNetwork({}))).network
+        networkPreset: this.network ?? (await (this.wallet.getNetwork({}))).network
       }
     )
     return await broadcaster.broadcast(Transaction.fromAtomicBEEF(signedTx))
