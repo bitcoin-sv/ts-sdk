@@ -36,7 +36,7 @@ export class IdentityClient {
    * The publicly revealed certificate is included in a blockchain transaction and broadcast to a federated overlay node.
    *
    * @param {Certificate} certificate - The master certificate to selectively reveal.
-   * @param {Record<string, string>} fieldsToReveal - A map of field names to their values to be revealed. Only these fields will be included in the public certificate.
+   * @param {CertificateFieldNameUnder50Bytes[]} fieldsToReveal - An array of certificate field names to reveal. Only these fields will be included in the public certificate.
    *
    * @returns {Promise<object>} A promise that resolves with the broadcast result from the overlay network.
    * @throws {Error} Throws an error if the certificate is invalid, the fields cannot be revealed, or if the broadcast fails.
