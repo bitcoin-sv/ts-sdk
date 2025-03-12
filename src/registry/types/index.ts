@@ -1,4 +1,4 @@
-import { PubKeyHex } from '@bsv/sdk'
+import { PubKeyHex } from '../../wallet/index.js'
 
 /**
  * Determines which category of registry item we are working with.

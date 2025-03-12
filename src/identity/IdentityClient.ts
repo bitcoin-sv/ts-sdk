@@ -1,19 +1,29 @@
-import { AuthFetch } from 'src/auth/clients/index.js'
+import { AuthFetch } from '../auth/clients/index.js'
 import { DEFAULT_IDENTITY_CLIENT_OPTIONS, defaultIdentity, DisplayableIdentity, KNOWN_IDENTITY_TYPES } from './types/index.js'
-import { CertificateFieldNameUnder50Bytes, DiscoverByAttributesArgs, DiscoverByIdentityKeyArgs, IdentityCertificate, OriginatorDomainNameStringUnder250Bytes, WalletCertificate, WalletClient, WalletInterface } from 'src/wallet/index.js'
-import { BroadcastFailure, BroadcastResponse, Transaction } from 'src/transaction/index.js'
-import { Certificate } from 'src/auth/index.js'
-import { PushDrop } from 'src/script/index.js'
-import { PrivateKey, Utils } from 'src/primitives/index.js'
-import { TopicBroadcaster } from 'src/overlay-tools/index.js'
+import {
+  CertificateFieldNameUnder50Bytes,
+  DiscoverByAttributesArgs,
+  DiscoverByIdentityKeyArgs,
+  IdentityCertificate,
+  OriginatorDomainNameStringUnder250Bytes,
+  WalletCertificate,
+  WalletClient,
+  WalletInterface
+} from '../wallet/index.js'
+import { BroadcastFailure, BroadcastResponse, Transaction } from '../transaction/index.js'
+import Certificate from '../auth/certificates/Certificate.js'
+import { PushDrop } from '../script/index.js'
+import { PrivateKey, Utils } from '../primitives/index.js'
+import { TopicBroadcaster } from '../overlay-tools/index.js'
 
 /**
  * IdentityClient lets you discover who others are, and let the world know who you are.
  */
 export class IdentityClient {
   private readonly authClient: AuthFetch
+  private readonly wallet: WalletInterface
   constructor(
-    private readonly wallet?: WalletInterface,
+    wallet?: WalletInterface,
     private readonly options = DEFAULT_IDENTITY_CLIENT_OPTIONS,
     private readonly originator?: OriginatorDomainNameStringUnder250Bytes
   ) {
@@ -131,6 +141,7 @@ export class IdentityClient {
   }
 
   /**
+   * TODO: Implement once revocation overlay is created
    * Remove public certificate revelation from overlay services by spending the identity token
    * @param serialNumber - Unique serial number of the certificate to revoke revelation
    */
