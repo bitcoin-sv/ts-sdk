@@ -31,6 +31,7 @@ export class StorageUploader {
         retentionPeriod: number
     ): Promise<{
         uploadURL: string
+        requiredHeaders: Record<string, string>
         amount?: number
     }> {
         const url = `${this.baseURL}/upload`
@@ -48,26 +49,32 @@ export class StorageUploader {
             status: string,
             uploadURL: string
             amount?: number
+            requiredHeaders: Record<string, string>
         }
         if (data.status === 'error') {
             throw new Error('Upload route returned an error.')
         }
         return {
             uploadURL: data.uploadURL,
+            requiredHeaders: data.requiredHeaders,
             amount: data.amount
         }
     }
 
     private async uploadFile(
         uploadURL: string,
-        file: UploadableFile
+        file: UploadableFile,
+        requiredHeaders: Record<string, string>
     ): Promise<UploadFileResult> {
         const body = Uint8Array.from(file.data)
 
         const response = await fetch(uploadURL, {
             method: 'PUT',
             body: body,
-            headers: { 'Content-Type': file.type }
+            headers: {
+                'Content-Type': file.type,
+                ...requiredHeaders
+            }
         })
         if (!response.ok) {
             throw new Error(`File upload failed: HTTP ${response.status}`)
@@ -102,8 +109,9 @@ export class StorageUploader {
         const { file, retentionPeriod } = params
         const fileSize = file.data.length
 
-        const { uploadURL, amount } = await this.getUploadInfo(fileSize, retentionPeriod)
-        return this.uploadFile(uploadURL, file)
+        const { uploadURL, amount, requiredHeaders } = await this.getUploadInfo(fileSize, retentionPeriod)
+        return this.uploadFile(uploadURL, file, requiredHeaders)
     }
 }
 
+ 
