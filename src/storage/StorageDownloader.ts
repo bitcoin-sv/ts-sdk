@@ -6,12 +6,12 @@ import Transaction from '../transaction/Transaction.js'
 import { Hash, Utils } from '../primitives/index.js'
 
 export interface DownloaderConfig {
-  networkPreset: string
+    networkPreset: string
 }
 
 export interface DownloadResult {
-  data: Buffer
-  mimeType: string | null
+    data: Buffer
+    mimeType: string | null
 }
 
 /**
@@ -26,66 +26,66 @@ export interface DownloadResult {
  * or there is an error retrieving url(s) stored in the UHRP token.
  */
 export class StorageDownloader {
-  private readonly networkPreset?: 'mainnet' | 'testnet' | 'local' = 'mainnet'
-  constructor (config?: DownloaderConfig) {
-    this.networkPreset
-  }
-
-  public async resolve (uhrpUrl: string): Promise<string[]> {
-    // Use UHRP lookup service
-    const lookupResolver = new LookupResolver({ networkPreset: this.networkPreset })
-    const response = await lookupResolver.query({ service: 'ls_uhrp', query: { uhrpUrl } })
-    if (response.type !== 'output-list') {
-      throw new Error('Lookup answer must be an output list')
-    }
-    const decodedResults: string[] = []
-    for (let i = 0; i < response.outputs.length; i++) {
-      const tx = Transaction.fromBEEF(response.outputs[i].beef)
-      const { fields } = PushDrop.decode(tx.outputs[response.outputs[i].outputIndex].lockingScript)
-      decodedResults.push(Utils.toUTF8(fields[2]))
-    }
-    return decodedResults
-  }
-
-  public async download (uhrpUrl: string) {
-    if (!StorageUtils.isValidURL(uhrpUrl)) {
-      throw new Error('Invalid parameter UHRP url')
-    }
-    const hash = StorageUtils.getHashFromURL(uhrpUrl)
-    const downloadURLs = await this.resolve(uhrpUrl)
-
-    if (!Array.isArray(downloadURLs) || downloadURLs.length === 0) {
-      throw new Error('No one currently hosts this file!')
+    private readonly networkPreset?: 'mainnet' | 'testnet' | 'local' = 'mainnet'
+    constructor(config?: DownloaderConfig) {
+        this.networkPreset
     }
 
-    for (let i = 0; i < downloadURLs.length; i++) {
-      try {
-        // The url is fetched
-        const result = await fetch(downloadURLs[i], { method: 'GET' })
-
-        // If the request fails, continue to the next url
-        if (!result.ok || result.status >= 400) {
-          continue
+    public async resolve(uhrpUrl: string): Promise<string[]> {
+        // Use UHRP lookup service
+        const lookupResolver = new LookupResolver({ networkPreset: this.networkPreset })
+        const response = await lookupResolver.query({ service: 'ls_uhrp', query: { uhrpUrl } })
+        if (response.type !== 'output-list') {
+            throw new Error('Lookup answer must be an output list')
         }
-        const body = await result.arrayBuffer()
+        const decodedResults: string[] = []
+        for (let i = 0; i < response.outputs.length; i++) {
+            const tx = Transaction.fromBEEF(response.outputs[i].beef)
+            const { fields } = PushDrop.decode(tx.outputs[response.outputs[i].outputIndex].lockingScript)
+            decodedResults.push(Utils.toUTF8(fields[2]))
+        }
+        return decodedResults
+    }
 
-        // The body is loaded into a number array
-        const content: number[] = [...new Uint8Array(body)]
-        const contentHash = Hash.sha256(content)
-        for (let i = 0; i < contentHash.length; ++i) {
-          if (contentHash[i] !== hash[i]) {
-            throw new Error('Value of content does not match hash of the url given')
-          }
+    public async download(uhrpUrl: string) {
+        if (!StorageUtils.isValidURL(uhrpUrl)) {
+            throw new Error('Invalid parameter UHRP url')
+        }
+        const hash = StorageUtils.getHashFromURL(uhrpUrl)
+        const downloadURLs = await this.resolve(uhrpUrl)
+
+        if (!Array.isArray(downloadURLs) || downloadURLs.length === 0) {
+            throw new Error('No one currently hosts this file!')
         }
 
-        return {
-          data: content,
-          mimeType: result.headers.get('Content-Type')
+        for (let i = 0; i < downloadURLs.length; i++) {
+            try {
+                // The url is fetched
+                const result = await fetch(downloadURLs[i], { method: 'GET' })
+
+                // If the request fails, continue to the next url
+                if (!result.ok || result.status >= 400) {
+                    continue
+                }
+                const body = await result.arrayBuffer()
+
+                // The body is loaded into a number array
+                const content: number[] = [...new Uint8Array(body)]
+                const contentHash = Hash.sha256(content)
+                for (let i = 0; i < contentHash.length; ++i) {
+                    if (contentHash[i] !== hash[i]) {
+                        throw new Error('Value of content does not match hash of the url given')
+                    }
+                }
+
+                return {
+                    data: content,
+                    mimeType: result.headers.get('Content-Type')
+                }
+            } catch (error) {
+                continue
+            }
         }
-      } catch (error) {
-        continue
-      }
+        throw new Error(`Unable to download content from ${uhrpUrl}`)
     }
-    throw new Error(`Unable to download content from ${uhrpUrl}`)
-  }
 }
