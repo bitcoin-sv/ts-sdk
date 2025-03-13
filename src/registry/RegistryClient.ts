@@ -75,7 +75,8 @@ export class RegistryClient {
       fields,
       protocol,
       '1',
-      'self'
+      'anyone',
+      true
     )
 
     // Create a transaction
@@ -87,7 +88,10 @@ export class RegistryClient {
           lockingScript: lockingScript.toHex(),
           outputDescription: `New ${data.definitionType} registration token`
         }
-      ]
+      ],
+      options: {
+        randomizeOutputs: false
+      }
     })
 
     if (tx === undefined) {
@@ -140,7 +144,7 @@ export class RegistryClient {
     const parsedRegistryRecords: DefinitionData[] = []
     for (const output of result.outputs) {
       try {
-        const parsedTx = Transaction.fromAtomicBEEF(output.beef)
+        const parsedTx = Transaction.fromBEEF(output.beef)
         const record = await this.parseLockingScript(definitionType, parsedTx.outputs[output.outputIndex].lockingScript)
         parsedRegistryRecords.push(record)
       } catch {
@@ -338,7 +342,7 @@ export class RegistryClient {
     let data: DefinitionData
     switch (definitionType) {
       case 'basket': {
-        if (decoded.fields.length !== 6) {
+        if (decoded.fields.length !== 7) {
           throw new Error('Unexpected field count for basket type.')
         }
         const [basketID, name, iconURL, description, docURL, operator] = decoded.fields
@@ -354,7 +358,7 @@ export class RegistryClient {
         break
       }
       case 'protocol': {
-        if (decoded.fields.length !== 7) {
+        if (decoded.fields.length !== 8) {
           throw new Error('Unexpected field count for proto type.')
         }
         const [
@@ -379,7 +383,7 @@ export class RegistryClient {
         break
       }
       case 'certificate': {
-        if (decoded.fields.length !== 7) {
+        if (decoded.fields.length !== 8) {
           throw new Error('Unexpected field count for certificate type.')
         }
         const [
