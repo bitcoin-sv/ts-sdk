@@ -25,7 +25,6 @@ export interface DownloadResult {
  * @throws {Error} If UHRP url parameter invalid or is not an array
  * or there is an error retrieving url(s) stored in the UHRP token.
  */
-
 export class StorageDownloader {
   private readonly networkPreset?: 'mainnet' | 'testnet' | 'local' = 'mainnet'
   constructor (config?: DownloaderConfig) {
