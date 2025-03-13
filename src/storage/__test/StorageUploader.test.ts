@@ -1,5 +1,6 @@
 import { StorageUploader } from '../StorageUploader.js'
-import { WalletClient, StorageUtils } from '../../../mod.js'
+import * as StorageUtils from '../StorageUtils.js'
+import WalletClient from '../../wallet/WalletClient.js'
 
 // A helper for converting a string to a number[] of UTF-8 bytes
 function stringToUtf8Array(str: string): number[] {
@@ -41,7 +42,7 @@ describe('StorageUploader Tests', () => {
         data,
         type: 'text/plain'
       },
-      retentionPeriod: 7 
+      retentionPeriod: 7
     })
 
     // We expect exactly one PUT request

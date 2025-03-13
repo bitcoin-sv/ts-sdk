@@ -12,7 +12,9 @@ import {
   Transport
 } from './types.js'
 import { VerifiableCertificate } from './certificates/VerifiableCertificate.js'
-import { Random, Utils, WalletInterface } from '../../mod.js'
+import Random from '../primitives/Random.js'
+import * as Utils from '../primitives/utils.js'
+import { WalletInterface } from '../wallet/Wallet.interfaces.js'
 
 const AUTH_VERSION = '0.1'
 
@@ -82,7 +84,9 @@ export class Peer {
       certifiers: [],
       types: {}
     }
-    this.transport.onData(this.handleIncomingMessage.bind(this)).catch(console.error)
+    this.transport.onData(this.handleIncomingMessage.bind(this)).catch(e => {
+      throw e
+    })
     this.sessionManager =
       sessionManager != null ? sessionManager : new SessionManager()
     if (autoPersistLastSession === false) {
@@ -424,10 +428,9 @@ export class Peer {
    */
   private async handleIncomingMessage (message: AuthMessage): Promise<void> {
     if (typeof message.version !== 'string' || message.version !== AUTH_VERSION) {
-      console.error(
+      throw new Error(
         `Invalid or unsupported message auth version! Received: ${message.version}, expected: ${AUTH_VERSION}`
       )
-      return
     }
 
     switch (message.messageType) {
@@ -447,7 +450,7 @@ export class Peer {
         await this.processGeneralMessage(message)
         break
       default:
-        console.error(
+        throw new Error(
           `Unknown message type of ${String(message.messageType)} from ${String(
             message.identityKey
           )}`
