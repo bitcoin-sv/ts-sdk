@@ -2,7 +2,9 @@ import {
   WalletInterface,
   WalletProtocol,
   WalletClient,
-  PubKeyHex
+  PubKeyHex,
+  SecurityLevel,
+  ProtocolString5To400Bytes
 } from '../wallet/index.js'
 import { Utils } from '../primitives/index.js'
 import {
@@ -106,7 +108,7 @@ export class RegistryClient {
    * - For "basket", the query is of type BasketMapQuery:
    *   { basketID?: string; name?: string; registryOperators?: string[]; }
    * - For "protocol", the query is of type ProtoMapQuery:
-   *   { name?: string; registryOperators?: string[]; protocolID?: string; securityLevel?: number; }
+   *   { name?: string; registryOperators?: string[]; protocolID?: WalletProtocol; }
    * - For "certificate", the query is of type CertMapQuery:
    *   { type?: string; name?: string; registryOperators?: string[]; }
    *
@@ -283,8 +285,7 @@ export class RegistryClient {
         break
       case 'protocol':
         fields = [
-          data.securityLevel.toString(),
-          data.protocolID,
+          JSON.stringify(data.protocolID),
           data.name,
           data.iconURL,
           data.description,
@@ -347,11 +348,10 @@ export class RegistryClient {
       }
 
       case 'protocol': {
-        if (decoded.fields.length !== 8) {
+        if (decoded.fields.length !== 7) {
           throw new Error('Unexpected field count for protocol type.')
         }
         const [
-          securityLevel,
           protocolID,
           name,
           iconURL,
@@ -363,8 +363,7 @@ export class RegistryClient {
 
         parsedData = {
           definitionType: 'protocol',
-          securityLevel: parseInt(Utils.toUTF8(securityLevel), 10) as 0 | 1 | 2,
-          protocolID: Utils.toUTF8(protocolID),
+          protocolID: deserializeWalletProtocol(Utils.toUTF8(protocolID)),
           name: Utils.toUTF8(name),
           iconURL: Utils.toUTF8(iconURL),
           description: Utils.toUTF8(description),
@@ -484,4 +483,28 @@ export class RegistryClient {
         throw new Error(`Unknown definition type: ${definitionType as string}`)
     }
   }
+}
+
+export function deserializeWalletProtocol(str: string): WalletProtocol {
+  // Parse the JSON string back into a JavaScript value.
+  const parsed = JSON.parse(str)
+
+  // Validate that the parsed value is an array with exactly two elements.
+  if (!Array.isArray(parsed) || parsed.length !== 2) {
+    throw new Error("Invalid wallet protocol format.")
+  }
+
+  const [security, protocolString] = parsed
+
+  // Validate that the security level is one of the allowed numbers.
+  if (![0, 1, 2].includes(security)) {
+    throw new Error("Invalid security level.")
+  }
+
+  // Validate that the protocol string is a string and its length is within the allowed bounds.
+  if (typeof protocolString !== "string") {
+    throw new Error("Invalid protocolID")
+  }
+
+  return [security as SecurityLevel, protocolString as ProtocolString5To400Bytes];
 }

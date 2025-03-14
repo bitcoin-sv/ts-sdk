@@ -1,4 +1,4 @@
-import { PubKeyHex } from '../../wallet/index.js'
+import { PubKeyHex, WalletProtocol } from '../../wallet/index.js'
 
 /**
  * We unify the registry “type” to these three strings everywhere:
@@ -34,8 +34,7 @@ export interface BasketDefinitionData {
  */
 export interface ProtocolDefinitionData {
   definitionType: 'protocol'
-  protocolID: string
-  securityLevel: 0 | 1 | 2
+  protocolID: WalletProtocol
   name: string
   iconURL: string
   description: string
@@ -102,13 +101,11 @@ export interface BasketQuery {
  *  - name
  *  - registryOperators
  *  - protocolID
- *  - securityLevel
  */
 export interface ProtocolQuery {
   name?: string
   registryOperators?: string[]
-  protocolID?: string
-  securityLevel?: number
+  protocolID?: WalletProtocol
 }
 
 /**

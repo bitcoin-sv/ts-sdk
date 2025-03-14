@@ -110,8 +110,7 @@ function buildDefinitionData(type: DefinitionType): DefinitionData {
     case 'protocol': {
       const data: ProtocolDefinitionData = {
         definitionType: 'protocol',
-        protocolID: 'someProtocolId',
-        securityLevel: 1,
+        protocolID: [1, 'someProtocolId'],
         name: 'Test Protocol',
         iconURL: 'https://someiconurl.com',
         description: 'Protocol Description',
