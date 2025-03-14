@@ -164,7 +164,7 @@ export class RegistryClient {
       }
       try {
         const [txid, outputIndex] = output.outpoint.split('.')
-        const tx = Transaction.fromBEEF(BEEF)
+        const tx = Transaction.fromBEEF(BEEF as number[])
         const lockingScript: LockingScript = tx.outputs[outputIndex].lockingScript
         const record = await this.parseLockingScript(
           definitionType,
@@ -176,7 +176,7 @@ export class RegistryClient {
           outputIndex: Number(outputIndex),
           satoshis: output.satoshis,
           lockingScript: lockingScript.toHex(),
-          beef: BEEF
+          beef: BEEF as number[]
         })
       } catch {
         // Ignore parse errors

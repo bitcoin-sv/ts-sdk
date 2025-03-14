@@ -66,7 +66,12 @@ jest.mock('../../transaction/index.js', () => {
       fromBEEF: jest.fn().mockImplementation((_tx: number[]) => ({
         outputs: [
           { lockingScript: 'decodedLockScript0' },
-          { lockingScript: 'decodedLockScript1' }
+          { lockingScript: 'decodedLockScript1' },
+          {
+            lockingScript: {
+              toHex: jest.fn().mockImplementation(() => 'decodedLockScript1AsHex')
+            }
+          }
         ]
       }))
     }
@@ -358,10 +363,13 @@ describe('RegistryClient', () => {
           {
             outpoint: 'skipMe.2',
             satoshis: 200,
-            lockingScript: 'lsHexC',
+            lockingScript: {
+              toHex: jest.fn(() => 'lsHexC')
+            },
             spendable: true
           }
-        ]
+        ],
+        BEEF: [0, 1, 2, 3]
       });
 
       // Use a mockImplementation to inspect the lockingScript and return appropriate decoded fields.
@@ -384,7 +392,7 @@ describe('RegistryClient', () => {
       const records = await registryClient.listOwnRegistryEntries('basket');
       expect(walletMock.listOutputs).toHaveBeenCalledWith({
         basket: 'basketmap',
-        include: 'locking scripts'
+        include: 'entire transactions'
       });
       // Only one spendable item should be returned if parsing succeeds.
       expect(records).toHaveLength(1);
@@ -393,7 +401,7 @@ describe('RegistryClient', () => {
         txid: 'skipMe',
         outputIndex: 2,
         satoshis: 200,
-        lockingScript: 'lsHexC'
+        lockingScript: 'decodedLockScript1AsHex'
       });
     });
 
@@ -417,7 +425,8 @@ describe('RegistryClient', () => {
         outputIndex: 0,
         satoshis: 1000,
         lockingScript: 'someLockingScriptHex',
-        registryOperator: 'mockPublicKey'
+        registryOperator: 'mockPublicKey',
+        beef: [0, 1, 2]
       }
     })
 
