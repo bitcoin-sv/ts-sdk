@@ -104,6 +104,14 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.4.2] - 2025-03-13
+
+### Fixed
+
+- Bug fixes and removed ambiguity with the registration process in the RegistryClient.
+
+---
+
 ## [1.4.1] - 2025-03-12
 
 ### Added
