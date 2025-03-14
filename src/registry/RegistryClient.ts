@@ -3,8 +3,7 @@ import {
   WalletProtocol,
   WalletClient,
   PubKeyHex,
-  SecurityLevel,
-  ProtocolString5To400Bytes
+  SecurityLevel
 } from '../wallet/index.js'
 import { Utils } from '../primitives/index.js'
 import {
@@ -44,7 +43,7 @@ const REGISTRANT_TOKEN_AMOUNT = 1
  */
 export class RegistryClient {
   private network: 'mainnet' | 'testnet'
-  constructor(
+  constructor (
     private readonly wallet: WalletInterface = new WalletClient()
   ) { }
 
@@ -58,7 +57,7 @@ export class RegistryClient {
    * @param data - Structured information about a 'basket', 'protocol', or 'certificate'.
    * @returns A promise with the broadcast result or failure.
    */
-  async registerDefinition(data: DefinitionData): Promise<BroadcastResponse | BroadcastFailure> {
+  async registerDefinition (data: DefinitionData): Promise<BroadcastResponse | BroadcastFailure> {
     const registryOperator = (await this.wallet.getPublicKey({ identityKey: true })).publicKey
     const pushdrop = new PushDrop(this.wallet)
 
@@ -151,7 +150,7 @@ export class RegistryClient {
    * @param definitionType - The type of registry definition to list ('basket', 'protocol', or 'certificate').
    * @returns A promise that resolves to an array of RegistryRecord objects.
    */
-  async listOwnRegistryEntries(definitionType: DefinitionType): Promise<RegistryRecord[]> {
+  async listOwnRegistryEntries (definitionType: DefinitionType): Promise<RegistryRecord[]> {
     const relevantBasketName = this.mapDefinitionTypeToBasketName(definitionType)
     const { outputs, BEEF } = await this.wallet.listOutputs({
       basket: relevantBasketName,
@@ -193,7 +192,7 @@ export class RegistryClient {
    * @param registryRecord - Must have valid txid, outputIndex, and lockingScript.
    * @returns Broadcast success/failure.
    */
-  async revokeOwnRegistryEntry(
+  async revokeOwnRegistryEntry (
     registryRecord: RegistryRecord
   ): Promise<BroadcastResponse | BroadcastFailure> {
     if (registryRecord.txid === undefined || typeof registryRecord.outputIndex === 'undefined' || registryRecord.lockingScript === undefined) {
@@ -279,7 +278,7 @@ export class RegistryClient {
    * Convert definition data into an array of pushdrop fields (strings).
    * Each definition type has a slightly different shape.
    */
-  private buildPushDropFields(
+  private buildPushDropFields (
     data: DefinitionData,
     registryOperator: PubKeyHex
   ): number[][] {
@@ -328,7 +327,7 @@ export class RegistryClient {
    * Decodes a pushdrop locking script for a given definition type,
    * returning a typed record with the appropriate fields.
    */
-  private async parseLockingScript(
+  private async parseLockingScript (
     definitionType: DefinitionType,
     lockingScript: LockingScript
   ): Promise<DefinitionData> {
@@ -419,7 +418,7 @@ export class RegistryClient {
       }
 
       default:
-        throw new Error(`Unsupported definition type: ${definitionType}`)
+        throw new Error(`Unsupported definition type: ${definitionType as string}`)
     }
 
     // Enforce that the pushdrop belongs to the CURRENT identity key
@@ -435,7 +434,7 @@ export class RegistryClient {
   /**
    * Convert our definitionType to the wallet protocol format ([protocolID, keyID]).
    */
-  private mapDefinitionTypeToWalletProtocol(definitionType: DefinitionType): WalletProtocol {
+  private mapDefinitionTypeToWalletProtocol (definitionType: DefinitionType): WalletProtocol {
     switch (definitionType) {
       case 'basket':
         return [1, 'basketmap']
@@ -444,14 +443,14 @@ export class RegistryClient {
       case 'certificate':
         return [1, 'certmap']
       default:
-        throw new Error(`Unknown definition type: ${definitionType}`)
+        throw new Error(`Unknown definition type: ${definitionType as string}`)
     }
   }
 
   /**
    * Convert 'basket'|'protocol'|'certificate' to the basket name used by the wallet.
    */
-  private mapDefinitionTypeToBasketName(definitionType: DefinitionType): string {
+  private mapDefinitionTypeToBasketName (definitionType: DefinitionType): string {
     switch (definitionType) {
       case 'basket':
         return 'basketmap'
@@ -467,7 +466,7 @@ export class RegistryClient {
   /**
    * Convert 'basket'|'protocol'|'certificate' to the broadcast topic name.
    */
-  private mapDefinitionTypeToTopic(definitionType: DefinitionType): string {
+  private mapDefinitionTypeToTopic (definitionType: DefinitionType): string {
     switch (definitionType) {
       case 'basket':
         return 'tm_basketmap'
@@ -483,7 +482,7 @@ export class RegistryClient {
   /**
    * Convert 'basket'|'protocol'|'certificate' to the lookup service name.
    */
-  private mapDefinitionTypeToServiceName(definitionType: DefinitionType): string {
+  private mapDefinitionTypeToServiceName (definitionType: DefinitionType): string {
     switch (definitionType) {
       case 'basket':
         return 'ls_basketmap'
@@ -497,26 +496,26 @@ export class RegistryClient {
   }
 }
 
-export function deserializeWalletProtocol(str: string): WalletProtocol {
+export function deserializeWalletProtocol (str: string): WalletProtocol {
   // Parse the JSON string back into a JavaScript value.
   const parsed = JSON.parse(str)
 
   // Validate that the parsed value is an array with exactly two elements.
   if (!Array.isArray(parsed) || parsed.length !== 2) {
-    throw new Error("Invalid wallet protocol format.")
+    throw new Error('Invalid wallet protocol format.')
   }
 
   const [security, protocolString] = parsed
 
   // Validate that the security level is one of the allowed numbers.
   if (![0, 1, 2].includes(security)) {
-    throw new Error("Invalid security level.")
+    throw new Error('Invalid security level.')
   }
 
   // Validate that the protocol string is a string and its length is within the allowed bounds.
-  if (typeof protocolString !== "string") {
-    throw new Error("Invalid protocolID")
+  if (typeof protocolString !== 'string') {
+    throw new Error('Invalid protocolID')
   }
 
-  return [security as SecurityLevel, protocolString as ProtocolString5To400Bytes];
+  return [security as SecurityLevel, protocolString]
 }
