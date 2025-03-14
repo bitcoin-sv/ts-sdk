@@ -153,9 +153,9 @@ export class RegistryClient {
    */
   async listOwnRegistryEntries(definitionType: DefinitionType): Promise<RegistryRecord[]> {
     const relevantBasketName = this.mapDefinitionTypeToBasketName(definitionType)
-    const { outputs } = await this.wallet.listOutputs({
+    const { outputs, BEEF } = await this.wallet.listOutputs({
       basket: relevantBasketName,
-      include: 'locking scripts'
+      include: 'entire transactions'
     })
 
     const results: RegistryRecord[] = []
@@ -164,17 +164,20 @@ export class RegistryClient {
         continue
       }
       try {
+        const [txid, outputIndex] = output.outpoint.split('.')
+        const tx = Transaction.fromBEEF(BEEF)
+        const lockingScript: LockingScript = tx.outputs[outputIndex].lockingScript
         const record = await this.parseLockingScript(
           definitionType,
-          LockingScript.fromHex(output.lockingScript as string)
+          lockingScript
         )
-        const [txid, outputIndex] = output.outpoint.split('.')
         results.push({
           ...record,
           txid,
           outputIndex: Number(outputIndex),
           satoshis: output.satoshis,
-          lockingScript: output.lockingScript as string
+          lockingScript: lockingScript.toHex(),
+          beef: BEEF
         })
       } catch {
         // Ignore parse errors
@@ -197,14 +200,6 @@ export class RegistryClient {
       throw new Error('Invalid registry record. Missing txid, outputIndex, or lockingScript.')
     }
 
-    // Prepare the unlocker
-    const pushdrop = new PushDrop(this.wallet)
-    const unlocker = await pushdrop.unlock(
-      this.mapDefinitionTypeToWalletProtocol(registryRecord.definitionType),
-      '1',
-      'anyone'
-    )
-
     // Create a descriptive label for the item we’re revoking
     const itemIdentifier =
       registryRecord.definitionType === 'basket'
@@ -218,6 +213,7 @@ export class RegistryClient {
     const outpoint = `${registryRecord.txid}.${registryRecord.outputIndex}`
     const { signableTransaction } = await this.wallet.createAction({
       description: `Revoke ${registryRecord.definitionType} item: ${itemIdentifier}`,
+      inputBEEF: registryRecord.beef,
       inputs: [
         {
           outpoint,
@@ -231,9 +227,22 @@ export class RegistryClient {
       throw new Error('Failed to create signable transaction.')
     }
 
+    const partialTx = Transaction.fromBEEF(signableTransaction.tx)
+
+    // Prepare the unlocker
+    const pushdrop = new PushDrop(this.wallet)
+    const unlocker = await pushdrop.unlock(
+      this.mapDefinitionTypeToWalletProtocol(registryRecord.definitionType),
+      '1',
+      'anyone',
+      'all',
+      false,
+      registryRecord.satoshis,
+      LockingScript.fromHex(registryRecord.lockingScript)
+    )
+
     // Convert to Transaction, apply signature
-    const tx = Transaction.fromBEEF(signableTransaction.tx)
-    const finalUnlockScript = await unlocker.sign(tx, registryRecord.outputIndex)
+    const finalUnlockScript = await unlocker.sign(partialTx, registryRecord.outputIndex)
 
     // Complete signing with the final unlock script
     const { tx: signedTx } = await this.wallet.signAction({
@@ -242,6 +251,9 @@ export class RegistryClient {
         [registryRecord.outputIndex]: {
           unlockingScript: finalUnlockScript.toHex()
         }
+      },
+      options: {
+        acceptDelayedBroadcast: false
       }
     })
 

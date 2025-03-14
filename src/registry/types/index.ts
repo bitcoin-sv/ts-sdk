@@ -1,4 +1,4 @@
-import { PubKeyHex, WalletProtocol } from '../../wallet/index.js'
+import { BEEF, PubKeyHex, WalletProtocol } from '../../wallet/index.js'
 
 /**
  * We unify the registry “type” to these three strings everywhere:
@@ -71,7 +71,8 @@ export interface TokenData {
   txid: string
   outputIndex: number
   satoshis: number
-  lockingScript: string
+  lockingScript: string,
+  beef: BEEF
 }
 
 /**
