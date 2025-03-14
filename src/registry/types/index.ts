@@ -1,10 +1,8 @@
-import { PubKeyHex } from '../../wallet/index.js'
+import { BEEF, PubKeyHex, WalletProtocol } from '../../wallet/index.js'
 
 /**
- * Determines which category of registry item we are working with.
- * - "basket" corresponds to BasketMap
- * - "protocol" corresponds to ProtoMap
- * - "certificate"  corresponds to CertMap
+ * We unify the registry “type” to these three strings everywhere:
+ *   'basket' | 'protocol' | 'certificate'
  */
 export type DefinitionType = 'basket' | 'protocol' | 'certificate'
 
@@ -19,7 +17,7 @@ export interface CertificateFieldDescriptor {
 }
 
 /**
- * Registry data for a Basket-style record (BasketMap).
+ * Registry data for a Basket-style record.
  */
 export interface BasketDefinitionData {
   definitionType: 'basket'
@@ -32,12 +30,11 @@ export interface BasketDefinitionData {
 }
 
 /**
- * Registry data for a Proto-style record (ProtoMap).
+ * Registry data for a Protocol-style record.
  */
 export interface ProtocolDefinitionData {
   definitionType: 'protocol'
-  protocolID: string
-  securityLevel: 0 | 1 | 2
+  protocolID: WalletProtocol
   name: string
   iconURL: string
   description: string
@@ -46,7 +43,7 @@ export interface ProtocolDefinitionData {
 }
 
 /**
- * Registry data for a Cert-style record (CertMap).
+ * Registry data for a Certificate-style record.
  */
 export interface CertificateDefinitionData {
   definitionType: 'certificate'
@@ -59,43 +56,76 @@ export interface CertificateDefinitionData {
   registryOperator?: PubKeyHex
 }
 
+/**
+ * Union of all possible definition data objects.
+ */
 export type DefinitionData =
   | BasketDefinitionData
   | ProtocolDefinitionData
   | CertificateDefinitionData
 
+/**
+ * Common info for the on-chain token/UTXO that points to a registry entry.
+ */
 export interface TokenData {
   txid: string
   outputIndex: number
   satoshis: number
-  lockingScript: string
+  lockingScript: string,
+  beef: BEEF
 }
 
+/**
+ * A registry record is a combination of the typed definition data
+ * plus the on-chain token data for the UTXO holding it.
+ */
 export type RegistryRecord = DefinitionData & TokenData
 
-// Lookup Query Types (Note: can be shared types with lookup service)
+// -------------------------------------------------------------------------
+// Query type definitions
+// -------------------------------------------------------------------------
 
-interface BasketMapQuery {
+/**
+ * When searching for basket definitions, we can filter by:
+ *  - basketID
+ *  - registryOperators
+ *  - name
+ */
+export interface BasketQuery {
   basketID?: string
   registryOperators?: string[]
   name?: string
 }
 
-interface ProtoMapQuery {
+/**
+ * When searching for protocol definitions, we can filter by:
+ *  - name
+ *  - registryOperators
+ *  - protocolID
+ */
+export interface ProtocolQuery {
   name?: string
   registryOperators?: string[]
-  protocolID?: string
-  securityLevel?: number
+  protocolID?: WalletProtocol
 }
 
-interface CertMapQuery {
+/**
+ * When searching for certificate definitions, we can filter by:
+ *  - type
+ *  - name
+ *  - registryOperators
+ */
+export interface CertificateQuery {
   type?: string
   name?: string
   registryOperators?: string[]
 }
 
+/**
+ * A lookup-service mapping of queries by each definition type.
+ */
 export interface RegistryQueryMapping {
-  basket: BasketMapQuery
-  protocol: ProtoMapQuery
-  certificate: CertMapQuery
+  basket: BasketQuery
+  protocol: ProtocolQuery
+  certificate: CertificateQuery
 }

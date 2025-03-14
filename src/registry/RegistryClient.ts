@@ -1,13 +1,11 @@
 import {
   WalletInterface,
   WalletProtocol,
-  WalletClient
-  ,
-  PubKeyHex
+  WalletClient,
+  PubKeyHex,
+  SecurityLevel
 } from '../wallet/index.js'
-import {
-  Utils
-} from '../primitives/index.js'
+import { Utils } from '../primitives/index.js'
 import {
   Transaction,
   BroadcastResponse,
@@ -17,10 +15,7 @@ import {
   LookupResolver,
   TopicBroadcaster
 } from '../overlay-tools/index.js'
-import {
-  PushDrop,
-  LockingScript
-} from '../script/index.js'
+import { PushDrop, LockingScript } from '../script/index.js'
 import {
   CertificateFieldDescriptor,
   DefinitionData,
@@ -33,18 +28,18 @@ const REGISTRANT_TOKEN_AMOUNT = 1
 
 /**
  * RegistryClient manages on-chain registry definitions for three types:
- * - BasketMap (basket-based items)
- * - ProtoMap (protocol-based items)
- * - CertMap (certificate-based items)
+ * - basket (basket-based items)
+ * - protocol (protocol-based items)
+ * - certificate (certificate-based items)
  *
  * It provides methods to:
  * - Register new definitions using pushdrop-based UTXOs.
- * - Resolve existing definitions using a overlay lookup service.
+ * - Resolve existing definitions using a lookup service.
  * - List registry entries associated with the operator's wallet.
  * - Revoke an existing registry entry by spending its UTXO.
  *
  * Registry operators use this client to establish and manage
- * canonical references for baskets, protocols, and certificates types.
+ * canonical references for baskets, protocols, and certificate types.
  */
 export class RegistryClient {
   private network: 'mainnet' | 'testnet'
@@ -59,24 +54,21 @@ export class RegistryClient {
    * Registry operators (i.e., identity key owners) can create these definitions
    * to establish canonical references for basket IDs, protocol specs, or certificate schemas.
    *
-   * @param data - The structured information needed to register an item of kind 'basket', 'protocol', or 'certificate'.
+   * @param data - Structured information about a 'basket', 'protocol', or 'certificate'.
    * @returns A promise with the broadcast result or failure.
    */
   async registerDefinition (data: DefinitionData): Promise<BroadcastResponse | BroadcastFailure> {
     const registryOperator = (await this.wallet.getPublicKey({ identityKey: true })).publicKey
     const pushdrop = new PushDrop(this.wallet)
 
-    // Build the array of fields, depending on the definition type
+    // Convert definition data into PushDrop fields
     const fields = this.buildPushDropFields(data, registryOperator)
-    const protocol = this.getWalletProtocol(data.definitionType)
 
-    // Lock the fields
-    const lockingScript = await pushdrop.lock(
-      fields,
-      protocol,
-      '1',
-      'self'
-    )
+    // Convert the user-friendly definitionType to the actual wallet protocol
+    const protocol = this.mapDefinitionTypeToWalletProtocol(data.definitionType)
+
+    // Lock the fields into a pushdrop-based UTXO
+    const lockingScript = await pushdrop.lock(fields, protocol, '1', 'anyone', true)
 
     // Create a transaction
     const { tx } = await this.wallet.createAction({
@@ -85,21 +77,24 @@ export class RegistryClient {
         {
           satoshis: REGISTRANT_TOKEN_AMOUNT,
           lockingScript: lockingScript.toHex(),
-          outputDescription: `New ${data.definitionType} registration token`
+          outputDescription: `New ${data.definitionType} registration token`,
+          basket: this.mapDefinitionTypeToBasketName(data.definitionType)
         }
-      ]
+      ],
+      options: {
+        randomizeOutputs: false
+      }
     })
 
     if (tx === undefined) {
       throw new Error(`Failed to create ${data.definitionType} registration transaction!`)
     }
 
-    // Broadcast
-
+    // Broadcast to the relevant topic
     const broadcaster = new TopicBroadcaster(
-      [this.getBroadcastTopic(data.definitionType)],
+      [this.mapDefinitionTypeToTopic(data.definitionType)],
       {
-        networkPreset: this.network ??= (await (this.wallet.getNetwork({}))).network
+        networkPreset: this.network ??= (await this.wallet.getNetwork({})).network
       }
     )
     return await broadcaster.broadcast(Transaction.fromAtomicBEEF(tx))
@@ -112,7 +107,7 @@ export class RegistryClient {
    * - For "basket", the query is of type BasketMapQuery:
    *   { basketID?: string; name?: string; registryOperators?: string[]; }
    * - For "protocol", the query is of type ProtoMapQuery:
-   *   { name?: string; registryOperators?: string[]; protocolID?: string; securityLevel?: number; }
+   *   { name?: string; registryOperators?: string[]; protocolID?: WalletProtocol; }
    * - For "certificate", the query is of type CertMapQuery:
    *   { type?: string; name?: string; registryOperators?: string[]; }
    *
@@ -125,14 +120,10 @@ export class RegistryClient {
     query: RegistryQueryMapping[T]
   ): Promise<DefinitionData[]> {
     const resolver = new LookupResolver()
+    const serviceName = this.mapDefinitionTypeToServiceName(definitionType)
 
-    // The service name depends on the kind
-    const serviceName = this.getServiceName(definitionType)
-    const result = await resolver.query({
-      service: serviceName,
-      query
-    })
-
+    // Make the lookup query
+    const result = await resolver.query({ service: serviceName, query })
     if (result.type !== 'output-list') {
       return []
     }
@@ -140,11 +131,12 @@ export class RegistryClient {
     const parsedRegistryRecords: DefinitionData[] = []
     for (const output of result.outputs) {
       try {
-        const parsedTx = Transaction.fromAtomicBEEF(output.beef)
-        const record = await this.parseLockingScript(definitionType, parsedTx.outputs[output.outputIndex].lockingScript)
+        const parsedTx = Transaction.fromBEEF(output.beef)
+        const lockingScript = parsedTx.outputs[output.outputIndex].lockingScript
+        const record = await this.parseLockingScript(definitionType, lockingScript)
         parsedRegistryRecords.push(record)
       } catch {
-        // skip
+        // Skip invalid or non-pushdrop outputs
       }
     }
     return parsedRegistryRecords
@@ -159,29 +151,35 @@ export class RegistryClient {
    * @returns A promise that resolves to an array of RegistryRecord objects.
    */
   async listOwnRegistryEntries (definitionType: DefinitionType): Promise<RegistryRecord[]> {
-    const relevantBasketName = this.getBasketName(definitionType)
-    const { outputs } = await this.wallet.listOutputs({
+    const relevantBasketName = this.mapDefinitionTypeToBasketName(definitionType)
+    const { outputs, BEEF } = await this.wallet.listOutputs({
       basket: relevantBasketName,
-      include: 'locking scripts'
+      include: 'entire transactions'
     })
-    const results: RegistryRecord[] = []
 
+    const results: RegistryRecord[] = []
     for (const output of outputs) {
-      if (output.spendable) {
+      if (!output.spendable) {
         continue
       }
       try {
-        const record = await this.parseLockingScript(definitionType, LockingScript.fromHex(output.lockingScript as string))
         const [txid, outputIndex] = output.outpoint.split('.')
+        const tx = Transaction.fromBEEF(BEEF as number[])
+        const lockingScript: LockingScript = tx.outputs[outputIndex].lockingScript
+        const record = await this.parseLockingScript(
+          definitionType,
+          lockingScript
+        )
         results.push({
           ...record,
           txid,
           outputIndex: Number(outputIndex),
           satoshis: output.satoshis,
-          lockingScript: output.lockingScript as string
+          lockingScript: lockingScript.toHex(),
+          beef: BEEF as number[]
         })
       } catch {
-        // ignore parse errors
+        // Ignore parse errors
       }
     }
 
@@ -191,29 +189,17 @@ export class RegistryClient {
   /**
    * Revokes a registry record by spending its associated UTXO.
    *
-   * This function creates a transaction that spends the UTXO corresponding to the provided registry record,
-   * revoking the registry entry. It prepares an unlocker using the appropriate wallet protocol,
-   * builds a signable transaction, signs it, and then broadcasts the finalized transaction.
-   *
-   * @param registryRecord - The registry record to revoke. It must include a valid txid, outputIndex, and lockingScript.
-   * @returns A promise that resolves with either a BroadcastResponse upon success or a BroadcastFailure on error.
-   * @throws If required fields are missing or if transaction creation/signing fails.
+   * @param registryRecord - Must have valid txid, outputIndex, and lockingScript.
+   * @returns Broadcast success/failure.
    */
   async revokeOwnRegistryEntry (
     registryRecord: RegistryRecord
   ): Promise<BroadcastResponse | BroadcastFailure> {
     if (registryRecord.txid === undefined || typeof registryRecord.outputIndex === 'undefined' || registryRecord.lockingScript === undefined) {
-      throw new Error('Invalid record. Missing txid, outputIndex, or lockingScript.')
+      throw new Error('Invalid registry record. Missing txid, outputIndex, or lockingScript.')
     }
 
-    // Prepare the unlocker
-    const pushdrop = new PushDrop(this.wallet)
-    const unlocker = await pushdrop.unlock(
-      this.getWalletProtocol(registryRecord.definitionType),
-      '1',
-      'anyone'
-    )
-
+    // Create a descriptive label for the item we’re revoking
     const itemIdentifier =
       registryRecord.definitionType === 'basket'
         ? registryRecord.basketID
@@ -223,13 +209,10 @@ export class RegistryClient {
             ? (registryRecord.name !== undefined ? registryRecord.name : registryRecord.type)
             : 'unknown'
 
-    const description = `Revoke ${registryRecord.definitionType} item: ${String(itemIdentifier)}`
-
-    // Create a new transaction that spends the UTXO
     const outpoint = `${registryRecord.txid}.${registryRecord.outputIndex}`
     const { signableTransaction } = await this.wallet.createAction({
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      description,
+      description: `Revoke ${registryRecord.definitionType} item: ${itemIdentifier}`,
+      inputBEEF: registryRecord.beef,
       inputs: [
         {
           outpoint,
@@ -243,17 +226,33 @@ export class RegistryClient {
       throw new Error('Failed to create signable transaction.')
     }
 
-    // Build a transaction object, sign with the unlock script
-    const tx = Transaction.fromBEEF(signableTransaction.tx)
-    const finalUnlockScript = await unlocker.sign(tx, registryRecord.outputIndex)
+    const partialTx = Transaction.fromBEEF(signableTransaction.tx)
 
-    // Complete the signing
+    // Prepare the unlocker
+    const pushdrop = new PushDrop(this.wallet)
+    const unlocker = await pushdrop.unlock(
+      this.mapDefinitionTypeToWalletProtocol(registryRecord.definitionType),
+      '1',
+      'anyone',
+      'all',
+      false,
+      registryRecord.satoshis,
+      LockingScript.fromHex(registryRecord.lockingScript)
+    )
+
+    // Convert to Transaction, apply signature
+    const finalUnlockScript = await unlocker.sign(partialTx, registryRecord.outputIndex)
+
+    // Complete signing with the final unlock script
     const { tx: signedTx } = await this.wallet.signAction({
       reference: signableTransaction.reference,
       spends: {
         [registryRecord.outputIndex]: {
           unlockingScript: finalUnlockScript.toHex()
         }
+      },
+      options: {
+        acceptDelayedBroadcast: false
       }
     })
 
@@ -263,21 +262,25 @@ export class RegistryClient {
 
     // Broadcast
     const broadcaster = new TopicBroadcaster(
-      [this.getBroadcastTopic(registryRecord.definitionType)],
+      [this.mapDefinitionTypeToTopic(registryRecord.definitionType)],
       {
-        networkPreset: this.network ??= (await (this.wallet.getNetwork({}))).network
+        networkPreset: this.network ??= (await this.wallet.getNetwork({})).network
       }
     )
     return await broadcaster.broadcast(Transaction.fromAtomicBEEF(signedTx))
   }
 
   // --------------------------------------------------------------------------
-  // INTERNAL HELPER METHODS
+  // INTERNAL UTILITY METHODS
   // --------------------------------------------------------------------------
 
+  /**
+   * Convert definition data into an array of pushdrop fields (strings).
+   * Each definition type has a slightly different shape.
+   */
   private buildPushDropFields (
     data: DefinitionData,
-    registryOperator: string
+    registryOperator: PubKeyHex
   ): number[][] {
     let fields: string[]
 
@@ -293,8 +296,7 @@ export class RegistryClient {
         break
       case 'protocol':
         fields = [
-          data.securityLevel.toString(),
-          data.protocolID,
+          JSON.stringify(data.protocolID),
           data.name,
           data.iconURL,
           data.description,
@@ -312,17 +314,17 @@ export class RegistryClient {
         ]
         break
       default:
-        throw new Error('Invalid registry kind specified')
+        throw new Error('Unsupported definition type')
     }
 
-    // Append the registry operator to all cases.
+    // Append the operator's public identity key last
     fields.push(registryOperator)
 
     return fields.map(field => Utils.toArray(field))
   }
 
   /**
-   * Decodes a pushdrop locking script for a given registry kind,
+   * Decodes a pushdrop locking script for a given definition type,
    * returning a typed record with the appropriate fields.
    */
   private async parseLockingScript (
@@ -335,15 +337,17 @@ export class RegistryClient {
     }
 
     let registryOperator: PubKeyHex
-    let data: DefinitionData
+    let parsedData: DefinitionData
+
     switch (definitionType) {
       case 'basket': {
-        if (decoded.fields.length !== 6) {
+        if (decoded.fields.length !== 7) {
           throw new Error('Unexpected field count for basket type.')
         }
         const [basketID, name, iconURL, description, docURL, operator] = decoded.fields
         registryOperator = Utils.toUTF8(operator)
-        data = {
+
+        parsedData = {
           definitionType: 'basket',
           basketID: Utils.toUTF8(basketID),
           name: Utils.toUTF8(name),
@@ -353,12 +357,12 @@ export class RegistryClient {
         }
         break
       }
+
       case 'protocol': {
         if (decoded.fields.length !== 7) {
-          throw new Error('Unexpected field count for proto type.')
+          throw new Error('Unexpected field count for protocol type.')
         }
         const [
-          securityLevel,
           protocolID,
           name,
           iconURL,
@@ -367,10 +371,10 @@ export class RegistryClient {
           operator
         ] = decoded.fields
         registryOperator = Utils.toUTF8(operator)
-        data = {
+
+        parsedData = {
           definitionType: 'protocol',
-          securityLevel: parseInt(Utils.toUTF8(securityLevel), 10) as 0 | 1 | 2,
-          protocolID: Utils.toUTF8(protocolID),
+          protocolID: deserializeWalletProtocol(Utils.toUTF8(protocolID)),
           name: Utils.toUTF8(name),
           iconURL: Utils.toUTF8(iconURL),
           description: Utils.toUTF8(description),
@@ -378,8 +382,9 @@ export class RegistryClient {
         }
         break
       }
+
       case 'certificate': {
-        if (decoded.fields.length !== 7) {
+        if (decoded.fields.length !== 8) {
           throw new Error('Unexpected field count for certificate type.')
         }
         const [
@@ -391,17 +396,16 @@ export class RegistryClient {
           fieldsJSON,
           operator
         ] = decoded.fields
-
         registryOperator = Utils.toUTF8(operator)
 
-        let parsedFields: Record<string, CertificateFieldDescriptor>
+        let parsedFields: Record<string, CertificateFieldDescriptor> = {}
         try {
           parsedFields = JSON.parse(Utils.toUTF8(fieldsJSON))
         } catch {
-          parsedFields = {}
+          // If there's a JSON parse error, assume empty
         }
 
-        data = {
+        parsedData = {
           definitionType: 'certificate',
           type: Utils.toUTF8(certType),
           name: Utils.toUTF8(name),
@@ -412,25 +416,25 @@ export class RegistryClient {
         }
         break
       }
+
       default:
-        throw new Error('Invalid registry kind for parsing.')
+        throw new Error(`Unsupported definition type: ${definitionType as string}`)
     }
 
+    // Enforce that the pushdrop belongs to the CURRENT identity key
     const currentIdentityKey = (await this.wallet.getPublicKey({ identityKey: true })).publicKey
     if (registryOperator !== currentIdentityKey) {
       throw new Error('This registry token does not belong to the current wallet.')
     }
 
-    return {
-      ...data,
-      registryOperator
-    }
+    // Return the typed data plus the operator key
+    return { ...parsedData, registryOperator }
   }
 
   /**
-   * Returns the (protocolID, keyID) used for pushdrop based on the registry kind.
+   * Convert our definitionType to the wallet protocol format ([protocolID, keyID]).
    */
-  private getWalletProtocol (definitionType: DefinitionType): WalletProtocol {
+  private mapDefinitionTypeToWalletProtocol (definitionType: DefinitionType): WalletProtocol {
     switch (definitionType) {
       case 'basket':
         return [1, 'basketmap']
@@ -439,14 +443,14 @@ export class RegistryClient {
       case 'certificate':
         return [1, 'certmap']
       default:
-        throw new Error(`Unknown registry type: ${definitionType as string}`)
+        throw new Error(`Unknown definition type: ${definitionType as string}`)
     }
   }
 
   /**
-   * Returns the name of the basket used by the wallet
+   * Convert 'basket'|'protocol'|'certificate' to the basket name used by the wallet.
    */
-  private getBasketName (definitionType: DefinitionType): string {
+  private mapDefinitionTypeToBasketName (definitionType: DefinitionType): string {
     switch (definitionType) {
       case 'basket':
         return 'basketmap'
@@ -455,14 +459,14 @@ export class RegistryClient {
       case 'certificate':
         return 'certmap'
       default:
-        throw new Error(`Unknown basket type: ${definitionType as string}`)
+        throw new Error(`Unknown definition type: ${definitionType as string}`)
     }
   }
 
   /**
-   * Returns the broadcast topic to be used with SHIPBroadcaster.
+   * Convert 'basket'|'protocol'|'certificate' to the broadcast topic name.
    */
-  private getBroadcastTopic (definitionType: DefinitionType): string {
+  private mapDefinitionTypeToTopic (definitionType: DefinitionType): string {
     switch (definitionType) {
       case 'basket':
         return 'tm_basketmap'
@@ -471,14 +475,14 @@ export class RegistryClient {
       case 'certificate':
         return 'tm_certmap'
       default:
-        throw new Error(`Unknown topic type: ${definitionType as string}`)
+        throw new Error(`Unknown definition type: ${definitionType as string}`)
     }
   }
 
   /**
-   * Returns the lookup service name to use.
+   * Convert 'basket'|'protocol'|'certificate' to the lookup service name.
    */
-  private getServiceName (definitionType: DefinitionType): string {
+  private mapDefinitionTypeToServiceName (definitionType: DefinitionType): string {
     switch (definitionType) {
       case 'basket':
         return 'ls_basketmap'
@@ -487,7 +491,31 @@ export class RegistryClient {
       case 'certificate':
         return 'ls_certmap'
       default:
-        throw new Error(`Unknown service type: ${definitionType as string}`)
+        throw new Error(`Unknown definition type: ${definitionType as string}`)
     }
   }
+}
+
+export function deserializeWalletProtocol (str: string): WalletProtocol {
+  // Parse the JSON string back into a JavaScript value.
+  const parsed = JSON.parse(str)
+
+  // Validate that the parsed value is an array with exactly two elements.
+  if (!Array.isArray(parsed) || parsed.length !== 2) {
+    throw new Error('Invalid wallet protocol format.')
+  }
+
+  const [security, protocolString] = parsed
+
+  // Validate that the security level is one of the allowed numbers.
+  if (![0, 1, 2].includes(security)) {
+    throw new Error('Invalid security level.')
+  }
+
+  // Validate that the protocol string is a string and its length is within the allowed bounds.
+  if (typeof protocolString !== 'string') {
+    throw new Error('Invalid protocolID')
+  }
+
+  return [security as SecurityLevel, protocolString]
 }
