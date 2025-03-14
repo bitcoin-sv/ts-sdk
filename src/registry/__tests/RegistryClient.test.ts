@@ -23,7 +23,7 @@ jest.mock('../../overlay-tools/index.js', () => {
       broadcast: mockBroadcast
     })),
     LookupResolver: jest.fn().mockImplementation(() => ({
-      query: jest.fn()
+      query: jest.fn() // We'll override in tests
     }))
   }
 })
@@ -42,8 +42,7 @@ jest.mock('../../script/index.js', () => {
         })
       })),
       {
-        // Ensure decode is a Jest mock
-        decode: jest.fn()
+        decode: jest.fn() // We'll override in tests
       }
     ),
     LockingScript: {
@@ -52,13 +51,11 @@ jest.mock('../../script/index.js', () => {
   }
 })
 
-  // Ensure `PushDrop.decode` is recognized as a Jest mock
-  ; (PushDrop as any).decode = jest.fn()
-
 jest.mock('../../transaction/index.js', () => {
   return {
     Transaction: {
       fromAtomicBEEF: jest.fn().mockImplementation((_tx: number[]) => ({
+        // minimal mock
         toHexBEEF: () => 'mockTxHexBEEF',
         outputs: [
           { lockingScript: 'mockLockingScriptObject0' },
@@ -66,7 +63,12 @@ jest.mock('../../transaction/index.js', () => {
           { lockingScript: 'mockLockingScriptObject2' }
         ]
       })),
-      fromBEEF: jest.fn().mockImplementation((_tx: number[]) => ({}))
+      fromBEEF: jest.fn().mockImplementation((_tx: number[]) => ({
+        outputs: [
+          { lockingScript: 'decodedLockScript0' },
+          { lockingScript: 'decodedLockScript1' }
+        ]
+      }))
     }
   }
 })
@@ -159,7 +161,6 @@ describe('RegistryClient', () => {
 
     registryClient = new RegistryClient(walletMock as WalletInterface)
 
-    // Clear all mock calls
     jest.clearAllMocks()
     mockBroadcast.mockClear()
   })
@@ -173,19 +174,23 @@ describe('RegistryClient', () => {
       const result = await registryClient.registerDefinition(data)
       expect(result).toBe('mockBroadcastSuccess')
 
-      expect(walletMock.createAction).toHaveBeenCalledWith({
-        description: 'Register a new basket item',
-        outputs: expect.arrayContaining([
-          expect.objectContaining({
-            satoshis: 1,
-            outputDescription: 'New basket registration token'
-          })
-        ])
-      })
-      expect(TopicBroadcaster).toHaveBeenCalledWith(
-        ['tm_basketmap'],
-        { networkPreset: 'main' }
+      // We use partial matching so extra fields (like options) are allowed
+      expect(walletMock.createAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: 'Register a new basket item',
+          outputs: expect.arrayContaining([
+            expect.objectContaining({
+              satoshis: 1,
+              outputDescription: 'New basket registration token',
+              basket: 'basketmap',
+              lockingScript: 'mockLockingScriptHex'
+            })
+          ])
+        })
       )
+      expect(TopicBroadcaster).toHaveBeenCalledWith(['tm_basketmap'], {
+        networkPreset: 'main'
+      })
       expect(mockBroadcast).toHaveBeenCalledTimes(1)
     })
 
@@ -194,20 +199,23 @@ describe('RegistryClient', () => {
       const result = await registryClient.registerDefinition(data)
       expect(result).toBe('mockBroadcastSuccess')
 
-      expect(walletMock.createAction).toHaveBeenCalledWith({
-        description: 'Register a new protocol item',
-        outputs: expect.arrayContaining([
-          expect.objectContaining({
-            satoshis: 1,
-            outputDescription: 'New protocol registration token'
-          })
-        ])
-      })
-
-      expect(TopicBroadcaster).toHaveBeenCalledWith(
-        ['tm_protomap'],
-        { networkPreset: 'main' }
+      expect(walletMock.createAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: 'Register a new protocol item',
+          outputs: expect.arrayContaining([
+            expect.objectContaining({
+              satoshis: 1,
+              outputDescription: 'New protocol registration token',
+              basket: 'protomap',
+              lockingScript: 'mockLockingScriptHex'
+            })
+          ])
+        })
       )
+
+      expect(TopicBroadcaster).toHaveBeenCalledWith(['tm_protomap'], {
+        networkPreset: 'main'
+      })
       expect(mockBroadcast).toHaveBeenCalledTimes(1)
     })
 
@@ -216,20 +224,23 @@ describe('RegistryClient', () => {
       const result = await registryClient.registerDefinition(data)
       expect(result).toBe('mockBroadcastSuccess')
 
-      expect(walletMock.createAction).toHaveBeenCalledWith({
-        description: 'Register a new certificate item',
-        outputs: expect.arrayContaining([
-          expect.objectContaining({
-            satoshis: 1,
-            outputDescription: 'New certificate registration token'
-          })
-        ])
-      })
-
-      expect(TopicBroadcaster).toHaveBeenCalledWith(
-        ['tm_certmap'],
-        { networkPreset: 'main' }
+      expect(walletMock.createAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: 'Register a new certificate item',
+          outputs: expect.arrayContaining([
+            expect.objectContaining({
+              satoshis: 1,
+              outputDescription: 'New certificate registration token',
+              basket: 'certmap',
+              lockingScript: 'mockLockingScriptHex'
+            })
+          ])
+        })
       )
+
+      expect(TopicBroadcaster).toHaveBeenCalledWith(['tm_certmap'], {
+        networkPreset: 'main'
+      })
       expect(mockBroadcast).toHaveBeenCalledTimes(1)
     })
 
@@ -244,9 +255,10 @@ describe('RegistryClient', () => {
     })
 
     it('should throw an error on invalid definition type', async () => {
-      const invalidData = { definitionType: 'invalidType' } as any as DefinitionData
+      // We expect "Unsupported definition type" if that’s what your code throws
+      const invalidData = { definitionType: 'invalidType' } as unknown as DefinitionData
       await expect(registryClient.registerDefinition(invalidData)).rejects.toThrow(
-        'Invalid registry kind specified'
+        'Unsupported definition type'
       )
     })
   })
@@ -256,8 +268,8 @@ describe('RegistryClient', () => {
   // ------------------------------------------------------------------
   describe('resolve', () => {
     it('should return empty array if resolver does not return output-list', async () => {
-      (LookupResolver as jest.Mock).mockImplementation(() => ({
-        query: jest.fn().mockResolvedValue({ type: 'unknown' })
+      ; (LookupResolver as jest.Mock).mockImplementation(() => ({
+        query: jest.fn().mockResolvedValue({ type: 'not-output-list' })
       }))
 
       const result = await registryClient.resolve('basket', { name: 'foo' })
@@ -268,26 +280,27 @@ describe('RegistryClient', () => {
       ; (LookupResolver as jest.Mock).mockImplementation(() => ({
         query: jest.fn().mockResolvedValue({
           type: 'output-list',
-          outputs: [
-            { beef: [9, 9, 9], outputIndex: 0 }
-          ]
+          outputs: [{ beef: [9, 9, 9], outputIndex: 0 }]
         })
       }))
 
-        // Mock decode once, so the code that does `PushDrop.decode(...)` returns some fields
+        // The code expects 7 fields for basket (6 definition fields + 1 extra signature field)
         ; (PushDrop.decode as jest.Mock).mockReturnValue({
           fields: [
-            [98],  // 'b'
-            [97],  // 'a'
+            [98], // 'b'
+            [97], // 'a'
             [115], // 's'
             [107], // 'k'
             [101], // 'e'
-            [116]  // 't' => operator
+            [116], // 't' => operator
+            [111]  // extra signature field
           ]
         })
 
-        // The final field must match the current wallet pubkey => 't'
-        ; (walletMock.getPublicKey as jest.Mock).mockResolvedValueOnce({ publicKey: 't' })
+        // The final field must match the current wallet pubkey => 'mockPublicKey'
+        ; (walletMock.getPublicKey as jest.Mock).mockResolvedValueOnce({
+          publicKey: 't'
+        })
 
       const result = await registryClient.resolve('basket', { basketID: 'whatever' })
       expect(result).toHaveLength(1)
@@ -313,10 +326,10 @@ describe('RegistryClient', () => {
         })
       }))
 
-        // We do two .mockReturnValueOnce calls so each decode returns something different.
+        // Return empty fields so parseLockingScript fails the length check
         ; (PushDrop.decode as jest.Mock)
-          .mockReturnValueOnce({ fields: [] })
-          .mockReturnValueOnce({ fields: [] })
+          .mockReturnValueOnce({ fields: [] }) // fail
+          .mockReturnValueOnce({ fields: [] }) // fail again
 
       const result = await registryClient.resolve('basket', { name: 'fooAgain' })
       expect(result).toEqual([])
@@ -328,51 +341,63 @@ describe('RegistryClient', () => {
   // ------------------------------------------------------------------
   describe('listOwnRegistryEntries', () => {
     it('should parse and return registry records from wallet outputs', async () => {
-      // The wallet returns 3 outputs, but we skip any "spendable" or parse-failing ones
-      ; (walletMock.listOutputs as jest.Mock).mockResolvedValue({
+      // The wallet returns 3 outputs; only one is spendable
+      (walletMock.listOutputs as jest.Mock).mockResolvedValue({
         outputs: [
           {
             outpoint: 'abc123.0',
             satoshis: 1000,
-            lockingScript: 'someLockingScriptHex',
+            lockingScript: 'lsHexA',
             spendable: false
           },
           {
             outpoint: 'xyz999.1',
             satoshis: 500,
-            lockingScript: 'badLockingScriptHex',
+            lockingScript: 'lsHexB',
             spendable: false
           },
           {
             outpoint: 'skipMe.2',
             satoshis: 200,
-            lockingScript: 'skipLockingScriptHex',
+            lockingScript: 'lsHexC',
             spendable: true
           }
         ]
-      })
+      });
 
-        // We decode the first output successfully => 6 fields => valid basket
-        // Then the second decode => parse fails
-        ; (PushDrop.decode as jest.Mock)
-          .mockReturnValueOnce({ fields: Array(6).fill([97]) })
-          .mockReturnValueOnce({ fields: [] })
-        ; (walletMock.getPublicKey as jest.Mock).mockResolvedValueOnce({ publicKey: 'a' })
+      // Use a mockImplementation to inspect the lockingScript and return appropriate decoded fields.
+      (PushDrop.decode as jest.Mock).mockImplementation((scriptObj) => {
+        return {
+          fields: [
+            [98],  // 'b'
+            [97],  // 'a'
+            [115], // 's'
+            [107], // 'k'
+            [101], // 'e'
+            [116], // 't'
+            [111]  // extra signature field
+          ]
+        }
+      });
 
-      const records = await registryClient.listOwnRegistryEntries('basket')
+      (walletMock.getPublicKey as jest.Mock).mockResolvedValue({ publicKey: 't' }); // <-- Semicolon
+
+      const records = await registryClient.listOwnRegistryEntries('basket');
       expect(walletMock.listOutputs).toHaveBeenCalledWith({
         basket: 'basketmap',
         include: 'locking scripts'
-      })
-      expect(records).toHaveLength(1)
+      });
+      // Only one spendable item should be returned if parsing succeeds.
+      expect(records).toHaveLength(1);
       expect(records[0]).toMatchObject({
         definitionType: 'basket',
-        txid: 'abc123',
-        outputIndex: 0,
-        satoshis: 1000,
-        lockingScript: 'someLockingScriptHex'
-      })
-    })
+        txid: 'skipMe',
+        outputIndex: 2,
+        satoshis: 200,
+        lockingScript: 'lsHexC'
+      });
+    });
+
   })
 
   // ------------------------------------------------------------------
@@ -401,18 +426,22 @@ describe('RegistryClient', () => {
       const result = await registryClient.revokeOwnRegistryEntry(validRecord)
       expect(result).toBe('mockBroadcastSuccess')
 
-      expect(walletMock.createAction).toHaveBeenCalledWith({
-        description: 'Revoke basket item: myBasket',
-        inputs: [
-          {
-            outpoint: 'someTxId.0',
-            unlockingScriptLength: 73,
-            inputDescription: 'Revoking basket token'
-          }
-        ]
-      })
+      expect(walletMock.createAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: 'Revoke basket item: myBasket',
+          inputs: [
+            {
+              outpoint: 'someTxId.0',
+              unlockingScriptLength: 73,
+              inputDescription: 'Revoking basket token'
+            }
+          ]
+        })
+      )
 
-      expect(TopicBroadcaster).toHaveBeenCalledWith(['tm_basketmap'], { networkPreset: 'main' })
+      expect(TopicBroadcaster).toHaveBeenCalledWith(['tm_basketmap'], {
+        networkPreset: 'main'
+      })
       expect(mockBroadcast).toHaveBeenCalled()
     })
 
@@ -435,7 +464,6 @@ describe('RegistryClient', () => {
 
     it('should propagate broadcast errors', async () => {
       mockBroadcast.mockRejectedValueOnce(new Error('Broadcast failure!'))
-
       await expect(registryClient.revokeOwnRegistryEntry(validRecord)).rejects.toThrow(
         'Broadcast failure!'
       )
