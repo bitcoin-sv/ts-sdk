@@ -6,6 +6,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | |
 | --- |
+| [DownloadResult](#interface-downloadresult) |
+| [DownloaderConfig](#interface-downloaderconfig) |
 | [UploadFileResult](#interface-uploadfileresult) |
 | [UploadableFile](#interface-uploadablefile) |
 | [UploaderConfig](#interface-uploaderconfig) |
@@ -14,6 +16,29 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ---
 
+### Interface: DownloadResult
+
+```ts
+export interface DownloadResult {
+    data: Buffer;
+    mimeType: string | null;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
+### Interface: DownloaderConfig
+
+```ts
+export interface DownloaderConfig {
+    networkPreset: string;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
 ### Interface: UploadFileResult
 
 ```ts
@@ -54,6 +79,32 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ## Classes
 
+| |
+| --- |
+| [StorageDownloader](#class-storagedownloader) |
+| [StorageUploader](#class-storageuploader) |
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
+
+### Class: StorageDownloader
+
+Locates HTTP URLs where content can be downloaded. It uses the passed or the default one.
+
+```ts
+export class StorageDownloader {
+    constructor(config?: DownloaderConfig) 
+    public async resolve(uhrpUrl: string): Promise<string[]> 
+    public async download(uhrpUrl: string) 
+}
+```
+
+See also: [DownloaderConfig](./storage.md#interface-downloaderconfig)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
 ### Class: StorageUploader
 
 ```ts
