@@ -161,7 +161,9 @@ export default class TopicBroadcaster implements Broadcaster {
         'Transactions sent via SHIP to Overlay Services must be serializable to BEEF format.'
       )
     }
-    const interestedHosts = this.networkPreset === 'local' ? ['http://localhost:8080'] : await this.findInterestedHosts()
+    const interestedHosts = this.networkPreset === 'local'
+      ? [{ 'http://localhost:8080': new Set<string>(this.topics) }]
+      : await this.findInterestedHosts()
     if (Object.keys(interestedHosts).length === 0) {
       return {
         status: 'error',
