@@ -82,7 +82,7 @@ export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilit
 
   constructor (httpClient = fetch, allowHTTP: boolean = false) {
     this.httpClient = httpClient
-    this.allowHTTP = false
+    this.allowHTTP = allowHTTP
   }
 
   async send (url: string, taggedBEEF: TaggedBEEF): Promise<STEAK> {
