@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.4.4 - 2025-03-15](#144---2025-03-15)
 - [1.4.3 - 2025-03-14](#143---2025-03-14)
 - [1.4.2 - 2025-03-13](#142---2025-03-13)
 - [1.4.1 - 2025-03-12](#141---2025-03-12)
@@ -103,6 +104,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.4.4] - 2025-03-15
+
+### Fixed
+
+- Fixed allow HTTP bug in broadcast facilitator
 
 ---
 
