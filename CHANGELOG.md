@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.4.3 - 2025-03-14](#143---2025-03-14)
+- [1.4.2 - 2025-03-13](#142---2025-03-13)
+- [1.4.1 - 2025-03-12](#141---2025-03-12)
 - [1.4.0 - 2025-03-10](#140---2025-03-7)
   - Scope increase to include Storage and Message Box client functionality
 - [1.3.36 - 2025-03-07](#1336---2025-03-7)
@@ -100,6 +103,31 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.4.3] - 2025-03-14
+
+### Fixed
+
+- Bug fixes and removed ambiguity with the registration process in the RegistryClient.
+
+---
+
+## [1.4.2] - 2025-03-13
+
+### Added
+
+- Implement UHRP Storage Downloader
+
+---
+
+## [1.4.1] - 2025-03-12
+
+### Added
+
+- Implement IdentityClient
+- Implement RegistryClient
 
 ---
 
