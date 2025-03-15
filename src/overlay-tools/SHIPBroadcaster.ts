@@ -87,7 +87,7 @@ export class HTTPSOverlayBroadcastFacilitator
 
   constructor(httpClient = fetch, allowHTTP: boolean = false) {
     this.httpClient = httpClient
-    this.allowHTTP = allowHTTP
+    this.allowHTTP = allowHTTP // fix
   }
 
   async send(url: string, taggedBEEF: TaggedBEEF): Promise<STEAK> {
