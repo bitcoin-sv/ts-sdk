@@ -66,7 +66,10 @@ export interface SHIPBroadcasterConfig {
   /** Determines which topics (all, any, or a specific list) must be present within STEAK received from at least one host for the broadcast to be considered a success. */
   requireAcknowledgmentFromAnyHostForTopics?: 'all' | 'any' | string[]
   /** Determines a mapping whose keys are specific hosts and whose values are the topics (all, any, or a specific list) that must be present within the STEAK received by the given hosts, in order for the broadcast to be considered a success. */
-  requireAcknowledgmentFromSpecificHostsForTopics?: Record<string, 'all' | 'any' | string[]>
+  requireAcknowledgmentFromSpecificHostsForTopics?: Record<
+  string,
+  'all' | 'any' | string[]
+  >
 }
 
 /** Facilitates transaction broadcasts that return STEAK. */
@@ -76,13 +79,14 @@ export interface OverlayBroadcastFacilitator {
 
 const MAX_SHIP_QUERY_TIMEOUT = 1000
 
-export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilitator {
+export class HTTPSOverlayBroadcastFacilitator
+implements OverlayBroadcastFacilitator {
   httpClient: typeof fetch
   allowHTTP: boolean
 
   constructor (httpClient = fetch, allowHTTP: boolean = false) {
     this.httpClient = httpClient
-    this.allowHTTP = false
+    this.allowHTTP = allowHTTP // fix
   }
 
   async send (url: string, taggedBEEF: TaggedBEEF): Promise<STEAK> {
@@ -114,9 +118,21 @@ export default class TopicBroadcaster implements Broadcaster {
   private readonly topics: string[]
   private readonly facilitator: OverlayBroadcastFacilitator
   private readonly resolver: LookupResolver
-  private readonly requireAcknowledgmentFromAllHostsForTopics: | 'all' | 'any' | string[]
-  private readonly requireAcknowledgmentFromAnyHostForTopics: | 'all' | 'any' | string[]
-  private readonly requireAcknowledgmentFromSpecificHostsForTopics: Record<string, 'all' | 'any' | string[]>
+  private readonly requireAcknowledgmentFromAllHostsForTopics:
+  | 'all'
+  | 'any'
+  | string[]
+
+  private readonly requireAcknowledgmentFromAnyHostForTopics:
+  | 'all'
+  | 'any'
+  | string[]
+
+  private readonly requireAcknowledgmentFromSpecificHostsForTopics: Record<
+  string,
+  'all' | 'any' | string[]
+  >
+
   private readonly networkPreset: 'mainnet' | 'testnet' | 'local'
 
   /**
@@ -129,13 +145,20 @@ export default class TopicBroadcaster implements Broadcaster {
     if (topics.length === 0) {
       throw new Error('At least one topic is required for broadcast.')
     }
-    if (topics.some((x) => !x.startsWith('tm_'))) {
+    if (topics.some(x => !x.startsWith('tm_'))) {
       throw new Error('Every topic must start with "tm_".')
     }
     this.topics = topics
     this.networkPreset = config.networkPreset ?? 'mainnet'
-    this.facilitator = config.facilitator ?? new HTTPSOverlayBroadcastFacilitator(undefined, this.networkPreset === 'local')
-    this.resolver = config.resolver ?? new LookupResolver({ networkPreset: this.networkPreset })
+    this.facilitator =
+      config.facilitator ??
+      new HTTPSOverlayBroadcastFacilitator(
+        undefined,
+        this.networkPreset === 'local'
+      )
+    this.resolver =
+      config.resolver ??
+      new LookupResolver({ networkPreset: this.networkPreset })
     this.requireAcknowledgmentFromAllHostsForTopics =
       config.requireAcknowledgmentFromAllHostsForTopics ?? []
     this.requireAcknowledgmentFromAnyHostForTopics =
@@ -161,7 +184,10 @@ export default class TopicBroadcaster implements Broadcaster {
         'Transactions sent via SHIP to Overlay Services must be serializable to BEEF format.'
       )
     }
-    const interestedHosts = this.networkPreset === 'local' ? ['http://localhost:8080'] : await this.findInterestedHosts()
+    const interestedHosts =
+      this.networkPreset === 'local'
+        ? ['http://localhost:8080']
+        : await this.findInterestedHosts()
     if (Object.keys(interestedHosts).length === 0) {
       return {
         status: 'error',
@@ -188,7 +214,7 @@ export default class TopicBroadcaster implements Broadcaster {
     )
 
     const results = await Promise.all(hostPromises)
-    const successfulHosts = results.filter((result) => result.success)
+    const successfulHosts = results.filter(result => result.success)
 
     if (successfulHosts.length === 0) {
       return {
@@ -308,8 +334,7 @@ export default class TopicBroadcaster implements Broadcaster {
         return {
           status: 'error',
           code: 'ERR_REQUIRE_ACK_FROM_SPECIFIC_HOSTS_FAILED',
-          description:
-            'Specific hosts did not acknowledge the required topics.'
+          description: 'Specific hosts did not acknowledge the required topics.'
         }
       }
     }
@@ -318,7 +343,9 @@ export default class TopicBroadcaster implements Broadcaster {
     return {
       status: 'success',
       txid: tx.id('hex'),
-      message: `Sent to ${successfulHosts.length} Overlay Services ${successfulHosts.length === 1 ? 'host' : 'hosts'}.`
+      message: `Sent to ${successfulHosts.length} Overlay Services ${
+        successfulHosts.length === 1 ? 'host' : 'hosts'
+      }.`
     }
   }
 
