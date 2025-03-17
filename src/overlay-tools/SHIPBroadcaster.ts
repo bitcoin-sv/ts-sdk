@@ -74,7 +74,7 @@ export interface OverlayBroadcastFacilitator {
   send: (url: string, taggedBEEF: TaggedBEEF) => Promise<STEAK>
 }
 
-const MAX_SHIP_QUERY_TIMEOUT = 1000
+const MAX_SHIP_QUERY_TIMEOUT = 5000
 
 export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilitator {
   httpClient: typeof fetch
