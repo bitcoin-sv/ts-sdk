@@ -39,7 +39,7 @@ export class StorageDownloader {
       throw new Error('Lookup answer must be an output list')
     }
     const decodedResults: string[] = []
-    const currentTime = Math.floor(Date.now() / 1000000)
+    const currentTime = Math.floor(Date.now() / 1000)
     for (let i = 0; i < response.outputs.length; i++) {
       const tx = Transaction.fromBEEF(response.outputs[i].beef)
       const { fields } = PushDrop.decode(tx.outputs[response.outputs[i].outputIndex].lockingScript)

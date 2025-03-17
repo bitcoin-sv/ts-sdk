@@ -170,7 +170,7 @@ describe('StorageDownloader', () => {
         })
 
         it('throws if all entries are expired', async () => {
-            const currentTime = Math.floor(Date.now() / 1000)
+            const currentTime = Math.floor(Date.now())
 
             jest.spyOn(LookupResolver.prototype, 'query').mockResolvedValue({
                 type: 'output-list',

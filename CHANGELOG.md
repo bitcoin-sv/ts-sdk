@@ -116,6 +116,7 @@ All notable changes to this project will be documented in this file. The format 
 
 - Fixed midding headers in StorageUploader
 - Added check for expiryTime in StorageDownloader
+- Fxi timeout in lookup resolver
 
 ## [1.4.6] - 2025-03-15
 

@@ -53,7 +53,7 @@ export const DEFAULT_TESTNET_SLAP_TRACKERS: string[] = [
   'https://testnet-users.bapp.dev'
 ]
 
-const MAX_TRACKER_WAIT_TIME = 1000
+const MAX_TRACKER_WAIT_TIME = 5000
 
 /** Configuration options for the Lookup resolver. */
 export interface LookupResolverConfig {
