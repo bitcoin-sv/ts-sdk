@@ -71,6 +71,8 @@ describe('StorageDownloader', () => {
             const resolved = await downloader.resolve('fakeUhrpUrl')
             expect(resolved).toEqual(['http://a.com', 'http://a.com'])
         })
+
+
     })
 
     describe('download()', () => {
@@ -103,7 +105,7 @@ describe('StorageDownloader', () => {
                 193, 139, 142, 159, 142, 32, 8, 151, 20, 133,
                 110, 226, 51, 179, 144, 42, 89, 29, 13, 95,
                 41, 37
-              ]
+            ]
             jest.spyOn(StorageUtils, 'getHashFromURL').mockReturnValue(knownHash)
 
             // Suppose two possible download URLs
@@ -165,6 +167,38 @@ describe('StorageDownloader', () => {
             await expect(downloader.download('validButNoGoodHostUrl'))
                 .rejects
                 .toThrow('Unable to download content from validButNoGoodHostUrl')
+        })
+
+        it('throws if all entries are expired', async () => {
+            const currentTime = Math.floor(Date.now() / 1000)
+
+            jest.spyOn(LookupResolver.prototype, 'query').mockResolvedValue({
+                type: 'output-list',
+                outputs: [
+                    { beef: 'fake-beef-a', outputIndex: 0 },
+                    { beef: 'fake-beef-b', outputIndex: 1 }
+                ]
+            } as any)
+
+            jest.spyOn(Transaction, 'fromBEEF').mockImplementation(() => {
+                return {
+                    outputs: [
+                        { lockingScript: {} },
+                        { lockingScript: {} }
+                    ]
+                } as any
+            })
+
+            jest.spyOn(PushDrop, 'decode').mockImplementation(() => {
+                return {
+                    lockingPublicKey: {} as PublicKey,
+                    fields: [[], [], [], [currentTime - 100]]
+                }
+            })
+
+            await expect(downloader.resolve('expiredUhrpUrl'))
+                .resolves
+                .toEqual(["", ""])
         })
     })
 })

@@ -20,7 +20,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export interface DownloadResult {
-    data: Buffer;
+    data: number[];
     mimeType: string | null;
 }
 ```
@@ -32,7 +32,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export interface DownloaderConfig {
-    networkPreset: string;
+    networkPreset: "mainnet" | "testnet" | "local";
 }
 ```
 
@@ -96,11 +96,11 @@ Locates HTTP URLs where content can be downloaded. It uses the passed or the def
 export class StorageDownloader {
     constructor(config?: DownloaderConfig) 
     public async resolve(uhrpUrl: string): Promise<string[]> 
-    public async download(uhrpUrl: string) 
+    public async download(uhrpUrl: string): Promise<DownloadResult> 
 }
 ```
 
-See also: [DownloaderConfig](./storage.md#interface-downloaderconfig)
+See also: [DownloadResult](./storage.md#interface-downloadresult), [DownloaderConfig](./storage.md#interface-downloaderconfig)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
