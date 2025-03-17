@@ -88,7 +88,7 @@ describe('SHIPCast', () => {
           topics: ['tm_foo']
         }
       },
-      1000
+      5000
     )
 
     expect(mockFacilitator.send).toHaveBeenCalledWith('https://shiphost.com', {
@@ -289,7 +289,7 @@ describe('SHIPCast', () => {
           topics: ['tm_foo']
         }
       },
-      1000
+      5000
     )
 
     expect(mockFacilitator.send).not.toHaveBeenCalled()
@@ -516,7 +516,7 @@ describe('SHIPCast', () => {
           topics: ['tm_foo', 'tm_bar']
         }
       },
-      1000
+      5000
     )
 
     expect(mockFacilitator.send).toHaveBeenCalledTimes(2)
@@ -971,7 +971,7 @@ describe('SHIPCast', () => {
           topics: ['tm_foo', 'tm_bar']
         }
       },
-      1000
+      5000
     )
   })
 
