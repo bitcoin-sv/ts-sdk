@@ -39,9 +39,16 @@ export class StorageDownloader {
       throw new Error('Lookup answer must be an output list')
     }
     const decodedResults: string[] = []
+    const currentTime = Math.floor(Date.now() / 1000)
     for (let i = 0; i < response.outputs.length; i++) {
       const tx = Transaction.fromBEEF(response.outputs[i].beef)
       const { fields } = PushDrop.decode(tx.outputs[response.outputs[i].outputIndex].lockingScript)
+
+      const expiryTime = new Utils.Reader(fields[3]).readVarIntNum()
+      if (expiryTime < currentTime) {
+        continue
+      }
+
       decodedResults.push(Utils.toUTF8(fields[2]))
     }
     return decodedResults

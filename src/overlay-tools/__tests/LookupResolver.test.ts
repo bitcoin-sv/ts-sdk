@@ -108,7 +108,7 @@ describe('LookupResolver', () => {
             service: 'ls_foo'
           }
         },
-        1000
+        5000
       ],
       [
         'https://slaphost.com',
@@ -214,7 +214,7 @@ describe('LookupResolver', () => {
             service: 'ls_foo'
           }
         },
-        1000
+        5000
       ],
       [
         'https://slaphost.com',
@@ -474,7 +474,7 @@ describe('LookupResolver', () => {
             service: 'ls_foo'
           }
         },
-        1000
+        5000
       ],
       [
         'https://mock.slap2',
@@ -484,7 +484,7 @@ describe('LookupResolver', () => {
             service: 'ls_foo'
           }
         },
-        1000
+        5000
       ],
       [
         'https://slaphost1.com',
@@ -595,7 +595,7 @@ describe('LookupResolver', () => {
             service: 'ls_foo'
           }
         },
-        1000
+        5000
       ],
       [
         'https://slaphost1.com',
@@ -707,7 +707,7 @@ describe('LookupResolver', () => {
             service: 'ls_foo'
           }
         },
-        1000
+        5000
       ],
       [
         'https://slaphost1.com',
@@ -818,7 +818,7 @@ describe('LookupResolver', () => {
             service: 'ls_foo'
           }
         },
-        1000
+        5000
       ],
       [
         'https://slaphost1.com',
@@ -873,7 +873,7 @@ describe('LookupResolver', () => {
             service: 'ls_foo'
           }
         },
-        1000
+        5000
       ]
     ])
   })
@@ -968,7 +968,7 @@ describe('LookupResolver', () => {
             service: 'ls_foo'
           }
         },
-        1000
+        5000
       ],
       [
         'https://slaphost1.com',
@@ -1066,7 +1066,7 @@ describe('LookupResolver', () => {
             service: 'ls_foo'
           }
         },
-        1000
+        5000
       ]
     ])
   })
@@ -1161,7 +1161,7 @@ describe('LookupResolver', () => {
               service: 'ls_foo'
             }
           },
-          1000
+          5000
         ],
         [
           'https://mock.slap2',
@@ -1171,7 +1171,7 @@ describe('LookupResolver', () => {
               service: 'ls_foo'
             }
           },
-          1000
+          5000
         ],
         [
           'https://slaphost.com',
@@ -1292,7 +1292,7 @@ describe('LookupResolver', () => {
               service: 'ls_foo'
             }
           },
-          1000
+          5000
         ],
         [
           'https://slaphost1.com',
@@ -1403,7 +1403,7 @@ describe('LookupResolver', () => {
               service: 'ls_foo'
             }
           },
-          1000
+          5000
         ],
         [
           'https://slaphost1.com',
@@ -1513,7 +1513,7 @@ describe('LookupResolver', () => {
               service: 'ls_foo'
             }
           },
-          1000
+          5000
         ],
         [
           'https://slaphost1.com',
@@ -1596,7 +1596,7 @@ describe('LookupResolver', () => {
               service: 'ls_foo'
             }
           },
-          1000
+          5000
         ],
         [
           'https://slaphost.com',

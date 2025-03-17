@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.4.7 - 2025-03-17](#147---2025-03-17)
 - [1.4.6 - 2025-03-15](#146---2025-03-15)
 - [1.4.5 - 2025-03-15](#145---2025-03-15)
 - [1.4.4 - 2025-03-15](#144---2025-03-15)
@@ -108,6 +109,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Security
 
 ---
+
+## [1.4.7] - 2025-03-17
+
+### Fixed
+
+- Fixed midding headers in StorageUploader
+- Added check for expiryTime in StorageDownloader
+- Fxi timeout in lookup resolver
 
 ## [1.4.6] - 2025-03-15
 
