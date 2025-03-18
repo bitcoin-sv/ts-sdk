@@ -161,6 +161,7 @@ export default class WindowCWISubstrate implements WalletInterface {
       | 'unsigned'
       | 'nosend'
       | 'nonfinal'
+      | 'failed'
       isOutgoing: boolean
       description: DescriptionString5to50Bytes
       labels?: LabelStringUnder300Bytes[]

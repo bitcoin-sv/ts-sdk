@@ -230,6 +230,7 @@ export type ActionStatus =
   | 'unsigned'
   | 'nosend'
   | 'nonfinal'
+  | 'failed'
 
 /**
  * Controls behavior of input BEEF validation.

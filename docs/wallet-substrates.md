@@ -382,7 +382,7 @@ export default class WindowCWISubstrate implements WalletInterface {
         actions: Array<{
             txid: TXIDHexString;
             satoshis: SatoshiValue;
-            status: "completed" | "unprocessed" | "sending" | "unproven" | "unsigned" | "nosend" | "nonfinal";
+            status: "completed" | "unprocessed" | "sending" | "unproven" | "unsigned" | "nosend" | "nonfinal" | "failed";
             isOutgoing: boolean;
             description: DescriptionString5to50Bytes;
             labels?: LabelStringUnder300Bytes[];
