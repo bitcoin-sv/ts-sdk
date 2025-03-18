@@ -626,6 +626,9 @@ export default class WalletWireProcessor implements WalletWire {
               case 'nonfinal':
                 statusCode = 7
                 break
+              case 'failed':
+                statusCode = 8
+                break
               default:
                 statusCode = -1
                 break
