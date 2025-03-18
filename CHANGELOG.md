@@ -111,6 +111,14 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.4.9] - 2025-03-18
+
+### Add
+
+- Add action status 'failed' which is the result of abortAction.
+
+---
+
 ## [1.4.8] - 2025-03-17
 
 ### Fixed
