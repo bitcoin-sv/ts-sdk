@@ -43,7 +43,8 @@ import {
   SignActionResult,
   TXIDHexString,
   VersionString7To30Bytes,
-  WalletInterface
+  WalletInterface,
+  ActionStatus
 } from '../Wallet.interfaces.js'
 import WalletWire from './WalletWire.js'
 import Certificate from '../../auth/certificates/Certificate.js'
@@ -602,14 +603,7 @@ export default class WalletWireTransceiver implements WalletInterface {
     const actions: Array<{
       txid: TXIDHexString
       satoshis: SatoshiValue
-      status:
-      | 'completed'
-      | 'unprocessed'
-      | 'sending'
-      | 'unproven'
-      | 'unsigned'
-      | 'nosend'
-      | 'nonfinal'
+      status: ActionStatus
       isOutgoing: boolean
       description: DescriptionString5to50Bytes
       labels?: LabelStringUnder300Bytes[]
@@ -643,14 +637,7 @@ export default class WalletWireTransceiver implements WalletInterface {
       const satoshis = resultReader.readVarIntNum()
 
       const statusCode = resultReader.readInt8()
-      let status:
-        | 'completed'
-        | 'unprocessed'
-        | 'sending'
-        | 'unproven'
-        | 'unsigned'
-        | 'nosend'
-        | 'nonfinal'
+      let status: ActionStatus
       switch (statusCode) {
         case 1:
           status = 'completed'
@@ -672,6 +659,9 @@ export default class WalletWireTransceiver implements WalletInterface {
           break
         case 7:
           status = 'nonfinal'
+          break
+        case 8:
+          status = 'failed'
           break
         default:
           throw new Error(`Unknown status code: ${statusCode}`)
