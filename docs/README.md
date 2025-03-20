@@ -7,9 +7,11 @@ The documentation is split into various pages, each covering a set of related fu
 - [Transaction](./transaction.md) — Covers transaction construction, signing, broadcasters, fee models, merkle proofs, and SPV structures like BUMP
 - [Messages](./messages.md) — Covers generalizable message signing, verification, encryption and decryption
 - [TOTP](./totp.md) - Covers Time-based One Time Password, useful for validating counterparties across unsecured mediums.
-- [Wallet](./wallet-substrates.md) - Covers the Wallet Substrates for communication between applications and wallets using a standard interface.
+- [Wallet](./wallet.md) - Covers the Wallet interface for communication between applications and wallets using a standard interface.
+- [Wallet Substrates](./wallet-substrates.md) - Covers the Wallet Substrates which facilitate communication between apps and wallets.
 - [Overlay Tools](./overlay-tools.md) - Covers the use of Overlays for broadcast of transactions based on topics, as well as distributed lookup of tokens.
 - [Auth](./auth.md) - Mutual Authentication and Service Monetization Framework
+- [Storage](./storage.md) — Covers a UHRP client for storing and retrieving data from distributed data storage services by hash.
 - [Compat](./compat.md) — Covers deprecated functionality for legacy systems like BIP32 and ECIES
 
 ## Swagger
