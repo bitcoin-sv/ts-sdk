@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.4.10 - 2025-03-24](#1410---2025-03-24)
 - [1.4.8 - 2025-03-17](#148---2025-03-17)
 - [1.4.7 - 2025-03-17](#147---2025-03-17)
 - [1.4.6 - 2025-03-15](#146---2025-03-15)
@@ -108,6 +109,15 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+
+## [1.4.10] - 2025-03-24
+
+### Fix
+
+- Fix signature pre-image mismatch caused by browser-modified content-type header in AuthFetch.
 
 ---
 
