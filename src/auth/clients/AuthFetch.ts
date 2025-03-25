@@ -349,10 +349,11 @@ export class AuthFetch {
     }
 
     // Construct headers to send / sign:
-    // - Custom headers prefixed with x-bsv are included
-    // - x-bsv-auth headers are not allowed
-    // - content-type and authorization are signed by client
-    const includedHeaders: [string, string][] = []
+    // Ensures clients only provided supported HTTP request headers
+    // - Include custom headers prefixed with x-bsv (excluding those starting with x-bsv-auth)
+    // - Include a normalized version of the content-type header
+    // - Include the authorization header
+    const includedHeaders: Array<[string, string]> = []
     for (let [k, v] of Object.entries(headers)) {
       k = k.toLowerCase() // We will always sign lower-case header keys
       if (k.startsWith('x-bsv-') || k === 'authorization') {
@@ -362,12 +363,15 @@ export class AuthFetch {
         includedHeaders.push([k, v])
       } else if (k.startsWith('content-type')) {
         // Normalize the Content-Type header by removing any parameters (e.g., "; charset=utf-8")
-        v = (v as string).split(';')[0].trim()
+        v = v.split(';')[0].trim()
         includedHeaders.push([k, v])
       } else {
         throw new Error('Unsupported header in the simplified fetch implementation. Only content-type, authorization, and x-bsv-* headers are supported.')
       }
     }
+
+    // Sort the headers by key to ensure a consistent order for signing and verification.
+    includedHeaders.sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
 
     // nHeaders
     writer.writeVarIntNum(includedHeaders.length)
