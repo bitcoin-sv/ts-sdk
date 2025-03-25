@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.4.11 - 2025-03-25](#1411---2025-03-25)
 - [1.4.10 - 2025-03-24](#1410---2025-03-24)
 - [1.4.8 - 2025-03-17](#148---2025-03-17)
 - [1.4.7 - 2025-03-17](#147---2025-03-17)
@@ -112,6 +113,13 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.4.11] - 2025-03-25
+
+### Fix
+
+- Sorts AuthFetch request and response headers by key before serialization to ensure a consistent order for signing and verification.
+
+---
 
 ## [1.4.10] - 2025-03-24
 

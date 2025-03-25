@@ -152,25 +152,20 @@ export class SimplifiedFetchTransport implements Transport {
       payloadWriter.write(Utils.toArray(response.headers.get('x-bsv-auth-request-id'), 'base64'))
       payloadWriter.writeVarIntNum(response.status)
 
-      // Filter out headers the server signed:
-      // - Custom headers prefixed with x-bsv are included, except auth
-      // - x-bsv-auth headers are not allowed
-      // - authorization header is signed by the server
+      // PARSE RESPONSE HEADERS FROM SERVER --------------------------------
+      // Parse response headers from the server and include only the signed headers:
+      // - Include custom headers prefixed with x-bsv (excluding those starting with x-bsv-auth)
+      // - Include the authorization header
       const includedHeaders: [string, string][] = []
-      // Collect headers into a raw array for sorting
-      const headersArray: [string, string][] = []
       response.headers.forEach((value, key) => {
         const lowerKey = key.toLowerCase()
-        if (lowerKey.startsWith('x-bsv-') || lowerKey === 'authorization') {
-          if (!lowerKey.startsWith('x-bsv-auth')) {
-            headersArray.push([lowerKey, value])
-          }
+        if ((lowerKey.startsWith('x-bsv-') || lowerKey === 'authorization') && !lowerKey.startsWith('x-bsv-auth')) {
+          includedHeaders.push([lowerKey, value])
         }
       })
 
-      // Sort headers explicitly to match server-side order
-      headersArray.sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
-      includedHeaders.push(...headersArray)
+      // Sort the headers by key to ensure a consistent order for signing and verification.
+      includedHeaders.sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
 
       // nHeaders
       payloadWriter.writeVarIntNum(includedHeaders.length)
