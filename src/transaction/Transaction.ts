@@ -403,7 +403,7 @@ export default class Transaction {
 
   /**
    * Computes fees prior to signing.
-   * If no fee model is provided, uses a SatoshisPerKilobyte fee model that pays 10 sat/kb.
+   * If no fee model is provided, uses a SatoshisPerKilobyte fee model that pays 1 sat/kb.
    * If fee is a number, the transaction uses that value as fee.
    *
    * @param modelOrFee - The initialized fee model to use or fixed fee for the transaction
@@ -412,7 +412,7 @@ export default class Transaction {
    *
    */
   async fee (
-    modelOrFee: FeeModel | number = new SatoshisPerKilobyte(10),
+    modelOrFee: FeeModel | number = new SatoshisPerKilobyte(1),
     changeDistribution: 'equal' | 'random' = 'equal'
   ): Promise<void> {
     this.cachedHash = undefined
