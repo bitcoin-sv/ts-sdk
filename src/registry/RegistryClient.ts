@@ -199,6 +199,12 @@ export class RegistryClient {
       throw new Error('Invalid registry record. Missing txid, outputIndex, or lockingScript.')
     }
 
+    // Check if the registry record belongs to the current user
+    const currentIdentityKey = (await this.wallet.getPublicKey({ identityKey: true })).publicKey
+    if (registryRecord.registryOperator !== currentIdentityKey) {
+      throw new Error('This registry token does not belong to the current wallet.')
+    }
+
     // Create a descriptive label for the item we’re revoking
     const itemIdentifier =
       registryRecord.definitionType === 'basket'
@@ -419,12 +425,6 @@ export class RegistryClient {
 
       default:
         throw new Error(`Unsupported definition type: ${definitionType as string}`)
-    }
-
-    // Enforce that the pushdrop belongs to the CURRENT identity key
-    const currentIdentityKey = (await this.wallet.getPublicKey({ identityKey: true })).publicKey
-    if (registryOperator !== currentIdentityKey) {
-      throw new Error('This registry token does not belong to the current wallet.')
     }
 
     // Return the typed data plus the operator key
