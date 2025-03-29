@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.4.12 - 2025-03-28](#1412---2025-03-28)
 - [1.4.11 - 2025-03-25](#1411---2025-03-25)
 - [1.4.10 - 2025-03-24](#1410---2025-03-24)
 - [1.4.8 - 2025-03-17](#148---2025-03-17)
@@ -110,6 +111,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.4.12] - 2025-03-28
+
+### Fix
+
+- Removed registryOperator check from token parseLockingScript helper function.
 
 ---
 
