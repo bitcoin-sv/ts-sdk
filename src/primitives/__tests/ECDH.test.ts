@@ -12,12 +12,12 @@ describe('ECDH', function () {
     expect(sh1.toString()).toEqual(sh2.toString())
     sh1 = s1.deriveSharedSecret(
       PublicKey.fromString(
-        Buffer.from(s2.toPublicKey().toDER()).toString('hex')
+        s2.toPublicKey().toDER('hex') as string
       )
     )
     sh2 = s2.deriveSharedSecret(
       PublicKey.fromString(
-        Buffer.from(s1.toPublicKey().toDER()).toString('hex')
+        s1.toPublicKey().toDER('hex') as string
       )
     )
 

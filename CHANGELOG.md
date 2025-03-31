@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.4.14 - 2025-03-31](#1414---2025-03-31)
 - [1.4.13 - 2025-03-30](#1413---2025-03-30)
 - [1.4.12 - 2025-03-28](#1412---2025-03-28)
 - [1.4.11 - 2025-03-25](#1411---2025-03-25)
@@ -18,7 +19,7 @@ All notable changes to this project will be documented in this file. The format 
 - [1.4.2 - 2025-03-13](#142---2025-03-13)
 - [1.4.1 - 2025-03-12](#141---2025-03-12)
 - [1.4.0 - 2025-03-10](#140---2025-03-7)
-  - Scope increase to include Storage and Message Box client functionality
+  - Scope increase to include Identity, Storage, and Message Box client functionality
 - [1.3.36 - 2025-03-07](#1336---2025-03-7)
 - [1.3.35 - 2025-03-07](#1335---2025-03-7)
 - [1.3.34 - 2025-03-06](#1334---2025-03-6)
@@ -112,6 +113,16 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+
+---
+
+
+## [1.4.14] - 2025-03-31
+
+### Change
+
+- Tx fee update to 1 sat per kilobyte as default.
 
 ---
 
