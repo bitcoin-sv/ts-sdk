@@ -1,6 +1,6 @@
 {
   "name": "@bsv/sdk",
-  "version": "1.4.12",
+  "version": "1.4.13",
   "type": "module",
   "description": "BSV Blockchain Software Development Kit",
   "main": "dist/cjs/mod.js",
@@ -230,7 +230,9 @@
   "homepage": "https://github.com/bitcoin-sv/ts-sdk#readme",
   "devDependencies": {
     "@eslint/js": "^9.19.0",
+    "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.14",
     "eslint": "^8.57.1",
     "globals": "^15.14.0",
     "jest": "^29.7.0",
