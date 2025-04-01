@@ -222,11 +222,13 @@ export class AuthFetch {
             config.retryCounter ??= 3
             const response = await this.fetch(url, config)
             resolve(response)
+            return
           }
           if (error.message.includes('HTTP server failed to authenticate')) {
             try {
               const response = await this.handleFetchAndValidate(url, config, peerToUse)
               resolve(response)
+              return
             } catch (fetchError) {
               reject(fetchError)
             }
