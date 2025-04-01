@@ -74,6 +74,9 @@ export default class LocalKVStore {
     }
     let fields: number[][]
     try {
+      if (typeof results.outputs[0].lockingScript !== 'string') {
+        throw new Error('No locking script')
+      }
       const decoded = PushDrop.decode(LockingScript.fromHex(results.outputs[0].lockingScript))
       if (decoded.fields.length !== 1) {
         throw new Error('Invalid token.')
