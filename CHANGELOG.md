@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.4.17 - 2025-04-01](#1417---2025-04-01)
 - [1.4.16 - 2025-04-01](#1416---2025-04-01)
 - [1.4.15 - 2025-03-31](#1415---2025-03-31)
 - [1.4.14 - 2025-03-31](#1414---2025-03-31)
@@ -119,6 +120,13 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.4.17] - 2025-04-01
+
+### Added
+
+- Key value storage implementation
+
+---
 
 ## [1.4.16] - 2025-04-01
 
