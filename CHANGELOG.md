@@ -120,15 +120,13 @@ All notable changes to this project will be documented in this file. The format 
 ---
 
 
-
 ## [1.4.16] - 2025-04-01
 
 ### Change
 
-- updating jest.config.js to remove warning of use of globals
+- Updating jest.config.js to remove warning of use of globals
 
 ---
-
 
 ## [1.4.15] - 2025-03-31
 
@@ -137,7 +135,6 @@ All notable changes to this project will be documented in this file. The format 
 - Simplified AuthFetch error handling to avoid intercepting external errors, improving the developer experience.
 
 ---
-
 
 ## [1.4.14] - 2025-03-31
 
