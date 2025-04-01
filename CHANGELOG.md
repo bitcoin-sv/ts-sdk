@@ -122,6 +122,15 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Change
 
+- updating jest.config.js to remove warning of use of globals
+
+---
+
+
+## [1.4.14] - 2025-03-31
+
+### Change
+
 - Tx fee update to 1 sat per kilobyte as default.
 
 ---
