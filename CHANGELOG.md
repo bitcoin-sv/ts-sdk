@@ -126,6 +126,10 @@ All notable changes to this project will be documented in this file. The format 
 
 - Updating jest.config.js to remove warning of use of globals
 
+### Security
+
+- Updating dependencies
+
 ---
 
 ## [1.4.15] - 2025-03-31
