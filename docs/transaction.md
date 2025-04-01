@@ -1477,7 +1477,7 @@ export default class Transaction {
     addOutput(output: TransactionOutput): void 
     addP2PKHOutput(address: number[] | string, satoshis?: number): void 
     updateMetadata(metadata: Record<string, any>): void 
-    async fee(modelOrFee: FeeModel | number = new SatoshisPerKilobyte(10), changeDistribution: "equal" | "random" = "equal"): Promise<void> 
+    async fee(modelOrFee: FeeModel | number = new SatoshisPerKilobyte(1), changeDistribution: "equal" | "random" = "equal"): Promise<void> 
     getFee(): number 
     async sign(): Promise<void> 
     async broadcast(broadcaster: Broadcaster = defaultBroadcaster()): Promise<BroadcastResponse | BroadcastFailure> 
@@ -1567,11 +1567,11 @@ Argument Details
 #### Method fee
 
 Computes fees prior to signing.
-If no fee model is provided, uses a SatoshisPerKilobyte fee model that pays 10 sat/kb.
+If no fee model is provided, uses a SatoshisPerKilobyte fee model that pays 1 sat/kb.
 If fee is a number, the transaction uses that value as fee.
 
 ```ts
-async fee(modelOrFee: FeeModel | number = new SatoshisPerKilobyte(10), changeDistribution: "equal" | "random" = "equal"): Promise<void> 
+async fee(modelOrFee: FeeModel | number = new SatoshisPerKilobyte(1), changeDistribution: "equal" | "random" = "equal"): Promise<void> 
 ```
 See also: [FeeModel](./transaction.md#interface-feemodel), [SatoshisPerKilobyte](./transaction.md#class-satoshisperkilobyte)
 
