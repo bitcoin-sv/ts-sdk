@@ -125,28 +125,6 @@ export class SimplifiedFetchTransport implements Transport {
         body: httpRequestWithAuthHeaders.body
       })
 
-      // Check for an acceptable status
-      if (!SUCCESS_STATUS_CODES.includes(response.status)) {
-        // Try parsing JSON error
-        let errorInfo;
-        try {
-          errorInfo = await response.json();
-        } catch {
-          // Fallback to text if JSON parse fails
-          const text = await response.text().catch(() => '');
-          throw new Error(`HTTP ${response.status} - ${text || 'Unknown error'}`);
-        }
-
-        // If we find a known { status: 'error', code, description } structure
-        if (errorInfo?.status === 'error' && typeof errorInfo.description === 'string') {
-          const msg = `HTTP ${response.status} - ${errorInfo.description}`;
-          throw new Error(errorInfo.code ? `${msg} (code: ${errorInfo.code})` : msg);
-        }
-
-        // Otherwise just throw whatever we got
-        throw new Error(`HTTP ${response.status} - ${JSON.stringify(errorInfo)}`);
-      }
-
       const parsedBody = await response.arrayBuffer()
       const payloadWriter = new Utils.Writer()
       payloadWriter.write(Utils.toArray(response.headers.get('x-bsv-auth-request-id'), 'base64'))
