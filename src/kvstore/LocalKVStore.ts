@@ -74,7 +74,7 @@ export default class LocalKVStore {
     }
     let fields: number[][]
     try {
-      const decoded = PushDrop.decode(LockingScript.fromHex(results.outputs[0].lockingScript!))
+      const decoded = PushDrop.decode(LockingScript.fromHex(results.outputs[0].lockingScript))
       if (decoded.fields.length !== 1) {
         throw new Error('Invalid token.')
       }
@@ -196,7 +196,7 @@ export default class LocalKVStore {
         randomizeOutputs: false
       }
     })
-    return `${txid}.0`
+    return `${txid as string}.0`
   }
 
   /**
@@ -209,7 +209,7 @@ export default class LocalKVStore {
    * @param {string} key - The key to remove.
    * @returns {Promise<string | void>} A promise that resolves to the txid of the removal transaction if successful.
    */
-  async remove (key: string): Promise<OutpointString | void> {
+  async remove (key: string): Promise<OutpointString | undefined> {
     const results = await this.wallet.listOutputs({
       basket: this.context,
       tags: [key],
