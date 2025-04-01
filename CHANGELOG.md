@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.4.16 - 2025-04-01](#1416---2025-04-01)
 - [1.4.15 - 2025-03-31](#1415---2025-03-31)
 - [1.4.14 - 2025-03-31](#1414---2025-03-31)
 - [1.4.13 - 2025-03-30](#1413---2025-03-30)
@@ -119,6 +120,18 @@ All notable changes to this project will be documented in this file. The format 
 ---
 
 
+## [1.4.16] - 2025-04-01
+
+### Fix
+
+- Updating jest.config.js to remove warning of use of globals
+
+### Security
+
+- Updating dependencies
+
+---
+
 ## [1.4.15] - 2025-03-31
 
 ### Change
@@ -126,7 +139,6 @@ All notable changes to this project will be documented in this file. The format 
 - Simplified AuthFetch error handling to avoid intercepting external errors, improving the developer experience.
 
 ---
-
 
 ## [1.4.14] - 2025-03-31
 

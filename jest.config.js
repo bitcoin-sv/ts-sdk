@@ -8,12 +8,10 @@ export default {
 
   // Ignore compiled output
   testPathIgnorePatterns: ['dist/'],
-
-  // These globals configure ts-jest to output ESM
-  globals: {
-    'ts-jest': {
-      useESM: true
-    }
+  transform: {
+      '^.+\\.test.ts?$': ['ts-jest', { 
+        useESM: true
+      }],
   },
 
   // Tell Jest that files ending in .ts should be treated as ESM modules
