@@ -1,6 +1,6 @@
 {
   "name": "@bsv/sdk",
-  "version": "1.4.15",
+  "version": "1.4.17",
   "type": "module",
   "description": "BSV Blockchain Software Development Kit",
   "main": "dist/cjs/mod.js",
@@ -193,6 +193,16 @@
       "import": "./dist/esm/src/storage/*.js",
       "require": "./dist/cjs/src/storage/*.js",
       "types": "./dist/types/src/storage/*.d.ts"
+    },
+    "./kvstore": {
+      "import": "./dist/esm/src/kvstore/index.js",
+      "require": "./dist/cjs/src/kvstore/index.js",
+      "types": "./dist/types/src/kvstore/index.d.ts"
+    },
+    "./kvstore/*": {
+      "import": "./dist/esm/src/kvstore/*.js",
+      "require": "./dist/cjs/src/kvstore/*.js",
+      "types": "./dist/types/src/kvstore/*.d.ts"
     },
     "./umd": {
       "import": "./dist/umd/bundle.js"
