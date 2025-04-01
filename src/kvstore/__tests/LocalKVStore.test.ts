@@ -1,5 +1,5 @@
 /** eslint-env jest */
-import LocalKVStore from '../LocalKVStore'
+import LocalKVStore from '../LocalKVStore.js'
 import LockingScript from '../../script/LockingScript.js'
 import PushDrop from '../../script/templates/PushDrop.js'
 import * as Utils from '../../primitives/utils.js'
@@ -20,7 +20,7 @@ const testEncryptedValue = Buffer.from('encryptedData') // Use Buffer for cipher
 const testRawValue = 'myTestDataValue'
 const testRawValueBuffer = Buffer.from(testRawValue) // Buffer for raw value
 
-jest.mock('../../script/LockingScript', () => {
+jest.mock('../../script/LockingScript.js', () => {
   const mockLockingScriptInstance = {
     toHex: jest.fn(() => testLockingScriptHex) // Default value
   }
@@ -29,7 +29,7 @@ jest.mock('../../script/LockingScript', () => {
   }
 })
 
-jest.mock('../../script/templates/PushDrop', () => {
+jest.mock('../../script/templates/PushDrop.js', () => {
   const mockLockingScriptInstance = {
     toHex: jest.fn(() => testLockingScriptHex) // Default value
   }
@@ -55,18 +55,18 @@ jest.mock('../../script/templates/PushDrop', () => {
     { decode: mockPushDropDecode } // Static method mock
   )
 })
-jest.mock('../../transaction/Transaction', () => ({
+jest.mock('../../transaction/Transaction.js', () => ({
   // Static method returns a minimal mock object
   fromAtomicBEEF: jest.fn(() => ({ /* mock tx object if needed */ }))
 }))
 
-jest.mock('../../primitives/Utils', () => ({
+jest.mock('../../primitives/Utils.js', () => ({
   // Ensure toArray returns Array<number> or Uint8Array
   toArray: jest.fn((str: string, encoding = 'utf8') => Array.from(Buffer.from(str, encoding as BufferEncoding))),
   toUTF8: jest.fn((arr: number[] | Uint8Array) => Buffer.from(arr).toString('utf8'))
 }))
 
-jest.mock('../../wallet/WalletClient', () => jest.fn())
+jest.mock('../../wallet/WalletClient.js', () => jest.fn())
 
 // --- Typed Mocks for SDK Components ---
 const MockedLockingScript = LockingScript as jest.Mocked<typeof LockingScript>
