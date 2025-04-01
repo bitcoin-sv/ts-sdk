@@ -31,17 +31,26 @@ export default class LocalKVStore {
   private readonly encrypt: boolean
 
   /**
+   * An originator to use with PushDrop and the wallet.
+   * @private
+   * @readonly
+   */
+  private readonly originator?: string
+
+  /**
    * Creates an instance of the localKVStore.
    *
    * @param {WalletInterface} [wallet=new WalletClient()] - The wallet interface to use. Defaults to a new WalletClient instance.
    * @param {string} [context='kvstore-default'] - The context (basket) for namespacing keys. Defaults to 'kvstore-default'.
    * @param {boolean} [encrypt=true] - Whether to encrypt values. Defaults to true.
+   * @param {string} [originator] — An originator to use with PushDrop and the wallet, if provided.
    * @throws {Error} If the context is missing or empty.
    */
   constructor (
     wallet: WalletInterface = new WalletClient(),
     context = 'kvstore-default',
-    encrypt = true
+    encrypt = true,
+    originator?: string
   ) {
     if (typeof context !== 'string' || context.length < 1) {
       throw new Error('A context in which to operate is required.')
@@ -49,6 +58,7 @@ export default class LocalKVStore {
     this.wallet = wallet
     this.context = context
     this.encrypt = encrypt
+    this.originator = originator
   }
 
   /**
@@ -120,7 +130,7 @@ export default class LocalKVStore {
       })
       valueAsArray = ciphertext
     }
-    const pushdrop = new PushDrop(this.wallet)
+    const pushdrop = new PushDrop(this.wallet, this.originator)
     const lockingScript = await pushdrop.lock(
       [valueAsArray],
       [2, this.context],
@@ -221,7 +231,7 @@ export default class LocalKVStore {
     if (results.totalOutputs === 0) {
       return // Key not found, do nothing
     }
-    const pushdrop = new PushDrop(this.wallet)
+    const pushdrop = new PushDrop(this.wallet, this.originator)
     try {
       const inputs: CreateActionInput[] = []
       for (let i = 0; i < results.outputs.length; i++) {
@@ -232,7 +242,7 @@ export default class LocalKVStore {
         })
       }
       const { signableTransaction } = await this.wallet.createAction({
-        description: `Update ${key} in ${this.context}`,
+        description: `Remove ${key} in ${this.context}`,
         inputBEEF: results.BEEF,
         inputs,
         options: {
