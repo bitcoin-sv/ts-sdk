@@ -125,6 +125,14 @@ export class SimplifiedFetchTransport implements Transport {
         body: httpRequestWithAuthHeaders.body
       })
 
+      // Check for an acceptable status
+      if (response.status === 500 && !response.headers.get('x-bsv-auth-request-id')) {
+        // Try parsing JSON error
+        const errorInfo = await response.json()
+        // Otherwise just throw whatever we got
+        throw new Error(`HTTP ${response.status} - ${JSON.stringify(errorInfo)}`);
+      }
+
       const parsedBody = await response.arrayBuffer()
       const payloadWriter = new Utils.Writer()
       payloadWriter.write(Utils.toArray(response.headers.get('x-bsv-auth-request-id'), 'base64'))
