@@ -122,7 +122,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [1.4.16] - 2025-04-01
 
-### Change
+### Fix
 
 - Updating jest.config.js to remove warning of use of globals
 
