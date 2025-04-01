@@ -64,18 +64,32 @@
       "filenameSubString": "wallet"
     },
     {
-      "inputFilename": "src/wallet/substrates/index.ts",
-      "outputFilename": "docs/wallet-substrates.md",
-      "firstHeadingLevel": 1,
-      "noDetailsSummary": true,
-      "filenameSubString": "wallet/substrates"
-    },
-    {
       "inputFilename": "src/storage/index.ts",
       "outputFilename": "docs/storage.md",
       "firstHeadingLevel": 1,
       "noDetailsSummary": true,
       "filenameSubString": "storage"
+    },
+    {
+      "inputFilename": "src/registry/index.ts",
+      "outputFilename": "docs/registry.md",
+      "firstHeadingLevel": 1,
+      "noDetailsSummary": true,
+      "filenameSubString": "registry"
+    },
+    {
+      "inputFilename": "src/identity/index.ts",
+      "outputFilename": "docs/identity.md",
+      "firstHeadingLevel": 1,
+      "noDetailsSummary": true,
+      "filenameSubString": "identity"
+    },
+    {
+      "inputFilename": "src/kvstore/index.ts",
+      "outputFilename": "docs/kvstore.md",
+      "firstHeadingLevel": 1,
+      "noDetailsSummary": true,
+      "filenameSubString": "kvstore"
     }
   ]
 }
