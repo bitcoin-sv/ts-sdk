@@ -60,7 +60,7 @@ jest.mock('../../transaction/Transaction.js', () => ({
   fromAtomicBEEF: jest.fn(() => ({ /* mock tx object if needed */ }))
 }))
 
-jest.mock('../../primitives/Utils.js', () => ({
+jest.mock('../../primitives/utils.js', () => ({
   // Ensure toArray returns Array<number> or Uint8Array
   toArray: jest.fn((str: string, encoding = 'utf8') => Array.from(Buffer.from(str, encoding as BufferEncoding))),
   toUTF8: jest.fn((arr: number[] | Uint8Array) => Buffer.from(arr).toString('utf8'))
