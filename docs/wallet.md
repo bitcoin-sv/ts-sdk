@@ -3945,6 +3945,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export type WalletErrorCode = keyof typeof walletErrors
 ```
 
+See also: [walletErrors](./wallet.md#enum-walleterrors)
+
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -3973,6 +3975,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ## Enums
 
+| |
+| --- |
+| [SecurityLevels](#enum-securitylevels) |
+| [walletErrors](#enum-walleterrors) |
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
+
 ### Enum: SecurityLevels
 
 ```ts
@@ -3984,6 +3995,21 @@ export enum SecurityLevels {
 ```
 
 See also: [Counterparty](./wallet.md#type-counterparty)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
+### Enum: walletErrors
+
+```ts
+export enum walletErrors {
+    unknownError = 1,
+    unsupportedAction = 2,
+    invalidHmac = 3,
+    invalidSignature = 4,
+    reviewActions = 5
+}
+```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 

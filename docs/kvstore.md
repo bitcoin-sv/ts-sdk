@@ -21,7 +21,7 @@ export default class LocalKVStore {
     } 
     async getOutputs(key: string, limit?: number): Promise<ListOutputsResult> 
     async get(key: string, defaultValue: string | undefined = undefined): Promise<string | undefined> 
-    getLockingScriptHex(output: WalletOutput, beef: Beef): LockingScript 
+    getLockingScript(output: WalletOutput, beef: Beef): LockingScript 
     async lookupValue(key: string, defaultValue: string | undefined, limit?: number): Promise<LookupValueResult> 
     getInputs(outputs: WalletOutput[]): CreateActionInput[] 
     async getSpends(key: string, outputs: WalletOutput[], pushdrop: PushDrop, atomicBEEF: AtomicBEEF): Promise<Record<number, SignActionSpend>> 
