@@ -70,7 +70,6 @@ export default class HTTPWalletJSON implements WalletInterface {
       // Check the HTTP status on the original response
       if (!res.ok) {
         if (res.status === 400 && data.isError && data.code === 5) {
-          debugger;
           const err = new WERR_REVIEW_ACTIONS(data.reviewActionResults, data.sendWithResults, data.txid, data.tx, data.noSendChange)
           throw err
         } else {
@@ -79,7 +78,6 @@ export default class HTTPWalletJSON implements WalletInterface {
             args,
             message: data.message ?? `HTTP Client error ${res.status}`
           }
-          debugger;
           throw new Error(JSON.stringify(err))
         }
       }
