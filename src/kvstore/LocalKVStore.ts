@@ -92,9 +92,9 @@ export default class LocalKVStore {
     return r.value
   }
 
-  getLockingScriptHex (output: WalletOutput, beef: Beef): LockingScript {
+  getLockingScript (output: WalletOutput, beef: Beef): LockingScript {
     const [txid, vout] = output.outpoint.split('.')
-    const tx = beef.findAtomicTransaction(txid)
+    const tx = beef.findTxid(txid).tx
     if (tx == null) { throw new Error(`beef must contain txid ${txid}`) }
     const lockingScript = tx.outputs[Number(vout)].lockingScript
     return lockingScript
@@ -112,7 +112,7 @@ export default class LocalKVStore {
     let field: number[]
     try {
       if (lor.BEEF === undefined) { throw new Error('entire transactions listOutputs option must return valid BEEF') }
-      const lockingScript = this.getLockingScriptHex(output, Beef.fromBinary(lor.BEEF))
+      const lockingScript = this.getLockingScript(output, Beef.fromBinary(lor.BEEF))
       const decoded = PushDrop.decode(lockingScript)
       if (decoded.fields.length < 1 || decoded.fields.length > 2) {
         throw new Error('Invalid token.')
