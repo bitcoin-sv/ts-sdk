@@ -15,22 +15,13 @@ Allows setting, getting, and removing key-value pairs, with optional encryption.
 ```ts
 export default class LocalKVStore {
     constructor(wallet: WalletInterface = new WalletClient(), context = "kvstore-default", encrypt = true, originator?: string) 
-    getProtocol(key: string): {
-        protocolID: WalletProtocol;
-        keyID: string;
-    } 
-    async getOutputs(key: string, limit?: number): Promise<ListOutputsResult> 
     async get(key: string, defaultValue: string | undefined = undefined): Promise<string | undefined> 
-    getLockingScript(output: WalletOutput, beef: Beef): LockingScript 
-    async lookupValue(key: string, defaultValue: string | undefined, limit?: number): Promise<LookupValueResult> 
-    getInputs(outputs: WalletOutput[]): CreateActionInput[] 
-    async getSpends(key: string, outputs: WalletOutput[], pushdrop: PushDrop, atomicBEEF: AtomicBEEF): Promise<Record<number, SignActionSpend>> 
     async set(key: string, value: string): Promise<OutpointString> 
     async remove(key: string): Promise<string[]> 
 }
 ```
 
-See also: [AtomicBEEF](./wallet.md#type-atomicbeef), [Beef](./transaction.md#class-beef), [CreateActionInput](./wallet.md#interface-createactioninput), [ListOutputsResult](./wallet.md#interface-listoutputsresult), [LockingScript](./script.md#class-lockingscript), [OutpointString](./wallet.md#type-outpointstring), [PushDrop](./script.md#class-pushdrop), [SignActionSpend](./wallet.md#interface-signactionspend), [WalletClient](./wallet.md#class-walletclient), [WalletInterface](./wallet.md#interface-walletinterface), [WalletOutput](./wallet.md#interface-walletoutput), [WalletProtocol](./wallet.md#type-walletprotocol), [encrypt](./messages.md#variable-encrypt)
+See also: [OutpointString](./wallet.md#type-outpointstring), [WalletClient](./wallet.md#class-walletclient), [WalletInterface](./wallet.md#interface-walletinterface), [encrypt](./messages.md#variable-encrypt)
 
 #### Constructor
 
