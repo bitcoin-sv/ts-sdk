@@ -6,30 +6,31 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [AbortActionArgs](#interface-abortactionargs) | [GetVersionResult](#interface-getversionresult) | [SendWithResult](#interface-sendwithresult) |
-| [AbortActionResult](#interface-abortactionresult) | [IdentityCertificate](#interface-identitycertificate) | [SignActionArgs](#interface-signactionargs) |
-| [AcquireCertificateArgs](#interface-acquirecertificateargs) | [IdentityCertifier](#interface-identitycertifier) | [SignActionOptions](#interface-signactionoptions) |
-| [AuthenticatedResult](#interface-authenticatedresult) | [InternalizeActionArgs](#interface-internalizeactionargs) | [SignActionResult](#interface-signactionresult) |
-| [BasketInsertion](#interface-basketinsertion) | [InternalizeActionResult](#interface-internalizeactionresult) | [SignActionSpend](#interface-signactionspend) |
-| [CertificateResult](#interface-certificateresult) | [InternalizeOutput](#interface-internalizeoutput) | [SignableTransaction](#interface-signabletransaction) |
-| [CreateActionArgs](#interface-createactionargs) | [KeyDeriverApi](#interface-keyderiverapi) | [VerifyHmacArgs](#interface-verifyhmacargs) |
-| [CreateActionInput](#interface-createactioninput) | [KeyLinkageResult](#interface-keylinkageresult) | [VerifyHmacResult](#interface-verifyhmacresult) |
-| [CreateActionOptions](#interface-createactionoptions) | [ListActionsArgs](#interface-listactionsargs) | [VerifySignatureArgs](#interface-verifysignatureargs) |
-| [CreateActionOutput](#interface-createactionoutput) | [ListActionsResult](#interface-listactionsresult) | [VerifySignatureResult](#interface-verifysignatureresult) |
-| [CreateActionResult](#interface-createactionresult) | [ListCertificatesArgs](#interface-listcertificatesargs) | [WalletAction](#interface-walletaction) |
-| [CreateHmacArgs](#interface-createhmacargs) | [ListCertificatesResult](#interface-listcertificatesresult) | [WalletActionInput](#interface-walletactioninput) |
-| [CreateHmacResult](#interface-createhmacresult) | [ListOutputsArgs](#interface-listoutputsargs) | [WalletActionOutput](#interface-walletactionoutput) |
-| [CreateSignatureArgs](#interface-createsignatureargs) | [ListOutputsResult](#interface-listoutputsresult) | [WalletCertificate](#interface-walletcertificate) |
-| [CreateSignatureResult](#interface-createsignatureresult) | [ProveCertificateArgs](#interface-provecertificateargs) | [WalletDecryptArgs](#interface-walletdecryptargs) |
-| [DiscoverByAttributesArgs](#interface-discoverbyattributesargs) | [ProveCertificateResult](#interface-provecertificateresult) | [WalletDecryptResult](#interface-walletdecryptresult) |
-| [DiscoverByIdentityKeyArgs](#interface-discoverbyidentitykeyargs) | [RelinquishCertificateArgs](#interface-relinquishcertificateargs) | [WalletEncryptArgs](#interface-walletencryptargs) |
-| [DiscoverCertificatesResult](#interface-discovercertificatesresult) | [RelinquishCertificateResult](#interface-relinquishcertificateresult) | [WalletEncryptResult](#interface-walletencryptresult) |
-| [GetHeaderArgs](#interface-getheaderargs) | [RelinquishOutputArgs](#interface-relinquishoutputargs) | [WalletEncryptionArgs](#interface-walletencryptionargs) |
-| [GetHeaderResult](#interface-getheaderresult) | [RelinquishOutputResult](#interface-relinquishoutputresult) | [WalletErrorObject](#interface-walleterrorobject) |
-| [GetHeightResult](#interface-getheightresult) | [RevealCounterpartyKeyLinkageArgs](#interface-revealcounterpartykeylinkageargs) | [WalletInterface](#interface-walletinterface) |
-| [GetNetworkResult](#interface-getnetworkresult) | [RevealCounterpartyKeyLinkageResult](#interface-revealcounterpartykeylinkageresult) | [WalletOutput](#interface-walletoutput) |
-| [GetPublicKeyArgs](#interface-getpublickeyargs) | [RevealSpecificKeyLinkageArgs](#interface-revealspecifickeylinkageargs) | [WalletPayment](#interface-walletpayment) |
-| [GetPublicKeyResult](#interface-getpublickeyresult) | [RevealSpecificKeyLinkageResult](#interface-revealspecifickeylinkageresult) | [WalletWire](#interface-walletwire) |
+| [AbortActionArgs](#interface-abortactionargs) | [IdentityCertificate](#interface-identitycertificate) | [SignActionArgs](#interface-signactionargs) |
+| [AbortActionResult](#interface-abortactionresult) | [IdentityCertifier](#interface-identitycertifier) | [SignActionOptions](#interface-signactionoptions) |
+| [AcquireCertificateArgs](#interface-acquirecertificateargs) | [InternalizeActionArgs](#interface-internalizeactionargs) | [SignActionResult](#interface-signactionresult) |
+| [AuthenticatedResult](#interface-authenticatedresult) | [InternalizeActionResult](#interface-internalizeactionresult) | [SignActionSpend](#interface-signactionspend) |
+| [BasketInsertion](#interface-basketinsertion) | [InternalizeOutput](#interface-internalizeoutput) | [SignableTransaction](#interface-signabletransaction) |
+| [CertificateResult](#interface-certificateresult) | [KeyDeriverApi](#interface-keyderiverapi) | [VerifyHmacArgs](#interface-verifyhmacargs) |
+| [CreateActionArgs](#interface-createactionargs) | [KeyLinkageResult](#interface-keylinkageresult) | [VerifyHmacResult](#interface-verifyhmacresult) |
+| [CreateActionInput](#interface-createactioninput) | [ListActionsArgs](#interface-listactionsargs) | [VerifySignatureArgs](#interface-verifysignatureargs) |
+| [CreateActionOptions](#interface-createactionoptions) | [ListActionsResult](#interface-listactionsresult) | [VerifySignatureResult](#interface-verifysignatureresult) |
+| [CreateActionOutput](#interface-createactionoutput) | [ListCertificatesArgs](#interface-listcertificatesargs) | [WalletAction](#interface-walletaction) |
+| [CreateActionResult](#interface-createactionresult) | [ListCertificatesResult](#interface-listcertificatesresult) | [WalletActionInput](#interface-walletactioninput) |
+| [CreateHmacArgs](#interface-createhmacargs) | [ListOutputsArgs](#interface-listoutputsargs) | [WalletActionOutput](#interface-walletactionoutput) |
+| [CreateHmacResult](#interface-createhmacresult) | [ListOutputsResult](#interface-listoutputsresult) | [WalletCertificate](#interface-walletcertificate) |
+| [CreateSignatureArgs](#interface-createsignatureargs) | [ProveCertificateArgs](#interface-provecertificateargs) | [WalletDecryptArgs](#interface-walletdecryptargs) |
+| [CreateSignatureResult](#interface-createsignatureresult) | [ProveCertificateResult](#interface-provecertificateresult) | [WalletDecryptResult](#interface-walletdecryptresult) |
+| [DiscoverByAttributesArgs](#interface-discoverbyattributesargs) | [RelinquishCertificateArgs](#interface-relinquishcertificateargs) | [WalletEncryptArgs](#interface-walletencryptargs) |
+| [DiscoverByIdentityKeyArgs](#interface-discoverbyidentitykeyargs) | [RelinquishCertificateResult](#interface-relinquishcertificateresult) | [WalletEncryptResult](#interface-walletencryptresult) |
+| [DiscoverCertificatesResult](#interface-discovercertificatesresult) | [RelinquishOutputArgs](#interface-relinquishoutputargs) | [WalletEncryptionArgs](#interface-walletencryptionargs) |
+| [GetHeaderArgs](#interface-getheaderargs) | [RelinquishOutputResult](#interface-relinquishoutputresult) | [WalletErrorObject](#interface-walleterrorobject) |
+| [GetHeaderResult](#interface-getheaderresult) | [RevealCounterpartyKeyLinkageArgs](#interface-revealcounterpartykeylinkageargs) | [WalletInterface](#interface-walletinterface) |
+| [GetHeightResult](#interface-getheightresult) | [RevealCounterpartyKeyLinkageResult](#interface-revealcounterpartykeylinkageresult) | [WalletOutput](#interface-walletoutput) |
+| [GetNetworkResult](#interface-getnetworkresult) | [RevealSpecificKeyLinkageArgs](#interface-revealspecifickeylinkageargs) | [WalletPayment](#interface-walletpayment) |
+| [GetPublicKeyArgs](#interface-getpublickeyargs) | [RevealSpecificKeyLinkageResult](#interface-revealspecifickeylinkageresult) | [WalletWire](#interface-walletwire) |
+| [GetPublicKeyResult](#interface-getpublickeyresult) | [ReviewActionResult](#interface-reviewactionresult) |  |
+| [GetVersionResult](#interface-getversionresult) | [SendWithResult](#interface-sendwithresult) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -837,6 +838,38 @@ See also: [Byte](./wallet.md#type-byte), [KeyIDStringUnder800Bytes](./wallet.md#
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
+### Interface: ReviewActionResult
+
+```ts
+export interface ReviewActionResult {
+    txid: TXIDHexString;
+    status: ReviewActionResultStatus;
+    competingTxs?: string[];
+    competingBeef?: number[];
+}
+```
+
+See also: [ReviewActionResultStatus](./wallet.md#type-reviewactionresultstatus), [TXIDHexString](./wallet.md#type-txidhexstring)
+
+#### Property competingBeef
+
+Merged beef of competingTxs, valid when status is 'doubleSpend'.
+
+```ts
+competingBeef?: number[]
+```
+
+#### Property competingTxs
+
+Any competing txids reported for this txid, valid when status is 'doubleSpend'.
+
+```ts
+competingTxs?: string[]
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
 ### Interface: SendWithResult
 
 ```ts
@@ -1502,6 +1535,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | [HTTPWalletWire](#class-httpwalletwire) |
 | [KeyDeriver](#class-keyderiver) |
 | [ProtoWallet](#class-protowallet) |
+| [WERR_REVIEW_ACTIONS](#class-werr_review_actions) |
 | [WalletClient](#class-walletclient) |
 | [WalletError](#class-walleterror) |
 | [WalletWireProcessor](#class-walletwireprocessor) |
@@ -2095,6 +2129,36 @@ export class ProtoWallet {
 ```
 
 See also: [CreateHmacArgs](./wallet.md#interface-createhmacargs), [CreateHmacResult](./wallet.md#interface-createhmacresult), [CreateSignatureArgs](./wallet.md#interface-createsignatureargs), [CreateSignatureResult](./wallet.md#interface-createsignatureresult), [GetPublicKeyArgs](./wallet.md#interface-getpublickeyargs), [KeyDeriverApi](./wallet.md#interface-keyderiverapi), [PrivateKey](./primitives.md#class-privatekey), [PubKeyHex](./wallet.md#type-pubkeyhex), [RevealCounterpartyKeyLinkageArgs](./wallet.md#interface-revealcounterpartykeylinkageargs), [RevealCounterpartyKeyLinkageResult](./wallet.md#interface-revealcounterpartykeylinkageresult), [RevealSpecificKeyLinkageArgs](./wallet.md#interface-revealspecifickeylinkageargs), [RevealSpecificKeyLinkageResult](./wallet.md#interface-revealspecifickeylinkageresult), [VerifyHmacArgs](./wallet.md#interface-verifyhmacargs), [VerifyHmacResult](./wallet.md#interface-verifyhmacresult), [VerifySignatureArgs](./wallet.md#interface-verifysignatureargs), [VerifySignatureResult](./wallet.md#interface-verifysignatureresult), [WalletDecryptArgs](./wallet.md#interface-walletdecryptargs), [WalletDecryptResult](./wallet.md#interface-walletdecryptresult), [WalletEncryptArgs](./wallet.md#interface-walletencryptargs), [WalletEncryptResult](./wallet.md#interface-walletencryptresult), [decrypt](./messages.md#variable-decrypt), [encrypt](./messages.md#variable-encrypt)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
+### Class: WERR_REVIEW_ACTIONS
+
+When a `createAction` or `signAction` is completed in undelayed mode (`acceptDelayedBroadcast`: false),
+any unsucccessful result will return the results by way of this exception to ensure attention is
+paid to processing errors.
+
+```ts
+export class WERR_REVIEW_ACTIONS extends Error {
+    code: number;
+    isError: boolean = true;
+    constructor(public reviewActionResults: ReviewActionResult[], public sendWithResults: SendWithResult[], public txid?: TXIDHexString, public tx?: AtomicBEEF, public noSendChange?: OutpointString[]) 
+}
+```
+
+See also: [AtomicBEEF](./wallet.md#type-atomicbeef), [OutpointString](./wallet.md#type-outpointstring), [ReviewActionResult](./wallet.md#interface-reviewactionresult), [SendWithResult](./wallet.md#interface-sendwithresult), [TXIDHexString](./wallet.md#type-txidhexstring)
+
+#### Constructor
+
+All parameters correspond to their comparable `createAction` or `signSction` results
+with the exception of `reviewActionResults`;
+which contains more details, particularly for double spend results.
+
+```ts
+constructor(public reviewActionResults: ReviewActionResult[], public sendWithResults: SendWithResult[], public txid?: TXIDHexString, public tx?: AtomicBEEF, public noSendChange?: OutpointString[]) 
+```
+See also: [AtomicBEEF](./wallet.md#type-atomicbeef), [OutpointString](./wallet.md#type-outpointstring), [ReviewActionResult](./wallet.md#interface-reviewactionresult), [SendWithResult](./wallet.md#interface-sendwithresult), [TXIDHexString](./wallet.md#type-txidhexstring)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -3459,20 +3523,21 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 | | | |
 | --- | --- | --- |
-| [AcquireCertificateResult](#type-acquirecertificateresult) | [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500bytes) | [PositiveIntegerMax10](#type-positiveintegermax10) |
-| [AcquisitionProtocol](#type-acquisitionprotocol) | [EntityNameStringMax100Bytes](#type-entitynamestringmax100bytes) | [PositiveIntegerOrZero](#type-positiveintegerorzero) |
-| [ActionStatus](#type-actionstatus) | [ErrorCodeString10To40Bytes](#type-errorcodestring10to40bytes) | [ProtocolString5To400Bytes](#type-protocolstring5to400bytes) |
-| [AtomicBEEF](#type-atomicbeef) | [ErrorDescriptionString20To200Bytes](#type-errordescriptionstring20to200bytes) | [PubKeyHex](#type-pubkeyhex) |
-| [BEEF](#type-beef) | [HexString](#type-hexstring) | [SatoshiValue](#type-satoshivalue) |
-| [Base64String](#type-base64string) | [ISOTimestampString](#type-isotimestampstring) | [SecurityLevel](#type-securitylevel) |
-| [BasketStringUnder300Bytes](#type-basketstringunder300bytes) | [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes) | [SendWithResultStatus](#type-sendwithresultstatus) |
-| [BooleanDefaultFalse](#type-booleandefaultfalse) | [KeyringRevealer](#type-keyringrevealer) | [TXIDHexString](#type-txidhexstring) |
-| [BooleanDefaultTrue](#type-booleandefaulttrue) | [LabelStringUnder300Bytes](#type-labelstringunder300bytes) | [TrustSelf](#type-trustself) |
-| [Byte](#type-byte) | [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes) | [VersionString7To30Bytes](#type-versionstring7to30bytes) |
-| [CallType](#type-calltype) | [OutpointString](#type-outpointstring) | [WalletCounterparty](#type-walletcounterparty) |
-| [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes) | [OutputTagStringUnder300Bytes](#type-outputtagstringunder300bytes) | [WalletErrorCode](#type-walleterrorcode) |
-| [Counterparty](#type-counterparty) | [PositiveInteger](#type-positiveinteger) | [WalletNetwork](#type-walletnetwork) |
-| [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes) | [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000) | [WalletProtocol](#type-walletprotocol) |
+| [AcquireCertificateResult](#type-acquirecertificateresult) | [EntityNameStringMax100Bytes](#type-entitynamestringmax100bytes) | [ProtocolString5To400Bytes](#type-protocolstring5to400bytes) |
+| [AcquisitionProtocol](#type-acquisitionprotocol) | [ErrorCodeString10To40Bytes](#type-errorcodestring10to40bytes) | [PubKeyHex](#type-pubkeyhex) |
+| [ActionStatus](#type-actionstatus) | [ErrorDescriptionString20To200Bytes](#type-errordescriptionstring20to200bytes) | [ReviewActionResultStatus](#type-reviewactionresultstatus) |
+| [AtomicBEEF](#type-atomicbeef) | [HexString](#type-hexstring) | [SatoshiValue](#type-satoshivalue) |
+| [BEEF](#type-beef) | [ISOTimestampString](#type-isotimestampstring) | [SecurityLevel](#type-securitylevel) |
+| [Base64String](#type-base64string) | [KeyIDStringUnder800Bytes](#type-keyidstringunder800bytes) | [SendWithResultStatus](#type-sendwithresultstatus) |
+| [BasketStringUnder300Bytes](#type-basketstringunder300bytes) | [KeyringRevealer](#type-keyringrevealer) | [TXIDHexString](#type-txidhexstring) |
+| [BooleanDefaultFalse](#type-booleandefaultfalse) | [LabelStringUnder300Bytes](#type-labelstringunder300bytes) | [TrustSelf](#type-trustself) |
+| [BooleanDefaultTrue](#type-booleandefaulttrue) | [OriginatorDomainNameStringUnder250Bytes](#type-originatordomainnamestringunder250bytes) | [VersionString7To30Bytes](#type-versionstring7to30bytes) |
+| [Byte](#type-byte) | [OutpointString](#type-outpointstring) | [WalletCounterparty](#type-walletcounterparty) |
+| [CallType](#type-calltype) | [OutputTagStringUnder300Bytes](#type-outputtagstringunder300bytes) | [WalletErrorCode](#type-walleterrorcode) |
+| [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes) | [PositiveInteger](#type-positiveinteger) | [WalletNetwork](#type-walletnetwork) |
+| [Counterparty](#type-counterparty) | [PositiveIntegerDefault10Max10000](#type-positiveintegerdefault10max10000) | [WalletProtocol](#type-walletprotocol) |
+| [DescriptionString5to50Bytes](#type-descriptionstring5to50bytes) | [PositiveIntegerMax10](#type-positiveintegermax10) |  |
+| [EntityIconURLStringMax500Bytes](#type-entityiconurlstringmax500bytes) | [PositiveIntegerOrZero](#type-positiveintegerorzero) |  |
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -3778,6 +3843,23 @@ See also: [HexString](./wallet.md#type-hexstring)
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
+### Type: ReviewActionResultStatus
+
+Indicates status of a new Action following a `createAction` or `signAction` in immediate mode:
+When `acceptDelayedBroadcast` is falses.
+
+'success': The action has been broadcast and accepted by the bitcoin processing network.
+'doulbeSpend': The action has been confirmed to double spend one or more inputs, and by the "first-seen-rule" is the loosing transaction.
+'invalidTx': The action was rejected by the processing network as an invalid bitcoin transaction.
+'serviceError': The broadcast services are currently unable to reach the bitcoin network. The action is now queued for delayed retries.
+
+```ts
+export type ReviewActionResultStatus = "success" | "doubleSpend" | "serviceError" | "invalidTx"
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
 ### Type: SatoshiValue
 
 ```ts
@@ -3863,6 +3945,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 export type WalletErrorCode = keyof typeof walletErrors
 ```
 
+See also: [walletErrors](./wallet.md#enum-walleterrors)
+
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
 ---
@@ -3891,6 +3975,15 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ## Enums
 
+| |
+| --- |
+| [SecurityLevels](#enum-securitylevels) |
+| [walletErrors](#enum-walleterrors) |
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
+
 ### Enum: SecurityLevels
 
 ```ts
@@ -3902,6 +3995,21 @@ export enum SecurityLevels {
 ```
 
 See also: [Counterparty](./wallet.md#type-counterparty)
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
+### Enum: walletErrors
+
+```ts
+export enum walletErrors {
+    unknownError = 1,
+    unsupportedAction = 2,
+    invalidHmac = 3,
+    invalidSignature = 4,
+    reviewActions = 5
+}
+```
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 

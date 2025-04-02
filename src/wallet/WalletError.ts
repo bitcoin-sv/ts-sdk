@@ -16,12 +16,14 @@ export class WalletError extends Error {
 }
 
 // NOTE: Enum values must not exceed the UInt8 range (0–255)
-enum walletErrors {
+export enum walletErrors {
   unknownError = 1,
   unsupportedAction = 2,
   invalidHmac = 3,
   invalidSignature = 4,
+  reviewActions = 5,
 }
 
-export default walletErrors
 export type WalletErrorCode = keyof typeof walletErrors
+
+export default WalletError

@@ -120,6 +120,18 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.4.18] - 2025-04-02
+
+### Changes
+
+- LocalKVStore: Additional testing, passing.
+
+### Added
+
+- WERR_REVIEW_ACTIONS error class and support through HTTPWalletJson
+
+---
+
 ## [1.4.17] - 2025-04-01
 
 ### Added

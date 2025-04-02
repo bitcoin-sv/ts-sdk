@@ -14,10 +14,10 @@ Allows setting, getting, and removing key-value pairs, with optional encryption.
 
 ```ts
 export default class LocalKVStore {
-    constructor(wallet: WalletInterface = new WalletClient(), context = "kvstore-default", encrypt = true) 
+    constructor(wallet: WalletInterface = new WalletClient(), context = "kvstore-default", encrypt = true, originator?: string) 
     async get(key: string, defaultValue: string | undefined = undefined): Promise<string | undefined> 
     async set(key: string, value: string): Promise<OutpointString> 
-    async remove(key: string): Promise<OutpointString | undefined> 
+    async remove(key: string): Promise<string[]> 
 }
 ```
 
@@ -28,7 +28,7 @@ See also: [OutpointString](./wallet.md#type-outpointstring), [WalletClient](./wa
 Creates an instance of the localKVStore.
 
 ```ts
-constructor(wallet: WalletInterface = new WalletClient(), context = "kvstore-default", encrypt = true) 
+constructor(wallet: WalletInterface = new WalletClient(), context = "kvstore-default", encrypt = true, originator?: string) 
 ```
 See also: [WalletClient](./wallet.md#class-walletclient), [WalletInterface](./wallet.md#interface-walletinterface), [encrypt](./messages.md#variable-encrypt)
 
@@ -40,6 +40,8 @@ Argument Details
   + The context (basket) for namespacing keys. Defaults to 'kvstore-default'.
 + **encrypt**
   + Whether to encrypt values. Defaults to true.
++ **originator**
+  + — An originator to use with PushDrop and the wallet, if provided.
 
 Throws
 
@@ -67,7 +69,7 @@ Argument Details
 
 Throws
 
-If multiple outputs are found for the key (ambiguous state).
+If too many outputs are found for the key (ambiguous state).
 
 If the found output's locking script cannot be decoded or represents an invalid token format.
 
@@ -80,13 +82,12 @@ If the key does not exist, it does nothing.
 If signing the removal transaction fails, it relinquishes the original outputs instead of spending.
 
 ```ts
-async remove(key: string): Promise<OutpointString | undefined> 
+async remove(key: string): Promise<string[]> 
 ```
-See also: [OutpointString](./wallet.md#type-outpointstring)
 
 Returns
 
-A promise that resolves to the txid of the removal transaction if successful.
+A promise that resolves to the txids of the removal transactions if successful.
 
 Argument Details
 
