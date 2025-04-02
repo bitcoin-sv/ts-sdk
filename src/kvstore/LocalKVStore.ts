@@ -62,11 +62,11 @@ export default class LocalKVStore {
     this.originator = originator
   }
 
-  getProtocol (key: string): { protocolID: WalletProtocol, keyID: string } {
+  private getProtocol (key: string): { protocolID: WalletProtocol, keyID: string } {
     return { protocolID: [2, this.context], keyID: key }
   }
 
-  async getOutputs (key: string, limit?: number): Promise<ListOutputsResult> {
+  private async getOutputs (key: string, limit?: number): Promise<ListOutputsResult> {
     const results = await this.wallet.listOutputs({
       basket: this.context,
       tags: [key],
@@ -92,7 +92,7 @@ export default class LocalKVStore {
     return r.value
   }
 
-  getLockingScript (output: WalletOutput, beef: Beef): LockingScript {
+  private getLockingScript (output: WalletOutput, beef: Beef): LockingScript {
     const [txid, vout] = output.outpoint.split('.')
     const tx = beef.findTxid(txid)?.tx
     if (tx == null) { throw new Error(`beef must contain txid ${txid}`) }
@@ -100,7 +100,7 @@ export default class LocalKVStore {
     return lockingScript
   }
 
-  async lookupValue (key: string, defaultValue: string | undefined, limit?: number): Promise<LookupValueResult> {
+  private async lookupValue (key: string, defaultValue: string | undefined, limit?: number): Promise<LookupValueResult> {
     const lor = await this.getOutputs(key, limit)
     const r: LookupValueResult = { value: defaultValue, outpoint: undefined, lor }
     const { outputs } = lor
@@ -133,7 +133,7 @@ export default class LocalKVStore {
     return r
   }
 
-  getInputs (outputs: WalletOutput[]): CreateActionInput[] {
+  private getInputs (outputs: WalletOutput[]): CreateActionInput[] {
     const inputs: CreateActionInput[] = []
     for (let i = 0; i < outputs.length; i++) {
       inputs.push({
@@ -145,7 +145,7 @@ export default class LocalKVStore {
     return inputs
   }
 
-  async getSpends (key: string, outputs: WalletOutput[], pushdrop: PushDrop, atomicBEEF: AtomicBEEF): Promise<Record<number, SignActionSpend>> {
+  private async getSpends (key: string, outputs: WalletOutput[], pushdrop: PushDrop, atomicBEEF: AtomicBEEF): Promise<Record<number, SignActionSpend>> {
     const p = this.getProtocol(key)
     const tx = Transaction.fromAtomicBEEF(atomicBEEF)
     const spends: Record<number, SignActionSpend> = {}
