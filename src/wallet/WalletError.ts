@@ -21,6 +21,7 @@ enum walletErrors {
   unsupportedAction = 2,
   invalidHmac = 3,
   invalidSignature = 4,
+  reviewActions = 5,
 }
 
 export default walletErrors

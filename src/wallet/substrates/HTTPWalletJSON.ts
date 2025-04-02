@@ -33,8 +33,9 @@ import {
   SecurityLevel,
   SignActionArgs,
   SignActionResult,
-  VersionString7To30Bytes
+  VersionString7To30Bytes,
 } from '../Wallet.interfaces.js'
+import { WERR_REVIEW_ACTIONS } from '../WERR_REVIEW_ACTIONS.js'
 
 export default class HTTPWalletJSON implements WalletInterface {
   baseUrl: string
@@ -68,12 +69,17 @@ export default class HTTPWalletJSON implements WalletInterface {
 
       // Check the HTTP status on the original response
       if (!res.ok) {
-        const err = {
-          call,
-          args,
-          message: data.message ?? `HTTP Client error ${res.status}`
+        if (res.status === 400 && data.isError && data.code === 5) {
+          const err = new WERR_REVIEW_ACTIONS(data.reviewActionResults, data.sendWithResults, data.txid, data.tx, data.noSendChange)
+          throw err
+        } else {
+          const err = {
+            call,
+            args,
+            message: data.message ?? `HTTP Client error ${res.status}`
+          }
+          throw new Error(JSON.stringify(err))
         }
-        throw new Error(JSON.stringify(err))
       }
       return data
     }
