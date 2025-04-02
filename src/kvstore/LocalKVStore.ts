@@ -42,14 +42,14 @@ export default class LocalKVStore {
    * Creates an instance of the localKVStore.
    *
    * @param {WalletInterface} [wallet=new WalletClient()] - The wallet interface to use. Defaults to a new WalletClient instance.
-   * @param {string} [context='kvstore-default'] - The context (basket) for namespacing keys. Defaults to 'kvstore-default'.
+   * @param {string} [context='kvstoredefault'] - The context (basket) for namespacing keys. Defaults to 'kvstore-default'.
    * @param {boolean} [encrypt=true] - Whether to encrypt values. Defaults to true.
    * @param {string} [originator] — An originator to use with PushDrop and the wallet, if provided.
    * @throws {Error} If the context is missing or empty.
    */
   constructor (
     wallet: WalletInterface = new WalletClient(),
-    context = 'kvstore-default',
+    context = 'kvstoredefault',
     encrypt = true,
     originator?: string
   ) {
