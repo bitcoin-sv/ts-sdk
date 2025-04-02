@@ -94,7 +94,7 @@ export default class LocalKVStore {
 
   getLockingScript (output: WalletOutput, beef: Beef): LockingScript {
     const [txid, vout] = output.outpoint.split('.')
-    const tx = beef.findTxid(txid).tx
+    const tx = beef.findTxid(txid)?.tx
     if (tx == null) { throw new Error(`beef must contain txid ${txid}`) }
     const lockingScript = tx.outputs[Number(vout)].lockingScript
     return lockingScript
