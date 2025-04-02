@@ -62,11 +62,11 @@ export default class LocalKVStore {
     this.originator = originator
   }
 
-  getProtocol(key: string) : { protocolID: WalletProtocol, keyID: string } {
+  getProtocol (key: string): { protocolID: WalletProtocol, keyID: string } {
     return { protocolID: [2, this.context], keyID: key }
   }
 
-  async getOutputs(key: string, limit?: number) : Promise<ListOutputsResult> {
+  async getOutputs (key: string, limit?: number): Promise<ListOutputsResult> {
     const results = await this.wallet.listOutputs({
       basket: this.context,
       tags: [key],
@@ -92,18 +92,16 @@ export default class LocalKVStore {
     return r.value
   }
 
-  getLockingScriptHex(output: WalletOutput, beef: Beef) : LockingScript {
-    const [txid,vout] = output.outpoint.split('.')
+  getLockingScriptHex (output: WalletOutput, beef: Beef): LockingScript {
+    const [txid, vout] = output.outpoint.split('.')
     const tx = beef.findAtomicTransaction(txid)
     const lockingScript = tx.outputs[Number(vout)].lockingScript
     return lockingScript
   }
 
-  async lookupValue(key, defaultValue = undefined, limit?: number)
-  : Promise<{ value: string | undefined, outpoint: OutpointString | undefined, lor: ListOutputsResult }>
-  {
+  async lookupValue (key, defaultValue = undefined, limit?: number): Promise<{ value: string | undefined, outpoint: OutpointString | undefined, lor: ListOutputsResult }> {
     const lor = await this.getOutputs(key, limit)
-    const r = { value: defaultValue, outpoint: <OutpointString | undefined>undefined, lor }
+    const r = { value: defaultValue, outpoint: undefined as OutpointString | undefined, lor }
     const { outputs } = lor
     if (outputs.length === 0) {
       return r
@@ -112,7 +110,8 @@ export default class LocalKVStore {
     r.outpoint = output.outpoint
     let field: number[]
     try {
-      const lockingScript = this.getLockingScriptHex(output, Beef.fromBinary(lor.BEEF!))
+      if (lor.BEEF === undefined) { throw new Error('entire transactions listOutputs option must return valid BEEF') }
+      const lockingScript = this.getLockingScriptHex(output, Beef.fromBinary(lor.BEEF))
       const decoded = PushDrop.decode(lockingScript)
       if (decoded.fields.length < 1 || decoded.fields.length > 2) {
         throw new Error('Invalid token.')
@@ -133,7 +132,7 @@ export default class LocalKVStore {
     return r
   }
 
-  getInputs(outputs: WalletOutput[]): CreateActionInput[] {
+  getInputs (outputs: WalletOutput[]): CreateActionInput[] {
     const inputs: CreateActionInput[] = []
     for (let i = 0; i < outputs.length; i++) {
       inputs.push({
@@ -145,7 +144,7 @@ export default class LocalKVStore {
     return inputs
   }
 
-  async getSpends(key: string, outputs: WalletOutput[], pushdrop: PushDrop, atomicBEEF: AtomicBEEF): Promise<Record<number, SignActionSpend>> {
+  async getSpends (key: string, outputs: WalletOutput[], pushdrop: PushDrop, atomicBEEF: AtomicBEEF): Promise<Record<number, SignActionSpend>> {
     const p = this.getProtocol(key)
     const tx = Transaction.fromAtomicBEEF(atomicBEEF)
     const spends: Record<number, SignActionSpend> = {}
@@ -172,7 +171,7 @@ export default class LocalKVStore {
    * @param {string} value - The value to associate with the key.
    * @returns {Promise<OutpointString>} A promise that resolves to the outpoint string (txid.vout) of the new or updated token output.
    */
-  async set(key: string, value: string): Promise<OutpointString> {
+  async set (key: string, value: string): Promise<OutpointString> {
     const current = await this.lookupValue(key, undefined, 10)
     if (current.value === value) {
       // Don't create a new transaction if the value doesn't need to change...
@@ -183,7 +182,7 @@ export default class LocalKVStore {
     if (this.encrypt) {
       const { ciphertext } = await this.wallet.encrypt({
         ...protocol,
-        plaintext: valueAsArray,
+        plaintext: valueAsArray
       })
       valueAsArray = ciphertext
     }
@@ -217,15 +216,15 @@ export default class LocalKVStore {
       if (outputs.length > 0 && typeof signableTransaction !== 'object') {
         throw new Error('Wallet did not return a signable transaction when expected.')
       }
-      if (txid && !signableTransaction) {
-        outpoint = `${txid}.0`
+      if (signableTransaction == null) {
+        outpoint = `${txid as string}.0`
       } else {
         const spends = await this.getSpends(key, outputs, pushdrop, signableTransaction.tx)
         const { txid } = await this.wallet.signAction({
           reference: signableTransaction.reference,
           spends
         })
-        outpoint = `${txid}.0`
+        outpoint = `${txid as string}.0`
       }
     } catch (_) {
       throw new Error(`There are ${outputs.length} outputs with tag ${key} that cannot be unlocked.`)
@@ -243,7 +242,7 @@ export default class LocalKVStore {
    * @param {string} key - The key to remove.
    * @returns {Promise<string[]>} A promise that resolves to the txids of the removal transactions if successful.
    */
-  async remove(key: string): Promise<string[]> {
+  async remove (key: string): Promise<string[]> {
     const txids: string[] = []
     for (; ;) {
       const { outputs, BEEF: inputBEEF, totalOutputs } = await this.getOutputs(key)
@@ -272,8 +271,7 @@ export default class LocalKVStore {
           throw new Error(`There are ${totalOutputs} outputs with tag ${key} that cannot be unlocked.`)
         }
       }
-      if (outputs.length === totalOutputs)
-        break;
+      if (outputs.length === totalOutputs) { break }
     }
     return txids
   }
