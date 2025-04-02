@@ -303,6 +303,30 @@ export interface SendWithResult {
   status: SendWithResultStatus
 }
 
+/**
+ * Indicates status of a new Action following a `createAction` or `signAction` in immediate mode:
+ * When `acceptDelayedBroadcast` is falses.
+ *
+ * 'success': The action has been broadcast and accepted by the bitcoin processing network.
+ * 'doulbeSpend': The action has been confirmed to double spend one or more inputs, and by the "first-seen-rule" is the loosing transaction.
+ * 'invalidTx': The action was rejected by the processing network as an invalid bitcoin transaction.
+ * 'serviceError': The broadcast services are currently unable to reach the bitcoin network. The action is now queued for delayed retries.
+ */
+export type ReviewActionResultStatus = 'success' | 'doubleSpend' | 'serviceError' | 'invalidTx'
+
+export interface ReviewActionResult {
+  txid: TXIDHexString
+  status: ReviewActionResultStatus
+  /**
+   * Any competing txids reported for this txid, valid when status is 'doubleSpend'.
+   */
+  competingTxs?: string[]
+  /**
+   * Merged beef of competingTxs, valid when status is 'doubleSpend'.
+   */
+  competingBeef?: number[]
+}
+
 export interface SignableTransaction {
   tx: AtomicBEEF
   reference: Base64String

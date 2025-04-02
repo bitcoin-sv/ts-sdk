@@ -73,6 +73,7 @@ export default class HTTPWalletJSON implements WalletInterface {
           args,
           message: data.message ?? `HTTP Client error ${res.status}`
         }
+        debugger;
         throw new Error(JSON.stringify(err))
       }
       return data
