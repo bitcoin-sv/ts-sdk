@@ -95,13 +95,15 @@ export default class LocalKVStore {
   getLockingScriptHex (output: WalletOutput, beef: Beef): LockingScript {
     const [txid, vout] = output.outpoint.split('.')
     const tx = beef.findAtomicTransaction(txid)
+    if (!tx)
+      throw new Error(`beef must contain txid ${txid}`)
     const lockingScript = tx.outputs[Number(vout)].lockingScript
     return lockingScript
   }
 
-  async lookupValue (key, defaultValue = undefined, limit?: number): Promise<{ value: string | undefined, outpoint: OutpointString | undefined, lor: ListOutputsResult }> {
+  async lookupValue (key: string, defaultValue: string | undefined, limit?: number): Promise<LookupValueResult> {
     const lor = await this.getOutputs(key, limit)
-    const r = { value: defaultValue, outpoint: undefined as OutpointString | undefined, lor }
+    const r: LookupValueResult = { value: defaultValue, outpoint: undefined, lor }
     const { outputs } = lor
     if (outputs.length === 0) {
       return r
@@ -174,6 +176,8 @@ export default class LocalKVStore {
   async set (key: string, value: string): Promise<OutpointString> {
     const current = await this.lookupValue(key, undefined, 10)
     if (current.value === value) {
+      if (current.outpoint === undefined)
+        throw new Error('outpoint must be valid when value is valid and unchanged')
       // Don't create a new transaction if the value doesn't need to change...
       return current.outpoint
     }
@@ -266,6 +270,8 @@ export default class LocalKVStore {
             reference: signableTransaction.reference,
             spends
           })
+          if (txid === undefined)
+            throw new Error('signAction must return a valid txid')
           txids.push(txid)
         } catch (_) {
           throw new Error(`There are ${totalOutputs} outputs with tag ${key} that cannot be unlocked.`)
@@ -275,4 +281,10 @@ export default class LocalKVStore {
     }
     return txids
   }
+}
+
+interface LookupValueResult {
+  value: string | undefined
+  outpoint: OutpointString | undefined
+  lor: ListOutputsResult
 }
