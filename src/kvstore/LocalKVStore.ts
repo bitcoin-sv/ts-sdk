@@ -95,8 +95,7 @@ export default class LocalKVStore {
   getLockingScriptHex (output: WalletOutput, beef: Beef): LockingScript {
     const [txid, vout] = output.outpoint.split('.')
     const tx = beef.findAtomicTransaction(txid)
-    if (!tx)
-      throw new Error(`beef must contain txid ${txid}`)
+    if (tx == null) { throw new Error(`beef must contain txid ${txid}`) }
     const lockingScript = tx.outputs[Number(vout)].lockingScript
     return lockingScript
   }
@@ -176,8 +175,7 @@ export default class LocalKVStore {
   async set (key: string, value: string): Promise<OutpointString> {
     const current = await this.lookupValue(key, undefined, 10)
     if (current.value === value) {
-      if (current.outpoint === undefined)
-        throw new Error('outpoint must be valid when value is valid and unchanged')
+      if (current.outpoint === undefined) { throw new Error('outpoint must be valid when value is valid and unchanged') }
       // Don't create a new transaction if the value doesn't need to change...
       return current.outpoint
     }
@@ -270,8 +268,7 @@ export default class LocalKVStore {
             reference: signableTransaction.reference,
             spends
           })
-          if (txid === undefined)
-            throw new Error('signAction must return a valid txid')
+          if (txid === undefined) { throw new Error('signAction must return a valid txid') }
           txids.push(txid)
         } catch (_) {
           throw new Error(`There are ${totalOutputs} outputs with tag ${key} that cannot be unlocked.`)
