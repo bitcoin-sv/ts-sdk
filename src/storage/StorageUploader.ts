@@ -159,7 +159,8 @@ export class StorageUploader {
    * @param {string} uhrpUrl - The UHRP URL, e.g. "uhrp://abcd..."
    * @returns {Promise<FindFileData>} An object with file name, size, MIME type, and expiry time
    * @throws {Error} If the server or the route returns an error
-   */  public async findFile(uhrpUrl: string): Promise<FindFileData> {
+   */
+  public async findFile(uhrpUrl: string): Promise<FindFileData> {
     const url = new URL(`${this.baseURL}/find`)
     url.searchParams.set('uhrpUrl', uhrpUrl)
 
