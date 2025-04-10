@@ -46,7 +46,7 @@ export class StorageUploader {
    * Creates a new StorageUploader instance.
    * @param {UploaderConfig} config - An object containing the storage server's URL and a wallet interface
    */
-  constructor(config: UploaderConfig) {
+  constructor (config: UploaderConfig) {
     this.baseURL = config.storageURL
     this.authFetch = new AuthFetch(config.wallet)
   }
@@ -59,14 +59,14 @@ export class StorageUploader {
    * @returns {Promise<{ uploadURL: string; requiredHeaders: Record<string, string>; amount?: number }>}
    * @throws {Error} If the server returns a non-OK response or an error status
    */
-  private async getUploadInfo(
+  private async getUploadInfo (
     fileSize: number,
     retentionPeriod: number
   ): Promise<{
-    uploadURL: string
-    requiredHeaders: Record<string, string>
-    amount?: number
-  }> {
+      uploadURL: string
+      requiredHeaders: Record<string, string>
+      amount?: number
+    }> {
     const url = `${this.baseURL}/upload`
     const body = { fileSize, retentionPeriod }
 
@@ -103,7 +103,7 @@ export class StorageUploader {
    * @returns {Promise<UploadFileResult>} An object indicating whether publishing was successful and the resulting UHRP URL
    * @throws {Error} If the server returns a non-OK response
    */
-  private async uploadFile(
+  private async uploadFile (
     uploadURL: string,
     file: UploadableFile,
     requiredHeaders: Record<string, string>
@@ -143,7 +143,7 @@ export class StorageUploader {
    * @returns {Promise<UploadFileResult>} An object with the file's UHRP URL
    * @throws {Error} If the server or upload step returns a non-OK response
    */
-  public async publishFile(params: {
+  public async publishFile (params: {
     file: UploadableFile
     retentionPeriod: number
   }): Promise<UploadFileResult> {
@@ -159,7 +159,7 @@ export class StorageUploader {
    * @param {string} uhrpUrl - The UHRP URL, e.g. "uhrp://abcd..."
    * @returns {Promise<FindFileData>} An object with file name, size, MIME type, and expiry time
    * @throws {Error} If the server or the route returns an error
-   */  public async findFile(uhrpUrl: string): Promise<FindFileData> {
+   */ public async findFile (uhrpUrl: string): Promise<FindFileData> {
     const url = new URL(`${this.baseURL}/find`)
     url.searchParams.set('uhrpUrl', uhrpUrl)
 
@@ -172,15 +172,15 @@ export class StorageUploader {
 
     const data = await response.json() as {
       status: string
-      data: { name: string; size: string; mimeType: string; expiryTime: number }
+      data: { name: string, size: string, mimeType: string, expiryTime: number }
       code?: string
       description?: string
     }
 
     if (data.status === 'error') {
-      throw new Error(
-        `findFile returned an error: ${data.code} - ${data.description}`
-      )
+      const errCode = data.code ?? 'unknown-code'
+      const errDesc = data.description ?? 'no-description'
+      throw new Error(`findFile returned an error: ${errCode} - ${errDesc}`)
     }
     return data.data
   }
@@ -190,7 +190,7 @@ export class StorageUploader {
    * @returns {Promise<any>} The array of uploads returned by the server
    * @throws {Error} If the server or the route returns an error
    */
-  public async listUploads(): Promise<any> {
+  public async listUploads (): Promise<any> {
     const url = `${this.baseURL}/list`
     const response = await this.authFetch.fetch(url, {
       method: 'GET'
@@ -201,9 +201,9 @@ export class StorageUploader {
 
     const data = await response.json()
     if (data.status === 'error') {
-      throw new Error(
-        `listUploads returned an error: ${data.code} - ${data.description}`
-      )
+      const errCode = data.code as string ?? 'unknown-code'
+      const errDesc = data.description as string ?? 'no-description'
+      throw new Error(`listUploads returned an error: ${errCode} - ${errDesc}`)
     }
     return data.uploads
   }
@@ -218,7 +218,7 @@ export class StorageUploader {
    * @returns {Promise<RenewFileResult>} An object with the new and previous expiry times, plus any cost
    * @throws {Error} If the request fails or the server returns an error
    */
-  public async renewFile(uhrpUrl: string, additionalMinutes: number): Promise<RenewFileResult> {
+  public async renewFile (uhrpUrl: string, additionalMinutes: number): Promise<RenewFileResult> {
     const url = `${this.baseURL}/renew`
     const body = { uhrpUrl, additionalMinutes }
 
@@ -227,7 +227,7 @@ export class StorageUploader {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     })
-    if (response.ok) {
+    if (!response.ok) {
       throw new Error(`renewFile request failed: HTTP ${response.status}`)
     }
 
@@ -241,9 +241,9 @@ export class StorageUploader {
     }
 
     if (data.status === 'error') {
-      throw new Error(
-        `renewFile returned an error: ${data.code} - ${data.description}`
-      )
+      const errCode = data.code ?? 'unknown-code'
+      const errDesc = data.description ?? 'no-description'
+      throw new Error(`renewFile returned an error: ${errCode} - ${errDesc}`)
     }
 
     return {

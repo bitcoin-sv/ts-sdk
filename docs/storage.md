@@ -8,6 +8,8 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 | --- |
 | [DownloadResult](#interface-downloadresult) |
 | [DownloaderConfig](#interface-downloaderconfig) |
+| [FindFileData](#interface-findfiledata) |
+| [RenewFileResult](#interface-renewfileresult) |
 | [UploadFileResult](#interface-uploadfileresult) |
 | [UploadableFile](#interface-uploadablefile) |
 | [UploaderConfig](#interface-uploaderconfig) |
@@ -33,6 +35,34 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ```ts
 export interface DownloaderConfig {
     networkPreset: "mainnet" | "testnet" | "local";
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
+### Interface: FindFileData
+
+```ts
+export interface FindFileData {
+    name: string;
+    size: string;
+    mimeType: string;
+    expiryTime: number;
+}
+```
+
+Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
+
+---
+### Interface: RenewFileResult
+
+```ts
+export interface RenewFileResult {
+    status: string;
+    prevExpiryTime?: number;
+    newExpiryTime?: number;
+    amount?: number;
 }
 ```
 
@@ -107,6 +137,12 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 ---
 ### Class: StorageUploader
 
+The StorageUploader class provides client-side methods for:
+- Uploading files with a specified retention period
+- Finding file metadata by UHRP URL
+- Listing all user uploads
+- Renewing an existing advertisement's expiry time
+
 ```ts
 export class StorageUploader {
     constructor(config: UploaderConfig) 
@@ -114,10 +150,65 @@ export class StorageUploader {
         file: UploadableFile;
         retentionPeriod: number;
     }): Promise<UploadFileResult> 
+    public async findFile(uhrpUrl: string): Promise<FindFileData> 
+    public async listUploads(): Promise<any> 
+    public async renewFile(uhrpUrl: string, additionalMinutes: number): Promise<RenewFileResult> 
 }
 ```
 
-See also: [UploadFileResult](./storage.md#interface-uploadfileresult), [UploadableFile](./storage.md#interface-uploadablefile), [UploaderConfig](./storage.md#interface-uploaderconfig)
+See also: [FindFileData](./storage.md#interface-findfiledata), [RenewFileResult](./storage.md#interface-renewfileresult), [UploadFileResult](./storage.md#interface-uploadfileresult), [UploadableFile](./storage.md#interface-uploadablefile), [UploaderConfig](./storage.md#interface-uploaderconfig)
+
+#### Constructor
+
+Creates a new StorageUploader instance.
+
+```ts
+constructor(config: UploaderConfig) 
+```
+See also: [UploaderConfig](./storage.md#interface-uploaderconfig)
+
+Argument Details
+
++ **config**
+  + An object containing the storage server's URL and a wallet interface
+
+#### Method findFile
+
+Retrieves metadata for a file matching the given UHRP URL from the `/find` route.
+
+```ts
+public async findFile(uhrpUrl: string): Promise<FindFileData> 
+```
+See also: [FindFileData](./storage.md#interface-findfiledata)
+
+Returns
+
+An object with file name, size, MIME type, and expiry time
+
+Argument Details
+
++ **uhrpUrl**
+  + The UHRP URL, e.g. "uhrp://abcd..."
+
+Throws
+
+If the server or the route returns an error
+
+#### Method listUploads
+
+Lists all advertisements belonging to the user from the `/list` route.
+
+```ts
+public async listUploads(): Promise<any> 
+```
+
+Returns
+
+The array of uploads returned by the server
+
+Throws
+
+If the server or the route returns an error
 
 #### Method publishFile
 
@@ -138,18 +229,37 @@ See also: [UploadFileResult](./storage.md#interface-uploadfileresult), [Uploadab
 
 Returns
 
-An object indicating whether the file was published successfully and the resulting UHRP URL.
-
-Argument Details
-
-+ **params.file**
-  + An object describing the file’s data (number[] array of bytes) and mime type.
-+ **params.retentionPeriod**
-  + Number of minutes to keep the file hosted.
+An object with the file's UHRP URL
 
 Throws
 
-If either the upload info request or the subsequent file upload request fails (non-OK HTTP status).
+If the server or upload step returns a non-OK response
+
+#### Method renewFile
+
+Renews the hosting time for an existing file advertisement identified by uhrpUrl.
+Calls the `/renew` route to add `additionalMinutes` to the GCS customTime
+and re-mint the advertisement token on-chain.
+
+```ts
+public async renewFile(uhrpUrl: string, additionalMinutes: number): Promise<RenewFileResult> 
+```
+See also: [RenewFileResult](./storage.md#interface-renewfileresult)
+
+Returns
+
+An object with the new and previous expiry times, plus any cost
+
+Argument Details
+
++ **uhrpUrl**
+  + The UHRP URL of the file (e.g., "uhrp://abcd1234...")
++ **additionalMinutes**
+  + The number of minutes to extend
+
+Throws
+
+If the request fails or the server returns an error
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 

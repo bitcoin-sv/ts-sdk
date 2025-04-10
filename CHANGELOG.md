@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.4.19 - 2025-04-09](#1419---2025-04-09)
+- [1.4.18 - 2025-04-02](#1418---2025-04-02)
 - [1.4.17 - 2025-04-01](#1417---2025-04-01)
 - [1.4.16 - 2025-04-01](#1416---2025-04-01)
 - [1.4.15 - 2025-03-31](#1415---2025-03-31)
@@ -117,6 +119,13 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Security
 
+---
+
+## [1.4.19] - 2025-04-09
+
+### Added
+
+- find, list, and renew functions to the StorageUploader class along with tests for each
 
 ---
 
