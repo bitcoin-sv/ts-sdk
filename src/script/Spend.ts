@@ -126,6 +126,22 @@ export default class Spend {
   }
 
   step (): void {
+    // If the stack (or alt stack) is over 100MB, evaluation has failed.
+    let stackMem = 0;
+    for (let i = 0; i < this.stack.length; i++) {
+      stackMem += this.stack[i].length
+    }
+    if (stackMem > 100000000) {
+      this.scriptEvaluationError('Stack memory usage has exceeded 100 MB!')
+    }
+    let altStackMem = 0;
+    for (let i = 0; i < this.altStack.length; i++) {
+      altStackMem += this.altStack[i].length
+    }
+    if (altStackMem > 100000000) {
+      this.scriptEvaluationError('Alt stack memory usage has exceeded 100 MB!')
+    }
+
     // If the context is UnlockingScript and we have reached the end,
     // set the context to LockingScript and zero the program counter
     if (
