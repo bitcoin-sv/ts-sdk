@@ -1138,6 +1138,7 @@ describe('Transaction', () => {
     describe('addP2PKHOutput', () => {
       it('should create an output on the current transaction using an address hash or string', async () => {
         const privateKey = PrivateKey.fromRandom()
+        const pubKeyHash = privateKey.toPublicKey().toHash()
         const lockingScript = new P2PKH().lock(privateKey.toAddress())
         const tx = new Transaction()
         tx.addInput({
@@ -1146,11 +1147,16 @@ describe('Transaction', () => {
           unlockingScriptTemplate: new P2PKH().unlock(privateKey)
         })
         tx.addP2PKHOutput(privateKey.toAddress(), 10000)
-        expect(tx.outputs.length).toEqual(1)
+        tx.addP2PKHOutput(pubKeyHash, 10000)
+        expect(tx.outputs.length).toEqual(2)
         expect(tx.outputs[0].satoshis).toEqual(10000)
+        expect(tx.outputs[1].satoshis).toEqual(10000)
         expect(
           tx.outputs[0].lockingScript.toHex() === lockingScript.toHex()
         ).toBeTruthy()
+        expect(
+          tx.outputs[0].lockingScript.toHex() === tx.outputs[1].lockingScript.toHex()
+        ).toBeTruthy()        
       })
     })
   })
@@ -1281,16 +1287,4 @@ describe('Transaction', () => {
     })
   })
 
-  describe('addP2PKHOutput', () => {
-    it('should create an output on the current transaction using an address hash or string', async () => {
-      const privateKey = PrivateKey.fromRandom()
-      const lockingScript = new P2PKH().lock(privateKey.toAddress())
-      const tx = new Transaction()
-      tx.addInput({
-        sourceTXID: '00'.repeat(32),
-        sourceOutputIndex: 0,
-        unlockingScriptTemplate: new P2PKH().unlock(privateKey),
-      })
-    })
-  })
 })
