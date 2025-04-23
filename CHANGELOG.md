@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.4.20 - 2025-04-23](#1420---2025-04-23)
 - [1.4.19 - 2025-04-09](#1419---2025-04-09)
 - [1.4.18 - 2025-04-02](#1418---2025-04-02)
 - [1.4.17 - 2025-04-01](#1417---2025-04-01)
@@ -118,6 +119,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.4.20] - 2025-04-23
+
+### Fixed
+
+- Export HTTPWalletJSON substrate.
 
 ---
 
