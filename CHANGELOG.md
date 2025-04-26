@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.4.21 - 2025-04-13](#1420---2025-04-17)
 - [1.4.20 - 2025-04-23](#1420---2025-04-23)
 - [1.4.19 - 2025-04-09](#1419---2025-04-09)
 - [1.4.18 - 2025-04-02](#1418---2025-04-02)
@@ -119,6 +120,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.4.21] - 2025-04-17
+
+### Fixed
+
+- Transaction.test.js: addP2PKHOutput: removed repeated and incomplete test and added extra test to fulfill description
 
 ---
 
