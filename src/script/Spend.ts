@@ -57,6 +57,7 @@ export default class Spend {
   stack: number[][]
   altStack: number[][]
   ifStack: boolean[]
+  memoryLimit: number
 
   /**
    * @constructor
@@ -87,6 +88,7 @@ export default class Spend {
    *   inputIndex: 0, // inputIndex
    *   unlockingScript: UnlockingScript.fromASM("3045... 02ab..."),
    *   inputSequence: 0xffffffff // inputSequence
+   *   memoryLimit: 100000 // memoryLimit
    * });
    */
   constructor (params: {
@@ -101,6 +103,7 @@ export default class Spend {
     inputSequence: number
     inputIndex: number
     lockTime: number
+    memoryLimit?: number
   }) {
     this.sourceTXID = params.sourceTXID
     this.sourceOutputIndex = params.sourceOutputIndex
@@ -113,6 +116,7 @@ export default class Spend {
     this.unlockingScript = params.unlockingScript
     this.inputSequence = params.inputSequence
     this.lockTime = params.lockTime
+    this.memoryLimit = params.memoryLimit ?? 100000000
     this.reset()
   }
 
@@ -131,15 +135,15 @@ export default class Spend {
     for (let i = 0; i < this.stack.length; i++) {
       stackMem += this.stack[i].length
     }
-    if (stackMem > 100000000) {
-      this.scriptEvaluationError('Stack memory usage has exceeded 100 MB!')
+    if (stackMem > this.memoryLimit) {
+      this.scriptEvaluationError('Stack memory usage has exceeded ' + this.memoryLimit + ' bytes')
     }
     let altStackMem = 0
     for (let i = 0; i < this.altStack.length; i++) {
       altStackMem += this.altStack[i].length
     }
-    if (altStackMem > 100000000) {
-      this.scriptEvaluationError('Alt stack memory usage has exceeded 100 MB!')
+    if (altStackMem > this.memoryLimit) {
+      this.scriptEvaluationError('Alt stack memory usage has exceeded ' + this.memoryLimit + ' bytes')
     }
 
     // If the context is UnlockingScript and we have reached the end,
