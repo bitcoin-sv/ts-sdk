@@ -1311,15 +1311,22 @@ describe('Transaction', () => {
       })
       sourceTransaction.addOutput({
         satoshis: 2,
-        lockingScript: Script.fromASM('OP_2 OP_MUL ' + 'OP_DUP OP_MUL '.repeat(100) + 'OP_DROP'),
+        lockingScript: Script.fromASM('OP_2 OP_MUL ' + 'OP_DUP OP_MUL '.repeat(16) + 'OP_DROP'),
       })
       await sourceTransaction.sign()
+
+      sourceTransaction.merklePath = new MerklePath(1000, [
+        [
+          { offset: 0, hash: sourceTransaction.id('hex'), txid: true },
+          { offset: 1, duplicate: true }
+        ]
+      ])
 
       const tx = new Transaction()
       tx.addInput({
         sourceTransaction,
         sourceOutputIndex: 0,
-        unlockingScript: Script.fromASM('OP_TRUE ' + 'deadbeef'.repeat(64))
+        unlockingScript: Script.fromASM('OP_TRUE ' + 'deadbeef'.repeat(2))
       })
       tx.addOutput({
         satoshis: 1,
@@ -1328,11 +1335,12 @@ describe('Transaction', () => {
       await tx.fee()
       await tx.sign()
 
-      await expect(tx.verify('scripts only', new SatoshisPerKilobyte(1), 1000)).rejects.toThrow('Stack memory usage has exceeded 1000 bytes')
+      // default should be 100KB
+      await expect(tx.verify('scripts only', new SatoshisPerKilobyte(1))).rejects.toThrow('Stack memory usage has exceeded 100000 bytes')
     })
   })
 
-  describe('preventResourceExhaustionBig', () => {
+  describe('preventResourceExhaustionSmall', () => {
     it('should run script evaluation but error out as soon as the memory usage exceeds the limit', async () => {
       const sourceTransaction = new Transaction()
       sourceTransaction.addInput({
@@ -1366,7 +1374,7 @@ describe('Transaction', () => {
       await tx.fee()
       await tx.sign()
 
-      await expect(tx.verify('scripts only', new SatoshisPerKilobyte(1), 100)).resolves.toBe(true)
+      await expect(tx.verify('scripts only', new SatoshisPerKilobyte(1), 35)).resolves.toBe(true)
     })
   })
 })

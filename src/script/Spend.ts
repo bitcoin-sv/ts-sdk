@@ -116,7 +116,7 @@ export default class Spend {
     this.unlockingScript = params.unlockingScript
     this.inputSequence = params.inputSequence
     this.lockTime = params.lockTime
-    this.memoryLimit = params.memoryLimit ?? 100000000
+    this.memoryLimit = params.memoryLimit ?? 100000 // 100 MB is going to be processed by most miners by policy, but the default should protect apps against memory attacks.
     this.reset()
   }
 
@@ -136,14 +136,14 @@ export default class Spend {
       stackMem += this.stack[i].length
     }
     if (stackMem > this.memoryLimit) {
-      this.scriptEvaluationError('Stack memory usage has exceeded ' + this.memoryLimit + ' bytes')
+      this.scriptEvaluationError('Stack memory usage has exceeded ' + String(this.memoryLimit) + ' bytes')
     }
     let altStackMem = 0
     for (let i = 0; i < this.altStack.length; i++) {
       altStackMem += this.altStack[i].length
     }
     if (altStackMem > this.memoryLimit) {
-      this.scriptEvaluationError('Alt stack memory usage has exceeded ' + this.memoryLimit + ' bytes')
+      this.scriptEvaluationError('Alt stack memory usage has exceeded ' + String(this.memoryLimit) + ' bytes')
     }
 
     // If the context is UnlockingScript and we have reached the end,

@@ -860,7 +860,7 @@ export default class Transaction {
           inputIndex: i,
           outputs: tx.outputs,
           lockTime: tx.lockTime,
-          memoryLimit: memoryLimit
+          memoryLimit
         })
         const spendValid = spend.validate()
 
