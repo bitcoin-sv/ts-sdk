@@ -136,17 +136,25 @@ export default class Spend {
     this.altStackMem = 0
   }
 
-  step = async (): Promise<boolean> => {
+  step (): boolean {
     let poppedValue: number[] | undefined
     // If the stack (or alt stack) is over the memory limit, evaluation has failed.
     if (this.stackMem > this.memoryLimit) {
+      console.log(`Stack memory limit exceeded: ${this.stackMem} > ${this.memoryLimit}`);
       this.scriptEvaluationError('Stack memory usage has exceeded ' + String(this.memoryLimit) + ' bytes')
       return false
     }
     if (this.altStackMem > this.memoryLimit) {
+      console.log(`Alt stack memory limit exceeded: ${this.altStackMem} > ${this.memoryLimit}`);
       this.scriptEvaluationError('Alt stack memory usage has exceeded ' + String(this.memoryLimit) + ' bytes')
       return false
     }
+    console.log(`Current stack memory: ${this.stackMem}, Alt stack memory: ${this.altStackMem}`);
+
+    // Clear popped values after use to free memory
+    const clearPoppedValue = () => {
+      poppedValue = undefined;
+    };
 
     // If the context is UnlockingScript and we have reached the end,
     // set the context to LockingScript and zero the program counter
@@ -595,6 +603,7 @@ export default class Spend {
             if (poppedValue) {
               this.stackMem -= poppedValue.length
             }
+            clearPoppedValue();
           }
           this.ifStack.push(fValue)
           break
@@ -626,6 +635,7 @@ export default class Spend {
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           if (fValue) {
           } else {
             this.scriptEvaluationError(
@@ -654,6 +664,7 @@ export default class Spend {
             this.altStackMem += poppedValue.length
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           break
 
         case OP.OP_FROMALTSTACK:
@@ -668,6 +679,7 @@ export default class Spend {
             this.stackMem += poppedValue.length
             this.altStackMem -= poppedValue.length
           }
+          clearPoppedValue();
           break
 
         case OP.OP_2DROP:
@@ -680,10 +692,12 @@ export default class Spend {
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           poppedValue = this.stack.pop()
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           break
 
         case OP.OP_2DUP:
@@ -787,6 +801,7 @@ export default class Spend {
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           break
 
         case OP.OP_DUP:
@@ -833,6 +848,7 @@ export default class Spend {
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           if (n < 0 || n >= this.stack.length) {
             this.scriptEvaluationError(
               `${OP[currentOpcode] as string} requires the top stack element to be 0 or a positive number less than the current size of the stack.`
@@ -934,6 +950,7 @@ export default class Spend {
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           break
 
         case OP.OP_INVERT:
@@ -961,6 +978,7 @@ export default class Spend {
             if (poppedValue) {
               this.stackMem -= poppedValue.length
             }
+            clearPoppedValue();
           } else {
             bn1 = new BigNumber(buf1)
             bn2 = BigNumber.fromScriptNum(
@@ -977,10 +995,12 @@ export default class Spend {
             if (poppedValue) {
               this.stackMem -= poppedValue.length
             }
+            clearPoppedValue();
             poppedValue = this.stack.pop()
             if (poppedValue) {
               this.stackMem -= poppedValue.length
             }
+            clearPoppedValue();
             let shifted
             if (currentOpcode === OP.OP_LSHIFT) {
               shifted = bn1.ushln(n)
@@ -1011,18 +1031,21 @@ export default class Spend {
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           poppedValue = this.stack.pop()
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           this.stack.push(fEqual ? [1] : [])
           this.stackMem += (fEqual ? 1 : 0)
           if (currentOpcode === OP.OP_EQUALVERIFY) {
-            if (fEqual) {
+            if (this.castToBool(this.stacktop(-1))) {
               poppedValue = this.stack.pop()
               if (poppedValue) {
                 this.stackMem -= poppedValue.length
               }
+              clearPoppedValue();
             } else {
               this.scriptEvaluationError(
                 'OP_EQUALVERIFY requires the top two stack items to be equal.'
@@ -1070,6 +1093,7 @@ export default class Spend {
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           this.stack.push(bn.toScriptNum())
           this.stackMem += bn.toScriptNum().length
           break
@@ -1163,10 +1187,12 @@ export default class Spend {
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           poppedValue = this.stack.pop()
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           this.stack.push(bn.toScriptNum())
           this.stackMem += bn.toScriptNum().length
 
@@ -1176,6 +1202,7 @@ export default class Spend {
               if (poppedValue) {
                 this.stackMem -= poppedValue.length
               }
+              clearPoppedValue();
             } else {
               this.scriptEvaluationError(
                 'OP_NUMEQUALVERIFY requires the top stack item to be truthy.'
@@ -1198,14 +1225,17 @@ export default class Spend {
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           poppedValue = this.stack.pop()
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           poppedValue = this.stack.pop()
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           this.stack.push(fValue ? [1] : [])
           this.stackMem += (fValue ? 1 : 0)
           break
@@ -1239,6 +1269,7 @@ export default class Spend {
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           this.stack.push(bufHash)
           this.stackMem += bufHash.length
           break
@@ -1302,10 +1333,12 @@ export default class Spend {
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           poppedValue = this.stack.pop()
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
 
           // stack.push_back(fSuccess ? vchTrue : vchFalse);
           this.stack.push(fSuccess ? [1] : [])
@@ -1316,6 +1349,7 @@ export default class Spend {
               if (poppedValue) {
                 this.stackMem -= poppedValue.length
               }
+              clearPoppedValue();
             } else {
               this.scriptEvaluationError(
                 'OP_CHECKSIGVERIFY requires that a valid signature is provided.'
@@ -1447,6 +1481,7 @@ export default class Spend {
             if (poppedValue) {
               this.stackMem -= poppedValue.length
             }
+            clearPoppedValue();
           }
 
           // A bug causes CHECKMULTISIG to consume one extra argument
@@ -1470,6 +1505,7 @@ export default class Spend {
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
 
           this.stack.push(fSuccess ? [1] : [])
           this.stackMem += (fSuccess ? 1 : 0)
@@ -1480,6 +1516,7 @@ export default class Spend {
               if (poppedValue) {
                 this.stackMem -= poppedValue.length
               }
+              clearPoppedValue();
             } else {
               this.scriptEvaluationError(
                 'OP_CHECKMULTISIGVERIFY requires that a sufficient number of valid signatures are provided.'
@@ -1510,6 +1547,7 @@ export default class Spend {
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           break
 
         case OP.OP_SPLIT:
@@ -1565,6 +1603,7 @@ export default class Spend {
           if (poppedValue) {
             this.stackMem -= poppedValue.length
           }
+          clearPoppedValue();
           rawnum = this.stacktop(-1)
 
           // Try to see if we can fit that number in the number of
@@ -1656,8 +1695,7 @@ export default class Spend {
         'Unlocking scripts can only contain push operations, and no other opcodes.'
       )
     }
-    while (true) {
-      this.step()
+    while (this.step()) {
       if (
         this.context === 'LockingScript' &&
         this.programCounter >= this.lockingScript.chunks.length
