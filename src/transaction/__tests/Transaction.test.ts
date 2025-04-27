@@ -1340,8 +1340,48 @@ describe('Transaction', () => {
     })
   })
 
+  describe('preventResourceExhaustionP2PKH', () => {
+    it('should run script evaluation with only 144 bytes of memory allocation and still be valid for a simple P2PKH', async () => {
+      const key = PrivateKey.fromRandom()
+      const sourceTransaction = new Transaction()
+      sourceTransaction.addInput({
+        sourceTXID: '00'.repeat(32),
+        sourceOutputIndex: 0,
+        unlockingScript: Script.fromASM('OP_TRUE'),
+      })
+      sourceTransaction.addOutput({
+        satoshis: 2,
+        lockingScript: new P2PKH().lock(key.toAddress()),
+      })
+      await sourceTransaction.sign()
+
+      sourceTransaction.merklePath = new MerklePath(1000, [
+        [
+          { offset: 0, hash: sourceTransaction.id('hex'), txid: true },
+          { offset: 1, duplicate: true }
+        ]
+      ])
+
+      const tx = new Transaction()
+      tx.addInput({
+        sourceTransaction,
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: new P2PKH().unlock(key, 'none', true)
+      })
+      tx.addOutput({
+        satoshis: 1,
+        lockingScript: Script.fromASM('OP_NOP'),
+      })
+      await tx.fee()
+      await tx.sign()
+
+      // P2PKH takes less than 150 bytes apparently
+      await expect(tx.verify('scripts only', new SatoshisPerKilobyte(1), 150)).resolves.toBe(true)
+    })
+  })
+
   describe('preventResourceExhaustionSmall', () => {
-    it('should run script evaluation but error out as soon as the memory usage exceeds the limit', async () => {
+    it('should run script evaluation and pass so long as we stay within the limit', async () => {
       const sourceTransaction = new Transaction()
       sourceTransaction.addInput({
         sourceTXID: '00'.repeat(32),
