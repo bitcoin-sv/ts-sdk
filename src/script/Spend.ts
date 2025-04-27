@@ -38,6 +38,7 @@ const requireCleanStack = true
  * @property {number} inputIndex - The index of this input in the current transaction.
  * @property {UnlockingScript} unlockingScript - The unlocking script that unlocks the UTXO for spending.
  * @property {number} inputSequence - The sequence number of this input.
+ * @property {number} lockTime - The lock time of the transaction.
  */
 export default class Spend {
   sourceTXID: string
@@ -58,6 +59,8 @@ export default class Spend {
   altStack: number[][]
   ifStack: boolean[]
   memoryLimit: number
+  stackMem: number
+  altStackMem: number
 
   /**
    * @constructor
@@ -117,6 +120,8 @@ export default class Spend {
     this.inputSequence = params.inputSequence
     this.lockTime = params.lockTime
     this.memoryLimit = params.memoryLimit ?? 100000 // 100 MB is going to be processed by most miners by policy, but the default should protect apps against memory attacks.
+    this.stackMem = 0
+    this.altStackMem = 0
     this.reset()
   }
 
@@ -127,23 +132,20 @@ export default class Spend {
     this.stack = []
     this.altStack = []
     this.ifStack = []
+    this.stackMem = 0
+    this.altStackMem = 0
   }
 
-  step (): void {
-    // If the stack (or alt stack) is over 100MB, evaluation has failed.
-    let stackMem = 0
-    for (let i = 0; i < this.stack.length; i++) {
-      stackMem += this.stack[i].length
-    }
-    if (stackMem > this.memoryLimit) {
+  step = async (): Promise<boolean> => {
+    let poppedValue: number[] | undefined
+    // If the stack (or alt stack) is over the memory limit, evaluation has failed.
+    if (this.stackMem > this.memoryLimit) {
       this.scriptEvaluationError('Stack memory usage has exceeded ' + String(this.memoryLimit) + ' bytes')
+      return false
     }
-    let altStackMem = 0
-    for (let i = 0; i < this.altStack.length; i++) {
-      altStackMem += this.altStack[i].length
-    }
-    if (altStackMem > this.memoryLimit) {
+    if (this.altStackMem > this.memoryLimit) {
       this.scriptEvaluationError('Alt stack memory usage has exceeded ' + String(this.memoryLimit) + ' bytes')
+      return false
     }
 
     // If the context is UnlockingScript and we have reached the end,
@@ -284,6 +286,10 @@ export default class Spend {
         //  Non-canonical signature: R value type mismatch
         return false
       }
+      if (buf[4 - 1] !== nLEnR) {
+        //  Non-canonical signature: R length mismatch
+        return false
+      }
       if (nLEnR === 0) {
         //  Non-canonical signature: R length is zero
         return false
@@ -300,6 +306,10 @@ export default class Spend {
       const S = buf.slice(6 + nLEnR)
       if (buf[6 + nLEnR - 2] !== 0x02) {
         //  Non-canonical signature: S value type mismatch
+        return false
+      }
+      if (buf[6 + nLEnR - 1] !== nLEnS) {
+        //  Non-canonical signature: S length mismatch
         return false
       }
       if (nLEnS === 0) {
@@ -325,14 +335,20 @@ export default class Spend {
       }
 
       if (!isChecksigFormat(buf)) {
-        this.scriptEvaluationError('The signature format is invalid.')
+        this.scriptEvaluationError(
+          'The signature format is invalid.'
+        )
       }
       const sig = TransactionSignature.fromChecksigFormat(buf)
       if (requireLowSSignatures && !sig.hasLowS()) {
-        this.scriptEvaluationError('The signature must have a low S value.')
+        this.scriptEvaluationError(
+          'The signature must have a low S value.'
+        )
       }
       if ((sig.scope & TransactionSignature.SIGHASH_FORKID) === 0) {
-        this.scriptEvaluationError('The signature must use SIGHASH_FORKID.')
+        this.scriptEvaluationError(
+          'The signature must use SIGHASH_FORKID.'
+        )
         return false
       }
 
@@ -358,7 +374,9 @@ export default class Spend {
           )
         }
       } else {
-        this.scriptEvaluationError('The public key is in an unknown format.')
+        this.scriptEvaluationError(
+          'The public key is in an unknown format.'
+        )
       }
       return true
     }
@@ -448,8 +466,10 @@ export default class Spend {
 
       if (!Array.isArray(operation.data)) {
         this.stack.push([])
+        this.stackMem += 0
       } else {
         this.stack.push(operation.data)
+        this.stackMem += operation.data.length
       }
     } else if (
       isScriptExecuting ||
@@ -476,6 +496,7 @@ export default class Spend {
           n = currentOpcode - (OP.OP_1 - 1)
           buf = new BigNumber(n).toScriptNum()
           this.stack.push(buf)
+          this.stackMem += buf.length
           break
 
         case OP.OP_NOP:
@@ -570,7 +591,10 @@ export default class Spend {
             if (currentOpcode === OP.OP_NOTIF) {
               fValue = !fValue
             }
-            this.stack.pop()
+            poppedValue = this.stack.pop()
+            if (poppedValue) {
+              this.stackMem -= poppedValue.length
+            }
           }
           this.ifStack.push(fValue)
           break
@@ -598,8 +622,11 @@ export default class Spend {
           }
           buf = this.stacktop(-1)
           fValue = this.castToBool(buf)
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
           if (fValue) {
-            this.stack.pop()
           } else {
             this.scriptEvaluationError(
               'OP_VERIFY requires the top stack value to be truthy.'
@@ -621,7 +648,12 @@ export default class Spend {
             this.scriptEvaluationError(
               'OP_TOALTSTACK requires at oeast one item to be on the stack.')
           }
-          this.altStack.push(this.stack.pop() ?? [])
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.altStack.push(poppedValue)
+            this.altStackMem += poppedValue.length
+            this.stackMem -= poppedValue.length
+          }
           break
 
         case OP.OP_FROMALTSTACK:
@@ -630,7 +662,12 @@ export default class Spend {
               'OP_FROMALTSTACK requires at least one item to be on the stack.'
             )
           }
-          this.stack.push(this.altStack.pop() ?? [])
+          poppedValue = this.altStack.pop()
+          if (poppedValue) {
+            this.stack.push(poppedValue)
+            this.stackMem += poppedValue.length
+            this.altStackMem -= poppedValue.length
+          }
           break
 
         case OP.OP_2DROP:
@@ -639,8 +676,14 @@ export default class Spend {
               'OP_2DROP requires at least two items to be on the stack.'
             )
           }
-          this.stack.pop()
-          this.stack.pop()
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
           break
 
         case OP.OP_2DUP:
@@ -652,7 +695,9 @@ export default class Spend {
           buf1 = this.stacktop(-2)
           buf2 = this.stacktop(-1)
           this.stack.push([...buf1])
+          this.stackMem += buf1.length
           this.stack.push([...buf2])
+          this.stackMem += buf2.length
           break
 
         case OP.OP_3DUP:
@@ -665,8 +710,11 @@ export default class Spend {
           buf2 = this.stacktop(-2)
           buf3 = this.stacktop(-1)
           this.stack.push([...buf1])
+          this.stackMem += buf1.length
           this.stack.push([...buf2])
+          this.stackMem += buf2.length
           this.stack.push([...buf3])
+          this.stackMem += buf3.length
           break
 
         case OP.OP_2OVER:
@@ -678,7 +726,9 @@ export default class Spend {
           buf1 = this.stacktop(-4)
           buf2 = this.stacktop(-3)
           this.stack.push([...buf1])
+          this.stackMem += buf1.length
           this.stack.push([...buf2])
+          this.stackMem += buf2.length
           break
 
         case OP.OP_2ROT:
@@ -689,7 +739,9 @@ export default class Spend {
           }
           spliced = this.stack.splice(this.stack.length - 6, 2)
           this.stack.push(spliced[0])
+          this.stackMem += spliced[0].length
           this.stack.push(spliced[1])
+          this.stackMem += spliced[1].length
           break
 
         case OP.OP_2SWAP:
@@ -700,7 +752,9 @@ export default class Spend {
           }
           spliced = this.stack.splice(this.stack.length - 4, 2)
           this.stack.push(spliced[0])
+          this.stackMem += spliced[0].length
           this.stack.push(spliced[1])
+          this.stackMem += spliced[1].length
           break
 
         case OP.OP_IFDUP:
@@ -713,12 +767,14 @@ export default class Spend {
           fValue = this.castToBool(buf)
           if (fValue) {
             this.stack.push([...buf])
+            this.stackMem += buf.length
           }
           break
 
         case OP.OP_DEPTH:
           buf = new BigNumber(this.stack.length).toScriptNum()
           this.stack.push(buf)
+          this.stackMem += buf.length
           break
 
         case OP.OP_DROP:
@@ -727,7 +783,10 @@ export default class Spend {
               'OP_DROP requires at least one item to be on the stack.'
             )
           }
-          this.stack.pop()
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
           break
 
         case OP.OP_DUP:
@@ -737,6 +796,7 @@ export default class Spend {
             )
           }
           this.stack.push([...this.stacktop(-1)])
+          this.stackMem += this.stacktop(-1).length
           break
 
         case OP.OP_NIP:
@@ -746,6 +806,7 @@ export default class Spend {
             )
           }
           this.stack.splice(this.stack.length - 2, 1)
+          this.stackMem -= this.stacktop(-1).length
           break
 
         case OP.OP_OVER:
@@ -755,6 +816,7 @@ export default class Spend {
             )
           }
           this.stack.push([...this.stacktop(-2)])
+          this.stackMem += this.stacktop(-2).length
           break
 
         case OP.OP_PICK:
@@ -767,7 +829,10 @@ export default class Spend {
           buf = this.stacktop(-1)
           bn = BigNumber.fromScriptNum(buf, requireMinimalPush)
           n = bn.toNumber()
-          this.stack.pop()
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
           if (n < 0 || n >= this.stack.length) {
             this.scriptEvaluationError(
               `${OP[currentOpcode] as string} requires the top stack element to be 0 or a positive number less than the current size of the stack.`
@@ -776,8 +841,10 @@ export default class Spend {
           buf = this.stacktop(-n - 1)
           if (currentOpcode === OP.OP_ROLL) {
             this.stack.splice(this.stack.length - n - 1, 1)
+            this.stackMem -= buf.length
           }
           this.stack.push([...buf])
+          this.stackMem += buf.length
           break
 
         case OP.OP_ROT:
@@ -813,6 +880,7 @@ export default class Spend {
             )
           }
           this.stack.splice(this.stack.length - 2, 0, [...this.stacktop(-1)])
+          this.stackMem += this.stacktop(-1).length
           break
 
         case OP.OP_SIZE:
@@ -823,6 +891,7 @@ export default class Spend {
           }
           bn = new BigNumber(this.stacktop(-1).length)
           this.stack.push(bn.toScriptNum())
+          this.stackMem += bn.toScriptNum().length
           break
 
         case OP.OP_AND:
@@ -861,7 +930,10 @@ export default class Spend {
           }
 
           // And pop vch2.
-          this.stack.pop()
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
           break
 
         case OP.OP_INVERT:
@@ -885,7 +957,10 @@ export default class Spend {
           }
           buf1 = this.stacktop(-2)
           if (buf1.length === 0) {
-            this.stack.pop()
+            poppedValue = this.stack.pop()
+            if (poppedValue) {
+              this.stackMem -= poppedValue.length
+            }
           } else {
             bn1 = new BigNumber(buf1)
             bn2 = BigNumber.fromScriptNum(
@@ -898,8 +973,14 @@ export default class Spend {
                 `${OP[currentOpcode] as string} requires the top item on the stack not to be negative.`
               )
             }
-            this.stack.pop()
-            this.stack.pop()
+            poppedValue = this.stack.pop()
+            if (poppedValue) {
+              this.stackMem -= poppedValue.length
+            }
+            poppedValue = this.stack.pop()
+            if (poppedValue) {
+              this.stackMem -= poppedValue.length
+            }
             let shifted
             if (currentOpcode === OP.OP_LSHIFT) {
               shifted = bn1.ushln(n)
@@ -912,6 +993,7 @@ export default class Spend {
               buf1.length
             )
             this.stack.push(bufShifted)
+            this.stackMem += bufShifted.length
           }
           break
 
@@ -925,12 +1007,22 @@ export default class Spend {
           buf1 = this.stacktop(-2)
           buf2 = this.stacktop(-1)
           fEqual = toHex(buf1) === toHex(buf2)
-          this.stack.pop()
-          this.stack.pop()
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
           this.stack.push(fEqual ? [1] : [])
+          this.stackMem += (fEqual ? 1 : 0)
           if (currentOpcode === OP.OP_EQUALVERIFY) {
             if (fEqual) {
-              this.stack.pop()
+              poppedValue = this.stack.pop()
+              if (poppedValue) {
+                this.stackMem -= poppedValue.length
+              }
             } else {
               this.scriptEvaluationError(
                 'OP_EQUALVERIFY requires the top two stack items to be equal.'
@@ -974,8 +1066,12 @@ export default class Spend {
               bn = new BigNumber(bn.cmpn(0) !== 0 ? 1 : 0 + 0)
               break
           }
-          this.stack.pop()
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
           this.stack.push(bn.toScriptNum())
+          this.stackMem += bn.toScriptNum().length
           break
 
         case OP.OP_ADD:
@@ -1063,13 +1159,23 @@ export default class Spend {
               bn = bn1.cmp(bn2) > 0 ? bn1 : bn2
               break
           }
-          this.stack.pop()
-          this.stack.pop()
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
           this.stack.push(bn.toScriptNum())
+          this.stackMem += bn.toScriptNum().length
 
           if (currentOpcode === OP.OP_NUMEQUALVERIFY) {
             if (this.castToBool(this.stacktop(-1))) {
-              this.stack.pop()
+              poppedValue = this.stack.pop()
+              if (poppedValue) {
+                this.stackMem -= poppedValue.length
+              }
             } else {
               this.scriptEvaluationError(
                 'OP_NUMEQUALVERIFY requires the top stack item to be truthy.'
@@ -1088,10 +1194,20 @@ export default class Spend {
           bn2 = BigNumber.fromScriptNum(this.stacktop(-2), requireMinimalPush)
           bn3 = BigNumber.fromScriptNum(this.stacktop(-1), requireMinimalPush)
           fValue = bn2.cmp(bn1) <= 0 && bn1.cmp(bn3) < 0
-          this.stack.pop()
-          this.stack.pop()
-          this.stack.pop()
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
           this.stack.push(fValue ? [1] : [])
+          this.stackMem += (fValue ? 1 : 0)
           break
 
         case OP.OP_RIPEMD160:
@@ -1105,7 +1221,7 @@ export default class Spend {
             )
           }
 
-          let bufHash: number[] = [] // ✅ Initialize bufHash to an empty array
+          let bufHash: number[] = [] // Initialize bufHash to an empty array
           buf = this.stacktop(-1)
           if (currentOpcode === OP.OP_RIPEMD160) {
             bufHash = Hash.ripemd160(buf)
@@ -1119,8 +1235,12 @@ export default class Spend {
             bufHash = Hash.hash256(buf)
           }
 
-          this.stack.pop()
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
           this.stack.push(bufHash)
+          this.stackMem += bufHash.length
           break
         }
 
@@ -1178,14 +1298,24 @@ export default class Spend {
             )
           }
 
-          this.stack.pop()
-          this.stack.pop()
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
 
           // stack.push_back(fSuccess ? vchTrue : vchFalse);
           this.stack.push(fSuccess ? [1] : [])
+          this.stackMem += (fSuccess ? 1 : 0)
           if (currentOpcode === OP.OP_CHECKSIGVERIFY) {
             if (fSuccess) {
-              this.stack.pop()
+              poppedValue = this.stack.pop()
+              if (poppedValue) {
+                this.stackMem -= poppedValue.length
+              }
             } else {
               this.scriptEvaluationError(
                 'OP_CHECKSIGVERIFY requires that a valid signature is provided.'
@@ -1313,7 +1443,10 @@ export default class Spend {
               ikey2--
             }
 
-            this.stack.pop()
+            poppedValue = this.stack.pop()
+            if (poppedValue) {
+              this.stackMem -= poppedValue.length
+            }
           }
 
           // A bug causes CHECKMULTISIG to consume one extra argument
@@ -1333,13 +1466,20 @@ export default class Spend {
               `${OP[currentOpcode] as string} requires the extra stack item to be empty.`
             )
           }
-          this.stack.pop()
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
 
           this.stack.push(fSuccess ? [1] : [])
+          this.stackMem += (fSuccess ? 1 : 0)
 
           if (currentOpcode === OP.OP_CHECKMULTISIGVERIFY) {
             if (fSuccess) {
-              this.stack.pop()
+              poppedValue = this.stack.pop()
+              if (poppedValue) {
+                this.stackMem -= poppedValue.length
+              }
             } else {
               this.scriptEvaluationError(
                 'OP_CHECKMULTISIGVERIFY requires that a sufficient number of valid signatures are provided.'
@@ -1363,7 +1503,13 @@ export default class Spend {
             )
           }
           this.stack[this.stack.length - 2] = [...buf1, ...buf2]
-          this.stack.pop()
+          this.stackMem -= buf1.length
+          this.stackMem -= buf2.length
+          this.stackMem += buf1.length + buf2.length
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
           break
 
         case OP.OP_SPLIT:
@@ -1392,7 +1538,10 @@ export default class Spend {
 
           // Replace existing stack values by the new values.
           this.stack[this.stack.length - 2] = buf2.slice(0, n)
+          this.stackMem -= buf1.length
+          this.stackMem += n
           this.stack[this.stack.length - 1] = buf2.slice(n)
+          this.stackMem += buf1.length - n
           break
 
         case OP.OP_NUM2BIN:
@@ -1412,7 +1561,10 @@ export default class Spend {
             )
           }
 
-          this.stack.pop()
+          poppedValue = this.stack.pop()
+          if (poppedValue) {
+            this.stackMem -= poppedValue.length
+          }
           rawnum = this.stacktop(-1)
 
           // Try to see if we can fit that number in the number of
@@ -1451,6 +1603,8 @@ export default class Spend {
           num[n] = signbit
 
           this.stack[this.stack.length - 1] = num
+          this.stackMem -= rawnum.length
+          this.stackMem += size
           break
 
         case OP.OP_BIN2NUM:
@@ -1464,6 +1618,8 @@ export default class Spend {
           buf2 = minimallyEncode(buf1)
 
           this.stack[this.stack.length - 1] = buf2
+          this.stackMem -= buf1.length
+          this.stackMem += buf2.length
 
           // The resulting number must be a valid number.
           if (!isMinimallyEncoded(buf2)) {
@@ -1480,6 +1636,7 @@ export default class Spend {
 
     // Finally, increment the program counter
     this.programCounter++
+    return true
   }
 
   /**
