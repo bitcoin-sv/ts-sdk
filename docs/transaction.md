@@ -1974,7 +1974,7 @@ Argument Details
 Verifies the legitimacy of the Bitcoin transaction according to the rules of SPV by ensuring all the input transactions link back to valid block headers, the chain of spends for all inputs are valid, and the sum of inputs is not less than the sum of outputs.
 
 ```ts
-async verify(chainTracker: ChainTracker | "scripts only" = defaultChainTracker(), feeModel?: FeeModel): Promise<boolean> 
+async verify(chainTracker: ChainTracker | "scripts only" = defaultChainTracker(), feeModel?: FeeModel, memoryLimit?: number): Promise<boolean> 
 ```
 See also: [ChainTracker](./transaction.md#interface-chaintracker), [FeeModel](./transaction.md#interface-feemodel), [defaultChainTracker](./transaction.md#function-defaultchaintracker)
 
@@ -1986,6 +1986,10 @@ Argument Details
 
 + **chainTracker**
   + An instance of ChainTracker, a Bitcoin block header tracker. If the value is set to 'scripts only', headers will not be verified. If not provided then the default chain tracker will be used.
++ **feeModel**
+  + An instance of FeeModel, a fee model to use for fee calculation. If not provided then the default fee model will be used.
++ **memoryLimit**
+  + The maximum memory in bytes usage allowed for script evaluation. If not provided then the default memory limit will be used.
 
 Example
 
