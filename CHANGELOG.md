@@ -123,6 +123,24 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.4.22] - 2025-04-27
+
+### Added
+
+- Max Memory Allocation for script evaluation defaulting to 100 KB for practicality (concensus policy is 100 MB but this would kill a regular browser window for example, so users who want to do things like OP_PUSHTX with a massive ordinal in the input should explicitly set a higher limit as so:
+
+```js
+tx.verify('scripts only', new SatoshisPerKilobyte(1), 100000000)
+```
+
+Developers are encouraged to have this set to something pretty low if their app is just for P2PKH for example where allocation can be more like 35 bytes. That would prevent malicious actors sending high memory use transactions as an attack on the service.
+
+### Changed
+
+There was some slightly weird patterns in the Spend step method which. It was async, I think unnecessarily. It was also looping beyond the point of script execution failure. Noticable now that it will fail on exceeding the allowed memory allocation.
+
+---
+
 ## [1.4.21] - 2025-04-17
 
 ### Fixed

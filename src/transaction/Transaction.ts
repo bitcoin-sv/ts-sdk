@@ -761,6 +761,8 @@ export default class Transaction {
    * Verifies the legitimacy of the Bitcoin transaction according to the rules of SPV by ensuring all the input transactions link back to valid block headers, the chain of spends for all inputs are valid, and the sum of inputs is not less than the sum of outputs.
    *
    * @param chainTracker - An instance of ChainTracker, a Bitcoin block header tracker. If the value is set to 'scripts only', headers will not be verified. If not provided then the default chain tracker will be used.
+   * @param feeModel - An instance of FeeModel, a fee model to use for fee calculation. If not provided then the default fee model will be used.
+   * @param memoryLimit - The maximum memory in bytes usage allowed for script evaluation. If not provided then the default memory limit will be used.
    *
    * @returns Whether the transaction is valid according to the rules of SPV.
    *
@@ -768,7 +770,8 @@ export default class Transaction {
    */
   async verify (
     chainTracker: ChainTracker | 'scripts only' = defaultChainTracker(),
-    feeModel?: FeeModel
+    feeModel?: FeeModel,
+    memoryLimit?: number
   ): Promise<boolean> {
     const verifiedTxids = new Set<string>()
     const txQueue: Transaction[] = [this]
@@ -856,7 +859,8 @@ export default class Transaction {
           inputSequence: input.sequence ?? 0,
           inputIndex: i,
           outputs: tx.outputs,
-          lockTime: tx.lockTime
+          lockTime: tx.lockTime,
+          memoryLimit
         })
         const spendValid = spend.validate()
 

@@ -13,6 +13,7 @@ import P2PKH from '../../script/templates/P2PKH'
 import fromUtxo from '../../compat/Utxo'
 import MerklePath from '../../transaction/MerklePath'
 import { BEEF_V1 } from '../../transaction/Beef'
+import SatoshisPerKilobyte from '../../transaction/fee-models/SatoshisPerKilobyte'
 
 import sighashVectors from '../../primitives/__tests/sighash.vectors'
 import invalidTransactions from './tx.invalid.vectors'
@@ -1287,4 +1288,133 @@ describe('Transaction', () => {
     })
   })
 
+  describe('addP2PKHOutput', () => {
+    it('should create an output on the current transaction using an address hash or string', async () => {
+      const privateKey = PrivateKey.fromRandom()
+      const lockingScript = new P2PKH().lock(privateKey.toAddress())
+      const tx = new Transaction()
+      tx.addInput({
+        sourceTXID: '00'.repeat(32),
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: new P2PKH().unlock(privateKey),
+      })
+    })
+  })
+
+  describe('preventResourceExhaustion', () => {
+    it('should run script evaluation but error out as soon as the memory usage exceeds the limit', async () => {
+      const sourceTransaction = new Transaction()
+      sourceTransaction.addInput({
+        sourceTXID: '00'.repeat(32),
+        sourceOutputIndex: 0,
+        unlockingScript: Script.fromASM('OP_TRUE'),
+      })
+      sourceTransaction.addOutput({
+        satoshis: 2,
+        lockingScript: Script.fromASM('OP_2 OP_MUL ' + 'OP_DUP OP_MUL '.repeat(16) + 'OP_DROP'),
+      })
+      await sourceTransaction.sign()
+
+      sourceTransaction.merklePath = new MerklePath(1000, [
+        [
+          { offset: 0, hash: sourceTransaction.id('hex'), txid: true },
+          { offset: 1, duplicate: true }
+        ]
+      ])
+
+      const tx = new Transaction()
+      tx.addInput({
+        sourceTransaction,
+        sourceOutputIndex: 0,
+        unlockingScript: Script.fromASM('OP_TRUE ' + 'deadbeef'.repeat(2))
+      })
+      tx.addOutput({
+        satoshis: 1,
+        lockingScript: Script.fromASM('OP_NOP'),
+      })
+      await tx.fee()
+      await tx.sign()
+
+      // default should be 100KB
+      await expect(tx.verify('scripts only', new SatoshisPerKilobyte(1))).rejects.toThrow('Stack memory usage has exceeded 100000 bytes')
+    })
+  })
+
+  describe('preventResourceExhaustionP2PKH', () => {
+    it('should run script evaluation with only 144 bytes of memory allocation and still be valid for a simple P2PKH', async () => {
+      const key = PrivateKey.fromRandom()
+      const sourceTransaction = new Transaction()
+      sourceTransaction.addInput({
+        sourceTXID: '00'.repeat(32),
+        sourceOutputIndex: 0,
+        unlockingScript: Script.fromASM('OP_TRUE'),
+      })
+      sourceTransaction.addOutput({
+        satoshis: 2,
+        lockingScript: new P2PKH().lock(key.toAddress()),
+      })
+      await sourceTransaction.sign()
+
+      sourceTransaction.merklePath = new MerklePath(1000, [
+        [
+          { offset: 0, hash: sourceTransaction.id('hex'), txid: true },
+          { offset: 1, duplicate: true }
+        ]
+      ])
+
+      const tx = new Transaction()
+      tx.addInput({
+        sourceTransaction,
+        sourceOutputIndex: 0,
+        unlockingScriptTemplate: new P2PKH().unlock(key, 'none', true)
+      })
+      tx.addOutput({
+        satoshis: 1,
+        lockingScript: Script.fromASM('OP_NOP'),
+      })
+      await tx.fee()
+      await tx.sign()
+
+      // P2PKH takes less than 150 bytes apparently
+      await expect(tx.verify('scripts only', new SatoshisPerKilobyte(1), 150)).resolves.toBe(true)
+    })
+  })
+
+  describe('preventResourceExhaustionSmall', () => {
+    it('should run script evaluation and pass so long as we stay within the limit', async () => {
+      const sourceTransaction = new Transaction()
+      sourceTransaction.addInput({
+        sourceTXID: '00'.repeat(32),
+        sourceOutputIndex: 0,
+        unlockingScript: Script.fromASM('OP_TRUE'),
+      })
+      sourceTransaction.addOutput({
+        satoshis: 2,
+        lockingScript: Script.fromASM('OP_2 OP_MUL OP_DUP OP_MUL OP_DUP OP_MUL OP_DROP'),
+      })
+      await sourceTransaction.sign()
+
+      sourceTransaction.merklePath = new MerklePath(1000, [
+        [
+          { offset: 0, hash: sourceTransaction.id('hex'), txid: true },
+          { offset: 1, duplicate: true }
+        ]
+      ])
+
+      const tx = new Transaction()
+      tx.addInput({
+        sourceTransaction,
+        sourceOutputIndex: 0,
+        unlockingScript: Script.fromASM('OP_TRUE ' + 'deadbeef'.repeat(2))
+      })
+      tx.addOutput({
+        satoshis: 1,
+        lockingScript: Script.fromASM('OP_NOP'),
+      })
+      await tx.fee()
+      await tx.sign()
+
+      await expect(tx.verify('scripts only', new SatoshisPerKilobyte(1), 35)).resolves.toBe(true)
+    })
+  })
 })
