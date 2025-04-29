@@ -697,7 +697,7 @@ Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](
 
 ```ts
 export interface ProveCertificateArgs {
-    certificate: WalletCertificate;
+    certificate: Partial<WalletCertificate>;
     fieldsToReveal: CertificateFieldNameUnder50Bytes[];
     verifier: PubKeyHex;
     privileged?: BooleanDefaultFalse;

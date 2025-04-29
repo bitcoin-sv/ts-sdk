@@ -131,10 +131,6 @@ All notable changes to this project will be documented in this file. The format 
 
 - A helper function to create a VerifiableCertificate from a WalletCertificate for ease of use
 
-### Changed
-
-- Wallet.interfaces.ts removed Partial from the cetificate parameter of ProveCertificateArgs
-
 ---
 
 ## [1.4.22] - 2025-04-27
