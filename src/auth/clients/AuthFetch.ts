@@ -495,7 +495,6 @@ export class AuthFetch {
       }
     })
 
-    console.log(Utils.toBase64(tx))
 
 
     // Attach the payment to the request headers
