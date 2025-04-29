@@ -495,6 +495,8 @@ export class AuthFetch {
       }
     })
 
+
+
     // Attach the payment to the request headers
     config.headers = config.headers || {}
     config.headers['x-bsv-payment'] = JSON.stringify({
