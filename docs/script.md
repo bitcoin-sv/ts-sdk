@@ -756,6 +756,9 @@ export default class Spend {
     stack: number[][];
     altStack: number[][];
     ifStack: boolean[];
+    memoryLimit: number;
+    stackMem: number;
+    altStackMem: number;
     constructor(params: {
         sourceTXID: string;
         sourceOutputIndex: number;
@@ -768,9 +771,10 @@ export default class Spend {
         inputSequence: number;
         inputIndex: number;
         lockTime: number;
+        memoryLimit?: number;
     }) 
     reset(): void 
-    step(): void 
+    step(): boolean 
     validate(): boolean 
 }
 ```
@@ -792,6 +796,7 @@ constructor(params: {
     inputSequence: number;
     inputIndex: number;
     lockTime: number;
+    memoryLimit?: number;
 }) 
 ```
 See also: [LockingScript](./script.md#class-lockingscript), [TransactionInput](./transaction.md#interface-transactioninput), [TransactionOutput](./transaction.md#interface-transactionoutput), [UnlockingScript](./script.md#class-unlockingscript)
@@ -837,6 +842,7 @@ const spend = new Spend({
   inputIndex: 0, // inputIndex
   unlockingScript: UnlockingScript.fromASM("3045... 02ab..."),
   inputSequence: 0xffffffff // inputSequence
+  memoryLimit: 100000 // memoryLimit
 });
 ```
 

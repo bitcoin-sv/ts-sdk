@@ -1491,7 +1491,7 @@ export default class Transaction {
     id(): number[];
     id(enc: "hex"): string;
     id(enc?: "hex"): number[] | string 
-    async verify(chainTracker: ChainTracker | "scripts only" = defaultChainTracker(), feeModel?: FeeModel): Promise<boolean> 
+    async verify(chainTracker: ChainTracker | "scripts only" = defaultChainTracker(), feeModel?: FeeModel, memoryLimit?: number): Promise<boolean> 
     toBEEF(allowPartial?: boolean): number[] 
     toAtomicBEEF(allowPartial?: boolean): number[] 
 }

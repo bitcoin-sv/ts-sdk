@@ -844,7 +844,7 @@ export interface ListCertificatesResult {
  * @param {DescriptionString5to50Bytes} [privilegedReason] - Reason provided for privileged access, required if this is a privileged operation.
  */
 export interface ProveCertificateArgs {
-  certificate: Partial<WalletCertificate>
+  certificate: WalletCertificate
   fieldsToReveal: CertificateFieldNameUnder50Bytes[]
   verifier: PubKeyHex
   privileged?: BooleanDefaultFalse

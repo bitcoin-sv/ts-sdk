@@ -4,6 +4,7 @@ import type {
   CertificateFieldNameUnder50Bytes,
   HexString,
   OutpointString,
+  WalletCertificate,
 } from '../../wallet/Wallet.interfaces.js'
 import SymmetricKey from '../../primitives/SymmetricKey.js'
 import * as Utils from '../../primitives/utils.js'
@@ -48,6 +49,29 @@ export class VerifiableCertificate extends Certificate {
     )
     this.keyring = keyring
     this.decryptedFields = decryptedFields
+  }
+
+  /**
+   *
+   * @param {WalletCertificate} certificate – The source certificate that was issued and signed by the certifier.
+   * @param {Record<CertificateFieldNameUnder50Bytes, string>} keyring – A allows the verifier to decrypt selected certificate fields.
+   * @returns {VerifiableCertificate} – A fully-formed instance containing the
+   *   original certificate data plus the supplied keyring.
+   */
+  static fromCertificate(
+    certificate: WalletCertificate,
+    keyring: Record<CertificateFieldNameUnder50Bytes, string>
+  ): VerifiableCertificate {
+    return new VerifiableCertificate(
+      certificate.type,
+      certificate.serialNumber,
+      certificate.subject,
+      certificate.certifier,
+      certificate.revocationOutpoint,
+      certificate.fields,
+      keyring,
+      certificate.signature
+    )
   }
 
   /**

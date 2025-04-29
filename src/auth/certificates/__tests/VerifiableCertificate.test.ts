@@ -1,8 +1,9 @@
 import { VerifiableCertificate } from '../../../auth/certificates/VerifiableCertificate'
+import Certificate from '../../../auth/certificates/Certificate'
 import { PrivateKey, Utils } from '../../../../mod'
 import { CompletedProtoWallet } from '../../../auth/certificates/__tests/CompletedProtoWallet'
 import { MasterCertificate } from '../../../auth/certificates/MasterCertificate'
-import { ProtoWallet } from '../../../wallet/index'
+import { ProtoWallet, WalletCertificate } from '../../../wallet/index'
 
 describe('VerifiableCertificate', () => {
   const subjectPrivateKey = PrivateKey.fromRandom()
@@ -146,6 +147,32 @@ describe('VerifiableCertificate', () => {
       const decrypted = await verifiableCert.decryptFields(
         new ProtoWallet('anyone')
       )
+      expect(decrypted).toEqual(plaintextFields)
+    })
+  })
+  
+  describe('fromCertificate', () => {
+    it('should create an equivalent VerifiableCertificate and decrypt correctly', async () => {
+      const baseCert = new Certificate(
+        verifiableCert.type,
+        verifiableCert.serialNumber,
+        verifiableCert.subject,
+        verifiableCert.certifier,
+        verifiableCert.revocationOutpoint,
+        verifiableCert.fields,
+        verifiableCert.signature        
+      ) as WalletCertificate
+
+      const verifiable = VerifiableCertificate.fromCertificate(
+        baseCert,
+        verifiableCert.keyring
+      )
+
+      expect(verifiable).toBeInstanceOf(VerifiableCertificate)
+      expect(verifiable.serialNumber).toEqual(sampleSerialNumber)
+      expect(verifiable.keyring).toEqual(verifiableCert.keyring)
+
+      const decrypted = await verifiable.decryptFields(verifierWallet)
       expect(decrypted).toEqual(plaintextFields)
     })
   })
