@@ -1142,11 +1142,12 @@ export class VerifiableCertificate extends Certificate {
     keyring: Record<CertificateFieldNameUnder50Bytes, string>;
     decryptedFields?: Record<CertificateFieldNameUnder50Bytes, Base64String>;
     constructor(type: Base64String, serialNumber: Base64String, subject: PubKeyHex, certifier: PubKeyHex, revocationOutpoint: OutpointString, fields: Record<CertificateFieldNameUnder50Bytes, string>, keyring: Record<CertificateFieldNameUnder50Bytes, string>, signature?: HexString, decryptedFields?: Record<CertificateFieldNameUnder50Bytes, Base64String>) 
+    static fromCertificate(certificate: WalletCertificate, keyring: Record<CertificateFieldNameUnder50Bytes, string>): VerifiableCertificate 
     async decryptFields(verifierWallet: ProtoWallet, privileged?: boolean, privilegedReason?: string): Promise<Record<CertificateFieldNameUnder50Bytes, string>> 
 }
 ```
 
-See also: [Base64String](#type-base64string), [Certificate](#class-certificate), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [ProtoWallet](#class-protowallet), [PubKeyHex](#type-pubkeyhex)
+See also: [Base64String](#type-base64string), [Certificate](#class-certificate), [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [HexString](#type-hexstring), [OutpointString](#type-outpointstring), [ProtoWallet](#class-protowallet), [PubKeyHex](#type-pubkeyhex), [WalletCertificate](#interface-walletcertificate)
 
 <details>
 
@@ -1177,6 +1178,25 @@ Argument Details
 Throws
 
 Throws an error if any of the decryption operations fail, with a message indicating the failure context.
+
+#### Method fromCertificate
+
+```ts
+static fromCertificate(certificate: WalletCertificate, keyring: Record<CertificateFieldNameUnder50Bytes, string>): VerifiableCertificate 
+```
+See also: [CertificateFieldNameUnder50Bytes](#type-certificatefieldnameunder50bytes), [VerifiableCertificate](#class-verifiablecertificate), [WalletCertificate](#interface-walletcertificate)
+
+Returns
+
+– A fully-formed instance containing the
+original certificate data plus the supplied keyring.
+
+Argument Details
+
++ **certificate**
+  + – The source certificate that was issued and signed by the certifier.
++ **keyring**
+  + – A allows the verifier to decrypt selected certificate fields.
 
 </details>
 
