@@ -54,7 +54,7 @@ export class NodejsHttpClient implements HttpClient {
         })
       })
 
-      req.on('error', (error) => {
+      req.on('error', (error: Error) => {
         reject(error)
       })
 

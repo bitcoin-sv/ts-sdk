@@ -22,8 +22,8 @@ export function defaultHttpClient(): HttpClient {
     // eslint-disable-next-line
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const nodeFetch = require('node-fetch')
-      return new NodejsHttpClient(nodeFetch)
+      const https = require('https')
+      return new NodejsHttpClient(https)
     } catch (e) {
       return noHttpClient
     }

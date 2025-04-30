@@ -4,6 +4,68 @@ import {
   HttpClientResponse
 } from './HttpClient.js'
 
+/** Node Https module interface limited to options needed by ts-sdk */
+export interface BinaryHttpsNodejs {
+  request: (
+    url: string,
+    options: HttpClientRequestOptions,
+    callback: (res: any) => void
+  ) => BinaryNodejsHttpClientRequest
+}
+
+/** Nodejs result of the Node https.request call limited to options needed by ts-sdk */
+export interface BinaryNodejsHttpClientRequest {
+  write: (chunk: Buffer) => void
+
+  on: (event: string, callback: (data: any) => void) => void
+
+  end: (() => void) & (() => void)
+}
+
+/**
+ * Adapter for Node Https module to be used as HttpClient
+ */
+export class BinaryNodejsHttpClient implements HttpClient {
+  constructor(private readonly https: BinaryHttpsNodejs) { }
+
+  async request(
+    url: string,
+    requestOptions: HttpClientRequestOptions
+  ): Promise<HttpClientResponse> {
+    return await new Promise((resolve, reject) => {
+      const req = this.https.request(url, requestOptions, (res) => {
+        let body = ''
+        res.on('data', (chunk: string) => {
+          body += chunk
+        })
+        res.on('end', () => {
+          const ok = res.statusCode >= 200 && res.statusCode <= 299
+          const mediaType = res.headers['content-type']
+          const data =
+            body !== '' && typeof mediaType === 'string' && mediaType.startsWith('application/json')
+              ? JSON.parse(body)
+              : body
+          resolve({
+            status: res.statusCode,
+            statusText: res.statusMessage,
+            ok,
+            data
+          })
+        })
+      })
+
+      req.on('error', (error: Error) => {
+        reject(error)
+      })
+
+      if (requestOptions.data !== null && requestOptions.data !== undefined) {
+        req.write(Buffer.from(requestOptions.data))
+      }
+      req.end()
+    })
+  }
+}
+
 /** fetch function interface limited to options needed by ts-sdk */
 /**
  * Makes a request to the server.
@@ -22,7 +84,7 @@ export interface FetchOptions {
   /** An object literal set request's headers. */
   headers?: Record<string, string>
   /** An object or null to set request's body. */
-  body?: Buffer | Uint8Array |Blob | null
+  body?: Buffer | Uint8Array | Blob | null
 }
 
 /**
@@ -68,8 +130,8 @@ export function binaryHttpClient(): HttpClient {
     // eslint-disable-next-line
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const nodeFetch = require('node-fetch')
-      return new BinaryFetchClient(nodeFetch)
+      const https = require('https')
+      return new BinaryNodejsHttpClient(https)
     } catch (e) {
       return noHttpClient
     }
