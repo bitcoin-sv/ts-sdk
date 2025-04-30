@@ -68,8 +68,8 @@ export function binaryHttpClient(): HttpClient {
     // eslint-disable-next-line
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const https = require('https')
-      return new BinaryFetchClient(https)
+      const nodeFetch = require('node-fetch')
+      return new BinaryFetchClient(nodeFetch)
     } catch (e) {
       return noHttpClient
     }
