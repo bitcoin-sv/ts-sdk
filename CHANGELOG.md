@@ -125,6 +125,14 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.4.23] - 2025-04-29
+
+### Added
+
+- A binary body http client and Teranode HTTP broadcaster.
+
+---
+
 ## [1.4.22] - 2025-04-27
 
 ### Added
