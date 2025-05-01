@@ -125,7 +125,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-## [1.4.23] - 2025-04-29
+## [1.4.24] - 2025-05-01
 
 ### Added
 
