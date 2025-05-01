@@ -74,6 +74,20 @@ For a more detailed tutorial and advanced examples, check our [Documentation](#d
   
 - **Secure Encryption and Signed Messages**: Enhanced mechanisms for encryption and digital signatures, replacing outdated methods.
 
+- **P2P Authentication**: Robust peer-to-peer authentication mechanisms to ensure secure connections between parties.
+
+- **Identity**: Comprehensive identity management system supporting identity verification and certificate management.
+
+- **Key Value Store**: Distributed key-value store for decentralized data storage and retrieval.
+
+- **Distributed Storage**: Scalable and secure distributed data storage solutions to support blockchain applications.
+
+- **Wallet Interface**: Standardized interface for wallet operations, supporting multiple cryptocurrencies and protocols.
+
+- **Overlay Tools**: Advanced tools for overlay network management and optimization.
+
+- **Distributed Protocol and Certificate Registration**: Efficient systems for registering and managing distributed protocols and certificates.
+
 ## Documentation
 
 [The Docs](https://bitcoin-sv.github.io/ts-sdk) are available here on Github pages.  
