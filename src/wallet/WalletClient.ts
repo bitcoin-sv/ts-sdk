@@ -40,6 +40,7 @@ import XDMSubstrate from './substrates/XDM.js'
 import WalletWireTransceiver from './substrates/WalletWireTransceiver.js'
 import HTTPWalletWire from './substrates/HTTPWalletWire.js'
 import HTTPWalletJSON from './substrates/HTTPWalletJSON.js'
+import ReactNativeWebView from './substrates/ReactNativeWebView.js'
 
 const MAX_XDM_RESPONSE_WAIT = 200
 
@@ -113,10 +114,17 @@ export default class WalletClient implements WalletInterface {
             await checkSub()
             this.substrate = sub
           } catch (e) {
-            // No comms. Tell the user to install a BSV wallet.
-            throw new Error(
-              'No wallet available over any communication substrate. Install a BSV wallet today!'
-            )
+            // HTTP JSON failed, attempt the next...
+            try {
+              sub = new ReactNativeWebView()
+              await checkSub()
+              this.substrate = sub
+            } catch (e) {
+              // No comms. Tell the user to install a BSV wallet.
+              throw new Error(
+                'No wallet available over any communication substrate. Install a BSV wallet today!'
+              )
+            }
           }
         }
       }
