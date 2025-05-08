@@ -129,6 +129,19 @@ export default class Script {
     while (!br.eof()) {
       const op = br.readUInt8()
 
+      // if OP_RETURN and not in a conditional block, do not parse the rest of the data,
+      // rather just return the last chunk as data without prefixing with data length.
+      if (op === OP.OP_RETURN) {
+        chunks.push({
+          op
+        })
+        const restOfData = br.read()
+        chunks.push({
+          data: restOfData,
+          op: -1
+        })
+      }
+
       let len = 0
       // eslint-disable-next-line @typescript-eslint/no-shadow
       let data: number[] = []
@@ -224,6 +237,10 @@ export default class Script {
     for (let i = 0; i < this.chunks.length; i++) {
       const chunk = this.chunks[i]
       const op = chunk.op
+      if (op === -1) { // special case for unformatted data
+        writer.write(chunk.data)
+        return writer.toArray()
+      }
       writer.writeUInt8(op)
       if (chunk.data != null) {
         if (op < OP.OP_PUSHDATA1) {
