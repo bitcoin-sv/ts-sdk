@@ -125,13 +125,15 @@ export default class Script {
     bin = [...bin]
     const chunks: ScriptChunk[] = []
 
+    let inConditionalBlock: number = 0
+
     const br = new Reader(bin)
     while (!br.eof()) {
       const op = br.readUInt8()
 
       // if OP_RETURN and not in a conditional block, do not parse the rest of the data,
       // rather just return the last chunk as data without prefixing with data length.
-      if (op === OP.OP_RETURN) {
+      if (op === OP.OP_RETURN && !inConditionalBlock) {
         chunks.push({
           op
         })
@@ -140,6 +142,12 @@ export default class Script {
           data: restOfData,
           op: -1
         })
+      }
+
+      if (op === OP.OP_IF || op === OP.OP_NOTIF || op === OP.OP_VERIF || op === OP.OP_VERNOTIF) {
+        inConditionalBlock++
+      } else if (op === OP.OP_ENDIF) {
+        inConditionalBlock--
       }
 
       let len = 0
