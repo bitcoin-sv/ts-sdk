@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.5.0 - 2025-05-09](#150---2025-05-09)
+  - Hereon compatible with Metanet Mobile v0.0.1
 - [1.4.23 - 2025-04-29](#1423---2025-04-29)
 - [1.4.22 - 2025-04-27](#1422---2025-04-27)
 - [1.4.21 - 2025-04-13](#1421---2025-04-17)
@@ -122,6 +124,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.5.0] - 2025-05-09
+
+### Added
+
+- ReactNativeWebView substrate, intentionally keeping the JSON stringify simple option for seralization, not using base64 so that we can update JSON HTTP at the same time as ReactNativeWebView. Therefore NOT for production use yet. I'm keen to get this in here so that updating deps within apps will allow us to test many apps from within mobile context in these early days.
 
 ---
 
