@@ -133,11 +133,10 @@ export default class Script {
 
       // if OP_RETURN and not in a conditional block, do not parse the rest of the data,
       // rather just return the last chunk as data without prefixing with data length.
-      if (op === OP.OP_RETURN && !inConditionalBlock) {
-        const restOfData = br.read()
+      if (op === OP.OP_RETURN && !inConditionalBlock ) {
         chunks.push({
           op,
-          data: restOfData
+          data:  br.read()
         })
         break
       }
@@ -243,12 +242,11 @@ export default class Script {
     for (let i = 0; i < this.chunks.length; i++) {
       const chunk = this.chunks[i]
       const op = chunk.op
+      writer.writeUInt8(op)
       if (op === OP.OP_RETURN && chunk.data != null) { // special case for unformatted data
         writer.write(chunk.data)
-        return writer.toArray()
-      }
-      writer.writeUInt8(op)
-      if (chunk.data != null) {
+        break
+      } else if (chunk.data != null) {
         if (op < OP.OP_PUSHDATA1) {
           writer.write(chunk.data)
         } else if (op === OP.OP_PUSHDATA1) {
