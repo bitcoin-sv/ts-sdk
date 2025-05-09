@@ -34,7 +34,7 @@ import { CallType } from './WalletWireCalls.js'
 
 type ReactNativeWindow = Window & {
   ReactNativeWebView: {
-    postMessage: (message: any, targetOrigin: string) => void
+    postMessage: (message: any) => void
   }
 }
 
@@ -69,10 +69,24 @@ export default class ReactNativeWebView implements WalletInterface {
         const data = JSON.parse(e.data)
         if (
           data.type !== 'CWI' ||
-          !e.isTrusted ||
           data.id !== id ||
           data.isInvocation === true
-        ) { return }
+        ) {
+          const reasons = {
+            'data.type !== "CWI"': data.type !== 'CWI',
+            'data.id !== id': data.id !== id,
+            'data.isInvocation === true': data.isInvocation === true
+          }
+          const trueReasons = Object.entries(reasons)
+            .filter(([_, value]) => value)
+            .map(([key, _]) => key)
+          if (trueReasons.length > 0) {
+            console.warn('Discarding message because: ', trueReasons.join(', '))
+          }
+          return
+        } else {
+          console.info('accepting message', data)
+        }
         if (typeof window.removeEventListener === 'function') {
           window.removeEventListener('message', listener)
         }
@@ -91,8 +105,7 @@ export default class ReactNativeWebView implements WalletInterface {
           id,
           call,
           args
-        }),
-        this.domain
+        })
       )
     })
   }

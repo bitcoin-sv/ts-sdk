@@ -92,6 +92,7 @@ export default class WalletClient implements WalletInterface {
       }
     }
     try {
+      console.log('Connecting to substrate...')
       sub = new WindowCWISubstrate()
       await checkSub()
       this.substrate = sub
@@ -116,7 +117,8 @@ export default class WalletClient implements WalletInterface {
           } catch (e) {
             // HTTP JSON failed, attempt the next...
             try {
-              sub = new ReactNativeWebView()
+              console.log('ReactNativeWebView')
+              sub = new ReactNativeWebView(this.originator)
               await checkSub()
               this.substrate = sub
             } catch (e) {
