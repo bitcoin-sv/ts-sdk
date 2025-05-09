@@ -21,11 +21,7 @@ export default class LocalKVStore {
 }
 ```
 
-See also: [OutpointString](#type-outpointstring), [WalletClient](#class-walletclient), [WalletInterface](#interface-walletinterface)
-
-<details>
-
-<summary>Class LocalKVStore Details</summary>
+See also: [OutpointString](./wallet.md#type-outpointstring), [WalletClient](./wallet.md#class-walletclient), [WalletInterface](./wallet.md#interface-walletinterface), [encrypt](./messages.md#variable-encrypt)
 
 #### Constructor
 
@@ -34,7 +30,7 @@ Creates an instance of the localKVStore.
 ```ts
 constructor(wallet: WalletInterface = new WalletClient(), context = "kvstore default", encrypt = true, originator?: string) 
 ```
-See also: [WalletClient](#class-walletclient), [WalletInterface](#interface-walletinterface)
+See also: [WalletClient](./wallet.md#class-walletclient), [WalletInterface](./wallet.md#interface-walletinterface), [encrypt](./messages.md#variable-encrypt)
 
 Argument Details
 
@@ -111,7 +107,7 @@ If signing the update/collapse transaction fails, it relinquishes the original o
 ```ts
 async set(key: string, value: string): Promise<OutpointString> 
 ```
-See also: [OutpointString](#type-outpointstring)
+See also: [OutpointString](./wallet.md#type-outpointstring)
 
 Returns
 
@@ -123,8 +119,6 @@ Argument Details
   + The key to set or update.
 + **value**
   + The value to associate with the key.
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 

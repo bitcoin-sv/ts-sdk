@@ -102,7 +102,7 @@ export interface UploaderConfig {
 }
 ```
 
-See also: [WalletInterface](#interface-walletinterface)
+See also: [WalletInterface](./wallet.md#interface-walletinterface)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -130,7 +130,7 @@ export class StorageDownloader {
 }
 ```
 
-See also: [DownloadResult](#interface-downloadresult), [DownloaderConfig](#interface-downloaderconfig)
+See also: [DownloadResult](./storage.md#interface-downloadresult), [DownloaderConfig](./storage.md#interface-downloaderconfig)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -156,11 +156,7 @@ export class StorageUploader {
 }
 ```
 
-See also: [FindFileData](#interface-findfiledata), [RenewFileResult](#interface-renewfileresult), [UploadFileResult](#interface-uploadfileresult), [UploadableFile](#interface-uploadablefile), [UploaderConfig](#interface-uploaderconfig)
-
-<details>
-
-<summary>Class StorageUploader Details</summary>
+See also: [FindFileData](./storage.md#interface-findfiledata), [RenewFileResult](./storage.md#interface-renewfileresult), [UploadFileResult](./storage.md#interface-uploadfileresult), [UploadableFile](./storage.md#interface-uploadablefile), [UploaderConfig](./storage.md#interface-uploaderconfig)
 
 #### Constructor
 
@@ -169,7 +165,7 @@ Creates a new StorageUploader instance.
 ```ts
 constructor(config: UploaderConfig) 
 ```
-See also: [UploaderConfig](#interface-uploaderconfig)
+See also: [UploaderConfig](./storage.md#interface-uploaderconfig)
 
 Argument Details
 
@@ -183,7 +179,7 @@ Retrieves metadata for a file matching the given UHRP URL from the `/find` route
 ```ts
 public async findFile(uhrpUrl: string): Promise<FindFileData> 
 ```
-See also: [FindFileData](#interface-findfiledata)
+See also: [FindFileData](./storage.md#interface-findfiledata)
 
 Returns
 
@@ -229,7 +225,7 @@ public async publishFile(params: {
     retentionPeriod: number;
 }): Promise<UploadFileResult> 
 ```
-See also: [UploadFileResult](#interface-uploadfileresult), [UploadableFile](#interface-uploadablefile)
+See also: [UploadFileResult](./storage.md#interface-uploadfileresult), [UploadableFile](./storage.md#interface-uploadablefile)
 
 Returns
 
@@ -248,7 +244,7 @@ and re-mint the advertisement token on-chain.
 ```ts
 public async renewFile(uhrpUrl: string, additionalMinutes: number): Promise<RenewFileResult> 
 ```
-See also: [RenewFileResult](#interface-renewfileresult)
+See also: [RenewFileResult](./storage.md#interface-renewfileresult)
 
 Returns
 
@@ -264,8 +260,6 @@ Argument Details
 Throws
 
 If the request fails or the server returns an error
-
-</details>
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -306,7 +300,7 @@ getHashFromURL = (URL: string): number[] => {
 }
 ```
 
-See also: [fromBase58Check](#variable-frombase58check), [normalizeURL](#variable-normalizeurl), [toHex](#variable-tohex)
+See also: [fromBase58Check](./primitives.md#variable-frombase58check), [normalizeURL](./storage.md#variable-normalizeurl), [toHex](./primitives.md#variable-tohex)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -320,7 +314,7 @@ getURLForFile = (file: number[]): string => {
 }
 ```
 
-See also: [getURLForHash](#variable-geturlforhash), [sha256](#variable-sha256)
+See also: [getURLForHash](./storage.md#variable-geturlforhash), [sha256](./primitives.md#variable-sha256)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -336,7 +330,7 @@ getURLForHash = (hash: number[]): string => {
 }
 ```
 
-See also: [toArray](#variable-toarray), [toBase58Check](#variable-tobase58check)
+See also: [toArray](./primitives.md#variable-toarray), [toBase58Check](./primitives.md#variable-tobase58check)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
@@ -355,7 +349,7 @@ isValidURL = (URL: string): boolean => {
 }
 ```
 
-See also: [getHashFromURL](#variable-gethashfromurl)
+See also: [getHashFromURL](./storage.md#variable-gethashfromurl)
 
 Links: [API](#api), [Interfaces](#interfaces), [Classes](#classes), [Functions](#functions), [Types](#types), [Enums](#enums), [Variables](#variables)
 
