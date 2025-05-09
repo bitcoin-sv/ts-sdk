@@ -117,7 +117,6 @@ export default class WalletClient implements WalletInterface {
           } catch (e) {
             // HTTP JSON failed, attempt the next...
             try {
-              console.log('ReactNativeWebView')
               sub = new ReactNativeWebView(this.originator)
               await checkSub()
               this.substrate = sub
