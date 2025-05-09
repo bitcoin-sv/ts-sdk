@@ -139,6 +139,7 @@ export default class Script {
           op,
           data: restOfData
         })
+        break
       }
 
       if (op === OP.OP_IF || op === OP.OP_NOTIF || op === OP.OP_VERIF || op === OP.OP_VERNOTIF) {
