@@ -133,10 +133,10 @@ export default class Script {
 
       // if OP_RETURN and not in a conditional block, do not parse the rest of the data,
       // rather just return the last chunk as data without prefixing with data length.
-      if (op === OP.OP_RETURN && !inConditionalBlock ) {
+      if (op === OP.OP_RETURN && !inConditionalBlock) {
         chunks.push({
           op,
-          data:  br.read()
+          data: br.read()
         })
         break
       }
