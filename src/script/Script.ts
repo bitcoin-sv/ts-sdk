@@ -125,9 +125,27 @@ export default class Script {
     bin = [...bin]
     const chunks: ScriptChunk[] = []
 
+    let inConditionalBlock: number = 0
+
     const br = new Reader(bin)
     while (!br.eof()) {
       const op = br.readUInt8()
+
+      // if OP_RETURN and not in a conditional block, do not parse the rest of the data,
+      // rather just return the last chunk as data without prefixing with data length.
+      if (op === OP.OP_RETURN && inConditionalBlock === 0) {
+        chunks.push({
+          op,
+          data: br.read()
+        })
+        break
+      }
+
+      if (op === OP.OP_IF || op === OP.OP_NOTIF || op === OP.OP_VERIF || op === OP.OP_VERNOTIF) {
+        inConditionalBlock++
+      } else if (op === OP.OP_ENDIF) {
+        inConditionalBlock--
+      }
 
       let len = 0
       // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -225,7 +243,10 @@ export default class Script {
       const chunk = this.chunks[i]
       const op = chunk.op
       writer.writeUInt8(op)
-      if (chunk.data != null) {
+      if (op === OP.OP_RETURN && chunk.data != null) { // special case for unformatted data
+        writer.write(chunk.data)
+        break
+      } else if (chunk.data != null) {
         if (op < OP.OP_PUSHDATA1) {
           writer.write(chunk.data)
         } else if (op === OP.OP_PUSHDATA1) {

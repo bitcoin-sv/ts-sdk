@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.5.1 - 2025-05-13](#151---2025-05-13)
 - [1.5.0 - 2025-05-09](#150---2025-05-09)
   - Hereon compatible with Metanet Mobile v0.0.1
 - [1.4.23 - 2025-04-29](#1423---2025-04-29)
@@ -124,6 +125,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.5.1] - 2025-05-13
+
+### Fixed
+
+- Stop parsing script chunks once we hit an op return out of a conditional block.
 
 ---
 
