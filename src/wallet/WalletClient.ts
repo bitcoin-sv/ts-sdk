@@ -57,6 +57,7 @@ export default class WalletClient implements WalletInterface {
     | 'XDM'
     | 'window.CWI'
     | 'json-api'
+    | 'react-native'
     | WalletInterface = 'auto',
     originator?: OriginatorDomainNameStringUnder250Bytes
   ) {
@@ -66,6 +67,7 @@ export default class WalletClient implements WalletInterface {
     if (substrate === 'window.CWI') substrate = new WindowCWISubstrate()
     if (substrate === 'XDM') substrate = new XDMSubstrate()
     if (substrate === 'json-api') substrate = new HTTPWalletJSON(originator)
+    if (substrate === 'react-native') substrate = new ReactNativeWebView(originator)
     this.substrate = substrate
     this.originator = originator
   }
@@ -92,7 +94,6 @@ export default class WalletClient implements WalletInterface {
       }
     }
     try {
-      console.log('Connecting to substrate...')
       sub = new WindowCWISubstrate()
       await checkSub()
       this.substrate = sub
@@ -109,7 +110,7 @@ export default class WalletClient implements WalletInterface {
           await checkSub()
           this.substrate = sub
         } catch (e) {
-          // HTTP JSON failed, attempt the next...
+          // HTTP Wire failed, attempt the next...
           try {
             sub = new HTTPWalletJSON(this.originator)
             await checkSub()
