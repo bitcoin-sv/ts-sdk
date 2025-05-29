@@ -28,4 +28,4 @@ node benchmarks/serialization-bench.js 200000 1
 | Branch | toSm big | toSm little | fromSm big | fromSm little | fromScriptNum |
 | --- | --- | --- | --- | --- | --- |
 | master (pre-May-2025) | 6.12ms | 10.11ms | 6.35ms | 12.56ms | 3.39ms |
-| fix-mem (May-2025) | 8.46ms | 8.12ms | 27.77ms | 11.16ms | 10.31ms |
+| fix-mem (May-2025) | 4.11ms | 5.05ms | 4.44ms | 5.80ms | 2.10ms |

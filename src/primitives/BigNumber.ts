@@ -737,28 +737,25 @@ export default class BigNumber {
     if (bytes.length === 0) return new BigNumber(0n)
 
     let sign: 0 | 1 = 0
-    let hex = ''
+    let mag = 0n
 
     if (endian === 'little') {
-      const last = bytes.length - 1
-      let firstByte = bytes[last]
-      if ((firstByte & 0x80) !== 0) { sign = 1; firstByte &= 0x7f }
-      hex += (firstByte < 16 ? '0' : '') + firstByte.toString(16)
-      for (let i = last - 1; i >= 0; i--) {
-        const b = bytes[i]
-        hex += (b < 16 ? '0' : '') + b.toString(16)
+      let i = bytes.length - 1
+      let byte = bytes[i]
+      if ((byte & 0x80) !== 0) { sign = 1; byte &= 0x7f }
+      mag = BigInt(byte)
+      for (i = i - 1; i >= 0; i--) {
+        mag = (mag << 8n) | BigInt(bytes[i])
       }
     } else {
-      let firstByte = bytes[0]
-      if ((firstByte & 0x80) !== 0) { sign = 1; firstByte &= 0x7f }
-      hex += (firstByte < 16 ? '0' : '') + firstByte.toString(16)
+      let byte = bytes[0]
+      if ((byte & 0x80) !== 0) { sign = 1; byte &= 0x7f }
+      mag = BigInt(byte)
       for (let i = 1; i < bytes.length; i++) {
-        const b = bytes[i]
-        hex += (b < 16 ? '0' : '') + b.toString(16)
+        mag = (mag << 8n) | BigInt(bytes[i])
       }
     }
 
-    const mag = hex === '' ? 0n : BigInt('0x' + hex)
     const r = new BigNumber(0n)
     r._initializeState(mag, sign)
     return r
@@ -769,23 +766,23 @@ export default class BigNumber {
       return this._sign === 1 ? [0x80] : []
     }
 
-    let hex = this._getMinimalHex()
-    if (hex.length % 2 !== 0) hex = '0' + hex
-
-    const byteLen = hex.length / 2
-    const bytes = new Array(byteLen)
-    for (let i = 0, j = 0; i < hex.length; i += 2) {
-      bytes[j++] = parseInt(hex.slice(i, i + 2), 16)
+    const leBytes: number[] = []
+    let temp = this._magnitude
+    while (temp > 0n) {
+      leBytes.push(Number(temp & 0xffn))
+      temp >>= 8n
     }
+
+    const beBytes = leBytes.slice().reverse()
 
     if (this._sign === 1) {
-      if ((bytes[0] & 0x80) !== 0) bytes.unshift(0x80)
-      else bytes[0] |= 0x80
-    } else if ((bytes[0] & 0x80) !== 0) {
-      bytes.unshift(0x00)
+      if ((beBytes[0] & 0x80) !== 0) beBytes.unshift(0x80)
+      else beBytes[0] |= 0x80
+    } else if ((beBytes[0] & 0x80) !== 0) {
+      beBytes.unshift(0x00)
     }
 
-    return endian === 'little' ? bytes.reverse() : bytes
+    return endian === 'little' ? beBytes.reverse() : beBytes
   }
 
   static fromBits (bits: number, strict: boolean = false): BigNumber {
