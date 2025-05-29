@@ -110,6 +110,25 @@ function isChunkMinimalPushHelper (chunk: ScriptChunk): boolean {
   return true
 }
 
+/**
+ * The Spend class represents a spend action within a Bitcoin SV transaction.
+ * It encapsulates all the necessary data required for spending a UTXO (Unspent Transaction Output)
+ * and includes details about the source transaction, output, and the spending transaction itself.
+ *
+ * @property {string} sourceTXID - The transaction ID of the source UTXO.
+ * @property {number} sourceOutputIndex - The index of the output in the source transaction.
+ * @property {BigNumber} sourceSatoshis - The amount of satoshis in the source UTXO.
+ * @property {LockingScript} lockingScript - The locking script associated with the UTXO.
+ * @property {number} transactionVersion - The version of the current transaction.
+ * @property {Array<{ sourceTXID: string, sourceOutputIndex: number, sequence: number }>} otherInputs -
+ *           An array of other inputs in the transaction, each with a txid, outputIndex, and sequence number.
+ * @property {Array<{ satoshis: BigNumber, lockingScript: LockingScript }>} outputs -
+ *           An array of outputs of the current transaction, including the satoshi value and locking script for each.
+ * @property {number} inputIndex - The index of this input in the current transaction.
+ * @property {UnlockingScript} unlockingScript - The unlocking script that unlocks the UTXO for spending.
+ * @property {number} inputSequence - The sequence number of this input.
+ * @property {number} lockTime - The lock time of the transaction.
+ */
 export default class Spend {
   sourceTXID: string
   sourceOutputIndex: number
@@ -133,6 +152,38 @@ export default class Spend {
   stackMem: number
   altStackMem: number
 
+  /**
+   * @constructor
+   * Constructs the Spend object with necessary transaction details.
+   * @param {string} params.sourceTXID - The transaction ID of the source UTXO.
+   * @param {number} params.sourceOutputIndex - The index of the output in the source transaction.
+   * @param {BigNumber} params.sourceSatoshis - The amount of satoshis in the source UTXO.
+   * @param {LockingScript} params.lockingScript - The locking script associated with the UTXO.
+   * @param {number} params.transactionVersion - The version of the current transaction.
+   * @param {Array<{ sourceTXID: string, sourceOutputIndex: number, sequence: number }>} params.otherInputs -
+   *        An array of other inputs in the transaction.
+   * @param {Array<{ satoshis: BigNumber, lockingScript: LockingScript }>} params.outputs -
+   *        The outputs of the current transaction.
+   * @param {number} params.inputIndex - The index of this input in the current transaction.
+   * @param {UnlockingScript} params.unlockingScript - The unlocking script for this spend.
+   * @param {number} params.inputSequence - The sequence number of this input.
+   * @param {number} params.lockTime - The lock time of the transaction.
+   *
+   * @example
+   * const spend = new Spend({
+   *   sourceTXID: "abcd1234", // sourceTXID
+   *   sourceOutputIndex: 0, // sourceOutputIndex
+   *   sourceSatoshis: new BigNumber(1000), // sourceSatoshis
+   *   lockingScript: LockingScript.fromASM("OP_DUP OP_HASH160 abcd1234... OP_EQUALVERIFY OP_CHECKSIG"),
+   *   transactionVersion: 1, // transactionVersion
+   *   otherInputs: [{ sourceTXID: "abcd1234", sourceOutputIndex: 1, sequence: 0xffffffff }], // otherInputs
+   *   outputs: [{ satoshis: new BigNumber(500), lockingScript: LockingScript.fromASM("OP_DUP...") }], // outputs
+   *   inputIndex: 0, // inputIndex
+   *   unlockingScript: UnlockingScript.fromASM("3045... 02ab..."),
+   *   inputSequence: 0xffffffff // inputSequence
+   *   memoryLimit: 100000 // memoryLimit
+   * });
+   */
   constructor (params: {
     sourceTXID: string
     sourceOutputIndex: number
@@ -258,7 +309,7 @@ export default class Spend {
         return false
       }
     } catch (e) {
-      this.scriptEvaluationError('The signature format is invalid.') // Match original more closely
+      this.scriptEvaluationError('The signature format is invalid.')
       return false
     }
     return true
@@ -290,7 +341,7 @@ export default class Spend {
     try {
       PublicKey.fromDER(buf as number[]) // This can throw for stricter DER rules
     } catch (e) {
-      this.scriptEvaluationError('The public key is in an unknown format.') // Match original
+      this.scriptEvaluationError('The public key is in an unknown format.')
       return false
     }
     return true
@@ -381,10 +432,9 @@ export default class Spend {
           this.pushStackCopy(SCRIPTNUMS_0_TO_16[n])
           break
 
-        // Replicating original NOP block structure
         case OP.OP_NOP:
-        case OP.OP_NOP2: // CHECKLOCKTIMEVERIFY
-        case OP.OP_NOP3: // CHECKSEQUENCEVERIFY
+        case OP.OP_NOP2: // Formerly CHECKLOCKTIMEVERIFY
+        case OP.OP_NOP3: // Formerly CHECKSEQUENCEVERIFY
         case OP.OP_NOP1:
         case OP.OP_NOP4:
         case OP.OP_NOP5:
@@ -395,9 +445,6 @@ export default class Spend {
         case OP.OP_NOP10:
           /* falls through */
           // eslint-disable-next-line no-fallthrough
-        // The original code example had cases for OP_NOP11 through OP_NOP77.
-        // Assuming these constants exist in OP.ts as per the original code structure
-        // If they don't, this will need adjustment based on actual OP.ts content
         // eslint-disable-next-line no-fallthrough
         case OP.OP_NOP11: case OP.OP_NOP12: case OP.OP_NOP13: case OP.OP_NOP14: case OP.OP_NOP15:
         case OP.OP_NOP16: case OP.OP_NOP17: case OP.OP_NOP18: case OP.OP_NOP19: case OP.OP_NOP20:
@@ -411,7 +458,7 @@ export default class Spend {
         case OP.OP_NOP56: case OP.OP_NOP57: case OP.OP_NOP58: case OP.OP_NOP59: case OP.OP_NOP60:
         case OP.OP_NOP61: case OP.OP_NOP62: case OP.OP_NOP63: case OP.OP_NOP64: case OP.OP_NOP65:
         case OP.OP_NOP66: case OP.OP_NOP67: case OP.OP_NOP68: case OP.OP_NOP69: case OP.OP_NOP70:
-        case OP.OP_NOP71: case OP.OP_NOP72: case OP.OP_NOP73: /* case OP.OP_NOP74 ... OP.OP_NOP76 not in original OP.ts provided */
+        case OP.OP_NOP71: case OP.OP_NOP72: case OP.OP_NOP73:
         case OP.OP_NOP77:
           break
 
@@ -760,7 +807,6 @@ export default class Spend {
         }
         case OP.OP_CHECKMULTISIG:
         case OP.OP_CHECKMULTISIGVERIFY: {
-          // Use original logic for `i` and stack access to ensure exact behavior
           i = 1
           if (this.stack.length < i) {
             this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least 1 item for nKeys.`)
@@ -813,7 +859,7 @@ export default class Spend {
             if (bufSig.length > 0) {
               try {
                 sig = TransactionSignature.fromChecksigFormat(bufSig)
-                pubkey = PublicKey.fromDER(bufPubkey) // Original uses fromString(toHex(bufPubkey)), fromDER is more direct
+                pubkey = PublicKey.fromDER(bufPubkey)
                 fOk = this.verifySignature(sig, pubkey, subscript)
               } catch (e) {
                 fOk = false
@@ -830,27 +876,6 @@ export default class Spend {
             }
           }
 
-          // Pop actual arguments: N_val, M_val, keys, sigs. Dummy popped separately.
-          // Original code pops `i-1` items in loop, then dummy. `i` is total items including dummy.
-          // let itemsToPop = (isig -1) + (ikey -1 - nKeysCount) -1; // This is complex, use original's i
-          // let original_i = (nKeysCountNum + nSigsCountNum + 2); // Count of N, M, keys, sigs.
-          // This is not the 'i' from the original code.
-          // The 'i' in original code is total stack items involved.
-
-          // Total items related to CHECKMULTISIG arguments (N_val, keys, M_val, sigs, dummy_val)
-          // The original `i` variable at the end of arg parsing was (nKeysCount + nSigsCount + 3)
-          // This loop pops (nKeysCount + nSigsCount + 2) items.
-          // let popLoopCounter = (BigNumber.fromScriptNum(this.stackTop(-1), false).toNumber() + // N
-          // BigNumber.fromScriptNum(this.stackTop(-(1 + BigNumber.fromScriptNum(this.stackTop(-1), false).toNumber() + 1)), false).toNumber() + // M
-          // 2); // for N_val and M_val themselves
-
-          // This popping logic needs to be exactly like the original's `while (i-- > 1)`
-          // let originalSDK_i = (
-          //     (BigNumber.fromScriptNum(this.stack[this.stack.length - (1)], false).toNumber()) + // N
-          //     (BigNumber.fromScriptNum(this.stack[this.stack.length - (1 + BigNumber.fromScriptNum(this.stack[this.stack.length - (1)], false).toNumber() + 1)], false).toNumber()) + // M
-          //     3 // for N_val, M_val, dummy
-          // );
-
           // Correct total items consumed by op (N_val, keys, M_val, sigs, dummy)
           const itemsConsumedByOp = 1 + // N_val
                                   BigNumber.fromScriptNum(this.stackTop(-1), false).toNumber() + // keys
@@ -860,7 +885,6 @@ export default class Spend {
 
           let popCount = itemsConsumedByOp - 1 // Pop all except dummy
           while (popCount > 0) {
-            // TODO: SCRIPT_VERIFY_NULLFAIL logic if needed.
             this.popStack()
             popCount--
           }
@@ -925,7 +949,6 @@ export default class Spend {
             break
           }
 
-          // Padding and sign extension logic (from original implementation)
           const resultN2B = new Array(size).fill(0x00)
           let signbit = 0x00
 
@@ -934,7 +957,7 @@ export default class Spend {
             rawnum[rawnum.length - 1] &= 0x7f // Remove sign bit for padding
           }
 
-          // Copy rawnum (now positive magnitude) into the result buffer
+          // Copy rawnum (now positive magnitude) into the result
           for (let k = 0; k < rawnum.length; k++) {
             resultN2B[k] = rawnum[k]
           }
@@ -966,6 +989,17 @@ export default class Spend {
     return true
   }
 
+  /**
+   * @method validate
+   * Validates the spend action by interpreting the locking and unlocking scripts.
+   * @returns {boolean} Returns true if the scripts are valid and the spend is legitimate, otherwise false.
+   * @example
+   * if (spend.validate()) {
+   *   console.log("Spend is valid!");
+   * } else {
+   *   console.log("Invalid spend!");
+   * }
+   */
   validate (): boolean {
     if (requirePushOnlyUnlockingScripts && !this.unlockingScript.isPushOnly()) {
       this.scriptEvaluationError(
