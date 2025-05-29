@@ -647,8 +647,59 @@ export default class BigNumber {
   static fromNumber (n: number): BigNumber { return new BigNumber(n) }
   static fromString (str: string, base?: number | 'hex'): BigNumber { return new BigNumber(str, base) }
 
-  static fromSm (bytes: number[], endian: 'big' | 'little' = 'big'): BigNumber { if (bytes.length === 0) return new BigNumber(0n); const b = [...(endian === 'little' ? bytes.slice().reverse() : bytes)]; let s: 0 | 1 = 0; if (b.length > 0 && (b[0] & 0x80) !== 0) { s = 1; b[0] &= 0x7f } let m = 0n; for (let i = 0; i < b.length; i++)m = (m << 8n) | BigInt(b[i]); const r = new BigNumber(0n); r._initializeState(m, s); return r }
-  toSm (endian: 'big' | 'little' = 'big'): number[] { if (this._magnitude === 0n && this._sign === 0) return []; if (this._magnitude === 0n && this._sign === 1) return [0x80]; let bytes: number[] = []; let tM = this._magnitude; while (tM > 0n) { bytes.unshift(Number(tM & 0xffn)); tM >>= 8n } if (bytes.length === 0 && this._magnitude !== 0n)bytes = [0]; if (this._sign === 1) { if (bytes.length === 0)bytes = [0x80]; else if ((bytes[0] & 0x80) !== 0)bytes.unshift(0x80); else bytes[0] |= 0x80 } else { if (bytes.length > 0 && (bytes[0] & 0x80) !== 0)bytes.unshift(0x00) } return endian === 'little' ? bytes.reverse() : bytes }
+  static fromSm (bytes: number[], endian: 'big' | 'little' = 'big'): BigNumber {
+    if (bytes.length === 0) return new BigNumber(0n)
+
+    let sign: 0 | 1 = 0
+    let hex = ''
+
+    if (endian === 'little') {
+      let last = bytes.length - 1
+      let firstByte = bytes[last]
+      if ((firstByte & 0x80) !== 0) { sign = 1; firstByte &= 0x7f }
+      hex += (firstByte < 16 ? '0' : '') + firstByte.toString(16)
+      for (let i = last - 1; i >= 0; i--) {
+        const b = bytes[i]
+        hex += (b < 16 ? '0' : '') + b.toString(16)
+      }
+    } else {
+      let firstByte = bytes[0]
+      if ((firstByte & 0x80) !== 0) { sign = 1; firstByte &= 0x7f }
+      hex += (firstByte < 16 ? '0' : '') + firstByte.toString(16)
+      for (let i = 1; i < bytes.length; i++) {
+        const b = bytes[i]
+        hex += (b < 16 ? '0' : '') + b.toString(16)
+      }
+    }
+
+    const mag = hex === '' ? 0n : BigInt('0x' + hex)
+    const r = new BigNumber(0n)
+    r._initializeState(mag, sign)
+    return r
+  }
+  toSm (endian: 'big' | 'little' = 'big'): number[] {
+    if (this._magnitude === 0n) {
+      return this._sign === 1 ? [0x80] : []
+    }
+
+    let hex = this._getMinimalHex()
+    if (hex.length % 2 !== 0) hex = '0' + hex
+
+    const byteLen = hex.length / 2
+    const bytes = new Array(byteLen)
+    for (let i = 0, j = 0; i < hex.length; i += 2) {
+      bytes[j++] = parseInt(hex.slice(i, i + 2), 16)
+    }
+
+    if (this._sign === 1) {
+      if ((bytes[0] & 0x80) !== 0) bytes.unshift(0x80)
+      else bytes[0] |= 0x80
+    } else if ((bytes[0] & 0x80) !== 0) {
+      bytes.unshift(0x00)
+    }
+
+    return endian === 'little' ? bytes.reverse() : bytes
+  }
 
   static fromBits (bits: number, strict: boolean = false): BigNumber {
     const nSize = bits >>> 24
@@ -730,9 +781,12 @@ export default class BigNumber {
 
   static fromScriptNum (num: number[], requireMinimal: boolean = false, maxNumSize?: number): BigNumber {
     if (maxNumSize !== undefined && num.length > maxNumSize) throw new Error('script number overflow')
-    if (requireMinimal && num.length > 0) {
+    if (num.length === 0) return new BigNumber(0n)
+    if (requireMinimal) {
       if ((num[num.length - 1] & 0x7f) === 0) {
-        if (num.length <= 1 || (num[num.length - 2] & 0x80) === 0) throw new Error('non-minimally encoded script number')
+        if (num.length <= 1 || (num[num.length - 2] & 0x80) === 0) {
+          throw new Error('non-minimally encoded script number')
+        }
       }
     }
     return BigNumber.fromSm(num, 'little')
