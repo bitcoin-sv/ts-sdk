@@ -120,7 +120,7 @@ export default class PrivateKey extends BigNumber {
    * @throws {Error} If the string is not a valid hexadecimal or represents an invalid private key.
    **/
   static fromHex (str: string): PrivateKey {
-    return new PrivateKey(super.fromHex(str, 'be'))
+    return new PrivateKey(super.fromHex(str, 'big'))
   }
 
   /**
