@@ -1311,7 +1311,7 @@ describe('Transaction', () => {
       })
       sourceTransaction.addOutput({
         satoshis: 2,
-        lockingScript: Script.fromASM('OP_2 OP_MUL ' + 'OP_DUP OP_MUL '.repeat(16) + 'OP_DROP'),
+        lockingScript: Script.fromASM('OP_2 OP_MUL ' + 'OP_DUP OP_MUL '.repeat(22) + 'OP_DROP'),
       })
       await sourceTransaction.sign()
 
@@ -1336,7 +1336,7 @@ describe('Transaction', () => {
       await tx.sign()
 
       // default should be 100KB
-      await expect(tx.verify('scripts only', new SatoshisPerKilobyte(1))).rejects.toThrow('Stack memory usage has exceeded 100000 bytes')
+      await expect(tx.verify('scripts only', new SatoshisPerKilobyte(1))).rejects.toThrow('Stack memory usage has exceeded 32000000 bytes')
     })
   })
 

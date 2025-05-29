@@ -158,7 +158,7 @@ export default class Spend {
     this.unlockingScript = params.unlockingScript
     this.inputSequence = params.inputSequence
     this.lockTime = params.lockTime
-    this.memoryLimit = params.memoryLimit ?? 100000
+    this.memoryLimit = params.memoryLimit ?? 32000000
     this.stack = []
     this.altStack = []
     this.ifStack = []
