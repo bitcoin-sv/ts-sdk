@@ -178,9 +178,33 @@ export default class Spend {
     this.altStackMem = 0
   }
 
+  private ensureStackMem (additional: number): void {
+    if (this.stackMem + additional > this.memoryLimit) {
+      this.scriptEvaluationError(
+        'Stack memory usage has exceeded ' + String(this.memoryLimit) + ' bytes'
+      )
+    }
+  }
+
+  private ensureAltStackMem (additional: number): void {
+    if (this.altStackMem + additional > this.memoryLimit) {
+      this.scriptEvaluationError(
+        'Alt stack memory usage has exceeded ' + String(this.memoryLimit) + ' bytes'
+      )
+    }
+  }
+
   private pushStack (item: number[]): void {
+    this.ensureStackMem(item.length)
     this.stack.push(item)
     this.stackMem += item.length
+  }
+
+  private pushStackCopy (item: Readonly<number[]>): void {
+    this.ensureStackMem(item.length)
+    const copy = item.slice()
+    this.stack.push(copy)
+    this.stackMem += copy.length
   }
 
   private popStack (): number[] {
@@ -202,6 +226,7 @@ export default class Spend {
   }
 
   private pushAltStack (item: number[]): void {
+    this.ensureAltStackMem(item.length)
     this.altStack.push(item)
     this.altStackMem += item.length
   }
@@ -346,14 +371,14 @@ export default class Spend {
       let i: number, ikey: number, ikey2: number, isig: number, nKeysCount: number, nSigsCount: number, fOk: boolean
 
       switch (currentOpcode) {
-        case OP.OP_1NEGATE: this.pushStack([...SCRIPTNUM_NEG_1]); break
-        case OP.OP_0: this.pushStack([...SCRIPTNUMS_0_TO_16[0]]); break
+        case OP.OP_1NEGATE: this.pushStackCopy(SCRIPTNUM_NEG_1); break
+        case OP.OP_0: this.pushStackCopy(SCRIPTNUMS_0_TO_16[0]); break
         case OP.OP_1: case OP.OP_2: case OP.OP_3: case OP.OP_4:
         case OP.OP_5: case OP.OP_6: case OP.OP_7: case OP.OP_8:
         case OP.OP_9: case OP.OP_10: case OP.OP_11: case OP.OP_12:
         case OP.OP_13: case OP.OP_14: case OP.OP_15: case OP.OP_16:
           n = currentOpcode - (OP.OP_1 - 1)
-          this.pushStack([...SCRIPTNUMS_0_TO_16[n]])
+          this.pushStackCopy(SCRIPTNUMS_0_TO_16[n])
           break
 
         // Replicating original NOP block structure
@@ -436,20 +461,20 @@ export default class Spend {
           if (this.stack.length < 2) this.scriptEvaluationError('OP_2DUP requires at least two items to be on the stack.')
           buf1 = this.stackTop(-2)
           buf2 = this.stackTop(-1)
-          this.pushStack([...buf1]); this.pushStack([...buf2])
+          this.pushStackCopy(buf1); this.pushStackCopy(buf2)
           break
         case OP.OP_3DUP:
           if (this.stack.length < 3) this.scriptEvaluationError('OP_3DUP requires at least three items to be on the stack.')
           buf1 = this.stackTop(-3)
           buf2 = this.stackTop(-2)
           buf3 = this.stackTop(-1)
-          this.pushStack([...buf1]); this.pushStack([...buf2]); this.pushStack([...buf3])
+          this.pushStackCopy(buf1); this.pushStackCopy(buf2); this.pushStackCopy(buf3)
           break
         case OP.OP_2OVER:
           if (this.stack.length < 4) this.scriptEvaluationError('OP_2OVER requires at least four items to be on the stack.')
           buf1 = this.stackTop(-4)
           buf2 = this.stackTop(-3)
-          this.pushStack([...buf1]); this.pushStack([...buf2])
+          this.pushStackCopy(buf1); this.pushStackCopy(buf2)
           break
         case OP.OP_2ROT:
           if (this.stack.length < 6) this.scriptEvaluationError('OP_2ROT requires at least six items to be on the stack.')
@@ -471,7 +496,7 @@ export default class Spend {
           if (this.stack.length < 1) this.scriptEvaluationError('OP_IFDUP requires at least one item to be on the stack.')
           buf1 = this.stackTop()
           if (this.castToBool(buf1)) {
-            this.pushStack([...buf1])
+            this.pushStackCopy(buf1)
           }
           break
         case OP.OP_DEPTH:
@@ -483,7 +508,7 @@ export default class Spend {
           break
         case OP.OP_DUP:
           if (this.stack.length < 1) this.scriptEvaluationError('OP_DUP requires at least one item to be on the stack.')
-          this.pushStack([...this.stackTop()])
+          this.pushStackCopy(this.stackTop())
           break
         case OP.OP_NIP:
           if (this.stack.length < 2) this.scriptEvaluationError('OP_NIP requires at least two items to be on the stack.')
@@ -493,7 +518,7 @@ export default class Spend {
           break
         case OP.OP_OVER:
           if (this.stack.length < 2) this.scriptEvaluationError('OP_OVER requires at least two items to be on the stack.')
-          this.pushStack([...this.stackTop(-2)])
+          this.pushStackCopy(this.stackTop(-2))
           break
         case OP.OP_PICK:
         case OP.OP_ROLL:
@@ -509,7 +534,7 @@ export default class Spend {
             this.stackMem -= itemToMoveOrCopy.length
             this.pushStack(itemToMoveOrCopy)
           } else { // OP_PICK
-            this.pushStack([...itemToMoveOrCopy])
+            this.pushStackCopy(itemToMoveOrCopy)
           }
           break
         case OP.OP_ROT:
@@ -530,8 +555,9 @@ export default class Spend {
           buf1 = this.stackTop(-1) // Top element (x2)
           // stack is [... rest, x1, x2]
           // We want [... rest, x2_copy, x1, x2]
-          this.stack.splice(this.stack.length - 2, 0, [...buf1]) // Insert copy of x2 before x1
-          this.stackMem += (buf1).length // Account for the new copy
+          this.ensureStackMem(buf1.length)
+          this.stack.splice(this.stack.length - 2, 0, buf1.slice()) // Insert copy of x2 before x1
+          this.stackMem += buf1.length // Account for the new copy
           break
         case OP.OP_SIZE:
           if (this.stack.length < 1) this.scriptEvaluationError('OP_SIZE requires at least one item to be on the stack.')
@@ -617,8 +643,23 @@ export default class Spend {
         case OP.OP_LESSTHANOREQUAL: case OP.OP_GREATERTHANOREQUAL:
         case OP.OP_MIN: case OP.OP_MAX:
           if (this.stack.length < 2) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least two items to be on the stack.`)
-          bn2 = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush)
-          bn1 = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush)
+          buf2 = this.popStack()
+          buf1 = this.popStack()
+          bn2 = BigNumber.fromScriptNum(buf2, requireMinimalPush)
+          bn1 = BigNumber.fromScriptNum(buf1, requireMinimalPush)
+          let predictedLen = 0
+          switch (currentOpcode) {
+            case OP.OP_MUL:
+              predictedLen = bn1.byteLength() + bn2.byteLength()
+              break
+            case OP.OP_ADD:
+            case OP.OP_SUB:
+              predictedLen = Math.max(bn1.byteLength(), bn2.byteLength()) + 1
+              break
+            default:
+              predictedLen = Math.max(bn1.byteLength(), bn2.byteLength())
+          }
+          this.ensureStackMem(predictedLen)
           let resultBnArithmetic: BigNumber = new BigNumber(0)
           switch (currentOpcode) {
             case OP.OP_ADD: resultBnArithmetic = bn1.add(bn2); break
