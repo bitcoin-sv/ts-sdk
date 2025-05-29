@@ -483,6 +483,7 @@ export default class BigNumber {
     this.red = null
     return this.normSign()
   }
+
   imuln (num: number): this { this.assert(typeof num === 'number', 'Assertion failed'); this.assert(Math.abs(num) <= BigNumber.MAX_IMULN_ARG, 'Assertion failed'); this._setValueFromSigned(this._getSignedValue() * BigInt(num)); return this }
   muln (num: number): BigNumber { return this.clone().imuln(num) }
   sqr (): BigNumber {
@@ -654,7 +655,7 @@ export default class BigNumber {
     let hex = ''
 
     if (endian === 'little') {
-      let last = bytes.length - 1
+      const last = bytes.length - 1
       let firstByte = bytes[last]
       if ((firstByte & 0x80) !== 0) { sign = 1; firstByte &= 0x7f }
       hex += (firstByte < 16 ? '0' : '') + firstByte.toString(16)
@@ -677,6 +678,7 @@ export default class BigNumber {
     r._initializeState(mag, sign)
     return r
   }
+
   toSm (endian: 'big' | 'little' = 'big'): number[] {
     if (this._magnitude === 0n) {
       return this._sign === 1 ? [0x80] : []
