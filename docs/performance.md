@@ -35,3 +35,25 @@ After updating the internal length bookkeeping and avoiding repeated initialisat
 mul large numbers: 9.78ms
 add large numbers: 2.29ms
 ```
+
+### Serialization with 200k digits
+
+Benchmarking the script number serializers on 200,000-digit values using `node benchmarks/serialization-bench.js 200000 1` produced the following baseline results prior to optimisation:
+
+```
+toSm big: 1386.31ms
+toSm little: 1320.55ms
+fromSm big: 1060.76ms
+fromSm little: 1066.45ms
+fromScriptNum: 1055.22ms
+```
+
+After rewriting the serializers to rely on direct hex conversion and minimal checks the same benchmark now reports:
+
+```
+toSm big: 7.53ms
+toSm little: 11.38ms
+fromSm big: 12.87ms
+fromSm little: 8.24ms
+fromScriptNum: 37.18ms
+```
