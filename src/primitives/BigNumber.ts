@@ -1,8 +1,9 @@
 // @ts-nocheck
 import ReductionContext from './ReductionContext.js'
 
+// ... (rest of the BigNumber class as per your latest working version) ...
 export default class BigNumber {
-  // ... (static readonly arrays, wordSize, constants - UNCHANGED) ...
+  // ... (static readonly arrays, wordSize, constants - UNCHANGED from your previous "new" version) ...
   public static readonly zeros: string[] = [
     '', '0', '00', '000', '0000', '00000', '000000', '0000000', '00000000',
     '000000000', '0000000000', '00000000000', '000000000000', '0000000000000',
@@ -306,34 +307,33 @@ export default class BigNumber {
   inspect (): string { return (this.red !== null ? '<BN-R: ' : '<BN: ') + this.toString(16) + '>'; }
 
   private _getMinimalHex(): string {
-    return this._magnitude === 0n ? "0" : this._magnitude.toString(16);
+    if (this._magnitude === 0n) return "0";
+    return this._magnitude.toString(16);
   }
   
   toString (base: number | 'hex' = 10, padding: number = 1): string {
     if (base === 16 || base === 'hex') {
-      let hexStr = this._getMinimalHex(); // Raw hex, e.g., "f", "123", "0"
+      // For toString('hex', N), N is the 'multiple-of-N characters' rule from bn.js tests
+      // For toString(16, P) where P=1 (default) or P=0, it means minimal hex.
+      let hexStr = this._getMinimalHex(); // e.g., "f", "123", "0"
       
-      // Default bn.js toString(16) or toString(16,1) behavior: minimal hex, no extra padding.
-      // "0" remains "0". Odd length hex like "f" remains "f".
-      if (padding === 0) { // toString(16,0) -> "0" for zero, minimal for others.
-          // hexStr is already minimal or "0".
-      } else if (padding > 1) { // This implies the N-multiple rule for characters, e.g. toString('hex', 2)
-          // First, ensure hexStr is even length if not "0" to represent full bytes before applying multiple rule
-          if (hexStr !== "0" && hexStr.length % 2 !== 0) {
-              hexStr = '0' + hexStr;
-          }
-          // Then apply the N-multiple padding
-          while (hexStr.length % padding !== 0) {
-              hexStr = '0' + hexStr;
-          }
-      } else { // padding === 1 (default or explicit)
-          // No further padding for minimal hex output.
+      if (padding > 1) { // N-multiple rule for characters
+        // Ensure hexStr is even length if not "0" to represent full bytes before applying multiple rule
+        if (hexStr !== "0" && hexStr.length % 2 !== 0) {
+            hexStr = '0' + hexStr;
+        }
+        while (hexStr.length % padding !== 0) {
+            hexStr = '0' + hexStr;
+        }
       }
+      // If padding is 0 or 1, hexStr (minimal) is used as is.
+      // "0" is always "0" unless toHex("") specific case.
+      // Single digit hex like "f" is not "0f" by default from toString(16).
       return (this.isNeg() ? '-' : '') + hexStr;
     }
     
     if (typeof base !== 'number' || base < 2 || base > 36 || base % 1 !== 0) throw new Error('Base should be an integer between 2 and 36');
-    return this.toBaseString(base, padding); // padding is min digits for other bases
+    return this.toBaseString(base, padding);
   }
   
   private toBaseString (base: number, padding: number): string {
@@ -382,7 +382,7 @@ export default class BigNumber {
     if (val > BigNumber.MAX_SAFE_INTEGER_BIGINT || val < BigNumber.MIN_SAFE_INTEGER_BIGINT) throw new Error('Number can only safely store up to 53 bits');
     return Number(val);
   }
-  toJSON (): string { // toJSON should return minimal hex
+  toJSON (): string { 
     const hex = this._getMinimalHex();
     return (this.isNeg() ? '-' : '') + hex;
   }
@@ -487,7 +487,7 @@ export default class BigNumber {
     let exp = num.clone();         
 
     const baseIsNegative = currentBase.isNeg();
-    const expIsOdd = exp.isOdd(); // Check before modification
+    const expIsOdd = exp.isOdd(); 
     if (baseIsNegative) currentBase.ineg(); 
 
     while (!exp.isZero()) {
@@ -524,21 +524,23 @@ export default class BigNumber {
   umod (num:BigNumber):BigNumber{return this.divmod(num,'mod',true).mod!;}
   divRound (num:BigNumber):BigNumber{
     this.assert(!num.isZero());
-    const tV = this._getSignedValue();
-    const nV = num._getSignedValue();
-    let d = tV / nV;
-    const m = tV % nV;
+    const tV = this._getSignedValue(); 
+    const nV = num._getSignedValue(); 
+    
+    let d = tV / nV; 
+    const m = tV % nV; 
 
-    if (m === 0n) {
+    if (m === 0n) { 
         const r = new BigNumber(0n); r._setValueFromSigned(d); return r;
     }
-    const absMtimes2 = (m < 0n ? -m : m) * 2n;
+
+    const absM = m < 0n ? -m : m;
     const absNV = nV < 0n ? -nV : nV;
 
-    if (absMtimes2 >= absNV) { // If remainder is exactly half or more
-        if (tV * nV > 0n) { // If dividend and divisor have same sign, round up (away from zero)
+    if (absM * 2n >= absNV) { 
+        if ((tV > 0n && nV > 0n) || (tV < 0n && nV < 0n)) { 
             d += 1n;
-        } else { // Different signs, round down (away from zero for negative quotient)
+        } else { 
             d -= 1n;
         }
     }
@@ -600,14 +602,16 @@ export default class BigNumber {
   static fromHex (hex:string,endian?:'le'|'be'|'little'|'big'):BigNumber{let eE:'le'|'be'='be';if(endian==='little'||endian==='le')eE='le';return new BigNumber(hex,16,eE);}
   
   toHex (byteLength:number=0):string{
-    // BN.js behavior: toHex(0) for BN(0) is "". For non-zero, minimal even length.
-    // toHex(L) for BN(X) is X padded to L bytes (2L chars), even length.
     if (this.isZero() && byteLength === 0) return "";
     
-    let hexStr = this._getMinimalHex();
+    let hexStr = this._getMinimalHex(); // Raw hex: "0", "f", "10", "123"
+    
+    // Ensure even length for non-zero values (byte alignment)
     if (hexStr !== "0" && hexStr.length % 2 !== 0) {
         hexStr = '0' + hexStr;
     }
+    
+    // Pad to minimum character length (byteLength * 2)
     const minChars = byteLength * 2;
     while(hexStr.length < minChars) {
         hexStr = '0' + hexStr;
@@ -624,29 +628,27 @@ export default class BigNumber {
   
   static fromBits(bits: number, strict: boolean = false): BigNumber {
     const nSize = bits >>> 24;
-    const nWordCompact = bits & 0x007fffff;
-    const isNegativeFromBit = (bits & 0x00800000) !== 0;
+    const nWordCompact = bits & 0x007fffff; 
+    const isNegativeFromBit = (bits & 0x00800000) !== 0; 
 
     if (strict && isNegativeFromBit) {
         throw new Error('negative bit set');
     }
+    
     if (nSize === 0 && nWordCompact === 0) {
         if (isNegativeFromBit && strict) throw new Error('negative bit set for zero value');
         return new BigNumber(0n);
     }
 
-    let bn = new BigNumber(nWordCompact);
+    let bn = new BigNumber(nWordCompact); 
     
-    // nSize is the number of bytes. Original compact format uses 3 bytes from nWordCompact.
-    // If nSize < 3, it means some leading bytes of nWordCompact are conceptually zero.
-    // If nSize > 3, it means nWordCompact is the most significant part, followed by (nSize-3) zero bytes.
-    if (nSize < 3) { // If less than 3 bytes, effectively shift right to remove most significant conceptual zero bytes from nWordCompact
+    // This logic comes from original bn.js `fromCompact`
+    if (nSize <= 3) {
         bn.iushrn((3 - nSize) * 8);
-    } else if (nSize > 3) { // If more than 3 bytes, shift left to append conceptual zero bytes
+    } else {
         bn.iushln((nSize - 3) * 8);
     }
-    // If nSize == 3, no shift needed for the magnitude part based on nWordCompact.
-
+    
     if (isNegativeFromBit) {
         bn.ineg();
     }
@@ -658,25 +660,44 @@ export default class BigNumber {
     if (this.isZero() && !this.isNeg()) return 0;
 
     const isActualNegative = this.isNeg(); 
-    const bnAbs = this.abs();    
-
-    let nSize = bnAbs.byteLength();
-    if (nSize === 0 && !bnAbs.isZero()) nSize = 1; // Should only happen if bnAbs is e.g. BN(0) and was toHex("")
-
-    let nWordNum; 
-
-    if (nSize === 0) { // Only for BN(0)
-        nWordNum = 0;
-    } else if (nSize > 3) {
-        nWordNum = Number(bnAbs.ushrn((nSize - 3) * 8)._magnitude & 0xffffffn);
-    } else {
-        // Shift left to fill the 3 significant byte positions for nWord
-        nWordNum = Number(bnAbs._magnitude << BigInt((3 - nSize) * 8) & 0xffffffn);
+    let bnAbs = this.abs(); // Work with absolute value for magnitude
+    
+    // Get byte array of absolute value
+    let mB = bnAbs.toArray('be'); // Minimal byte array
+    
+    // Remove leading zeros from byte array, if any (toArray('be') might already do this if no length specified)
+    let firstNonZeroIdx = 0;
+    while(firstNonZeroIdx < mB.length -1 && mB[firstNonZeroIdx] === 0) { // Keep last byte if it's [0]
+        firstNonZeroIdx++;
+    }
+    mB = mB.slice(firstNonZeroIdx);
+    
+    let nSize = mB.length;
+    if (nSize === 0 && !bnAbs.isZero()){ // Should not happen if bnAbs is truly non-zero and toArray is correct
+        mB = [0]; // Should not be needed if toArray works for small numbers
+        nSize = 1;
+    }
+    if (bnAbs.isZero()) { // if original was, e.g., -0, bnAbs is 0.
+        nSize = 0; // Size for 0 is 0, unless it's negative 0 to be encoded
+        mB = [];
     }
 
-    if ((nWordNum & 0x00800000) !== 0) { 
-      nWordNum >>>= 8; 
-      nSize++;      
+
+    let nWordNum; 
+    if (nSize === 0) {
+        nWordNum = 0;
+    } else if (nSize <= 3) {
+        nWordNum = 0;
+        for (let i = 0; i < nSize; i++) {
+            nWordNum = (nWordNum << 8) | mB[i];
+        }
+    } else { // nSize > 3
+        nWordNum = (mB[0] << 16) | (mB[1] << 8) | mB[2];
+    }
+
+    if ((nWordNum & 0x00800000) !== 0 && nSize <= 0xff) { // MSB of 3-byte mantissa is set
+      nWordNum >>>= 8; // Shift mantissa over by one byte
+      nSize++;      // Increase size component by one
     }
     
     let b=(nSize << 24) | nWordNum;
