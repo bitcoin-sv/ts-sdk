@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.5.2 - 2025-05-28](#152---2025-05-28)
 - [1.5.1 - 2025-05-13](#151---2025-05-13)
 - [1.5.0 - 2025-05-09](#150---2025-05-09)
   - Hereon compatible with Metanet Mobile v0.0.1
@@ -125,6 +126,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.5.2] - 2025-05-28
+
+### Fixed
+
+- Align eval mem limits with current miner policy while stopping memory attacks at 100MB
 
 ---
 
