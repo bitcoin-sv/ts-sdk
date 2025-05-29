@@ -573,6 +573,10 @@ export class Beef {
     mergeBeef(beef: number[] | Beef): void 
     isValid(allowTxidOnly?: boolean): boolean 
     async verify(chainTracker: ChainTracker, allowTxidOnly?: boolean): Promise<boolean> 
+    verifyValid(allowTxidOnly?: boolean): {
+        valid: boolean;
+        roots: Record<number, string>;
+    } 
     toWriter(writer: Writer): void 
     toBinary(): number[] 
     toBinaryAtomic(txid: string): number[] 
@@ -947,6 +951,36 @@ Argument Details
 
 + **chainTracker**
   + Used to verify computed merkle path roots for all bump txids.
++ **allowTxidOnly**
+  + optional. If true, transaction txid is assumed valid
+
+#### Method verifyValid
+
+Sorts `txs` and confirms validity of transaction data contained in beef
+by validating structure of this beef.
+
+Returns block heights and merkle root values to be confirmed by a chaintracker.
+
+Validity requirements:
+1. No 'known' txids, unless `allowTxidOnly` is true.
+2. All transactions have bumps or their inputs chain back to bumps (or are known).
+3. Order of transactions satisfies dependencies before dependents.
+4. No transactions with duplicate txids.
+
+```ts
+verifyValid(allowTxidOnly?: boolean): {
+    valid: boolean;
+    roots: Record<number, string>;
+} 
+```
+
+Returns
+
+`valid` is true iff this Beef is structuraly valid.
+`roots` is a record where keys are block heights and values are the corresponding merkle roots to be validated.
+
+Argument Details
+
 + **allowTxidOnly**
   + optional. If true, transaction txid is assumed valid
 

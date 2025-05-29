@@ -129,11 +129,19 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-## [1.5.2] - 2025-05-28
+## [1.6.0] - 2025-05-29
 
 ### Fixed
 
 - Align eval mem limits with current miner policy while stopping memory attacks at 100MB
+- Use BigInt in BigNumber for faster proformance
+- Optimize script interpreter memory usage
+
+## [1.5.3] - 2025-05-29
+
+### Change
+
+- Make verifyValid in Beef class public. It was private.
 
 ---
 
