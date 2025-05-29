@@ -57,7 +57,7 @@ export default class K256 extends Mersenne {
 
     if (inputNominalLength <= 9) {
       const finalOutputWords = new Array(currentOutputWordCount)
-      for(let i=0; i < currentOutputWordCount; ++i) finalOutputWords[i] = tempOutputWords[i]
+      for (let i = 0; i < currentOutputWordCount; ++i) finalOutputWords[i] = tempOutputWords[i]
       output.words = finalOutputWords // Use setter
 
       input.words = [0] // Use setter to set to 0
@@ -69,7 +69,7 @@ export default class K256 extends Mersenne {
     tempOutputWords[currentOutputWordCount++] = prev & mask
 
     const finalOutputWords = new Array(currentOutputWordCount)
-    for(let i=0; i < currentOutputWordCount; ++i) finalOutputWords[i] = tempOutputWords[i]
+    for (let i = 0; i < currentOutputWordCount; ++i) finalOutputWords[i] = tempOutputWords[i]
     output.words = finalOutputWords // Use setter for output
 
     // For input modification
@@ -85,15 +85,15 @@ export default class K256 extends Mersenne {
     }
     prev >>>= 22
     if (currentInputNewWordCount < tempInputNewWords.length) { // Boundary check
-        tempInputNewWords[currentInputNewWordCount++] = prev
+      tempInputNewWords[currentInputNewWordCount++] = prev
     } else if (prev !== 0 && tempInputNewWords.length > 0) { // If prev is non-zero but no space, this is an issue.
-        // This case implies original logic might have relied on array auto-expansion or specific length handling
-        // For safety, if there's still a carry and no space, the array should have been bigger.
-        // However, the original logic `input.length -= 9` suggests truncation.
+      // This case implies original logic might have relied on array auto-expansion or specific length handling
+      // For safety, if there's still a carry and no space, the array should have been bigger.
+      // However, the original logic `input.length -= 9` suggests truncation.
     }
-    
+
     const finalInputNewWords = new Array(currentInputNewWordCount)
-    for(let i=0; i < currentInputNewWordCount; ++i) finalInputNewWords[i] = tempInputNewWords[i]
+    for (let i = 0; i < currentInputNewWordCount; ++i) finalInputNewWords[i] = tempInputNewWords[i]
     input.words = finalInputNewWords // Use setter, which will strip and set magnitude
   }
 
@@ -110,27 +110,27 @@ export default class K256 extends Mersenne {
    * const result = k256.imulK(number);
    */
   imulK (num: BigNumber): BigNumber {
-    let currentWords = num.words; // Get current words based on _magnitude and _nominalWordLength
-    const originalNominalLength = num.length; // Getter
+    const currentWords = num.words // Get current words based on _magnitude and _nominalWordLength
+    const originalNominalLength = num.length // Getter
 
-    const newNominalLength = originalNominalLength + 2;
-    const tempWords = new Array(newNominalLength).fill(0);
+    const newNominalLength = originalNominalLength + 2
+    const tempWords = new Array(newNominalLength).fill(0)
 
     for (let i = 0; i < originalNominalLength; i++) {
-      tempWords[i] = currentWords[i];
+      tempWords[i] = currentWords[i]
     }
     // tempWords is now effectively num.words expanded with zeroes
 
-    let lo = 0;
+    let lo = 0
     for (let i = 0; i < newNominalLength; i++) { // Iterate up to new expanded length
-      const w = tempWords[i] | 0;
-      lo += w * 0x3d1; // 0x3d1 = 977
-      tempWords[i] = lo & 0x3ffffff; // 26-bit mask
-      lo = w * 0x40 + ((lo / 0x4000000) | 0); // 0x40 = 64. 0x4000000 = 2^26
+      const w = tempWords[i] | 0
+      lo += w * 0x3d1 // 0x3d1 = 977
+      tempWords[i] = lo & 0x3ffffff // 26-bit mask
+      lo = w * 0x40 + ((lo / 0x4000000) | 0) // 0x40 = 64. 0x4000000 = 2^26
     }
 
-    num.words = tempWords; // Use setter to re-initialize from tempWords
-                           // The setter will handle _magnitude, _sign, _nominalWordLength, and strip.
-    return num;
+    num.words = tempWords // Use setter to re-initialize from tempWords
+    // The setter will handle _magnitude, _sign, _nominalWordLength, and strip.
+    return num
   }
 }

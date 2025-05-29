@@ -44,9 +44,9 @@ export default class Mersenne {
    * @returns A BigNumber with scaled size depending on prime magnitude.
    */
   private _tmp (): BigNumber {
-    const tmp = new BigNumber(BigInt(0)); // Initialize with BigInt 0
-    const requiredWords = Math.ceil(this.n / BigNumber.wordSize);
-    tmp.expand(Math.max(1, requiredWords)); // Expand sets _nominalWordLength
+    const tmp = new BigNumber(BigInt(0)) // Initialize with BigInt 0
+    const requiredWords = Math.ceil(this.n / BigNumber.wordSize)
+    tmp.expand(Math.max(1, requiredWords)) // Expand sets _nominalWordLength
     return tmp
   }
 
@@ -64,13 +64,13 @@ export default class Mersenne {
   ireduce (num: BigNumber): BigNumber {
     // Assumes that `num` is less than `P^2`
     // num = HI * (2 ^ N - K) + HI * K + LO = HI * K + LO (mod P)
-    let r = num // num is directly modified
+    const r = num // num is directly modified
     let rlen
 
     do {
       this.split(r, this.tmp) // r is modified (becomes HI), this.tmp becomes LO
-      this.imulK(r)      // r becomes HI * K
-      r.iadd(this.tmp)   // r becomes HI * K + LO
+      this.imulK(r) // r becomes HI * K
+      r.iadd(this.tmp) // r becomes HI * K + LO
       rlen = r.bitLength()
     } while (rlen > this.n)
 
@@ -82,7 +82,7 @@ export default class Mersenne {
     }
     // No explicit strip needed here if operations maintain correctness and setter handles it.
     // However, ensuring it's stripped to minimal form after reduction is good.
-    r.strip();
+    r.strip()
     return r
   }
 
