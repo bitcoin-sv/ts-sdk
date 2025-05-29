@@ -119,7 +119,7 @@ export default class Spend {
     this.unlockingScript = params.unlockingScript
     this.inputSequence = params.inputSequence
     this.lockTime = params.lockTime
-    this.memoryLimit = params.memoryLimit ?? 100000 // 100 MB is going to be processed by most miners by policy, but the default should protect apps against memory attacks.
+    this.memoryLimit = params.memoryLimit ?? 100000000 // 100 MB is going to be processed by most miners by policy, and is also a sane default to protect apps against memory attacks.
     this.stackMem = 0
     this.altStackMem = 0
     this.reset()
