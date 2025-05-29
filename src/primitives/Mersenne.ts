@@ -44,8 +44,8 @@ export default class Mersenne {
    * @returns A BigNumber with scaled size depending on prime magnitude.
    */
   private _tmp (): BigNumber {
-    const tmp = new BigNumber()
-    tmp.words = new Array(Math.ceil(this.n / 13))
+    const tmp = new BigNumber();
+    (tmp.words as any) = new Array(Math.ceil(this.n / 13))
     return tmp
   }
 
@@ -75,8 +75,8 @@ export default class Mersenne {
 
     const cmp = rlen < this.n ? -1 : r.ucmp(this.p)
     if (cmp === 0) {
-      r.words[0] = 0
-      r.length = 1
+      r.words[0] = 0;
+      (r.length as any) = 1
     } else if (cmp > 0) {
       r.isub(this.p)
     } else {

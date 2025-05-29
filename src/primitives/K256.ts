@@ -51,17 +51,17 @@ export default class K256 extends Mersenne {
     for (; i < outLen; i++) {
       output.words[i] = input.words[i]
     }
-    output.length = outLen
+    (output.length as any) = outLen
 
     if (input.length <= 9) {
-      input.words[0] = 0
-      input.length = 1
+      input.words[0] = 0;
+      (input.length as any) = 1
       return
     }
 
     // Shift by 9 limbs
     let prev = input.words[9]
-    output.words[output.length++] = prev & mask
+    output.words[(output as any).length++] = prev & mask
 
     for (i = 10; i < input.length; i++) {
       const next = input.words[i] | 0
@@ -71,9 +71,9 @@ export default class K256 extends Mersenne {
     prev >>>= 22
     input.words[i - 10] = prev
     if (prev === 0 && input.length > 10) {
-      input.length -= 10
+      (input as any).length -= 10
     } else {
-      input.length -= 9
+      (input as any).length -= 9
     }
   }
 
@@ -92,8 +92,8 @@ export default class K256 extends Mersenne {
   imulK (num: BigNumber): BigNumber {
     // K = 0x1000003d1 = [ 0x40, 0x3d1 ]
     num.words[num.length] = 0
-    num.words[num.length + 1] = 0
-    num.length += 2
+    num.words[num.length + 1] = 0;
+    (num.length as unknown as number) += 2
 
     // bounded at: 0x40 * 0x3ffffff + 0x3d0 = 0x100000390
     let lo = 0
@@ -106,9 +106,9 @@ export default class K256 extends Mersenne {
 
     // Fast length reduction
     if (num.words[num.length - 1] === 0) {
-      num.length--
+      (num.length as unknown as number)--
       if (num.words[num.length - 1] === 0) {
-        num.length--
+        (num.length as unknown as number)--
       }
     }
     return num
