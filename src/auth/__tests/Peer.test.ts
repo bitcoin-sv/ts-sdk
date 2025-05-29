@@ -40,6 +40,19 @@ class LocalTransport implements Transport {
   }
 }
 
+function waitForNextGeneralMessage (
+  peer: Peer,
+  handler?: (senderPublicKey: string, payload: number[]) => void
+): Promise<void> {
+  return new Promise(resolve => {
+    const listenerId = peer.listenForGeneralMessages((senderPublicKey, payload) => {
+      peer.stopListeningForGeneralMessages(listenerId)
+      if (handler !== undefined) handler(senderPublicKey, payload)
+      resolve()
+    })
+  })
+}
+
 describe('Peer class mutual authentication and certificate exchange', () => {
   let walletA: WalletInterface, walletB: WalletInterface
   let transportA: LocalTransport, transportB: LocalTransport
@@ -264,22 +277,14 @@ describe('Peer class mutual authentication and certificate exchange', () => {
         })().catch(e => { })
       })
     })
-    let aliceReceivedGeneralMessageOnFirstDevice = new Promise<void>((resolve) => {
-      aliceFirstDevice.listenForGeneralMessages((senderPublicKey, payload) => {
-        (async () => {
-          resolve()
-          alice1MessageHandler(senderPublicKey, payload)
-        })().catch(e => { })
-      })
-    })
-    const aliceReceivedGeneralMessageOnOtherDevice = new Promise<void>((resolve) => {
-      aliceOtherDevice.listenForGeneralMessages((senderPublicKey, payload) => {
-        (async () => {
-          resolve()
-          alice2MessageHandler(senderPublicKey, payload)
-        })().catch(e => { })
-      })
-    })
+    const aliceReceivedGeneralMessageOnFirstDevice = waitForNextGeneralMessage(
+      aliceFirstDevice,
+      alice1MessageHandler
+    )
+    const aliceReceivedGeneralMessageOnOtherDevice = waitForNextGeneralMessage(
+      aliceOtherDevice,
+      alice2MessageHandler
+    )
 
     await aliceFirstDevice.toPeer(Utils.toArray('Hello Bob!'))
     await bobReceivedGeneralMessage
@@ -288,8 +293,14 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     await aliceOtherDevice.toPeer(Utils.toArray('Hello Bob from my other device!'))
     await aliceReceivedGeneralMessageOnOtherDevice
     transportA1.connect(transportB)
-    await aliceFirstDevice.toPeer(Utils.toArray('Back on my first device now, Bob! Can you still hear me?'))
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    const waitForSecondMessage = waitForNextGeneralMessage(
+      aliceFirstDevice,
+      alice1MessageHandler
+    )
+    await aliceFirstDevice.toPeer(
+      Utils.toArray('Back on my first device now, Bob! Can you still hear me?')
+    )
+    await waitForSecondMessage
     expect(alice1MessageHandler.mock.calls.length).toEqual(2)
   }, 30000)
 
