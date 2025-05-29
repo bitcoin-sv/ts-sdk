@@ -1,9 +1,17 @@
 // @ts-nocheck
 import ReductionContext from './ReductionContext.js'
 
-// ... (rest of the BigNumber class as per your latest working version) ...
+/**
+ * JavaScript numbers are only precise up to 53 bits. Since Bitcoin relies on
+ * 256-bit cryptography, this BigNumber class enables operations on larger
+ * numbers.
+ *
+ * @class BigNumber
+ */
 export default class BigNumber {
-  // ... (static readonly arrays, wordSize, constants - UNCHANGED from your previous "new" version) ...
+  /**
+   * @privateinitializer
+   */
   public static readonly zeros: string[] = [
     '', '0', '00', '000', '0000', '00000', '000000', '0000000', '00000000',
     '000000000', '0000000000', '00000000000', '000000000000', '0000000000000',
@@ -13,11 +21,17 @@ export default class BigNumber {
     '000000000000000000000000', '0000000000000000000000000'
   ]
 
+  /**
+   * @privateinitializer
+   */
   static readonly groupSizes: number[] = [
     0, 0, 25, 16, 12, 11, 10, 9, 8, 8, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5,
     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
   ]
 
+  /**
+   * @privateinitializer
+   */
   static readonly groupBases: number[] = [
     0, 0, 33554432, 43046721, 16777216, 48828125, 60466176, 40353607, 16777216,
     43046721, 10000000, 19487171, 35831808, 62748517, 7529536, 11390625,
@@ -26,6 +40,14 @@ export default class BigNumber {
     28629151, 33554432, 39135393, 45435424, 52521875, 60466176
   ]
 
+  /**
+   * The word size of big number chunks.
+   *
+   * @property wordSize
+   *
+   * @example
+   * console.log(BigNumber.wordSize);  // output: 26
+   */
   static readonly wordSize: number = 26
   private static readonly WORD_SIZE_BIGINT: bigint = BigInt(BigNumber.wordSize)
   private static readonly WORD_MASK: bigint = (1n << BigNumber.WORD_SIZE_BIGINT) - 1n
@@ -37,12 +59,28 @@ export default class BigNumber {
   private _magnitude: bigint
   private _sign: 0 | 1
   private _nominalWordLength: number
+
+  /**
+   * Reduction context of the big number.
+   *
+   * @property red
+   */
   public red: ReductionContext | null
 
+  /**
+   * Negative flag. Indicates whether the big number is a negative number.
+   * - If 0, the number is positive.
+   * - If 1, the number is negative.
+   *
+   * @property negative
+   */
   public get negative (): number {
     return this._sign
   }
 
+  /**
+   * Sets the negative flag. Only 0 (positive) or 1 (negative) are allowed.
+   */
   public set negative (val: number) {
     this.assert(val === 0 || val === 1, 'Negative property must be 0 or 1')
     const newSign = val === 1 ? 1 : 0
@@ -64,6 +102,11 @@ export default class BigNumber {
     return arr.length > 0 ? arr : [0]
   }
 
+  /**
+   * Array of numbers, where each number represents a part of the value of the big number.
+   *
+   * @property words
+   */
   public get words (): number[] {
     const computed = this._computedWordsArray
     if (this._nominalWordLength <= computed.length) {
@@ -76,6 +119,9 @@ export default class BigNumber {
     return paddedWords
   }
 
+  /**
+   * Sets the words array representing the value of the big number.
+   */
   public set words (newWords: number[]) {
     const oldSign = this._sign
     let newMagnitude = 0n
@@ -90,10 +136,22 @@ export default class BigNumber {
     this.normSign()
   }
 
+  /**
+   * Length of the words array.
+   *
+   * @property length
+   */
   public get length (): number {
     return Math.max(1, this._nominalWordLength)
   }
 
+  /**
+   * Checks whether a value is an instance of BigNumber. Regular JS numbers fail this check.
+   *
+   * @method isBN
+   * @param num - The value to be checked.
+   * @returns - Returns a boolean value determining whether or not the checked num parameter is a BigNumber.
+   */
   static isBN (num: any): boolean {
     if (num instanceof BigNumber) return true
     return (
@@ -104,9 +162,33 @@ export default class BigNumber {
     )
   }
 
+  /**
+   * Returns the bigger value between two BigNumbers
+   *
+   * @method max
+   * @param left - The first BigNumber to be compared.
+   * @param right - The second BigNumber to be compared.
+   * @returns - Returns the bigger BigNumber between left and right.
+   */
   static max (left: BigNumber, right: BigNumber): BigNumber { return left.cmp(right) > 0 ? left : right }
+
+  /**
+   * Returns the smaller value between two BigNumbers
+   *
+   * @method min
+   * @param left - The first BigNumber to be compared.
+   * @param right - The second BigNumber to be compared.
+   * @returns - Returns the smaller value between left and right.
+   */
   static min (left: BigNumber, right: BigNumber): BigNumber { return left.cmp(right) < 0 ? left : right }
 
+  /**
+   * @constructor
+   *
+   * @param number - The number (various types accepted) to construct a BigNumber from. Default is 0.
+   * @param base - The base of number provided. By default is 10.
+   * @param endian - The endianness provided. By default is 'big endian'.
+   */
   constructor (
     number: number | string | number[] | bigint | undefined = 0,
     base: number | 'be' | 'le' | 'hex' = 10,
@@ -311,6 +393,14 @@ export default class BigNumber {
     return this._magnitude.toString(16)
   }
 
+  /**
+   * Converts the BigNumber instance to a string representation.
+   *
+   * @method toString
+   * @param base - The base for representing number. Default is 10. Other accepted values are 16 and 'hex'.
+   * @param padding - Represents the minimum number of digits to represent the BigNumber as a string. Default is 1.
+   * @returns The string representation of the BigNumber instance
+   */
   toString (base: number | 'hex' = 10, padding: number = 1): string {
     if (base === 16 || base === 'hex') {
       // For toString('hex', N), N is the 'multiple-of-N characters' rule from bn.js tests
@@ -378,12 +468,26 @@ export default class BigNumber {
     return (this._sign === 1 ? '-' : '') + out
   }
 
+  /**
+   * Converts the BigNumber instance to a JavaScript number.
+   * Please note that JavaScript numbers are only precise up to 53 bits.
+   *
+   * @method toNumber
+   * @throws If the BigNumber instance cannot be safely stored in a JavaScript number
+   * @returns The JavaScript number representation of the BigNumber instance.
+   */
   toNumber (): number {
     const val = this._getSignedValue()
     if (val > BigNumber.MAX_SAFE_INTEGER_BIGINT || val < BigNumber.MIN_SAFE_INTEGER_BIGINT) throw new Error('Number can only safely store up to 53 bits')
     return Number(val)
   }
 
+  /**
+   * Converts the BigNumber instance to a JSON-formatted string.
+   *
+   * @method toJSON
+   * @returns The JSON string representation of the BigNumber instance.
+   */
   toJSON (): string {
     const hex = this._getMinimalHex()
     return (this.isNeg() ? '-' : '') + hex
@@ -407,6 +511,14 @@ export default class BigNumber {
     }
   }
 
+  /**
+   * Converts the BigNumber instance to an array of bytes.
+   *
+   * @method toArray
+   * @param endian - Endianness of the output array, defaults to 'be'.
+   * @param length - Optional length of the output array.
+   * @returns Array of bytes representing the BigNumber.
+   */
   toArray (endian: 'le' | 'be' = 'be', length?: number): number[] {
     this.strip()
     const actualByteLength = this.byteLength()
@@ -423,7 +535,20 @@ export default class BigNumber {
     return res
   }
 
+  /**
+   * Calculates the number of bits required to represent the BigNumber.
+   *
+   * @method bitLength
+   * @returns The bit length of the BigNumber.
+   */
   bitLength (): number { if (this._magnitude === 0n) return 0; return this._magnitude.toString(2).length }
+  /**
+   * Converts a BigNumber to an array of bits.
+   *
+   * @method toBitArray
+   * @param num - The BigNumber to convert.
+   * @returns An array of bits.
+   */
   static toBitArray (num: BigNumber): Array<0 | 1> {
     const len = num.bitLength()
     if (len === 0) return []
@@ -435,8 +560,22 @@ export default class BigNumber {
     return w
   }
 
+  /**
+   * Instance version of {@link toBitArray}.
+   */
   toBitArray (): Array<0 | 1> { return BigNumber.toBitArray(this) }
 
+  /**
+   * Returns the number of trailing zero bits in the big number.
+   *
+   * @method zeroBits
+   * @returns Returns the number of trailing zero bits
+   * in the binary representation of the big number.
+   *
+   * @example
+   * const bn = new BigNumber('8'); // binary: 1000
+   * const zeroBits = bn.zeroBits(); // 3
+   */
   zeroBits (): number {
     if (this._magnitude === 0n) return 0
     let c = 0
@@ -448,6 +587,12 @@ export default class BigNumber {
     return c
   }
 
+  /**
+   * Calculates the number of bytes required to represent the BigNumber.
+   *
+   * @method byteLength
+   * @returns The byte length of the BigNumber.
+   */
   byteLength (): number { if (this._magnitude === 0n) return 0; return Math.ceil(this.bitLength() / 8) }
 
   private _getSignedValue (): bigint { return this._sign === 1 ? -this._magnitude : this._magnitude }
@@ -709,8 +854,36 @@ export default class BigNumber {
   redNeg (): BigNumber { this.assert(this.red, 'redNeg works only with red numbers'); this.red.verify1(this); return this.red.neg(this) }
   redPow (num: BigNumber): BigNumber { this.assert(this.red != null && num.red == null, 'redPow(normalNum)'); this.red.verify1(this); return this.red.pow(this, num) }
 
-  static fromHex (hex: string, endian?: 'le' | 'be' | 'little' | 'big'): BigNumber { let eE: 'le' | 'be' = 'be'; if (endian === 'little' || endian === 'le')eE = 'le'; return new BigNumber(hex, 16, eE) }
+  /**
+   * Creates a BigNumber from a hexadecimal string.
+   *
+   * @static
+   * @method fromHex
+   * @param hex - The hexadecimal string to create a BigNumber from.
+   * @param endian - Optional endianness for parsing the hex string.
+   * @returns Returns a BigNumber created from the hexadecimal input string.
+   *
+   * @example
+   * const exampleHex = 'a1b2c3';
+   * const bigNumber = BigNumber.fromHex(exampleHex);
+   */
+  static fromHex (hex: string, endian?: 'le' | 'be' | 'little' | 'big'): BigNumber {
+    let eE: 'le' | 'be' = 'be'
+    if (endian === 'little' || endian === 'le') eE = 'le'
+    return new BigNumber(hex, 16, eE)
+  }
 
+  /**
+   * Converts this BigNumber to a hexadecimal string.
+   *
+   * @method toHex
+   * @param length - The minimum length of the hex string
+   * @returns Returns a string representing the hexadecimal value of this BigNumber.
+   *
+   * @example
+   * const bigNumber = new BigNumber(255)
+   * const hex = bigNumber.toHex()
+   */
   toHex (byteLength: number = 0): string {
     if (this.isZero() && byteLength === 0) return ''
 
@@ -729,10 +902,46 @@ export default class BigNumber {
     return (this.isNeg() ? '-' : '') + hexStr
   }
 
+  /**
+   * Creates a BigNumber from a JSON-serialized string.
+   *
+   * @static
+   * @method fromJSON
+   * @param str - The JSON-serialized string to create a BigNumber from.
+   * @returns Returns a BigNumber created from the JSON input string.
+   */
   static fromJSON (str: string): BigNumber { return new BigNumber(str, 16) }
+
+  /**
+   * Creates a BigNumber from a number.
+   *
+   * @static
+   * @method fromNumber
+   * @param n - The number to create a BigNumber from.
+   * @returns Returns a BigNumber equivalent to the input number.
+   */
   static fromNumber (n: number): BigNumber { return new BigNumber(n) }
+
+  /**
+   * Creates a BigNumber from a string, considering an optional base.
+   *
+   * @static
+   * @method fromString
+   * @param str - The string to create a BigNumber from.
+   * @param base - The base used for conversion. If not provided, base 10 is assumed.
+   * @returns Returns a BigNumber equivalent to the string after conversion from the specified base.
+   */
   static fromString (str: string, base?: number | 'hex'): BigNumber { return new BigNumber(str, base) }
 
+  /**
+   * Creates a BigNumber from a signed magnitude number.
+   *
+   * @static
+   * @method fromSm
+   * @param bytes - The signed magnitude number to convert to a BigNumber.
+   * @param endian - Defines endianess. If not provided, big endian is assumed.
+   * @returns Returns a BigNumber equivalent to the signed magnitude number interpreted with specified endianess.
+   */
   static fromSm (bytes: number[], endian: 'big' | 'little' = 'big'): BigNumber {
     if (bytes.length === 0) return new BigNumber(0n)
 
@@ -764,6 +973,13 @@ export default class BigNumber {
     return r
   }
 
+  /**
+   * Converts this BigNumber to a signed magnitude number.
+   *
+   * @method toSm
+   * @param endian - Defines endianess. If not provided, big endian is assumed.
+   * @returns Returns an array equivalent to this BigNumber interpreted as a signed magnitude with specified endianess.
+   */
   toSm (endian: 'big' | 'little' = 'big'): number[] {
     if (this._magnitude === 0n) {
       return this._sign === 1 ? [0x80] : []
@@ -788,6 +1004,16 @@ export default class BigNumber {
     return endian === 'little' ? bytes.reverse() : bytes
   }
 
+  /**
+   * Creates a BigNumber from a number representing the "bits" value in a block header.
+   *
+   * @static
+   * @method fromBits
+   * @param bits - The number representing the bits value in a block header.
+   * @param strict - If true, an error is thrown if the number has negative bit set.
+   * @returns Returns a BigNumber equivalent to the "bits" value in a block header.
+   * @throws Will throw an error if `strict` is `true` and the number has negative bit set.
+   */
   static fromBits (bits: number, strict: boolean = false): BigNumber {
     const nSize = bits >>> 24
     const nWordCompact = bits & 0x007fffff
@@ -817,6 +1043,12 @@ export default class BigNumber {
     return bn
   }
 
+  /**
+   * Converts this BigNumber to a number representing the "bits" value in a block header.
+   *
+   * @method toBits
+   * @returns Returns a number equivalent to the "bits" value in a block header.
+   */
   toBits (): number {
     this.strip()
     if (this.isZero() && !this.isNeg()) return 0
@@ -866,7 +1098,21 @@ export default class BigNumber {
     return b >>> 0
   }
 
-  static fromScriptNum (num: number[], requireMinimal: boolean = false, maxNumSize?: number): BigNumber {
+  /**
+   * Creates a BigNumber from the format used in Bitcoin scripts.
+   *
+   * @static
+   * @method fromScriptNum
+   * @param num - The number in the format used in Bitcoin scripts.
+   * @param requireMinimal - If true, non-minimally encoded values will throw an error.
+   * @param maxNumSize - The maximum allowed size for the number.
+   * @returns Returns a BigNumber equivalent to the number used in a Bitcoin script.
+   */
+  static fromScriptNum (
+    num: number[],
+    requireMinimal: boolean = false,
+    maxNumSize?: number
+  ): BigNumber {
     if (maxNumSize !== undefined && num.length > maxNumSize) throw new Error('script number overflow')
     if (num.length === 0) return new BigNumber(0n)
     if (requireMinimal) {
@@ -879,8 +1125,22 @@ export default class BigNumber {
     return BigNumber.fromSm(num, 'little')
   }
 
+  /**
+   * Converts this BigNumber to a number in the format used in Bitcoin scripts.
+   *
+   * @method toScriptNum
+   * @returns Returns the equivalent to this BigNumber as a Bitcoin script number.
+   */
   toScriptNum (): number[] { return this.toSm('little') }
 
+  /**
+   * Compute the multiplicative inverse of the current BigNumber in the modulus field specified by `p`.
+   * The multiplicative inverse is a number which when multiplied with the current BigNumber gives '1' in the modulus field.
+   *
+   * @method _invmp
+   * @param p - The `BigNumber` specifying the modulus field.
+   * @returns The multiplicative inverse `BigNumber` in the modulus field specified by `p`.
+   */
   _invmp (p: BigNumber): BigNumber {
     this.assert(p._sign === 0, 'p must not be negative for _invmp')
     this.assert(!p.isZero(), 'p must not be zero for _invmp')
@@ -924,6 +1184,15 @@ export default class BigNumber {
     return resultBN
   }
 
+  /**
+   * Performs multiplication between the BigNumber instance and a given BigNumber.
+   * It chooses the multiplication method based on the lengths of the numbers to optimize execution time.
+   *
+   * @method mulTo
+   * @param num - The BigNumber multiply with.
+   * @param out - The BigNumber where to store the result.
+   * @returns The BigNumber resulting from the multiplication operation.
+   */
   mulTo (num: BigNumber, out: BigNumber): BigNumber {
     out._magnitude = this._magnitude * num._magnitude
     out._sign = out._magnitude === 0n ? 0 : ((this._sign ^ num._sign) as 0 | 1)
