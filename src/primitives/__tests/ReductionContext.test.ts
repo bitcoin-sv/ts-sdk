@@ -248,7 +248,12 @@ describe('BN.js/Reduction context', function () {
 
   it('should avoid 4.1.0 regresion', function () {
     const bits2int = (obits, q): BigNumber => {
-      const bits = new BigNumber(obits)
+      let bits
+      if (Buffer.isBuffer(obits)) {
+        bits = new BigNumber(obits.toString('hex'), 16)
+      } else {
+        bits = new BigNumber(obits)
+      }
       const shift = (obits.length << 3) - q.bitLength()
       if (shift > 0) {
         bits.ishrn(shift)
