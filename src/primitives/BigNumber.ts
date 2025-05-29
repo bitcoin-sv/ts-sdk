@@ -257,10 +257,8 @@ export default class BigNumber {
       this._nominalWordLength = 1
       this._sign = 0
     } else {
-      let len = 0; let temp = this._magnitude
-      if (temp === 0n) len = 1
-      else { while (temp > 0n) { temp >>= BigNumber.WORD_SIZE_BIGINT; len++ } }
-      this._nominalWordLength = len > 0 ? len : 1
+      const bitLen = this._magnitude.toString(2).length
+      this._nominalWordLength = Math.max(1, Math.ceil(bitLen / BigNumber.wordSize))
     }
   }
 
@@ -469,12 +467,40 @@ export default class BigNumber {
   add (num: BigNumber): BigNumber { const r = new BigNumber(0n); r._setValueFromSigned(this._getSignedValue() + num._getSignedValue()); return r }
   isub (num: BigNumber): this { this._setValueFromSigned(this._getSignedValue() - num._getSignedValue()); return this }
   sub (num: BigNumber): BigNumber { const r = new BigNumber(0n); r._setValueFromSigned(this._getSignedValue() - num._getSignedValue()); return r }
-  mul (num: BigNumber): BigNumber { const r = new BigNumber(0n); r._setValueFromSigned(this._getSignedValue() * num._getSignedValue()); return r }
-  imul (num: BigNumber): this { this._setValueFromSigned(this._getSignedValue() * num._getSignedValue()); return this }
+  mul (num: BigNumber): BigNumber {
+    const r = new BigNumber(0n)
+    r._magnitude = this._magnitude * num._magnitude
+    r._sign = r._magnitude === 0n ? 0 : ((this._sign ^ num._sign) as 0 | 1)
+    r._nominalWordLength = this.length + num.length
+    r.red = null
+    return r.normSign()
+  }
+
+  imul (num: BigNumber): this {
+    this._magnitude *= num._magnitude
+    this._sign = this._magnitude === 0n ? 0 : ((this._sign ^ num._sign) as 0 | 1)
+    this._nominalWordLength = this.length + num.length
+    this.red = null
+    return this.normSign()
+  }
   imuln (num: number): this { this.assert(typeof num === 'number', 'Assertion failed'); this.assert(Math.abs(num) <= BigNumber.MAX_IMULN_ARG, 'Assertion failed'); this._setValueFromSigned(this._getSignedValue() * BigInt(num)); return this }
   muln (num: number): BigNumber { return this.clone().imuln(num) }
-  sqr (): BigNumber { const v = this._getSignedValue(); const r = new BigNumber(0n); r._setValueFromSigned(v * v); return r }
-  isqr (): this { const v = this._getSignedValue(); this._setValueFromSigned(v * v); return this }
+  sqr (): BigNumber {
+    const r = new BigNumber(0n)
+    r._magnitude = this._magnitude * this._magnitude
+    r._sign = 0
+    r._nominalWordLength = this.length * 2
+    r.red = null
+    return r
+  }
+
+  isqr (): this {
+    this._magnitude *= this._magnitude
+    this._sign = 0
+    this._nominalWordLength = this.length * 2
+    this.red = null
+    return this
+  }
 
   pow (num: BigNumber): BigNumber {
     this.assert(num._sign === 0, 'Exponent for pow must be non-negative')
@@ -758,9 +784,11 @@ export default class BigNumber {
   }
 
   mulTo (num: BigNumber, out: BigNumber): BigNumber {
-    const resultVal = this._getSignedValue() * num._getSignedValue()
-    out._setValueFromSigned(resultVal)
+    out._magnitude = this._magnitude * num._magnitude
+    out._sign = out._magnitude === 0n ? 0 : ((this._sign ^ num._sign) as 0 | 1)
+    out._nominalWordLength = this.length + num.length
     out.red = null
+    out.normSign()
     return out
   }
 }
