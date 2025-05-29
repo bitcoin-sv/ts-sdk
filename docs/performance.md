@@ -29,3 +29,15 @@ node benchmarks/serialization-bench.js 200000 1
 | --- | --- | --- | --- | --- | --- |
 | master (pre-May-2025) | 6.12ms | 10.11ms | 6.35ms | 12.56ms | 3.39ms |
 | fix-mem (May-2025) | 8.46ms | 8.12ms | 27.77ms | 11.16ms | 10.31ms |
+
+## Transaction Verification
+
+Command:
+
+```bash
+node benchmarks/transaction-bench.js
+```
+
+| Branch | deep chain verify | wide transaction verify | large tx verify | nested inputs verify |
+| --- | --- | --- | --- | --- |
+| fix-mem (May-2025) | 3335.76ms | 2930.86ms | 1534.36ms | 1198.08ms |
