@@ -45,8 +45,8 @@ export default class BigNumber {
   private static readonly WORD_MASK: bigint = (1n << BigNumber.WORD_SIZE_BIGINT) - 1n;
   private static readonly MAX_SAFE_INTEGER_BIGINT: bigint = BigInt(Number.MAX_SAFE_INTEGER);
   private static readonly MIN_SAFE_INTEGER_BIGINT: bigint = BigInt(Number.MIN_SAFE_INTEGER);
-  private static readonly MAX_IMULN_ARG: number = 0x4000000 -1; // Original was `< 0x4000000`, so max is one less.
-  private static readonly MAX_NUMBER_CONSTRUCTOR_MAG_BIGINT: bigint = (1n << 53n) -1n; // 0x1fffffffffffff
+  private static readonly MAX_IMULN_ARG: number = 0x4000000 -1; 
+  private static readonly MAX_NUMBER_CONSTRUCTOR_MAG_BIGINT: bigint = (1n << 53n) -1n; 
 
 
   private _magnitude: bigint
@@ -93,27 +93,22 @@ export default class BigNumber {
   }
   
   public set words(newWords: number[]) {
-    // This re-initializes the BN based on these words, BE.
-    // This path is tricky because it bypasses the normal constructor safeguards
-    // and endian handling for array inputs. We assume newWords are 26-bit BE words.
     const oldSign = this._sign;
     let newMagnitude = 0n;
-    for (let i = newWords.length - 1; i >= 0; i--) {
-        newMagnitude = (newMagnitude << BigNumber.WORD_SIZE_BIGINT) | BigInt(newWords[i] & Number(BigNumber.WORD_MASK));
+    const len = newWords.length > 0 ? newWords.length : 1;
+    for (let i = len - 1; i >= 0; i--) {
+        const wordVal = newWords[i] === undefined ? 0 : newWords[i]; // Handle undefined in sparse arrays
+        newMagnitude = (newMagnitude << BigNumber.WORD_SIZE_BIGINT) | BigInt(wordVal & Number(BigNumber.WORD_MASK));
     }
     this._magnitude = newMagnitude;
-    this._sign = oldSign; // Preserve sign if possible
-    this._nominalWordLength = newWords.length > 0 ? newWords.length : 1;
-    this.normSign();
+    this._sign = oldSign; 
+    this._nominalWordLength = len;
+    this.normSign(); // This also calls _finishInitialization
   }
 
 
   public get length(): number {
-    // Original `length` was a direct property, mutable. `strip` would change it.
-    // `expand` would change it.
-    // The getter for `words` respects `_nominalWordLength`.
-    // So `length` should also respect `_nominalWordLength`.
-    return Math.max(1, this._nominalWordLength); // Ensure length is at least 1
+    return Math.max(1, this._nominalWordLength);
   }
 
   static isBN (num: any): boolean {
@@ -148,7 +143,7 @@ export default class BigNumber {
     if (base === 'le' || base === 'be') { effectiveEndian = base; effectiveBase = 10; }
     
     if (typeof number === 'number') { this.initNumber(number, effectiveEndian); return; }
-    if (Array.isArray(number)) { this.initArray(number, effectiveEndian); return; } // Check Array.isArray specifically
+    if (Array.isArray(number)) { this.initArray(number, effectiveEndian); return; } 
     
     if (typeof number === 'string') {
         if (effectiveBase === 'hex') effectiveBase = 16;
@@ -168,13 +163,13 @@ export default class BigNumber {
                 if (hexStr.length % 2 !== 0) hexStr = '0' + hexStr;
                 for (let i = 0; i < hexStr.length; i += 2) {
                     const byteHex = hexStr.substring(i, i + 2); const byteVal = parseInt(byteHex, 16);
-                    if (isNaN(byteVal)) throw new Error('Invalid character in ' + hexStr); // Match original error
+                    if (isNaN(byteVal)) throw new Error('Invalid character in ' + hexStr); 
                     bytes.push(byteVal);
                 }
                 this.initArray(bytes, 'le'); this._sign = sign; this.normSign(); return;
             } else {
                  try { tempMagnitude = BigInt('0x' + numStr); } 
-                 catch (e) { throw new Error('Invalid character in ' + numStr); } // Match original error
+                 catch (e) { throw new Error('Invalid character in ' + numStr); }
             }
             this._initializeState(tempMagnitude, sign); this.normSign();
         } else { 
@@ -182,15 +177,16 @@ export default class BigNumber {
                 this._parseBaseString(numStr, effectiveBase as number);
                 this._sign = sign; this.normSign();
                 if (effectiveEndian === 'le') {
-                    const currentSign = this._sign; // Preserve sign
-                    this.initArray(this.toArray('be'), 'le'); // Re-init as LE bytes
-                    this._sign = currentSign; this.normSign(); // Restore sign
+                    const currentSign = this._sign; 
+                    this.initArray(this.toArray('be'), 'le'); 
+                    this._sign = currentSign; this.normSign(); 
                 }
             } catch (e) {
-                if (e.message.includes('Invalid character in string') || e.message.includes('Invalid digit for base')) {
-                    throw new Error('Invalid character'); // Match original simpler error
+                // Match original simpler error message
+                if (e.message.includes('Invalid character in string') || e.message.includes('Invalid digit for base') || e.message.startsWith('Invalid character:')) {
+                    throw new Error('Invalid character'); 
                 }
-                throw e; // Rethrow if it's a different error
+                throw e;
             }
         }
     } else if (number !== 0) { this.assert(false, 'Unsupported input type for BigNumber constructor'); } 
@@ -203,7 +199,7 @@ export default class BigNumber {
 
     const digits = "0123456789abcdefghijklmnopqrstuvwxyz";
     let result = "";
-    let currentNum = num > 0n ? num : -num; // Work with positive magnitude
+    let currentNum = num > 0n ? num : -num; 
     const bigBase = BigInt(base);
 
     while (currentNum > 0n) {
@@ -219,30 +215,19 @@ export default class BigNumber {
     this._magnitude = 0n;
     const bigBase = BigInt(base);
     
-    // Original parseBase logic for chunking:
-    let limbLen = 0;
-    let limbPowNum = 1; // JS number for original loop condition
-    for (; limbPowNum * base <= 0x3ffffff && limbPowNum <= 0x3ffffff / base ; limbPowNum *= base) {
-        limbLen++;
+    let groupSize = BigNumber.groupSizes[base];
+    let groupBaseBigInt = BigInt(BigNumber.groupBases[base]);
+
+    if (!groupSize || !groupBaseBigInt) { // Fallback for bases not in tables
+        groupSize = Math.floor(Math.log(0x3ffffff) / Math.log(base)) || 1;
+        groupBaseBigInt = bigBase ** BigInt(groupSize);
     }
-    // After loop, limbLen is the number of digits whose value is <= 0x3ffffff.
-    // limbPowNum is base^limbLen.
-    // If base is large (e.g. 36), limbLen will be smaller.
-    // E.g. base 10: 10^0=1, 10^1=10,..., 10^7 < 0x3ffffff, 10^8 > 0x3ffffff. So limbLen=7. limbPowNum = 10^7.
-    // Original code: `limbLen--`, `limbPow = (limbPow / base) | 0`.
-    // This means chunks are `limbLen` long, multiplied by `base^(limbLen-1)`.
-    // No, the logic was: `limbLen` is max digits fitting in word. `limbPow` is `base^limbLen`.
-    // Then `imuln(limbPow)` and add the current chunk.
-    
-    const groupSize = BigNumber.groupSizes[base] || Math.floor(Math.log(0x3ffffff) / Math.log(base)); // Estimate if not in table
-    const groupBaseBigInt = BigInt(BigNumber.groupBases[base]) || (bigBase ** BigInt(groupSize));
     
     let currentPos = 0;
     const totalLen = numberStr.length;
     
-    // First chunk can be shorter
     let firstChunkLen = totalLen % groupSize;
-    if (firstChunkLen === 0 && totalLen > 0) firstChunkLen = groupSize; // If multiple of groupSize, first chunk is full size
+    if (firstChunkLen === 0 && totalLen > 0) firstChunkLen = groupSize;
 
     if (firstChunkLen > 0) {
         const chunkStr = numberStr.substring(currentPos, currentPos + firstChunkLen);
@@ -265,19 +250,13 @@ export default class BigNumber {
     for (let i = 0; i < str.length; i++) {
         const charCode = str.charCodeAt(i);
         let digitVal;
-        if (charCode >= 48 && charCode <= 57) digitVal = charCode - 48;
-        else if (charCode >= 65 && charCode <= 90) digitVal = charCode - 65 + 10;
-        else if (charCode >= 97 && charCode <= 122) digitVal = charCode - 97 + 10;
-        else throw new Error('Invalid character in string: ' + str[i]);
+        if (charCode >= 48 && charCode <= 57) digitVal = charCode - 48; // 0-9
+        else if (charCode >= 65 && charCode <= 90) digitVal = charCode - 65 + 10; // A-Z
+        else if (charCode >= 97 && charCode <= 122) digitVal = charCode - 97 + 10; // a-z
+        else throw new Error('Invalid character: ' + str[i]); // Simplified error
         
-        if (digitVal >= base) throw new Error('Invalid digit for base: ' + str[i]);
+        if (digitVal >= base) throw new Error('Invalid character'); // Simplified error
         r = r * base + digitVal;
-        // Check for overflow if r exceeds Number.MAX_SAFE_INTEGER, though chunks should be small enough.
-        if (r > Number.MAX_SAFE_INTEGER) {
-            // This indicates an issue with chunking logic in _parseBaseString if it happens.
-            // The original _parseBaseWord could also overflow silently.
-            // For strict compatibility, allow overflow if original did.
-        }
     }
     return r;
   }
@@ -291,9 +270,10 @@ export default class BigNumber {
   private _finishInitialization() : void {
     if (this._magnitude === 0n) {
         this._nominalWordLength = 1;
+        this._sign = 0; // Ensure sign is 0 for magnitude 0
     } else {
         let len = 0; let temp = this._magnitude;
-        if (temp === 0n) len = 1;
+        if (temp === 0n) len = 1; // Should not happen due to outer if
         else { while (temp > 0n) { temp >>= BigNumber.WORD_SIZE_BIGINT; len++; } }
         this._nominalWordLength = len > 0 ? len : 1;
     }
@@ -307,7 +287,7 @@ export default class BigNumber {
     this._initializeState(BigInt(Math.abs(number)), number < 0 ? 1 : 0);
     if (endian === 'le') {
         const currentSign = this._sign;
-        const beBytes = this.toArray('be'); // This toArray must be correct
+        const beBytes = this.toArray('be'); 
         this.initArray(beBytes, 'le'); 
         this._sign = currentSign; 
         this.normSign();
@@ -330,7 +310,7 @@ export default class BigNumber {
 
   expand (size: number): this {
     this.assert(size >= 0, "Expand size must be non-negative");
-    this._nominalWordLength = Math.max(this._nominalWordLength, size, 1); // Always at least 1
+    this._nominalWordLength = Math.max(this._nominalWordLength, size, 1);
     return this;
   }
   strip (): this { this._finishInitialization(); return this.normSign(); }
@@ -345,15 +325,14 @@ export default class BigNumber {
 
   private toHexString (padding: number): string {
     if (this._magnitude === 0n) {
-        if (padding === 0 && this.toString.caller !== BigNumber.prototype.toHex) return ''; // Original test `new BN().toString(16,0)` is '0', but `new BN().toHex(0)` is ''.
         let out = '0';
-        if (padding > 0 && padding !==1) { // padding = 1 means minimal length
-            while (out.length % padding !== 0) { out = '0' + out; }
+        if (padding > 0) { 
+          while (out.length < padding) { out = '0' + out; }
         }
         return out;
     }
     let hex = this._magnitude.toString(16);
-    if (padding > 0 && padding !== 1) { while (hex.length % padding !== 0) { hex = '0' + hex; } }
+    if (padding > 0) { while (hex.length < padding) { hex = '0' + hex; } }
     return (this._sign === 1 ? '-' : '') + hex;
   }
 
@@ -364,23 +343,27 @@ export default class BigNumber {
       return out;
     }
 
-    const groupSize = BigNumber.groupSizes[base] || Math.floor(Math.log(Number.MAX_SAFE_INTEGER) / Math.log(base)); // Estimate if not in table
-    const groupBase = BigInt(BigNumber.groupBases[base]) || (BigInt(base) ** BigInt(groupSize));
+    let groupSize = BigNumber.groupSizes[base];
+    let groupBaseBigInt = BigInt(BigNumber.groupBases[base]);
+    if (!groupSize || !groupBaseBigInt || groupBaseBigInt === 0n) { // Fallback for bases not in tables or if table entry is 0
+        groupSize = Math.floor(Math.log(Number.MAX_SAFE_INTEGER) / Math.log(base)) || 1;
+        groupBaseBigInt = BigInt(base) ** BigInt(groupSize);
+    }
     
     let out = '';
     let tempMag = this._magnitude;
 
     while (tempMag > 0n) {
-      const remainder = tempMag % groupBase;
-      tempMag /= groupBase;
+      const remainder = tempMag % groupBaseBigInt;
+      tempMag /= groupBaseBigInt;
       
-      let chunkStr = this._bigIntToStringInBase(remainder, base); // Use helper for large remainders
+      let chunkStr = this._bigIntToStringInBase(remainder, base);
 
       if (tempMag > 0n) { 
         const zerosToPrepend = groupSize - chunkStr.length;
         if (zerosToPrepend > 0 && zerosToPrepend < BigNumber.zeros.length) {
              out = BigNumber.zeros[zerosToPrepend] + chunkStr + out;
-        } else if (zerosToPrepend > 0) { // fallback if zeros array is too short
+        } else if (zerosToPrepend > 0) { 
             out = '0'.repeat(zerosToPrepend) + chunkStr + out;
         } else {
             out = chunkStr + out;
@@ -401,32 +384,30 @@ export default class BigNumber {
   }
   toJSON (): string { return this.toString(16); }
 
-  // Refined toArrayLike* methods
   private toArrayLikeGeneric (res: number[], isLE: boolean): void {
     let tempMag = this._magnitude;
     let position = isLE ? 0 : res.length - 1;
     const increment = isLE ? 1 : -1;
-    const endCond = isLE ? () => position < res.length : () => position >= 0;
-
-    while (tempMag > 0n && endCond()) {
+    
+    for (let k = 0; k < res.length; ++k) { // Iterate through entire res length
+        if (tempMag === 0n) break; // Stop if magnitude is exhausted
         res[position] = Number(tempMag & 0xffn);
         tempMag >>= 8n;
         position += increment;
     }
-    // Remaining res elements are already 0 from initialization in toArray
   }
   
   toArray (endian: 'le' | 'be' = 'be', length?: number): number[] {
     this.strip(); 
     const actualByteLength = this.byteLength();
-    // If BN is 0, byteLength is 0. If length undefined, reqLength = max(1,0) = 1. Array is [0]. Correct.
     const reqLength = length ?? Math.max(1, actualByteLength); 
     
     this.assert(actualByteLength <= reqLength, 'byte array longer than desired length');
     this.assert(reqLength > 0, 'Requested array length <= 0');
 
     const res = new Array(reqLength).fill(0); 
-    if (this._magnitude === 0n) return res; 
+    if (this._magnitude === 0n && reqLength > 0) return res; // If 0, array of zeros
+    if (this._magnitude === 0n && reqLength === 0) return []; // Edge case from some tests, though reqLength > 0 is asserted.
     
     this.toArrayLikeGeneric(res, endian === 'le');
     return res;
@@ -442,8 +423,8 @@ export default class BigNumber {
   private _getSignedValue(): bigint { return this._sign === 1 ? -this._magnitude : this._magnitude; }
   private _setValueFromSigned(sVal: bigint): void { if (sVal < 0n) {this._magnitude = -sVal; this._sign = 1;} else {this._magnitude = sVal; this._sign = 0;} this._finishInitialization(); this.normSign(); }
 
-  toTwos (width: number): BigNumber { this.assert(width >= 0); const Bw = BigInt(width); let v = this._getSignedValue(); if (this._sign === 1 && this._magnitude !== 0n) v = (1n << Bw) - this._magnitude; const m = (1n << Bw) - 1n; v &= m; const r = new BigNumber(0n); r._initializeState(v, 0); return r; }
-  fromTwos (width: number): BigNumber { this.assert(width >= 0); const Bw = BigInt(width); let m = this._magnitude; if (width > 0 && (m >> (Bw - 1n)) & 1n) { const sVal = m - (1n << Bw); const r = new BigNumber(0n); r._setValueFromSigned(sVal); return r; } return this.clone(); }
+  toTwos (width: number): BigNumber { this.assert(width >= 0); const Bw = BigInt(width); let v = this._getSignedValue(); if (this._sign === 1 && this._magnitude !== 0n) v = (1n << Bw) + v; /* For negative, v is already negative. (1<<Bw) - abs(v) */ const m = (1n << Bw) - 1n; v &= m; const r = new BigNumber(0n); r._initializeState(v, 0); return r; }
+  fromTwos (width: number): BigNumber { this.assert(width >= 0); const Bw = BigInt(width); let m = this._magnitude; if (width > 0 && (m >> (Bw - 1n)) & 1n && this._sign === 0 /* only for positive numbers that look negative in two's complement */ ) { const sVal = m - (1n << Bw); const r = new BigNumber(0n); r._setValueFromSigned(sVal); return r; } return this.clone(); }
 
   isNeg (): boolean { return this._sign === 1 && this._magnitude !== 0n; }
   neg (): BigNumber { return this.clone().ineg(); }
@@ -451,9 +432,9 @@ export default class BigNumber {
 
   private _iuop(num: BigNumber, op: (a: bigint, b: bigint) => bigint): this {
     const newMag = op(this._magnitude, num._magnitude);
-    const isXor = op.toString().includes('^'); // Hacky way to detect XOR for length adjustment
+    const isXor = op === ((a: bigint, b: bigint) => a ^ b); 
     let targetNominalLength = this._nominalWordLength;
-    if (isXor) targetNominalLength = Math.max(this.length, num.length); // `length` getter considers _nominalWordLength
+    if (isXor) targetNominalLength = Math.max(this.length, num.length); 
     
     this._magnitude = newMag;
     this._finishInitialization(); 
@@ -485,22 +466,19 @@ export default class BigNumber {
   sub (num: BigNumber): BigNumber { const r=new BigNumber(0n); r._setValueFromSigned(this._getSignedValue() - num._getSignedValue()); return r; }
   mul (num: BigNumber): BigNumber { const r=new BigNumber(0n); r._setValueFromSigned(this._getSignedValue() * num._getSignedValue()); return r; }
   imul (num: BigNumber): this { this._setValueFromSigned(this._getSignedValue() * num._getSignedValue()); return this; }
-  imuln (num: number): this { this.assert(typeof num==='number'); this.assert(Math.abs(num) <= BigNumber.MAX_IMULN_ARG, 'num is too large'); this._setValueFromSigned(this._getSignedValue()*BigInt(num)); return this; }
+  imuln (num: number): this { this.assert(typeof num==='number', 'Assertion failed'); this.assert(Math.abs(num) <= BigNumber.MAX_IMULN_ARG, 'Assertion failed'); this._setValueFromSigned(this._getSignedValue()*BigInt(num)); return this; }
   muln (num: number): BigNumber { return this.clone().imuln(num); }
   sqr (): BigNumber { const v=this._getSignedValue(); const r=new BigNumber(0n); r._setValueFromSigned(v*v); return r; }
   isqr (): this { const v=this._getSignedValue(); this._setValueFromSigned(v*v); return this; }
 
   pow (num: BigNumber): BigNumber {
     this.assert(num._sign === 0, "Exponent for pow must be non-negative");
+    this.assert(num._magnitude < BigInt(2**32), "Exponent too large for pow"); // Safety for BigInt pow
     let baseVal = this._getSignedValue();
     let expVal = num._magnitude;
     if (expVal === 0n) return new BigNumber(1n);
-    let resVal = 1n;
-    while (expVal > 0n) {
-      if (expVal & 1n) resVal *= baseVal;
-      baseVal *= baseVal;
-      expVal >>= 1n;
-    }
+    // BigInt handles negative base for pow correctly: (-2)**2 = 4, (-2)**3 = -8
+    const resVal = baseVal ** expVal;
     const r = new BigNumber(0n); r._setValueFromSigned(resVal); return r;
   }
 
@@ -522,8 +500,19 @@ export default class BigNumber {
   div (num:BigNumber):BigNumber{return this.divmod(num,'div',false).div!;}
   mod (num:BigNumber):BigNumber{return this.divmod(num,'mod',false).mod!;}
   umod (num:BigNumber):BigNumber{return this.divmod(num,'mod',true).mod!;}
-  divRound (num:BigNumber):BigNumber{this.assert(!num.isZero());const tV=this._getSignedValue();const nV=num._getSignedValue();let d=tV/nV;const m=tV%nV;if(m===0n){const r=new BigNumber(0n);r._setValueFromSigned(d);return r;}const two=2n;const mT2A=m<0n?-m*two:m*two;const nVA=nV<0n?-nV:nV;if(mT2A>=nVA){if((tV>0n&&nV>0n)||(tV<0n&&nV<0n))d+=1n;else d-=1n;}const r=new BigNumber(0n);r._setValueFromSigned(d);return r;}
-  modrn (num:number):number{this.assert(num!==0);const tV=this._getSignedValue();const nV=BigInt(num);let res=tV%nV;if(res!==0n&&((res<0n&&num>0)||(res>0n&&num<0)))res+=nV;return Number(res);}
+  divRound (num:BigNumber):BigNumber{this.assert(!num.isZero());const tV=this._getSignedValue();const nV=num._getSignedValue();let d=tV/nV;const m=tV%nV;if(m===0n){const r=new BigNumber(0n);r._setValueFromSigned(d);return r;}const two=2n;const mT2A=m<0n?-m*two:m*two;const nVA=nV<0n?-nV:nV;if(mT2A>nVA || (mT2A===nVA && ((tV>0n && nV<0n) || (tV<0n && nV>0n)) ? (d%2n !== 0n) : (d%2n !==0n || m*2n === nV ))){ /* Banker's rounding logic can be complex; this tries to round half to even for positive d, or away from zero for negative d. Simplified: round halves away from zero. */ if(tV*nV > 0n) d = m*two >= nVA ? d+1n: d; else d = m*two >= nVA ? d-1n: d; } const r=new BigNumber(0n);r._setValueFromSigned(d);return r;}
+  
+  modrn (num_arg: number): number {
+    this.assert(num_arg !== 0, "Division by zero in modrn");
+    const abs_divisor = BigInt(Math.abs(num_arg));
+    if (abs_divisor === 0n) throw new Error("Division by zero in modrn");
+
+    let result_mag_bigint = this._magnitude % abs_divisor;
+    // Original bn.js modrn did not consider the sign of `this`.
+    // It effectively performed `this.abs().modrn(abs(num_arg))` then applied sign of `num_arg`.
+    return num_arg < 0 ? Number(-result_mag_bigint) : Number(result_mag_bigint);
+  }
+
   idivn (num:number):this{this.assert(num!==0);this.assert(Math.abs(num)<=BigNumber.MAX_IMULN_ARG,'num is too large');this._setValueFromSigned(this._getSignedValue()/BigInt(num));return this;}
   divn (num:number):BigNumber{return this.clone().idivn(num);}
 
@@ -560,7 +549,7 @@ export default class BigNumber {
   redPow(num:BigNumber):BigNumber{this.assert(this.red!=null&&num.red==null,'redPow(normalNum)');this.red.verify1(this);return this.red.pow(this,num);}
 
   static fromHex (hex:string,endian?:'le'|'be'|'little'|'big'):BigNumber{let eE:'le'|'be'='be';if(endian==='little'||endian==='le')eE='le';return new BigNumber(hex,16,eE);}
-  toHex (length:number=0):string{return this.toString('hex',length*2);}
+  toHex (length:number=0):string{ const s = this.toString('hex',length*2); if (this._magnitude === 0n && length === 0) return ''; return s; }
   static fromJSON(str:string):BigNumber{return new BigNumber(str,16);}
   static fromNumber(n:number):BigNumber{return new BigNumber(n);}
   static fromString(str:string,base?:number|'hex'):BigNumber{return new BigNumber(str,base);}
@@ -568,91 +557,129 @@ export default class BigNumber {
   static fromSm(bytes:number[],endian:'big'|'little'='big'):BigNumber{if(bytes.length===0)return new BigNumber(0n);const b=[...(endian==='little'?bytes.slice().reverse():bytes)];let s:0|1=0;if(b.length>0&&(b[0]&0x80)!==0){s=1;b[0]&=0x7f;}let m=0n;for(let i=0;i<b.length;i++)m=(m<<8n)|BigInt(b[i]);const r=new BigNumber(0n);r._initializeState(m,s);return r;}
   toSm(endian:'big'|'little'='big'):number[]{if(this._magnitude===0n&&this._sign===0)return[];if(this._magnitude===0n&&this._sign===1)return[0x80];let bytes:number[]=[];let tM=this._magnitude;while(tM>0n){bytes.unshift(Number(tM&0xffn));tM>>=8n;}if(bytes.length===0&&this._magnitude!==0n)bytes=[0];if(this._sign===1){if(bytes.length===0)bytes=[0x80];else if((bytes[0]&0x80)!==0)bytes.unshift(0x80);else bytes[0]|=0x80;}else{if(bytes.length>0&&(bytes[0]&0x80)!==0)bytes.unshift(0x00);}return endian==='little'?bytes.reverse():bytes;}
   
-  static fromBits(bits:number,strict:boolean=false):BigNumber{const nS=bits>>>24;const nW=bits&0x007fffff;const iN=(bits&0x00800000)!==0;if(strict&&iN&&nW!==0)throw new Error('Negative bit set in strict mode for fromBits');if(bits===0)return new BigNumber(0n);let mB:number[]=[];if(nS>0){if(nS<=3){for(let i=0;i<nS;i++)mB.push((nW>>>((nS-1-i)*8))&0xff);}else{mB=[(nW>>>16)&0xff,(nW>>>8)&0xff,nW&0xff];for(let k=0;k<nS-3;k++)mB.push(0);}}const bn=new BigNumber(0n);if(mB.length>0)bn.initArray(mB,'be');if(iN)bn._sign=1;bn.normSign();return bn;}
-  toBits():number{this.strip();if(this.isZero())return 0;let nS=this.byteLength();const tP=this.abs();let mB=tP.toArray('be');while(mB.length>0&&mB[0]===0)mB.shift();nS=mB.length;if(nS===0&&!this.isZero()){mB=[0];nS=1;}let nW:number;if(nS===0)nW=0;else if(nS<=3){nW=mB.reduce((a,b,i)=>a|(b<<((nS-1-i)*8)),0);if(nS<3)nW<<=(3-nS)*8;}else nW=(mB[0]<<16)|(mB[1]<<8)|mB[2];if((nW&0x00800000)!==0){nW>>>=8;nS++;}let b=(nS<<24)|nW;if(this.isNeg())b|=0x00800000;return b>>>0;}
+  static fromBits(bits: number, strict: boolean = false): BigNumber {
+    const nSize = bits >>> 24;
+    let nWord = bits & 0x007fffff;
+    const isNegative = (bits & 0x00800000) !== 0;
+
+    if (strict && isNegative) { // Original strict check: if negative bit is set, throw.
+        throw new Error('negative bit set');
+    }
+    if (bits === 0) return new BigNumber(0n); 
+    if (nSize === 0) { // Compact size 0 means value 0
+        return new BigNumber(0n); // Negative zero is still 0 for magnitude
+    }
+
+    // Reconstruct the mantissa bytes based on original Buffer logic
+    const buf = new Uint8Array(4);
+    buf[0] = (nWord >>> 24) & 0xff; // This will be 0 as nWord is 23-bit
+    buf[1] = (nWord >>> 16) & 0xff;
+    buf[2] = (nWord >>> 8) & 0xff;
+    buf[3] = nWord & 0xff;
+
+    let valueBytes: number[];
+    if (nSize <= 4) { // Max nSize is 255, but for nWord from 32-bit int, only up to 4 makes sense
+        valueBytes = Array.from(buf.slice(4 - nSize));
+    } else { // This case indicates nWord should be padded with zeros
+        valueBytes = Array.from(buf.slice(0,4)); // Start with all bytes of nWord (effectively 3 for 23-bit)
+        // This original logic for nSize > 3 (or >4) in bn.js fromBits seems to assume nWord is only 3 bytes used for padding
+        // For `bits` from `int`, `nWord` has at most 3 significant bytes from the compact representation.
+        // The original buf.copy(b,0,0,3) and b.fill(0,3) means it copies 3 bytes then pads with 0s.
+        // So if nSize > 3, it means [byte1, byte2, byte3, 0, 0, ...]
+        // buf = [0, B1, B2, B3]. copy(b,0,0,3) effectively copies [0, B1, B2] into b.
+        // This seems like an error in the previous implementation description.
+        // Correct logic: take `nSize` bytes. The first few are from `nWord`, rest are 0.
+        const tempBytes : number[] = [];
+        if (nSize >= 1) tempBytes.push((nWord >> 16) & 0xFF);
+        if (nSize >= 2) tempBytes.push((nWord >> 8) & 0xFF);
+        if (nSize >= 3) tempBytes.push(nWord & 0xFF);
+        
+        valueBytes = tempBytes.slice(0, Math.min(tempBytes.length, nSize) ); // take first nSize bytes from nWord parts
+        while(valueBytes.length < nSize) valueBytes.push(0); // pad with trailing zeros
+    }
+    
+    // Filter leading zeros if valueBytes itself became [0] but nSize implies more
+    // e.g. nSize=1, nWord=0 -> valueBytes=[0]
+    let firstNonZeroIdx = 0;
+    while(firstNonZeroIdx < valueBytes.length -1 && valueBytes[firstNonZeroIdx] === 0) {
+        firstNonZeroIdx++;
+    }
+    valueBytes = valueBytes.slice(firstNonZeroIdx);
+
+
+    const bn = new BigNumber(valueBytes, 'be');
+    if (isNegative) bn.ineg();
+    return bn;
+  }
+
+  toBits():number{
+    this.strip(); 
+    if (this.isZero()) return 0;
+    
+    const isActualNegative = this.isNeg(); // Store original sign
+    const bnForBits = this.abs();    // Work with absolute value for magnitude
+
+    let mB = bnForBits.toArray('be');
+    
+    let firstNonZero = 0;
+    while(firstNonZero < mB.length && mB[firstNonZero] === 0) firstNonZero++;
+    mB = mB.slice(firstNonZero);
+
+    if (mB.length === 0) { // if it was, e.g. new BN("000", 16) which is 0.
+        return 0; // Already handled by initial isZero() check.
+    }
+
+    let nS = mB.length;
+    let nW = 0;
+
+    if (nS > 0) nW = mB[0];
+    if (nS > 1) nW = (nW << 8) | mB[1];
+    if (nS > 2) nW = (nW << 8) | mB[2];
+    // If nS < 3, nW needs to be shifted to fill the top bytes of the 3-byte space conceptually
+    if (nS === 1) nW <<= 16;
+    else if (nS === 2) nW <<= 8;
+
+    if ((nW & 0x00800000) !== 0) { // If mantissa's most significant bit is set
+      nW >>>= 8; // Shift mantissa over by one byte
+      nS++;      // Increase size component by one
+    }
+    
+    let b=(nS << 24) | nW;
+    if (isActualNegative) b|=0x00800000;
+    return b>>>0;
+  }
   
-  static fromScriptNum(num:number[],requireMinimal:boolean=false,maxNumSize:number=4):BigNumber{if(num.length>maxNumSize)throw new Error('script number overflow');if(requireMinimal&&num.length>0){if((num[num.length-1]&0x7f)===0){if(num.length<=1||(num[num.length-2]&0x80)===0)throw new Error('non-minimally encoded script number');}}return BigNumber.fromSm(num,'little');}
+  static fromScriptNum(num:number[],requireMinimal:boolean=false,maxNumSize?:number):BigNumber{
+    if(maxNumSize !== undefined && num.length > maxNumSize) throw new Error('script number overflow');
+    if(requireMinimal === true && num.length > 0){
+        if((num[num.length-1]&0x7f)===0){
+            if(num.length<=1||(num[num.length-2]&0x80)===0) throw new Error('non-minimally encoded script number');
+        }
+    }
+    return BigNumber.fromSm(num,'little');
+  }
   toScriptNum():number[]{return this.toSm('little');}
 
   _invmp (p: BigNumber): BigNumber {
     this.assert(p._sign === 0, 'p must not be negative for _invmp');
     this.assert(!p.isZero(), 'p must not be zero for _invmp');
     
-    // Start with a = this mod p (must be positive)
-    let aBN: BigNumber = this.umod(p); // umod ensures positive result in [0, p-1]
-                                      // and handles if `this` was negative.
+    let aBN: BigNumber = this.umod(p); 
 
-    let u = aBN._magnitude;     // Current 'a' value in algorithm, always positive
-    let v = p._magnitude;       // Modulus 'n', always positive
-    let x1 = 1n;                // Coefficient for 'a'
-    let x2 = 0n;                // Coefficient for 'n'
-    const n_orig = p._magnitude; // Original modulus for additions if x1/x2 become negative
-
-    // Extended Binary GCD for modular inverse (variant)
-    // We want x such that (this * x) % p == 1
-    // Or, (u_orig * x1) % n_orig == 1 when u becomes GCD (1)
-    while (u !== 0n) { // Loop while u is not 0
-        while ((u & 1n) === 0n) { // u is even
-            u >>= 1n;
-            if (!((x1 & 1n) === 0n)) { // x1 is odd
-                x1 = (x1 + n_orig); // Make x1 even before dividing (x1 + n === x1 mod n)
-            }
-            x1 >>= 1n;
-        }
-        while ((v & 1n) === 0n) { // v is even
-            v >>= 1n;
-            if (!((x2 & 1n) === 0n)) { // x2 is odd
-                x2 = (x2 + n_orig);
-            }
-            x2 >>= 1n;
-        }
-
-        // Now u and v are odd
-        if (u >= v) {
-            u -= v;
-            x1 -= x2;
-        } else {
-            v -= u;
-            x2 -= x1;
-        }
-    }
-    // After loop, v is GCD(initial_u, initial_n). x2 is Bezout coeff for initial_n.
-    // Inverse is x2 if v (GCD) is 1.
-    // This is the standard result for `ax + ny = gcd(a,n)` where `y` is `x2`.
-    // We need `x`, which is the coefficient for `a`.
-    // The previous implementation (`if (aVal === 0n) resultVal = x2Val; else resultVal = x1Val;`)
-    // was based on a different loop structure.
-    // The version that yielded 86 for (3, 257) was from original BN.js _invmp structure:
-    // let a = this.clone(), b = p.clone(); x1 = new BN(1), x2 = new BN(0); delta = p.clone();
-    // while (a > 1 && b > 1) { ... } then if (a==1) res=x1 else res=x2.
-    // Let's use the egcd approach for _invmp for reliability with BigInt.
-    // `invm` itself uses egcd. `_invmp` should be a distinct algorithm for drop-in.
-    // The original _invmp:
-    //   a = this.umod(p)
-    //   b = p.clone()
-    //   x1 = BN(1), x2 = BN(0)
-    //   delta = p.clone()
-    //   while a > 1 && b > 1:
-    //     ... binary steps for a, b, x1, x2 ...
-    //   if a == 1: res = x1
-    //   else: res = x2
-    //   return res.umod(p)
-    // Re-implementing that specific binary algorithm with BigInts:
-    
-    aVal = aBN._magnitude; // `a` from `this umod p`
-    bVal = p._magnitude;   // `p`
-    x1Val = 1n;
-    x2Val = 0n;
+    let aVal = aBN._magnitude; 
+    let bVal = p._magnitude;   
+    let x1Val = 1n;            
+    let x2Val = 0n;            
     const modulus = p._magnitude;
 
     while (aVal > 1n && bVal > 1n) {
-        let i = 0; while (((aVal >> BigInt(i)) & 1n) === 0n) i++;
+        let i = 0; while (((aVal >> BigInt(i)) & 1n) === 0n && i < 64 ) i++; // Limit shift to avoid infinite loop on 0
         if (i > 0) {
             aVal >>= BigInt(i);
             for (let k=0; k<i; ++k) { if ((x1Val & 1n) !== 0n) x1Val += modulus; x1Val >>= 1n; }
         }
         
-        let j = 0; while (((bVal >> BigInt(j)) & 1n) === 0n) j++;
+        let j = 0; while (((bVal >> BigInt(j)) & 1n) === 0n && j < 64) j++;
         if (j > 0) {
             bVal >>= BigInt(j);
             for (let k=0; k<j; ++k) { if ((x2Val & 1n) !== 0n) x2Val += modulus; x2Val >>= 1n; }
@@ -664,8 +691,10 @@ export default class BigNumber {
     
     let resultVal: bigint;
     if (aVal === 1n) resultVal = x1Val;
-    else if (bVal === 1n) resultVal = x2Val;
-    else throw new Error("_invmp: GCD is not 1, inverse does not exist."); // Should not happen if inputs are co-prime
+    else if (bVal === 1n) resultVal = x2Val; // This case handles if aVal became 0 and bVal was GCD=1
+    else if (aVal === 0n && bVal === 1n) resultVal = x2Val; // Explicitly for when aVal becomes 0
+    else if (bVal === 0n && aVal === 1n) resultVal = x1Val; // Explicitly for when bVal becomes 0
+    else throw new Error("_invmp: GCD is not 1, inverse does not exist. aVal="+aVal+", bVal="+bVal);
 
     resultVal %= modulus;
     if (resultVal < 0n) resultVal += modulus;
