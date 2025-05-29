@@ -42,7 +42,7 @@ export default class Teranode implements Broadcaster {
       headers: {
         'Content-Type': 'application/octet-stream'
       },
-      data: new Blob([new Uint8Array(rawTx)])
+      data: new Uint8Array(rawTx)
     }
     try {
       const response = await this.httpClient.request<string>(

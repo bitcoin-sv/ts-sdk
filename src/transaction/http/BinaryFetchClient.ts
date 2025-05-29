@@ -15,7 +15,7 @@ export interface BinaryHttpsNodejs {
 
 /** Nodejs result of the Node https.request call limited to options needed by ts-sdk */
 export interface BinaryNodejsHttpClientRequest {
-  write: (chunk: Buffer) => void
+  write: (chunk: Uint8Array) => void
 
   on: (event: string, callback: (data: any) => void) => void
 
@@ -58,10 +58,22 @@ export class BinaryNodejsHttpClient implements HttpClient {
         reject(error)
       })
 
-      if (requestOptions.data !== null && requestOptions.data !== undefined) {
-        req.write(Buffer.from(requestOptions.data))
-      }
-      req.end()
+      ;(async () => {
+        if (requestOptions.data !== null && requestOptions.data !== undefined) {
+          let chunk: Uint8Array
+          if (typeof requestOptions.data === 'string') {
+            chunk = new TextEncoder().encode(requestOptions.data)
+          } else if (requestOptions.data instanceof Uint8Array) {
+            chunk = requestOptions.data
+          } else if (requestOptions.data instanceof Blob) {
+            chunk = new Uint8Array(await requestOptions.data.arrayBuffer())
+          } else {
+            chunk = new Uint8Array(requestOptions.data as any)
+          }
+          req.write(chunk)
+        }
+        req.end()
+      })().catch(reject)
     })
   }
 }
@@ -84,7 +96,7 @@ export interface FetchOptions {
   /** An object literal set request's headers. */
   headers?: Record<string, string>
   /** An object or null to set request's body. */
-  body?: Buffer | Uint8Array | Blob | null
+  body?: Uint8Array | Blob | null
 }
 
 /**
