@@ -128,6 +128,14 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.5.3] - 2025-05-29
+
+### Change
+
+- Make verifyValid in Beef class public. It was private.
+
+---
+
 ## [1.5.1] - 2025-05-13
 
 ### Fixed
