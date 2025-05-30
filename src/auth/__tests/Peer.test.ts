@@ -8,6 +8,10 @@ import { MasterCertificate } from '../../auth/certificates/MasterCertificate.js'
 import { getVerifiableCertificates } from '../../auth/utils/getVerifiableCertificates.js'
 import { CompletedProtoWallet } from '../certificates/__tests/CompletedProtoWallet.js'
 
+const certifierPrivKey = new PrivateKey(21)
+const alicePrivKey = new PrivateKey(22)
+const bobPrivKey = new PrivateKey(23)
+
 jest.mock('../../auth/utils/getVerifiableCertificates')
 
 class LocalTransport implements Transport {
@@ -62,7 +66,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
 
   const certificateType = Utils.toBase64(new Array(32).fill(1))
   // const certificateSerialNumber = Utils.toBase64(new Array(32).fill(2))
-  const certifierPrivateKey = PrivateKey.fromRandom()
+  const certifierPrivateKey = certifierPrivKey
   const certifierPublicKey = certifierPrivateKey.toPublicKey().toString()
   const certificatesToRequest = {
     certifiers: [certifierPublicKey],
@@ -211,8 +215,8 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     certificatesReceivedByAlice = []
     certificatesReceivedByBob = []
 
-    walletA = new CompletedProtoWallet(PrivateKey.fromRandom())
-    walletB = new CompletedProtoWallet(PrivateKey.fromRandom())
+    walletA = new CompletedProtoWallet(alicePrivKey)
+    walletB = new CompletedProtoWallet(bobPrivKey)
   })
 
   it('Neither Alice nor Bob request certificates, mutual authentication completes successfully', async () => {
@@ -248,10 +252,10 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     const transportA2 = new LocalTransport()
     const transportB = new LocalTransport()
     transportA1.connect(transportB)
-    const aliceKey = PrivateKey.fromRandom()
+    const aliceKey = alicePrivKey
     const walletA1 = new CompletedProtoWallet(aliceKey)
     const walletA2 = new CompletedProtoWallet(aliceKey)
-    const walletB = new CompletedProtoWallet(PrivateKey.fromRandom())
+    const walletB = new CompletedProtoWallet(alicePrivKey)
     const aliceFirstDevice = new Peer(
       walletA1,
       transportA1
