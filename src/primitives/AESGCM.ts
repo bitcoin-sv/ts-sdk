@@ -242,27 +242,24 @@ export const getBytes = function (numericValue: number): number[] {
 }
 
 const createZeroBlock = function (length: number): number[] {
-  let i
-  const result = []
-
-  for (i = 0; i < length; i++) {
-    result.push(0x00)
-  }
-
-  return result
+  return new Array(length).fill(0)
 }
 
 const R = [0xe1].concat(createZeroBlock(15))
 
 export const exclusiveOR = function (block0: number[], block1: number[]): number[] {
-  let i
-  const result = []
-
-  for (i = 0; i < block0.length; i++) {
+  const len = block0.length
+  const result = new Array(len)
+  for (let i = 0; i < len; i++) {
     result[i] = block0[i] ^ block1[i]
   }
-
   return result
+}
+
+const xorInto = function (target: number[], block: number[]): void {
+  for (let i = 0; i < target.length; i++) {
+    target[i] ^= block[i]
+  }
 }
 
 export const rightShift = function (block: number[]): number[] {
@@ -286,19 +283,20 @@ export const rightShift = function (block: number[]): number[] {
 export const multiply = function (block0: number[], block1: number[]): number[] {
   let i
   let j
-  let v = block1.slice()
-  let z = createZeroBlock(16)
+  const v = block1.slice()
+  const z = createZeroBlock(16)
 
   for (i = 0; i < 16; i++) {
     for (j = 7; j !== -1; j--) {
       if (checkBit(block0, i, j) !== 0) {
-        z = exclusiveOR(z, v)
+        xorInto(z, v)
       }
 
       if (checkBit(v, 15, 0) !== 0) {
-        v = exclusiveOR(rightShift(v), R)
+        rightShift(v)
+        xorInto(v, R)
       } else {
-        v = rightShift(v)
+        rightShift(v)
       }
     }
   }
@@ -329,13 +327,11 @@ export function ghash (input: number[], hashSubKey: number[]): number[] {
   let result = createZeroBlock(16)
 
   for (i = 0; i < input.length; i += 16) {
-    result = multiply(
-      exclusiveOR(
-        result,
-        input.slice(i, Math.min(i + 16, input.length))
-      ),
-      hashSubKey
-    )
+    const block = new Array(16)
+    for (let j = 0; j < 16; j++) {
+      block[j] = result[j] ^ (input[i + j] ?? 0)
+    }
+    result = multiply(block, hashSubKey)
   }
 
   return result
@@ -346,23 +342,19 @@ function gctr (
   initialCounterBlock: number[],
   key: number[]
 ): number[] {
-  let i: number
-  let j
-  let y
+  if (input.length === 0) return []
+
+  const output = new Array(input.length)
   let counterBlock = initialCounterBlock
-  const output = []
-
-  if (input.length === 0) {
-    return input
-  }
-
+  let pos = 0
   const n = Math.ceil(input.length / 16)
-  for (i = 0; i < n; i++) {
-    y = exclusiveOR(input.slice(i * 16, Math.min((i + 1) * 16, input.length)),
-      AES(counterBlock, key))
 
-    for (j = 0; j < y.length; j++) {
-      output.push(y[j])
+  for (let i = 0; i < n; i++) {
+    const counter = AES(counterBlock, key)
+    const chunk = Math.min(16, input.length - pos)
+    for (let j = 0; j < chunk; j++) {
+      output[pos] = input[pos] ^ counter[j]
+      pos++
     }
 
     if (i + 1 < n) {
