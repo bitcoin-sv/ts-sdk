@@ -54,3 +54,16 @@ node benchmarks/symmetric-key-bench.js
 | --- | --- | --- | --- | --- | --- | --- |
 | fix-mem baseline | 8609.78ms | 8372.23ms | 34.02ms | 48.58ms | 859.38ms | 960.16ms |
 | optimized AESGCM (round 1) | 7678.65ms | 7619.82ms | 60.23ms | 35.21ms | 871.89ms | 763.13ms |
+
+## Reader/Writer Operations
+
+Command:
+
+```bash
+node benchmarks/reader-writer-bench.js
+```
+
+| Branch | mixed ops | large payloads | 3000 small payloads | 400 medium payloads |
+| --- | --- | --- | --- | --- |
+| fix-mem baseline | 9.93ms | 127.49ms | 27.86ms | 41.71ms |
+| optimized utils.ts | 5.02ms | 91.93ms | 19.04ms | 53.80ms |
