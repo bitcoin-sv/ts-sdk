@@ -68,3 +68,16 @@ node benchmarks/reader-writer-bench.js
 | --- | --- | --- | --- | --- |
 | fix-mem baseline | 9.93ms | 127.49ms | 27.86ms | 41.71ms |
 | optimized utils.ts | 5.02ms | 91.93ms | 19.04ms | 53.80ms |
+
+## Peer Handshake Benchmark
+
+Command:
+
+```bash
+node benchmarks/peer-bench.js 5
+```
+
+| Branch | 5 handshakes |
+| --- | --- |
+| baseline | 3986.12ms |
+| optimized peer | 3933.00ms |

@@ -57,9 +57,38 @@ export class SessionManager {
    * @param {PeerSession} session - The peer session to update.
    */
   updateSession (session: PeerSession): void {
-    // Remove the old references (if any) and re-add
-    this.removeSession(session)
-    this.addSession(session)
+    if (typeof session.sessionNonce !== 'string') {
+      throw new Error('Invalid session: sessionNonce is required to update a session.')
+    }
+
+    const existing = this.sessionNonceToSession.get(session.sessionNonce)
+
+    if (existing != null && existing.peerIdentityKey !== session.peerIdentityKey) {
+      if (existing.peerIdentityKey) {
+        const set = this.identityKeyToNonces.get(existing.peerIdentityKey)
+        if (set != null) {
+          set.delete(session.sessionNonce)
+          if (set.size === 0) this.identityKeyToNonces.delete(existing.peerIdentityKey)
+        }
+      }
+      if (session.peerIdentityKey) {
+        let set = this.identityKeyToNonces.get(session.peerIdentityKey)
+        if (set == null) {
+          set = new Set<string>()
+          this.identityKeyToNonces.set(session.peerIdentityKey, set)
+        }
+        set.add(session.sessionNonce)
+      }
+    } else if (existing == null && session.peerIdentityKey) {
+      let set = this.identityKeyToNonces.get(session.peerIdentityKey)
+      if (set == null) {
+        set = new Set<string>()
+        this.identityKeyToNonces.set(session.peerIdentityKey, set)
+      }
+      set.add(session.sessionNonce)
+    }
+
+    this.sessionNonceToSession.set(session.sessionNonce, session)
   }
 
   /**

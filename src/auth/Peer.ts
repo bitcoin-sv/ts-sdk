@@ -52,6 +52,7 @@ export class Peer {
   number,
   { callback: (sessionNonce: string) => void, sessionNonce: string }
   > = new Map()
+  private readonly initialResponseByNonce: Map<string, Set<number>> = new Map()
 
   // Single shared counter for all callback types
   private callbackIdCounter: number = 0
@@ -61,6 +62,7 @@ export class Peer {
 
   // Last-interacted-with peer identity key (if the user calls toPeer with no identityKey)
   private lastInteractedWithPeer: string | undefined
+  private identityPublicKey: string | undefined
 
   /**
    * Creates a new Peer instance
@@ -94,6 +96,15 @@ export class Peer {
     } else {
       this.autoPersistLastSession = true
     }
+  }
+
+  private async getIdentityPublicKey (): Promise<string> {
+    if (this.identityPublicKey === undefined) {
+      this.identityPublicKey = (
+        await this.wallet.getPublicKey({ identityKey: true })
+      ).publicKey
+    }
+    return this.identityPublicKey
   }
 
   /**
@@ -132,8 +143,7 @@ export class Peer {
     const generalMessage: AuthMessage = {
       version: AUTH_VERSION,
       messageType: 'general',
-      identityKey: (await this.wallet.getPublicKey({ identityKey: true }))
-        .publicKey,
+      identityKey: await this.getIdentityPublicKey(),
       nonce: requestNonce,
       yourNonce: peerSession.peerNonce,
       payload: message,
@@ -196,8 +206,7 @@ export class Peer {
     const certRequestMessage: AuthMessage = {
       version: AUTH_VERSION,
       messageType: 'certificateRequest',
-      identityKey: (await this.wallet.getPublicKey({ identityKey: true }))
-        .publicKey,
+      identityKey: await this.getIdentityPublicKey(),
       nonce: requestNonce,
       initialNonce: peerSession.sessionNonce,
       yourNonce: peerSession.peerNonce,
@@ -356,8 +365,7 @@ export class Peer {
     const initialRequest: AuthMessage = {
       version: AUTH_VERSION,
       messageType: 'initialRequest',
-      identityKey: (await this.wallet.getPublicKey({ identityKey: true }))
-        .publicKey,
+      identityKey: await this.getIdentityPublicKey(),
       initialNonce: sessionNonce,
       requestedCertificates: this.certificatesToRequest
     }
@@ -407,6 +415,12 @@ export class Peer {
       callback,
       sessionNonce
     })
+    let set = this.initialResponseByNonce.get(sessionNonce)
+    if (set == null) {
+      set = new Set<number>()
+      this.initialResponseByNonce.set(sessionNonce, set)
+    }
+    set.add(callbackID)
     return callbackID
   }
 
@@ -417,6 +431,14 @@ export class Peer {
    * @param {number} callbackID - The ID of the callback to remove.
    */
   private stopListeningForInitialResponses (callbackID: number): void {
+    const entry = this.onInitialResponseReceivedCallbacks.get(callbackID)
+    if (entry != null) {
+      const set = this.initialResponseByNonce.get(entry.sessionNonce)
+      if (set != null) {
+        set.delete(callbackID)
+        if (set.size === 0) this.initialResponseByNonce.delete(entry.sessionNonce)
+      }
+    }
     this.onInitialResponseReceivedCallbacks.delete(callbackID)
   }
 
@@ -518,8 +540,7 @@ export class Peer {
     const initialResponseMessage: AuthMessage = {
       version: AUTH_VERSION,
       messageType: 'initialResponse',
-      identityKey: (await this.wallet.getPublicKey({ identityKey: true }))
-        .publicKey,
+      identityKey: await this.getIdentityPublicKey(),
       initialNonce: sessionNonce,
       yourNonce: message.initialNonce,
       certificates: certificatesToInclude,
@@ -598,12 +619,16 @@ export class Peer {
     // Update lastInteractedWithPeer
     this.lastInteractedWithPeer = message.identityKey
 
-    // Let the handshake wait-latch know we got our response
-    this.onInitialResponseReceivedCallbacks.forEach(entry => {
-      if (entry.sessionNonce === peerSession.sessionNonce) {
-        entry.callback(peerSession.sessionNonce)
+    const sessionNonce = peerSession.sessionNonce
+    if (sessionNonce) {
+      const set = this.initialResponseByNonce.get(sessionNonce)
+      if (set != null) {
+        for (const id of set) {
+          const entry = this.onInitialResponseReceivedCallbacks.get(id)
+          if (entry != null) entry.callback(sessionNonce)
+        }
       }
-    })
+    }
 
     // The peer might also request certificates from us
     if (
@@ -712,8 +737,7 @@ export class Peer {
     const certificateResponse: AuthMessage = {
       version: AUTH_VERSION,
       messageType: 'certificateResponse',
-      identityKey: (await this.wallet.getPublicKey({ identityKey: true }))
-        .publicKey,
+      identityKey: await this.getIdentityPublicKey(),
       nonce: requestNonce,
       initialNonce: peerSession.sessionNonce,
       yourNonce: peerSession.peerNonce,

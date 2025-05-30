@@ -51,6 +51,8 @@ export default class Certificate {
    */
   signature?: HexString
 
+  private _verificationResult?: boolean
+
   /**
    * Constructs a new Certificate.
    *
@@ -211,6 +213,8 @@ export default class Certificate {
    * @returns {Promise<boolean>} - A promise that resolves to true if the signature is valid.
    */
   async verify(): Promise<boolean> {
+    if (this._verificationResult !== undefined) return this._verificationResult
+
     // A verifier can be any wallet capable of verifying signatures
     const verifier = new ProtoWallet('anyone')
     const verificationData = this.toBinary(false) // Exclude the signature from the verification data
@@ -218,13 +222,14 @@ export default class Certificate {
     const signatureHex = this.signature ?? '' // Provide a fallback value (empty string)
 
     const { valid } = await verifier.verifySignature({
-      signature: Utils.toArray(signatureHex, 'hex'), // Now it is always a string
+      signature: Utils.toArray(signatureHex, 'hex'),
       data: verificationData,
       protocolID: [2, 'certificate signature'],
       keyID: `${this.type} ${this.serialNumber}`,
-      counterparty: this.certifier // The certifier is the one who signed the certificate
+      counterparty: this.certifier
     })
 
+    this._verificationResult = valid
     return valid
   }
 

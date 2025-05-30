@@ -94,26 +94,29 @@ export class VerifiableCertificate extends Certificate {
     }
 
     try {
-      const decryptedFields: Record<CertificateFieldNameUnder50Bytes, string> =
-        {}
-      for (const fieldName in this.keyring) {
-        const { plaintext: fieldRevelationKey } = await verifierWallet.decrypt({
-          ciphertext: Utils.toArray(this.keyring[fieldName], 'base64'),
-          ...Certificate.getCertificateFieldEncryptionDetails(
-            fieldName,
-            this.serialNumber
-          ),
-          counterparty: this.subject,
-          privileged,
-          privilegedReason
-        })
+      const entries = await Promise.all(
+        Object.keys(this.keyring).map(async fieldName => {
+          const { plaintext: fieldRevelationKey } = await verifierWallet.decrypt({
+            ciphertext: Utils.toArray(this.keyring[fieldName], 'base64'),
+            ...Certificate.getCertificateFieldEncryptionDetails(
+              fieldName,
+              this.serialNumber
+            ),
+            counterparty: this.subject,
+            privileged,
+            privilegedReason
+          })
 
-        const fieldValue = new SymmetricKey(fieldRevelationKey).decrypt(
-          Utils.toArray(this.fields[fieldName], 'base64')
-        )
-        decryptedFields[fieldName] = Utils.toUTF8(fieldValue as number[])
-      }
-      return decryptedFields
+          const fieldValue = new SymmetricKey(fieldRevelationKey).decrypt(
+            Utils.toArray(this.fields[fieldName], 'base64')
+          )
+          return [fieldName, Utils.toUTF8(fieldValue as number[])]
+        })
+      )
+      return Object.fromEntries(entries) as Record<
+        CertificateFieldNameUnder50Bytes,
+        string
+      >;
     } catch (error) {
       throw new Error(
         `Failed to decrypt selectively revealed certificate fields using keyring: ${String(error instanceof Error ? error.message : error)}`
