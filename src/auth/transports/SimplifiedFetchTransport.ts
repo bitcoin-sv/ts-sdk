@@ -57,10 +57,12 @@ export class SimplifiedFetchTransport implements Transport {
             resolve()
           }
           const response = await responsePromise
-
           // Handle the response if data is received and callback is set
           if (response.ok && this.onDataCallback) {
             const responseMessage = await response.json()
+            if(responseMessage.status == 'certificate received' ) {
+              resolve()
+            }
             this.onDataCallback(responseMessage as AuthMessage)
           } else {
             // Server may be a non authenticated server
@@ -126,7 +128,8 @@ export class SimplifiedFetchTransport implements Transport {
       })
 
       // Check for an acceptable status
-      if (response.status === 500 && !response.headers.get('x-bsv-auth-request-id')) {
+      if (response.status === 500 && (response.headers.get('x-bsv-auth-request-id') == null &&
+          response.headers.get('x-bsv-auth-requested-certificates') == null)) {
         // Try parsing JSON error
         const errorInfo = await response.json()
         // Otherwise just throw whatever we got
@@ -135,7 +138,10 @@ export class SimplifiedFetchTransport implements Transport {
 
       const parsedBody = await response.arrayBuffer()
       const payloadWriter = new Utils.Writer()
-      payloadWriter.write(Utils.toArray(response.headers.get('x-bsv-auth-request-id'), 'base64'))
+      if(response.headers.get('x-bsv-auth-request-id') != null)
+      {
+          payloadWriter.write(Utils.toArray(response.headers.get('x-bsv-auth-request-id'), 'base64'));
+      }
       payloadWriter.writeVarIntNum(response.status)
 
       // PARSE RESPONSE HEADERS FROM SERVER --------------------------------
