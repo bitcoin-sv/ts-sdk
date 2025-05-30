@@ -76,7 +76,7 @@ function shiftRows (state: number[][]): void {
   state[1][3] = tmp
 
   tmp = state[2][0]
-  let tmp2 = state[2][1]
+  const tmp2 = state[2][1]
   state[2][0] = state[2][2]
   state[2][1] = state[2][3]
   state[2][2] = tmp
@@ -87,28 +87,6 @@ function shiftRows (state: number[][]): void {
   state[3][2] = state[3][1]
   state[3][1] = state[3][0]
   state[3][0] = tmp
-}
-
-function finiteFieldMultiplication (value0: number, value1: number): number {
-  let i
-  let result = 0
-
-  for (i = 0; i < 8; i++) {
-    if ((value1 & 1) !== 0) {
-      result = result ^ value0
-    }
-
-    if ((value0 & 0x80) !== 0) {
-      value0 = value0 << 1
-      value0 = value0 ^ 0x11b
-    } else {
-      value0 = value0 << 1
-    }
-
-    value1 = value1 >> 1
-  }
-
-  return result
 }
 
 function mixColumns (state: number[][]): void {

@@ -596,7 +596,7 @@ export class Writer {
 export class Reader {
   public bin: number[]
   public pos: number
-  private length: number
+  private readonly length: number
 
   constructor (bin: number[] = [], pos: number = 0) {
     this.bin = bin
