@@ -379,21 +379,20 @@ export const fromBase58Check = (
 
 export class Writer {
   public bufs: number[][]
+  private length: number
 
   constructor (bufs?: number[][]) {
     this.bufs = bufs !== undefined ? bufs : []
+    this.length = 0
+    for (const b of this.bufs) this.length += b.length
   }
 
   getLength (): number {
-    let len = 0
-    for (const buf of this.bufs) {
-      len = len + buf.length
-    }
-    return len
+    return this.length
   }
 
   toArray (): number[] {
-    const totalLength = this.getLength()
+    const totalLength = this.length
     const ret = new Array(totalLength)
     let offset = 0
     for (const buf of this.bufs) {
@@ -406,6 +405,7 @@ export class Writer {
 
   write (buf: number[]): this {
     this.bufs.push(buf)
+    this.length += buf.length
     return this
   }
 
@@ -415,6 +415,7 @@ export class Writer {
       buf2[i] = buf[buf.length - 1 - i]
     }
     this.bufs.push(buf2)
+    this.length += buf2.length
     return this
   }
 
@@ -433,10 +434,12 @@ export class Writer {
   }
 
   writeUInt16BE (n: number): this {
-    this.bufs.push([
+    const buf = [
       (n >> 8) & 0xff, // shift right 8 bits to get the high byte
       n & 0xff // low byte is just the last 8 bits
-    ])
+    ]
+    this.bufs.push(buf)
+    this.length += 2
     return this
   }
 
@@ -445,10 +448,12 @@ export class Writer {
   }
 
   writeUInt16LE (n: number): this {
-    this.bufs.push([
+    const buf = [
       n & 0xff, // low byte is just the last 8 bits
       (n >> 8) & 0xff // shift right 8 bits to get the high byte
-    ])
+    ]
+    this.bufs.push(buf)
+    this.length += 2
     return this
   }
 
@@ -457,12 +462,14 @@ export class Writer {
   }
 
   writeUInt32BE (n: number): this {
-    this.bufs.push([
+    const buf = [
       (n >> 24) & 0xff, // highest byte
       (n >> 16) & 0xff,
       (n >> 8) & 0xff,
       n & 0xff // lowest byte
-    ])
+    ]
+    this.bufs.push(buf)
+    this.length += 4
     return this
   }
 
@@ -471,12 +478,14 @@ export class Writer {
   }
 
   writeUInt32LE (n: number): this {
-    this.bufs.push([
+    const buf = [
       n & 0xff, // lowest byte
       (n >> 8) & 0xff,
       (n >> 16) & 0xff,
       (n >> 24) & 0xff // highest byte
-    ])
+    ]
+    this.bufs.push(buf)
+    this.length += 4
     return this
   }
 
@@ -587,24 +596,26 @@ export class Writer {
 export class Reader {
   public bin: number[]
   public pos: number
+  private length: number
 
   constructor (bin: number[] = [], pos: number = 0) {
     this.bin = bin
     this.pos = pos
+    this.length = bin.length
   }
 
   public eof (): boolean {
-    return this.pos >= this.bin.length
+    return this.pos >= this.length
   }
 
-  public read (len = this.bin.length): number[] {
+  public read (len = this.length): number[] {
     const start = this.pos
     const end = this.pos + len
     this.pos = end
     return this.bin.slice(start, end)
   }
 
-  public readReverse (len = this.bin.length): number[] {
+  public readReverse (len = this.length): number[] {
     const buf2 = new Array(len)
     for (let i = 0; i < len; i++) {
       buf2[i] = this.bin[this.pos + len - 1 - i]
