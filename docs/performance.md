@@ -54,3 +54,4 @@ node benchmarks/symmetric-key-bench.js
 | --- | --- | --- | --- | --- | --- | --- |
 | fix-mem baseline | 8609.78ms | 8372.23ms | 34.02ms | 48.58ms | 859.38ms | 960.16ms |
 | optimized AESGCM (round 1) | 7678.65ms | 7619.82ms | 60.23ms | 35.21ms | 871.89ms | 763.13ms |
+| optimized AESGCM (round 2) | 2026.89ms | 1793.35ms | 15.01ms | 7.88ms | 213.35ms | 169.37ms |
