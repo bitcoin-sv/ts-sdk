@@ -53,4 +53,4 @@ node benchmarks/symmetric-key-bench.js
 | Branch | encrypt large 2MB | decrypt large 2MB | encrypt 50 small | decrypt 50 small | encrypt 200 medium | decrypt 200 medium |
 | --- | --- | --- | --- | --- | --- | --- |
 | fix-mem baseline | 8609.78ms | 8372.23ms | 34.02ms | 48.58ms | 859.38ms | 960.16ms |
-| optimized AESGCM | 7678.65ms | 7619.82ms | 60.23ms | 35.21ms | 871.89ms | 763.13ms |
+| optimized AESGCM (round 1) | 7678.65ms | 7619.82ms | 60.23ms | 35.21ms | 871.89ms | 763.13ms |
