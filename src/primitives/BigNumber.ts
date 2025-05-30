@@ -896,7 +896,7 @@ export default class BigNumber {
       pa = a - q * pa
       a = t
       t = pb
-      pb = b - q * pb;
+      pb = b - q * pb
       b = t
     }
     const ra = new BigNumber(0n)
