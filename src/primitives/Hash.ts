@@ -9,6 +9,17 @@ const assert = (
   }
 }
 
+// Lookup table for hexadecimal conversion
+const HEX_TABLE: number[] = (() => {
+  const table = new Array<number>(256).fill(0)
+  for (let i = 0; i < 10; i++) table[48 + i] = i
+  for (let i = 0; i < 6; i++) {
+    table[65 + i] = 10 + i
+    table[97 + i] = 10 + i
+  }
+  return table
+})()
+
 /**
  * The BaseHash class is an abstract base class for cryptographic hash functions.
  * It provides a common structure and functionality for hash function classes.
@@ -239,7 +250,7 @@ export function toArray (
   if (!(msg as unknown as boolean)) {
     return []
   }
-  const res = []
+  let res: number[] = []
   if (typeof msg === 'string') {
     if (enc !== 'hex') {
       // Inspired by stringToUtf8ByteArray() in closure-library by Google
@@ -267,12 +278,16 @@ export function toArray (
         }
       }
     } else {
-      msg = msg.replace(/[^a-z0-9]+/gi, '')
+      msg = msg.replace(/[^a-fA-F0-9]+/g, '')
       if (msg.length % 2 !== 0) {
         msg = '0' + msg
       }
-      for (let i = 0; i < msg.length; i += 2) {
-        res.push(parseInt(msg[i] + msg[i + 1], 16))
+      const len = msg.length / 2
+      res = new Array(len)
+      for (let i = 0, j = 0; j < len; j++, i += 2) {
+        const a = HEX_TABLE[msg.charCodeAt(i)]
+        const b = HEX_TABLE[msg.charCodeAt(i + 1)]
+        res[j] = (a << 4) | b
       }
     }
   } else {

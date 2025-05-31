@@ -41,6 +41,7 @@ node benchmarks/transaction-bench.js
 | Branch | deep chain verify | wide transaction verify | large tx verify | nested inputs verify |
 | --- | --- | --- | --- | --- |
 | fix-mem (May-2025) | 3335.76ms | 2930.86ms | 1534.36ms | 1198.08ms |
+| bigint optimizations | 2305.78ms | 2325.47ms | 1268.73ms | 859.70ms |
 
 ## SymmetricKey Encryption/Decryption
 
