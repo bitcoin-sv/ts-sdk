@@ -13,13 +13,102 @@ import TransactionInput from '../transaction/TransactionInput.js'
 import TransactionOutput from '../transaction/TransactionOutput.js'
 
 // These constants control the current behavior of the interpreter.
-// In the future, all of them will go away.
 const maxScriptElementSize = 1024 * 1024 * 1024
 const maxMultisigKeyCount = Math.pow(2, 31) - 1
 const requireMinimalPush = true
 const requirePushOnlyUnlockingScripts = true
 const requireLowSSignatures = true
 const requireCleanStack = true
+
+// --- Optimization: Pre-computed script numbers ---
+const SCRIPTNUM_NEG_1 = Object.freeze(new BigNumber(-1).toScriptNum())
+const SCRIPTNUMS_0_TO_16: ReadonlyArray<Readonly<number[]>> = Object.freeze(
+  Array.from({ length: 17 }, (_, i) => Object.freeze(new BigNumber(i).toScriptNum()))
+)
+
+// --- Helper functions ---
+
+function compareNumberArrays (a: Readonly<number[]>, b: Readonly<number[]>): boolean {
+  if (a.length !== b.length) return false
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false
+  }
+  return true
+}
+
+function isMinimallyEncodedHelper (
+  buf: Readonly<number[]>,
+  maxNumSize: number = Number.MAX_SAFE_INTEGER
+): boolean {
+  if (buf.length > maxNumSize) {
+    return false
+  }
+  if (buf.length > 0) {
+    if ((buf[buf.length - 1] & 0x7f) === 0) {
+      if (buf.length <= 1 || (buf[buf.length - 2] & 0x80) === 0) {
+        return false
+      }
+    }
+  }
+  return true
+}
+
+function isChecksigFormatHelper (buf: Readonly<number[]>): boolean {
+  // This is a simplified check. The full DER check is more complex and typically
+  // done by TransactionSignature.fromChecksigFormat which can throw.
+  // This helper is mostly for early bailout or non-throwing checks if needed.
+  if (buf.length < 9 || buf.length > 73) return false
+  if (buf[0] !== 0x30) return false // DER SEQUENCE
+  if (buf[1] !== buf.length - 3) return false // Total length (excluding type and length byte for sequence, and hash type)
+
+  const rMarker = buf[2]
+  const rLen = buf[3]
+  if (rMarker !== 0x02) return false // DER INTEGER
+  if (rLen === 0) return false // R length is zero
+  if (5 + rLen >= buf.length) return false // S length misplaced or R too long
+
+  const sMarkerOffset = 4 + rLen
+  const sMarker = buf[sMarkerOffset]
+  const sLen = buf[sMarkerOffset + 1]
+  if (sMarker !== 0x02) return false // DER INTEGER
+  if (sLen === 0) return false // S length is zero
+
+  // Check R value negative or excessively padded
+  if ((buf[4] & 0x80) !== 0) return false // R value negative
+  if (rLen > 1 && buf[4] === 0x00 && (buf[5] & 0x80) === 0) return false // R value excessively padded
+
+  // Check S value negative or excessively padded
+  const sValueOffset = sMarkerOffset + 2
+  if ((buf[sValueOffset] & 0x80) !== 0) return false // S value negative
+  if (sLen > 1 && buf[sValueOffset] === 0x00 && (buf[sValueOffset + 1] & 0x80) === 0) return false // S value excessively padded
+
+  if (rLen + sLen + 7 !== buf.length) return false // Final length check including hash type
+
+  return true
+}
+
+function isOpcodeDisabledHelper (op: number): boolean {
+  return (
+    op === OP.OP_2MUL ||
+    op === OP.OP_2DIV ||
+    op === OP.OP_VERIF ||
+    op === OP.OP_VERNOTIF ||
+    op === OP.OP_VER
+  )
+}
+
+function isChunkMinimalPushHelper (chunk: ScriptChunk): boolean {
+  const data = chunk.data
+  const op = chunk.op
+  if (!Array.isArray(data)) return true
+  if (data.length === 0) return op === OP.OP_0
+  if (data.length === 1 && data[0] >= 1 && data[0] <= 16) return op === OP.OP_1 + (data[0] - 1)
+  if (data.length === 1 && data[0] === 0x81) return op === OP.OP_1NEGATE
+  if (data.length <= 75) return op === data.length
+  if (data.length <= 255) return op === OP.OP_PUSHDATA1
+  if (data.length <= 65535) return op === OP.OP_PUSHDATA2
+  return true
+}
 
 /**
  * The Spend class represents a spend action within a Bitcoin SV transaction.
@@ -52,6 +141,7 @@ export default class Spend {
   unlockingScript: UnlockingScript
   inputSequence: number
   lockTime: number
+
   context: 'UnlockingScript' | 'LockingScript'
   programCounter: number
   lastCodeSeparator: number | null
@@ -119,7 +209,10 @@ export default class Spend {
     this.unlockingScript = params.unlockingScript
     this.inputSequence = params.inputSequence
     this.lockTime = params.lockTime
-    this.memoryLimit = params.memoryLimit ?? 100000 // 100 MB is going to be processed by most miners by policy, but the default should protect apps against memory attacks.
+    this.memoryLimit = params.memoryLimit ?? 32000000
+    this.stack = []
+    this.altStack = []
+    this.ifStack = []
     this.stackMem = 0
     this.altStackMem = 0
     this.reset()
@@ -136,25 +229,156 @@ export default class Spend {
     this.altStackMem = 0
   }
 
+  private ensureStackMem (additional: number): void {
+    if (this.stackMem + additional > this.memoryLimit) {
+      this.scriptEvaluationError(
+        'Stack memory usage has exceeded ' + String(this.memoryLimit) + ' bytes'
+      )
+    }
+  }
+
+  private ensureAltStackMem (additional: number): void {
+    if (this.altStackMem + additional > this.memoryLimit) {
+      this.scriptEvaluationError(
+        'Alt stack memory usage has exceeded ' + String(this.memoryLimit) + ' bytes'
+      )
+    }
+  }
+
+  private pushStack (item: number[]): void {
+    this.ensureStackMem(item.length)
+    this.stack.push(item)
+    this.stackMem += item.length
+  }
+
+  private pushStackCopy (item: Readonly<number[]>): void {
+    this.ensureStackMem(item.length)
+    const copy = item.slice()
+    this.stack.push(copy)
+    this.stackMem += copy.length
+  }
+
+  private popStack (): number[] {
+    if (this.stack.length === 0) {
+      this.scriptEvaluationError('Attempted to pop from an empty stack.')
+    }
+    const item = this.stack.pop() as number[]
+    this.stackMem -= item.length
+    return item
+  }
+
+  private stackTop (index: number = -1): number[] {
+    // index = -1 for top, -2 for second top, etc.
+    // stack.length + index provides 0-based index from start
+    if (this.stack.length === 0 || this.stack.length < Math.abs(index) || (index >= 0 && index >= this.stack.length)) {
+      this.scriptEvaluationError(`Stack underflow accessing element at index ${index}. Stack length is ${this.stack.length}.`)
+    }
+    return this.stack[this.stack.length + index]
+  }
+
+  private pushAltStack (item: number[]): void {
+    this.ensureAltStackMem(item.length)
+    this.altStack.push(item)
+    this.altStackMem += item.length
+  }
+
+  private popAltStack (): number[] {
+    if (this.altStack.length === 0) {
+      this.scriptEvaluationError('Attempted to pop from an empty alt stack.')
+    }
+    const item = this.altStack.pop() as number[]
+    this.altStackMem -= item.length
+    return item
+  }
+
+  private checkSignatureEncoding (buf: Readonly<number[]>): boolean {
+    if (buf.length === 0) return true
+
+    if (!isChecksigFormatHelper(buf)) {
+      this.scriptEvaluationError('The signature format is invalid.') // Generic message like original
+      return false
+    }
+    try {
+      const sig = TransactionSignature.fromChecksigFormat(buf as number[]) // This can throw for stricter DER rules
+      if (requireLowSSignatures && !sig.hasLowS()) {
+        this.scriptEvaluationError('The signature must have a low S value.')
+        return false
+      }
+      if ((sig.scope & TransactionSignature.SIGHASH_FORKID) === 0) {
+        this.scriptEvaluationError('The signature must use SIGHASH_FORKID.')
+        return false
+      }
+    } catch (e) {
+      this.scriptEvaluationError('The signature format is invalid.')
+      return false
+    }
+    return true
+  }
+
+  private checkPublicKeyEncoding (buf: Readonly<number[]>): boolean {
+    if (buf.length === 0) {
+      this.scriptEvaluationError('Public key is empty.')
+      return false
+    }
+    if (buf.length < 33) {
+      this.scriptEvaluationError('The public key is too short, it must be at least 33 bytes.')
+      return false
+    }
+    if (buf[0] === 0x04) {
+      if (buf.length !== 65) {
+        this.scriptEvaluationError('The non-compressed public key must be 65 bytes.')
+        return false
+      }
+    } else if (buf[0] === 0x02 || buf[0] === 0x03) {
+      if (buf.length !== 33) {
+        this.scriptEvaluationError('The compressed public key must be 33 bytes.')
+        return false
+      }
+    } else {
+      this.scriptEvaluationError('The public key is in an unknown format.')
+      return false
+    }
+    try {
+      PublicKey.fromDER(buf as number[]) // This can throw for stricter DER rules
+    } catch (e) {
+      this.scriptEvaluationError('The public key is in an unknown format.')
+      return false
+    }
+    return true
+  }
+
+  private verifySignature (
+    sig: TransactionSignature,
+    pubkey: PublicKey,
+    subscript: Script
+  ): boolean {
+    const preimage = TransactionSignature.format({
+      sourceTXID: this.sourceTXID,
+      sourceOutputIndex: this.sourceOutputIndex,
+      sourceSatoshis: this.sourceSatoshis,
+      transactionVersion: this.transactionVersion,
+      otherInputs: this.otherInputs,
+      outputs: this.outputs,
+      inputIndex: this.inputIndex,
+      subscript,
+      inputSequence: this.inputSequence,
+      lockTime: this.lockTime,
+      scope: sig.scope
+    })
+    const hash = new BigNumber(Hash.hash256(preimage))
+    return verify(hash, sig, pubkey)
+  }
+
   step (): boolean {
-    let poppedValue: number[] | undefined
-    // If the stack (or alt stack) is over the memory limit, evaluation has failed.
     if (this.stackMem > this.memoryLimit) {
       this.scriptEvaluationError('Stack memory usage has exceeded ' + String(this.memoryLimit) + ' bytes')
-      return false
+      return false // Error thrown
     }
     if (this.altStackMem > this.memoryLimit) {
       this.scriptEvaluationError('Alt stack memory usage has exceeded ' + String(this.memoryLimit) + ' bytes')
-      return false
+      return false // Error thrown
     }
 
-    // Clear popped values after use to free memory
-    const clearPoppedValue = (): void => {
-      poppedValue = undefined
-    }
-
-    // If the context is UnlockingScript and we have reached the end,
-    // set the context to LockingScript and zero the program counter
     if (
       this.context === 'UnlockingScript' &&
       this.programCounter >= this.unlockingScript.chunks.length
@@ -163,350 +387,54 @@ export default class Spend {
       this.programCounter = 0
     }
 
-    let operation: ScriptChunk
-    if (this.context === 'UnlockingScript') {
-      operation = this.unlockingScript.chunks[this.programCounter]
-    } else {
-      operation = this.lockingScript.chunks[this.programCounter]
+    const currentScript = this.context === 'UnlockingScript' ? this.unlockingScript : this.lockingScript
+    if (this.programCounter >= currentScript.chunks.length) {
+      return false
     }
+    const operation = currentScript.chunks[this.programCounter]
 
-    const isOpcodeDisabled = (op: number): boolean => {
-      return (
-        op === OP.OP_2MUL ||
-        op === OP.OP_2DIV ||
-        op === OP.OP_VERIF ||
-        op === OP.OP_VERNOTIF ||
-        op === OP.OP_VER
-      )
+    const currentOpcode = operation.op
+    if (typeof currentOpcode === 'undefined') {
+      this.scriptEvaluationError(`Missing opcode in ${this.context} at pc=${this.programCounter}.`) // Error thrown
     }
-
-    const isChunkMinimal = (chunk: ScriptChunk): boolean => {
-      const data = chunk.data
-      const op = chunk.op
-      if (!Array.isArray(data)) {
-        return true
-      }
-      if (data.length === 0) {
-        // Could have used OP_0.
-        return op === OP.OP_0
-      } else if (data.length === 1 && data[0] >= 1 && data[0] <= 16) {
-        // Could have used OP_1 .. OP_16.
-        return op === OP.OP_1 + (data[0] - 1)
-      } else if (data.length === 1 && data[0] === 0x81) {
-        // Could have used OP_1NEGATE.
-        return op === OP.OP_1NEGATE
-      } else if (data.length <= 75) {
-        // Could have used a direct push (opCode indicating number of bytes pushed + those bytes).
-        return op === data.length
-      } else if (data.length <= 255) {
-        // Could have used OP_PUSHDATA.
-        return op === OP.OP_PUSHDATA1
-      } else if (data.length <= 65535) {
-        // Could have used OP_PUSHDATA2.
-        return op === OP.OP_PUSHDATA2
-      }
-      return true
-    }
-
-    // Following example from sCrypt now using Number.MAX_SAFE_INTEGER (bsv/lib/transaction/input/input).
-    const isMinimallyEncoded = (
-      buf: number[],
-      maxNumSize: number = Number.MAX_SAFE_INTEGER
-    ): boolean => {
-      if (buf.length > maxNumSize) {
-        return false
-      }
-
-      if (buf.length > 0) {
-        // Check that the number is encoded with the minimum possible number
-        // of bytes.
-        //
-        // If the most-significant-byte - excluding the sign bit - is zero
-        // then we're not minimal. Note how this test also rejects the
-        // negative-zero encoding, 0x80.
-        if ((buf[buf.length - 1] & 0x7f) === 0) {
-          // One exception: if there's more than one byte and the most
-          // significant bit of the second-most-significant-byte is set it
-          // would conflict with the sign bit. An example of this case is
-          // +-255, which encode to 0xff00 and 0xff80 respectively.
-          // (big-endian).
-          if (buf.length <= 1 || (buf[buf.length - 2] & 0x80) === 0) {
-            return false
-          }
-        }
-      }
-      return true
-    }
-
-    const padDataToSize = (buf: number[], len: number): number[] => {
-      const b = buf
-      while (b.length < len) {
-        b.unshift(0)
-      }
-      return b
-    }
-
-    /**
-     * This function is translated from bitcoind's IsDERSignature and is used in
-     * the script interpreter.  This "DER" format actually includes an extra byte,
-     * the nHashType, at the end. It is really the tx format, not DER format.
-     *
-     * A canonical signature exists of: [30] [total len] [02] [len R] [R] [02] [len S] [S] [hashtype]
-     * Where R and S are not negative (their first byte has its highest bit not set), and not
-     * excessively padded (do not start with a 0 byte, unless an otherwise negative number follows,
-     * in which case a single 0 byte is necessary and even required).
-     *
-     * See https://bitcointalk.org/index.php?topic=8392.msg127623#msg127623
-     */
-    const isChecksigFormat = (buf: number[]): boolean => {
-      if (buf.length < 9) {
-        //  Non-canonical signature: too short
-        return false
-      }
-      if (buf.length > 73) {
-        // Non-canonical signature: too long
-        return false
-      }
-      if (buf[0] !== 0x30) {
-        //  Non-canonical signature: wrong type
-        return false
-      }
-      if (buf[1] !== buf.length - 3) {
-        //  Non-canonical signature: wrong length marker
-        return false
-      }
-      const nLEnR = buf[3]
-      if (5 + nLEnR >= buf.length) {
-        //  Non-canonical signature: S length misplaced
-        return false
-      }
-      const nLEnS = buf[5 + nLEnR]
-      if (nLEnR + nLEnS + 7 !== buf.length) {
-        //  Non-canonical signature: R+S length mismatch
-        return false
-      }
-
-      const R = buf.slice(4)
-      if (buf[4 - 2] !== 0x02) {
-        //  Non-canonical signature: R value type mismatch
-        return false
-      }
-      if (buf[4 - 1] !== nLEnR) {
-        //  Non-canonical signature: R length mismatch
-        return false
-      }
-      if (nLEnR === 0) {
-        //  Non-canonical signature: R length is zero
-        return false
-      }
-      if ((R[0] & 0x80) !== 0) {
-        //  Non-canonical signature: R value negative
-        return false
-      }
-      if (nLEnR > 1 && R[0] === 0x00 && (R[1] & 0x80) === 0) {
-        //  Non-canonical signature: R value excessively padded
-        return false
-      }
-
-      const S = buf.slice(6 + nLEnR)
-      if (buf[6 + nLEnR - 2] !== 0x02) {
-        //  Non-canonical signature: S value type mismatch
-        return false
-      }
-      if (buf[6 + nLEnR - 1] !== nLEnS) {
-        //  Non-canonical signature: S length mismatch
-        return false
-      }
-      if (nLEnS === 0) {
-        //  Non-canonical signature: S length is zero
-        return false
-      }
-      if ((S[0] & 0x80) !== 0) {
-        //  Non-canonical signature: S value negative
-        return false
-      }
-      if (nLEnS > 1 && S[0] === 0x00 && (S[1] & 0x80) === 0) {
-        //  Non-canonical signature: S value excessively padded
-        return false
-      }
-      return true
-    }
-
-    const checkSignatureEncoding = (buf: number[]): boolean => {
-      // Empty signature. Not strictly DER encoded, but allowed to provide a
-      // compact way to provide an invalid signature for use with CHECK(MULTI)SIG
-      if (buf.length === 0) {
-        return true
-      }
-
-      if (!isChecksigFormat(buf)) {
-        this.scriptEvaluationError(
-          'The signature format is invalid.'
-        )
-      }
-      const sig = TransactionSignature.fromChecksigFormat(buf)
-      if (requireLowSSignatures && !sig.hasLowS()) {
-        this.scriptEvaluationError(
-          'The signature must have a low S value.'
-        )
-      }
-      if ((sig.scope & TransactionSignature.SIGHASH_FORKID) === 0) {
-        this.scriptEvaluationError(
-          'The signature must use SIGHASH_FORKID.'
-        )
-        return false
-      }
-
-      return true
-    }
-
-    const checkPublicKeyEncoding = (buf: number[]): boolean => {
-      if (buf.length < 33) {
-        this.scriptEvaluationError(
-          'The public key is too short, it must be at least 33 bytes.'
-        )
-      }
-      if (buf[0] === 0x04) {
-        if (buf.length !== 65) {
-          this.scriptEvaluationError(
-            'The non-compressed public key must be 65 bytes.'
-          )
-        }
-      } else if (buf[0] === 0x02 || buf[0] === 0x03) {
-        if (buf.length !== 33) {
-          this.scriptEvaluationError(
-            'The compressed public key must be 33 bytes.'
-          )
-        }
-      } else {
-        this.scriptEvaluationError(
-          'The public key is in an unknown format.'
-        )
-      }
-      return true
-    }
-
-    const verifySignature = (
-      sig: TransactionSignature,
-      pubkey: PublicKey,
-      subscript: Script
-    ): boolean => {
-      const preimage = TransactionSignature.format({
-        sourceTXID: this.sourceTXID,
-        sourceOutputIndex: this.sourceOutputIndex,
-        sourceSatoshis: this.sourceSatoshis,
-        transactionVersion: this.transactionVersion,
-        otherInputs: this.otherInputs,
-        outputs: this.outputs,
-        inputIndex: this.inputIndex,
-        subscript,
-        inputSequence: this.inputSequence,
-        lockTime: this.lockTime,
-        scope: sig.scope
-      })
-      const hash = new BigNumber(Hash.hash256(preimage))
-      return verify(hash, sig, pubkey)
+    if (Array.isArray(operation.data) && operation.data.length > maxScriptElementSize) {
+      this.scriptEvaluationError(`Data push > ${maxScriptElementSize} bytes (pc=${this.programCounter}).`) // Error thrown
     }
 
     const isScriptExecuting = !this.ifStack.includes(false)
-    let buf: number[],
-      buf1: number[],
-      buf2: number[],
-      buf3: number[],
-      spliced: number[][],
-      n: number,
-      size: number,
-      rawnum: number[],
-      num: number[],
-      signbit: number,
-      x1: number[],
-      x2: number[],
-      x3: number[],
-      bn: BigNumber,
-      bn1: BigNumber,
-      bn2: BigNumber,
-      bn3: BigNumber,
-      bufSig: number[],
-      bufPubkey: number[],
-      subscript
-    let sig,
-      pubkey,
-      i: number,
-      fOk: boolean,
-      nKeysCount: number,
-      ikey: number,
-      ikey2: number,
-      nSigsCount: number,
-      isig: number
-    let fValue: boolean, fEqual: boolean, fSuccess: boolean
 
-    // Read instruction
-    const currentOpcode = operation.op
-    if (typeof currentOpcode === 'undefined') {
-      this.scriptEvaluationError(
-        `An opcode is missing in this chunk of the ${this.context}!`
-      )
-    }
-    if (
-      Array.isArray(operation.data) &&
-      operation.data.length > maxScriptElementSize
-    ) {
-      this.scriptEvaluationError(
-        `It's not currently possible to push data larger than ${maxScriptElementSize} bytes.`
-      )
+    if (isScriptExecuting && isOpcodeDisabledHelper(currentOpcode)) {
+      this.scriptEvaluationError(`This opcode is currently disabled. (Opcode: ${OP[currentOpcode] as string}, PC: ${this.programCounter})`) // Error thrown
     }
 
-    if (isScriptExecuting && isOpcodeDisabled(currentOpcode)) {
-      this.scriptEvaluationError('This opcode is currently disabled.')
-    }
-
-    if (
-      isScriptExecuting &&
-      currentOpcode >= 0 &&
-      currentOpcode <= OP.OP_PUSHDATA4
-    ) {
-      if (requireMinimalPush && !isChunkMinimal(operation)) {
-        this.scriptEvaluationError('This data is not minimally-encoded.')
+    if (isScriptExecuting && currentOpcode >= 0 && currentOpcode <= OP.OP_PUSHDATA4) {
+      if (requireMinimalPush && !isChunkMinimalPushHelper(operation)) {
+        this.scriptEvaluationError(`This data is not minimally-encoded. (PC: ${this.programCounter})`) // Error thrown
       }
+      this.pushStack(Array.isArray(operation.data) ? operation.data : [])
+    } else if (isScriptExecuting || (currentOpcode >= OP.OP_IF && currentOpcode <= OP.OP_ENDIF)) {
+      let buf: number[], buf1: number[], buf2: number[], buf3: number[]
+      let x1: number[], x2: number[], x3: number[]
+      let bn: BigNumber, bn1: BigNumber, bn2: BigNumber, bn3: BigNumber
+      let n: number, size: number, fValue: boolean, fSuccess: boolean, subscript: Script
+      let bufSig: number[], bufPubkey: number[]
+      let sig: TransactionSignature, pubkey: PublicKey
+      let i: number, ikey: number, isig: number, nKeysCount: number, nSigsCount: number, fOk: boolean
 
-      if (!Array.isArray(operation.data)) {
-        this.stack.push([])
-        this.stackMem += 0
-      } else {
-        this.stack.push(operation.data)
-        this.stackMem += operation.data.length
-      }
-    } else if (
-      isScriptExecuting ||
-      (OP.OP_IF <= currentOpcode && currentOpcode <= OP.OP_ENDIF)
-    ) {
       switch (currentOpcode) {
-        case OP.OP_1NEGATE:
-        case OP.OP_1:
-        case OP.OP_2:
-        case OP.OP_3:
-        case OP.OP_4:
-        case OP.OP_5:
-        case OP.OP_6:
-        case OP.OP_7:
-        case OP.OP_8:
-        case OP.OP_9:
-        case OP.OP_10:
-        case OP.OP_11:
-        case OP.OP_12:
-        case OP.OP_13:
-        case OP.OP_14:
-        case OP.OP_15:
-        case OP.OP_16:
+        case OP.OP_1NEGATE: this.pushStackCopy(SCRIPTNUM_NEG_1); break
+        case OP.OP_0: this.pushStackCopy(SCRIPTNUMS_0_TO_16[0]); break
+        case OP.OP_1: case OP.OP_2: case OP.OP_3: case OP.OP_4:
+        case OP.OP_5: case OP.OP_6: case OP.OP_7: case OP.OP_8:
+        case OP.OP_9: case OP.OP_10: case OP.OP_11: case OP.OP_12:
+        case OP.OP_13: case OP.OP_14: case OP.OP_15: case OP.OP_16:
           n = currentOpcode - (OP.OP_1 - 1)
-          buf = new BigNumber(n).toScriptNum()
-          this.stack.push(buf)
-          this.stackMem += buf.length
+          this.pushStackCopy(SCRIPTNUMS_0_TO_16[n])
           break
 
         case OP.OP_NOP:
-        case OP.OP_NOP2:
-        case OP.OP_NOP3:
+        case OP.OP_NOP2: // Formerly CHECKLOCKTIMEVERIFY
+        case OP.OP_NOP3: // Formerly CHECKSEQUENCEVERIFY
         case OP.OP_NOP1:
         case OP.OP_NOP4:
         case OP.OP_NOP5:
@@ -515,69 +443,22 @@ export default class Spend {
         case OP.OP_NOP8:
         case OP.OP_NOP9:
         case OP.OP_NOP10:
-        case OP.OP_NOP11:
-        case OP.OP_NOP12:
-        case OP.OP_NOP13:
-        case OP.OP_NOP14:
-        case OP.OP_NOP15:
-        case OP.OP_NOP16:
-        case OP.OP_NOP17:
-        case OP.OP_NOP18:
-        case OP.OP_NOP19:
-        case OP.OP_NOP20:
-        case OP.OP_NOP21:
-        case OP.OP_NOP22:
-        case OP.OP_NOP23:
-        case OP.OP_NOP24:
-        case OP.OP_NOP25:
-        case OP.OP_NOP26:
-        case OP.OP_NOP27:
-        case OP.OP_NOP28:
-        case OP.OP_NOP29:
-        case OP.OP_NOP30:
-        case OP.OP_NOP31:
-        case OP.OP_NOP32:
-        case OP.OP_NOP33:
-        case OP.OP_NOP34:
-        case OP.OP_NOP35:
-        case OP.OP_NOP36:
-        case OP.OP_NOP37:
-        case OP.OP_NOP38:
-        case OP.OP_NOP39:
-        case OP.OP_NOP40:
-        case OP.OP_NOP41:
-        case OP.OP_NOP42:
-        case OP.OP_NOP43:
-        case OP.OP_NOP44:
-        case OP.OP_NOP45:
-        case OP.OP_NOP46:
-        case OP.OP_NOP47:
-        case OP.OP_NOP48:
-        case OP.OP_NOP49:
-        case OP.OP_NOP50:
-        case OP.OP_NOP51:
-        case OP.OP_NOP52:
-        case OP.OP_NOP53:
-        case OP.OP_NOP54:
-        case OP.OP_NOP55:
-        case OP.OP_NOP56:
-        case OP.OP_NOP57:
-        case OP.OP_NOP58:
-        case OP.OP_NOP59:
-        case OP.OP_NOP60:
-        case OP.OP_NOP61:
-        case OP.OP_NOP62:
-        case OP.OP_NOP63:
-        case OP.OP_NOP64:
-        case OP.OP_NOP65:
-        case OP.OP_NOP66:
-        case OP.OP_NOP67:
-        case OP.OP_NOP68:
-        case OP.OP_NOP69:
-        case OP.OP_NOP70:
-        case OP.OP_NOP71:
-        case OP.OP_NOP72:
-        case OP.OP_NOP73:
+          /* falls through */
+          // eslint-disable-next-line no-fallthrough
+        // eslint-disable-next-line no-fallthrough
+        case OP.OP_NOP11: case OP.OP_NOP12: case OP.OP_NOP13: case OP.OP_NOP14: case OP.OP_NOP15:
+        case OP.OP_NOP16: case OP.OP_NOP17: case OP.OP_NOP18: case OP.OP_NOP19: case OP.OP_NOP20:
+        case OP.OP_NOP21: case OP.OP_NOP22: case OP.OP_NOP23: case OP.OP_NOP24: case OP.OP_NOP25:
+        case OP.OP_NOP26: case OP.OP_NOP27: case OP.OP_NOP28: case OP.OP_NOP29: case OP.OP_NOP30:
+        case OP.OP_NOP31: case OP.OP_NOP32: case OP.OP_NOP33: case OP.OP_NOP34: case OP.OP_NOP35:
+        case OP.OP_NOP36: case OP.OP_NOP37: case OP.OP_NOP38: case OP.OP_NOP39: case OP.OP_NOP40:
+        case OP.OP_NOP41: case OP.OP_NOP42: case OP.OP_NOP43: case OP.OP_NOP44: case OP.OP_NOP45:
+        case OP.OP_NOP46: case OP.OP_NOP47: case OP.OP_NOP48: case OP.OP_NOP49: case OP.OP_NOP50:
+        case OP.OP_NOP51: case OP.OP_NOP52: case OP.OP_NOP53: case OP.OP_NOP54: case OP.OP_NOP55:
+        case OP.OP_NOP56: case OP.OP_NOP57: case OP.OP_NOP58: case OP.OP_NOP59: case OP.OP_NOP60:
+        case OP.OP_NOP61: case OP.OP_NOP62: case OP.OP_NOP63: case OP.OP_NOP64: case OP.OP_NOP65:
+        case OP.OP_NOP66: case OP.OP_NOP67: case OP.OP_NOP68: case OP.OP_NOP69: case OP.OP_NOP70:
+        case OP.OP_NOP71: case OP.OP_NOP72: case OP.OP_NOP73:
         case OP.OP_NOP77:
           break
 
@@ -585,1091 +466,525 @@ export default class Spend {
         case OP.OP_NOTIF:
           fValue = false
           if (isScriptExecuting) {
-            if (this.stack.length < 1) {
-              this.scriptEvaluationError(
-                'OP_IF and OP_NOTIF require at least one item on the stack when they are used!'
-              )
-            }
-            buf = this.stacktop(-1)
-
+            if (this.stack.length < 1) this.scriptEvaluationError('OP_IF and OP_NOTIF require at least one item on the stack when they are used!')
+            buf = this.popStack()
             fValue = this.castToBool(buf)
-            if (currentOpcode === OP.OP_NOTIF) {
-              fValue = !fValue
-            }
-            poppedValue = this.stack.pop()
-            if (poppedValue != null) {
-              this.stackMem -= poppedValue.length
-            }
-            clearPoppedValue()
+            if (currentOpcode === OP.OP_NOTIF) fValue = !fValue
           }
           this.ifStack.push(fValue)
           break
-
         case OP.OP_ELSE:
-          if (this.ifStack.length === 0) {
-            this.scriptEvaluationError('OP_ELSE requires a preceeding OP_IF.')
-          }
-          this.ifStack[this.ifStack.length - 1] =
-            !this.ifStack[this.ifStack.length - 1]
+          if (this.ifStack.length === 0) this.scriptEvaluationError('OP_ELSE requires a preceeding OP_IF.')
+          this.ifStack[this.ifStack.length - 1] = !this.ifStack[this.ifStack.length - 1]
           break
-
         case OP.OP_ENDIF:
-          if (this.ifStack.length === 0) {
-            this.scriptEvaluationError('OP_ENDIF requires a preceeding OP_IF.')
-          }
+          if (this.ifStack.length === 0) this.scriptEvaluationError('OP_ENDIF requires a preceeding OP_IF.')
           this.ifStack.pop()
           break
-
         case OP.OP_VERIFY:
-          if (this.stack.length < 1) {
-            this.scriptEvaluationError(
-              'OP_VERIFY requires at least one item to be on the stack.'
-            )
-          }
-          buf = this.stacktop(-1)
-          fValue = this.castToBool(buf)
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
-          if (!fValue) {
-            this.scriptEvaluationError(
-              'OP_VERIFY requires the top stack value to be truthy.'
-            )
-          }
+          if (this.stack.length < 1) this.scriptEvaluationError('OP_VERIFY requires at least one item to be on the stack.')
+          buf1 = this.stackTop()
+          fValue = this.castToBool(buf1)
+          if (!fValue) this.scriptEvaluationError('OP_VERIFY requires the top stack value to be truthy.')
+          this.popStack()
           break
-
         case OP.OP_RETURN:
-          if (this.context === 'UnlockingScript') {
-            this.programCounter = this.unlockingScript.chunks.length
-          } else {
-            this.programCounter = this.lockingScript.chunks.length
-          }
+          if (this.context === 'UnlockingScript') this.programCounter = this.unlockingScript.chunks.length
+          else this.programCounter = this.lockingScript.chunks.length
           this.ifStack = []
+          this.programCounter-- // To counteract the final increment and ensure loop termination
           break
 
         case OP.OP_TOALTSTACK:
-          if (this.stack.length < 1) {
-            this.scriptEvaluationError(
-              'OP_TOALTSTACK requires at oeast one item to be on the stack.')
-          }
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.altStack.push(poppedValue)
-            this.altStackMem += poppedValue.length
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
+          if (this.stack.length < 1) this.scriptEvaluationError('OP_TOALTSTACK requires at oeast one item to be on the stack.')
+          this.pushAltStack(this.popStack())
           break
-
         case OP.OP_FROMALTSTACK:
-          if (this.altStack.length < 1) {
-            this.scriptEvaluationError(
-              'OP_FROMALTSTACK requires at least one item to be on the stack.'
-            )
-          }
-          poppedValue = this.altStack.pop()
-          if (poppedValue != null) {
-            this.stack.push(poppedValue)
-            this.stackMem += poppedValue.length
-            this.altStackMem -= poppedValue.length
-          }
-          clearPoppedValue()
+          if (this.altStack.length < 1) this.scriptEvaluationError('OP_FROMALTSTACK requires at least one item to be on the stack.') // "stack" here means altstack
+          this.pushStack(this.popAltStack())
           break
-
         case OP.OP_2DROP:
-          if (this.stack.length < 2) {
-            this.scriptEvaluationError(
-              'OP_2DROP requires at least two items to be on the stack.'
-            )
-          }
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
+          if (this.stack.length < 2) this.scriptEvaluationError('OP_2DROP requires at least two items to be on the stack.')
+          this.popStack(); this.popStack()
           break
-
         case OP.OP_2DUP:
-          if (this.stack.length < 2) {
-            this.scriptEvaluationError(
-              'OP_2DUP requires at least two items to be on the stack.'
-            )
-          }
-          buf1 = this.stacktop(-2)
-          buf2 = this.stacktop(-1)
-          this.stack.push([...buf1])
-          this.stackMem += buf1.length
-          this.stack.push([...buf2])
-          this.stackMem += buf2.length
+          if (this.stack.length < 2) this.scriptEvaluationError('OP_2DUP requires at least two items to be on the stack.')
+          buf1 = this.stackTop(-2)
+          buf2 = this.stackTop(-1)
+          this.pushStackCopy(buf1); this.pushStackCopy(buf2)
           break
-
         case OP.OP_3DUP:
-          if (this.stack.length < 3) {
-            this.scriptEvaluationError(
-              'OP_3DUP requires at least three items to be on the stack.'
-            )
-          }
-          buf1 = this.stacktop(-3)
-          buf2 = this.stacktop(-2)
-          buf3 = this.stacktop(-1)
-          this.stack.push([...buf1])
-          this.stackMem += buf1.length
-          this.stack.push([...buf2])
-          this.stackMem += buf2.length
-          this.stack.push([...buf3])
-          this.stackMem += buf3.length
+          if (this.stack.length < 3) this.scriptEvaluationError('OP_3DUP requires at least three items to be on the stack.')
+          buf1 = this.stackTop(-3)
+          buf2 = this.stackTop(-2)
+          buf3 = this.stackTop(-1)
+          this.pushStackCopy(buf1); this.pushStackCopy(buf2); this.pushStackCopy(buf3)
           break
-
         case OP.OP_2OVER:
-          if (this.stack.length < 4) {
-            this.scriptEvaluationError(
-              'OP_2OVER requires at least four items to be on the stack.'
-            )
-          }
-          buf1 = this.stacktop(-4)
-          buf2 = this.stacktop(-3)
-          this.stack.push([...buf1])
-          this.stackMem += buf1.length
-          this.stack.push([...buf2])
-          this.stackMem += buf2.length
+          if (this.stack.length < 4) this.scriptEvaluationError('OP_2OVER requires at least four items to be on the stack.')
+          buf1 = this.stackTop(-4)
+          buf2 = this.stackTop(-3)
+          this.pushStackCopy(buf1); this.pushStackCopy(buf2)
           break
-
-        case OP.OP_2ROT:
-          if (this.stack.length < 6) {
-            this.scriptEvaluationError(
-              'OP_2ROT requires at least six items to be on the stack.'
-            )
-          }
-          spliced = this.stack.splice(this.stack.length - 6, 2)
-          this.stack.push(spliced[0])
-          this.stackMem += spliced[0].length
-          this.stack.push(spliced[1])
-          this.stackMem += spliced[1].length
+        case OP.OP_2ROT: {
+          if (this.stack.length < 6) this.scriptEvaluationError('OP_2ROT requires at least six items to be on the stack.')
+          const rot6 = this.popStack(); const rot5 = this.popStack()
+          const rot4 = this.popStack(); const rot3 = this.popStack()
+          const rot2 = this.popStack(); const rot1 = this.popStack()
+          this.pushStack(rot3); this.pushStack(rot4)
+          this.pushStack(rot5); this.pushStack(rot6)
+          this.pushStack(rot1); this.pushStack(rot2)
           break
-
-        case OP.OP_2SWAP:
-          if (this.stack.length < 4) {
-            this.scriptEvaluationError(
-              'OP_2SWAP requires at least four items to be on the stack.'
-            )
-          }
-          spliced = this.stack.splice(this.stack.length - 4, 2)
-          this.stack.push(spliced[0])
-          this.stackMem += spliced[0].length
-          this.stack.push(spliced[1])
-          this.stackMem += spliced[1].length
+        }
+        case OP.OP_2SWAP: {
+          if (this.stack.length < 4) this.scriptEvaluationError('OP_2SWAP requires at least four items to be on the stack.')
+          const swap4 = this.popStack(); const swap3 = this.popStack()
+          const swap2 = this.popStack(); const swap1 = this.popStack()
+          this.pushStack(swap3); this.pushStack(swap4)
+          this.pushStack(swap1); this.pushStack(swap2)
           break
-
+        }
         case OP.OP_IFDUP:
-          if (this.stack.length < 1) {
-            this.scriptEvaluationError(
-              'OP_IFDUP requires at least one item to be on the stack.'
-            )
-          }
-          buf = this.stacktop(-1)
-          fValue = this.castToBool(buf)
-          if (fValue) {
-            this.stack.push([...buf])
-            this.stackMem += buf.length
+          if (this.stack.length < 1) this.scriptEvaluationError('OP_IFDUP requires at least one item to be on the stack.')
+          buf1 = this.stackTop()
+          if (this.castToBool(buf1)) {
+            this.pushStackCopy(buf1)
           }
           break
-
         case OP.OP_DEPTH:
-          buf = new BigNumber(this.stack.length).toScriptNum()
-          this.stack.push(buf)
-          this.stackMem += buf.length
+          this.pushStack(new BigNumber(this.stack.length).toScriptNum())
           break
-
         case OP.OP_DROP:
-          if (this.stack.length < 1) {
-            this.scriptEvaluationError(
-              'OP_DROP requires at least one item to be on the stack.'
-            )
-          }
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
+          if (this.stack.length < 1) this.scriptEvaluationError('OP_DROP requires at least one item to be on the stack.')
+          this.popStack()
           break
-
         case OP.OP_DUP:
-          if (this.stack.length < 1) {
-            this.scriptEvaluationError(
-              'OP_DUP requires at least one item to be on the stack.'
-            )
-          }
-          this.stack.push([...this.stacktop(-1)])
-          this.stackMem += this.stacktop(-1).length
+          if (this.stack.length < 1) this.scriptEvaluationError('OP_DUP requires at least one item to be on the stack.')
+          this.pushStackCopy(this.stackTop())
           break
-
         case OP.OP_NIP:
-          if (this.stack.length < 2) {
-            this.scriptEvaluationError(
-              'OP_NIP requires at least two items to be on the stack.'
-            )
-          }
-          this.stack.splice(this.stack.length - 2, 1)
-          this.stackMem -= this.stacktop(-1).length
+          if (this.stack.length < 2) this.scriptEvaluationError('OP_NIP requires at least two items to be on the stack.')
+          buf2 = this.popStack()
+          this.popStack()
+          this.pushStack(buf2)
           break
-
         case OP.OP_OVER:
-          if (this.stack.length < 2) {
-            this.scriptEvaluationError(
-              'OP_OVER requires at least two items to be on the stack.'
-            )
-          }
-          this.stack.push([...this.stacktop(-2)])
-          this.stackMem += this.stacktop(-2).length
+          if (this.stack.length < 2) this.scriptEvaluationError('OP_OVER requires at least two items to be on the stack.')
+          this.pushStackCopy(this.stackTop(-2))
           break
-
         case OP.OP_PICK:
-        case OP.OP_ROLL:
-          if (this.stack.length < 2) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires at least two items to be on the stack.`
-            )
-          }
-          buf = this.stacktop(-1)
-          bn = BigNumber.fromScriptNum(buf, requireMinimalPush)
+        case OP.OP_ROLL: {
+          if (this.stack.length < 2) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least two items to be on the stack.`)
+          bn = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush)
           n = bn.toNumber()
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
           if (n < 0 || n >= this.stack.length) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires the top stack element to be 0 or a positive number less than the current size of the stack.`
-            )
+            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the top stack element to be 0 or a positive number less than the current size of the stack.`)
           }
-          buf = this.stacktop(-n - 1)
+          const itemToMoveOrCopy = this.stack[this.stack.length - 1 - n]
           if (currentOpcode === OP.OP_ROLL) {
-            this.stack.splice(this.stack.length - n - 1, 1)
-            this.stackMem -= buf.length
+            this.stack.splice(this.stack.length - 1 - n, 1)
+            this.stackMem -= itemToMoveOrCopy.length
+            this.pushStack(itemToMoveOrCopy)
+          } else { // OP_PICK
+            this.pushStackCopy(itemToMoveOrCopy)
           }
-          this.stack.push([...buf])
-          this.stackMem += buf.length
           break
-
+        }
         case OP.OP_ROT:
-          if (this.stack.length < 3) {
-            this.scriptEvaluationError(
-              'OP_ROT requires at least three items to be on the stack.'
-            )
-          }
-          x1 = this.stacktop(-3)
-          x2 = this.stacktop(-2)
-          x3 = this.stacktop(-1)
-          this.stack[this.stack.length - 3] = x2
-          this.stack[this.stack.length - 2] = x3
-          this.stack[this.stack.length - 1] = x1
+          if (this.stack.length < 3) this.scriptEvaluationError('OP_ROT requires at least three items to be on the stack.')
+          x3 = this.popStack()
+          x2 = this.popStack()
+          x1 = this.popStack()
+          this.pushStack(x2); this.pushStack(x3); this.pushStack(x1)
           break
-
         case OP.OP_SWAP:
-          if (this.stack.length < 2) {
-            this.scriptEvaluationError(
-              'OP_SWAP requires at least two items to be on the stack.'
-            )
-          }
-          x1 = this.stacktop(-2)
-          x2 = this.stacktop(-1)
-          this.stack[this.stack.length - 2] = x2
-          this.stack[this.stack.length - 1] = x1
+          if (this.stack.length < 2) this.scriptEvaluationError('OP_SWAP requires at least two items to be on the stack.')
+          x2 = this.popStack()
+          x1 = this.popStack()
+          this.pushStack(x2); this.pushStack(x1)
           break
-
         case OP.OP_TUCK:
-          if (this.stack.length < 2) {
-            this.scriptEvaluationError(
-              'OP_TUCK requires at least two items to be on the stack.'
-            )
-          }
-          this.stack.splice(this.stack.length - 2, 0, [...this.stacktop(-1)])
-          this.stackMem += this.stacktop(-1).length
+          if (this.stack.length < 2) this.scriptEvaluationError('OP_TUCK requires at least two items to be on the stack.')
+          buf1 = this.stackTop(-1) // Top element (x2)
+          // stack is [... rest, x1, x2]
+          // We want [... rest, x2_copy, x1, x2]
+          this.ensureStackMem(buf1.length)
+          this.stack.splice(this.stack.length - 2, 0, buf1.slice()) // Insert copy of x2 before x1
+          this.stackMem += buf1.length // Account for the new copy
           break
-
         case OP.OP_SIZE:
-          if (this.stack.length < 1) {
-            this.scriptEvaluationError(
-              'OP_SIZE requires at least one item to be on the stack.'
-            )
-          }
-          bn = new BigNumber(this.stacktop(-1).length)
-          this.stack.push(bn.toScriptNum())
-          this.stackMem += bn.toScriptNum().length
+          if (this.stack.length < 1) this.scriptEvaluationError('OP_SIZE requires at least one item to be on the stack.')
+          this.pushStack(new BigNumber(this.stackTop().length).toScriptNum())
           break
 
         case OP.OP_AND:
         case OP.OP_OR:
-        case OP.OP_XOR:
-          if (this.stack.length < 2) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires at least one item to be on the stack.`
-            )
-          }
-          buf1 = this.stacktop(-2)
-          buf2 = this.stacktop(-1)
+        case OP.OP_XOR: {
+          if (this.stack.length < 2) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least two items on the stack.`)
+          buf2 = this.popStack()
+          buf1 = this.popStack()
+          if (buf1.length !== buf2.length) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the top two stack items to be the same size.`)
 
-          if (buf1.length !== buf2.length) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires the top two stack items to be the same size.`
-            )
+          const resultBufBitwiseOp = new Array(buf1.length)
+          for (let k = 0; k < buf1.length; k++) {
+            if (currentOpcode === OP.OP_AND) resultBufBitwiseOp[k] = buf1[k] & buf2[k]
+            else if (currentOpcode === OP.OP_OR) resultBufBitwiseOp[k] = buf1[k] | buf2[k]
+            else resultBufBitwiseOp[k] = buf1[k] ^ buf2[k]
           }
-
-          switch (currentOpcode) {
-            case OP.OP_AND:
-              for (let i = 0; i < buf1.length; i++) {
-                buf1[i] &= buf2[i]
-              }
-              break
-            case OP.OP_OR:
-              for (let i = 0; i < buf1.length; i++) {
-                buf1[i] |= buf2[i]
-              }
-              break
-            case OP.OP_XOR:
-              for (let i = 0; i < buf1.length; i++) {
-                buf1[i] ^= buf2[i]
-              }
-              break
-          }
-
-          // And pop vch2.
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
-          break
-
-        case OP.OP_INVERT:
-          if (this.stack.length < 1) {
-            this.scriptEvaluationError(
-              'OP_INVERT requires at least one item to be on the stack.'
-            )
-          }
-          buf = this.stacktop(-1)
-          for (let i = 0; i < buf.length; i++) {
-            buf[i] = ~buf[i]
-          }
-          break
-
-        case OP.OP_LSHIFT:
-        case OP.OP_RSHIFT:
-          if (this.stack.length < 2) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires at least two items to be on the stack.`
-            )
-          }
-          buf1 = this.stacktop(-2)
-          if (buf1.length === 0) {
-            poppedValue = this.stack.pop()
-            if (poppedValue != null) {
-              this.stackMem -= poppedValue.length
-            }
-            clearPoppedValue()
-          } else {
-            bn1 = new BigNumber(buf1)
-            bn2 = BigNumber.fromScriptNum(
-              this.stacktop(-1),
-              requireMinimalPush
-            )
-            n = bn2.toNumber()
-            if (n < 0) {
-              this.scriptEvaluationError(
-                `${OP[currentOpcode] as string} requires the top item on the stack not to be negative.`
-              )
-            }
-            poppedValue = this.stack.pop()
-            if (poppedValue != null) {
-              this.stackMem -= poppedValue.length
-            }
-            clearPoppedValue()
-            poppedValue = this.stack.pop()
-            if (poppedValue != null) {
-              this.stackMem -= poppedValue.length
-            }
-            clearPoppedValue()
-            let shifted
-            if (currentOpcode === OP.OP_LSHIFT) {
-              shifted = bn1.ushln(n)
-            }
-            if (currentOpcode === OP.OP_RSHIFT) {
-              shifted = bn1.ushrn(n)
-            }
-            const bufShifted = padDataToSize(
-              shifted.toArray().slice(buf1.length * -1),
-              buf1.length
-            )
-            this.stack.push(bufShifted)
-            this.stackMem += bufShifted.length
-          }
-          break
-
-        case OP.OP_EQUAL:
-        case OP.OP_EQUALVERIFY:
-          if (this.stack.length < 2) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires at least two items to be on the stack.`
-            )
-          }
-          buf1 = this.stacktop(-2)
-          buf2 = this.stacktop(-1)
-          fEqual = toHex(buf1) === toHex(buf2)
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
-          this.stack.push(fEqual ? [1] : [])
-          this.stackMem += (fEqual ? 1 : 0)
-          if (currentOpcode === OP.OP_EQUALVERIFY) {
-            if (this.castToBool(this.stacktop(-1))) {
-              poppedValue = this.stack.pop()
-              if (poppedValue != null) {
-                this.stackMem -= poppedValue.length
-              }
-              clearPoppedValue()
-            } else {
-              this.scriptEvaluationError(
-                'OP_EQUALVERIFY requires the top two stack items to be equal.'
-              )
-            }
-          }
-          break
-
-        case OP.OP_1ADD:
-        case OP.OP_1SUB:
-        case OP.OP_NEGATE:
-        case OP.OP_ABS:
-        case OP.OP_NOT:
-        case OP.OP_0NOTEQUAL:
-          if (this.stack.length < 1) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires at least one items to be on the stack.`
-            )
-          }
-          buf = this.stacktop(-1)
-          bn = BigNumber.fromScriptNum(buf, requireMinimalPush)
-          switch (currentOpcode) {
-            case OP.OP_1ADD:
-              bn = bn.addn(1)
-              break
-            case OP.OP_1SUB:
-              bn = bn.subn(1)
-              break
-            case OP.OP_NEGATE:
-              bn = bn.neg()
-              break
-            case OP.OP_ABS:
-              if (bn.cmpn(0) < 0) {
-                bn = bn.neg()
-              }
-              break
-            case OP.OP_NOT:
-              bn = new BigNumber(bn.cmpn(0) === 0 ? 1 : 0 + 0)
-              break
-            case OP.OP_0NOTEQUAL:
-              bn = new BigNumber(bn.cmpn(0) !== 0 ? 1 : 0 + 0)
-              break
-          }
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
-          this.stack.push(bn.toScriptNum())
-          this.stackMem += bn.toScriptNum().length
-          break
-
-        case OP.OP_ADD:
-        case OP.OP_SUB:
-        case OP.OP_MUL:
-        case OP.OP_MOD:
-        case OP.OP_DIV:
-        case OP.OP_BOOLAND:
-        case OP.OP_BOOLOR:
-        case OP.OP_NUMEQUAL:
-        case OP.OP_NUMEQUALVERIFY:
-        case OP.OP_NUMNOTEQUAL:
-        case OP.OP_LESSTHAN:
-        case OP.OP_GREATERTHAN:
-        case OP.OP_LESSTHANOREQUAL:
-        case OP.OP_GREATERTHANOREQUAL:
-        case OP.OP_MIN:
-        case OP.OP_MAX:
-          if (this.stack.length < 2) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires at least two items to be on the stack.`
-            )
-          }
-          bn1 = BigNumber.fromScriptNum(this.stacktop(-2), requireMinimalPush)
-          bn2 = BigNumber.fromScriptNum(this.stacktop(-1), requireMinimalPush)
-          bn = new BigNumber(0)
-
-          switch (currentOpcode) {
-            case OP.OP_ADD:
-              bn = bn1.add(bn2)
-              break
-            case OP.OP_SUB:
-              bn = bn1.sub(bn2)
-              break
-            case OP.OP_MUL:
-              bn = bn1.mul(bn2)
-              break
-            case OP.OP_DIV:
-              if (bn2.cmpn(0) === 0) {
-                this.scriptEvaluationError('OP_DIV cannot divide by zero!')
-              }
-              bn = bn1.div(bn2)
-              break
-            case OP.OP_MOD:
-              if (bn2.cmpn(0) === 0) {
-                this.scriptEvaluationError('OP_MOD cannot divide by zero!')
-              }
-              bn = bn1.mod(bn2)
-              break
-            case OP.OP_BOOLAND:
-              bn = new BigNumber(
-                bn1.cmpn(0) !== 0 && bn2.cmpn(0) !== 0 ? 1 : 0 + 0
-              )
-              break
-            case OP.OP_BOOLOR:
-              bn = new BigNumber(
-                bn1.cmpn(0) !== 0 || bn2.cmpn(0) !== 0 ? 1 : 0 + 0
-              )
-              break
-            case OP.OP_NUMEQUAL:
-              bn = new BigNumber(bn1.cmp(bn2) === 0 ? 1 : 0 + 0)
-              break
-            case OP.OP_NUMEQUALVERIFY:
-              bn = new BigNumber(bn1.cmp(bn2) === 0 ? 1 : 0 + 0)
-              break
-            case OP.OP_NUMNOTEQUAL:
-              bn = new BigNumber(bn1.cmp(bn2) !== 0 ? 1 : 0 + 0)
-              break
-            case OP.OP_LESSTHAN:
-              bn = new BigNumber(bn1.cmp(bn2) < 0 ? 1 : 0 + 0)
-              break
-            case OP.OP_GREATERTHAN:
-              bn = new BigNumber(bn1.cmp(bn2) > 0 ? 1 : 0 + 0)
-              break
-            case OP.OP_LESSTHANOREQUAL:
-              bn = new BigNumber(bn1.cmp(bn2) <= 0 ? 1 : 0 + 0)
-              break
-            case OP.OP_GREATERTHANOREQUAL:
-              bn = new BigNumber(bn1.cmp(bn2) >= 0 ? 1 : 0 + 0)
-              break
-            case OP.OP_MIN:
-              bn = bn1.cmp(bn2) < 0 ? bn1 : bn2
-              break
-            case OP.OP_MAX:
-              bn = bn1.cmp(bn2) > 0 ? bn1 : bn2
-              break
-          }
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
-          this.stack.push(bn.toScriptNum())
-          this.stackMem += bn.toScriptNum().length
-
-          if (currentOpcode === OP.OP_NUMEQUALVERIFY) {
-            if (this.castToBool(this.stacktop(-1))) {
-              poppedValue = this.stack.pop()
-              if (poppedValue != null) {
-                this.stackMem -= poppedValue.length
-              }
-              clearPoppedValue()
-            } else {
-              this.scriptEvaluationError(
-                'OP_NUMEQUALVERIFY requires the top stack item to be truthy.'
-              )
-            }
-          }
-          break
-
-        case OP.OP_WITHIN:
-          if (this.stack.length < 3) {
-            this.scriptEvaluationError(
-              'OP_WITHIN requires at least three items to be on the stack.'
-            )
-          }
-          bn1 = BigNumber.fromScriptNum(this.stacktop(-3), requireMinimalPush)
-          bn2 = BigNumber.fromScriptNum(this.stacktop(-2), requireMinimalPush)
-          bn3 = BigNumber.fromScriptNum(this.stacktop(-1), requireMinimalPush)
-          fValue = bn2.cmp(bn1) <= 0 && bn1.cmp(bn3) < 0
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
-          this.stack.push(fValue ? [1] : [])
-          this.stackMem += (fValue ? 1 : 0)
-          break
-
-        case OP.OP_RIPEMD160:
-        case OP.OP_SHA1:
-        case OP.OP_SHA256:
-        case OP.OP_HASH160:
-        case OP.OP_HASH256: {
-          if (this.stack.length < 1) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires at least one item to be on the stack.`
-            )
-          }
-
-          let bufHash: number[] = [] // Initialize bufHash to an empty array
-          buf = this.stacktop(-1)
-          if (currentOpcode === OP.OP_RIPEMD160) {
-            bufHash = Hash.ripemd160(buf)
-          } else if (currentOpcode === OP.OP_SHA1) {
-            bufHash = Hash.sha1(buf)
-          } else if (currentOpcode === OP.OP_SHA256) {
-            bufHash = Hash.sha256(buf)
-          } else if (currentOpcode === OP.OP_HASH160) {
-            bufHash = Hash.hash160(buf)
-          } else if (currentOpcode === OP.OP_HASH256) {
-            bufHash = Hash.hash256(buf)
-          }
-
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
-          this.stack.push(bufHash)
-          this.stackMem += bufHash.length
+          this.pushStack(resultBufBitwiseOp)
           break
         }
+        case OP.OP_INVERT: {
+          if (this.stack.length < 1) this.scriptEvaluationError('OP_INVERT requires at least one item to be on the stack.')
+          buf = this.popStack()
+          const invertedBufOp = new Array(buf.length)
+          for (let k = 0; k < buf.length; k++) {
+            invertedBufOp[k] = (~buf[k]) & 0xff
+          }
+          this.pushStack(invertedBufOp)
+          break
+        }
+        case OP.OP_LSHIFT:
+        case OP.OP_RSHIFT: {
+          if (this.stack.length < 2) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least two items to be on the stack.`)
+          bn2 = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush) // n (shift amount)
+          buf1 = this.popStack() // value to shift
+          n = bn2.toNumber()
+          if (n < 0) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the top item on the stack not to be negative.`)
+          if (buf1.length === 0) {
+            this.pushStack([])
+            break
+          }
+          bn1 = new BigNumber(buf1)
+          let shiftedBn: BigNumber
+          if (currentOpcode === OP.OP_LSHIFT) shiftedBn = bn1.ushln(n)
+          else shiftedBn = bn1.ushrn(n)
 
+          const shiftedArr = shiftedBn.toArray('le', buf1.length)
+          this.pushStack(shiftedArr)
+          break
+        }
+        case OP.OP_EQUAL:
+        case OP.OP_EQUALVERIFY:
+          if (this.stack.length < 2) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least two items to be on the stack.`)
+          buf2 = this.popStack()
+          buf1 = this.popStack()
+          fValue = compareNumberArrays(buf1, buf2)
+          this.pushStack(fValue ? [1] : [])
+          if (currentOpcode === OP.OP_EQUALVERIFY) {
+            if (!fValue) this.scriptEvaluationError('OP_EQUALVERIFY requires the top two stack items to be equal.')
+            this.popStack()
+          }
+          break
+
+        case OP.OP_1ADD: case OP.OP_1SUB:
+        case OP.OP_NEGATE: case OP.OP_ABS:
+        case OP.OP_NOT: case OP.OP_0NOTEQUAL:
+          if (this.stack.length < 1) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least one item to be on the stack.`)
+          bn = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush)
+          switch (currentOpcode) {
+            case OP.OP_1ADD: bn = bn.add(new BigNumber(1)); break
+            case OP.OP_1SUB: bn = bn.sub(new BigNumber(1)); break
+            case OP.OP_NEGATE: bn = bn.neg(); break
+            case OP.OP_ABS: if (bn.isNeg()) bn = bn.neg(); break
+            case OP.OP_NOT: bn = new BigNumber(bn.cmpn(0) === 0 ? 1 : 0); break
+            case OP.OP_0NOTEQUAL: bn = new BigNumber(bn.cmpn(0) !== 0 ? 1 : 0); break
+          }
+          this.pushStack(bn.toScriptNum())
+          break
+        case OP.OP_ADD: case OP.OP_SUB: case OP.OP_MUL: case OP.OP_DIV: case OP.OP_MOD:
+        case OP.OP_BOOLAND: case OP.OP_BOOLOR:
+        case OP.OP_NUMEQUAL: case OP.OP_NUMEQUALVERIFY: case OP.OP_NUMNOTEQUAL:
+        case OP.OP_LESSTHAN: case OP.OP_GREATERTHAN:
+        case OP.OP_LESSTHANOREQUAL: case OP.OP_GREATERTHANOREQUAL:
+        case OP.OP_MIN: case OP.OP_MAX: {
+          if (this.stack.length < 2) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least two items to be on the stack.`)
+          buf2 = this.popStack()
+          buf1 = this.popStack()
+          bn2 = BigNumber.fromScriptNum(buf2, requireMinimalPush)
+          bn1 = BigNumber.fromScriptNum(buf1, requireMinimalPush)
+          let predictedLen = 0
+          switch (currentOpcode) {
+            case OP.OP_MUL:
+              predictedLen = bn1.byteLength() + bn2.byteLength()
+              break
+            case OP.OP_ADD:
+            case OP.OP_SUB:
+              predictedLen = Math.max(bn1.byteLength(), bn2.byteLength()) + 1
+              break
+            default:
+              predictedLen = Math.max(bn1.byteLength(), bn2.byteLength())
+          }
+          this.ensureStackMem(predictedLen)
+          let resultBnArithmetic: BigNumber = new BigNumber(0)
+          switch (currentOpcode) {
+            case OP.OP_ADD: resultBnArithmetic = bn1.add(bn2); break
+            case OP.OP_SUB: resultBnArithmetic = bn1.sub(bn2); break
+            case OP.OP_MUL: resultBnArithmetic = bn1.mul(bn2); break
+            case OP.OP_DIV:
+              if (bn2.cmpn(0) === 0) this.scriptEvaluationError('OP_DIV cannot divide by zero!')
+              resultBnArithmetic = bn1.div(bn2); break
+            case OP.OP_MOD:
+              if (bn2.cmpn(0) === 0) this.scriptEvaluationError('OP_MOD cannot divide by zero!')
+              resultBnArithmetic = bn1.mod(bn2); break
+            case OP.OP_BOOLAND: resultBnArithmetic = new BigNumber((bn1.cmpn(0) !== 0 && bn2.cmpn(0) !== 0) ? 1 : 0); break
+            case OP.OP_BOOLOR: resultBnArithmetic = new BigNumber((bn1.cmpn(0) !== 0 || bn2.cmpn(0) !== 0) ? 1 : 0); break
+            case OP.OP_NUMEQUAL: resultBnArithmetic = new BigNumber(bn1.cmp(bn2) === 0 ? 1 : 0); break
+            case OP.OP_NUMEQUALVERIFY: resultBnArithmetic = new BigNumber(bn1.cmp(bn2) === 0 ? 1 : 0); break
+            case OP.OP_NUMNOTEQUAL: resultBnArithmetic = new BigNumber(bn1.cmp(bn2) !== 0 ? 1 : 0); break
+            case OP.OP_LESSTHAN: resultBnArithmetic = new BigNumber(bn1.cmp(bn2) < 0 ? 1 : 0); break
+            case OP.OP_GREATERTHAN: resultBnArithmetic = new BigNumber(bn1.cmp(bn2) > 0 ? 1 : 0); break
+            case OP.OP_LESSTHANOREQUAL: resultBnArithmetic = new BigNumber(bn1.cmp(bn2) <= 0 ? 1 : 0); break
+            case OP.OP_GREATERTHANOREQUAL: resultBnArithmetic = new BigNumber(bn1.cmp(bn2) >= 0 ? 1 : 0); break
+            case OP.OP_MIN: resultBnArithmetic = bn1.cmp(bn2) < 0 ? bn1 : bn2; break
+            case OP.OP_MAX: resultBnArithmetic = bn1.cmp(bn2) > 0 ? bn1 : bn2; break
+          }
+          this.pushStack(resultBnArithmetic.toScriptNum())
+          if (currentOpcode === OP.OP_NUMEQUALVERIFY) {
+            if (!this.castToBool(this.stackTop())) this.scriptEvaluationError('OP_NUMEQUALVERIFY requires the top stack item to be truthy.')
+            this.popStack()
+          }
+          break
+        }
+        case OP.OP_WITHIN:
+          if (this.stack.length < 3) this.scriptEvaluationError('OP_WITHIN requires at least three items to be on the stack.')
+          bn3 = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush) // max
+          bn2 = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush) // min
+          bn1 = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush) // x
+          fValue = bn1.cmp(bn2) >= 0 && bn1.cmp(bn3) < 0
+          this.pushStack(fValue ? [1] : [])
+          break
+
+        case OP.OP_RIPEMD160: case OP.OP_SHA1: case OP.OP_SHA256:
+        case OP.OP_HASH160: case OP.OP_HASH256: {
+          if (this.stack.length < 1) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least one item to be on the stack.`)
+          buf = this.popStack()
+          let hashResult: number[] = [] // Initialize to empty, to satisfy TS compiler
+          if (currentOpcode === OP.OP_RIPEMD160) hashResult = Hash.ripemd160(buf)
+          else if (currentOpcode === OP.OP_SHA1) hashResult = Hash.sha1(buf)
+          else if (currentOpcode === OP.OP_SHA256) hashResult = Hash.sha256(buf)
+          else if (currentOpcode === OP.OP_HASH160) hashResult = Hash.hash160(buf)
+          else if (currentOpcode === OP.OP_HASH256) hashResult = Hash.hash256(buf)
+          this.pushStack(hashResult)
+          break
+        }
         case OP.OP_CODESEPARATOR:
           this.lastCodeSeparator = this.programCounter
           break
-
         case OP.OP_CHECKSIG:
-        case OP.OP_CHECKSIGVERIFY:
-          if (this.stack.length < 2) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires at least two items to be on the stack.`
-            )
+        case OP.OP_CHECKSIGVERIFY: {
+          if (this.stack.length < 2) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least two items to be on the stack.`)
+          bufPubkey = this.popStack()
+          bufSig = this.popStack()
+
+          if (!this.checkSignatureEncoding(bufSig) || !this.checkPublicKeyEncoding(bufPubkey)) {
+            // Error already thrown by helpers
+            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires correct encoding for the public key and signature.`) // Fallback, should be unreachable
           }
 
-          bufSig = this.stacktop(-2)
-          bufPubkey = this.stacktop(-1)
-
-          if (
-            !checkSignatureEncoding(bufSig) ||
-            !checkPublicKeyEncoding(bufPubkey)
-          ) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires correct encoding for the public key and signature.`
-            )
-          }
-
-          // Subset of script starting at the most recent codeseparator
-          // CScript scriptCode(pbegincodehash, pend);
-          if (this.context === 'UnlockingScript') {
-            subscript = new Script(
-              this.unlockingScript.chunks.slice(this.lastCodeSeparator ?? 0)
-            )
-          } else {
-            subscript = new Script(
-              this.lockingScript.chunks.slice(this.lastCodeSeparator ?? 0)
-            )
-          }
-
-          // Drop the signature, since there's no way for a signature to sign itself
+          const scriptForChecksig = this.context === 'UnlockingScript' ? this.unlockingScript : this.lockingScript
+          const scriptCodeChunks = scriptForChecksig.chunks.slice(this.lastCodeSeparator === null ? 0 : this.lastCodeSeparator + 1)
+          subscript = new Script(scriptCodeChunks)
           subscript.findAndDelete(new Script().writeBin(bufSig))
 
-          try {
-            sig = TransactionSignature.fromChecksigFormat(bufSig)
-            pubkey = PublicKey.fromDER(bufPubkey)
-            fSuccess = verifySignature(sig, pubkey, subscript)
-          } catch (e) {
-            // invalid sig or pubkey
-            fSuccess = false
-          }
-
-          if (!fSuccess && bufSig.length > 0) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} failed to verify the signature, and requires an empty signature when verification fails.`
-            )
-          }
-
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
-
-          // stack.push_back(fSuccess ? vchTrue : vchFalse);
-          this.stack.push(fSuccess ? [1] : [])
-          this.stackMem += (fSuccess ? 1 : 0)
-          if (currentOpcode === OP.OP_CHECKSIGVERIFY) {
-            if (fSuccess) {
-              poppedValue = this.stack.pop()
-              if (poppedValue != null) {
-                this.stackMem -= poppedValue.length
-              }
-              clearPoppedValue()
-            } else {
-              this.scriptEvaluationError(
-                'OP_CHECKSIGVERIFY requires that a valid signature is provided.'
-              )
+          fSuccess = false
+          if (bufSig.length > 0) {
+            try {
+              sig = TransactionSignature.fromChecksigFormat(bufSig)
+              pubkey = PublicKey.fromDER(bufPubkey)
+              fSuccess = this.verifySignature(sig, pubkey, subscript)
+            } catch (e) {
+              fSuccess = false
             }
           }
-          break
 
+          this.pushStack(fSuccess ? [1] : [])
+          if (currentOpcode === OP.OP_CHECKSIGVERIFY) {
+            if (!fSuccess) this.scriptEvaluationError('OP_CHECKSIGVERIFY requires that a valid signature is provided.')
+            this.popStack()
+          }
+          break
+        }
         case OP.OP_CHECKMULTISIG:
-        case OP.OP_CHECKMULTISIGVERIFY:
+        case OP.OP_CHECKMULTISIGVERIFY: {
           i = 1
           if (this.stack.length < i) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires at least 1 item to be on the stack.`
-            )
+            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least 1 item for nKeys.`)
           }
 
-          nKeysCount = BigNumber.fromScriptNum(
-            this.stacktop(-i),
-            requireMinimalPush
-          ).toNumber()
-          // TODO: Keys and opcount are parameterized in client. No magic numbers!
+          nKeysCount = BigNumber.fromScriptNum(this.stackTop(-i), requireMinimalPush).toNumber()
           if (nKeysCount < 0 || nKeysCount > maxMultisigKeyCount) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires a key count between 0 and ${maxMultisigKeyCount}.`
-            )
+            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires a key count between 0 and ${maxMultisigKeyCount}.`)
           }
           ikey = ++i
           i += nKeysCount
 
-          // ikey2 is the position of last non-signature item in
-          // the stack. Top stack item = 1. With
-          // SCRIPT_VERIFY_NULLFAIL, this is used for cleanup if
-          // operation fails.
-          ikey2 = nKeysCount + 2
-
           if (this.stack.length < i) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires the number of stack items not to be less than the number of keys used.`
-            )
+            this.scriptEvaluationError(`${OP[currentOpcode] as string} stack too small for nKeys and keys. Need ${i}, have ${this.stack.length}.`)
           }
 
-          nSigsCount = BigNumber.fromScriptNum(
-            this.stacktop(-i),
-            requireMinimalPush
-          ).toNumber()
+          nSigsCount = BigNumber.fromScriptNum(this.stackTop(-i), requireMinimalPush).toNumber()
           if (nSigsCount < 0 || nSigsCount > nKeysCount) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires the number of signatures to be no greater than the number of keys.`
-            )
+            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the number of signatures to be no greater than the number of keys.`)
           }
           isig = ++i
           i += nSigsCount
           if (this.stack.length < i) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires the number of stack items not to be less than the number of signatures provided.`
-            )
+            this.scriptEvaluationError(`${OP[currentOpcode] as string} stack too small for N, keys, M, sigs, and dummy. Need ${i}, have ${this.stack.length}.`)
           }
 
-          // Subset of script starting at the most recent codeseparator
-          if (this.context === 'UnlockingScript') {
-            subscript = new Script(
-              this.unlockingScript.chunks.slice(this.lastCodeSeparator ?? 0)
-            )
-          } else {
-            subscript = new Script(
-              this.lockingScript.chunks.slice(this.lastCodeSeparator ?? 0)
-            )
-          }
+          const baseScriptCMS = this.context === 'UnlockingScript' ? this.unlockingScript : this.lockingScript
+          const subscriptChunksCMS = baseScriptCMS.chunks.slice(this.lastCodeSeparator === null ? 0 : this.lastCodeSeparator + 1)
+          subscript = new Script(subscriptChunksCMS)
 
-          // Drop the signatures, since there's no way for a signature to sign itself
           for (let k = 0; k < nSigsCount; k++) {
-            bufSig = this.stacktop(-isig - k)
+            bufSig = this.stackTop(-isig - k) // Sigs are closer to top than keys
             subscript.findAndDelete(new Script().writeBin(bufSig))
           }
 
           fSuccess = true
           while (fSuccess && nSigsCount > 0) {
-            // valtype& vchSig  = this.stacktop(-isig);
-            bufSig = this.stacktop(-isig)
-            // valtype& vchPubKey = this.stacktop(-ikey);
-            bufPubkey = this.stacktop(-ikey)
+            if (nKeysCount === 0) { // No more keys to check against but still sigs left
+              fSuccess = false
+              break
+            }
+            bufSig = this.stackTop(-isig)
+            bufPubkey = this.stackTop(-ikey)
 
-            if (
-              !checkSignatureEncoding(bufSig) ||
-              !checkPublicKeyEncoding(bufPubkey)
-            ) {
-              this.scriptEvaluationError(
-                `${OP[currentOpcode] as string} requires correct encoding for the public key and signature.`
-              )
+            if (!this.checkSignatureEncoding(bufSig) || !this.checkPublicKeyEncoding(bufPubkey)) {
+              this.scriptEvaluationError(`${OP[currentOpcode] as string} requires correct encoding for the public key and signature.`)
             }
 
-            try {
-              sig = TransactionSignature.fromChecksigFormat(bufSig)
-              pubkey = PublicKey.fromString(toHex(bufPubkey))
-              fOk = verifySignature(sig, pubkey, subscript)
-            } catch (e) {
-              // invalid sig or pubkey
-              fOk = false
+            fOk = false
+            if (bufSig.length > 0) {
+              try {
+                sig = TransactionSignature.fromChecksigFormat(bufSig)
+                pubkey = PublicKey.fromDER(bufPubkey)
+                fOk = this.verifySignature(sig, pubkey, subscript)
+              } catch (e) {
+                fOk = false
+              }
             }
 
             if (fOk) {
-              isig++
-              nSigsCount--
+              isig++; nSigsCount--
             }
-            ikey++
-            nKeysCount--
+            ikey++; nKeysCount--
 
-            // If there are more signatures left than keys left,
-            // then too many signatures have failed
             if (nSigsCount > nKeysCount) {
               fSuccess = false
             }
           }
 
-          // Clean up stack of actual arguments
-          while (i-- > 1) {
-            if (!fSuccess && ikey2 === 0 && this.stacktop(-1).length > 0) {
-              this.scriptEvaluationError(
-                `${OP[currentOpcode] as string} failed to verify a signature, and requires an empty signature when verification fails.`
-              )
-            }
+          // Correct total items consumed by op (N_val, keys, M_val, sigs, dummy)
+          const itemsConsumedByOp = 1 + // N_val
+                                  BigNumber.fromScriptNum(this.stackTop(-1), false).toNumber() + // keys
+                                  1 + // M_val
+                                  BigNumber.fromScriptNum(this.stackTop(-(1 + BigNumber.fromScriptNum(this.stackTop(-1), false).toNumber() + 1)), false).toNumber() + // sigs
+                                  1 // dummy
 
-            if (ikey2 > 0) {
-              ikey2--
-            }
-
-            poppedValue = this.stack.pop()
-            if (poppedValue != null) {
-              this.stackMem -= poppedValue.length
-            }
-            clearPoppedValue()
+          let popCount = itemsConsumedByOp - 1 // Pop all except dummy
+          while (popCount > 0) {
+            this.popStack()
+            popCount--
           }
 
-          // A bug causes CHECKMULTISIG to consume one extra argument
-          // whose contents were not checked in any way.
-          //
-          // Unfortunately this is a potential source of mutability,
-          // so optionally verify it is exactly equal to zero prior
-          // to removing it from the stack.
+          // Check and pop dummy
           if (this.stack.length < 1) {
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires an extra item to be on the stack.`
-            )
+            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires an extra item (dummy) to be on the stack.`)
           }
-          if (this.stacktop(-1).length > 0) {
-            // NOTE: Is this necessary? We don't care about malleability.
-            this.scriptEvaluationError(
-              `${OP[currentOpcode] as string} requires the extra stack item to be empty.`
-            )
+          const dummyBuf = this.popStack()
+          if (dummyBuf.length > 0) { // SCRIPT_VERIFY_NULLDUMMY
+            this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the extra stack item (dummy) to be empty.`)
           }
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
 
-          this.stack.push(fSuccess ? [1] : [])
-          this.stackMem += (fSuccess ? 1 : 0)
-
+          this.pushStack(fSuccess ? [1] : [])
           if (currentOpcode === OP.OP_CHECKMULTISIGVERIFY) {
-            if (fSuccess) {
-              poppedValue = this.stack.pop()
-              if (poppedValue != null) {
-                this.stackMem -= poppedValue.length
-              }
-              clearPoppedValue()
-            } else {
-              this.scriptEvaluationError(
-                'OP_CHECKMULTISIGVERIFY requires that a sufficient number of valid signatures are provided.'
-              )
-            }
+            if (!fSuccess) this.scriptEvaluationError('OP_CHECKMULTISIGVERIFY requires that a sufficient number of valid signatures are provided.')
+            this.popStack()
           }
           break
+        }
 
-        case OP.OP_CAT:
-          if (this.stack.length < 2) {
-            this.scriptEvaluationError(
-              'OP_CAT requires at least two items to be on the stack.'
-            )
-          }
-
-          buf1 = this.stacktop(-2)
-          buf2 = this.stacktop(-1)
-          if (buf1.length + buf2.length > maxScriptElementSize) {
-            this.scriptEvaluationError(
-              `It's not currently possible to push data larger than ${maxScriptElementSize} bytes.`
-            )
-          }
-          this.stack[this.stack.length - 2] = [...buf1, ...buf2]
-          this.stackMem -= buf1.length
-          this.stackMem -= buf2.length
-          this.stackMem += buf1.length + buf2.length
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
+        case OP.OP_CAT: {
+          if (this.stack.length < 2) this.scriptEvaluationError('OP_CAT requires at least two items to be on the stack.')
+          buf2 = this.popStack()
+          buf1 = this.popStack()
+          const catResult = (buf1).concat(buf2)
+          if (catResult.length > maxScriptElementSize) this.scriptEvaluationError(`It's not currently possible to push data larger than ${maxScriptElementSize} bytes.`)
+          this.pushStack(catResult)
           break
+        }
+        case OP.OP_SPLIT: {
+          if (this.stack.length < 2) this.scriptEvaluationError('OP_SPLIT requires at least two items to be on the stack.')
+          const posBuf = this.popStack()
+          const dataToSplit = this.popStack()
 
-        case OP.OP_SPLIT:
-          if (this.stack.length < 2) {
-            this.scriptEvaluationError(
-              'OP_SPLIT requires at least two items to be on the stack.'
-            )
-          }
-          buf1 = this.stacktop(-2)
-
-          // Make sure the split point is apropriate.
-          n = BigNumber.fromScriptNum(
-            this.stacktop(-1),
-            requireMinimalPush
-          ).toNumber()
-          if (n < 0 || n > buf1.length) {
-            this.scriptEvaluationError(
-              'OP_SPLIT requires the first stack item to be a non-negative number less than or equal to the size of the second-from-top stack item.'
-            )
+          n = BigNumber.fromScriptNum(posBuf, requireMinimalPush).toNumber()
+          if (n < 0 || n > dataToSplit.length) {
+            this.scriptEvaluationError('OP_SPLIT requires the first stack item to be a non-negative number less than or equal to the size of the second-from-top stack item.')
           }
 
-          // Prepare the results in their own buffer as `data`
-          // will be invalidated.
-          // Copy buffer data, to slice it before
-          buf2 = [...buf1]
-
-          // Replace existing stack values by the new values.
-          this.stack[this.stack.length - 2] = buf2.slice(0, n)
-          this.stackMem -= buf1.length
-          this.stackMem += n
-          this.stack[this.stack.length - 1] = buf2.slice(n)
-          this.stackMem += buf1.length - n
+          this.pushStack(dataToSplit.slice(0, n))
+          this.pushStack(dataToSplit.slice(n))
           break
+        }
+        case OP.OP_NUM2BIN: {
+          if (this.stack.length < 2) this.scriptEvaluationError('OP_NUM2BIN requires at least two items to be on the stack.')
 
-        case OP.OP_NUM2BIN:
-          if (this.stack.length < 2) {
-            this.scriptEvaluationError(
-              'OP_NUM2BIN requires at least two items to be on the stack.'
-            )
+          size = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush).toNumber()
+          if (size > maxScriptElementSize || size < 0) { // size can be 0
+            this.scriptEvaluationError(`It's not currently possible to push data larger than ${maxScriptElementSize} bytes or negative size.`)
           }
 
-          size = BigNumber.fromScriptNum(
-            this.stacktop(-1),
-            requireMinimalPush
-          ).toNumber()
-          if (size > maxScriptElementSize) {
-            this.scriptEvaluationError(
-              `It's not currently possible to push data larger than ${maxScriptElementSize} bytes.`
-            )
-          }
-
-          poppedValue = this.stack.pop()
-          if (poppedValue != null) {
-            this.stackMem -= poppedValue.length
-          }
-          clearPoppedValue()
-          rawnum = this.stacktop(-1)
-
-          // Try to see if we can fit that number in the number of
-          // byte requested.
-          rawnum = minimallyEncode(rawnum)
+          let rawnum = this.popStack() // This is the number to convert
+          rawnum = minimallyEncode(rawnum) // Get its minimal scriptnum form
 
           if (rawnum.length > size) {
-            this.scriptEvaluationError(
-              'OP_NUM2BIN requires that the size expressed in the top stack item is large enough to hold the value expressed in the second-from-top stack item.'
-            )
+            this.scriptEvaluationError('OP_NUM2BIN requires that the size expressed in the top stack item is large enough to hold the value expressed in the second-from-top stack item.')
           }
 
-          // We already have an element of the right size, we
-          // don't need to do anything.
           if (rawnum.length === size) {
-            this.stack[this.stack.length - 1] = rawnum
+            this.pushStack(rawnum)
             break
           }
 
-          signbit = 0x00
+          const resultN2B = new Array(size).fill(0x00)
+          let signbit = 0x00
+
           if (rawnum.length > 0) {
-            signbit = rawnum[rawnum.length - 1] & 0x80
-            rawnum[rawnum.length - 1] &= 0x7f
+            signbit = rawnum[rawnum.length - 1] & 0x80 // Store sign bit
+            rawnum[rawnum.length - 1] &= 0x7f // Remove sign bit for padding
           }
 
-          num = new Array(size)
-          num.fill(0)
-          for (n = 0; n < size; n++) {
-            num[n] = rawnum[n]
-          }
-          n = rawnum.length - 1
-          while (n++ < size - 2) {
-            num[n] = 0x00
+          // Copy rawnum (now positive magnitude) into the result
+          for (let k = 0; k < rawnum.length; k++) {
+            resultN2B[k] = rawnum[k]
           }
 
-          num[n] = signbit
-
-          this.stack[this.stack.length - 1] = num
-          this.stackMem -= rawnum.length
-          this.stackMem += size
+          // If the original number was negative, the sign bit must be set on the new MSB
+          if (signbit !== 0) {
+            resultN2B[size - 1] |= 0x80
+          }
+          this.pushStack(resultN2B)
           break
-
-        case OP.OP_BIN2NUM:
-          if (this.stack.length < 1) {
-            this.scriptEvaluationError(
-              'OP_BIN2NUM requires at least one item to be on the stack.'
-            )
+        }
+        case OP.OP_BIN2NUM: {
+          if (this.stack.length < 1) this.scriptEvaluationError('OP_BIN2NUM requires at least one item to be on the stack.')
+          buf1 = this.popStack()
+          const b2nResult = minimallyEncode(buf1)
+          if (!isMinimallyEncodedHelper(b2nResult)) {
+            this.scriptEvaluationError('OP_BIN2NUM requires that the resulting number is valid.')
           }
-
-          buf1 = this.stacktop(-1)
-          buf2 = minimallyEncode(buf1)
-
-          this.stack[this.stack.length - 1] = buf2
-          this.stackMem -= buf1.length
-          this.stackMem += buf2.length
-
-          // The resulting number must be a valid number.
-          if (!isMinimallyEncoded(buf2)) {
-            this.scriptEvaluationError(
-              'OP_BIN2NUM requires that the resulting number is valid.'
-            )
-          }
+          this.pushStack(b2nResult)
           break
+        }
 
         default:
-          this.scriptEvaluationError('Invalid opcode!')
+          this.scriptEvaluationError(`Invalid opcode ${currentOpcode} (pc=${this.programCounter}).`)
       }
     }
 
-    // Finally, increment the program counter
     this.programCounter++
     return true
   }
@@ -1691,6 +1006,7 @@ export default class Spend {
         'Unlocking scripts can only contain push operations, and no other opcodes.'
       )
     }
+
     while (this.step()) {
       if (
         this.context === 'LockingScript' &&
@@ -1699,46 +1015,55 @@ export default class Spend {
         break
       }
     }
+
     if (this.ifStack.length > 0) {
       this.scriptEvaluationError(
-        'Every OP_IF must be terminated prior to the end of the script.'
+        'Every OP_IF, OP_NOTIF, or OP_ELSE must be terminated with OP_ENDIF prior to the end of the script.'
       )
     }
+
     if (requireCleanStack) {
       if (this.stack.length !== 1) {
         this.scriptEvaluationError(
-          'The clean stack rule requires exactly one item to be on the stack after script execution.'
+          `The clean stack rule requires exactly one item to be on the stack after script execution, found ${this.stack.length}.`
         )
       }
     }
-    if (!this.castToBool(this.stacktop(-1))) {
+
+    if (this.stack.length === 0) {
+      this.scriptEvaluationError(
+        'The top stack element must be truthy after script evaluation (stack is empty).'
+      )
+    } else if (!this.castToBool(this.stackTop())) {
       this.scriptEvaluationError(
         'The top stack element must be truthy after script evaluation.'
       )
     }
+
     return true
   }
 
-  private stacktop (i: number): number[] {
-    return this.stack[this.stack.length + i]
-  }
-
-  private castToBool (val: number[]): boolean {
+  private castToBool (val: Readonly<number[]>): boolean {
+    if (val.length === 0) return false
     for (let i = 0; i < val.length; i++) {
       if (val[i] !== 0) {
-        // can be negative zero
-        if (i === val.length - 1 && val[i] === 0x80) {
-          return false
-        }
-        return true
+        return !(i === val.length - 1 && val[i] === 0x80)
       }
     }
     return false
   }
 
   private scriptEvaluationError (str: string): void {
+    const pcInfo = `Context: ${this.context}, PC: ${this.programCounter}`
+    const stackHex = this.stack.map(s => (s != null && typeof s.length !== 'undefined') ? toHex(s) : (s === null || s === undefined ? 'null/undef' : 'INVALID_STACK_ITEM')).join(', ')
+    const altStackHex = this.altStack.map(s => (s != null && typeof s.length !== 'undefined') ? toHex(s) : (s === null || s === undefined ? 'null/undef' : 'INVALID_STACK_ITEM')).join(', ')
+
+    const stackInfo = `Stack: [${stackHex}] (len: ${this.stack.length}, mem: ${this.stackMem})`
+    const altStackInfo = `AltStack: [${altStackHex}] (len: ${this.altStack.length}, mem: ${this.altStackMem})`
+    const ifStackInfo = `IfStack: [${this.ifStack.join(', ')}]`
+
     throw new Error(
-      `Script evaluation error: ${str}\n\nSource TXID: ${this.sourceTXID}\nSource output index: ${this.sourceOutputIndex}\nContext: ${this.context}\nProgram counter: ${this.programCounter}\nStack size: ${this.stack.length}\nAlt stack size: ${this.altStack.length}`
+      `Script evaluation error: ${str}\nTXID: ${this.sourceTXID}, OutputIdx: ${this.sourceOutputIndex}\n${pcInfo}\n${stackInfo}\n${altStackInfo}\n${ifStackInfo}`
     )
   }
 }

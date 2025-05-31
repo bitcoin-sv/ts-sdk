@@ -5,28 +5,31 @@ import { CompletedProtoWallet } from '../../../auth/certificates/__tests/Complet
 import { MasterCertificate } from '../../../auth/certificates/MasterCertificate'
 import { ProtoWallet, WalletCertificate } from '../../../wallet/index'
 
+const subjectPrivateKey = new PrivateKey(21)
+const subjectIdentityKey = subjectPrivateKey.toPublicKey().toString()
+const certifierPrivateKey = new PrivateKey(22)
+const certifierIdentityKey = certifierPrivateKey.toPublicKey().toString()
+const verifierPrivateKey = new PrivateKey(23)
+const verifierIdentityKey = verifierPrivateKey.toPublicKey().toString()
+
+const wrongPrivateKey = new PrivateKey(31)
+const wrongWallet = new CompletedProtoWallet(wrongPrivateKey)
+
+const subjectWallet = new CompletedProtoWallet(subjectPrivateKey)
+const verifierWallet = new CompletedProtoWallet(verifierPrivateKey)
+
+const sampleType = Utils.toBase64(new Array(32).fill(1))
+const sampleSerialNumber = Utils.toBase64(new Array(32).fill(2))
+const sampleRevocationOutpoint =
+  'deadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000.1'
+
+const plaintextFields = {
+  name: 'Alice',
+  email: 'alice@example.com',
+  organization: 'Example Corp'
+}
+
 describe('VerifiableCertificate', () => {
-  const subjectPrivateKey = PrivateKey.fromRandom()
-  const subjectIdentityKey = subjectPrivateKey.toPublicKey().toString()
-  const certifierPrivateKey = PrivateKey.fromRandom()
-  const certifierIdentityKey = certifierPrivateKey.toPublicKey().toString()
-  const verifierPrivateKey = PrivateKey.fromRandom()
-  const verifierIdentityKey = verifierPrivateKey.toPublicKey().toString()
-
-  const subjectWallet = new CompletedProtoWallet(subjectPrivateKey)
-  const verifierWallet = new CompletedProtoWallet(verifierPrivateKey)
-
-  const sampleType = Utils.toBase64(new Array(32).fill(1))
-  const sampleSerialNumber = Utils.toBase64(new Array(32).fill(2))
-  const sampleRevocationOutpoint =
-    'deadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000.1'
-
-  const plaintextFields = {
-    name: 'Alice',
-    email: 'alice@example.com',
-    organization: 'Example Corp'
-  }
-
   let verifiableCert: VerifiableCertificate
 
   beforeEach(async () => {
@@ -79,9 +82,6 @@ describe('VerifiableCertificate', () => {
     })
 
     it('should fail if the verifier wallet does not have the correct private key (wrong key)', async () => {
-      const wrongPrivateKey = PrivateKey.fromRandom()
-      const wrongWallet = new CompletedProtoWallet(wrongPrivateKey)
-
       await expect(verifiableCert.decryptFields(wrongWallet)).rejects.toThrow(
         /Failed to decrypt selectively revealed certificate fields using keyring/
       )

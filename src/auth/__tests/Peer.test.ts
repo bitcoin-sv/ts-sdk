@@ -8,6 +8,10 @@ import { MasterCertificate } from '../../auth/certificates/MasterCertificate.js'
 import { getVerifiableCertificates } from '../../auth/utils/getVerifiableCertificates.js'
 import { CompletedProtoWallet } from '../certificates/__tests/CompletedProtoWallet.js'
 
+const certifierPrivKey = new PrivateKey(21)
+const alicePrivKey = new PrivateKey(22)
+const bobPrivKey = new PrivateKey(23)
+
 jest.mock('../../auth/utils/getVerifiableCertificates')
 
 class LocalTransport implements Transport {
@@ -40,6 +44,19 @@ class LocalTransport implements Transport {
   }
 }
 
+function waitForNextGeneralMessage (
+  peer: Peer,
+  handler?: (senderPublicKey: string, payload: number[]) => void
+): Promise<void> {
+  return new Promise(resolve => {
+    const listenerId = peer.listenForGeneralMessages((senderPublicKey, payload) => {
+      peer.stopListeningForGeneralMessages(listenerId)
+      if (handler !== undefined) handler(senderPublicKey, payload)
+      resolve()
+    })
+  })
+}
+
 describe('Peer class mutual authentication and certificate exchange', () => {
   let walletA: WalletInterface, walletB: WalletInterface
   let transportA: LocalTransport, transportB: LocalTransport
@@ -49,7 +66,7 @@ describe('Peer class mutual authentication and certificate exchange', () => {
 
   const certificateType = Utils.toBase64(new Array(32).fill(1))
   // const certificateSerialNumber = Utils.toBase64(new Array(32).fill(2))
-  const certifierPrivateKey = PrivateKey.fromRandom()
+  const certifierPrivateKey = certifierPrivKey
   const certifierPublicKey = certifierPrivateKey.toPublicKey().toString()
   const certificatesToRequest = {
     certifiers: [certifierPublicKey],
@@ -198,8 +215,8 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     certificatesReceivedByAlice = []
     certificatesReceivedByBob = []
 
-    walletA = new CompletedProtoWallet(PrivateKey.fromRandom())
-    walletB = new CompletedProtoWallet(PrivateKey.fromRandom())
+    walletA = new CompletedProtoWallet(alicePrivKey)
+    walletB = new CompletedProtoWallet(bobPrivKey)
   })
 
   it('Neither Alice nor Bob request certificates, mutual authentication completes successfully', async () => {
@@ -235,10 +252,10 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     const transportA2 = new LocalTransport()
     const transportB = new LocalTransport()
     transportA1.connect(transportB)
-    const aliceKey = PrivateKey.fromRandom()
+    const aliceKey = alicePrivKey
     const walletA1 = new CompletedProtoWallet(aliceKey)
     const walletA2 = new CompletedProtoWallet(aliceKey)
-    const walletB = new CompletedProtoWallet(PrivateKey.fromRandom())
+    const walletB = new CompletedProtoWallet(alicePrivKey)
     const aliceFirstDevice = new Peer(
       walletA1,
       transportA1
@@ -264,22 +281,14 @@ describe('Peer class mutual authentication and certificate exchange', () => {
         })().catch(e => { })
       })
     })
-    let aliceReceivedGeneralMessageOnFirstDevice = new Promise<void>((resolve) => {
-      aliceFirstDevice.listenForGeneralMessages((senderPublicKey, payload) => {
-        (async () => {
-          resolve()
-          alice1MessageHandler(senderPublicKey, payload)
-        })().catch(e => { })
-      })
-    })
-    const aliceReceivedGeneralMessageOnOtherDevice = new Promise<void>((resolve) => {
-      aliceOtherDevice.listenForGeneralMessages((senderPublicKey, payload) => {
-        (async () => {
-          resolve()
-          alice2MessageHandler(senderPublicKey, payload)
-        })().catch(e => { })
-      })
-    })
+    const aliceReceivedGeneralMessageOnFirstDevice = waitForNextGeneralMessage(
+      aliceFirstDevice,
+      alice1MessageHandler
+    )
+    const aliceReceivedGeneralMessageOnOtherDevice = waitForNextGeneralMessage(
+      aliceOtherDevice,
+      alice2MessageHandler
+    )
 
     await aliceFirstDevice.toPeer(Utils.toArray('Hello Bob!'))
     await bobReceivedGeneralMessage
@@ -288,8 +297,14 @@ describe('Peer class mutual authentication and certificate exchange', () => {
     await aliceOtherDevice.toPeer(Utils.toArray('Hello Bob from my other device!'))
     await aliceReceivedGeneralMessageOnOtherDevice
     transportA1.connect(transportB)
-    await aliceFirstDevice.toPeer(Utils.toArray('Back on my first device now, Bob! Can you still hear me?'))
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    const waitForSecondMessage = waitForNextGeneralMessage(
+      aliceFirstDevice,
+      alice1MessageHandler
+    )
+    await aliceFirstDevice.toPeer(
+      Utils.toArray('Back on my first device now, Bob! Can you still hear me?')
+    )
+    await waitForSecondMessage
     expect(alice1MessageHandler.mock.calls.length).toEqual(2)
   }, 30000)
 

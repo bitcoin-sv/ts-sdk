@@ -64,105 +64,150 @@ export default class BigNumber {
     static readonly groupSizes: number[] 
     static readonly groupBases: number[] 
     static readonly wordSize: number = 26;
-    negative: number;
-    words: number[];
-    length: number;
-    red: ReductionContext | null;
+    public red: ReductionContext | null;
+    public get negative(): number 
+    public set negative(val: number) 
+    public get words(): number[] 
+    public set words(newWords: number[]) 
+    public get length(): number 
     static isBN(num: any): boolean 
     static max(left: BigNumber, right: BigNumber): BigNumber 
     static min(left: BigNumber, right: BigNumber): BigNumber 
-    constructor(number: number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
+    constructor(number: number | string | number[] | bigint | undefined = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
     copy(dest: BigNumber): void 
     static move(dest: BigNumber, src: BigNumber): void 
     clone(): BigNumber 
     expand(size: number): this 
     strip(): this 
-    normSign(): this 
+    normSign(): this { if (this._magnitude === 0n)
+        this._sign = 0; return this; }
     inspect(): string 
     toString(base: number | "hex" = 10, padding: number = 1): string 
     toNumber(): number 
     toJSON(): string 
     toArray(endian: "le" | "be" = "be", length?: number): number[] 
-    bitLength(): number 
+    bitLength(): number { if (this._magnitude === 0n)
+        return 0; return this._magnitude.toString(2).length; }
     static toBitArray(num: BigNumber): Array<0 | 1> 
     toBitArray(): Array<0 | 1> 
     zeroBits(): number 
-    byteLength(): number 
-    toTwos(width: number): BigNumber 
+    byteLength(): number { if (this._magnitude === 0n)
+        return 0; return Math.ceil(this.bitLength() / 8); }
+    toTwos(width: number): BigNumber { this.assert(width >= 0); const Bw = BigInt(width); let v = this._getSignedValue(); if (this._sign === 1 && this._magnitude !== 0n)
+        v = (1n << Bw) + v; const m = (1n << Bw) - 1n; v &= m; const r = new BigNumber(0n); r._initializeState(v, 0); return r; }
     fromTwos(width: number): BigNumber 
     isNeg(): boolean 
     neg(): BigNumber 
-    ineg(): BigNumber 
-    iuor(num: BigNumber): BigNumber 
-    ior(num: BigNumber): BigNumber 
+    ineg(): this { if (this._magnitude !== 0n)
+        this._sign = this._sign === 1 ? 0 : 1; return this; }
+    iuor(num: BigNumber): this 
+    iuand(num: BigNumber): this 
+    iuxor(num: BigNumber): this 
+    ior(num: BigNumber): this 
+    iand(num: BigNumber): this 
+    ixor(num: BigNumber): this 
     or(num: BigNumber): BigNumber 
     uor(num: BigNumber): BigNumber 
-    iuand(num: BigNumber): BigNumber 
-    iand(num: BigNumber): BigNumber 
     and(num: BigNumber): BigNumber 
     uand(num: BigNumber): BigNumber 
-    iuxor(num: BigNumber): this 
-    ixor(num: BigNumber): this 
     xor(num: BigNumber): BigNumber 
     uxor(num: BigNumber): BigNumber 
-    inotn(width: number): BigNumber 
+    inotn(width: number): this 
     notn(width: number): BigNumber 
-    setn(bit: number, val: 0 | 1 | true | false): this 
+    setn(bit: number, val: any): this { this.assert(typeof bit === "number" && bit >= 0); const Bb = BigInt(bit); if (val === 1 || val === true)
+        this._magnitude |= (1n << Bb);
+    else
+        this._magnitude &= ~(1n << Bb); const wnb = Math.floor(bit / BigNumber.wordSize) + 1; this._nominalWordLength = Math.max(this._nominalWordLength, wnb); this._finishInitialization(); return this.strip(); }
     iadd(num: BigNumber): this 
     add(num: BigNumber): BigNumber 
-    isub(num: BigNumber): BigNumber 
+    isub(num: BigNumber): this 
     sub(num: BigNumber): BigNumber 
-    comb10MulTo(self: BigNumber, num: BigNumber, out: BigNumber): BigNumber 
-    mulTo(num: BigNumber, out: BigNumber): BigNumber 
     mul(num: BigNumber): BigNumber 
-    imul(num: BigNumber): BigNumber 
-    imuln(num: number): BigNumber 
+    imul(num: BigNumber): this 
+    imuln(num: number): this 
     muln(num: number): BigNumber 
     sqr(): BigNumber 
-    isqr(): BigNumber 
+    isqr(): this 
     pow(num: BigNumber): BigNumber 
-    iushln(bits: number): this 
+    iushln(bits: number): this { this.assert(typeof bits === "number" && bits >= 0); if (bits === 0)
+        return this; this._magnitude <<= BigInt(bits); this._finishInitialization(); return this.strip(); }
     ishln(bits: number): this 
-    iushrn(bits: number, hint?: number, extended?: BigNumber): this 
-    ishrn(bits, hint?, extended?): this 
-    shln(bits): BigNumber 
-    ushln(bits): BigNumber 
-    shrn(bits): BigNumber 
-    ushrn(bits): BigNumber 
+    iushrn(bits: number, hint?: number, extended?: BigNumber): this { this.assert(typeof bits === "number" && bits >= 0); if (bits === 0) {
+        if (extended != null)
+            extended._initializeState(0n, 0);
+        return this;
+    } if (extended != null) {
+        const m = (1n << BigInt(bits)) - 1n;
+        const sOut = this._magnitude & m;
+        extended._initializeState(sOut, 0);
+    } this._magnitude >>= BigInt(bits); this._finishInitialization(); return this.strip(); }
+    ishrn(bits: number, hint?: number, extended?: BigNumber): this 
+    shln(bits: number): BigNumber 
+    ushln(bits: number): BigNumber 
+    shrn(bits: number): BigNumber 
+    ushrn(bits: number): BigNumber 
     testn(bit: number): boolean 
-    imaskn(bits): this 
-    maskn(bits): BigNumber 
-    iaddn(num: number): BigNumber 
-    isubn(num: number): BigNumber 
+    imaskn(bits: number): this 
+    maskn(bits: number): BigNumber 
+    iaddn(num: number): this 
+    _iaddn(num: number): this 
+    isubn(num: number): this 
     addn(num: number): BigNumber 
     subn(num: number): BigNumber 
     iabs(): this 
     abs(): BigNumber 
-    _ishlnsubmul(num: BigNumber, mul, shift: number): this 
     divmod(num: BigNumber, mode?: "div" | "mod", positive?: boolean): any 
     div(num: BigNumber): BigNumber 
     mod(num: BigNumber): BigNumber 
     umod(num: BigNumber): BigNumber 
     divRound(num: BigNumber): BigNumber 
-    modrn(num: number): number 
-    idivn(num: number): BigNumber 
+    modrn(numArg: number): number 
+    idivn(num: number): this 
     divn(num: number): BigNumber 
     egcd(p: BigNumber): {
         a: BigNumber;
         b: BigNumber;
         gcd: BigNumber;
-    } 
-    _invmp(p: BigNumber): BigNumber 
-    gcd(num: BigNumber): BigNumber 
+    } { this.assert(p._sign === 0, "p must not be negative"); this.assert(!p.isZero(), "p must not be zero"); let uV = this._getSignedValue(); let vV = p._magnitude; let a = 1n; let pa = 0n; let b = 0n; let pb = 1n; while (vV !== 0n) {
+        const q = uV / vV;
+        let t = vV;
+        vV = uV % vV;
+        uV = t;
+        t = pa;
+        pa = a - q * pa;
+        a = t;
+        t = pb;
+        pb = b - q * pb;
+        b = t;
+    } const ra = new BigNumber(0n); ra._setValueFromSigned(a); const rb = new BigNumber(0n); rb._setValueFromSigned(b); const rg = new BigNumber(0n); rg._initializeState(uV < 0n ? -uV : uV, 0); return { a: ra, b: rb, gcd: rg }; }
+    gcd(num: BigNumber): BigNumber { let u = this._magnitude; let v = num._magnitude; if (u === 0n) {
+        const r = new BigNumber(0n);
+        r._setValueFromSigned(v);
+        return r.iabs();
+    } if (v === 0n) {
+        const r = new BigNumber(0n);
+        r._setValueFromSigned(u);
+        return r.iabs();
+    } while (v !== 0n) {
+        const t = u % v;
+        u = v;
+        v = t;
+    } const res = new BigNumber(0n); res._initializeState(u, 0); return res; }
     invm(num: BigNumber): BigNumber 
     isEven(): boolean 
     isOdd(): boolean 
     andln(num: number): number 
     bincn(bit: number): this 
     isZero(): boolean 
-    cmpn(num: number): 1 | 0 | -1 
-    cmp(num: BigNumber): 1 | 0 | -1 
-    ucmp(num: BigNumber): 1 | 0 | -1 
+    cmpn(num: number): 1 | 0 | -1 { this.assert(Math.abs(num) <= BigNumber.MAX_IMULN_ARG, "Number is too big"); const tV = this._getSignedValue(); const nV = BigInt(num); if (tV < nV)
+        return -1; if (tV > nV)
+        return 1; return 0; }
+    cmp(num: BigNumber): 1 | 0 | -1 { const tV = this._getSignedValue(); const nV = num._getSignedValue(); if (tV < nV)
+        return -1; if (tV > nV)
+        return 1; return 0; }
+    ucmp(num: BigNumber): 1 | 0 | -1 { if (this._magnitude < num._magnitude)
+        return -1; if (this._magnitude > num._magnitude)
+        return 1; return 0; }
     gtn(num: number): boolean 
     gt(num: BigNumber): boolean 
     gten(num: number): boolean 
@@ -189,17 +234,19 @@ export default class BigNumber {
     redInvm(): BigNumber 
     redNeg(): BigNumber 
     redPow(num: BigNumber): BigNumber 
-    static fromHex(hex: string, endian?: "little" | "big"): BigNumber 
-    toHex(length: number = 0): string 
+    static fromHex(hex: string, endian?: "le" | "be" | "little" | "big"): BigNumber 
+    toHex(byteLength: number = 0): string 
     static fromJSON(str: string): BigNumber 
     static fromNumber(n: number): BigNumber 
     static fromString(str: string, base?: number | "hex"): BigNumber 
-    static fromSm(num: number[], endian: "big" | "little" = "big"): BigNumber 
+    static fromSm(bytes: number[], endian: "big" | "little" = "big"): BigNumber 
     toSm(endian: "big" | "little" = "big"): number[] 
     static fromBits(bits: number, strict: boolean = false): BigNumber 
     toBits(): number 
-    static fromScriptNum(num: number[], requireMinimal?: boolean, maxNumSize?: number): BigNumber 
+    static fromScriptNum(num: number[], requireMinimal: boolean = false, maxNumSize?: number): BigNumber 
     toScriptNum(): number[] 
+    _invmp(p: BigNumber): BigNumber 
+    mulTo(num: BigNumber, out: BigNumber): BigNumber 
 }
 ```
 
@@ -208,7 +255,7 @@ See also: [ReductionContext](./primitives.md#class-reductioncontext), [toArray](
 #### Constructor
 
 ```ts
-constructor(number: number | string | number[] = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
+constructor(number: number | string | number[] | bigint | undefined = 0, base: number | "be" | "le" | "hex" = 10, endian: "be" | "le" = "be") 
 ```
 
 Argument Details
@@ -220,51 +267,12 @@ Argument Details
 + **endian**
   + The endianness provided. By default is 'big endian'.
 
-Example
-
-```ts
-import BigNumber from './BigNumber';
-const bn = new BigNumber('123456', 10, 'be');
-```
-
-#### Property length
-
-Length of the words array.
-
-```ts
-length: number
-```
-
-Example
-
-```ts
-let num = new BigNumber(50000);
-console.log(num.length);  // output: 1
-```
-
-#### Property negative
-
-Negative flag. Indicates whether the big number is a negative number.
-- If 0, the number is positive.
-- If 1, the number is negative.
-
-```ts
-negative: number
-```
-
-Example
-
-```ts
-let num = new BigNumber("-10");
-console.log(num.negative);  // output: 1
-```
-
 #### Property red
 
 Reduction context of the big number.
 
 ```ts
-red: ReductionContext | null
+public red: ReductionContext | null
 ```
 See also: [ReductionContext](./primitives.md#class-reductioncontext)
 
@@ -280,21 +288,6 @@ Example
 
 ```ts
 console.log(BigNumber.wordSize);  // output: 26
-```
-
-#### Property words
-
-Array of numbers, where each number represents a part of the value of the big number.
-
-```ts
-words: number[]
-```
-
-Example
-
-```ts
-let num = new BigNumber(50000);
-console.log(num.words);  // output: [ 50000 ]
 ```
 
 #### Method _invmp
@@ -316,564 +309,31 @@ Argument Details
 + **p**
   + The `BigNumber` specifying the modulus field.
 
-Example
-
-```ts
-const bigNum = new BigNumber('45');
-const p = new BigNumber('100');
-const inverse = bigNum._invmp(p); // inverse here would be a BigNumber such that (inverse*bigNum) % p = '1'
-```
-
-#### Method _ishlnsubmul
-
-Perform an in-place shift left, subtract, and multiply operation on a BigNumber instance.
-This method modifies the existing BigNumber instance.
-
-```ts
-_ishlnsubmul(num: BigNumber, mul, shift: number): this 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-the updated BigNumber instance after performing the in-place shift, subtract, and multiply operations.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to be operated on.
-+ **mul**
-  + The multiplication factor.
-+ **shift**
-  + The number of places to shift left.
-
-Example
-
-```ts
-let number = new BigNumber(10);
-number._ishlnsubmul(new BigNumber(2), 3, 1);
-console.log(number.toString()); // Outputs result after performing operations
-```
-
-#### Method abs
-
-Obtains the absolute value of a BigNumber instance.
-This operation does not affect the actual object but instead returns a new instance of BigNumber.
-
-```ts
-abs(): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-a new BigNumber instance with the absolute value of the current instance.
-
-Example
-
-```ts
-let negativeNumber = new BigNumber(-10);
-let absolute = negativeNumber.abs();
-console.log(absolute.toString()); // Outputs: "10"
-```
-
-#### Method add
-
-Add `num` to `this` BigNumber.
-
-```ts
-add(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a new BigNumber which is the result of the addition.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to add to `this` BigNumber.
-
-Example
-
-```ts
-const num1 = new BigNumber('10');
-const addResult = num1.add(new BigNumber('20'));
-console.log(addResult.toString());
-```
-
-#### Method addn
-
-Returns a new BigNumber that is the result of adding a plain number to the original BigNumber.
-
-```ts
-addn(num: number): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a new BigNumber which is the sum of the original BigNumber and the plain number.
-
-Argument Details
-
-+ **num**
-  + The plain number to add.
-
-Example
-
-```ts
-const myNumber = new BigNumber(50);
-const newNumber = myNumber.addn(2); // newNumber becomes 52, myNumber doesn't change.
-```
-
-#### Method and
-
-Performs a bitwise AND operation that returns a new BigNumber, and keeps the bits
-set in the result only if the corresponding bit is set in both operands.
-
-```ts
-and(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns new BigNumber resulting from the bitwise AND operation.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to perform the bitwise AND operation with.
-
-Example
-
-```ts
-const num1 = new BigNumber('10');
-const num2 = new BigNumber('20');
-console.log(num1.and(num2).toString());
-```
-
-#### Method andln
-
-Returns the result of bitwise AND operation between the least significant 26 bits of
-this BigNumber and the provided number.
-This method is mostly used to mask-off less significant bits.
-
-```ts
-andln(num: number): number 
-```
-
-Returns
-
-The result of the AND operation.
-
-Argument Details
-
-+ **num**
-  + The number to AND with.
-
-Example
-
-```ts
-let a = new BigNumber(60);
-let result = a.andln(13); // 12
-```
-
-#### Method bincn
-
-Increments the value at the bit position specified by the input parameter.
-
-```ts
-bincn(bit: number): this 
-```
-
-Returns
-
-This BigNumber after incrementing at the specific bit position.
-
-Argument Details
-
-+ **bit**
-  + The bit position to increment at.
-
-Example
-
-```ts
-let a = new BigNumber(5);
-a.bincn(2); // a = 7
-```
-
 #### Method bitLength
 
-Returns the number of used bits in this big number.
+Calculates the number of bits required to represent the BigNumber.
 
 ```ts
-bitLength(): number 
+bitLength(): number { if (this._magnitude === 0n)
+    return 0; return this._magnitude.toString(2).length; }
 ```
 
 Returns
 
-The number of used bits
+The bit length of the BigNumber.
 
 #### Method byteLength
 
-Get the byte length of the BigNumber
+Calculates the number of bytes required to represent the BigNumber.
 
 ```ts
-byteLength(): number 
+byteLength(): number { if (this._magnitude === 0n)
+    return 0; return Math.ceil(this.bitLength() / 8); }
 ```
 
 Returns
 
-Returns the byte length of the big number.
-
-Example
-
-```ts
-const BigNumber = require("./BigNumber");
-const bn = new BigNumber('1234');
-const byteLen = bn.byteLength();
-```
-
-#### Method clone
-
-Creates a copy of the current BigNumber instance.
-
-```ts
-clone(): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-A new BigNumber instance, identical to the original.
-
-Example
-
-```ts
-const bn = new BigNumber('123456', 10, 'be');
-const bnClone = bn.clone();
-```
-
-#### Method cmp
-
-Compare this big number with another big number.
-
-```ts
-cmp(num: BigNumber): 1 | 0 | -1 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns:
-1 if this big number is greater,
--1 if it's less,
-0 if they are equal.
-
-Argument Details
-
-+ **num**
-  + The big number to compare with.
-
-Example
-
-```ts
-import BigNumber from './BigNumber';
-const bn1 = new BigNumber('10');
-const bn2 = new BigNumber('6');
-const comparisonResult = bn1.cmp(bn2); // 1 - because 10 is greater than 6
-```
-
-#### Method cmpn
-
-Compares this BigNumber with the given number.
-It returns -1 if this BigNumber is less than the number, 0 if they're equal, and 1 if the BigNumber is greater than the number.
-
-```ts
-cmpn(num: number): 1 | 0 | -1 
-```
-
-Returns
-
--1, 0, or 1 based on the comparison result.
-
-Argument Details
-
-+ **num**
-  + The number to compare with.
-
-Example
-
-```ts
-let a = new BigNumber(15);
-let result = a.cmpn(10); // 1
-```
-
-#### Method copy
-
-The copy method copies the state of this BigNumber into an exsiting `dest` BigNumber.
-
-```ts
-copy(dest: BigNumber): void 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Argument Details
-
-+ **dest**
-  + The BigNumber instance that will be updated to become a copy.
-
-Example
-
-```ts
-const bn1 = new BigNumber('123456', 10, 'be');
-const bn2 = new BigNumber();
-bn1.copy(bn2);
-// bn2 is now a BigNumber representing 123456
-```
-
-#### Method div
-
-Divides a BigNumber instance by another BigNumber and returns result. This does not modify the actual object.
-
-```ts
-div(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-A new BigNumber instance of the division result.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to divide by.
-
-Example
-
-```ts
-let number = new BigNumber(10);
-let result = number.div(new BigNumber(2));
-console.log(result.toString()); // Outputs: "5"
-```
-
-#### Method divRound
-
-Returns the rounded quotient after division of one `BigNumber` by another `BigNumber`.
-
-```ts
-divRound(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The rounded quotient `BigNumber` after division.
-
-Argument Details
-
-+ **num**
-  + The divisor `BigNumber`.
-
-Example
-
-```ts
-const bigNum1 = new BigNumber('100');
-const bigNum2 = new BigNumber('45');
-const quotient = bigNum1.divRound(bigNum2); // quotient here would be '2'
-```
-
-#### Method divmod
-
-Performs division and/or modulus operation on a BigNumber instance depending on the 'mode' parameter.
-If the mode parameter is not provided, both division and modulus results are returned.
-
-```ts
-divmod(num: BigNumber, mode?: "div" | "mod", positive?: boolean): any 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Object with properties for division (div) and modulo (mod) results.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to divide by.
-+ **mode**
-  + Specifies operation as 'mod' for modulus, 'div' for division, or both if not specified.
-+ **positive**
-  + Specifies if unsigned modulus is requested.
-
-Example
-
-```ts
-let number = new BigNumber(10);
-let result = number.divmod(new BigNumber(3));
-console.log(result.div.toString()); // Outputs: "3"
-console.log(result.mod.toString()); // Outputs: "1"
-```
-
-#### Method divn
-
-Returns the quotient `BigNumber` after division of one `BigNumber` by a primitive number.
-
-```ts
-divn(num: number): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-A new quotient `BigNumber` after division.
-
-Argument Details
-
-+ **num**
-  + The divisor primitive number.
-
-Example
-
-```ts
-const bigNum = new BigNumber('100');
-const num = 45;
-const quotient = bigNum.divn(num); // quotient here would be '2'
-```
-
-#### Method egcd
-
-Computes the Extended Euclidean Algorithm for this BigNumber and provided BigNumber `p`.
-The Extended Euclidean Algorithm is a method to find the GCD (Greatest Common Divisor) and the multiplicative inverse in a modulus field.
-
-```ts
-egcd(p: BigNumber): {
-    a: BigNumber;
-    b: BigNumber;
-    gcd: BigNumber;
-} 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-An object `{a: BigNumber, b: BigNumber, gcd: BigNumber}` where `gcd` is the GCD of the numbers, `a` is the coefficient of `this`, and `b` is the coefficient of `p` in Bézout's identity.
-
-Argument Details
-
-+ **p**
-  + The `BigNumber` with which the Extended Euclidean Algorithm will be computed.
-
-Example
-
-```ts
-const bigNum1 = new BigNumber('100');
-const bigNum2 = new BigNumber('45');
-const result = bigNum1.egcd(bigNum2);
-```
-
-#### Method eq
-
-Compares the current BigNumber with the given number and returns whether they're equal.
-
-```ts
-eq(num: BigNumber): boolean 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns true if the current BigNumber is equal to the provided number, otherwise false.
-
-Argument Details
-
-+ **num**
-  + The number to compare equality with.
-
-Example
-
-```ts
-let bigNum = new BigNumber(10);
-bigNum.eq(new BigNumber(10)); // true
-```
-
-#### Method eqn
-
-Checks if this BigNumber instance is equal to a number.
-
-```ts
-eqn(num: number): boolean 
-```
-
-Returns
-
-Returns true if this BigNumber is equal to the number, false otherwise.
-
-Argument Details
-
-+ **num**
-  + The number to compare with.
-
-Example
-
-```ts
-let bigNumber = new BigNumber('1234');
-let isEqual = bigNumber.eqn(1234); // Returns true
-```
-
-#### Method expand
-
-Increases the BigNumber length up to a certain size and initializes new elements with 0.
-
-```ts
-expand(size: number): this 
-```
-
-Returns
-
-The BigNumber instance after expansion.
-
-Argument Details
-
-+ **size**
-  + The desired size to grow the BigNumber length.
-
-Example
-
-```ts
-const bn = new BigNumber('123456', 10, 'be');
-bn.expand(10);
-```
-
-#### Method forceRed
-
-Forces the current BigNumber into a reduction context, irrespective of the BigNumber's current state.
-
-```ts
-forceRed(ctx: ReductionContext): this 
-```
-See also: [ReductionContext](./primitives.md#class-reductioncontext)
-
-Returns
-
-Returns the BigNumber in the given ReductionContext.
-
-Argument Details
-
-+ **ctx**
-  + The ReductionContext to forcefully convert the BigNumber to.
-
-Example
-
-```ts
-let bigNum = new BigNumber(10);
-let redCtx = new ReductionContext();
-bigNum.forceRed(redCtx);
-```
+The byte length of the BigNumber.
 
 #### Method fromBits
 
@@ -899,19 +359,12 @@ Throws
 
 Will throw an error if `strict` is `true` and the number has negative bit set.
 
-Example
-
-```ts
-const bits = 0x1d00ffff;
-const bigNumber = BigNumber.fromBits(bits);
-```
-
 #### Method fromHex
 
 Creates a BigNumber from a hexadecimal string.
 
 ```ts
-static fromHex(hex: string, endian?: "little" | "big"): BigNumber 
+static fromHex(hex: string, endian?: "le" | "be" | "little" | "big"): BigNumber 
 ```
 See also: [BigNumber](./primitives.md#class-bignumber)
 
@@ -923,6 +376,8 @@ Argument Details
 
 + **hex**
   + The hexadecimal string to create a BigNumber from.
++ **endian**
+  + Optional endianness for parsing the hex string.
 
 Example
 
@@ -949,13 +404,6 @@ Argument Details
 + **str**
   + The JSON-serialized string to create a BigNumber from.
 
-Example
-
-```ts
-const serialized = '{"type":"BigNumber","hex":"a1b2c3"}';
-const bigNumber = BigNumber.fromJSON(serialized);
-```
-
 #### Method fromNumber
 
 Creates a BigNumber from a number.
@@ -974,42 +422,12 @@ Argument Details
 + **n**
   + The number to create a BigNumber from.
 
-Example
-
-```ts
-const number = 1234;
-const bigNumber = BigNumber.fromNumber(number);
-```
-
-#### Method fromRed
-
-Converts a BigNumber from a reduction context, making sure the number is indeed in a reduction context.
-Throws an error in case the number is not in a reduction context.
-
-```ts
-fromRed(): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns the BigNumber out of the ReductionContext.
-
-Example
-
-```ts
-let bigNum = new BigNumber(10);
-let redCtx = new ReductionContext();
-bigNum.toRed(redCtx);
-bigNum.fromRed();
-```
-
 #### Method fromScriptNum
 
 Creates a BigNumber from the format used in Bitcoin scripts.
 
 ```ts
-static fromScriptNum(num: number[], requireMinimal?: boolean, maxNumSize?: number): BigNumber 
+static fromScriptNum(num: number[], requireMinimal: boolean = false, maxNumSize?: number): BigNumber 
 ```
 See also: [BigNumber](./primitives.md#class-bignumber)
 
@@ -1024,25 +442,14 @@ Argument Details
 + **requireMinimal**
   + If true, non-minimally encoded values will throw an error.
 + **maxNumSize**
-  + The maximum allowed size for the number. If not provided, defaults to 4.
-
-Throws
-
-Will throw an error if `requireMinimal` is `true` and the value is non-minimally encoded. Will throw an error if number length is greater than `maxNumSize`.
-
-Example
-
-```ts
-const num = [0x02, 0x01]
-const bigNumber = BigNumber.fromScriptNum(num, true, 5)
-```
+  + The maximum allowed size for the number.
 
 #### Method fromSm
 
 Creates a BigNumber from a signed magnitude number.
 
 ```ts
-static fromSm(num: number[], endian: "big" | "little" = "big"): BigNumber 
+static fromSm(bytes: number[], endian: "big" | "little" = "big"): BigNumber 
 ```
 See also: [BigNumber](./primitives.md#class-bignumber)
 
@@ -1052,17 +459,10 @@ Returns a BigNumber equivalent to the signed magnitude number interpreted with s
 
 Argument Details
 
-+ **num**
++ **bytes**
   + The signed magnitude number to convert to a BigNumber.
 + **endian**
   + Defines endianess. If not provided, big endian is assumed.
-
-Example
-
-```ts
-const num = [0x81]
-const bigNumber = BigNumber.fromSm(num, { endian: 'little' }); // equivalent to BigNumber from '-1'
-```
 
 #### Method fromString
 
@@ -1084,501 +484,9 @@ Argument Details
 + **base**
   + The base used for conversion. If not provided, base 10 is assumed.
 
-Example
-
-```ts
-const str = '1234';
-const bigNumber = BigNumber.fromString(str, 16);
-```
-
-#### Method fromTwos
-
-Converts this big number from two's complement with a specified bit width.
-
-```ts
-fromTwos(width: number): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns the big number converted from two's complement.
-
-Argument Details
-
-+ **width**
-  + The bit width.
-
-Example
-
-```ts
-const BigNumber = require("./BigNumber");
-const bn = new BigNumber('-1234');
-const fromTwos = bn.fromTwos(16);
-```
-
-#### Method gcd
-
-Computes and returns the greatest common divisor (GCD) of this BigNumber and the provided BigNumber.
-
-```ts
-gcd(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The GCD of this BigNumber and the provided BigNumber.
-
-Argument Details
-
-+ **num**
-  + The BigNumber with which to compute the GCD.
-
-Example
-
-```ts
-let a = new BigNumber(48);
-let b = new BigNumber(18);
-let gcd = a.gcd(b);
-```
-
-#### Method gt
-
-Checks if this BigNumber instance is greater than another BigNumber.
-
-```ts
-gt(num: BigNumber): boolean 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns true if this BigNumber is greater than the other BigNumber, false otherwise.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to compare with.
-
-Example
-
-```ts
-let bigNumber1 = new BigNumber('2345');
-let bigNumber2 = new BigNumber('1234');
-let isGreater = bigNumber1.gt(bigNumber2); // Returns true
-```
-
-#### Method gte
-
-Checks if this BigNumber instance is greater than or equal to another BigNumber.
-
-```ts
-gte(num: BigNumber): boolean 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns true if this BigNumber is greater than or equal to the other BigNumber, false otherwise.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to compare with.
-
-Example
-
-```ts
-let bigNumber1 = new BigNumber('1234');
-let bigNumber2 = new BigNumber('1234');
-let isGreaterOrEqual = bigNumber1.gte(bigNumber2); // Returns true
-```
-
-#### Method gten
-
-Checks if this BigNumber instance is greater than or equal to a number.
-
-```ts
-gten(num: number): boolean 
-```
-
-Returns
-
-Returns true if this BigNumber is greater than or equal to the number, false otherwise.
-
-Argument Details
-
-+ **num**
-  + The number to compare with.
-
-Example
-
-```ts
-let bigNumber = new BigNumber('1234');
-let isGreaterOrEqual = bigNumber.gten(1234); // Returns true
-```
-
-#### Method gtn
-
-Checks if this BigNumber instance is greater than a number.
-
-```ts
-gtn(num: number): boolean 
-```
-
-Returns
-
-Returns true if this BigNumber is greater than the number, false otherwise.
-
-Argument Details
-
-+ **num**
-  + The number to compare with.
-
-Example
-
-```ts
-let bigNumber = new BigNumber('2345');
-let isGreater = bigNumber.gtn(1234); // Returns true
-```
-
-#### Method iabs
-
-Performs an in-place operation to make the BigNumber an absolute value.
-
-```ts
-iabs(): this 
-```
-
-Returns
-
-Returns the BigNumber as an absolute value.
-
-Example
-
-```ts
-const myNumber = new BigNumber(-50);
-myNumber.iabs(); // myNumber becomes 50.
-```
-
-#### Method iadd
-
-Add `num` to `this` BigNumber in-place.
-
-```ts
-iadd(num: BigNumber): this 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns the BigNumber after performing the addition.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to add to `this` BigNumber.
-
-Example
-
-```ts
-const num1 = new BigNumber('10');
-num1.iadd(new BigNumber('20'));
-console.log(num1.toString());
-```
-
-#### Method iaddn
-
-Performs an in-place addition of a plain number to the BigNumber.
-
-```ts
-iaddn(num: number): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns the BigNumber after the addition.
-
-Argument Details
-
-+ **num**
-  + The plain number to add.
-
-Throws
-
-Will throw an error if num is not a number or is larger than 0x4000000.
-
-Example
-
-```ts
-const myNumber = new BigNumber(50);
-myNumber.iaddn(2); // myNumber becomes 52.
-```
-
-#### Method iand
-
-Performs an in-place operation that does a bitwise AND operation in-place,
-on the current instance and given BigNumber such that it modifies the current
-instance only if neither operand is negative. This method is similar to the iuand method but
-checks for negative values before operation.
-
-```ts
-iand(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns the current BigNumber instance after performing the bitwise AND operation.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to perform the bitwise AND operation with.
-
-Example
-
-```ts
-const num1 = new BigNumber('10');
-const num2 = new BigNumber('20');
-console.log(num1.iand(num2).toString());
-```
-
-#### Method idivn
-
-Performs an in-place division of a `BigNumber` by a primitive number.
-
-```ts
-idivn(num: number): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The `BigNumber` itself after being divided.
-Note: 'in-place' means that this operation modifies the original `BigNumber`.
-
-Argument Details
-
-+ **num**
-  + The divisor primitive number.
-
-Example
-
-```ts
-const bigNum = new BigNumber('100');
-const num = 45;
-bigNum.idivn(num); // the bigNum here directly becomes '2'
-```
-
-#### Method imaskn
-
-Performs an in-place operation to keep only the lower bits of the number.
-
-```ts
-imaskn(bits): this 
-```
-
-Returns
-
-Returns the BigNumber with only the specified lower bits.
-
-Argument Details
-
-+ **bits**
-  + The number of lower bits to keep.
-
-Throws
-
-Will throw an error if bits is not a positive number.
-
-Will throw an error if initial BigNumber is negative as imaskn only works with positive numbers.
-
-Example
-
-```ts
-const myNumber = new BigNumber(52);
-myNumber.imaskn(2); // myNumber becomes 0 because lower 2 bits of 52 (110100) are 00.
-```
-
-#### Method imul
-
-Performs an in-place multiplication of the BigNumber instance by a given BigNumber.
-
-```ts
-imul(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The BigNumber itself after the multiplication.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to multiply with.
-
-Example
-
-```ts
-const bn1 = new BigNumber('12345');
-const bn2 = new BigNumber('23456');
-bn1.imul(bn2);
-```
-
-#### Method imuln
-
-Performs an in-place multiplication of the BigNumber instance by a number.
-This method asserts the input to be a number less than 0x4000000 to prevent overflowing.
-If negavtive number is provided, the resulting BigNumber will be inversely negative.
-
-```ts
-imuln(num: number): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The BigNumber itself after the multiplication.
-
-Argument Details
-
-+ **num**
-  + The number to multiply with.
-
-Example
-
-```ts
-const bn = new BigNumber('12345');
-bn.imuln(23456);
-```
-
-#### Method ineg
-
-Negates the big number in-place.
-
-```ts
-ineg(): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns this big number as the negation of itself.
-
-Example
-
-```ts
-const BigNumber = require("./BigNumber");
-const bn = new BigNumber('1234');
-bn.ineg(); // bn is now -1234
-```
-
-#### Method inotn
-
-In-place method that performs a bitwise NOT operation on a BigNumber up to a specified bit width.
-
-```ts
-inotn(width: number): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns the BigNumber after performing the bitwise NOT operation.
-
-Argument Details
-
-+ **width**
-  + The number of bits to perform the NOT operation on.
-
-Example
-
-```ts
-const num = new BigNumber('42');
-num.inotn(10);
-console.log(num.toString());
-```
-
-#### Method inspect
-
-Utility for inspecting the current BigNumber instance. Accompanied with a prefix '<BN: ' or '<BN-R: '.
-
-```ts
-inspect(): string 
-```
-
-Returns
-
-A string representation to inspect the BigNumber instance.
-
-Example
-
-```ts
-const bn = new BigNumber('123456', 10, 'be');
-bn.inspect();
-```
-
-#### Method invm
-
-Computes and returns the modular multiplicative inverse of this BigNumber in the field defined by the provided BigNumber.
-
-```ts
-invm(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The modular multiplicative inverse of this BigNumber.
-
-Argument Details
-
-+ **num**
-  + The BigNumber that defines the field.
-
-Example
-
-```ts
-let a = new BigNumber(3);
-let field = new BigNumber(7);
-let inverse = a.invm(field);
-```
-
-#### Method ior
-
-Performs a bitwise OR operation with another BigNumber, considering
-that neither of the numbers can be negative. Stores the result in this BigNumber.
-
-```ts
-ior(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns this BigNumber after performing the bitwise OR operation.
-
-Argument Details
-
-+ **num**
-  + The other BigNumber.
-
-Example
-
-```ts
-const BigNumber = require("./BigNumber");
-const bn1 = new BigNumber('10'); // binary: 1010
-const bn2 = new BigNumber('6'); // binary: 0110
-bn1.ior(bn2); // now, bn1 binary: 1110
-```
-
 #### Method isBN
 
-Checks whether a value is an instance of BigNumber. If not, then checks the features of the input to determine potential compatibility. Regular JS numbers fail this check.
+Checks whether a value is an instance of BigNumber. Regular JS numbers fail this check.
 
 ```ts
 static isBN(num: any): boolean 
@@ -1592,515 +500,6 @@ Argument Details
 
 + **num**
   + The value to be checked.
-
-Example
-
-```ts
-const validNum = new BigNumber(5);
-BigNumber.isBN(validNum); // returns true
-
-const invalidNum = 5;
-BigNumber.isBN(invalidNum); // returns false
-```
-
-#### Method isEven
-
-Checks if this BigNumber is even.
-An even number is an integer which is evenly divisible by two.
-
-```ts
-isEven(): boolean 
-```
-
-Returns
-
-true if this BigNumber is even, else false.
-
-Example
-
-```ts
-let a = new BigNumber(4);
-let isEven = a.isEven(); // true
-```
-
-#### Method isNeg
-
-Checks if the big number is negative.
-
-```ts
-isNeg(): boolean 
-```
-
-Returns
-
-Returns true if the big number is negative, otherwise false.
-
-Example
-
-```ts
-const BigNumber = require("./BigNumber");
-const bn = new BigNumber('-1234');
-const isNegative = bn.isNeg(); // true
-```
-
-#### Method isOdd
-
-Checks if this BigNumber is Odd.
-An odd number is an integer which is not evenly divisible by two.
-
-```ts
-isOdd(): boolean 
-```
-
-Returns
-
-true if this BigNumber is Odd, else false.
-
-Example
-
-```ts
-let a = new BigNumber(3);
-let isOdd = a.isOdd(); // true
-```
-
-#### Method isZero
-
-Checks if this BigNumber is Zero.
-A BigNumber is zero if it only contains one word and that word is 0.
-
-```ts
-isZero(): boolean 
-```
-
-Returns
-
-true if this BigNumber is Zero, else false.
-
-Example
-
-```ts
-let a = new BigNumber(0);
-let isZero = a.isZero(); // true
-```
-
-#### Method ishln
-
-Performs an in-place left shift operation on the BigNumber instance only if it is non-negative.
-
-```ts
-ishln(bits: number): this 
-```
-
-Returns
-
-The BigNumber instance after performing the shift operation.
-
-Argument Details
-
-+ **bits**
-  + The number of positions to shift.
-
-Example
-
-```ts
-let myNumber = new BigNumber(4);
-myNumber.ishln(2); // Returns BigNumber of value 16
-```
-
-#### Method ishrn
-
-Performs an in-place right shift operation on the BigNumber instance only if it is non-negative.
-
-```ts
-ishrn(bits, hint?, extended?): this 
-```
-
-Returns
-
-The BigNumber instance after performing the shift operation.
-
-Argument Details
-
-+ **bits**
-  + The number of positions to shift.
-+ **hint**
-  + Lowest bit before trailing zeroes.
-+ **extended**
-  + To be filled with the bits that are shifted out.
-
-Example
-
-```ts
-let myNumber = new BigNumber(16);
-myNumber.ishrn(2); // Returns BigNumber of value 4
-```
-
-#### Method isqr
-
-Performs in-place multiplication of the BigNumber instance by itself.
-
-```ts
-isqr(): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The result of multiplying the BigNumber instance by itself.
-
-Example
-
-```ts
-let myNumber = new BigNumber(4);
-myNumber.isqr(); // Returns BigNumber of value 16
-```
-
-#### Method isub
-
-Subtract `num` from `this` BigNumber in-place.
-
-```ts
-isub(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns the BigNumber after performing the subtraction.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to be subtracted from `this` BigNumber.
-
-Example
-
-```ts
-const num1 = new BigNumber('20');
-num1.isub(new BigNumber('10'));
-console.log(num1.toString());
-```
-
-#### Method isubn
-
-Performs an in-place subtraction of a plain number from the BigNumber.
-
-```ts
-isubn(num: number): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns the BigNumber after the subtraction.
-
-Argument Details
-
-+ **num**
-  + The plain number to subtract.
-
-Throws
-
-Will throw an error if num is not a number or is larger than 0x4000000.
-
-Example
-
-```ts
-const myNumber = new BigNumber(52);
-myNumber.isubn(2); // myNumber becomes 50.
-```
-
-#### Method iuand
-
-Performs a bitwise AND operation in-place(this method changes the calling object)
-on the current instance and given BigNumber such that it modifies the current
-instance and keeps the bits set in the result only if the corresponding bit is set
-in both operands.
-
-```ts
-iuand(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns the current BigNumber instance after performing the bitwise AND operation.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to perform the bitwise AND operation with.
-
-Example
-
-```ts
-const num1 = new BigNumber('10');
-const num2 = new BigNumber('20');
-console.log(num1.iuand(num2).toString());
-```
-
-#### Method iuor
-
-Performs a bitwise OR operation with another BigNumber and stores
-the result in this BigNumber.
-
-```ts
-iuor(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns this BigNumber after performing the bitwise OR operation.
-
-Argument Details
-
-+ **num**
-  + The other BigNumber.
-
-Example
-
-```ts
-const BigNumber = require("./BigNumber");
-const bn1 = new BigNumber('10'); // binary: 1010
-const bn2 = new(num: BigNumber): BigNumber BigNumber('6'); // binary: 0110
-bn1.iuor(bn2); // now, bn1 binary: 1110
-```
-
-#### Method iushln
-
-Performs in-place bitwise left shift operation on the BigNumber instance.
-
-```ts
-iushln(bits: number): this 
-```
-
-Returns
-
-The BigNumber instance after performing the shift operation.
-
-Argument Details
-
-+ **bits**
-  + The number of positions to shift.
-
-Example
-
-```ts
-let myNumber = new BigNumber(4);
-myNumber.iushln(2); // Returns BigNumber of value 16
-```
-
-#### Method iushrn
-
-Performs an in-place unsigned bitwise right shift operation on the BigNumber instance.
-
-```ts
-iushrn(bits: number, hint?: number, extended?: BigNumber): this 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The BigNumber instance after performing the shift operation.
-
-Argument Details
-
-+ **bits**
-  + The number of positions to shift.
-+ **hint**
-  + Lowest bit before trailing zeroes.
-+ **extended**
-  + To be filled with the bits that are shifted out.
-
-Example
-
-```ts
-let myNumber = new BigNumber(16);
-myNumber.iushrn(2); // Returns BigNumber of value 4
-```
-
-#### Method iuxor
-
-Modifies the current instance by performing a bitwise XOR operation
-in-place with the provided BigNumber. It keeps the bits set in the result only if the
-corresponding bits in the operands are different.
-
-```ts
-iuxor(num: BigNumber): this 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns the current BigNumber instance after performing the bitwise XOR operation.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to perform the bitwise XOR operation with.
-
-Example
-
-```ts
-const num1 = new BigNumber('10');
-const num2 = new BigNumber('20');
-console.log(num1.iuxor(num2).toString());
-```
-
-#### Method ixor
-
-Performs an in-place operation that does a bitwise XOR operation in-place,
-on the current instance and given BigNumber such that it modifies the current
-instance only if neither operand is negative. This method is similar to the iuxor method but
-checks for negative values before operation.
-
-```ts
-ixor(num: BigNumber): this 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns the current BigNumber instance after performing the bitwise XOR operation.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to perform the bitwise XOR operation with.
-
-Example
-
-```ts
-const num1 = new BigNumber('10');
-const num2 = new BigNumber('20');
-console.log(num1.ixor(num2).toString());
-```
-
-#### Method lt
-
-Checks if this BigNumber instance is less than another BigNumber.
-
-```ts
-lt(num: BigNumber): boolean 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns true if this BigNumber is less than the other BigNumber, false otherwise.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to compare with.
-
-Example
-
-```ts
-let bigNumber1 = new BigNumber('1234');
-let bigNumber2 = new BigNumber('2345');
-let isLess = bigNumber1.lt(bigNumber2); // Returns true
-```
-
-#### Method lte
-
-Checks if this BigNumber instance is less than or equal to another BigNumber.
-
-```ts
-lte(num: BigNumber): boolean 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns true if this BigNumber is less than or equal to the other BigNumber, false otherwise.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to compare with.
-
-Example
-
-```ts
-let bigNumber1 = new BigNumber('2345');
-let bigNumber2 = new BigNumber('2345');
-let isLessOrEqual = bigNumber1.lte(bigNumber2); // Returns true
-```
-
-#### Method lten
-
-Checks if this BigNumber instance is less than or equal to a number.
-
-```ts
-lten(num: number): boolean 
-```
-
-Returns
-
-Returns true if this BigNumber is less than or equal to the number, false otherwise.
-
-Argument Details
-
-+ **num**
-  + The number to compare with.
-
-Example
-
-```ts
-let bigNumber = new BigNumber('2345');
-let isLessOrEqual = bigNumber.lten(2345); // Returns true
-```
-
-#### Method ltn
-
-Checks if this BigNumber instance is less than a number.
-
-```ts
-ltn(num: number): boolean 
-```
-
-Returns
-
-Returns true if this BigNumber is less than the number, false otherwise.
-
-Argument Details
-
-+ **num**
-  + The number to compare with.
-
-Example
-
-```ts
-let bigNumber = new BigNumber('1234');
-let isLess = bigNumber.ltn(2345); // Returns true
-```
-
-#### Method maskn
-
-Returns a new BigNumber that keeps only the lower bits of the original number.
-
-```ts
-maskn(bits): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a new BigNumber with only the specified lower bits of the original number.
-
-Argument Details
-
-+ **bits**
-  + The number of lower bits to keep.
-
-Example
-
-```ts
-const myNumber = new BigNumber(52);
-const newNumber = myNumber.maskn(2); // newNumber becomes 0, myNumber doesn't change.
-```
 
 #### Method max
 
@@ -2122,14 +521,6 @@ Argument Details
 + **right**
   + The second BigNumber to be compared.
 
-Example
-
-```ts
-const bn1 = new BigNumber(5);
-const bn2 = new BigNumber(10);
-BigNumber.max(bn1, bn2); // returns bn2
-```
-
 #### Method min
 
 Returns the smaller value between two BigNumbers
@@ -2149,118 +540,6 @@ Argument Details
   + The first BigNumber to be compared.
 + **right**
   + The second BigNumber to be compared.
-
-Example
-
-```ts
-const bn1 = new BigNumber(5);
-const bn2 = new BigNumber(10);
-BigNumber.min(bn1, bn2); // returns bn1
-```
-
-#### Method mod
-
-Returns the remainder after division of one `BigNumber` by another `BigNumber`.
-
-```ts
-mod(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The remainder `BigNumber` after division.
-
-Argument Details
-
-+ **num**
-  + The divisor `BigNumber`.
-
-Example
-
-```ts
-const bigNum1 = new BigNumber('100');
-const bigNum2 = new BigNumber('45');
-const remainder = bigNum1.mod(bigNum2); // remainder here would be '10'
-```
-
-#### Method modrn
-
-Returns the remainder after division of a `BigNumber` by a primitive number.
-
-```ts
-modrn(num: number): number 
-```
-
-Returns
-
-The remainder number after division.
-
-Argument Details
-
-+ **num**
-  + The divisor primitive number.
-
-Example
-
-```ts
-const bigNum = new BigNumber('100');
-const num = 45;
-const remainder = bigNum.modrn(num); // remainder here would be '10'
-```
-
-#### Method move
-
-
-Directly transfers the attributes of the source BigNumber to the destination BigNumber.
-
-```ts
-static move(dest: BigNumber, src: BigNumber): void 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Argument Details
-
-+ **dest**
-  + The BigNumber that attributes will be moved into.
-+ **src**
-  + The BigNumber that attributes will be moved from.
-
-Example
-
-```ts
-const src = new BigNumber('123456', 10, 'be');
-const dest = new BigNumber();
-BigNumber.move(dest, src);
-// dest is now a BigNumber representing 123456
-```
-
-#### Method mul
-
-Performs multiplication between the BigNumber instance and a given BigNumber.
-It creates a new BigNumber to store the result.
-
-```ts
-mul(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The BigNumber resulting from the multiplication operation.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to multiply with.
-
-Example
-
-```ts
-const bn1 = new BigNumber('12345');
-const bn2 = new BigNumber('23456');
-const result = bn1.mul(bn2);
-```
 
 #### Method mulTo
 
@@ -2283,724 +562,9 @@ Argument Details
 + **out**
   + The BigNumber where to store the result.
 
-Example
-
-```ts
-const bn1 = new BigNumber('12345');
-const bn2 = new BigNumber('23456');
-const output = new BigNumber();
-bn1.mulTo(bn2, output);
-```
-
-#### Method muln
-
-Performs multiplication between the BigNumber instance and a number.
-It performs the multiplication operation in-place to a cloned BigNumber.
-
-```ts
-muln(num: number): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The resulting BigNumber from the multiplication operation.
-
-Argument Details
-
-+ **num**
-  + The number to multiply with.
-
-Example
-
-```ts
-const bn = new BigNumber('12345');
-const result = bn.muln(23456);
-```
-
-#### Method neg
-
-Negates the big number and returns a new instance.
-
-```ts
-neg(): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a new BigNumber that is the negation of this big number.
-
-Example
-
-```ts
-const BigNumber = require("./BigNumber");
-const bn = new BigNumber('1234');
-const neg = bn.neg(); // -1234
-```
-
-#### Method normSign
-
-Normalizes the sign of the BigNumber. Changes -0 to 0.
-
-```ts
-normSign(): this 
-```
-
-Returns
-
-The normalized BigNumber instance.
-
-Example
-
-```ts
-const bn = new BigNumber('-0', 10, 'be');
-bn.normSign();
-```
-
-#### Method notn
-
-Performs a bitwise NOT operation on a BigNumber up to a specified bit width. Returns a new BigNumber.
-
-```ts
-notn(width: number): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a new BigNumber resulting from the bitwise NOT operation.
-
-Argument Details
-
-+ **width**
-  + The number of bits to perform the NOT operation on.
-
-Example
-
-```ts
-const num = new BigNumber('42');
-const notnResult = num.notn(10);
-console.log(notnResult.toString());
-```
-
-#### Method or
-
-Performs a bitwise OR operation on the current instance and given
-BigNumber and returns a new BigNumber, in such a way that if either
-the corresponding bit in the first operand or the second operand is
-1, then the output is also 1.
-
-```ts
-or(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a new BigNumber resulting from the bitwise OR operation.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to perform the bitwise OR operation with.
-
-Example
-
-```ts
-const num1 = new BigNumber('10');
-const num2 = new BigNumber('20');
-console.log(num1.or(num2).toString());
-```
-
-#### Method pow
-
-Raises the BigNumber instance to the power of the specified BigNumber.
-
-```ts
-pow(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The result of raising the BigNumber instance to the power of num.
-
-Argument Details
-
-+ **num**
-  + The exponent to raise the BigNumber instance to.
-
-Example
-
-```ts
-let base = new BigNumber(2);
-let exponent = new BigNumber(3);
-base.pow(exponent); // Returns BigNumber of value 8
-```
-
-#### Method redAdd
-
-Performs addition operation of the current BigNumber with the given number in a reduction context.
-Throws an error in case the number is not in a reduction context.
-
-```ts
-redAdd(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a new BigNumber that's the sum of the current BigNumber and the provided number in the reduction context.
-
-Argument Details
-
-+ **num**
-  + The number to add to the current BigNumber.
-
-Example
-
-```ts
-let bigNum = new BigNumber(10);
-let redCtx = new ReductionContext();
-bigNum.toRed(redCtx);
-bigNum.redAdd(new BigNumber(20)); // returns a BigNumber of 30 in reduction context
-```
-
-#### Method redIAdd
-
-Performs in-place addition operation of the current BigNumber with the given number in a reduction context.
-Throws an error in case the number is not in a reduction context.
-
-```ts
-redIAdd(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns the modified current BigNumber after adding the provided number in the reduction context.
-
-Argument Details
-
-+ **num**
-  + The number to add to the current BigNumber.
-
-Example
-
-```ts
-let bigNum = new BigNumber(10);
-let redCtx = new ReductionContext();
-bigNum.toRed(redCtx);
-bigNum.redIAdd(new BigNumber(20)); // modifies the bigNum to 30 in reduction context
-```
-
-#### Method redIMul
-
-Performs an in-place multiplication of this BigNumber instance with another BigNumber within a reduction context.
-Expects that this BigNumber is within the reduction context i.e., it has been reduced.
-
-```ts
-redIMul(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-A BigNumber that is the result of the in-place multiplication operation, within the reduction context.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to multiply with the current BigNumber.
-
-Example
-
-```ts
-let bigNum1 = new BigNumber('10').toRed(someRed);
-let bigNum2 = new BigNumber('5');
-bigNum1.redIMul(bigNum2);
-```
-
-#### Method redISqr
-
-In-place square of a "red" (reduced) BigNumber.
-This function squares the calling BigNumber and overwrites it with the result.
-It only works if the number is "reduced". A number is considered reduced
-if it has a `red` field that points to a reduction context object.
-
-```ts
-redISqr(): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-This BigNumber squared in place
-
-Throws
-
-If the BigNumber is not reduced
-
-Example
-
-```ts
-const num = new BigNumber('25').toRed(someRed);
-num.redISqr();
-console.log(num.toString()); // Outputs: '625' mod the red value
-```
-
-#### Method redISub
-
-Performs in-place subtraction operation of the current BigNumber with the given number in a reduction context.
-Throws an error in case the number is not in a reduction context.
-
-```ts
-redISub(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns the modified current BigNumber after subtracting the provided number in the reduction context.
-
-Argument Details
-
-+ **num**
-  + The number to subtract from the current BigNumber.
-
-Example
-
-```ts
-let bigNum = new BigNumber(30);
-let redCtx = new ReductionContext();
-bigNum.toRed(redCtx);
-bigNum.redISub(new BigNumber(20)); // modifies the bigNum to 10 in reduction context
-```
-
-#### Method redInvm
-
-Find multiplicative inverse (reciprocal) in respect to reduction context.
-The method works only on numbers that have a reduction context set.
-
-```ts
-redInvm(): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a BigNumber that is multiplicative inverse in respect to the reduction context.
-
-Throws
-
-Will throw an error if this number does not have a reduction context.
-
-Example
-
-```ts
-let a = new BigNumber('2345', 16);
-a.red = someReductionContext;
-let aInverse = a.redInvm();
-```
-
-#### Method redMul
-
-Performs multiplication operation of the current BigNumber with the given number in a reduction context.
-Throws an error in case the number is not in a reduction context.
-
-```ts
-redMul(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a new BigNumber that's the product of the current BigNumber and the provided number in the reduction context.
-
-Argument Details
-
-+ **num**
-  + The number to multiply with the current BigNumber.
-
-Example
-
-```ts
-let bigNum = new BigNumber(10);
-let redCtx = new ReductionContext();
-bigNum.toRed(redCtx);
-bigNum.redMul(new BigNumber(20)); // returns a BigNumber of 200 in reduction context
-```
-
-#### Method redNeg
-
-Find negative version of this number in respect to reduction context.
-The method works only on numbers that have a reduction context set.
-
-```ts
-redNeg(): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a BigNumber that is the negative version of this number in respect to the reduction context.
-
-Throws
-
-Will throw an error if this number does not have a reduction context.
-
-Example
-
-```ts
-let a = new BigNumber('2345', 16);
-a.red = someReductionContext;
-let aNeg = a.redNeg();
-```
-
-#### Method redPow
-
-Raises this number to the power of 'num', in respect to reduction context.
-Note that 'num' must not have a reduction context set.
-
-```ts
-redPow(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a BigNumber that is this number raised to the power of 'num', in respect to the reduction context.
-
-Argument Details
-
-+ **num**
-  + The exponent to raise this number to.
-
-Throws
-
-Will throw an error if this number does not have a reduction context or 'num' has a reduction context.
-
-Example
-
-```ts
-let a = new BigNumber(3);
-a.red = someReductionContext;
-let b = new BigNumber(3);
-let result = a.redPow(b);  // equivalent to (a^b) mod red
-```
-
-#### Method redShl
-
-Performs the shift left operation on the current BigNumber in the reduction context.
-Throws an error in case the number is not in a reduction context.
-
-```ts
-redShl(num: number): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a new BigNumber after performing the shift left operation on the current BigNumber in the reduction context.
-
-Argument Details
-
-+ **num**
-  + The positions to shift left the current BigNumber.
-
-Example
-
-```ts
-let bigNum = new BigNumber(1);
-let redCtx = new ReductionContext();
-bigNum.toRed(redCtx);
-bigNum.redShl(2); // returns a BigNumber of 4 in reduction context
-```
-
-#### Method redSqr
-
-Square of a "red" (reduced) BigNumber.
-This function squares the calling BigNumber and returns the result.
-It only works if the number is "reduced". A number is considered reduced
-if it has a `red` field that points to a reduction context object.
-
-```ts
-redSqr(): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The square of the BigNumber
-
-Throws
-
-If the BigNumber is not reduced
-
-Example
-
-```ts
-const num = new BigNumber('25').toRed(someRed);
-const result = num.redSqr();
-console.log(result.toString()); // Outputs: '625' mod the red value
-```
-
-#### Method redSqrt
-
-Square root of a "red" (reduced) BigNumber.
-This function calculates the square root of the calling BigNumber
-and returns the result. It only works if the number is "reduced".
-A number is considered reduced if it has a `red`
-field that points to a reduction context object.
-
-```ts
-redSqrt(): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The square root of the BigNumber
-
-Throws
-
-If the BigNumber is not reduced
-
-Example
-
-```ts
-const num = new BigNumber('4').toRed(someRed);
-const result = num.redSqrt();
-console.log(result.toString()); // Outputs: '2' mod the red value
-```
-
-#### Method redSub
-
-Performs subtraction operation of the current BigNumber with the given number in a reduction context.
-Throws an error in case the number is not in a reduction context.
-
-```ts
-redSub(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a new BigNumber that's the subtraction result of the current BigNumber and the provided number in the reduction context.
-
-Argument Details
-
-+ **num**
-  + The number to subtract from the current BigNumber.
-
-Example
-
-```ts
-let bigNum = new BigNumber(30);
-let redCtx = new ReductionContext();
-bigNum.toRed(redCtx);
-bigNum.redSub(new BigNumber(20)); // returns a BigNumber of 10 in reduction context
-```
-
-#### Method setn
-
-Set `bit` of `this` BigNumber. The `bit` is a position in the binary representation,
-and `val` is the value to be set at that position (`0` or `1`).
-
-```ts
-setn(bit: number, val: 0 | 1 | true | false): this 
-```
-
-Returns
-
-Returns the BigNumber after setting the value at the bit position.
-
-Argument Details
-
-+ **bit**
-  + The bit position to set.
-+ **val**
-  + The value to set at the bit position.
-
-Example
-
-```ts
-const num = new BigNumber('42');
-num.setn(2, 1);
-console.log(num.toString());
-```
-
-#### Method shln
-
-Performs a bitwise left shift operation on a clone of the BigNumber instance.
-
-```ts
-shln(bits): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-A new BigNumber, which is the result of the shift operation.
-
-Argument Details
-
-+ **bits**
-  + The number of positions to shift.
-
-Example
-
-```ts
-let myNumber = new BigNumber(4);
-let shiftedNumber = myNumber.shln(2);
-console.log(shiftedNumber.toString()); // Outputs "16"
-```
-
-#### Method shrn
-
-Performs a bitwise right shift operation on a clone of the BigNumber instance.
-
-```ts
-shrn(bits): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-A new BigNumber resulting from the shift operation.
-
-Argument Details
-
-+ **bits**
-  + The number of bits to shift.
-
-Example
-
-```ts
-let myNumber = new BigNumber(16);
-let shiftedNumber = myNumber.shrn(3);
-console.log(shiftedNumber.toString()); // Outputs "2"
-```
-
-#### Method sqr
-
-Squares the BigNumber instance.
-
-```ts
-sqr(): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The BigNumber squared.
-
-Example
-
-```ts
-const bn = new BigNumber('12345');
-const result = bn.sqr();
-```
-
-#### Method strip
-
-Removes leading zeros.
-
-```ts
-strip(): this 
-```
-
-Returns
-
-- Returns the BigNumber after stripping leading zeros.
-
-Example
-
-```ts
-const bn = new BigNumber("000000", 2, "be");
-bn.strip();
-// bn now represents 0
-```
-
-#### Method sub
-
-Subtract `num` from `this` BigNumber.
-
-```ts
-sub(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a new BigNumber which is the result of the subtraction.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to be subtracted from `this` BigNumber.
-
-Example
-
-```ts
-const num1 = new BigNumber('20');
-const subResult = num1.sub(new BigNumber('10'));
-console.log(subResult.toString());
-```
-
-#### Method subn
-
-Returns a new BigNumber that is the result of subtracting a plain number from the original BigNumber.
-
-```ts
-subn(num: number): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a new BigNumber which is the difference of the original BigNumber and the plain number.
-
-Argument Details
-
-+ **num**
-  + The plain number to subtract.
-
-Example
-
-```ts
-const myNumber = new BigNumber(52);
-const newNumber = myNumber.subn(2);  // newNumber becomes 50, myNumber doesn't change.
-```
-
-#### Method testn
-
-Tests if the nth bit of the BigNumber is set.
-
-```ts
-testn(bit: number): boolean 
-```
-
-Returns
-
-A boolean indicating whether the nth bit is set.
-
-Argument Details
-
-+ **bit**
-  + The position of the bit to test.
-
-Example
-
-```ts
-let myNumber = new BigNumber(10); // 1010 in binary
-myNumber.testn(1); // Returns true (indicating that the second bit from right is set)
-```
-
 #### Method toArray
 
-Converts the BigNumber instance to a JavaScript number array.
+Converts the BigNumber instance to an array of bytes.
 
 ```ts
 toArray(endian: "le" | "be" = "be", length?: number): number[] 
@@ -3008,26 +572,18 @@ toArray(endian: "le" | "be" = "be", length?: number): number[]
 
 Returns
 
-The JavaScript array representation of the BigNumber instance.
+Array of bytes representing the BigNumber.
 
 Argument Details
 
 + **endian**
-  + The endian for converting BigNumber to array. Default value is 'be'.
+  + Endianness of the output array, defaults to 'be'.
 + **length**
-  + The length for the resultant array. Default value is undefined.
-
-Example
-
-```ts
-const bn = new BigNumber('123456', 10, 'be');
-bn.toArray('be', 8);
-```
+  + Optional length of the output array.
 
 #### Method toBitArray
 
-Convert a big number to a boolean array representing
-a binary number, where each array index is a bit.
+Converts a BigNumber to an array of bits.
 
 ```ts
 static toBitArray(num: BigNumber): Array<0 | 1> 
@@ -3036,42 +592,12 @@ See also: [BigNumber](./primitives.md#class-bignumber)
 
 Returns
 
-Returns an array of booleans representing
-a binary number, with each array index being a bit.
+An array of bits.
 
 Argument Details
 
 + **num**
-  + The big number to convert.
-
-Example
-
-```ts
-const BigNumber = require("./BigNumber");
-const bn = new BigNumber('6'); // binary: 110
-const bits = BigNumber.toBitArray(bn); // [1,1,0]
-```
-
-#### Method toBitArray
-
-Convert this big number to a boolean array representing
-a binary number, where each array index is a bit.
-
-```ts
-toBitArray(): Array<0 | 1> 
-```
-
-Returns
-
-Returns an array of booleans representing a binary number.
-
-Example
-
-```ts
-const BigNumber = require("./BigNumber");
-const bn = new BigNumber('6'); // binary: 110
-const bits = bn.toBitArray(); // [ 1, 1, 0 ]
-```
+  + The BigNumber to convert.
 
 #### Method toBits
 
@@ -3085,19 +611,12 @@ Returns
 
 Returns a number equivalent to the "bits" value in a block header.
 
-Example
-
-```ts
-const bigNumber = new BigNumber(1);
-const bits = bigNumber.toBits();
-```
-
 #### Method toHex
 
 Converts this BigNumber to a hexadecimal string.
 
 ```ts
-toHex(length: number = 0): string 
+toHex(byteLength: number = 0): string 
 ```
 
 Returns
@@ -3112,8 +631,8 @@ Argument Details
 Example
 
 ```ts
-const bigNumber = new BigNumber(255);
-const hex = bigNumber.toHex();
+const bigNumber = new BigNumber(255)
+const hex = bigNumber.toHex()
 ```
 
 #### Method toJSON
@@ -3127,13 +646,6 @@ toJSON(): string
 Returns
 
 The JSON string representation of the BigNumber instance.
-
-Example
-
-```ts
-const bn = new BigNumber('123456', 10, 'be');
-bn.toJSON();
-```
 
 #### Method toNumber
 
@@ -3152,40 +664,6 @@ Throws
 
 If the BigNumber instance cannot be safely stored in a JavaScript number
 
-Example
-
-```ts
-const bn = new BigNumber('123456', 10, 'be');
-bn.toNumber();
-```
-
-#### Method toRed
-
-Converts a BigNumber to a reduction context ensuring the number is a positive integer and is not already in a reduction context.
-Throws an error in case the number is either negative or already in a reduction context.
-
-```ts
-toRed(ctx: ReductionContext): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber), [ReductionContext](./primitives.md#class-reductioncontext)
-
-Returns
-
-Returns the BigNumber in the given ReductionContext.
-
-Argument Details
-
-+ **ctx**
-  + The ReductionContext to convert the BigNumber to.
-
-Example
-
-```ts
-let bigNum = new BigNumber(10);
-let redCtx = new ReductionContext();
-bigNum.toRed(redCtx);
-```
-
 #### Method toScriptNum
 
 Converts this BigNumber to a number in the format used in Bitcoin scripts.
@@ -3197,13 +675,6 @@ toScriptNum(): number[]
 Returns
 
 Returns the equivalent to this BigNumber as a Bitcoin script number.
-
-Example
-
-```ts
-const bigNumber = new BigNumber(258)
-const num = bigNumber.toScriptNum() // equivalent to bigNumber.toSm('little')
-```
 
 #### Method toSm
 
@@ -3221,13 +692,6 @@ Argument Details
 
 + **endian**
   + Defines endianess. If not provided, big endian is assumed.
-
-Example
-
-```ts
-const bigNumber = new BigNumber(-1);
-const num = bigNumber.toSm('little'); // [0x81]
-```
 
 #### Method toString
 
@@ -3250,256 +714,6 @@ Argument Details
 + **padding**
   + Represents the minimum number of digits to represent the BigNumber as a string. Default is 1.
 
-Throws
-
-If base is not between 2 and 36.
-
-Example
-
-```ts
-const bn = new BigNumber('123456', 10, 'be');
-bn.toString(16); // Converts the BigNumber to a hexadecimal string.
-```
-
-#### Method toTwos
-
-Converts this big number to two's complement with a specified bit width.
-
-```ts
-toTwos(width: number): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns the two's complement of the big number.
-
-Argument Details
-
-+ **width**
-  + The bit width.
-
-Example
-
-```ts
-const BigNumber = require("./BigNumber");
-const bn = new BigNumber('-1234');
-const twosComp = bn.toTwos(16);
-```
-
-#### Method uand
-
-Performs a bitwise AND operation without considering signed bit
-(no negative values) which returns a new BigNumber, similar to the `and` method.
-
-```ts
-uand(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns new BigNumber resulting from the bitwise AND operation without sign consideration.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to perform the bitwise AND operation with.
-
-Example
-
-```ts
-const num1 = new BigNumber('10');
-const num2 = new BigNumber('20');
-console.log(num1.uand(num2).toString());
-```
-
-#### Method ucmp
-
-Performs an unsigned comparison between this BigNumber instance and another.
-
-```ts
-ucmp(num: BigNumber): 1 | 0 | -1 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns 1 if this BigNumber is bigger, -1 if it is smaller, and 0 if they are equal.
-
-Argument Details
-
-+ **num**
-  + The BigNumber instance to compare with.
-
-Example
-
-```ts
-let bigNumber1 = new BigNumber('1234');
-let bigNumber2 = new BigNumber('2345');
-let comparisonResult = bigNumber1.ucmp(bigNumber2); // Returns -1
-```
-
-#### Method umod
-
-Returns the remainder after unsigned division of one `BigNumber` by another `BigNumber`.
-
-```ts
-umod(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-The remainder `BigNumber` after unsigned division.
-Note: Here 'unsigned division' means that signs of the numbers are ignored.
-
-Argument Details
-
-+ **num**
-  + The divisor `BigNumber`.
-
-Example
-
-```ts
-const bigNum1 = new BigNumber('-100');
-const bigNum2 = new BigNumber('45');
-const remainder = bigNum1.umod(bigNum2); // remainder here would be '10' as signs are ignored.
-```
-
-#### Method uor
-
-Performs a bitwise OR operation on the current instance and given
-BigNumber without considering signed bit(no negative values) and returns a new BigNumber,
-similar to the `or` method.
-
-```ts
-uor(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a new BigNumber resulting from the bitwise OR operation without sign consideration.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to perform the bitwise OR operation with.
-
-Example
-
-```ts
-const num1 = new BigNumber('10');
-const num2 = new BigNumber('20');
-console.log(num1.uor(num2).toString());
-```
-
-#### Method ushln
-
-Performs an unsigned bitwise shift left operation on a clone of the BigNumber instance.
-
-```ts
-ushln(bits): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-A new BigNumber resulting from the shift operation.
-
-Argument Details
-
-+ **bits**
-  + The number of bits to shift.
-
-Example
-
-```ts
-let myNumber = new BigNumber(4);
-let shiftedNumber = myNumber.ushln(2);
-console.log(shiftedNumber.toString()); // Outputs "16"
-```
-
-#### Method ushrn
-
-Performs an unsigned bitwise shift right operation on a clone of the BigNumber instance.
-
-```ts
-ushrn(bits): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-A new BigNumber resulting from the shift operation.
-
-Argument Details
-
-+ **bits**
-  + The number of bits to shift.
-
-Example
-
-```ts
-let myNumber = new BigNumber(20);
-let shiftedNumber = myNumber.ushrn(2);
-console.log(shiftedNumber.toString()); // Outputs "5"
-```
-
-#### Method uxor
-
-Performs an unsigned XOR operation on this BigNumber with the supplied BigNumber. Returns a new BigNumber.
-
-```ts
-uxor(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a new BigNumber resulting from the unsigned bitwise XOR operation.
-
-Argument Details
-
-+ **num**
-  + The BigNumber with which the unsigned bitwise XOR operation is to be performed.
-
-Example
-
-```ts
-const num1 = new BigNumber('30');
-const num2 = new BigNumber('40');
-console.log(num1.uxor(num2).toString()); // Output will be the result of unsigned XOR operation
-```
-
-#### Method xor
-
-Performs a bitwise XOR operation which returns a new BigNumber, and keeps the bits
-set in the result only if the corresponding bits in the operands are different.
-
-```ts
-xor(num: BigNumber): BigNumber 
-```
-See also: [BigNumber](./primitives.md#class-bignumber)
-
-Returns
-
-Returns a new BigNumber resulting from the bitwise XOR operation.
-
-Argument Details
-
-+ **num**
-  + The BigNumber to perform the bitwise XOR operation with.
-
-Example
-
-```ts
-const num1 = new BigNumber('10');
-const num2 = new BigNumber('20');
-console.log(num1.xor(num2).toString());
-```
-
 #### Method zeroBits
 
 Returns the number of trailing zero bits in the big number.
@@ -3516,7 +730,6 @@ in the binary representation of the big number.
 Example
 
 ```ts
-const BigNumber = require("./BigNumber");
 const bn = new BigNumber('8'); // binary: 1000
 const zeroBits = bn.zeroBits(); // 3
 ```
@@ -4276,9 +1489,9 @@ See also: [BigNumber](./primitives.md#class-bignumber)
 Argument Details
 
 + **input**
-  + The BigNumber to be shifted.
+  + The BigNumber to be shifted (will contain HI part).
 + **out**
-  + The BigNumber to hold the shifted result.
+  + The BigNumber to hold the shifted result (LO part).
 
 Example
 

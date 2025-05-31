@@ -31,7 +31,7 @@ export default class Mersenne {
     this.name = name
     this.p = new BigNumber(p, 16)
     this.n = this.p.bitLength()
-    this.k = new BigNumber(1).iushln(this.n).isub(this.p)
+    this.k = new BigNumber(BigInt(1)).iushln(this.n).isub(this.p) // Use 1n for BigInt compatibility
 
     this.tmp = this._tmp()
   }
@@ -44,8 +44,9 @@ export default class Mersenne {
    * @returns A BigNumber with scaled size depending on prime magnitude.
    */
   private _tmp (): BigNumber {
-    const tmp = new BigNumber()
-    tmp.words = new Array(Math.ceil(this.n / 13))
+    const tmp = new BigNumber(BigInt(0)) // Initialize with BigInt 0
+    const requiredWords = Math.ceil(this.n / BigNumber.wordSize)
+    tmp.expand(Math.max(1, requiredWords)) // Expand sets _nominalWordLength
     return tmp
   }
 
@@ -63,32 +64,25 @@ export default class Mersenne {
   ireduce (num: BigNumber): BigNumber {
     // Assumes that `num` is less than `P^2`
     // num = HI * (2 ^ N - K) + HI * K + LO = HI * K + LO (mod P)
-    let r = num
+    const r = num // num is directly modified
     let rlen
 
     do {
-      this.split(r, this.tmp)
-      r = this.imulK(r)
-      r = r.iadd(this.tmp)
+      this.split(r, this.tmp) // r is modified (becomes HI), this.tmp becomes LO
+      this.imulK(r) // r becomes HI * K
+      r.iadd(this.tmp) // r becomes HI * K + LO
       rlen = r.bitLength()
     } while (rlen > this.n)
 
     const cmp = rlen < this.n ? -1 : r.ucmp(this.p)
     if (cmp === 0) {
-      r.words[0] = 0
-      r.length = 1
+      r.words = [0] // Set to zero using the words setter
     } else if (cmp > 0) {
       r.isub(this.p)
-    } else {
-      if (r.strip !== undefined) {
-        // r is a BN v4 instance
-        r.strip()
-      } else {
-        // r is a BN v5 instance
-        r.strip()
-      }
     }
-
+    // No explicit strip needed here if operations maintain correctness and setter handles it.
+    // However, ensuring it's stripped to minimal form after reduction is good.
+    r.strip()
     return r
   }
 
@@ -97,13 +91,15 @@ export default class Mersenne {
    * to meet the magnitude of the pseudo-Mersenne prime.
    *
    * @method split
-   * @param input - The BigNumber to be shifted.
-   * @param out - The BigNumber to hold the shifted result.
+   * @param input - The BigNumber to be shifted (will contain HI part).
+   * @param out - The BigNumber to hold the shifted result (LO part).
    *
    * @example
    * mersenne.split(new BigNumber('2345', 16), new BigNumber());
    */
   split (input: BigNumber, out: BigNumber): void {
+    // out gets the LO bits (shifted out part)
+    // input gets modified to be the HI bits (remaining part after shift)
     input.iushrn(this.n, 0, out)
   }
 

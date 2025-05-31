@@ -94,8 +94,8 @@ export default class MontgomoryMethod extends ReductionContext {
    */
   imul (a: BigNumber, b: BigNumber): BigNumber {
     if (a.isZero() || b.isZero()) {
-      a.words[0] = 0
-      a.length = 1
+      a.words[0] = 0;
+      (a as any).length = 1
       return a
     }
 

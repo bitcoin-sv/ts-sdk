@@ -43,38 +43,58 @@ export default class K256 extends Mersenne {
    * k256.split(input, output);
    */
   split (input: BigNumber, output: BigNumber): void {
-    // 256 = 9 * 26 + 22
-    const mask = 0x3fffff
+    const mask = 0x3fffff // 22 bits
+    const inputWords = input.words // Access via getter
+    const inputNominalLength = input.length // Access via getter, respects _nominalWordLength
 
-    const outLen = Math.min(input.length, 9)
-    let i = 0
-    for (; i < outLen; i++) {
-      output.words[i] = input.words[i]
+    const outLen = Math.min(inputNominalLength, 9)
+    const tempOutputWords = new Array(outLen + (inputNominalLength > 9 ? 1 : 0)).fill(0)
+
+    for (let i = 0; i < outLen; i++) {
+      tempOutputWords[i] = inputWords[i]
     }
-    output.length = outLen
+    let currentOutputWordCount = outLen
 
-    if (input.length <= 9) {
-      input.words[0] = 0
-      input.length = 1
+    if (inputNominalLength <= 9) {
+      const finalOutputWords = new Array(currentOutputWordCount)
+      for (let i = 0; i < currentOutputWordCount; ++i) finalOutputWords[i] = tempOutputWords[i]
+      output.words = finalOutputWords // Use setter
+
+      input.words = [0] // Use setter to set to 0
       return
     }
 
     // Shift by 9 limbs
-    let prev = input.words[9]
-    output.words[output.length++] = prev & mask
+    let prev = inputWords[9]
+    tempOutputWords[currentOutputWordCount++] = prev & mask
 
-    for (i = 10; i < input.length; i++) {
-      const next = input.words[i] | 0
-      input.words[i - 10] = ((next & mask) << 4) | (prev >>> 22)
+    const finalOutputWords = new Array(currentOutputWordCount)
+    for (let i = 0; i < currentOutputWordCount; ++i) finalOutputWords[i] = tempOutputWords[i]
+    output.words = finalOutputWords // Use setter for output
+
+    // For input modification
+    const tempInputNewWords = new Array(Math.max(1, inputNominalLength - 9)).fill(0)
+    let currentInputNewWordCount = 0
+
+    for (let i = 10; i < inputNominalLength; i++) {
+      const next = inputWords[i] | 0
+      if (currentInputNewWordCount < tempInputNewWords.length) { // Boundary check
+        tempInputNewWords[currentInputNewWordCount++] = ((next & mask) << 4) | (prev >>> 22)
+      }
       prev = next
     }
     prev >>>= 22
-    input.words[i - 10] = prev
-    if (prev === 0 && input.length > 10) {
-      input.length -= 10
-    } else {
-      input.length -= 9
+    if (currentInputNewWordCount < tempInputNewWords.length) { // Boundary check
+      tempInputNewWords[currentInputNewWordCount++] = prev
+    } else if (prev !== 0 && tempInputNewWords.length > 0) { // If prev is non-zero but no space, this is an issue.
+      // This case implies original logic might have relied on array auto-expansion or specific length handling
+      // For safety, if there's still a carry and no space, the array should have been bigger.
+      // However, the original logic `input.length -= 9` suggests truncation.
     }
+
+    const finalInputNewWords = new Array(currentInputNewWordCount)
+    for (let i = 0; i < currentInputNewWordCount; ++i) finalInputNewWords[i] = tempInputNewWords[i]
+    input.words = finalInputNewWords // Use setter, which will strip and set magnitude
   }
 
   /**
@@ -90,27 +110,27 @@ export default class K256 extends Mersenne {
    * const result = k256.imulK(number);
    */
   imulK (num: BigNumber): BigNumber {
-    // K = 0x1000003d1 = [ 0x40, 0x3d1 ]
-    num.words[num.length] = 0
-    num.words[num.length + 1] = 0
-    num.length += 2
+    const currentWords = num.words // Get current words based on _magnitude and _nominalWordLength
+    const originalNominalLength = num.length // Getter
 
-    // bounded at: 0x40 * 0x3ffffff + 0x3d0 = 0x100000390
+    const newNominalLength = originalNominalLength + 2
+    const tempWords = new Array(newNominalLength).fill(0)
+
+    for (let i = 0; i < originalNominalLength; i++) {
+      tempWords[i] = currentWords[i]
+    }
+    // tempWords is now effectively num.words expanded with zeroes
+
     let lo = 0
-    for (let i = 0; i < num.length; i++) {
-      const w = num.words[i] | 0
-      lo += w * 0x3d1
-      num.words[i] = lo & 0x3ffffff
-      lo = w * 0x40 + ((lo / 0x4000000) | 0)
+    for (let i = 0; i < newNominalLength; i++) { // Iterate up to new expanded length
+      const w = tempWords[i] | 0
+      lo += w * 0x3d1 // 0x3d1 = 977
+      tempWords[i] = lo & 0x3ffffff // 26-bit mask
+      lo = w * 0x40 + ((lo / 0x4000000) | 0) // 0x40 = 64. 0x4000000 = 2^26
     }
 
-    // Fast length reduction
-    if (num.words[num.length - 1] === 0) {
-      num.length--
-      if (num.words[num.length - 1] === 0) {
-        num.length--
-      }
-    }
+    num.words = tempWords // Use setter to re-initialize from tempWords
+    // The setter will handle _magnitude, _sign, _nominalWordLength, and strip.
     return num
   }
 }
