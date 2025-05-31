@@ -512,16 +512,17 @@ export const verify = (msg: BigNumber, sig: Signature, key: Point): boolean => {
       k: bigint,
       P: { x: bigint, y: bigint }
     ): JacobianPoint => {
-      const N: JacobianPoint = { X: P.x, Y: P.y, Z: one }
+      let N: JacobianPoint = { X: P.x, Y: P.y, Z: one }
       let Q: JacobianPoint = { X: zero, Y: one, Z: zero } // Point at infinity
 
-      const kBin = k.toString(2)
-      for (let i = 0; i < kBin.length; i++) {
-        Q = pointDouble(Q)
-        if (kBin[i] === '1') {
-          Q = pointAdd(Q, N)
+      while (k > zero) {
+        if ((k & one) === one) {
+          Q = Q.Z === zero ? N : pointAdd(Q, N)
         }
+        N = pointDouble(N)
+        k >>= one
       }
+
       return Q
     }
 
