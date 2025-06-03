@@ -3,23 +3,30 @@ import { VerifiableCertificate } from '../../../auth/certificates/VerifiableCert
 import { PrivateKey, SymmetricKey, Utils, Random } from '../../../../mod'
 import { CompletedProtoWallet } from '../../../auth/certificates/__tests/CompletedProtoWallet'
 
+const subjectPrivateKey = new PrivateKey(21)
+const certifierPrivateKey = new PrivateKey(22)
+
+const fieldSymFixed1 = new SymmetricKey(51)
+const fieldSymWrong = new SymmetricKey(61)
+
+const subjectKey2 = new PrivateKey(71)
+const verifierKey2 = new PrivateKey(81)
+
+// A mock revocation outpoint for testing
+const mockRevocationOutpoint =
+  'deadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000.1'
+
+// Arbitrary certificate data (in plaintext)
+const plaintextFields = {
+  name: 'Alice',
+  email: 'alice@example.com',
+  department: 'Engineering'
+}
+
+const subjectWallet = new CompletedProtoWallet(subjectPrivateKey)
+const certifierWallet = new CompletedProtoWallet(certifierPrivateKey)
+
 describe('MasterCertificate', () => {
-  const subjectPrivateKey = PrivateKey.fromRandom()
-  const certifierPrivateKey = PrivateKey.fromRandom()
-
-  // A mock revocation outpoint for testing
-  const mockRevocationOutpoint =
-    'deadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000.1'
-
-  // Arbitrary certificate data (in plaintext)
-  const plaintextFields = {
-    name: 'Alice',
-    email: 'alice@example.com',
-    department: 'Engineering'
-  }
-
-  const subjectWallet = new CompletedProtoWallet(subjectPrivateKey)
-  const certifierWallet = new CompletedProtoWallet(certifierPrivateKey)
   let subjectIdentityKey: string
   let certifierIdentityKey: string
 
@@ -35,7 +42,7 @@ describe('MasterCertificate', () => {
   describe('constructor', () => {
     it('should construct a MasterCertificate successfully when masterKeyring is valid', () => {
       // Prepare a minimal valid MasterCertificate
-      const fieldSymKey = SymmetricKey.fromRandom()
+      const fieldSymKey = fieldSymFixed1
       const encryptedFieldValue = Utils.toBase64(
         fieldSymKey.encrypt(Utils.toArray('Alice', 'utf8')) as number[]
       )
@@ -129,7 +136,7 @@ describe('MasterCertificate', () => {
         mockRevocationOutpoint,
         {
           name: Utils.toBase64(
-            SymmetricKey.fromRandom().encrypt(
+            fieldSymWrong.encrypt(
               Utils.toArray('Alice', 'utf8')
             ) as number[]
           )
@@ -149,7 +156,7 @@ describe('MasterCertificate', () => {
   })
 
   describe('createKeyringForVerifier (static)', () => {
-    const verifierPrivateKey = PrivateKey.fromRandom()
+    const verifierPrivateKey = verifierKey2
     const verifierWallet = new CompletedProtoWallet(verifierPrivateKey)
     let verifierIdentityKey: string
 
@@ -350,7 +357,7 @@ describe('MasterCertificate', () => {
     })
     it('should allow issuing a self-signed certificate and decrypt it with the same wallet', async () => {
       // In a self-signed scenario, the subject and certifier are the same
-      const subjectWallet = new CompletedProtoWallet(PrivateKey.fromRandom())
+      const subjectWallet = new CompletedProtoWallet(subjectKey2)
 
       // Some sample fields
       const selfSignedFields = {

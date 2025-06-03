@@ -26,6 +26,9 @@ const BRC62Hex =
 const MerkleRootFromBEEF =
   'bb6f640cc4ee56bf38eb5a1969ac0c16caa2d3d202b22bf3735d10eec0ca6e00'
 
+const testPrivateKey = new PrivateKey(11)
+const testP2PKHScript = new P2PKH().lock(testPrivateKey.toPublicKey().toHash())
+
 describe('Transaction', () => {
   const txhex =
     '000000000100000000000000000000000000000000000000000000000000000000000000000000000001ae0000000001050000000000000001ae00000000'
@@ -713,19 +716,18 @@ describe('Transaction', () => {
           value: 10000
         }
       ]
-      const priv = PrivateKey.fromRandom()
       const tx = new Transaction()
       utxos.forEach(utxo => {
         const u = {
           txid: utxo.tx_hash,
           vout: utxo.tx_pos,
-          script: new P2PKH().lock(priv.toPublicKey().toHash()).toHex(),
+          script: testP2PKHScript.toHex(),
           satoshis: utxo.value
         }
-        tx.addInput(fromUtxo(u, new P2PKH().unlock(priv)))
+        tx.addInput(fromUtxo(u, new P2PKH().unlock(testPrivateKey)))
       })
       tx.addOutput({
-        lockingScript: new P2PKH().lock(priv.toAddress()),
+        lockingScript: testP2PKHScript,
         change: true
       })
       await tx.fee({ computeFee: async () => 10 })
@@ -1138,26 +1140,24 @@ describe('Transaction', () => {
 
     describe('addP2PKHOutput', () => {
       it('should create an output on the current transaction using an address hash or string', async () => {
-        const privateKey = PrivateKey.fromRandom()
-        const pubKeyHash = privateKey.toPublicKey().toHash()
-        const lockingScript = new P2PKH().lock(privateKey.toAddress())
+        const pubKeyHash = testPrivateKey.toPublicKey().toHash()
         const tx = new Transaction()
         tx.addInput({
           sourceTXID: '00'.repeat(32),
           sourceOutputIndex: 0,
-          unlockingScriptTemplate: new P2PKH().unlock(privateKey)
+          unlockingScriptTemplate: new P2PKH().unlock(testPrivateKey)
         })
-        tx.addP2PKHOutput(privateKey.toAddress(), 10000)
+        tx.addP2PKHOutput(testPrivateKey.toAddress(), 10000)
         tx.addP2PKHOutput(pubKeyHash, 10000)
         expect(tx.outputs.length).toEqual(2)
         expect(tx.outputs[0].satoshis).toEqual(10000)
         expect(tx.outputs[1].satoshis).toEqual(10000)
         expect(
-          tx.outputs[0].lockingScript.toHex() === lockingScript.toHex()
+          tx.outputs[0].lockingScript.toHex() === testP2PKHScript.toHex()
         ).toBeTruthy()
         expect(
           tx.outputs[0].lockingScript.toHex() === tx.outputs[1].lockingScript.toHex()
-        ).toBeTruthy()        
+        ).toBeTruthy()
       })
     })
   })
@@ -1290,13 +1290,11 @@ describe('Transaction', () => {
 
   describe('addP2PKHOutput', () => {
     it('should create an output on the current transaction using an address hash or string', async () => {
-      const privateKey = PrivateKey.fromRandom()
-      const lockingScript = new P2PKH().lock(privateKey.toAddress())
       const tx = new Transaction()
       tx.addInput({
         sourceTXID: '00'.repeat(32),
         sourceOutputIndex: 0,
-        unlockingScriptTemplate: new P2PKH().unlock(privateKey),
+        unlockingScriptTemplate: new P2PKH().unlock(testPrivateKey),
       })
     })
   })
@@ -1311,7 +1309,7 @@ describe('Transaction', () => {
       })
       sourceTransaction.addOutput({
         satoshis: 2,
-        lockingScript: Script.fromASM('OP_2 OP_MUL ' + 'OP_DUP OP_MUL '.repeat(16) + 'OP_DROP'),
+        lockingScript: Script.fromASM('OP_2 OP_MUL ' + 'OP_DUP OP_MUL '.repeat(22) + 'OP_DROP'),
       })
       await sourceTransaction.sign()
 
@@ -1336,7 +1334,7 @@ describe('Transaction', () => {
       await tx.sign()
 
       // default should be 100KB
-      await expect(tx.verify('scripts only', new SatoshisPerKilobyte(1))).rejects.toThrow('Stack memory usage has exceeded 100000 bytes')
+      await expect(tx.verify('scripts only', new SatoshisPerKilobyte(1))).rejects.toThrow('Stack memory usage has exceeded 32000000 bytes')
     })
   })
 

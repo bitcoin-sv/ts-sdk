@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.6.0 - 2025-05-29](#160---2025-05-29)
+- [1.5.3 - 2025-05-29](#153---2025-05-29)
 - [1.5.1 - 2025-05-13](#151---2025-05-13)
 - [1.5.0 - 2025-05-09](#150---2025-05-09)
   - Hereon compatible with Metanet Mobile v0.0.1
@@ -127,6 +129,14 @@ All notable changes to this project will be documented in this file. The format 
 ### Security
 
 ---
+
+## [1.6.0] - 2025-05-29
+
+### Fixed
+
+- Align eval mem limits with current miner policy while stopping memory attacks at 100MB
+- Use BigInt in BigNumber for faster proformance
+- Optimize script interpreter memory usage
 
 ## [1.5.3] - 2025-05-29
 
