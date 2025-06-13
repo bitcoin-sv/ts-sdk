@@ -512,6 +512,10 @@ export class Writer {
   }
 
   writeVarIntNum (n: number): this {
+    if (n == -1) {
+      this.writeVarIntBn(MaxUint64) // Special case for -1
+      return this
+    }
     const buf = Writer.varIntNum(n)
     this.write(buf)
     return this
@@ -720,6 +724,8 @@ export class Reader {
         bn = this.readUInt64LEBn()
         if (bn.lte(new BigNumber(2).pow(new BigNumber(53)))) {
           return bn.toNumber()
+        } else if (bn.eq(MaxUint64)) {
+          return -1 // Special case for max value
         } else {
           throw new Error(
             'number too large to retain precision - use readVarIntBn'
@@ -801,3 +807,5 @@ export const minimallyEncode = (buf: number[]): number[] => {
   // If we found the whole thing is zeros, then we have a zero.
   return []
 }
+
+export const MaxUint64 = new BigNumber("18446744073709551615") // 2^64 - 1
