@@ -16,6 +16,7 @@ import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate.js'
 export interface TaggedBEEF {
   beef: number[]
   topics: string[]
+  offChainValues?: number[]
 }
 
 /**
@@ -86,7 +87,6 @@ export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilit
   }
 
   async send (url: string, taggedBEEF: TaggedBEEF): Promise<STEAK> {
-    console.log(url)
     if (!url.startsWith('https:') && !this.allowHTTP) {
       throw new Error(
         'HTTPS facilitator can only use URLs that start with "https:"'
@@ -164,7 +164,6 @@ export default class TopicBroadcaster implements Broadcaster {
       )
     }
     const interestedHosts = await this.findInterestedHosts()
-    console.log(interestedHosts)
     if (Object.keys(interestedHosts).length === 0) {
       return {
         status: 'error',
