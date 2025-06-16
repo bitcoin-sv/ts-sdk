@@ -27,11 +27,8 @@ export type LookupAnswer =
     outputs: Array<{
       beef: number[]
       outputIndex: number
+      context?: number[]
     }>
-  }
-  | {
-    type: 'freeform'
-    result: unknown
   }
 
 /** Default SLAP trackers */
