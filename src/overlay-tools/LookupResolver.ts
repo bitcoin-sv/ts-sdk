@@ -197,11 +197,6 @@ export default class LookupResolver {
     }
 
     // Process the successful responses
-    if (successfulResponses[0].type === 'freeform') {
-      // Return the first freeform response
-      return successfulResponses[0]
-    }
-
     // Aggregate outputs from all successful responses
     const outputs = new Map<string, { beef: number[], outputIndex: number }>()
 
