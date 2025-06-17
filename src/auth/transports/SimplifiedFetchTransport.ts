@@ -17,6 +17,12 @@ export class SimplifiedFetchTransport implements Transport {
   fetchClient: typeof fetch
   baseUrl: string
 
+
+  private readonly POOL_SIZE = 5
+  private hangingControllers: AbortController[] = []
+  private isPoolActive = false
+  private hasConnected = false
+  
   /**
    * Constructs a new instance of SimplifiedFetchTransport.
    * @param baseUrl - The base URL for all HTTP requests made by this transport.
@@ -53,6 +59,7 @@ export class SimplifiedFetchTransport implements Transport {
             body: JSON.stringify(message)
           })
 
+          // For initialRequest message, mark connection as established and start pool.
           if (message.messageType !== "initialRequest") {
             resolve()
           }
@@ -60,10 +67,9 @@ export class SimplifiedFetchTransport implements Transport {
           // Handle the response if data is received and callback is set
           if (response.ok && this.onDataCallback) {
             const responseMessage = await response.json()
-            if(responseMessage.status == 'certificate received' ) {
-              resolve()
-            }
             this.onDataCallback(responseMessage as AuthMessage)
+            this.hasConnected = true
+            this.startHangingPool(responseMessage.yourNonce)
           } else {
             // Server may be a non authenticated server
             throw new Error('HTTP server failed to authenticate')
@@ -218,6 +224,65 @@ export class SimplifiedFetchTransport implements Transport {
     }
   }
 
+ /**
+   * Starts and maintains the pool of hanging non-general .well-known/auth requests.
+   * The pool is only created after an initial connection has been established.
+   */
+  private startHangingPool(initialNonce): void {
+    if (!this.hasConnected) return;
+    if (this.isPoolActive) return;
+    this.isPoolActive = true;
+    // Ensure pool contains at least POOL_SIZE hanging channels
+    // for (let i = 0; i < this.POOL_SIZE; i++) {
+      this.addHangingChannel(initialNonce)
+    // }
+  }
+
+ /**
+   * Initiates a single hanging .well-known/auth request.
+   * On response (if any), the onData callback is executed and a new channel is created.
+   */
+    private async addHangingChannel(initialNonce): Promise<void> {
+    if (!this.isPoolActive) return;
+    const controller = new AbortController();
+    this.hangingControllers.push(controller);
+    try {
+       const response = await this.fetchClient(`${this.baseUrl}/.well-known/auth`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({messageType: 'hangingRequest', initialNonce: initialNonce}),
+          })
+      if (response.ok && this.onDataCallback) {
+        const responseMessage = await response.json();
+        console.log(responseMessage.json);
+        // Process out-of-band message (e.g. a certificate request)
+        this.onDataCallback(responseMessage as AuthMessage);
+      }
+    } catch (e: any) {
+     if (this.isPoolActive && e.name !== 'AbortError') {
+      console.error('Hanging channel error:', e);
+    }
+    } finally {
+      // Remove finished/aborted controller from pool
+      this.hangingControllers = this.hangingControllers.filter(c => c !== controller);
+      if (this.isPoolActive) {
+        // Schedule the new channel asynchronously to avoid call stack overflow
+        setTimeout(() => this.addHangingChannel(), 0);
+      }
+    }
+  }
+
+  /**
+ * Disposes the hanging channel pool.
+ * This should be called when the connection is complete.
+ */
+public close(): void {
+  this.isPoolActive = false;
+  this.hangingControllers.forEach(controller => controller.abort());
+  this.hangingControllers = [];
+}
   /**
    * Deserializes a request payload from a byte array into an HTTP request-like structure.
    * 

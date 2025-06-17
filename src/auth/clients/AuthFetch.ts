@@ -240,7 +240,11 @@ export class AuthFetch {
         reject(e)
       }
     }) as Function)
-
+    const baseURL = new URL(url).origin;
+  const peer = this.peers[baseURL];
+  if (peer && peer.peer && peer.peer.transport instanceof SimplifiedFetchTransport) {
+    peer.peer.transport.close();
+  }
     // Check if server requires payment to access the requested route
     if (response.status === 402) {
       // Create and attach a payment, then retry
