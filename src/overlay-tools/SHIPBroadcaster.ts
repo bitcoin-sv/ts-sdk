@@ -1,3 +1,4 @@
+import { Utils } from 'mod.js'
 import {
   Transaction,
   BroadcastResponse,
@@ -92,13 +93,25 @@ export class HTTPSOverlayBroadcastFacilitator implements OverlayBroadcastFacilit
         'HTTPS facilitator can only use URLs that start with "https:"'
       )
     }
+    const headers = {
+      'Content-Type': 'application/octet-stream',
+      'X-Topics': JSON.stringify(taggedBEEF.topics)
+    }
+    let body
+    if (Array.isArray(taggedBEEF.offChainValues)) {
+      headers['x-includes-off-chain-values'] = 'true'
+      const w = new Utils.Writer()
+      w.writeVarIntNum(taggedBEEF.beef.length)
+      w.write(taggedBEEF.beef)
+      w.write(taggedBEEF.offChainValues)
+      body = new Uint8Array(w.toArray())
+    } else {
+      body = new Uint8Array(taggedBEEF.beef)
+    }
     const response = await fetch(`${url}/submit`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/octet-stream',
-        'X-Topics': JSON.stringify(taggedBEEF.topics)
-      },
-      body: new Uint8Array(taggedBEEF.beef)
+      headers,
+      body
     })
     if (response.ok) {
       return await response.json()
@@ -154,8 +167,8 @@ export default class TopicBroadcaster implements Broadcaster {
   async broadcast (
     tx: Transaction
   ): Promise<BroadcastResponse | BroadcastFailure> {
-    console.log(tx)
     let beef: number[]
+    const offChainValues = tx.metadata.get('OffChainValues') as number[]
     try {
       beef = tx.toBEEF()
     } catch (error) {
@@ -176,6 +189,7 @@ export default class TopicBroadcaster implements Broadcaster {
         try {
           const steak = await this.facilitator.send(host, {
             beef,
+            offChainValues,
             topics: [...topics]
           })
           if (steak == null || Object.keys(steak).length === 0) {
