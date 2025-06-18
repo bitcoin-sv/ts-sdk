@@ -139,6 +139,15 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.6.2] - 2025-06-18
+
+### Change
+
+- Use `OffChainValues` with TopicBroadcaster from `tx.metadata`
+- Handle and return context explicitly in LookupResolver
+
+---
+
 ## [1.6.0] - 2025-05-29
 
 ### Fixed
