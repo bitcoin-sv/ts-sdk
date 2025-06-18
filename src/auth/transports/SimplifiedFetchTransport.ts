@@ -18,9 +18,8 @@ export class SimplifiedFetchTransport implements Transport {
   baseUrl: string
 
 
-  private readonly POOL_SIZE = 5
-  private hangingControllers: AbortController[] = []
-  private isPoolActive = false
+    private hangingController?: AbortController;
+  private isChannelActive = false
   private hasConnected = false
   
   /**
@@ -65,16 +64,20 @@ export class SimplifiedFetchTransport implements Transport {
           }
           const response = await responsePromise
           // Handle the response if data is received and callback is set
+          const responseMessage = await response.json()
           if (response.ok && this.onDataCallback) {
-            const responseMessage = await response.json()
+            if(responseMessage.status === "certificate received") {
+              resolve()
+              return
+            }
             this.onDataCallback(responseMessage as AuthMessage)
-            this.hasConnected = true
-            this.startHangingPool(responseMessage.yourNonce)
           } else {
             // Server may be a non authenticated server
             throw new Error('HTTP server failed to authenticate')
           }
           if (message.messageType === "initialRequest") {
+            this.hasConnected = true
+            this.startHangingChannel(responseMessage.yourNonce)
             resolve()
           }
         } catch (e) {
@@ -228,24 +231,20 @@ export class SimplifiedFetchTransport implements Transport {
    * Starts and maintains the pool of hanging non-general .well-known/auth requests.
    * The pool is only created after an initial connection has been established.
    */
-  private startHangingPool(initialNonce): void {
-    if (!this.hasConnected) return;
-    if (this.isPoolActive) return;
-    this.isPoolActive = true;
-    // Ensure pool contains at least POOL_SIZE hanging channels
-    // for (let i = 0; i < this.POOL_SIZE; i++) {
-      this.addHangingChannel(initialNonce)
-    // }
+   private startHangingChannel(initialNonce): void {
+    if (this.isChannelActive) return;
+    this.isChannelActive = true;
+    this.addHangingChannel(initialNonce)
   }
 
  /**
    * Initiates a single hanging .well-known/auth request.
    * On response (if any), the onData callback is executed and a new channel is created.
    */
-    private async addHangingChannel(initialNonce): Promise<void> {
-    if (!this.isPoolActive) return;
-    const controller = new AbortController();
-    this.hangingControllers.push(controller);
+     private async addHangingChannel(initialNonce): Promise<void> {
+    if (!this.isChannelActive) return;
+
+    this.hangingController = new AbortController();
     try {
        const response = await this.fetchClient(`${this.baseUrl}/.well-known/auth`, {
             method: 'POST',
@@ -253,24 +252,25 @@ export class SimplifiedFetchTransport implements Transport {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({messageType: 'hangingRequest', initialNonce: initialNonce}),
+            signal: this.hangingController.signal
           })
       if (response.ok && this.onDataCallback) {
         const responseMessage = await response.json();
-        console.log(responseMessage.json);
-        // Process out-of-band message (e.g. a certificate request)
-        this.onDataCallback(responseMessage as AuthMessage);
+        if (Object.keys(responseMessage).length > 0) {
+            this.onDataCallback(responseMessage);
+        }
       }
     } catch (e: any) {
-     if (this.isPoolActive && e.name !== 'AbortError') {
-      console.error('Hanging channel error:', e);
-    }
-    } finally {
-      // Remove finished/aborted controller from pool
-      this.hangingControllers = this.hangingControllers.filter(c => c !== controller);
-      if (this.isPoolActive) {
-        // Schedule the new channel asynchronously to avoid call stack overflow
-        setTimeout(() => this.addHangingChannel(), 0);
+      if (e.name !== 'AbortError') {
+        console.error('Hanging channel request failed:', e);
       }
+    // } finally {
+    //   this.hangingController = undefined;
+    //   // To keep the channel open for subsequent server-initiated messages,
+    //   // we recursively start a new request.
+    //   if (this.isChannelActive) {
+    //     setTimeout(() => this.addHangingChannel(initialNonce), 0);
+    //   }
     }
   }
 
@@ -279,9 +279,11 @@ export class SimplifiedFetchTransport implements Transport {
  * This should be called when the connection is complete.
  */
 public close(): void {
-  this.isPoolActive = false;
-  this.hangingControllers.forEach(controller => controller.abort());
-  this.hangingControllers = [];
+  this.isChannelActive = false;
+  if (this.hangingController) {
+    this.hangingController.abort();
+    this.hangingController = undefined;
+  }
 }
   /**
    * Deserializes a request payload from a byte array into an HTTP request-like structure.
