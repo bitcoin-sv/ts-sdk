@@ -1,10 +1,10 @@
-import { Utils } from 'mod.js'
 import {
   Transaction,
   BroadcastResponse,
   BroadcastFailure,
   Broadcaster
 } from '../transaction/index.js'
+import * as Utils from '../primitives/utils.js'
 import LookupResolver from './LookupResolver.js'
 import OverlayAdminTokenTemplate from './OverlayAdminTokenTemplate.js'
 
