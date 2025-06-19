@@ -60,8 +60,8 @@ export class SimplifiedFetchTransport implements Transport {
           }
           const response = await responsePromise
           // Handle the response if data is received and callback is set
-          const responseMessage = await response.json()
           if (response.ok && this.onDataCallback) {
+            const responseMessage = await response.json()
             this.onDataCallback(responseMessage as AuthMessage)
           } else {
             // Server may be a non authenticated server
