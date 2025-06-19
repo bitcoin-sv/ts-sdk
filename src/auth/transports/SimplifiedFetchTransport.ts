@@ -18,10 +18,6 @@ export class SimplifiedFetchTransport implements Transport {
   baseUrl: string
 
 
-    private hangingController?: AbortController;
-  private isChannelActive = false
-  private hasConnected = false
-  
   /**
    * Constructs a new instance of SimplifiedFetchTransport.
    * @param baseUrl - The base URL for all HTTP requests made by this transport.
@@ -66,18 +62,12 @@ export class SimplifiedFetchTransport implements Transport {
           // Handle the response if data is received and callback is set
           const responseMessage = await response.json()
           if (response.ok && this.onDataCallback) {
-            if(responseMessage.status === "certificate received") {
-              resolve()
-              return
-            }
             this.onDataCallback(responseMessage as AuthMessage)
           } else {
             // Server may be a non authenticated server
             throw new Error('HTTP server failed to authenticate')
           }
           if (message.messageType === "initialRequest") {
-            this.hasConnected = true
-            this.startHangingChannel(responseMessage.yourNonce)
             resolve()
           }
         } catch (e) {
@@ -227,64 +217,6 @@ export class SimplifiedFetchTransport implements Transport {
     }
   }
 
- /**
-   * Starts and maintains the pool of hanging non-general .well-known/auth requests.
-   * The pool is only created after an initial connection has been established.
-   */
-   private startHangingChannel(initialNonce): void {
-    if (this.isChannelActive) return;
-    this.isChannelActive = true;
-    this.addHangingChannel(initialNonce)
-  }
-
- /**
-   * Initiates a single hanging .well-known/auth request.
-   * On response (if any), the onData callback is executed and a new channel is created.
-   */
-     private async addHangingChannel(initialNonce): Promise<void> {
-    if (!this.isChannelActive) return;
-
-    this.hangingController = new AbortController();
-    try {
-       const response = await this.fetchClient(`${this.baseUrl}/.well-known/auth`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({messageType: 'hangingRequest', initialNonce: initialNonce}),
-            signal: this.hangingController.signal
-          })
-      if (response.ok && this.onDataCallback) {
-        const responseMessage = await response.json();
-        if (Object.keys(responseMessage).length > 0) {
-            this.onDataCallback(responseMessage);
-        }
-      }
-    } catch (e: any) {
-      if (e.name !== 'AbortError') {
-        console.error('Hanging channel request failed:', e);
-      }
-    // } finally {
-    //   this.hangingController = undefined;
-    //   // To keep the channel open for subsequent server-initiated messages,
-    //   // we recursively start a new request.
-    //   if (this.isChannelActive) {
-    //     setTimeout(() => this.addHangingChannel(initialNonce), 0);
-    //   }
-    }
-  }
-
-  /**
- * Disposes the hanging channel pool.
- * This should be called when the connection is complete.
- */
-public close(): void {
-  this.isChannelActive = false;
-  if (this.hangingController) {
-    this.hangingController.abort();
-    this.hangingController = undefined;
-  }
-}
   /**
    * Deserializes a request payload from a byte array into an HTTP request-like structure.
    * 
