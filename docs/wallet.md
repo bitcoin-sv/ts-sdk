@@ -2610,7 +2610,7 @@ The SDK is how applications communicate with wallets over a communications subst
 export default class WalletClient implements WalletInterface {
     public substrate: "auto" | WalletInterface;
     originator?: OriginatorDomainNameStringUnder250Bytes;
-    constructor(substrate: "auto" | "Cicada" | "XDM" | "window.CWI" | "json-api" | WalletInterface = "auto", originator?: OriginatorDomainNameStringUnder250Bytes) 
+    constructor(substrate: "auto" | "Cicada" | "XDM" | "window.CWI" | "json-api" | "react-native" | WalletInterface = "auto", originator?: OriginatorDomainNameStringUnder250Bytes) 
     async connectToSubstrate(): Promise<void> 
     async createAction(args: CreateActionArgs): Promise<CreateActionResult> 
     async signAction(args: SignActionArgs): Promise<SignActionResult> 

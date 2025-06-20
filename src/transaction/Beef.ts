@@ -391,7 +391,24 @@ export class Beef {
     return true
   }
 
-  private verifyValid (allowTxidOnly?: boolean): {
+  /**
+   * Sorts `txs` and confirms validity of transaction data contained in beef
+   * by validating structure of this beef.
+   *
+   * Returns block heights and merkle root values to be confirmed by a chaintracker.
+   *
+   * Validity requirements:
+   * 1. No 'known' txids, unless `allowTxidOnly` is true.
+   * 2. All transactions have bumps or their inputs chain back to bumps (or are known).
+   * 3. Order of transactions satisfies dependencies before dependents.
+   * 4. No transactions with duplicate txids.
+   *
+   * @param allowTxidOnly optional. If true, transaction txid is assumed valid
+   * @returns {{valid: boolean, roots: Record<number, string>}}
+   * `valid` is true iff this Beef is structuraly valid.
+   * `roots` is a record where keys are block heights and values are the corresponding merkle roots to be validated.
+   */
+  verifyValid (allowTxidOnly?: boolean): {
     valid: boolean
     roots: Record<number, string>
   } {
