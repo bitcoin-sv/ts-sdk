@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
-- [1.6.1 - 2025-06-20](#161---2025-06-20)
+- [1.6.3 - 2025-06-20](#163---2025-06-20)
+- [1.6.2 - 2025-06-18](#162---2025-06-18)
+- [1.6.1 - 2025-06-16](#161---2025-06-16)
 - [1.6.0 - 2025-05-29](#160---2025-05-29)
 - [1.5.3 - 2025-05-29](#153---2025-05-29)
 - [1.5.1 - 2025-05-13](#151---2025-05-13)
@@ -131,11 +133,30 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-## [1.6.1] - 2025-06-20
+## [1.6.3] - 2025-06-20
 
 ### Fixed
 
 - Don't use "negative bytes" when writing -1 to byte array
+
+---
+
+## [1.6.2] - 2025-06-18
+
+### Change
+
+- Use `OffChainValues` with TopicBroadcaster from `tx.metadata`
+- Handle and return context explicitly in LookupResolver
+
+---
+
+## [1.6.1] - 2025-06-16
+
+### Change
+
+- New types for Private Overlay support
+
+---
 
 ## [1.6.0] - 2025-05-29
 
