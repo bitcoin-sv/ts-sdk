@@ -512,7 +512,7 @@ export class Writer {
   }
 
   writeVarIntNum (n: number): this {
-    if (n == -1) {
+    if (n === -1) {
       this.writeVarIntBn(MaxUint64) // Special case for -1
       return this
     }
@@ -808,4 +808,4 @@ export const minimallyEncode = (buf: number[]): number[] => {
   return []
 }
 
-export const MaxUint64 = new BigNumber("18446744073709551615") // 2^64 - 1
+export const MaxUint64 = new BigNumber('18446744073709551615') // 2^64 - 1
