@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.6.1 - 2025-06-20](#161---2025-06-20)
 - [1.6.0 - 2025-05-29](#160---2025-05-29)
 - [1.5.3 - 2025-05-29](#153---2025-05-29)
 - [1.5.1 - 2025-05-13](#151---2025-05-13)
@@ -130,12 +131,18 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.6.1] - 2025-06-20
+
+### Fixed
+
+- Don't use "negative bytes" when writing -1 to byte array
+
 ## [1.6.0] - 2025-05-29
 
 ### Fixed
 
 - Align eval mem limits with current miner policy while stopping memory attacks at 100MB
-- Use BigInt in BigNumber for faster proformance
+- Use BigInt in BigNumber for faster performance
 - Optimize script interpreter memory usage
 
 ## [1.5.3] - 2025-05-29
