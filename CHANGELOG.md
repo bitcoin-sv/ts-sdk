@@ -199,7 +199,7 @@ To LocalKVStore:
 ### Fixed
 
 - Align eval mem limits with current miner policy while stopping memory attacks at 100MB
-- Use BigInt in BigNumber for faster proformance
+- Use BigInt in BigNumber for faster performance
 - Optimize script interpreter memory usage
 
 ## [1.5.3] - 2025-05-29
