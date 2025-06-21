@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.6.5 - 2025-06-21](#165---2025-06-21)
 - [1.6.4 - 2025-06-20](#164---2025-06-20)
 - [1.6.3 - 2025-06-20](#163---2025-06-20)
 - [1.6.2 - 2025-06-18](#162---2025-06-18)
@@ -131,6 +132,13 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.6.5] - 2025-06-21
+
+### Added
+- ChainTracker which relies on an instance of [Block Headers Service](https://github.com/bitcoin-sv/block-headers-service).
 
 ---
 
