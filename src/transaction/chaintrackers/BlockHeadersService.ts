@@ -30,6 +30,13 @@ interface MerkleRootVerificationResponse {
 
 /**
  * Represents a chain tracker based on a BlockHeadersService API.
+ * 
+ * @example
+ * ```typescript
+ * const chainTracker = new BlockHeadersService('https://headers.spv.money', {
+ *   apiKey: '17JxRHcJerGBEbusx56W8o1m8Js73TFGo'
+ * })
+ * ```
  */
 export class BlockHeadersService implements ChainTracker {
   protected readonly baseUrl: string
