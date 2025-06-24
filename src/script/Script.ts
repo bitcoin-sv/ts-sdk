@@ -117,11 +117,12 @@ export default class Script {
    * @method fromBinary
    * Static method to construct a Script instance from a binary array.
    * @param bin - The script in binary array format.
+   * @param legacyData - If true, arbitrary data following an OP_RETURN is parsed as a single data chunk.
    * @returns A new Script instance.
    * @example
    * const script = Script.fromBinary([0x76, 0xa9, ...])
    */
-  static fromBinary (bin: number[]): Script {
+  static fromBinary (bin: number[], legacyData?: boolean): Script {
     bin = [...bin]
     const chunks: ScriptChunk[] = []
 
@@ -133,7 +134,7 @@ export default class Script {
 
       // if OP_RETURN and not in a conditional block, do not parse the rest of the data,
       // rather just return the last chunk as data without prefixing with data length.
-      if (op === OP.OP_RETURN && inConditionalBlock === 0) {
+      if (legacyData === true && op === OP.OP_RETURN && inConditionalBlock === 0) {
         chunks.push({
           op,
           data: br.read()
@@ -391,11 +392,13 @@ export default class Script {
    */
   findAndDelete (script: Script): Script {
     const buf = script.toHex()
-    for (let i = 0; i < this.chunks.length; i++) {
+    for (let i = 0; i < this.chunks.length;) {
       const script2 = new Script([this.chunks[i]])
       const buf2 = script2.toHex()
       if (buf === buf2) {
         this.chunks.splice(i, 1)
+      } else {
+        i++
       }
     }
     return this
