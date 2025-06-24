@@ -8,11 +8,11 @@ import TransactionOutput from '../transaction/TransactionOutput.js'
 import { isatty } from 'tty'
 
 export default class TransactionSignature extends Signature {
-  public static readonly SIGHASH_ALL = 0x00000001
-  public static readonly SIGHASH_NONE = 0x00000002
-  public static readonly SIGHASH_SINGLE = 0x00000003
-  public static readonly SIGHASH_CHRONICLE = 0x00000020
-  public static readonly SIGHASH_FORKID = 0x00000040
+  public static readonly SIGHASH_ALL =          0x00000001
+  public static readonly SIGHASH_NONE =         0x00000002
+  public static readonly SIGHASH_SINGLE =       0x00000003
+  public static readonly SIGHASH_CHRONICLE =    0x00000020
+  public static readonly SIGHASH_FORKID =       0x00000040
   public static readonly SIGHASH_ANYONECANPAY = 0x00000080
 
   scope: number
@@ -36,9 +36,10 @@ export default class TransactionSignature extends Signature {
     scope: number
   }): number[] {
 
-    const isAnyoneCanPay = (params.scope & TransactionSignature.SIGHASH_ANYONECANPAY) !== 0
-    const isSingle = (params.scope & TransactionSignature.SIGHASH_SINGLE) !== 0
-    const isNone = (params.scope & TransactionSignature.SIGHASH_NONE) !== 0
+    const isAnyoneCanPay = (params.scope & TransactionSignature.SIGHASH_ANYONECANPAY) !== TransactionSignature.SIGHASH_ANYONECANPAY
+    const isSingle = (params.scope & 3) === TransactionSignature.SIGHASH_SINGLE
+    const isNone = (params.scope & 3) === TransactionSignature.SIGHASH_NONE
+    const isAll = (params.scope & 3) === TransactionSignature.SIGHASH_ALL
 
 
     const currentInput = {
@@ -88,7 +89,7 @@ export default class TransactionSignature extends Signature {
       writeInputs([currentInput])
     }
 
-    if (!isSingle && !isNone) {
+    if (isAll) {
       const outputs = params.outputs.map(output => ({
         satoshis: output.satoshis ?? 0, // Default to 0 if undefined
         script: output.lockingScript.toBinary()
@@ -97,8 +98,9 @@ export default class TransactionSignature extends Signature {
     } else if (isSingle) {
       const outputs: { satoshis: number, script: number[] }[] = []
       for (let i = 0; i < params.inputIndex; i++) outputs.push({ satoshis: 0, script: emptyScript })
-      const o = params.outputs[params.inputIndex]!
-      outputs.push({ satoshis: o.satoshis ?? 0, script: o.lockingScript.toBinary() })
+      const o = params.outputs[params.inputIndex]
+      if (o !== undefined)
+        outputs.push({ satoshis: o.satoshis ?? 0, script: o.lockingScript.toBinary() })
       writeOutputs(outputs)
     } else if (isNone) {
       writeOutputs([])
