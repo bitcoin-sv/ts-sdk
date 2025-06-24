@@ -1,21 +1,122 @@
 import Signature from './Signature.js'
 import BigNumber from './BigNumber.js'
 import * as Hash from './Hash.js'
-import { toArray, Writer } from './utils.js'
+import { toArray, toHex, Writer } from './utils.js'
 import Script from '../script/Script.js'
 import TransactionInput from '../transaction/TransactionInput.js'
 import TransactionOutput from '../transaction/TransactionOutput.js'
+import { isatty } from 'tty'
 
 export default class TransactionSignature extends Signature {
   public static readonly SIGHASH_ALL = 0x00000001
   public static readonly SIGHASH_NONE = 0x00000002
   public static readonly SIGHASH_SINGLE = 0x00000003
+  public static readonly SIGHASH_CHRONICLE = 0x00000020
   public static readonly SIGHASH_FORKID = 0x00000040
   public static readonly SIGHASH_ANYONECANPAY = 0x00000080
 
   scope: number
 
-  static format (params: {
+  /**
+   * Implements the original bitcoin transaction signature digest preimage algorithm (OTDA).
+   * @param params 
+   * @returns preimage as a byte array
+   */
+  static formatOTDA (params: {
+    sourceTXID: string
+    sourceOutputIndex: number
+    sourceSatoshis: number
+    transactionVersion: number
+    otherInputs: TransactionInput[]
+    outputs: TransactionOutput[]
+    inputIndex: number
+    subscript: Script
+    inputSequence: number
+    lockTime: number
+    scope: number
+  }): number[] {
+
+    const isAnyoneCanPay = (params.scope & TransactionSignature.SIGHASH_ANYONECANPAY) !== 0
+    const isSingle = (params.scope & TransactionSignature.SIGHASH_SINGLE) !== 0
+    const isNone = (params.scope & TransactionSignature.SIGHASH_NONE) !== 0
+
+
+    const currentInput = {
+      sourceTXID: params.sourceTXID!,
+      sourceOutputIndex: params.sourceOutputIndex,
+      sequence: params.inputSequence,
+      script: params.subscript.toBinary()
+    }
+
+    const writer = new Writer()
+
+    function writeInputs(inputs: { sourceTXID: string, sourceOutputIndex: number, sequence: number, script: number[] }[]) : void {
+      writer.writeVarIntNum(inputs.length)
+      for (const input of inputs) {
+        writer.writeReverse(toArray(input.sourceTXID, 'hex'))
+        writer.writeUInt32LE(input.sourceOutputIndex)
+        writer.writeVarIntNum(input.script.length)
+        writer.write(input.script)
+        writer.writeUInt32LE(input.sequence)
+      }
+    }
+
+    function writeOutputs(outputs: { satoshis: number, script: number[] }[]) : void {
+      writer.writeVarIntNum(outputs.length)
+      for (const output of outputs) {
+        writer.writeUInt64LE(output.satoshis)
+        writer.writeVarIntNum(output.script.length)
+        writer.write(output.script)
+      }
+    }
+
+    // Version
+    writer.writeInt32LE(params.transactionVersion)
+
+    const emptyScript = new Script().toBinary()
+
+    if (!isAnyoneCanPay) {
+      const inputs = params.otherInputs.map(input => ({
+        sourceTXID: input.sourceTXID!,
+        sourceOutputIndex: input.sourceOutputIndex,
+        sequence: (isSingle || isNone) ? 0 : (input.sequence ?? 0xffffffff), // Default to max sequence number
+        script: emptyScript
+      }))
+      inputs.splice(params.inputIndex, 0, currentInput)
+      writeInputs(inputs)
+    } else if (isAnyoneCanPay) {
+      writeInputs([currentInput])
+    }
+
+    if (!isSingle && !isNone) {
+      const outputs = params.outputs.map(output => ({
+        satoshis: output.satoshis ?? 0, // Default to 0 if undefined
+        script: output.lockingScript.toBinary()
+      }))
+      writeOutputs(outputs)
+    } else if (isSingle) {
+      const outputs: { satoshis: number, script: number[] }[] = []
+      for (let i = 0; i < params.inputIndex; i++) outputs.push({ satoshis: 0, script: emptyScript })
+      const o = params.outputs[params.inputIndex]!
+      outputs.push({ satoshis: o.satoshis ?? 0, script: o.lockingScript.toBinary() })
+      writeOutputs(outputs)
+    } else if (isNone) {
+      writeOutputs([])
+    }
+
+    // Locktime
+    writer.writeUInt32LE(params.lockTime)
+
+    // sighashType
+    writer.writeUInt32LE(params.scope >>> 0)
+
+    const buf = writer.toArray()
+    const preimage = toHex(buf)
+    const sighash = toHex(Hash.hash256(buf))
+    return buf
+  }
+
+  static formatBip143 (params: {
     sourceTXID: string
     sourceOutputIndex: number
     sourceSatoshis: number
@@ -164,7 +265,37 @@ export default class TransactionSignature extends Signature {
     writer.writeUInt32LE(params.scope >>> 0)
 
     const buf = writer.toArray()
+    const preimage = toHex(buf)
+    const sighash = toHex(Hash.hash256(buf))
     return buf
+  }
+
+  static format(params: {
+    sourceTXID: string
+    sourceOutputIndex: number
+    sourceSatoshis: number
+    transactionVersion: number
+    otherInputs: TransactionInput[]
+    outputs: TransactionOutput[]
+    inputIndex: number
+    subscript: Script
+    inputSequence: number
+    lockTime: number
+    scope: number
+  }): number[] {
+
+    const hasForkId = (params.scope & TransactionSignature.SIGHASH_FORKID) !== 0
+    const hasChronicle = (params.scope & TransactionSignature.SIGHASH_CHRONICLE) !== 0
+
+    if (hasForkId) {
+      return TransactionSignature.formatBip143(params)
+    }
+    
+    if (!hasForkId || hasChronicle) {
+      return TransactionSignature.formatOTDA(params)
+    }
+
+    return []
   }
 
   // The format used in a tx
