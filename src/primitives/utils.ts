@@ -403,6 +403,10 @@ export class Writer {
     return ret
   }
 
+  toHex(): string {
+    return this.toArray().map((n) => n.toString(16).padStart(2, '0')).join('')
+  }
+
   write (buf: number[]): this {
     this.bufs.push(buf)
     this.length += buf.length
