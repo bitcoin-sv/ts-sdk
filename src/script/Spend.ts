@@ -119,7 +119,7 @@ function isChunkMinimalPushHelper (chunk: ScriptChunk): boolean {
  * @property {number} inputSequence - The sequence number of this input.
  * @property {number} lockTime - The lock time of the transaction.
  * @property {number} memoryLimit - Control over script interpreter memory usage.
- * @property {boolean} enableRelaxed - Optional. If true, disables all the maleability restrictions consitent with Chronicle release.
+ * @property {boolean} isRelaxed - Optional. If true, disables all the maleability restrictions consitent with Chronicle release.
  */
 export default class Spend {
   sourceTXID: string
@@ -144,7 +144,7 @@ export default class Spend {
   stackMem: number
   altStackMem: number
 
-  enableRelaxed?: boolean
+  isRelaxed?: boolean
 
   /**
    * @constructor
@@ -163,7 +163,7 @@ export default class Spend {
    * @param {number} params.inputSequence - The sequence number of this input.
    * @param {number} params.lockTime - The lock time of the transaction.
    * @param {number} params.memoryLimit - Optional control over script interpreter memory usage.
-   * @param {boolean} params.enableRelaxed - Optional. If true, disables all the maleability restrictions consitent with Chronicle release.
+   * @param {boolean} params.isRelaxed - Optional. If true, disables all the maleability restrictions consitent with Chronicle release.
    *
    * @example
    * const spend = new Spend({
@@ -193,7 +193,7 @@ export default class Spend {
     inputIndex: number
     lockTime: number
     memoryLimit?: number
-    enableRelaxed?: boolean
+    isRelaxed?: boolean
   }) {
     this.sourceTXID = params.sourceTXID
     this.sourceOutputIndex = params.sourceOutputIndex
@@ -207,7 +207,7 @@ export default class Spend {
     this.inputSequence = params.inputSequence
     this.lockTime = params.lockTime
     this.memoryLimit = params.memoryLimit ?? 32000000
-    this.enableRelaxed = params.enableRelaxed
+    this.isRelaxed = params.isRelaxed
     this.stack = []
     this.altStack = []
     this.ifStack = []
@@ -298,7 +298,7 @@ export default class Spend {
     }
     try {
       const sig = TransactionSignature.fromChecksigFormat(buf as number[]) // This can throw for stricter DER rules
-      if (!this.enableRelaxed && requireLowSSignatures && !sig.hasLowS()) {
+      if (!this.isRelaxed && requireLowSSignatures && !sig.hasLowS()) {
         this.scriptEvaluationError('The signature must have a low S value.')
         return false
       }
@@ -399,7 +399,7 @@ export default class Spend {
     const isScriptExecuting = !this.ifStack.includes(false)
 
     if (isScriptExecuting && currentOpcode >= 0 && currentOpcode <= OP.OP_PUSHDATA4) {
-      if (requireMinimalPush && !isChunkMinimalPushHelper(operation)) {
+      if (!this.isRelaxed && requireMinimalPush && !isChunkMinimalPushHelper(operation)) {
         this.scriptEvaluationError(`This data is not minimally-encoded. (PC: ${this.programCounter})`) // Error thrown
       }
       this.pushStack(Array.isArray(operation.data) ? operation.data : [])
@@ -419,8 +419,8 @@ export default class Spend {
           break
         case OP.OP_SUBSTR: {
           if (this.stack.length < 3) this.scriptEvaluationError('OP_SUBSTR requires at least three items to be on the stack.')
-          const len = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush).toNumber()
-          const offset = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush).toNumber()
+          const len = BigNumber.fromScriptNum(this.popStack(), !this.isRelaxed && requireMinimalPush).toNumber()
+          const offset = BigNumber.fromScriptNum(this.popStack(), !this.isRelaxed && requireMinimalPush).toNumber()
           buf = this.popStack()
           const size = buf.length
 
@@ -433,7 +433,7 @@ export default class Spend {
         }
         case OP.OP_LEFT: {
           if (this.stack.length < 2) this.scriptEvaluationError('OP_LEFT requires at least two items to be on the stack.')
-          const len = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush).toNumber()
+          const len = BigNumber.fromScriptNum(this.popStack(), !this.isRelaxed && requireMinimalPush).toNumber()
           buf = this.popStack()
           const size = buf.length
 
@@ -446,7 +446,7 @@ export default class Spend {
         }
         case OP.OP_RIGHT: {
           if (this.stack.length < 2) this.scriptEvaluationError('OP_RIGHT requires at least two items to be on the stack.')
-          const len = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush).toNumber()
+          const len = BigNumber.fromScriptNum(this.popStack(), !this.isRelaxed && requireMinimalPush).toNumber()
           buf = this.popStack()
           const size = buf.length
 
@@ -621,7 +621,7 @@ export default class Spend {
         case OP.OP_PICK:
         case OP.OP_ROLL: {
           if (this.stack.length < 2) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least two items to be on the stack.`)
-          bn = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush)
+          bn = BigNumber.fromScriptNum(this.popStack(), !this.isRelaxed && requireMinimalPush)
           n = bn.toNumber()
           if (n < 0 || n >= this.stack.length) {
             this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the top stack element to be 0 or a positive number less than the current size of the stack.`)
@@ -693,7 +693,7 @@ export default class Spend {
         case OP.OP_LSHIFT:
         case OP.OP_RSHIFT: {
           if (this.stack.length < 2) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least two items to be on the stack.`)
-          bn2 = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush) // n (shift amount)
+          bn2 = BigNumber.fromScriptNum(this.popStack(), !this.isRelaxed && requireMinimalPush) // n (shift amount)
           buf1 = this.popStack() // value to shift
           n = bn2.toNumber()
           if (n < 0) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the top item on the stack not to be negative.`)
@@ -727,7 +727,7 @@ export default class Spend {
         case OP.OP_NEGATE: case OP.OP_ABS:
         case OP.OP_NOT: case OP.OP_0NOTEQUAL:
           if (this.stack.length < 1) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least one item to be on the stack.`)
-          bn = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush)
+          bn = BigNumber.fromScriptNum(this.popStack(), !this.isRelaxed && requireMinimalPush)
           switch (currentOpcode) {
             case OP.OP_1ADD: bn = bn.add(new BigNumber(1)); break
             case OP.OP_1SUB: bn = bn.sub(new BigNumber(1)); break
@@ -749,8 +749,8 @@ export default class Spend {
           if (this.stack.length < 2) this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least two items to be on the stack.`)
           buf2 = this.popStack()
           buf1 = this.popStack()
-          bn2 = BigNumber.fromScriptNum(buf2, requireMinimalPush)
-          bn1 = BigNumber.fromScriptNum(buf1, requireMinimalPush)
+          bn2 = BigNumber.fromScriptNum(buf2, !this.isRelaxed && requireMinimalPush)
+          bn1 = BigNumber.fromScriptNum(buf1, !this.isRelaxed && requireMinimalPush)
           let predictedLen = 0
           switch (currentOpcode) {
             case OP.OP_MUL:
@@ -796,9 +796,9 @@ export default class Spend {
         }
         case OP.OP_WITHIN:
           if (this.stack.length < 3) this.scriptEvaluationError('OP_WITHIN requires at least three items to be on the stack.')
-          bn3 = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush) // max
-          bn2 = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush) // min
-          bn1 = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush) // x
+          bn3 = BigNumber.fromScriptNum(this.popStack(), !this.isRelaxed && requireMinimalPush) // max
+          bn2 = BigNumber.fromScriptNum(this.popStack(), !this.isRelaxed && requireMinimalPush) // min
+          bn1 = BigNumber.fromScriptNum(this.popStack(), !this.isRelaxed && requireMinimalPush) // x
           fValue = bn1.cmp(bn2) >= 0 && bn1.cmp(bn3) < 0
           this.pushStack(fValue ? [1] : [])
           break
@@ -861,7 +861,7 @@ export default class Spend {
             this.scriptEvaluationError(`${OP[currentOpcode] as string} requires at least 1 item for nKeys.`)
           }
 
-          nKeysCount = BigNumber.fromScriptNum(this.stackTop(-i), requireMinimalPush).toNumber()
+          nKeysCount = BigNumber.fromScriptNum(this.stackTop(-i), !this.isRelaxed && requireMinimalPush).toNumber()
           if (nKeysCount < 0 || nKeysCount > maxMultisigKeyCount) {
             this.scriptEvaluationError(`${OP[currentOpcode] as string} requires a key count between 0 and ${maxMultisigKeyCount}.`)
           }
@@ -872,7 +872,7 @@ export default class Spend {
             this.scriptEvaluationError(`${OP[currentOpcode] as string} stack too small for nKeys and keys. Need ${i}, have ${this.stack.length}.`)
           }
 
-          nSigsCount = BigNumber.fromScriptNum(this.stackTop(-i), requireMinimalPush).toNumber()
+          nSigsCount = BigNumber.fromScriptNum(this.stackTop(-i), !this.isRelaxed && requireMinimalPush).toNumber()
           if (nSigsCount < 0 || nSigsCount > nKeysCount) {
             this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the number of signatures to be no greater than the number of keys.`)
           }
@@ -943,7 +943,7 @@ export default class Spend {
             this.scriptEvaluationError(`${OP[currentOpcode] as string} requires an extra item (dummy) to be on the stack.`)
           }
           const dummyBuf = this.popStack()
-          if (dummyBuf.length > 0) { // SCRIPT_VERIFY_NULLDUMMY
+          if (!this.isRelaxed && dummyBuf.length > 0) { // SCRIPT_VERIFY_NULLDUMMY
             this.scriptEvaluationError(`${OP[currentOpcode] as string} requires the extra stack item (dummy) to be empty.`)
           }
 
@@ -969,7 +969,7 @@ export default class Spend {
           const posBuf = this.popStack()
           const dataToSplit = this.popStack()
 
-          n = BigNumber.fromScriptNum(posBuf, requireMinimalPush).toNumber()
+          n = BigNumber.fromScriptNum(posBuf, !this.isRelaxed && requireMinimalPush).toNumber()
           if (n < 0 || n > dataToSplit.length) {
             this.scriptEvaluationError('OP_SPLIT requires the first stack item to be a non-negative number less than or equal to the size of the second-from-top stack item.')
           }
@@ -981,7 +981,7 @@ export default class Spend {
         case OP.OP_NUM2BIN: {
           if (this.stack.length < 2) this.scriptEvaluationError('OP_NUM2BIN requires at least two items to be on the stack.')
 
-          size = BigNumber.fromScriptNum(this.popStack(), requireMinimalPush).toNumber()
+          size = BigNumber.fromScriptNum(this.popStack(), !this.isRelaxed && requireMinimalPush).toNumber()
           if (size > maxScriptElementSize || size < 0) { // size can be 0
             this.scriptEvaluationError(`It's not currently possible to push data larger than ${maxScriptElementSize} bytes or negative size.`)
           }
@@ -1050,7 +1050,7 @@ export default class Spend {
    * }
    */
   validate (): boolean {
-    if (requirePushOnlyUnlockingScripts && !this.unlockingScript.isPushOnly()) {
+    if (!this.isRelaxed && requirePushOnlyUnlockingScripts && !this.unlockingScript.isPushOnly()) {
       this.scriptEvaluationError(
         'Unlocking scripts can only contain push operations, and no other opcodes.'
       )
@@ -1071,7 +1071,7 @@ export default class Spend {
       )
     }
 
-    if (requireCleanStack) {
+    if (!this.isRelaxed && requireCleanStack) {
       if (this.stack.length !== 1) {
         this.scriptEvaluationError(
           `The clean stack rule requires exactly one item to be on the stack after script execution, found ${this.stack.length}.`
