@@ -96,11 +96,12 @@ export default class Script {
    * @method fromHex
    * Static method to construct a Script instance from a hexadecimal string.
    * @param hex - The script in hexadecimal format.
+   * @param legacyData - If true, arbitrary data following an OP_RETURN is parsed as a single data chunk.
    * @returns A new Script instance.
    * @example
    * const script = Script.fromHex("76a9...");
    */
-  static fromHex (hex: string): Script {
+  static fromHex (hex: string, legacyData?: boolean): Script {
     if (hex.length === 0) return Script.fromBinary([])
     if (hex.length % 2 !== 0) {
       throw new Error(
@@ -110,7 +111,7 @@ export default class Script {
     if (!/^[0-9a-fA-F]+$/.test(hex)) {
       throw new Error('Some elements in this string are not hex encoded.')
     }
-    return Script.fromBinary(toArray(hex, 'hex'))
+    return Script.fromBinary(toArray(hex, 'hex'), legacyData)
   }
 
   /**
