@@ -13,11 +13,10 @@ export interface DownloadResult {
   mimeType: string | null
 }
 
-
 export class StorageDownloader {
   private readonly networkPreset?: 'mainnet' | 'testnet' | 'local' = 'mainnet'
 
-  constructor(config?: DownloaderConfig) {
+  constructor (config?: DownloaderConfig) {
     this.networkPreset = config?.networkPreset
   }
 
@@ -26,7 +25,7 @@ export class StorageDownloader {
    * @param uhrpUrl The UHRP URL to resolve.
    * @returns A promise that resolves to an array of HTTP URLs.
    */
-  public async resolve(uhrpUrl: string): Promise<string[]> {
+  public async resolve (uhrpUrl: string): Promise<string[]> {
     // Use UHRP lookup service
     const lookupResolver = new LookupResolver({ networkPreset: this.networkPreset })
     const response = await lookupResolver.query({ service: 'ls_uhrp', query: { uhrpUrl } })
@@ -54,7 +53,7 @@ export class StorageDownloader {
    * @param uhrpUrl The UHRP URL to download.
    * @returns A promise that resolves to the downloaded content.
    */
-  public async download(uhrpUrl: string): Promise<DownloadResult> {
+  public async download (uhrpUrl: string): Promise<DownloadResult> {
     if (!StorageUtils.isValidURL(uhrpUrl)) {
       throw new Error('Invalid parameter UHRP url')
     }
