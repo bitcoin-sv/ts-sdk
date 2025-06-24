@@ -284,9 +284,13 @@ export default class TransactionSignature extends Signature {
     inputSequence: number
     lockTime: number
     scope: number
+    /**
+     * Supports running bitcoin-abc test vectors which reuses the CHRONICLE bit.
+     */
+    ignoreChronicle?: boolean
   }): number[] {
     const hasForkId = (params.scope & TransactionSignature.SIGHASH_FORKID) !== 0
-    const hasChronicle = (params.scope & TransactionSignature.SIGHASH_CHRONICLE) !== 0
+    const hasChronicle = params.ignoreChronicle !== true && (params.scope & TransactionSignature.SIGHASH_CHRONICLE) !== 0
 
     if (hasForkId && !hasChronicle) {
       return TransactionSignature.formatBip143(params)
