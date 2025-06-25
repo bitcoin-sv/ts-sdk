@@ -96,13 +96,15 @@ Argument Details
 
 #### Method set
 
-Sets or updates the value associated with a given key.
+Sets or updates the value associated with a given key atomically.
 If the key already exists (one or more outputs found), it spends the existing output(s)
 and creates a new one with the updated value. If multiple outputs exist for the key,
 they are collapsed into a single new output.
 If the key does not exist, it creates a new output.
 Handles encryption if enabled.
 If signing the update/collapse transaction fails, it relinquishes the original outputs and starts over with a new chain.
+Ensures atomicity by locking the key during the operation, preventing concurrent updates
+to the same key from missing earlier changes.
 
 ```ts
 async set(key: string, value: string): Promise<OutpointString> 

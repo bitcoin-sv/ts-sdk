@@ -135,6 +135,14 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.6.6] - 2025-06-25
+
+### Change
+
+- Make the set method of LocalKVStore update each key value atomically.
+
+---
+
 ## [1.6.5] - 2025-06-21
 
 ### Added
