@@ -135,6 +135,17 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.6.6] - 2025-06-25
+
+### Change
+
+To LocalKVStore:
+
+- Make the `set` method update each key value atomically.
+- Add acceptDelayedBroadcast constructor argument, default false.
+
+---
+
 ## [1.6.5] - 2025-06-21
 
 ### Added

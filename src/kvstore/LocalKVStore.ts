@@ -38,6 +38,14 @@ export default class LocalKVStore {
    */
   private readonly originator?: string
 
+  acceptDelayedBroadcast: boolean = false
+
+  /**
+   * A map to store locks for each key to ensure atomic updates.
+   * @private
+   */
+  private readonly keyLocks: Map<string, Promise<void>> = new Map()
+
   /**
    * Creates an instance of the localKVStore.
    *
@@ -51,7 +59,8 @@ export default class LocalKVStore {
     wallet: WalletInterface = new WalletClient(),
     context = 'kvstore default',
     encrypt = true,
-    originator?: string
+    originator?: string,
+    acceptDelayedBroadcast = false
   ) {
     if (typeof context !== 'string' || context.length < 1) {
       throw new Error('A context in which to operate is required.')
@@ -60,6 +69,7 @@ export default class LocalKVStore {
     this.context = context
     this.encrypt = encrypt
     this.originator = originator
+    this.acceptDelayedBroadcast = acceptDelayedBroadcast
   }
 
   private getProtocol (key: string): { protocolID: WalletProtocol, keyID: string } {
@@ -160,78 +170,106 @@ export default class LocalKVStore {
   }
 
   /**
-   * Sets or updates the value associated with a given key.
+   * Sets or updates the value associated with a given key atomically.
    * If the key already exists (one or more outputs found), it spends the existing output(s)
    * and creates a new one with the updated value. If multiple outputs exist for the key,
    * they are collapsed into a single new output.
    * If the key does not exist, it creates a new output.
    * Handles encryption if enabled.
    * If signing the update/collapse transaction fails, it relinquishes the original outputs and starts over with a new chain.
+   * Ensures atomicity by locking the key during the operation, preventing concurrent updates
+   * to the same key from missing earlier changes.
    *
    * @param {string} key - The key to set or update.
    * @param {string} value - The value to associate with the key.
    * @returns {Promise<OutpointString>} A promise that resolves to the outpoint string (txid.vout) of the new or updated token output.
    */
   async set (key: string, value: string): Promise<OutpointString> {
-    const current = await this.lookupValue(key, undefined, 10)
-    if (current.value === value) {
-      if (current.outpoint === undefined) { throw new Error('outpoint must be valid when value is valid and unchanged') }
-      // Don't create a new transaction if the value doesn't need to change...
-      return current.outpoint
+    // Check if a lock exists for this key and wait for it to resolve
+    const existingLock = this.keyLocks.get(key)
+    if (existingLock != null) {
+      await existingLock
     }
-    const protocol = this.getProtocol(key)
-    let valueAsArray = Utils.toArray(value, 'utf8')
-    if (this.encrypt) {
-      const { ciphertext } = await this.wallet.encrypt({
-        ...protocol,
-        plaintext: valueAsArray
-      })
-      valueAsArray = ciphertext
-    }
-    const pushdrop = new PushDrop(this.wallet, this.originator)
-    const lockingScript = await pushdrop.lock(
-      [valueAsArray],
-      protocol.protocolID,
-      protocol.keyID,
-      'self'
-    )
-    const { outputs, BEEF: inputBEEF } = current.lor
-    let outpoint: OutpointString
+
+    let resolveNewLock: () => void = () => {}
+    const newLock = new Promise<void>((resolve) => {
+      resolveNewLock = resolve
+    })
+    this.keyLocks.set(key, newLock)
+
     try {
-      const inputs = this.getInputs(outputs)
-      const { txid, signableTransaction } = await this.wallet.createAction({
-        description: `Update ${key} in ${this.context}`,
-        inputBEEF,
-        inputs,
-        outputs: [{
-          basket: this.context,
-          tags: [key],
-          lockingScript: lockingScript.toHex(),
-          satoshis: 1,
-          outputDescription: 'Key-value token'
-        }],
-        options: {
-          acceptDelayedBroadcast: false,
-          randomizeOutputs: false
+      const current = await this.lookupValue(key, undefined, 10)
+      if (current.value === value) {
+        if (current.outpoint === undefined) {
+          throw new Error('outpoint must be valid when value is valid and unchanged')
         }
-      })
-      if (outputs.length > 0 && typeof signableTransaction !== 'object') {
-        throw new Error('Wallet did not return a signable transaction when expected.')
+        // Don't create a new transaction if the value doesn't need to change
+        return current.outpoint
       }
-      if (signableTransaction == null) {
-        outpoint = `${txid as string}.0`
-      } else {
-        const spends = await this.getSpends(key, outputs, pushdrop, signableTransaction.tx)
-        const { txid } = await this.wallet.signAction({
-          reference: signableTransaction.reference,
-          spends
+
+      const protocol = this.getProtocol(key)
+      let valueAsArray = Utils.toArray(value, 'utf8')
+      if (this.encrypt) {
+        const { ciphertext } = await this.wallet.encrypt({
+          ...protocol,
+          plaintext: valueAsArray
         })
-        outpoint = `${txid as string}.0`
+        valueAsArray = ciphertext
       }
-    } catch (_) {
-      throw new Error(`There are ${outputs.length} outputs with tag ${key} that cannot be unlocked.`)
+
+      const pushdrop = new PushDrop(this.wallet, this.originator)
+      const lockingScript = await pushdrop.lock(
+        [valueAsArray],
+        protocol.protocolID,
+        protocol.keyID,
+        'self'
+      )
+
+      const { outputs, BEEF: inputBEEF } = current.lor
+      let outpoint: OutpointString
+      try {
+        const inputs = this.getInputs(outputs)
+        const { txid, signableTransaction } = await this.wallet.createAction({
+          description: `Update ${key} in ${this.context}`,
+          inputBEEF,
+          inputs,
+          outputs: [{
+            basket: this.context,
+            tags: [key],
+            lockingScript: lockingScript.toHex(),
+            satoshis: 1,
+            outputDescription: 'Key-value token'
+          }],
+          options: {
+            acceptDelayedBroadcast: this.acceptDelayedBroadcast,
+            randomizeOutputs: false
+          }
+        })
+
+        if (outputs.length > 0 && typeof signableTransaction !== 'object') {
+          throw new Error('Wallet did not return a signable transaction when expected.')
+        }
+
+        if (signableTransaction == null) {
+          outpoint = `${txid as string}.0`
+        } else {
+          const spends = await this.getSpends(key, outputs, pushdrop, signableTransaction.tx)
+          const { txid } = await this.wallet.signAction({
+            reference: signableTransaction.reference,
+            spends
+          })
+          outpoint = `${txid as string}.0`
+        }
+      } catch (_) {
+        throw new Error(`There are ${outputs.length} outputs with tag ${key} that cannot be unlocked.`)
+      }
+
+      return outpoint
+    } finally {
+      // Release the lock by resolving the promise and removing it from the map
+      this.keyLocks.delete(key)
+      resolveNewLock()
     }
-    return outpoint
   }
 
   /**
@@ -257,7 +295,7 @@ export default class LocalKVStore {
             inputBEEF,
             inputs,
             options: {
-              acceptDelayedBroadcast: false
+              acceptDelayedBroadcast: this.acceptDelayedBroadcast
             }
           })
           if (typeof signableTransaction !== 'object') {
