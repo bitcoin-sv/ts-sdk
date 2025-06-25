@@ -139,7 +139,10 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Change
 
-- Make the set method of LocalKVStore update each key value atomically.
+To LocalKVStore:
+
+- Make the `set` method update each key value atomically.
+- Add acceptDelayedBroadcast constructor argument, default false.
 
 ---
 

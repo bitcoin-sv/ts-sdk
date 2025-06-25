@@ -14,7 +14,8 @@ Allows setting, getting, and removing key-value pairs, with optional encryption.
 
 ```ts
 export default class LocalKVStore {
-    constructor(wallet: WalletInterface = new WalletClient(), context = "kvstore default", encrypt = true, originator?: string) 
+    acceptDelayedBroadcast: boolean = false;
+    constructor(wallet: WalletInterface = new WalletClient(), context = "kvstore default", encrypt = true, originator?: string, acceptDelayedBroadcast = false) 
     async get(key: string, defaultValue: string | undefined = undefined): Promise<string | undefined> 
     async set(key: string, value: string): Promise<OutpointString> 
     async remove(key: string): Promise<string[]> 
@@ -28,7 +29,7 @@ See also: [OutpointString](./wallet.md#type-outpointstring), [WalletClient](./wa
 Creates an instance of the localKVStore.
 
 ```ts
-constructor(wallet: WalletInterface = new WalletClient(), context = "kvstore default", encrypt = true, originator?: string) 
+constructor(wallet: WalletInterface = new WalletClient(), context = "kvstore default", encrypt = true, originator?: string, acceptDelayedBroadcast = false) 
 ```
 See also: [WalletClient](./wallet.md#class-walletclient), [WalletInterface](./wallet.md#interface-walletinterface), [encrypt](./messages.md#variable-encrypt)
 

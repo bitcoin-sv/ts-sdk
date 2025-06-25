@@ -38,6 +38,8 @@ export default class LocalKVStore {
    */
   private readonly originator?: string
 
+  acceptDelayedBroadcast: boolean = false
+
   /**
    * A map to store locks for each key to ensure atomic updates.
    * @private
@@ -57,7 +59,8 @@ export default class LocalKVStore {
     wallet: WalletInterface = new WalletClient(),
     context = 'kvstore default',
     encrypt = true,
-    originator?: string
+    originator?: string,
+    acceptDelayedBroadcast = false
   ) {
     if (typeof context !== 'string' || context.length < 1) {
       throw new Error('A context in which to operate is required.')
@@ -66,6 +69,7 @@ export default class LocalKVStore {
     this.context = context
     this.encrypt = encrypt
     this.originator = originator
+    this.acceptDelayedBroadcast = acceptDelayedBroadcast
   }
 
   private getProtocol (key: string): { protocolID: WalletProtocol, keyID: string } {
@@ -237,7 +241,7 @@ export default class LocalKVStore {
             outputDescription: 'Key-value token'
           }],
           options: {
-            acceptDelayedBroadcast: false,
+            acceptDelayedBroadcast: this.acceptDelayedBroadcast,
             randomizeOutputs: false
           }
         })
@@ -291,7 +295,7 @@ export default class LocalKVStore {
             inputBEEF,
             inputs,
             options: {
-              acceptDelayedBroadcast: false
+              acceptDelayedBroadcast: this.acceptDelayedBroadcast
             }
           })
           if (typeof signableTransaction !== 'object') {
