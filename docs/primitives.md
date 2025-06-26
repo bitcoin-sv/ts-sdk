@@ -3229,7 +3229,8 @@ export class Reader {
     public readInt32LE(): number 
     public readUInt64BEBn(): BigNumber 
     public readUInt64LEBn(): BigNumber 
-    public readVarIntNum(): number 
+    public readInt64LEBn(): BigNumber 
+    public readVarIntNum(signed: boolean = true): number 
     public readVarInt(): number[] 
     public readVarIntBn(): BigNumber 
 }

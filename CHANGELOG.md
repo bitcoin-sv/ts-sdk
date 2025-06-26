@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.6.8 - 2025-06-26](#168---2025-06-26)
+- [1.6.7 - 2025-06-25](#167---2025-06-25)
+- [1.6.6 - 2025-06-25](#166---2025-06-25)
 - [1.6.5 - 2025-06-21](#165---2025-06-21)
 - [1.6.4 - 2025-06-20](#164---2025-06-20)
 - [1.6.3 - 2025-06-20](#163---2025-06-20)
@@ -135,6 +138,20 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.6.8] - 2025-06-26
+
+### Change
+
+- VarInt read and write methods will now handle negative numbers by writing them as Int64.
+- `readVarIntNum` method now takes a signed argument to control whether to read as Int64 or Uint64.
+
+### Added
+
+- OverflowInt64 and OverflowUint64 constants.
+- `readInt64LEBn` method to read Int64 values.
+
+---
+
 ## [1.6.7] - 2025-06-25
 
 ### Change
@@ -199,7 +216,7 @@ To LocalKVStore:
 ### Fixed
 
 - Align eval mem limits with current miner policy while stopping memory attacks at 100MB
-- Use BigInt in BigNumber for faster proformance
+- Use BigInt in BigNumber for faster performance
 - Optimize script interpreter memory usage
 
 ## [1.5.3] - 2025-05-29
