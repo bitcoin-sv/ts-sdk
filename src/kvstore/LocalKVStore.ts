@@ -44,7 +44,7 @@ export default class LocalKVStore {
    * A map to store locks for each key to ensure atomic updates.
    * @private
    */
-  private readonly keyLocks: Map<string, Promise<void>> = new Map()
+  private readonly keyLocks: Map<string, ((value: void | PromiseLike<void>) => void)[]> = new Map()
 
   /**
    * Creates an instance of the localKVStore.
@@ -72,6 +72,41 @@ export default class LocalKVStore {
     this.acceptDelayedBroadcast = acceptDelayedBroadcast
   }
 
+  private async queueOperationOnKey(key: string) : Promise<((value: void | PromiseLike<void>) => void)[]> {
+    // Check if a lock exists for this key and wait for it to resolve
+    let lockQueue = this.keyLocks.get(key)
+    if (!lockQueue) {
+      lockQueue = []
+      this.keyLocks.set(key, lockQueue)
+    }
+
+    let resolveNewLock: () => void = () => {}
+    const newLock = new Promise<void>((resolve) => {
+      resolveNewLock = resolve
+      lockQueue!.push(resolve)
+    })
+
+    // If we are the only request, resolve the lock immediately, queue remains at 1 item until request ends.
+    if (lockQueue.length === 1) {
+      resolveNewLock()
+    }
+
+    await newLock
+
+    return lockQueue
+  }
+
+  private finishOperationOnKey(key: string, lockQueue: ((value: void | PromiseLike<void>) => void)[]): void {
+    lockQueue!.shift() // Remove the current lock from the queue
+    if (lockQueue!.length > 0) {
+      // If there are more locks waiting, resolve the next one
+      lockQueue![0]()
+    } else {
+      // If no more locks are waiting, remove the key from the map
+      this.keyLocks.delete(key)
+    }
+  }
+
   private getProtocol (key: string): { protocolID: WalletProtocol, keyID: string } {
     return { protocolID: [2, this.context], keyID: key }
   }
@@ -97,9 +132,18 @@ export default class LocalKVStore {
    * @throws {Error} If too many outputs are found for the key (ambiguous state).
    * @throws {Error} If the found output's locking script cannot be decoded or represents an invalid token format.
    */
-  async get (key: string, defaultValue: string | undefined = undefined): Promise<string | undefined> {
-    const r = await this.lookupValue(key, defaultValue, 5)
-    return r.value
+  async get(key: string, defaultValue: string | undefined = undefined): Promise<string | undefined> {
+
+    const lockQueue = await this.queueOperationOnKey(key)
+
+    try {
+
+      const r = await this.lookupValue(key, defaultValue, 5)
+      return r.value
+
+    } finally {
+      this.finishOperationOnKey(key, lockQueue)
+    }
   }
 
   private getLockingScript (output: WalletOutput, beef: Beef): LockingScript {
@@ -185,17 +229,8 @@ export default class LocalKVStore {
    * @returns {Promise<OutpointString>} A promise that resolves to the outpoint string (txid.vout) of the new or updated token output.
    */
   async set (key: string, value: string): Promise<OutpointString> {
-    // Check if a lock exists for this key and wait for it to resolve
-    const existingLock = this.keyLocks.get(key)
-    if (existingLock != null) {
-      await existingLock
-    }
 
-    let resolveNewLock: () => void = () => {}
-    const newLock = new Promise<void>((resolve) => {
-      resolveNewLock = resolve
-    })
-    this.keyLocks.set(key, newLock)
+    const lockQueue = await this.queueOperationOnKey(key)
 
     try {
       const current = await this.lookupValue(key, undefined, 10)
@@ -266,9 +301,7 @@ export default class LocalKVStore {
 
       return outpoint
     } finally {
-      // Release the lock by resolving the promise and removing it from the map
-      this.keyLocks.delete(key)
-      resolveNewLock()
+      this.finishOperationOnKey(key, lockQueue)
     }
   }
 
@@ -283,38 +316,47 @@ export default class LocalKVStore {
    * @returns {Promise<string[]>} A promise that resolves to the txids of the removal transactions if successful.
    */
   async remove (key: string): Promise<string[]> {
-    const txids: string[] = []
-    for (; ;) {
-      const { outputs, BEEF: inputBEEF, totalOutputs } = await this.getOutputs(key)
-      if (outputs.length > 0) {
-        const pushdrop = new PushDrop(this.wallet, this.originator)
-        try {
-          const inputs = this.getInputs(outputs)
-          const { signableTransaction } = await this.wallet.createAction({
-            description: `Remove ${key} in ${this.context}`,
-            inputBEEF,
-            inputs,
-            options: {
-              acceptDelayedBroadcast: this.acceptDelayedBroadcast
+
+    const lockQueue = await this.queueOperationOnKey(key)
+
+    try {
+
+      const txids: string[] = []
+      for (; ;) {
+        const { outputs, BEEF: inputBEEF, totalOutputs } = await this.getOutputs(key)
+        if (outputs.length > 0) {
+          const pushdrop = new PushDrop(this.wallet, this.originator)
+          try {
+            const inputs = this.getInputs(outputs)
+            const { signableTransaction } = await this.wallet.createAction({
+              description: `Remove ${key} in ${this.context}`,
+              inputBEEF,
+              inputs,
+              options: {
+                acceptDelayedBroadcast: this.acceptDelayedBroadcast
+              }
+            })
+            if (typeof signableTransaction !== 'object') {
+              throw new Error('Wallet did not return a signable transaction when expected.')
             }
-          })
-          if (typeof signableTransaction !== 'object') {
-            throw new Error('Wallet did not return a signable transaction when expected.')
+            const spends = await this.getSpends(key, outputs, pushdrop, signableTransaction.tx)
+            const { txid } = await this.wallet.signAction({
+              reference: signableTransaction.reference,
+              spends
+            })
+            if (txid === undefined) { throw new Error('signAction must return a valid txid') }
+            txids.push(txid)
+          } catch (_) {
+            throw new Error(`There are ${totalOutputs} outputs with tag ${key} that cannot be unlocked.`)
           }
-          const spends = await this.getSpends(key, outputs, pushdrop, signableTransaction.tx)
-          const { txid } = await this.wallet.signAction({
-            reference: signableTransaction.reference,
-            spends
-          })
-          if (txid === undefined) { throw new Error('signAction must return a valid txid') }
-          txids.push(txid)
-        } catch (_) {
-          throw new Error(`There are ${totalOutputs} outputs with tag ${key} that cannot be unlocked.`)
         }
+        if (outputs.length === totalOutputs) { break }
       }
-      if (outputs.length === totalOutputs) { break }
+      return txids
+
+    } finally {
+      this.finishOperationOnKey(key, lockQueue)
     }
-    return txids
   }
 }
 
