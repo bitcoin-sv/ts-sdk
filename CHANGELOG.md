@@ -142,8 +142,13 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Change
 
-- VarInt read and write methods with Utils handling of negative numbers.
-- Added OverflowInt64 and OverflowUint64 constants.
+- VarInt read and write methods will now handle negative numbers by writing them as Int64.
+- `readVarIntNum` method now takes a signed argument to control whether to read as Int64 or Uint64.
+
+### Added
+
+- OverflowInt64 and OverflowUint64 constants.
+- `readInt64LEBn` method to read Int64 values.
 
 ---
 
