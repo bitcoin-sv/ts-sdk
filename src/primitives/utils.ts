@@ -710,6 +710,12 @@ export class Reader {
 
   public readUInt64LEBn (): BigNumber {
     const bin = this.readReverse(8)
+    const bn = new BigNumber(bin)
+    return bn
+  }
+
+  public readInt64LEBn (): BigNumber {
+    const bin = this.readReverse(8)
     let bn = new BigNumber(bin)
     if (bn.gte(OverflowInt64)) {
       bn = bn.sub(OverflowUint64) // Adjust for negative numbers
@@ -717,7 +723,7 @@ export class Reader {
     return bn
   }
 
-  public readVarIntNum (): number {
+  public readVarIntNum (signed: boolean = true): number {
     const first = this.readUInt8()
     let bn: BigNumber
     switch (first) {
@@ -726,7 +732,7 @@ export class Reader {
       case 0xfe:
         return this.readUInt32LE()
       case 0xff:
-        bn = this.readUInt64LEBn()
+        const bn = signed ? this.readInt64LEBn() : this.readUInt64LEBn()
         if (bn.lte(new BigNumber(2).pow(new BigNumber(53)))) {
           return bn.toNumber()
         } else {
@@ -811,5 +817,5 @@ export const minimallyEncode = (buf: number[]): number[] => {
   return []
 }
 
-const OverflowInt64 = new BigNumber('9223372036854775808') // 2^63
-const OverflowUint64 = new BigNumber('18446744073709551616') // 2^64
+const OverflowInt64 = new BigNumber(2).pow(new BigNumber(63))
+const OverflowUint64 = new BigNumber(2).pow(new BigNumber(64))
