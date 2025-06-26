@@ -44,7 +44,7 @@ export default class LocalKVStore {
    * A map to store locks for each key to ensure atomic updates.
    * @private
    */
-  private readonly keyLocks: Map<string, ((value: void | PromiseLike<void>) => void)[]> = new Map()
+  private readonly keyLocks: Map<string, Array<(value: void | PromiseLike<void>) => void>> = new Map()
 
   /**
    * Creates an instance of the localKVStore.
@@ -72,10 +72,10 @@ export default class LocalKVStore {
     this.acceptDelayedBroadcast = acceptDelayedBroadcast
   }
 
-  private async queueOperationOnKey(key: string) : Promise<((value: void | PromiseLike<void>) => void)[]> {
+  private async queueOperationOnKey (key: string): Promise<Array<(value: void | PromiseLike<void>) => void>> {
     // Check if a lock exists for this key and wait for it to resolve
     let lockQueue = this.keyLocks.get(key)
-    if (!lockQueue) {
+    if (lockQueue == null) {
       lockQueue = []
       this.keyLocks.set(key, lockQueue)
     }
@@ -83,7 +83,7 @@ export default class LocalKVStore {
     let resolveNewLock: () => void = () => {}
     const newLock = new Promise<void>((resolve) => {
       resolveNewLock = resolve
-      lockQueue!.push(resolve)
+      if (lockQueue != null) { lockQueue.push(resolve) }
     })
 
     // If we are the only request, resolve the lock immediately, queue remains at 1 item until request ends.
@@ -96,14 +96,11 @@ export default class LocalKVStore {
     return lockQueue
   }
 
-  private finishOperationOnKey(key: string, lockQueue: ((value: void | PromiseLike<void>) => void)[]): void {
-    lockQueue!.shift() // Remove the current lock from the queue
-    if (lockQueue!.length > 0) {
+  private finishOperationOnKey (key: string, lockQueue: Array<(value: void | PromiseLike<void>) => void>): void {
+    lockQueue.shift() // Remove the current lock from the queue
+    if (lockQueue.length > 0) {
       // If there are more locks waiting, resolve the next one
-      lockQueue![0]()
-    } else {
-      // If no more locks are waiting, remove the key from the map
-      this.keyLocks.delete(key)
+      lockQueue[0]()
     }
   }
 
@@ -132,15 +129,12 @@ export default class LocalKVStore {
    * @throws {Error} If too many outputs are found for the key (ambiguous state).
    * @throws {Error} If the found output's locking script cannot be decoded or represents an invalid token format.
    */
-  async get(key: string, defaultValue: string | undefined = undefined): Promise<string | undefined> {
-
+  async get (key: string, defaultValue: string | undefined = undefined): Promise<string | undefined> {
     const lockQueue = await this.queueOperationOnKey(key)
 
     try {
-
       const r = await this.lookupValue(key, defaultValue, 5)
       return r.value
-
     } finally {
       this.finishOperationOnKey(key, lockQueue)
     }
@@ -229,7 +223,6 @@ export default class LocalKVStore {
    * @returns {Promise<OutpointString>} A promise that resolves to the outpoint string (txid.vout) of the new or updated token output.
    */
   async set (key: string, value: string): Promise<OutpointString> {
-
     const lockQueue = await this.queueOperationOnKey(key)
 
     try {
@@ -316,11 +309,9 @@ export default class LocalKVStore {
    * @returns {Promise<string[]>} A promise that resolves to the txids of the removal transactions if successful.
    */
   async remove (key: string): Promise<string[]> {
-
     const lockQueue = await this.queueOperationOnKey(key)
 
     try {
-
       const txids: string[] = []
       for (; ;) {
         const { outputs, BEEF: inputBEEF, totalOutputs } = await this.getOutputs(key)
@@ -353,7 +344,6 @@ export default class LocalKVStore {
         if (outputs.length === totalOutputs) { break }
       }
       return txids
-
     } finally {
       this.finishOperationOnKey(key, lockQueue)
     }
