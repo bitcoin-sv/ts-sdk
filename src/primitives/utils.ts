@@ -732,7 +732,7 @@ export class Reader {
       case 0xfe:
         return this.readUInt32LE()
       case 0xff:
-        const bn = signed ? this.readInt64LEBn() : this.readUInt64LEBn()
+        bn = signed ? this.readInt64LEBn() : this.readUInt64LEBn()
         if (bn.lte(new BigNumber(2).pow(new BigNumber(53)))) {
           return bn.toNumber()
         } else {
