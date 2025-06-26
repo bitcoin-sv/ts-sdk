@@ -512,10 +512,6 @@ export class Writer {
   }
 
   writeVarIntNum (n: number): this {
-    if (n === -1) {
-      this.writeVarIntBn(MaxUint64) // Special case for -1
-      return this
-    }
     const buf = Writer.varIntNum(n)
     this.write(buf)
     return this
@@ -529,6 +525,9 @@ export class Writer {
 
   static varIntNum (n: number): number[] {
     let buf: number[]
+    if (n < 0) {
+      return this.varIntBn(new BigNumber(n))
+    }
     if (n < 253) {
       buf = [n] // 1 byte
     } else if (n < 0x10000) {
@@ -569,6 +568,9 @@ export class Writer {
 
   static varIntBn (bn: BigNumber): number[] {
     let buf: number[]
+    if (bn.isNeg()) {
+      bn = bn.add(OverflowUint64) // Adjust for negative numbers
+    }
     if (bn.ltn(253)) {
       const n = bn.toNumber()
       // No need for bitwise operation as the value is within a byte's range
@@ -708,7 +710,10 @@ export class Reader {
 
   public readUInt64LEBn (): BigNumber {
     const bin = this.readReverse(8)
-    const bn = new BigNumber(bin)
+    let bn = new BigNumber(bin)
+    if (bn.gte(OverflowInt64)) {
+      bn = bn.sub(OverflowUint64) // Adjust for negative numbers
+    }
     return bn
   }
 
@@ -724,8 +729,6 @@ export class Reader {
         bn = this.readUInt64LEBn()
         if (bn.lte(new BigNumber(2).pow(new BigNumber(53)))) {
           return bn.toNumber()
-        } else if (bn.eq(MaxUint64)) {
-          return -1 // Special case for max value
         } else {
           throw new Error(
             'number too large to retain precision - use readVarIntBn'
@@ -808,4 +811,5 @@ export const minimallyEncode = (buf: number[]): number[] => {
   return []
 }
 
-export const MaxUint64 = new BigNumber('18446744073709551615') // 2^64 - 1
+const OverflowInt64 = new BigNumber('9223372036854775808') // 2^63
+const OverflowUint64 = new BigNumber('18446744073709551616') // 2^64
