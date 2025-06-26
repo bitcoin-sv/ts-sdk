@@ -135,6 +135,16 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
+## [1.6.7] - 2025-06-25
+
+### Change
+
+To LocalKVStore:
+
+- Extend locks to lockQueues and to get and remove operations.
+
+---
+
 ## [1.6.6] - 2025-06-25
 
 ### Change
