@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.6.5 - 2025-06-21](#165---2025-06-21)
+- [1.6.4 - 2025-06-20](#164---2025-06-20)
 - [1.6.3 - 2025-06-20](#163---2025-06-20)
 - [1.6.2 - 2025-06-18](#162---2025-06-18)
 - [1.6.1 - 2025-06-16](#161---2025-06-16)
@@ -133,11 +135,45 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-## [1.6.3] - 2025-06-20
+## [1.6.7] - 2025-06-25
 
 ### Fixed
 
-- Don't use "negative bytes" when writing -1 to byte array
+To LocalKVStore:
+
+- Extend locks to lockQueues and to get and remove operations.
+
+---
+
+## [1.6.6] - 2025-06-25
+
+### Change
+
+To LocalKVStore:
+
+- Make the `set` method update each key value atomically.
+- Add acceptDelayedBroadcast constructor argument, default false.
+
+---
+
+## [1.6.5] - 2025-06-21
+
+### Added
+- ChainTracker which relies on an instance of [Block Headers Service](https://github.com/bitcoin-sv/block-headers-service).
+
+---
+
+## [1.6.4] - 2025-06-20
+
+### Change
+- Export the type for `ScriptChunk` properly.
+
+---
+
+## [1.6.3] - 2025-06-20
+
+### Change
+- `SimplifiedFetchTransport`: Added more checks to ensure the connection at the transport layer is correct when sending certificates.
 
 ---
 
