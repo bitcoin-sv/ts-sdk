@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.6.8 - 2025-06-26](#168---2025-06-26)
+- [1.6.7 - 2025-06-25](#167---2025-06-25)
+- [1.6.6 - 2025-06-25](#166---2025-06-25)
 - [1.6.5 - 2025-06-21](#165---2025-06-21)
 - [1.6.4 - 2025-06-20](#164---2025-06-20)
 - [1.6.3 - 2025-06-20](#163---2025-06-20)
@@ -132,6 +135,15 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 ### Security
+
+---
+
+## [1.6.8] - 2025-06-26
+
+### Change
+
+- VarInt read and write methods with Utils handling of negative numbers.
+- Added OverflowInt64 and OverflowUint64 constants.
 
 ---
 
