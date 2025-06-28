@@ -176,7 +176,7 @@ To LocalKVStore:
 ## [1.6.5] - 2025-06-21
 
 ### Added
-- ChainTracker which relies on an instance of [Block Headers Service](https://github.com/bitcoin-sv/block-headers-service).
+- ChainTracker which relies on an instance of [Block Headers Service](https://github.com/bsv-blockchain/block-headers-service).
 
 ---
 
@@ -821,7 +821,7 @@ MerklePath.fromReader and MerklePath constructor legalOffsetsOnly optional argum
 
 Beef toBinaryAtomic now prunes transactions newer than target txid.
 Beef mergeBeefTx error if both isTxidOnly
-Bug [#162](https://github.com/bitcoin-sv/ts-sdk/issues/162)
+Bug [#162](https://github.com/bsv-blockchain/ts-sdk/issues/162)
 
 ---
 
@@ -1101,49 +1101,49 @@ const tx = Transaction.fromHexEF('020000000000000000ef01b2faffe1e1d3c88f4092f346
 - Use of sourceSatoshis as a parameter of TransactionInput type.
 
 ### Fixed
-* Increase default maxNumSize to MAX_SAFE_INJTEGER to resolve OP_BIN2NUM execution failures. by @tonesnotes in https://github.com/bitcoin-sv/ts-sdk/pull/20
-* Docs examples by @ty-everett in https://github.com/bitcoin-sv/ts-sdk/pull/21
-* Allow BigNumber constructor to accept a BigNumber. by @tonesnotes in https://github.com/bitcoin-sv/ts-sdk/pull/22
-* Hash enc digest hex by @tonesnotes in https://github.com/bitcoin-sv/ts-sdk/pull/27
-* [feature] helper function to allow Address => Locking Script by @sirdeggen in https://github.com/bitcoin-sv/ts-sdk/pull/24
-* [chore] npm run doc by @sirdeggen in https://github.com/bitcoin-sv/ts-sdk/pull/26
-* CRITICAL FIX for BigNumber fromSm by @tonesnotes in https://github.com/bitcoin-sv/ts-sdk/pull/30
-* [feature]: Block Header Service api by @sirdeggen in https://github.com/bitcoin-sv/ts-sdk/pull/23
-* Tone bug 31 by @tonesnotes in https://github.com/bitcoin-sv/ts-sdk/pull/33
-* Low Level Docs by @ty-everett in https://github.com/bitcoin-sv/ts-sdk/pull/32
-* push(...x) fails for large array x values by @tonesnotes in https://github.com/bitcoin-sv/ts-sdk/pull/36
-* [fix] length must be that of the data, not the original argument. by @sirdeggen in https://github.com/bitcoin-sv/ts-sdk/pull/37
-* [chore] ts-standard and linter stuff by @sirdeggen in https://github.com/bitcoin-sv/ts-sdk/pull/38
-* [feature] compact sigs by @sirdeggen in https://github.com/bitcoin-sv/ts-sdk/pull/39
-* controversial stuff by @sirdeggen in https://github.com/bitcoin-sv/ts-sdk/pull/40
-* Avoid requiring sourceTransaction on inputs. by @tonesnotes in https://github.com/bitcoin-sv/ts-sdk/pull/41
-* [fix] Enforce signature length in compact sigs by @sirdeggen in https://github.com/bitcoin-sv/ts-sdk/pull/44
-* Concept-level documentation by @ty-everett in https://github.com/bitcoin-sv/ts-sdk/pull/45
-* refactor: add more static factory methods to HD class and use them in examples by @dorzepowski in https://github.com/bitcoin-sv/ts-sdk/pull/48
-* refactor: replace returned type union with method overloading for transaction id. by @dorzepowski in https://github.com/bitcoin-sv/ts-sdk/pull/50
-* [docs] HOW_TX.md review and edits. Note: A topic worth discussing is c… by @jonesjBSV in https://github.com/bitcoin-sv/ts-sdk/pull/53
-* [chore] remove redundant line by @sirdeggen in https://github.com/bitcoin-sv/ts-sdk/pull/56
-* I suspect it should be this - see ts-paymail for more suggestions by @sirdeggen in https://github.com/bitcoin-sv/ts-sdk/pull/60
-* [fix] adding startsWith OP_ seems to fix the ASM parsing bug by @sirdeggen in https://github.com/bitcoin-sv/ts-sdk/pull/58
-* Add Transaction.parseScriptOffsets by @tonesnotes in https://github.com/bitcoin-sv/ts-sdk/pull/59
-* [fix] Compact SIgnatures Pubkey Recovery function precision. by @sirdeggen in https://github.com/bitcoin-sv/ts-sdk/pull/63
-* feat(#65): configure ARC with custom http client by @dorzepowski in https://github.com/bitcoin-sv/ts-sdk/pull/66
-* feat: default broadcaster and chain tracker by @dorzepowski in https://github.com/bitcoin-sv/ts-sdk/pull/67
-* Fixed fee model by @tiagolr in https://github.com/bitcoin-sv/ts-sdk/pull/70
-* toAddress() string prefix support by @tiagolr in https://github.com/bitcoin-sv/ts-sdk/pull/72
-* Addional input field sourceSatoshis to be used in fee calculation by @tiagolr in https://github.com/bitcoin-sv/ts-sdk/pull/71
-* Tone key length by @tonesnotes in https://github.com/bitcoin-sv/ts-sdk/pull/79
-* Improve JSON content type detection by @oskarszoon in https://github.com/bitcoin-sv/ts-sdk/pull/80
-* example-utxos-tx.md by @tiagolr in https://github.com/bitcoin-sv/ts-sdk/pull/75
-* Allow ARC config to set CallbackURL and other headers as required by @sirdeggen in https://github.com/bitcoin-sv/ts-sdk/pull/81
-* Tone overlay1 by @tonesnotes in https://github.com/bitcoin-sv/ts-sdk/pull/82
+* Increase default maxNumSize to MAX_SAFE_INJTEGER to resolve OP_BIN2NUM execution failures. by @tonesnotes in https://github.com/bsv-blockchain/ts-sdk/pull/20
+* Docs examples by @ty-everett in https://github.com/bsv-blockchain/ts-sdk/pull/21
+* Allow BigNumber constructor to accept a BigNumber. by @tonesnotes in https://github.com/bsv-blockchain/ts-sdk/pull/22
+* Hash enc digest hex by @tonesnotes in https://github.com/bsv-blockchain/ts-sdk/pull/27
+* [feature] helper function to allow Address => Locking Script by @sirdeggen in https://github.com/bsv-blockchain/ts-sdk/pull/24
+* [chore] npm run doc by @sirdeggen in https://github.com/bsv-blockchain/ts-sdk/pull/26
+* CRITICAL FIX for BigNumber fromSm by @tonesnotes in https://github.com/bsv-blockchain/ts-sdk/pull/30
+* [feature]: Block Header Service api by @sirdeggen in https://github.com/bsv-blockchain/ts-sdk/pull/23
+* Tone bug 31 by @tonesnotes in https://github.com/bsv-blockchain/ts-sdk/pull/33
+* Low Level Docs by @ty-everett in https://github.com/bsv-blockchain/ts-sdk/pull/32
+* push(...x) fails for large array x values by @tonesnotes in https://github.com/bsv-blockchain/ts-sdk/pull/36
+* [fix] length must be that of the data, not the original argument. by @sirdeggen in https://github.com/bsv-blockchain/ts-sdk/pull/37
+* [chore] ts-standard and linter stuff by @sirdeggen in https://github.com/bsv-blockchain/ts-sdk/pull/38
+* [feature] compact sigs by @sirdeggen in https://github.com/bsv-blockchain/ts-sdk/pull/39
+* controversial stuff by @sirdeggen in https://github.com/bsv-blockchain/ts-sdk/pull/40
+* Avoid requiring sourceTransaction on inputs. by @tonesnotes in https://github.com/bsv-blockchain/ts-sdk/pull/41
+* [fix] Enforce signature length in compact sigs by @sirdeggen in https://github.com/bsv-blockchain/ts-sdk/pull/44
+* Concept-level documentation by @ty-everett in https://github.com/bsv-blockchain/ts-sdk/pull/45
+* refactor: add more static factory methods to HD class and use them in examples by @dorzepowski in https://github.com/bsv-blockchain/ts-sdk/pull/48
+* refactor: replace returned type union with method overloading for transaction id. by @dorzepowski in https://github.com/bsv-blockchain/ts-sdk/pull/50
+* [docs] HOW_TX.md review and edits. Note: A topic worth discussing is c… by @jonesjBSV in https://github.com/bsv-blockchain/ts-sdk/pull/53
+* [chore] remove redundant line by @sirdeggen in https://github.com/bsv-blockchain/ts-sdk/pull/56
+* I suspect it should be this - see ts-paymail for more suggestions by @sirdeggen in https://github.com/bsv-blockchain/ts-sdk/pull/60
+* [fix] adding startsWith OP_ seems to fix the ASM parsing bug by @sirdeggen in https://github.com/bsv-blockchain/ts-sdk/pull/58
+* Add Transaction.parseScriptOffsets by @tonesnotes in https://github.com/bsv-blockchain/ts-sdk/pull/59
+* [fix] Compact SIgnatures Pubkey Recovery function precision. by @sirdeggen in https://github.com/bsv-blockchain/ts-sdk/pull/63
+* feat(#65): configure ARC with custom http client by @dorzepowski in https://github.com/bsv-blockchain/ts-sdk/pull/66
+* feat: default broadcaster and chain tracker by @dorzepowski in https://github.com/bsv-blockchain/ts-sdk/pull/67
+* Fixed fee model by @tiagolr in https://github.com/bsv-blockchain/ts-sdk/pull/70
+* toAddress() string prefix support by @tiagolr in https://github.com/bsv-blockchain/ts-sdk/pull/72
+* Addional input field sourceSatoshis to be used in fee calculation by @tiagolr in https://github.com/bsv-blockchain/ts-sdk/pull/71
+* Tone key length by @tonesnotes in https://github.com/bsv-blockchain/ts-sdk/pull/79
+* Improve JSON content type detection by @oskarszoon in https://github.com/bsv-blockchain/ts-sdk/pull/80
+* example-utxos-tx.md by @tiagolr in https://github.com/bsv-blockchain/ts-sdk/pull/75
+* Allow ARC config to set CallbackURL and other headers as required by @sirdeggen in https://github.com/bsv-blockchain/ts-sdk/pull/81
+* Tone overlay1 by @tonesnotes in https://github.com/bsv-blockchain/ts-sdk/pull/82
 
 ### New Contributors
-* @tonesnotes made their first contribution in https://github.com/bitcoin-sv/ts-sdk/pull/20
-* @dorzepowski made their first contribution in https://github.com/bitcoin-sv/ts-sdk/pull/48
-* @jonesjBSV made their first contribution in https://github.com/bitcoin-sv/ts-sdk/pull/53
-* @tiagolr made their first contribution in https://github.com/bitcoin-sv/ts-sdk/pull/70
-* @oskarszoon made their first contribution in https://github.com/bitcoin-sv/ts-sdk/pull/80
+* @tonesnotes made their first contribution in https://github.com/bsv-blockchain/ts-sdk/pull/20
+* @dorzepowski made their first contribution in https://github.com/bsv-blockchain/ts-sdk/pull/48
+* @jonesjBSV made their first contribution in https://github.com/bsv-blockchain/ts-sdk/pull/53
+* @tiagolr made their first contribution in https://github.com/bsv-blockchain/ts-sdk/pull/70
+* @oskarszoon made their first contribution in https://github.com/bsv-blockchain/ts-sdk/pull/80
 
 ## [1.0.0] - 2024-02-10
 
